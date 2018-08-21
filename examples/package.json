@@ -1,0 +1,31 @@
+{
+  "name": "ls",
+  "version": "1.0.0",
+  "description": "examples for TronWebApi",
+  "main": "index.js",
+  "author": "wjl&lzw",
+  "license": "MIT",
+  "dependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.0.0-beta.47",
+    "@babel/preset-react": "^7.0.0-beta.47",
+    "babel-core": "^6.0.20",
+    "babel-preset-es2015": "^6.0.15",
+    "babel-preset-stage-0": "^6.0.15",
+    "express": "^4.16.3",
+    "json-stringify-pretty-compact": "^1.2.0",
+    "module": "^1.2.5",
+    "next": "^6.1.1",
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
+    "tronweb": "^1.0.6"
+  },
+  "devDependencies": {
+    "cross-env": "^5.0.1",
+    "http-proxy-middleware": "^0.17.4"
+  },
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development PORT=4000 node server.js",
+    "build": "next build",
+    "prod": "cross-env NODE_ENV=production PORT=4000 node server.js"
+  }
+}
