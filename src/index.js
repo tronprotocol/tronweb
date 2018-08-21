@@ -644,7 +644,6 @@ class TronWeb {
                     let { contract_address,origin_address } = await _this.getContract(address);
                     let abiObj = parseAbi.call(_this,abiArray,{contract_address,owner_address:origin_address|| _this.defaultAccount})
                     let contractInstance = Object.assign({address:contract_address},abiObj);
-                    console.log('contractInstance:',contractInstance);
                     return contractInstance;
                 }
                 return new Object();
@@ -682,7 +681,6 @@ class TronWeb {
     }
 
     toBigNumber(str){
-        console.log(this.defaultAccount)
         return BigNumber(str)
     }
 

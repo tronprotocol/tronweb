@@ -51,7 +51,6 @@ export function parseAbi(abiArray,{owner_address,contract_address}){
                     fee_limit: otherParams.fee_limit,
                     call_value: otherParams.call_value,
                 }
-                //console.log('triggerCallBackParams::', triggerCallBackParams);
                 let res = await _this.triggerSmartContract(triggerCallBackParams);
                 if (res.constant_result) {
                     let coder = new utils.AbiCoder();
@@ -60,7 +59,6 @@ export function parseAbi(abiArray,{owner_address,contract_address}){
                         let constantArr = res.constant_result.map((item) => {
                             return ('0x' + item);
                         })
-                        //console.log(paramOutputTypes, constantArr);
                         res.constant_result = coder.decode(paramOutputTypes, constantArr[0]);
                     }
                 }
