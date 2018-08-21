@@ -1,6 +1,6 @@
 {
   "name": "tronweb",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A jssdk that encapsulates the TRON HTTP request",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -54,5 +54,5 @@
   "author": "wujiaolong&lizhengwei",
   "homepage": "https://tron.network",
   "license": "MIT",
-  "repository": ""
+  "repository": "https://github.com/tronprotocol/tron-web.git"
 }

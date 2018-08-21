@@ -27,7 +27,7 @@ async getBalance(){
 ```
 
 # GitHub
-https://github.com/gitwujiaolong/tronWeb.git
+https://github.com/tronprotocol/tron-web.git
 # docs
 [document](http://doc.tron.network/)
 [官方文档](http://doc.tron.network/)
