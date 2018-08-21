@@ -1,0 +1,58 @@
+{
+  "name": "tronweb",
+  "version": "1.0.6",
+  "description": "A jssdk that encapsulates the TRON HTTP request",
+  "main": "lib/index.js",
+  "module": "es/index.js",
+  "files": [
+    "es",
+    "lib",
+    "umd"
+  ],
+  "scripts": {
+    "build": "nwb build-web-module",
+    "clean": "nwb clean-module",
+    "test": "cross-env NODE_ENV=test NWB_TEST=true mocha --require babel-register test/*-test.js"
+  },
+  "dependencies": {
+    "axios": "^0.18.0",
+    "bignumber.js": "^7.2.1",
+    "chai": "^4.1.2",
+    "ethers": "^3.0.26",
+    "js-sha3": "^0.7.0"
+  },
+  "devDependencies": {
+    "nwb": "0.21.x",
+    "babel-preset-flow": "6.23.0",
+    "babel-register": "6.26.0",
+    "cross-env": "5.2.0",
+    "babel-cli": "6.26.0",
+    "babel-core": "6.26.3",
+    "babel-plugin-add-module-exports": "0.2.1",
+    "babel-plugin-inferno": "5.1.0",
+    "babel-plugin-istanbul": "4.1.6",
+    "babel-plugin-lodash": "3.2.11",
+    "babel-plugin-react-transform": "3.0.0",
+    "babel-plugin-syntax-dynamic-import": "6.18.0",
+    "babel-plugin-syntax-jsx": "6.18.0",
+    "babel-plugin-transform-decorators-legacy": "1.3.5",
+    "babel-plugin-transform-react-constant-elements": "6.23.0",
+    "babel-plugin-transform-react-jsx": "6.24.1",
+    "babel-plugin-transform-react-jsx-self": "6.22.0",
+    "babel-plugin-transform-react-jsx-source": "6.22.0",
+    "babel-plugin-transform-react-remove-prop-types": "0.4.10",
+    "babel-plugin-transform-runtime": "6.23.0",
+    "babel-polyfill": "6.26.0",
+    "babel-preset-env": "1.7.0",
+    "babel-preset-react": "6.24.1",
+    "babel-preset-stage-0": "6.24.1",
+    "babel-preset-stage-1": "6.24.1",
+    "babel-preset-stage-2": "6.24.1",
+    "babel-preset-stage-3": "6.24.1",
+    "babel-runtime": "6.26.0"
+  },
+  "author": "wujiaolong&lizhengwei",
+  "homepage": "https://tron.network",
+  "license": "MIT",
+  "repository": ""
+}
