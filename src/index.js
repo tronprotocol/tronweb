@@ -2,7 +2,7 @@ import xhr from 'axios'
 import  {address2HexString,stringUtf8toHex,hexString2Address,hexString2Utf8} from './utils/help'
 import {parseAbi} from "./private";
 import { generateAccount } from './utils/account'
-import {signTransaction} from './utils/crypto'
+import {signTransaction,pkToAddress} from './utils/crypto'
 import {utils} from 'ethers'
 import {BigNumber} from 'bignumber.js'
 
@@ -33,6 +33,16 @@ class TronWeb {
     setEventServer(value = 'http://52.44.75.99:18889'){
         this.tronInfuraUrl = value;
     }
+
+    /**
+     * get address from pk
+     * @param {string} pk
+     * @return {string} address
+     * */
+    login(pk){
+        return pkToAddress(pk);
+    }
+
     /**
      * Obtain account balance
      * @param {string} address

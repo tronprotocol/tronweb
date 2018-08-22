@@ -1,5 +1,5 @@
 import React,{ReactDOM} from 'react'
-import TronWeb from 'tronweb'
+import TronWeb from '../../src/index'
 import stringify from 'json-stringify-pretty-compact'
 import {utils} from 'ethers'
 let tronWeb = new TronWeb('http://52.44.75.99:8090');
@@ -348,6 +348,14 @@ class Index extends React.Component{
 
     }
 
+    //30、login
+    login(){
+        let account = tronWeb.login(tronWeb.defaultPk);
+        this.setState({
+            data:account
+        })
+    }
+
     render(){
         const { data } = this.state;
         return (
@@ -465,6 +473,11 @@ class Index extends React.Component{
                         <div>
                             <input type="button" value="调用合约" onClick={()=>{this.triggerContract()}}/>
                         </div>
+                        <div>
+                            <input type="button" value="登录" onClick={()=>this.login()}/>
+                        </div>
+
+
                     </div>
                 </div>
 
