@@ -3,6 +3,7 @@ import TronWeb from '../../src/index'
 import stringify from 'json-stringify-pretty-compact'
 import {utils} from 'ethers'
 let tronWeb = new TronWeb('http://52.44.75.99:8090');
+
 tronWeb.setEventServer('http://52.44.75.99:18889');
 tronWeb.defaultAccount = 'TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY';
 tronWeb.defaultPk='da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0';
@@ -14,6 +15,12 @@ class Index extends React.Component{
         let coder = new utils.AbiCoder();
         window.tronWeb = tronWeb;
     }
+    triggerChromeWallet(){
+        tronWeb.sendTransactionByWallet({to:'TZ3SmkD8qJK3VY8AnqN9XFiYuspEP3cwB5',amount:0.1},function(result){
+            console.log('cbk',result);
+        })
+    }
+
     async toBigNumber(){
         let str = '200000000000000000000001';
         let bigNumber = tronWeb.toBigNumber(str);
@@ -369,6 +376,9 @@ class Index extends React.Component{
                     <div>
                         账号：<input type="text" style={{width:'300px'}} ref={(input)=>this.account =input} defaultValue={tronWeb.defaultAccount}/>
                         <input type="button" onClick={()=>this.getBalance()} value="查询账户余额" />
+                    </div>
+                    <div>
+                        <input type="button" value="triggerWallet" onClick={()=>this.triggerChromeWallet()}/>
                     </div>
                     <div>
                         <input type="button" value="生成私钥地址(onLine)" onClick={()=>this.generateAddress()}/>

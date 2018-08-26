@@ -693,6 +693,48 @@ class TronWeb {
     toBigNumber(str){
         return BigNumber(str)
     }
+    sendTransactionByWallet(options,callback){
+        let {to,amount} = options;
+        if(document){
+            let oTronWallet = document.getElementById("oTronWallet");
+            let oWalletTransationResult = document.getElementById('transaction_wallet_result');
+            if (oTronWallet) {
+                console.log('Chrome extension is installed!');
+                var open_wallet = document.createEvent('Event');
+                open_wallet.initEvent('open_wallet', true, true);
+                oTronWallet.innerText=JSON.stringify({
+                    to:to,
+                    amount:amount
+                });
+                oTronWallet.dispatchEvent(open_wallet);
+                oWalletTransationResult.value = '';
+                let timer = setInterval(async ()=>{
+                    if(oWalletTransationResult.value){
+                        let walletResult = JSON.parse(oWalletTransationResult.value);
+                        if(!walletResult.success){
+                            callback('Failed')
+                        }else{
+                            let transactionid = walletResult.transaction.txID;
+                            let validResult = await this.getTransaction(transactionid);
+                            if(Object.keys(validResult).length==0){
+                                callback('Failed')
+                            }else{
+                                callback('success')
+                            }
+                        }
+                        //callback(JSON.parse(oWalletTransationResult.value))
+                        clearInterval(timer);
+                    }
+                },500)
+
+            }
+            else {
+                let returnWarn = 'Chrome extention is not installed yet...';
+                console.log(returnWarn);
+                return returnWarn;
+            }
+        }
+    }
 
 }
 export default TronWeb;
