@@ -735,6 +735,18 @@ class TronWeb {
             }
         }
     }
+    trxToSun(trxCount){
+        if(trxCount>=0){
+            return trxCount*Math.pow(10,6)
+        }
+        return 0;
+    }
+    sunToTrx(sunCount){
+        if(sunCount>=0){
+            return sunCount/Math.pow(10,6)
+        }
+        return 0;
+    }
 
 }
 export default TronWeb;
