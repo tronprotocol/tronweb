@@ -29,6 +29,7 @@ class Index extends React.Component{
         this.setState({
             data:value
         })
+
     }
     async getBalance(){
         const res = await tronWeb.getBalance(this.account.value);

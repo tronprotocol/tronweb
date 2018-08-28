@@ -121,7 +121,8 @@ class TronWeb {
             }
             const transaction = await this.createTransaction(to,from,amount)
             const signTransaction = await this.signTransaction(transaction,privateKey,0);
-            return await this.sendRawTransaction(signTransaction);
+            const res = await this.sendRawTransaction(signTransaction);
+            return Object.assign(res,signTransaction)
         }catch(err){
             console.error(err);
         }
@@ -717,17 +718,16 @@ class TronWeb {
                     if(oWalletTransationResult.value){
                         let walletResult = JSON.parse(oWalletTransationResult.value);
                         if(!walletResult.success){
-                            callback('Failed')
+                            callback&&callback('Failed')
                         }else{
                             let transactionid = walletResult.transaction.txID;
                             let validResult = await this.getTransaction(transactionid);
                             if(Object.keys(validResult).length==0){
-                                callback('Failed')
+                                callback&&callback('Failed')
                             }else{
-                                callback('success')
+                                callback&&callback('success')
                             }
                         }
-                        //callback(JSON.parse(oWalletTransationResult.value))
                         clearInterval(timer);
                     }
                 },500)
