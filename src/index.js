@@ -723,7 +723,6 @@ class TronWeb {
                                 callback&&callback('success')
                             }
                         }
-                        //callback(JSON.parse(oWalletTransationResult.value))
                         clearInterval(timer);
                     }
                 },500)
