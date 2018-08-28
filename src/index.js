@@ -121,7 +121,8 @@ class TronWeb {
             }
             const transaction = await this.createTransaction(to,from,amount)
             const signTransaction = await this.signTransaction(transaction,privateKey,0);
-            return await this.sendRawTransaction(signTransaction);
+            const res = await this.sendRawTransaction(signTransaction);
+            return Object.assign(res,signTransaction)
         }catch(err){
             console.error(err);
         }
