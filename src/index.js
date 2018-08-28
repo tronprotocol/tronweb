@@ -584,10 +584,14 @@ class TronWeb {
     }
 
     async getContract(contractAddress){
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/getcontract`,{
-            value:address2HexString(contractAddress)
-        })
-        return data;
+        try {
+            let {data} = await xhr.post(`${this.apiUrl}/wallet/getcontract`, {
+                value: address2HexString(contractAddress)
+            })
+            return data;
+        }catch (e) {
+            console.warn(e.toString())
+        }
     }
 
     async triggerSmartContract(options){
