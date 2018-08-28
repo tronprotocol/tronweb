@@ -652,7 +652,7 @@ class TronWeb {
             at: async function(address) {
                 if (address) {
                     let { contract_address,origin_address } = await _this.getContract(address);
-                    let abiObj = parseAbi.call(_this,abiArray,{contract_address,owner_address:origin_address|| _this.defaultAccount})
+                    let abiObj = parseAbi.call(_this,abiArray,{contract_address,owner_address: _this.defaultAccount})
                     let contractInstance = Object.assign({address:contract_address},abiObj);
                     return contractInstance;
                 }
