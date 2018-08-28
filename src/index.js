@@ -713,14 +713,14 @@ class TronWeb {
                     if(oWalletTransationResult.value){
                         let walletResult = JSON.parse(oWalletTransationResult.value);
                         if(!walletResult.success){
-                            callback('Failed')
+                            callback&&callback('Failed')
                         }else{
                             let transactionid = walletResult.transaction.txID;
                             let validResult = await this.getTransaction(transactionid);
                             if(Object.keys(validResult).length==0){
-                                callback('Failed')
+                                callback&&callback('Failed')
                             }else{
-                                callback('success')
+                                callback&&callback('success')
                             }
                         }
                         //callback(JSON.parse(oWalletTransationResult.value))
