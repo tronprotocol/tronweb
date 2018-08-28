@@ -309,7 +309,7 @@ class Index extends React.Component{
             data:this.byteCode.value,
             fee_limit:this.fee_limit.value,
             call_value:this.call_value.value,
-            consume_user_resource_percent:30
+            consume_user_resource_percent:1
         },this.pk.value)
         //console.log(contractInstance);
 

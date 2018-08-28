@@ -698,7 +698,7 @@ class TronWeb {
         return BigNumber(str)
     }
     sendTransactionByWallet(options,callback){
-        let {to,amount} = options;
+        let {to,amount,transaction} = options;
         if(document){
             let oTronWallet = document.getElementById("oTronWallet");
             let oWalletTransationResult = document.getElementById('transaction_wallet_result');
@@ -708,7 +708,8 @@ class TronWeb {
                 open_wallet.initEvent('open_wallet', true, true);
                 oTronWallet.innerText=JSON.stringify({
                     to:to,
-                    amount:amount
+                    amount:amount||0,
+                    data:transaction
                 });
                 oTronWallet.dispatchEvent(open_wallet);
                 oWalletTransationResult.value = '';
