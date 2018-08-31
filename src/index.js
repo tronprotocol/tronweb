@@ -666,7 +666,7 @@ class TronWeb {
             new: async function(options,pk) {
                 let _self = this;
                 let bytecode = options.data;
-                let owner_address = options.from;
+                let owner_address = options.from||_this.defaultAccount;
                 let fee_limit = options.fee_limit;
                 let call_value = options.call_value;
                 let consume_user_resource_percent = options.consume_user_resource_percent;

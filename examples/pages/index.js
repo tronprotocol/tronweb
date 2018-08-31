@@ -329,7 +329,7 @@ class Index extends React.Component{
         let contractAddress = '4103c4944768d1f95638b0634eaae648080dabcdbf'
         let contractInstance = await myContract.at(contractAddress);
 
-        let { transaction,txid,result,constant_result } = await contractInstance.fibonacciNotify(7,{
+        let { transaction,result,constant_result } = await contractInstance.fibonacciNotify(7,{
             fee_limit:700000000000000,
             call_value:0
         })
