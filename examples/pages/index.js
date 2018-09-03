@@ -369,81 +369,81 @@ class Index extends React.Component{
         return (
             <div>
                 <div className="box" style={{marginTop:'200px'}}>
-                    <h3>工具函数</h3>
+                    <h3>工具函数 - Tool function</h3>
                     <div>
                         <input type="button" value="to BigNumber" onClick={()=>this.toBigNumber()}/>
                     </div>
-                    <h3>账号、转账</h3>
+                    <h3>账号、转账 - Account number, transfer</h3>
                     <div>
-                        账号：<input type="text" style={{width:'300px'}} ref={(input)=>this.account =input} defaultValue={tronWeb.defaultAccount}/>
-                        <input type="button" onClick={()=>this.getBalance()} value="查询账户余额" />
+                        账号 - account number：<input type="text" style={{width:'300px'}} ref={(input)=>this.account =input} defaultValue={tronWeb.defaultAccount}/>
+                        <input type="button" onClick={()=>this.getBalance()} value="查询账户余额 - Check account balance" />
                     </div>
                     <div>
                         <input type="button" value="triggerWallet" onClick={()=>this.triggerChromeWallet()}/>
                     </div>
                     <div>
-                        <input type="button" value="生成私钥地址(onLine)" onClick={()=>this.generateAddress()}/>
-                        <input type="button" value="生成私钥地址(onClient)" onClick={()=>this.generateAddressOnClient()}/>
+                        <input type="button" value="生成私钥地址 - Generate private key address(onLine)" onClick={()=>this.generateAddress()}/>
+                        <input type="button" value="生成私钥地址 - Generate private key address(onClient)" onClick={()=>this.generateAddressOnClient()}/>
                         <div>
-                            <input type="button" value="验证地址" onClick={()=>this.validateAddress()}/>
+                            <input type="button" value="验证地址 - Verify address" onClick={()=>this.validateAddress()}/>
                         </div>
-                        <input type="button" value="通过密码创建地址" onClick={()=>this.createAddressWithPassWord()}/>
+                        <input type="button" value="通过密码创建地址 - Create an address with a password" onClick={()=>this.createAddressWithPassWord()}/>
 
-                        <input type="button" value="更新账号名称" onClick={()=>this.updateAccount()}/>
+                        <input type="button" value="更新账号名称 - Update account name" onClick={()=>this.updateAccount()}/>
                         <hr/>
                         <form>
                             <p><label>from</label><input type="text" style={{width:'300px'}} ref={(input)=>this.from =input} defaultValue={tronWeb.defaultAccount}/> </p>
                             <p><label>to</label><input type="text" style={{width:'300px'}} ref={(input)=>this.to =input} defaultValue={`TGhepyLuyML5n5jQBTykKqh9od8hQrBDkS`}/> </p>
                             <p><label>amount</label><input type="text" ref={(input)=>this.amount =input}  defaultValue={1000000} /> </p>
                             <p><label>pk</label><input type="text"  style={{width:'500px'}}ref={(input)=>this.pkForTransaction =input} defaultValue={tronWeb.defaultPk} /> </p>
-                            <input type="button" onClick={(e)=>this.sendTransaction(e)} value="转账" />
+                            <input type="button" onClick={(e)=>this.sendTransaction(e)} value="转账 - Transfer" />
                         </form>
                     </div>
-                    <h3>节点查询</h3>
+                    <h3>节点查询 - Node query</h3>
                     <div>
-                        <input type="button" value="查询API所在机器连接的节点" onClick={()=>this.listNodes()}/>
+                        <input type="button" value="查询API所在机器连接的节点 - Query the node to which the machine where the API is connected" onClick={()=>this.listNodes()}/>
                     </div>
-                    <h3>块查询</h3>
+                    <h3>块查询 - Block query</h3>
                     <div>
-                        块id或高度：<input type="text" style={{width:'600px'}} ref={(input)=>this.idOrHeight =input} defaultValue='00000000000005ae07f42776b3bfd8e873feaebf2d743aceb716db5f70cb373b' />
-                        <input type="button" onClick={()=>this.getBlock()} value="查询区块" />
-                        <input type="button" onClick={()=>this.getBlockTransactionCount()} value="查询区块内交易数量" />
+                        块id或高度 - Block id or height：<input type="text" style={{width:'600px'}} ref={(input)=>this.idOrHeight =input} defaultValue='00000000000005ae07f42776b3bfd8e873feaebf2d743aceb716db5f70cb373b' />
+                        <input type="button" onClick={()=>this.getBlock()} value="查询区块 - Query block" />
+                        <input type="button" onClick={()=>this.getBlockTransactionCount()} value="查询区块内交易数量 - Query the number of transactions in the block" />
                     </div>
                     <div>
-                        <input type="button" value="查询最新块" onClick={()=>this.blockNumber()}/>
-                        <input type="button" value="通过高度查询块" onClick={()=>this.getBlockByNum()}/>
-                        <input type="button" value="通过id查询块" onClick={()=>this.getBlockById()}/>
-                        <input type="button" value="通过高度范围查询块" onClick={()=>this.getBlockByLimitNext()}/>
-                        <input type="button" value="查询最近的几个块" onClick={()=>this.getBlockByLatestNum()}/>
+                        <input type="button" value="查询最新块 - Query the latest block" onClick={()=>this.blockNumber()}/>
+                        <input type="button" value="通过高度查询块 - Height query block" onClick={()=>this.getBlockByNum()}/>
+                        <input type="button" value="通过id查询块 - Query block by id" onClick={()=>this.getBlockById()}/>
+                        <input type="button" value="通过高度范围查询块 - Query block by height range" onClick={()=>this.getBlockByLimitNext()}/>
+                        <input type="button" value="查询最近的几个块 - Query the most recent blocks" onClick={()=>this.getBlockByLatestNum()}/>
                     </div>
-                    <h3>交易查询</h3>
+                    <h3>交易查询 - Transaction inquiry</h3>
                     <div>
-                        交易id：<input type="text" style={{width:'600px'}} ref={(input)=>this.transactionId =input} defaultValue='c523edd7b4b776aa44e4cd4bbdf925cb4eb6d047e27316e1ff919014cc6a9f54'/>
-                        <input type="button" value="通过id查询交易记录" onClick={()=>this.getTransaction()}/>
-                        <input type="button" value="统计所有的交易总数" onClick={()=>this.totalTransaction()}/>
+                        交易id - Transaction id：<input type="text" style={{width:'600px'}} ref={(input)=>this.transactionId =input} defaultValue='c523edd7b4b776aa44e4cd4bbdf925cb4eb6d047e27316e1ff919014cc6a9f54'/>
+                        <input type="button" value="通过id查询交易记录 - Query transaction records by id" onClick={()=>this.getTransaction()}/>
+                        <input type="button" value="统计所有的交易总数 - Count all transactions" onClick={()=>this.totalTransaction()}/>
                     </div>
-                    <h3>超级代表</h3>
+                    <h3>超级代表 - Super Representative (SR)</h3>
                     <div>
-                        <input type="button" value="查询所有超级代表" onClick={()=>this.listWitNesses()}/>
-                        <input type="button" value="获取下次统计投票时间" onClick={()=>this.getNextMaintenanceTime()}/>
-                        <input type="button" value="申请成为超级代表" onClick={()=>this.createWitness()}/>
-                        <input type="button" value="为超级代表投票" onClick={()=>this.voteWitnessAccount()}/>
-                        <input type="button" value="解冻结束冻结期的trx" onClick={()=>this.unfreezeBalance()}/>
-                        <input type="button" value="超级代表提现奖励到balance" onClick={()=>this.withdrawBalance()}/>
+                        <input type="button" value="查询所有超级代表 - Query all SR" onClick={()=>this.listWitNesses()}/>
+                        <input type="button" value="获取下次统计投票时间 - Get the next maintenance time" onClick={()=>this.getNextMaintenanceTime()}/>
+                        <input type="button" value="申请成为超级代表 - Apply to become a SR" onClick={()=>this.createWitness()}/>
+                        <input type="button" value="为超级代表投票 - Vote for the SR" onClick={()=>this.voteWitnessAccount()}/>
+                        <input type="button" value="解冻结束冻结期的trx - Unfreeze the trx at the end of the freeze period" onClick={()=>this.unfreezeBalance()}/>
+                        <input type="button" value="超级代表提现奖励到balance - SR withdraws the reward to balance" onClick={()=>this.withdrawBalance()}/>
                     </div>
-                    <h3>token管理</h3>
+                    <h3>token管理 - Token management</h3>
                     <div>
-                        <input type="button" value="查询所有token列表" onClick={()=>this.getAssetIssueList()}/>
-                        <input type="button" value="分页查询token列表" onClick={()=>this.getPaginateDassetIssueList()}/>
-                        <input type="button" value="查询某账户发行的token" onClick={()=>this.getAssetIssueByAccount()}/>
-                        <input type="button" value="根据名称查询token" onClick={()=>this.getAssetIssueByName()}/>
-                        <input type="button" value="发行token" onClick={()=>this.createAssetIssue()} style={{color:'red'}}/>
-                        <input type="button" value="转账token" onClick={()=>this.transferAsset()}/>
-                        <input type="button" value="修改token" onClick={()=>this.updateAsset()}/>
-                        <input type="button" value="解冻token" onClick={()=>this.unfreezeAsset()} style={{color:'red'}}/>
-                        <input type="button" value="参与token发行" onClick={()=>this.participateAssetIssue()}/>
+                        <input type="button" value="查询所有token列表 - Query all token lists" onClick={()=>this.getAssetIssueList()}/>
+                        <input type="button" value="分页查询token列表 - Paging query token list" onClick={()=>this.getPaginateDassetIssueList()}/>
+                        <input type="button" value="查询某账户发行的token - Query the token issued by an account" onClick={()=>this.getAssetIssueByAccount()}/>
+                        <input type="button" value="根据名称查询token - Query token by name" onClick={()=>this.getAssetIssueByName()}/>
+                        <input type="button" value="发行token - Issue token" onClick={()=>this.createAssetIssue()} style={{color:'red'}}/>
+                        <input type="button" value="转账token - Transfer token" onClick={()=>this.transferAsset()}/>
+                        <input type="button" value="修改token - Modify token" onClick={()=>this.updateAsset()}/>
+                        <input type="button" value="解冻token - Unfreeze the token" onClick={()=>this.unfreezeAsset()} style={{color:'red'}}/>
+                        <input type="button" value="参与token发行 - Participate in token issuance" onClick={()=>this.participateAssetIssue()}/>
                     </div>
-                    <h3>智能合约</h3>
+                    <h3>智能合约 - Smart contract</h3>
                     <div>
                          <div>
                              <form onSubmit={(e)=>this.deployContract(e)}>
@@ -471,21 +471,21 @@ class Index extends React.Component{
                                      <input type="text" ref={(input)=>this.call_value=input} defaultValue={0}/>
                                  </div>
                                  <div>
-                                     <input type="submit" value="部署合约"/>
+                                     <input type="submit" value="部署合约 - Deploy contract"/>
                                  </div>
                              </form>
                              <hr/>
                          </div>
                         <div>
-                            <label >查询合约地址：</label>
+                            <label >查询合约地址 - Query contract address：</label>
                             <input type="text" style={{width:'300px'}} ref={(input)=>this.contract_address=input} defaultValue={``}/>
-                            <input type="button" value="查询合约" onClick={()=>this.getContract()}/>
+                            <input type="button" value="查询合约 - Query contract" onClick={()=>this.getContract()}/>
                         </div>
                         <div>
-                            <input type="button" value="调用合约" onClick={()=>{this.triggerContract()}}/>
+                            <input type="button" value="调用合约 - Call contract" onClick={()=>{this.triggerContract()}}/>
                         </div>
                         <div>
-                            <input type="button" value="登录" onClick={()=>this.login()}/>
+                            <input type="button" value="登录 - login" onClick={()=>this.login()}/>
                         </div>
 
 
