@@ -240,7 +240,7 @@ class TronWeb {
         abbr=stringUtf8toHex(abbr);
         description=stringUtf8toHex(description);
         url = stringUtf8toHex(url);
-        let {data} = await xhr.post(`${this.apiUrl}/createassetissue`,{
+        let {data} = await xhr.post(`${this.apiUrl}/wallet/createassetissue`,{
             owner_address,
             name,
             abbr,
