@@ -87,7 +87,7 @@ class TronWeb {
      * @return {object}
      */
     async getBlockTransactionCount(hashStringOrBlockNumber){
-        const {data} = await this.getBlock(hashStringOrBlockNumber)
+        const data = await this.getBlock(hashStringOrBlockNumber)
         return {count:data.transactions?data.transactions.length:0};
     }
 

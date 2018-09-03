@@ -3,7 +3,6 @@ import TronWeb from '../../src/index'
 import stringify from 'json-stringify-pretty-compact'
 import {utils} from 'ethers'
 let tronWeb = new TronWeb('http://52.44.75.99:8090');
-
 tronWeb.setEventServer('http://52.44.75.99:18889');
 tronWeb.defaultAccount = 'TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY';
 tronWeb.defaultPk='da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0';
@@ -216,7 +215,7 @@ class Index extends React.Component{
     }
     //15、查询最新块
     async blockNumber(){
-        let res = await tronWeb.getNowBlock();
+        let res = await tronWeb.blockNumber();
         this.setState({
             data:res
         })
@@ -326,7 +325,7 @@ class Index extends React.Component{
     async triggerContract(){
         let abi = [{"constant":false,"inputs":[{"name":"number","type":"uint256"}],"name":"fibonacciNotify","outputs":[{"name":"result","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"number","type":"uint256"}],"name":"fibonacci","outputs":[{"name":"result","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"name":"input","type":"uint256"},{"indexed":false,"name":"result","type":"uint256"}],"name":"Notify","type":"event"}];
         let myContract = tronWeb.contract(abi);
-        let contractAddress = '4103c4944768d1f95638b0634eaae648080dabcdbf'
+        let contractAddress = '417e4d2782e6512c9824a742857ab4093802507555'
         let contractInstance = await myContract.at(contractAddress);
 
         let { transaction,result,constant_result } = await contractInstance.fibonacciNotify(7,{
@@ -408,13 +407,11 @@ class Index extends React.Component{
                         块id或高度 - Block id or height：<input type="text" style={{width:'600px'}} ref={(input)=>this.idOrHeight =input} defaultValue='00000000000005ae07f42776b3bfd8e873feaebf2d743aceb716db5f70cb373b' />
                         <input type="button" onClick={()=>this.getBlock()} value="查询区块 - Query block" />
                         <input type="button" onClick={()=>this.getBlockTransactionCount()} value="查询区块内交易数量 - Query the number of transactions in the block" />
+                        <input type="button" value="查询最新块 - Query the latest block" onClick={()=>this.blockNumber()}/>
                     </div>
                     <div>
-                        <input type="button" value="查询最新块 - Query the latest block" onClick={()=>this.blockNumber()}/>
-                        <input type="button" value="通过高度查询块 - Height query block" onClick={()=>this.getBlockByNum()}/>
-                        <input type="button" value="通过id查询块 - Query block by id" onClick={()=>this.getBlockById()}/>
-                        <input type="button" value="通过高度范围查询块 - Query block by height range" onClick={()=>this.getBlockByLimitNext()}/>
-                        <input type="button" value="查询最近的几个块 - Query the most recent blocks" onClick={()=>this.getBlockByLatestNum()}/>
+                        {/*<input type="button" value="通过高度范围查询块 - Query block by height range" onClick={()=>this.getBlockByLimitNext()}/>
+                        <input type="button" value="查询最近的几个块 - Query the most recent blocks" onClick={()=>this.getBlockByLatestNum()}/>*/}
                     </div>
                     <h3>交易查询 - Transaction inquiry</h3>
                     <div>
