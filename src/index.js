@@ -571,17 +571,35 @@ class TronWeb {
      * @return {object transction}
      * */
     async deployContract(options){
-        let {abi,bytecode,fee_limit,call_value,owner_address,consume_user_resource_percent} = options;
-        owner_address = address2HexString(owner_address);
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/deploycontract`,{
-            abi,
-            bytecode,
-            fee_limit,
-            call_value,
-            owner_address,
-            consume_user_resource_percent
-        })
-        return data;
+        try{
+            let payable = false;
+            let {abi,bytecode,fee_limit,call_value,owner_address,consume_user_resource_percent} = options;
+            owner_address = address2HexString(owner_address);
+            for(let v of JSON.parse(abi)){
+                if(v.payable){
+                    payable = true;
+                }
+            }
+            if(payable && call_value == 0){
+                throw "call_value must be set greater than 0 ,if contract type is payable";
+            }
+            if(!payable && call_value > 0){
+                throw "call_value must be set as 0 ,if contract type is't payable";
+            }
+            let {data} = await xhr.post(`${this.apiUrl}/wallet/deploycontract`,{
+                abi,
+                bytecode,
+                fee_limit,
+                call_value,
+                owner_address,
+                consume_user_resource_percent
+            })
+            return data;
+        }catch(err){
+            console.log(err);
+            return false;
+        }
+        
     }
 
     async getContract(contractAddress){
@@ -679,18 +697,23 @@ class TronWeb {
                     owner_address,
                     consume_user_resource_percent
                 })
-                let returnRes ={transactionHash:res.txID,address:res.contract_address}
-                if(Object.keys(res).indexOf('txID')>-1){
-                    const signTransaction = await _this.signTransaction(res,pk)
-                    //广播交易
-                    const result = await _this.sendRawTransaction(signTransaction);
-                    if(result){
-                        returnRes.broadCast = true;
-                    }
+                if(res){
+                    let returnRes ={transactionHash:res.txID,address:res.contract_address}
+                    if(Object.keys(res).indexOf('txID')>-1){
+                        const signTransaction = await _this.signTransaction(res,pk)
+                        //广播交易
+                        const result = await _this.sendRawTransaction(signTransaction);
+                        if(result){
+                            returnRes.broadCast = true;
+                        }
 
+                    }
+                    let contractInstance = await _self.at(returnRes.address);
+                    return Object.assign(contractInstance,returnRes);    
+                }else{
+                    return res;
                 }
-                let contractInstance = await _self.at(returnRes.address);
-                return Object.assign(contractInstance,returnRes);
+                
             }
         }
     }
