@@ -1,8 +1,20 @@
-import {signTransaction} from './utils/crypto'
-import {utils} from 'ethers'
+webpackHotUpdate(4,{
+
+/***/ "../src/private.js":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = parseAbi;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_crypto__ = __webpack_require__("../src/utils/crypto.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_crypto___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__utils_crypto__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ethers__ = __webpack_require__("../node_modules/ethers/index.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ethers___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_ethers__);
+
+
 async function timeInterval(eventName,ms,fn) {
     let timerName = eventName+'_timer';
-    return await new Promise((resolve) => {
+
+   return await new Promise((resolve) => {
         window[timerName] =setInterval(()=>{
            fn.then((result)=>{
                resolve(result);
@@ -10,7 +22,7 @@ async function timeInterval(eventName,ms,fn) {
         }, ms);
     });
 }
-export function parseAbi(abiArray,{owner_address,contract_address}){
+function parseAbi(abiArray,{owner_address,contract_address}){
     try{
         let _this = this;
         let returnObj = {};
@@ -34,6 +46,7 @@ export function parseAbi(abiArray,{owner_address,contract_address}){
                     })
                     function_selector += `(${paramInputTypes.join(',')})`;
                     params.push(paramInputTypes, paramInputValues);
+
                     for (let i = 0; i < arguments.length; i++) {
                         if (typeof arguments[i] == 'object') {
                             otherParams = arguments[i];
@@ -49,12 +62,9 @@ export function parseAbi(abiArray,{owner_address,contract_address}){
                         fee_limit: otherParams.fee_limit,
                         call_value: otherParams.call_value,
                     }
-                    if(otherParams.fee_limit>100000000 || otherParams.fee_limit<0){
-                        throw "fee_limit should be set between 0 and 1000000000";
-                    }
                     let res = await _this.triggerSmartContract(triggerCallBackParams);
                     if (res.constant_result) {
-                        let coder = new utils.AbiCoder();
+                        let coder = new __WEBPACK_IMPORTED_MODULE_1_ethers__["utils"].AbiCoder();
                         if (res.constant_result.length) {
                             //let value = res.constant_result[0];
                             let constantArr = res.constant_result.map((item) => {
@@ -66,9 +76,12 @@ export function parseAbi(abiArray,{owner_address,contract_address}){
                     return res;
 
                 }
+
                 returnObj[item.name].sendTransaction = async function (transaction, pk) {
-                    const sign_Transaction = await signTransaction(pk, transaction)
+                    const sign_Transaction = await Object(__WEBPACK_IMPORTED_MODULE_0__utils_crypto__["signTransaction"])(pk, transaction)
+
                     const sendResult = await _this.sendRawTransaction(sign_Transaction);
+
                     return sendResult;
                 }
             }
@@ -117,8 +130,12 @@ export function parseAbi(abiArray,{owner_address,contract_address}){
         })
         return returnObj;
     }catch(err){
-        console.err(err);
-        return false;
+        console.log(err)
     }
     
 }
+
+/***/ })
+
+})
+//# sourceMappingURL=4.0b2d41c5b003efadd01a.hot-update.js.map

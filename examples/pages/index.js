@@ -2,10 +2,14 @@ import React,{ReactDOM} from 'react'
 import TronWeb from '../../src/index'
 import stringify from 'json-stringify-pretty-compact'
 import {utils} from 'ethers'
-let tronWeb = new TronWeb('http://52.44.75.99:8090');
-tronWeb.setEventServer('http://52.44.75.99:18889');
-tronWeb.defaultAccount = 'TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY';
-tronWeb.defaultPk='da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0';
+//let tronWeb = new TronWeb('http://52.44.75.99:8090');
+//tronWeb.setEventServer('http://52.44.75.99:18889');
+//tronWeb.defaultAccount = 'TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY';
+//tronWeb.defaultPk='da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0';
+let tronWeb = new TronWeb('http://testapi.trondapps.org');
+tronWeb.setEventServer('http://testevent.trondapps.org');
+tronWeb.defaultAccount = 'TWsm8HtU2A5eEzoT8ev8yaoFjHsXLLrckb';
+tronWeb.defaultPk='8ef7dd1a81d4ef2b538daae0c20e37f4edb3fd1338aff91b03e2b8b1ed956645';
 class Index extends React.Component{
     state = {
         data:{}
@@ -15,8 +19,11 @@ class Index extends React.Component{
         window.tronWeb = tronWeb;
     }
     triggerChromeWallet(){
-        tronWeb.sendTransactionByWallet({to:'TZ3SmkD8qJK3VY8AnqN9XFiYuspEP3cwB5',amount:0.1},function(result){
+        const res = tronWeb.sendTransactionByWallet({to:'TZ3SmkD8qJK3VY8AnqN9XFiYuspEP3cwB5',amount:0.1},function(result){
             console.log('cbk',result);
+        })
+        this.setState({
+            data:res
         })
     }
 
@@ -301,18 +308,18 @@ class Index extends React.Component{
     //27、部署合约
     async deployContract(event){
         event.preventDefault();
-        let myContract = tronWeb.contract(JSON.parse( this.abi.value));
-
+        let myContract = tronWeb.contract(JSON.parse(this.abi.value));
         //部署合约
         let contractInstance = await myContract.new({
             from:this.owner_address.value,
             data:this.byteCode.value,
             fee_limit:this.fee_limit.value,
             call_value:this.call_value.value,
-            consume_user_resource_percent:1
+            consume_user_resource_percent:this.consume_user_resource_percent.value
         },this.pk.value)
-        //console.log(contractInstance);
-
+        this.setState({
+            data:contractInstance
+        })
     }
     //28、查询合约
     async getContract(){
@@ -325,13 +332,12 @@ class Index extends React.Component{
     async triggerContract(){
         let abi = [{"constant":false,"inputs":[{"name":"number","type":"uint256"}],"name":"fibonacciNotify","outputs":[{"name":"result","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"number","type":"uint256"}],"name":"fibonacci","outputs":[{"name":"result","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"name":"input","type":"uint256"},{"indexed":false,"name":"result","type":"uint256"}],"name":"Notify","type":"event"}];
         let myContract = tronWeb.contract(abi);
-        let contractAddress = '417e4d2782e6512c9824a742857ab4093802507555'
+        let contractAddress = '416061e95f6e362efc3170fd50ac22197d9119b09e';
         let contractInstance = await myContract.at(contractAddress);
-
         let { transaction,result,constant_result } = await contractInstance.fibonacciNotify(7,{
-            fee_limit:700000000000000,
+            fee_limit:7000000,
             call_value:0
-        })
+        });
         if(!constant_result){
             let res = await contractInstance.fibonacciNotify.sendTransaction(transaction,this.pk.value);
             this.setState({
@@ -453,10 +459,10 @@ class Index extends React.Component{
                                      <input type="text" style={{width:'500px'}} ref={(input)=>this.pk = input} defaultValue={tronWeb.defaultPk}/>
                                  </div>
                                  <div>
-                                     <label>Abi</label><textarea cols="50" rows="10" placeholder="abi" defaultValue={``} ref={(input)=>this.abi = input}></textarea>
+                                     <label>Abi</label><textarea cols="50" rows="10" placeholder="abi" defaultValue='' ref={(input)=>this.abi = input}></textarea>
                                  </div>
                                  <div>
-                                     <label>byteCode</label><textarea  cols="50" rows="10" placeholder='byteCode' defaultValue={``} ref={(input)=>this.byteCode = input}></textarea>
+                                     <label>byteCode</label><textarea  cols="50" rows="10" placeholder='byteCode' defaultValue='' ref={(input)=>this.byteCode = input}></textarea>
                                  </div>
 
                                  <div>
@@ -466,6 +472,10 @@ class Index extends React.Component{
                                  <div>
                                      <label >call_value：</label>
                                      <input type="text" ref={(input)=>this.call_value=input} defaultValue={0}/>
+                                 </div>
+                                 <div>
+                                     <label >consume_user_resource_percent：</label>
+                                     <input type="text" ref={(input)=>this.consume_user_resource_percent=input} defaultValue={0}/>
                                  </div>
                                  <div>
                                      <input type="submit" value="部署合约 - Deploy contract"/>

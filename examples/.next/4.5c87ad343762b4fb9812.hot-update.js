@@ -1,10 +1,28 @@
-import xhr from 'axios'
-import  {address2HexString,stringUtf8toHex,hexString2Address,hexString2Utf8} from './utils/help'
-import {parseAbi} from "./private";
-import { generateAccount } from './utils/account'
-import {signTransaction,pkToAddress} from './utils/crypto'
-import {utils} from 'ethers'
-import {BigNumber} from 'bignumber.js'
+webpackHotUpdate(4,{
+
+/***/ "../src/index.js":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_axios__ = __webpack_require__("../node_modules/axios/index.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_axios___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_axios__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_help__ = __webpack_require__("../src/utils/help.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__private__ = __webpack_require__("../src/private.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_account__ = __webpack_require__("../src/utils/account.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_account___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__utils_account__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_crypto__ = __webpack_require__("../src/utils/crypto.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_crypto___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4__utils_crypto__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_ethers__ = __webpack_require__("../node_modules/ethers/index.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_ethers___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_ethers__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_bignumber_js__ = __webpack_require__("../node_modules/bignumber.js/bignumber.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_bignumber_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6_bignumber_js__);
+
+
+
+
+
+
+
 
 class TronWeb {
     constructor(apiUrl,tronInfuraUrl) {
@@ -17,15 +35,15 @@ class TronWeb {
     toHex(str){
         //address
         if(str.length==34&&str.indexOf('T')==0){
-            return address2HexString(str)
+            return Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(str)
         }
-        return stringUtf8toHex(str)
+        return Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["d" /* stringUtf8toHex */])(str)
     }
     fromHex(sHex){
         if(sHex.length==42&&sHex.indexOf('41')==0){
-            return hexString2Address(sHex)
+            return Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["b" /* hexString2Address */])(sHex)
         }
-        return hexString2Utf8(sHex)
+        return Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["c" /* hexString2Utf8 */])(sHex)
     }
     setFullNodeServer(value){
         this.apiUrl = value;
@@ -40,7 +58,7 @@ class TronWeb {
      * @return {string} address
      * */
     login(pk){
-        return pkToAddress(pk);
+        return Object(__WEBPACK_IMPORTED_MODULE_4__utils_crypto__["pkToAddress"])(pk);
     }
 
     /**
@@ -49,8 +67,8 @@ class TronWeb {
      * @return {object}
      **/
     async getBalance(address){
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/getaccount`,{
-            address : address2HexString(address)
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/getaccount`,{
+            address : Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(address)
         })
         return data;
     }
@@ -61,7 +79,7 @@ class TronWeb {
      * @return {object}
      * */
     async blockNumber(){
-        let  { data }= await xhr.post(`${this.apiUrl}/wallet/getnowblock`)
+        let  { data }= await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/getnowblock`)
         return data;
     }
 
@@ -73,10 +91,10 @@ class TronWeb {
     async getBlock(hashStringOrBlockNumber){
         let data;
         if(isNaN(hashStringOrBlockNumber)){
-            data = await xhr.post(`${this.apiUrl}/wallet/getblockbyid`,{value:hashStringOrBlockNumber})
+            data = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/getblockbyid`,{value:hashStringOrBlockNumber})
         }else{
             hashStringOrBlockNumber = typeof hashStringOrBlockNumber === 'number' ? hashStringOrBlockNumber : parseInt(hashStringOrBlockNumber);
-            data = await xhr.post(`${this.apiUrl}/wallet/getblockbynum`,{num:hashStringOrBlockNumber})
+            data = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/getblockbynum`,{num:hashStringOrBlockNumber})
         }
         return data.data;
     }
@@ -97,7 +115,7 @@ class TronWeb {
      * @return {object}
      */
     async getTransaction(id){
-        const {data} = await xhr.post(`${this.apiUrl}/wallet/gettransactionbyid`,{value:id})
+        const {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/gettransactionbyid`,{value:id})
         return data;
     }
     /**
@@ -106,7 +124,7 @@ class TronWeb {
      * @returns {object} {num:11111}
      * */
     async getTransactionCount(){
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/totaltransaction`);
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/totaltransaction`);
         return data.num;
     }
     /**
@@ -134,9 +152,9 @@ class TronWeb {
      * @return {object} transaction
      * */
     async createTransaction(to_address,owner_address,amount){
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/createtransaction`,{
-            to_address:address2HexString(to_address),
-            owner_address:address2HexString(owner_address),
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/createtransaction`,{
+            to_address:Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(to_address),
+            owner_address:Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(owner_address),
             amount
         })
         return data;
@@ -149,23 +167,16 @@ class TronWeb {
      * */
 
     async signTransaction(transaction,privateKey,teriminal=0){
-        try{
         const addr = this.login(privateKey);
-        if(addr !== this.fromHex(transaction.raw_data.contract[0].parameter.value.owner_address)){
-            throw "Private key is error!";
-        }
+        console.log(addr,this.formHex(transaction.raw_data.contract[0].parameter.value.owner_address))
         if(teriminal==0){
-            return signTransaction(privateKey,transaction);
+            return Object(__WEBPACK_IMPORTED_MODULE_4__utils_crypto__["signTransaction"])(privateKey,transaction);
         } else {
-            let {data} = await xhr.post(`${this.apiUrl}/wallet/gettransactionsign`,{
+            let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/gettransactionsign`,{
                 transaction : transaction,
                 privateKey : privateKey
             })
             return data;
-        }
-        }catch(err){
-            console.error(err);
-            return false;
         }
     }
     /**
@@ -174,7 +185,7 @@ class TronWeb {
      * @return {object} {result:true}
      * */
     async sendRawTransaction(signTransaction){
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/broadcasttransaction`,signTransaction)
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/broadcasttransaction`,signTransaction)
         return data;
     }
     /**
@@ -183,9 +194,9 @@ class TronWeb {
      * @return {object}
      * */
     async updateAccount(account_name,owner_address){
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/updateaccount`,{
-            account_name:stringUtf8toHex(account_name),
-            owner_address:address2HexString(owner_address)
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/updateaccount`,{
+            account_name:Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["d" /* stringUtf8toHex */])(account_name),
+            owner_address:Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(owner_address)
         })
         return data;
     }
@@ -199,11 +210,11 @@ class TronWeb {
         let newVotes = votes.map((item)=>{
             return {
                 vote_count:item.vote_count,
-                vote_address:address2HexString(item.vote_address)
+                vote_address:Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(item.vote_address)
             }
         })
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/votewitnessaccount`,{
-            owner_address:address2HexString(owner_address),
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/votewitnessaccount`,{
+            owner_address:Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(owner_address),
             votes:newVotes
         })
         return data;
@@ -244,12 +255,12 @@ class TronWeb {
             public_free_asset_net_limit,
             frozen_supply
         } = oToken;
-        owner_address = address2HexString(owner_address);
-        name = stringUtf8toHex(name);
-        abbr=stringUtf8toHex(abbr);
-        description=stringUtf8toHex(description);
-        url = stringUtf8toHex(url);
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/createassetissue`,{
+        owner_address = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(owner_address);
+        name = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["d" /* stringUtf8toHex */])(name);
+        abbr=Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["d" /* stringUtf8toHex */])(abbr);
+        description=Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["d" /* stringUtf8toHex */])(description);
+        url = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["d" /* stringUtf8toHex */])(url);
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/createassetissue`,{
             owner_address,
             name,
             abbr,
@@ -273,9 +284,9 @@ class TronWeb {
      * @param {string} owner_address,{string} account_address
      * */
     async createAccount(owner_address,account_address){
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/createaccount`,{
-            owner_address:address2HexString(owner_address),
-            account_address:address2HexString(account_address)
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/createaccount`,{
+            owner_address:Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(owner_address),
+            account_address:Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(account_address)
         })
         return data;
     }
@@ -286,9 +297,9 @@ class TronWeb {
      * @return {object} transaction
      * */
     async createWitness(owner_address,url){
-        let {data}=await xhr.post(`${this.apiUrl}/wallet/createwitness`,{
-            owner_address:address2HexString(owner_address),
-            url:stringUtf8toHex(url)
+        let {data}=await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/createwitness`,{
+            owner_address:Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(owner_address),
+            url:Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["d" /* stringUtf8toHex */])(url)
         })
         return data;
     }
@@ -299,11 +310,11 @@ class TronWeb {
      * */
     async transferAsset(options){
         let {owner_address,to_address,asset_name,amount} = options;
-        owner_address = address2HexString(owner_address);
-        to_address = address2HexString(to_address);
-        asset_name = stringUtf8toHex(asset_name);
+        owner_address = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(owner_address);
+        to_address = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(to_address);
+        asset_name = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["d" /* stringUtf8toHex */])(asset_name);
 
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/transferasset`,{
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/transferasset`,{
             owner_address,to_address,asset_name,amount
         })
         return data;
@@ -314,9 +325,9 @@ class TronWeb {
      * @return {object}
      * */
     async easytransfer(passPhrase,toAddress,amount) {
-        let { data } = await xhr.post(`${this.apiUrl}/wallet/easytransfer`,{
-            passPhrase:stringUtf8toHex(passPhrase),
-            toAddress:address2HexString(toAddress),
+        let { data } = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/easytransfer`,{
+            passPhrase:Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["d" /* stringUtf8toHex */])(passPhrase),
+            toAddress:Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(toAddress),
             amount
         })
         return data;
@@ -328,8 +339,8 @@ class TronWeb {
      * @return {object}
      * */
     async createAddress(password){
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/createaddress`,{
-            value: stringUtf8toHex(password)
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/createaddress`,{
+            value: Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["d" /* stringUtf8toHex */])(password)
         })
         return data;
     }
@@ -346,11 +357,11 @@ class TronWeb {
      * */
     async participateAssetIssue(options){
         let {to_address,owner_address,amount,asset_name} = options;
-        to_address = address2HexString(to_address);
-        owner_address = address2HexString(owner_address);
-        asset_name = stringUtf8toHex(asset_name);
+        to_address = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(to_address);
+        owner_address = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(owner_address);
+        asset_name = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["d" /* stringUtf8toHex */])(asset_name);
 
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/participateassetissue`,{
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/participateassetissue`,{
             to_address,
             owner_address,
             amount,
@@ -364,8 +375,8 @@ class TronWeb {
      * @return {object} transaction
      * */
     async freezeBalance(owner_address,frozen_balance,frozen_duration){
-        owner_address = address2HexString(owner_address);
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/freezebalance`,{
+        owner_address = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(owner_address);
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/freezebalance`,{
             owner_address,
             frozen_balance,
             frozen_duration
@@ -379,8 +390,8 @@ class TronWeb {
      * @return {object} transaction
      * */
     async unfreezeBalance(owner_address){
-        owner_address = address2HexString(owner_address);
-        let {data} = xhr.post(`${this.apiUrl}/wallet/unfreezebalance`,{
+        owner_address = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(owner_address);
+        let {data} = __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/unfreezebalance`,{
             owner_address
         })
         return data;
@@ -392,8 +403,8 @@ class TronWeb {
      * @return {object} transaction
      * */
     async unfreezeAsset(owner_address){
-        owner_address = address2HexString(owner_address);
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/unfreezeasset`,{
+        owner_address = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(owner_address);
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/unfreezeasset`,{
             owner_address
         })
         return data;
@@ -404,8 +415,8 @@ class TronWeb {
      * @return {object} transaction
      */
     async withdrawBalance(owner_address){
-        owner_address = address2HexString(owner_address);
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/withdrawbalance`,{
+        owner_address = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(owner_address);
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/withdrawbalance`,{
             owner_address
         })
         return data;
@@ -417,10 +428,10 @@ class TronWeb {
      * */
     async updateAsset(options){
         let {owner_address,description,url,new_limit,new_public_limit} = options;
-        owner_address = address2HexString(owner_address);
-        description = stringUtf8toHex(description);
-        url = stringUtf8toHex(url);
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/updateasset`,{
+        owner_address = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(owner_address);
+        description = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["d" /* stringUtf8toHex */])(description);
+        url = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["d" /* stringUtf8toHex */])(url);
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/updateasset`,{
             owner_address,description,url,new_limit,new_public_limit
         })
         return data;
@@ -431,7 +442,7 @@ class TronWeb {
      * @return {object Array}
      * */
     async listNodes(){
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/listnodes`);
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/listnodes`);
         return data;
     }
     /**
@@ -440,8 +451,8 @@ class TronWeb {
      * @return {object}
      * */
     async getAssetIssueByAccount(address){
-        address = address2HexString(address);
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/getassetissuebyaccount`,{address})
+        address = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(address);
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/getassetissuebyaccount`,{address})
         return data;
     }
     /**
@@ -450,8 +461,8 @@ class TronWeb {
      * @return {object}
      * */
     async getAccountNet(address){
-        address = address2HexString(address);
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/getaccountnet`,{address})
+        address = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(address);
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/getaccountnet`,{address})
         return data;
     }
     /**
@@ -460,8 +471,8 @@ class TronWeb {
      * @return {object}
      * */
     async getAssetIssueByName(value){
-        value = stringUtf8toHex(value);
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/getassetissuebyname`,{value})
+        value = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["d" /* stringUtf8toHex */])(value);
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/getassetissuebyname`,{value})
         return data;
     }
    
@@ -471,7 +482,7 @@ class TronWeb {
      * @return {object}
      * */
     async getBlockByLimitNext(startNum,endNum){
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/getblockbylimitnext`,{startNum,endNum});
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/getblockbylimitnext`,{startNum,endNum});
         return data;
     }
 
@@ -481,7 +492,7 @@ class TronWeb {
      * @return {object}
      * */
     async getBlockByLatestNum(num){
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/getblockbylatestnum`,{num});
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/getblockbylatestnum`,{num});
         return data;
     }
    
@@ -492,7 +503,7 @@ class TronWeb {
      * @returns {Array}
      * */
     async listWitNesses(){
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/listwitnesses`)
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/listwitnesses`)
         return data;
     }
     /**
@@ -500,7 +511,7 @@ class TronWeb {
      * @returns {Array}
      * */
     async getAssetIssueList(){
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/getassetissuelist`)
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/getassetissuelist`)
         return data;
     }
     /**
@@ -509,7 +520,7 @@ class TronWeb {
      * @returns {Array} 
      * */
     async getPaginateDassetIssueList(offset,limit){
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/getpaginatedassetissuelist`,{offset,limit})
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/getpaginatedassetissuelist`,{offset,limit})
         return data;
     }
     
@@ -519,7 +530,7 @@ class TronWeb {
      * @returns {object} {num:time stamp}
      * */
     async getNextMainteNanceTime(){
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/getnextmaintenancetime`);
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/getnextmaintenancetime`);
         return data;
     }
 
@@ -529,9 +540,9 @@ class TronWeb {
      * @return {object}
      * */
     async easyTransferByPrivate(privateKey,toAddress,amount){
-        privateKey = stringUtf8toHex(privateKey);
-        toAddress = address2HexString(toAddress);
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/easytransferbyprivate`,{
+        privateKey = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["d" /* stringUtf8toHex */])(privateKey);
+        toAddress = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(toAddress);
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/easytransferbyprivate`,{
             privateKey,toAddress,amount
         })
         return data;
@@ -542,7 +553,7 @@ class TronWeb {
      * @return {object}
      * */
     async generateAddressOnLine(){
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/generateaddress`)
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/generateaddress`)
         return data;
     }
     /**
@@ -551,7 +562,7 @@ class TronWeb {
      * @return {object}
      * */
     async generateAddressOnClient(){
-        let data = await generateAccount();
+        let data = await Object(__WEBPACK_IMPORTED_MODULE_3__utils_account__["generateAccount"])();
         return data;
     }
 
@@ -562,8 +573,8 @@ class TronWeb {
      * @return {object}
      * */
     async validateAddress(address){
-        address = address2HexString(address);
-        let {data} = await xhr.post(`${this.apiUrl}/wallet/validateaddress`,{address})
+        address = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(address);
+        let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/validateaddress`,{address})
         return data;
     }
     /**
@@ -583,7 +594,7 @@ class TronWeb {
         try{
             let payable = false;
             let {abi,bytecode,fee_limit,call_value,owner_address,consume_user_resource_percent} = options;
-            owner_address = address2HexString(owner_address);
+            owner_address = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(owner_address);
             for(let v of JSON.parse(abi)){
                 if(v.payable){
                     payable = true;
@@ -598,7 +609,7 @@ class TronWeb {
             if(!payable && call_value > 0){
                 throw "call_value must be set as 0 ,if contract type is't payable";
             }
-            let {data} = await xhr.post(`${this.apiUrl}/wallet/deploycontract`,{
+            let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/deploycontract`,{
                 abi,
                 bytecode,
                 fee_limit,
@@ -616,8 +627,8 @@ class TronWeb {
 
     async getContract(contractAddress){
         try {
-            let {data} = await xhr.post(`${this.apiUrl}/wallet/getcontract`, {
-                value: address2HexString(contractAddress)
+            let {data} = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/getcontract`, {
+                value: Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(contractAddress)
             })
             return data;
         }catch (e) {
@@ -626,7 +637,7 @@ class TronWeb {
     }
 
     async triggerSmartContract(options){
-        let coder = new utils.AbiCoder()
+        let coder = new __WEBPACK_IMPORTED_MODULE_5_ethers__["utils"].AbiCoder()
         let {
             contract_address,
             function_selector,
@@ -635,22 +646,22 @@ class TronWeb {
             call_value,
             owner_address
         } = options
-        contract_address = address2HexString(contract_address);
+        contract_address = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(contract_address);
         function_selector = function_selector.replace(/\s*/g,'');
         if(parameter||parameter.length){
             let paramTypes = parameter[0];
             let paramValues = parameter[1];
             paramTypes.forEach((itemType,index)=>{
                 if(itemType =='address'){
-                    paramValues[index] = address2HexString(paramValues[index]).replace(/^(41)/,'0x');
+                    paramValues[index] = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(paramValues[index]).replace(/^(41)/,'0x');
                 }
             })
             parameter = coder.encode(paramTypes,paramValues).replace(/^(0x)/,'');
         }
 
-        owner_address = address2HexString(owner_address);
+        owner_address = Object(__WEBPACK_IMPORTED_MODULE_1__utils_help__["a" /* address2HexString */])(owner_address);
 
-        let { data } = await xhr.post(`${this.apiUrl}/wallet/triggersmartcontract`,{
+        let { data } = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.post(`${this.apiUrl}/wallet/triggersmartcontract`,{
             contract_address,
             function_selector,
             parameter,
@@ -676,7 +687,7 @@ class TronWeb {
         if(transactionId){
             requestUrl = `${this.tronInfuraUrl}/event/transaction/${transactionId}`
         }
-        let result = await xhr.get(requestUrl);
+        let result = await __WEBPACK_IMPORTED_MODULE_0_axios___default.a.get(requestUrl);
         return result;
     }
 
@@ -687,7 +698,7 @@ class TronWeb {
             at: async function(address) {
                 if (address) {
                     let { contract_address,origin_address } = await _this.getContract(address);
-                    let abiObj = parseAbi.call(_this,abiArray,{contract_address,owner_address: _this.defaultAccount})
+                    let abiObj = __WEBPACK_IMPORTED_MODULE_2__private__["a" /* parseAbi */].call(_this,abiArray,{contract_address,owner_address: _this.defaultAccount})
                     let contractInstance = Object.assign({address:contract_address},abiObj);
                     return contractInstance;
                 }
@@ -731,7 +742,7 @@ class TronWeb {
     }
 
     toBigNumber(str){
-        return BigNumber(str)
+        return Object(__WEBPACK_IMPORTED_MODULE_6_bignumber_js__["BigNumber"])(str)
     }
     sendTransactionByWallet(options,callback){
         let {to,amount,transaction} = options;
@@ -789,4 +800,10 @@ class TronWeb {
     }
 
 }
-export default TronWeb;
+/* harmony default export */ __webpack_exports__["a"] = (TronWeb);
+
+
+/***/ })
+
+})
+//# sourceMappingURL=4.5c87ad343762b4fb9812.hot-update.js.map
