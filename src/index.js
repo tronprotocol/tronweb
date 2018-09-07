@@ -23,15 +23,15 @@ class TronWeb {
 
     toHex(str) {
         // For converting addresses
-        if(str.length==34 && str.charAt(0) === 'T')
+        if(str.length == 34 && str.charAt(0) === 'T')
             return address2HexString(str);
 
         return stringUtf8toHex(str);
     }
 
-    fromHex(hex){
+    fromHex(hex) {
         // For converting addresses
-        if(hex.length==42 && hex.substr(0, 2) === '41')
+        if(hex.length == 42 && hex.substr(0, 2) === '41')
             return hexString2Address(sHex);
 
         return hexString2Utf8(sHex);
@@ -136,7 +136,7 @@ class TronWeb {
      * Fetch total amount of transactions on the blockchain
      * @returns {number} Total amount of transactions found
      **/
-    async getTransactionCount(){
+    async getTransactionCount() {
         let {data} = await xhr.post(`${this.apiUrl}/wallet/totaltransaction`);
         return data.num;
     }
@@ -183,7 +183,7 @@ class TronWeb {
      * @param {string} privateKey The private key to sign the transaction with
      * @return {object} transaction
      **/
-    async signTransaction(transaction, privateKey){
+    async signTransaction(transaction, privateKey) {
         const address = this.privateKeyToAddress(privateKey);
 
         if(address !== this.fromHex(transaction.raw_data.contract[0].parameter.value.owner_address))
@@ -208,7 +208,7 @@ class TronWeb {
      * @param {string} newName The new name for the account
      * @return {object}
      **/
-    async changeAccountName(address, newName){
+    async changeAccountName(address, newName) {
         const { data } = await xhr.post(`${this.apiUrl}/wallet/updateaccount`, {
             account_name: stringUtf8toHex(newName),
             owner_address: address2HexString(address)
@@ -222,7 +222,7 @@ class TronWeb {
      * @param {string} address The address of the account that is voting
      * @param {object} votes The votes for the SRs, in the format { [srAddress]: voteCountInTronPower }
      **/
-    async voteWitnessAccount(address, votes){
+    async voteWitnessAccount(address, votes) {
         votes = Object.entries(votes).map(([ srAddress, voteCount ]) => ({
             vote_address: address2HexString(srAddress),
             vote_count: voteCount
@@ -254,7 +254,7 @@ class TronWeb {
      *   "frozen_supply": { "frozen_amount": 1, "frozen_days": 2 }
      * }
      **/
-    async createToken(token){
+    async createToken(token) {
         let {
             owner_address,
             name,
@@ -296,7 +296,7 @@ class TronWeb {
      * @param {string} address The address of an activated account
      * @param {string} newAccountAddress The address of the new account to register
      **/
-    async registerAccount(address, newAccountAddress){
+    async registerAccount(address, newAccountAddress) {
         const { data } = await xhr.post(`${this.apiUrl}/wallet/createaccount`,{
             owner_address: address2HexString(address),
             account_address: address2HexString(newAccountAddress)
@@ -311,7 +311,7 @@ class TronWeb {
      * @param {string} url The homepage URL for the Super Representative
      * @return {object} transaction
      **/
-    async applyForSuperRepresentative(address, url){
+    async applyForSuperRepresentative(address, url) {
         const { data } = await xhr.post(`${this.apiUrl}/wallet/createwitness`,{
             owner_address: address2HexString(address),
             url: stringUtf8toHex(url)
@@ -361,7 +361,7 @@ class TronWeb {
      * @param {string} password The password of the account
      * @return {object}
      **/
-    async createAddressWithPassword(password){
+    async createAddressWithPassword(password) {
         const { data } = await xhr.post(`${this.apiUrl}/wallet/createaddress`, {
             value: stringUtf8toHex(password)
         });
@@ -546,7 +546,7 @@ class TronWeb {
      * Fetches a list of Super Representatives
      * @returns {Array}
      **/
-    async listSuperRepresentatives(){
+    async listSuperRepresentatives() {
         const { data } = await xhr.post(`${this.apiUrl}/wallet/listwitnesses`);
         return data;
     }
@@ -566,7 +566,7 @@ class TronWeb {
      * @param {number} [offset=0] The offset of the pagination
      * @returns {Array} 
      **/
-    async listAssetsPaginated(limit, offset = 0){
+    async listAssetsPaginated(limit, offset = 0) {
         const { data } = await xhr.post(`${this.apiUrl}/wallet/getpaginatedassetissuelist`, {
             limit,
             offset
@@ -752,7 +752,7 @@ class TronWeb {
                         address: res.contract_address 
                     };
 
-                    if(Object.keys(res).indexOf('txID')>-1){
+                    if(Object.keys(res).indexOf('txID')>-1) {
                         const signTransaction = await _this.signTransaction(res, pk);
                         const result = await _this.sendRawTransaction(signTransaction);
 
@@ -775,7 +775,7 @@ class TronWeb {
     // Leaving this untouched as I'm unawaure of the wallet API you're using
     sendTransactionByWallet(options, callback) {
         let {to,amount,transaction} = options;
-        if(document){
+        if(document) {
             let oTronWallet = document.getElementById("oTronWallet");
             let oWalletTransationResult = document.getElementById('transaction_wallet_result');
             if (oTronWallet) {
@@ -790,14 +790,14 @@ class TronWeb {
                 oTronWallet.dispatchEvent(open_wallet);
                 oWalletTransationResult.value = '';
                 let timer = setInterval(async ()=>{
-                    if(oWalletTransationResult.value){
+                    if(oWalletTransationResult.value) {
                         let walletResult = JSON.parse(oWalletTransationResult.value);
-                        if(!walletResult.success){
+                        if(!walletResult.success) {
                             callback&&callback('Failed')
                         }else{
                             let transactionid = walletResult.transaction.txID;
                             let validResult = await this.getTransaction(transactionid);
-                            if(Object.keys(validResult).length==0){
+                            if(Object.keys(validResult).length==0) {
                                 callback&&callback('Failed')
                             }else{
                                 callback&&callback('success')
