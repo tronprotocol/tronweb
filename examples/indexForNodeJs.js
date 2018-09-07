@@ -1,11 +1,11 @@
 require('babel-core/register')
 const Async = require('async')
-const TronWeb = require('../src/index.js')
-const api_url = 'http://52.44.75.99:8090'  //请求的http服务地址
-const event_server = 'http://52.44.75.99:18889' //请求合约事件服务地址
+const TronWeb = require('tronweb')
+const api_url = 'http://testapi.trondapps.org'  //请求的http服务地址
+const event_server = 'http://47.90.203.178:18891' //请求合约事件服务地址
 const tronWeb = new TronWeb(api_url,event_server)
-tronWeb.defaultAccount = 'TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY'
-tronWeb.defaultPk='da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0'
+tronWeb.defaultAccount = 'TWsm8HtU2A5eEzoT8ev8yaoFjHsXLLrckb'
+tronWeb.defaultPk='8ef7dd1a81d4ef2b538daae0c20e37f4edb3fd1338aff91b03e2b8b1ed956645'
 const getBalance = (cb)=>{
 	console.log('====================get balance====================');
 	tronWeb.getBalance(tronWeb.defaultAccount).then(res=>{

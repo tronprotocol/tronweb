@@ -2,18 +2,32 @@ import React,{ReactDOM} from 'react'
 import TronWeb from '../../src/index'
 import stringify from 'json-stringify-pretty-compact'
 import {utils} from 'ethers'
+//let tronWeb = new TronWeb('http://52.44.75.99:8090');
+//tronWeb.setEventServer('http://52.44.75.99:18889');
+//tronWeb.defaultAccount = 'TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY';
+//tronWeb.defaultPk='da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0';
 let tronWeb = new TronWeb('http://testapi.trondapps.org');
 tronWeb.setEventServer('http://testevent.trondapps.org');
-tronWeb.defaultAccount = 'TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY';
-tronWeb.defaultPk='da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0';
+tronWeb.defaultAccount = 'TWsm8HtU2A5eEzoT8ev8yaoFjHsXLLrckb';
+tronWeb.defaultPk='8ef7dd1a81d4ef2b538daae0c20e37f4edb3fd1338aff91b03e2b8b1ed956645';
 class Index extends React.Component{
     state = {
+        resource:'BANDWIDTH',
         data:{}
     }
     componentDidMount(){
-        //let coder = new utils.AbiCoder();
+        let coder = new utils.AbiCoder();
         window.tronWeb = tronWeb;
     }
+    triggerChromeWallet(){
+        const res = tronWeb.sendTransactionByWallet({to:'TZ3SmkD8qJK3VY8AnqN9XFiYuspEP3cwB5',amount:0.1},function(result){
+            console.log('cbk',result);
+        })
+        this.setState({
+            data:res
+        })
+    }
+
     async toBigNumber(){
         let str = '200000000000000000000001';
         let bigNumber = tronWeb.toBigNumber(str);
@@ -151,6 +165,15 @@ class Index extends React.Component{
         this.setState({
             data:res
         })
+    }
+    // 
+    async freezeBalance(){
+        const frozen_balance = Number(this.frozen_balance.value);
+        const resource = this.state.resource;
+        let res = await tronWeb.freezeBalance(tronWeb.defaultAccount,frozen_balance,3,resource);
+        this.setState({
+            data:res
+        })    
     }
     //8、 解冻已经技术冻结期的 TRX
     async unfreezeBalance(){
@@ -295,8 +318,7 @@ class Index extends React.Component{
     //27、部署合约
     async deployContract(event){
         event.preventDefault();
-        let myContract = tronWeb.contract(JSON.parse( this.abi.value));
-
+        let myContract = tronWeb.contract(JSON.parse(this.abi.value));
         //部署合约
         let contractInstance = await myContract.new({
             from:this.owner_address.value,
@@ -305,8 +327,9 @@ class Index extends React.Component{
             call_value:this.call_value.value,
             consume_user_resource_percent:this.consume_user_resource_percent.value
         },this.pk.value)
-        //console.log(contractInstance);
-
+        this.setState({
+            data:contractInstance
+        })
     }
     //28、查询合约
     async getContract(){
@@ -319,13 +342,12 @@ class Index extends React.Component{
     async triggerContract(){
         let abi = [{"constant":false,"inputs":[{"name":"number","type":"uint256"}],"name":"fibonacciNotify","outputs":[{"name":"result","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"number","type":"uint256"}],"name":"fibonacci","outputs":[{"name":"result","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"name":"input","type":"uint256"},{"indexed":false,"name":"result","type":"uint256"}],"name":"Notify","type":"event"}];
         let myContract = tronWeb.contract(abi);
-        let contractAddress = '4122d9a0fff0f6b7371dc94ba26659a79282204b78'
+        let contractAddress = '416061e95f6e362efc3170fd50ac22197d9119b09e';
         let contractInstance = await myContract.at(contractAddress);
-
         let { transaction,result,constant_result } = await contractInstance.fibonacciNotify(7,{
-            fee_limit:7000000000000,
+            fee_limit:7000000,
             call_value:0
-        })
+        });
         if(!constant_result){
             let res = await contractInstance.fibonacciNotify.sendTransaction(transaction,this.pk.value);
             this.setState({
@@ -371,7 +393,9 @@ class Index extends React.Component{
                         账号 - account number：<input type="text" style={{width:'300px'}} ref={(input)=>this.account =input} defaultValue={tronWeb.defaultAccount}/>
                         <input type="button" onClick={()=>this.getBalance()} value="查询账户余额 - Check account balance" />
                     </div>
-
+                    <div>
+                        <input type="button" value="triggerWallet" onClick={()=>this.triggerChromeWallet()}/>
+                    </div>
                     <div>
                         <input type="button" value="生成私钥地址 - Generate private key address(onLine)" onClick={()=>this.generateAddress()}/>
                         <input type="button" value="生成私钥地址 - Generate private key address(onClient)" onClick={()=>this.generateAddressOnClient()}/>
@@ -422,6 +446,9 @@ class Index extends React.Component{
                     </div>
                     <h3>token管理 - Token management</h3>
                     <div>
+                        <label>BANDWIDTH:<input defaultChecked ref="resource" name="resource" onChange={()=>{this.setState({resource:'BANDWIDTH'})}} type="radio"  /></label><label>ENERGY:<input ref="resource" name="resource" onChange={()=>{this.setState({resource:'ENERGY'})}} type="radio" /></label><input type="text" defaultValue="1000000" ref={input=>this.frozen_balance = input}  /><input type="button" value="冻结获取资源 - freeze gain resource" onClick={()=>this.freezeBalance()}/>
+                    </div>
+                    <div>
                         <input type="button" value="查询所有token列表 - Query all token lists" onClick={()=>this.getAssetIssueList()}/>
                         <input type="button" value="分页查询token列表 - Paging query token list" onClick={()=>this.getPaginateDassetIssueList()}/>
                         <input type="button" value="查询某账户发行的token - Query the token issued by an account" onClick={()=>this.getAssetIssueByAccount()}/>
@@ -445,10 +472,10 @@ class Index extends React.Component{
                                      <input type="text" style={{width:'500px'}} ref={(input)=>this.pk = input} defaultValue={tronWeb.defaultPk}/>
                                  </div>
                                  <div>
-                                     <label>Abi</label><textarea cols="50" rows="10" placeholder="abi" defaultValue={``} ref={(input)=>this.abi = input}></textarea>
+                                     <label>Abi</label><textarea cols="50" rows="10" placeholder="abi" defaultValue='' ref={(input)=>this.abi = input}></textarea>
                                  </div>
                                  <div>
-                                     <label>byteCode</label><textarea  cols="50" rows="10" placeholder='byteCode' defaultValue={``} ref={(input)=>this.byteCode = input}></textarea>
+                                     <label>byteCode</label><textarea  cols="50" rows="10" placeholder='byteCode' defaultValue='' ref={(input)=>this.byteCode = input}></textarea>
                                  </div>
 
                                  <div>
@@ -460,8 +487,8 @@ class Index extends React.Component{
                                      <input type="text" ref={(input)=>this.call_value=input} defaultValue={0}/>
                                  </div>
                                  <div>
-                                     <label>consume_user_resource_percent:</label>
-                                     <input type="number" ref={(input)=>this.consume_user_resource_percent=input} defaultValue={0}/>
+                                     <label >consume_user_resource_percent：</label>
+                                     <input type="text" ref={(input)=>this.consume_user_resource_percent=input} defaultValue={0}/>
                                  </div>
                                  <div>
                                      <input type="submit" value="部署合约 - Deploy contract"/>
@@ -489,6 +516,7 @@ class Index extends React.Component{
                     <textarea cols="100" rows="10"  value={stringify(data)} onChange={()=>{}}></textarea>
                 </div>
                 <style jsx>{`
+
                     label{
                         display:inline-block;
                         width:150px;

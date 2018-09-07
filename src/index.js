@@ -149,6 +149,11 @@ class TronWeb {
      * */
 
     async signTransaction(transaction,privateKey,teriminal=0){
+        try{
+        const addr = this.login(privateKey);
+        if(addr !== this.fromHex(transaction.raw_data.contract[0].parameter.value.owner_address)){
+            throw "Private key is error!";
+        }
         if(teriminal==0){
             return signTransaction(privateKey,transaction);
         } else {
@@ -157,6 +162,10 @@ class TronWeb {
                 privateKey : privateKey
             })
             return data;
+        }
+        }catch(err){
+            console.error(err);
+            return false;
         }
     }
     /**
@@ -350,16 +359,17 @@ class TronWeb {
         return data;
     }
     /**
-     * Freeze TRX, gain bandwidth, gain voting rights
-     * @param {string} owner_address,{float} frozen_balance,{int} frozen_duration
+     * Freeze TRX, gain bandwidth, gain voting rights or energy
+     * @param {string} owner_address,{float} frozen_balance,{int} frozen_duration,{string} resource
      * @return {object} transaction
      * */
-    async freezeBalance(owner_address,frozen_balance,frozen_duration){
+    async freezeBalance(owner_address,frozen_balance,frozen_duration,resource='BANDWIDTH'){
         owner_address = address2HexString(owner_address);
         let {data} = await xhr.post(`${this.apiUrl}/wallet/freezebalance`,{
             owner_address,
             frozen_balance,
-            frozen_duration
+            frozen_duration,
+            resource
         })
         return data;
     }
@@ -580,6 +590,9 @@ class TronWeb {
                     payable = true;
                 }
             }
+            if(fee_limit>1000000000){
+                throw "fee_limit don't allow greater than 1000000000";
+            }
             if(payable && call_value == 0){
                 throw "call_value must be set greater than 0 ,if contract type is payable";
             }
@@ -596,7 +609,7 @@ class TronWeb {
             })
             return data;
         }catch(err){
-            console.log(err);
+            console.error(err);
             return false;
         }
         
@@ -778,3 +791,5 @@ class TronWeb {
 
 }
 export default TronWeb;
+
+
