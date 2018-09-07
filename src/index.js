@@ -90,7 +90,7 @@ class TronWeb {
      * @return {object}
      **/
     async getBlock(blockIdentifier) {
-        if(isNaN(blockHashOrNumber)) {
+        if(isNaN(blockIdentifier)) {
             const { data } = await xhr.post(`${this.apiUrl}/wallet/getblockbyid`, { value: blockIdentifier });
             return data;
         }
