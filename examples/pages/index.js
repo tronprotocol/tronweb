@@ -12,6 +12,7 @@ tronWeb.defaultAccount = 'TWsm8HtU2A5eEzoT8ev8yaoFjHsXLLrckb';
 tronWeb.defaultPk='8ef7dd1a81d4ef2b538daae0c20e37f4edb3fd1338aff91b03e2b8b1ed956645';
 class Index extends React.Component{
     state = {
+        resource:'BANDWIDTH',
         data:{}
     }
     componentDidMount(){
@@ -164,6 +165,15 @@ class Index extends React.Component{
         this.setState({
             data:res
         })
+    }
+    // 
+    async freezeBalance(){
+        const frozen_balance = Number(this.frozen_balance.value);
+        const resource = this.state.resource;
+        let res = await tronWeb.freezeBalance(tronWeb.defaultAccount,frozen_balance,3,resource);
+        this.setState({
+            data:res
+        })    
     }
     //8、 解冻已经技术冻结期的 TRX
     async unfreezeBalance(){
@@ -435,6 +445,9 @@ class Index extends React.Component{
                         <input type="button" value="超级代表提现奖励到balance - SR withdraws the reward to balance" onClick={()=>this.withdrawBalance()}/>
                     </div>
                     <h3>token管理 - Token management</h3>
+                    <div>
+                        <label>BANDWIDTH:<input defaultChecked ref="resource" name="resource" onChange={()=>{this.setState({resource:'BANDWIDTH'})}} type="radio"  /></label><label>ENERGY:<input ref="resource" name="resource" onChange={()=>{this.setState({resource:'ENERGY'})}} type="radio" /></label><input type="text" defaultValue="1000000" ref={input=>this.frozen_balance = input}  /><input type="button" value="冻结获取资源 - freeze gain resource" onClick={()=>this.freezeBalance()}/>
+                    </div>
                     <div>
                         <input type="button" value="查询所有token列表 - Query all token lists" onClick={()=>this.getAssetIssueList()}/>
                         <input type="button" value="分页查询token列表 - Paging query token list" onClick={()=>this.getPaginateDassetIssueList()}/>
