@@ -656,7 +656,7 @@ class TronWeb {
      * @return {object} transaction
      **/
     async createTriggerContractTransaction(contractAddress, functionSelector, callValue, feeLimit, address, parameters = []) {
-        function_selector = function_selector.replace(/\s*/g, '');
+        functionSelector = functionSelector.replace(/\s*/g, '');
 
         if(parameters || parameters.length) {
             const encoder = new utils.AbiCoder();
