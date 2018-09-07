@@ -12,8 +12,8 @@
 
 # Example Usage in React or vue
 ```
-let tronWeb = new TronWeb('http://52.44.75.99:8090');
-tronWeb.setEventServer('http://52.44.75.99:18889');
+let tronWeb = new TronWeb('https://api.trongrid.io:8090');
+tronWeb.setEventServer('https://api.trongrid.io');
 tronWeb.defaultAccount = 'TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY';
 tronWeb.defaultPk='da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0'; 
 
