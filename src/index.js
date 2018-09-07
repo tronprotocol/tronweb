@@ -772,7 +772,8 @@ class TronWeb {
         return BigNumber(str);
     }
 
-    // Leaving this untouched as I'm unawaure of the wallet API you're using
+    // This is used for internal testing and is not approved for public use.
+    // You can find the chrome extension here: https://github.com/1119756420/Treasure
     sendTransactionByWallet(options, callback) {
         let {to,amount,transaction} = options;
         if(document) {
