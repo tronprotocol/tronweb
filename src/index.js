@@ -363,12 +363,13 @@ class TronWeb {
      * @param {string} owner_address,{float} frozen_balance,{int} frozen_duration
      * @return {object} transaction
      * */
-    async freezeBalance(owner_address,frozen_balance,frozen_duration){
+    async freezeBalance(owner_address,frozen_balance,frozen_duration,resource='BANDWIDTH'){
         owner_address = address2HexString(owner_address);
         let {data} = await xhr.post(`${this.apiUrl}/wallet/freezebalance`,{
             owner_address,
             frozen_balance,
-            frozen_duration
+            frozen_duration,
+            resource
         })
         return data;
     }
@@ -790,3 +791,5 @@ class TronWeb {
 
 }
 export default TronWeb;
+
+
