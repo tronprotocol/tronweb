@@ -1,7 +1,7 @@
 {
   "name": "tronweb",
   "version": "1.1.1",
-  "description": "A jssdk that encapsulates the TRON HTTP request",
+  "description": "JavaScript SDK that encapsulates the Tron Node HTTP API",
   "main": "lib/index.js",
   "module": "es/index.js",
   "files": [
@@ -51,8 +51,8 @@
     "babel-preset-stage-3": "6.24.1",
     "babel-runtime": "6.26.0"
   },
-  "author": "wujiaolong&lizhengwei",
-  "homepage": "https://tron.network",
+  "author": "Tron",
+  "homepage": "https://github.com/tronprotocol/tron-web",
   "license": "MIT",
   "repository": "https://github.com/tronprotocol/tron-web.git"
 }
