@@ -625,7 +625,7 @@ class TronWeb {
             throw new Error('call_value can only be greater than 0 if contract is type payable');
 
         const { data } = await xhr.post(`${this.apiUrl}/wallet/deploycontract`, {
-            owner_address: address2HexString(owner_address),            
+            owner_address: address2HexString(address),            
             fee_limit: feeLimit,
             call_value: callValue,
             consume_user_resource_percent: bandwidthLimit,
