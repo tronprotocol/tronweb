@@ -359,8 +359,8 @@ class TronWeb {
         return data;
     }
     /**
-     * Freeze TRX, gain bandwidth, gain voting rights
-     * @param {string} owner_address,{float} frozen_balance,{int} frozen_duration
+     * Freeze TRX, gain bandwidth, gain voting rights or energy
+     * @param {string} owner_address,{float} frozen_balance,{int} frozen_duration,{string} resource
      * @return {object} transaction
      * */
     async freezeBalance(owner_address,frozen_balance,frozen_duration,resource='BANDWIDTH'){

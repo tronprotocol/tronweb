@@ -1,6 +1,6 @@
 # Created by .ignore support plugin (hsz.mobi)
 /examples/node_modules/
-/example/.next/
+/examples/.next/
 /node_modules/
 /yarn.lock
 /questions.md
