@@ -19,13 +19,10 @@
     "bignumber.js": "^7.2.1",
     "chai": "^4.1.2",
     "ethers": "^3.0.26",
-    "js-sha3": "^0.7.0"
+    "js-sha3": "^0.7.0",
+    "validator": "^10.7.1"
   },
   "devDependencies": {
-    "nwb": "0.21.x",
-    "babel-preset-flow": "6.23.0",
-    "babel-register": "6.26.0",
-    "cross-env": "5.2.0",
     "babel-cli": "6.26.0",
     "babel-core": "6.26.3",
     "babel-plugin-add-module-exports": "0.2.1",
@@ -44,12 +41,16 @@
     "babel-plugin-transform-runtime": "6.23.0",
     "babel-polyfill": "6.26.0",
     "babel-preset-env": "1.7.0",
+    "babel-preset-flow": "6.23.0",
     "babel-preset-react": "6.24.1",
     "babel-preset-stage-0": "6.24.1",
     "babel-preset-stage-1": "6.24.1",
     "babel-preset-stage-2": "6.24.1",
     "babel-preset-stage-3": "6.24.1",
-    "babel-runtime": "6.26.0"
+    "babel-register": "6.26.0",
+    "babel-runtime": "6.26.0",
+    "cross-env": "5.2.0",
+    "nwb": "0.21.x"
   },
   "author": "TRON",
   "homepage": "https://github.com/tronprotocol/tron-web",
