@@ -8,6 +8,9 @@ import Trx from 'lib/trx';
 import Witness from 'lib/witness';
 
 export default class TronWeb {
+    static providers = providers;
+    static BigNumber = BigNumber;
+    
     constructor(fullNode, solidityNode, eventServer = false) {
         this.setFullNode(fullNode);
         this.setSolidityNode(solidityNode);
@@ -19,6 +22,8 @@ export default class TronWeb {
         this.transactionBuilder = new TransactionBuilder(this);
         this.trx = new Trx(this);
         this.witness = new Witness(this);
+
+        this.injectPromise = utils.promiseInjector(this);
     }
 
     isValidProvider(provider) {
@@ -29,7 +34,9 @@ export default class TronWeb {
         if(!this.eventServer)
             return false;
 
-        return axios.get(this.eventServer).then(({ data }) => utils.hasProperty(data, '_links'))
+        return axios.get(this.eventServer).then(({ data }) => {
+            return utils.hasProperty(data, '_links');
+        }).catch(() => false);
     }
 
     setFullNode(fullNode) {
@@ -37,6 +44,7 @@ export default class TronWeb {
             throw new Error('Invalid full node provided');
 
         this.fullNode = fullNode;
+        this.fullNode.setStatusPage('wallet/getnowblock');
     }
 
     setSolidityNode(solidityNode) {
@@ -44,6 +52,7 @@ export default class TronWeb {
             throw new Error('Invalid solidity node provided');
 
         this.solidityNode = solidityNode;
+        this.solidityNode.setStatusPage('walletsolidity/getnowblock');
     }
 
     setEventServer(eventServer = false) {
@@ -152,31 +161,31 @@ export default class TronWeb {
     }
 
     // TODO
-    getEventResult(...args) {
-        return utils.funcWrapper(args, (contractAddress, eventName, blockNumber) => {
-
-        });
+    getEventResult(contractAddress, eventName, blockNumber, callback = false) {
+        if(!callback)
+            return this.injectPromise(this.getEventResult, contractAddress, eventName, blockNumber);
     }
 
     // TODO
-    getEventByTransacionID(...args) {
-        return utils.funcWrapper(args, transactionID => {
-
-        });
+    getEventByTransacionID(transactionID, callback = false) {
+        if(!callback)
+            return this.injectPromise(this.getEventByTransacionID, transactionID);
     }
 
     // TODO
-    createAccount() {
-        return utils.funcWrapper([], (soliditySource) => {
-            // This is actually synchronous but web3 is async
-        });
+    createAccount(callback = false) {
+        if(!callback)
+            return this.injectPromise(this.createAccount);
     }
 
-    async isConnected() {
-        return {
+    async isConnected(callback = false) {
+        if(!callback)
+            return this.injectPromise(this.isConnected);
+
+        callback(null, {
             fullNode: await this.fullNode.isConnected(),
             solidityNode: await this.solidityNode.isConnected(),
             eventServer: await this.isEventServerConnected()
-        }
+        });
     }
 };

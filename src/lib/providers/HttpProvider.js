@@ -2,7 +2,7 @@ import axios from 'axios';
 import utils from 'utils';
 
 export default class HttpProvider {
-    constructor(host, timeout = 30000, user = false, password = false, headers = {}) {
+    constructor(host, timeout = 30000, user = false, password = false, headers = {}, statusPage = '/') {
         if(!utils.isValidURL(host))
             throw new Error('Invalid URL provided to HttpProvider');
 
@@ -20,6 +20,7 @@ export default class HttpProvider {
         this.user = user;
         this.password = password;
         this.headers = headers;
+        this.statusPage = statusPage;
 
         this.instance = axios.create({            
             baseURL: host,
@@ -32,16 +33,16 @@ export default class HttpProvider {
         });
     }
 
-    async isConnected() {
-        return this.instance.get().then(() => {
-            return false; // valid node will return 404 page
-        }).catch(err => {
-            return err.response && err.response.status === 404;
-        });
+    setStatusPage(statusPage = '/') {
+        this.statusPage = statusPage;
     }
 
-    // this.send('someMethod', { test: true }) -> http://node/someMethod?test=true
-    // this.send('otherMethod', { test: false }, 'post') -> http://node/otherMethod with body { test: false }
+    async isConnected(statusPage = this.statusPage) {
+        return this.instance.get(statusPage).then(({ data }) => {
+            return utils.hasProperties(data, 'blockID', 'block_header');
+        }).catch(err => false);
+    }
+
     request(url, payload = {}, method = 'get') {
         method = method.toLowerCase();
 

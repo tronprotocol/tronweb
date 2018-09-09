@@ -45,7 +45,29 @@ const utils = {
     },
 
     hasProperty(obj, property) {
-        return Object.property.hasOwnProperty.call(obj, property);
+        return Object.prototype.hasOwnProperty.call(obj, property);
+    },
+
+    hasProperties(obj, ...properties) {
+        return properties.length && !properties.map(property => {
+            return this.hasProperty(obj, property)
+        }).includes(false);
+    },
+
+    injectPromise(func, ...args) {
+        return new Promise((resolve, reject) => {
+            func(...args, (err, res) => {
+                if(err)
+                    reject(err);
+                else resolve(res);
+            });
+        });
+    },
+
+    promiseInjector(scope) {
+        return (func, ...args) => {
+            return this.injectPromise(func.bind(scope), ...args);
+        }
     }
 }
 
