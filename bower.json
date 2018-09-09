@@ -1,0 +1,27 @@
+{
+    "name": "tronweb",
+    "description": "JavaScript SDK that encapsulates the TRON Node HTTP API",
+    "main": "dist/TronWeb.js",
+    "authors": [
+        "TRON: https://github.com/tronprotocol",
+        "Kondax: https://github.com/Kondax"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/tronprotocol/tron-web",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/tronprotocol/tron-web.git"
+    },
+    "ignore": [
+        "**/.*",
+        "node_modules",
+        "bower_components",
+        "test",
+        "tests"
+    ],
+    "moduleType": [
+        "globals",
+        "amd",
+        "node"
+    ]
+}

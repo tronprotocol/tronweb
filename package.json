@@ -28,7 +28,10 @@
         "webpack-cli": "^3.1.0",
         "webpack-node-externals": "^1.7.2"
     },
-    "author": "TRON",
+    "authors": [
+        "TRON: https://github.com/tronprotocol",
+        "Kondax: https://github.com/Kondax"
+    ],
     "homepage": "https://github.com/tronprotocol/tron-web",
     "license": "MIT",
     "repository": "https://github.com/tronprotocol/tron-web.git"
