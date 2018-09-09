@@ -164,4 +164,20 @@ export default class Trx {
             callback(null, balance);
         }).catch(err => callback(err));
     }
+
+    getBandwidth(address = this.tronWeb.defaultAddress, callback = false) {
+        if(!callback)
+            return this.injectPromise(this.getBandwidth, address);
+
+        if(!this.tronWeb.isAddress(address))
+            return callback('Invalid address provided');
+
+        address = this.tronWeb.address.toHex(address);
+
+        this.tronWeb.fullNode.request('wallet/getaccountnet', {
+            address
+        }, 'post').then(({ freeNetUsed = 0, freeNetLimit = 0, NetUsed = 0, NetLimit = 0 }) => {
+            callback(null, (freeNetLimit - freeNetUsed) + (NetLimit - NetUsed));
+        }).catch(err => callback(err));
+    }
 };

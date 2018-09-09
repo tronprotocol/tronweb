@@ -21538,6 +21538,30 @@ function () {
         return callback(err);
       });
     }
+  }, {
+    key: "getBandwidth",
+    value: function getBandwidth() {
+      var address = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.tronWeb.defaultAddress;
+      var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      if (!callback) return this.injectPromise(this.getBandwidth, address);
+      if (!this.tronWeb.isAddress(address)) return callback('Invalid address provided');
+      address = this.tronWeb.address.toHex(address);
+      this.tronWeb.fullNode.request('wallet/getaccountnet', {
+        address: address
+      }, 'post').then(function (_ref4) {
+        var _ref4$freeNetUsed = _ref4.freeNetUsed,
+            freeNetUsed = _ref4$freeNetUsed === void 0 ? 0 : _ref4$freeNetUsed,
+            _ref4$freeNetLimit = _ref4.freeNetLimit,
+            freeNetLimit = _ref4$freeNetLimit === void 0 ? 0 : _ref4$freeNetLimit,
+            _ref4$NetUsed = _ref4.NetUsed,
+            NetUsed = _ref4$NetUsed === void 0 ? 0 : _ref4$NetUsed,
+            _ref4$NetLimit = _ref4.NetLimit,
+            NetLimit = _ref4$NetLimit === void 0 ? 0 : _ref4$NetLimit;
+        callback(null, freeNetLimit - freeNetUsed + (NetLimit - NetUsed));
+      }).catch(function (err) {
+        return callback(err);
+      });
+    }
   }]);
 
   return Trx;

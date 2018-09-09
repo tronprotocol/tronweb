@@ -86,6 +86,13 @@ const app = async () => {
         console.log('- Address: TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1');
         console.log('- Balance:', balance, '\n');
     console.groupEnd();
+
+    const bandwidth = await tronWeb.trx.getBandwidth('TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1');
+
+    console.group('Account bandwidth');
+        console.log('- Address: 4144abc6018aec80cf05e3ac94376d6cd76da1b112');
+        console.log('- Bandwidth:', bandwidth, '\n');
+    console.groupEnd();
 };
 
 app();
