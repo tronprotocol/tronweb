@@ -21320,6 +21320,12 @@ function () {
     value: function getBlock() {
       var block = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.tronWeb.defaultBlock;
       var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(block)) {
+        callback = block;
+        block = this.tronWeb.defaultBlock;
+      }
+
       if (!callback) return this.injectPromise(this.getBlock, block);
       if (block === false) return callback('No block identifier provided');
       if (block == 'earliest') block = 0;
@@ -21356,8 +21362,15 @@ function () {
     }
   }, {
     key: "getBlockTransactionCount",
-    value: function getBlockTransactionCount(block) {
+    value: function getBlockTransactionCount() {
+      var block = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.tronWeb.defaultBlock;
       var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(block)) {
+        callback = block;
+        block = this.tronWeb.defaultBlock;
+      }
+
       if (!callback) return this.injectPromise(this.getBlockTransactionCount, block);
       this.getBlock(block).then(function (_ref) {
         var _ref$transactions = _ref.transactions,
@@ -21396,7 +21409,6 @@ function () {
       if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(limit)) {
         callback = limit;
         limit = 0;
-        offset = 0;
       }
 
       if (!callback) return this.injectPromise(this.getTransactionsToAddress, address, limit, offset);
@@ -21456,47 +21468,49 @@ function () {
                 if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(limit)) {
                   callback = limit;
                   limit = 0;
-                  offset = 0;
                 }
 
                 if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(direction)) {
                   callback = direction;
                   direction = 'all';
-                  limit = 30;
-                  offset = 0;
+                }
+
+                if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(address)) {
+                  callback = address;
+                  address = this.tronWeb.defaultAddress;
                 }
 
                 if (callback) {
-                  _context.next = 10;
+                  _context.next = 11;
                   break;
                 }
 
                 return _context.abrupt("return", this.injectPromise(this.getTransactionsRelated, address, direction, limit, offset));
 
-              case 10:
+              case 11:
                 if (['to', 'from', 'all'].includes(direction)) {
-                  _context.next = 12;
+                  _context.next = 13;
                   break;
                 }
 
                 return _context.abrupt("return", callback('Invalid direction provided: Expected "to", "from" or "all"'));
 
-              case 12:
+              case 13:
                 if (!(direction == 'all')) {
-                  _context.next = 26;
+                  _context.next = 27;
                   break;
                 }
 
-                _context.prev = 13;
-                _context.next = 16;
+                _context.prev = 14;
+                _context.next = 17;
                 return this.getTransactionsRelated(address, 'from', limit, offset);
 
-              case 16:
+              case 17:
                 from = _context.sent;
-                _context.next = 19;
+                _context.next = 20;
                 return this.getTransactionsRelated(address, 'to', limit, offset);
 
-              case 19:
+              case 20:
                 to = _context.sent;
                 callback(null, _toConsumableArray(from.map(function (tx) {
                   return tx.direction = 'from', tx;
@@ -21505,39 +21519,39 @@ function () {
                 }))).sort(function (a, b) {
                   return b.raw_data.timestamp - a.raw_data.timestamp;
                 }));
-                _context.next = 26;
+                _context.next = 27;
                 break;
 
-              case 23:
-                _context.prev = 23;
-                _context.t0 = _context["catch"](13);
+              case 24:
+                _context.prev = 24;
+                _context.t0 = _context["catch"](14);
                 return _context.abrupt("return", callback(_context.t0));
 
-              case 26:
+              case 27:
                 if (this.tronWeb.isAddress(address)) {
-                  _context.next = 28;
+                  _context.next = 29;
                   break;
                 }
 
                 return _context.abrupt("return", callback('Invalid address provided'));
 
-              case 28:
+              case 29:
                 if (!(!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(limit) || limit < 0 || offset && limit < 1)) {
-                  _context.next = 30;
+                  _context.next = 31;
                   break;
                 }
 
                 return _context.abrupt("return", callback('Invalid limit provided'));
 
-              case 30:
+              case 31:
                 if (!(!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(offset) || offset < 0)) {
-                  _context.next = 32;
+                  _context.next = 33;
                   break;
                 }
 
                 return _context.abrupt("return", callback('Invalid offset provided'));
 
-              case 32:
+              case 33:
                 address = this.tronWeb.address.toHex(address);
                 this.tronWeb.solidityNode.request("walletextension/gettransactions".concat(direction, "this"), {
                   account: {
@@ -21552,12 +21566,12 @@ function () {
                   return callback(err);
                 });
 
-              case 34:
+              case 35:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, this, [[13, 23]]);
+        }, _callee, this, [[14, 24]]);
       }));
 
       return function getTransactionsRelated() {
@@ -21569,6 +21583,12 @@ function () {
     value: function getAccount() {
       var address = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.tronWeb.defaultAddress;
       var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(address)) {
+        callback = address;
+        address = this.tronWeb.defaultAddress;
+      }
+
       if (!callback) return this.injectPromise(this.getAccount, address);
       if (!this.tronWeb.isAddress(address)) return callback('Invalid address provided');
       address = this.tronWeb.address.toHex(address);
@@ -21585,6 +21605,12 @@ function () {
     value: function getBalance() {
       var address = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.tronWeb.defaultAddress;
       var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(address)) {
+        callback = address;
+        address = this.tronWeb.defaultAddress;
+      }
+
       if (!callback) return this.injectPromise(this.getBalance, address);
       this.getAccount(address).then(function (_ref3) {
         var _ref3$balance = _ref3.balance,
@@ -21599,6 +21625,12 @@ function () {
     value: function getBandwidth() {
       var address = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.tronWeb.defaultAddress;
       var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(address)) {
+        callback = address;
+        address = this.tronWeb.defaultAddress;
+      }
+
       if (!callback) return this.injectPromise(this.getBandwidth, address);
       if (!this.tronWeb.isAddress(address)) return callback('Invalid address provided');
       address = this.tronWeb.address.toHex(address);
@@ -21625,6 +21657,12 @@ function () {
 
       var address = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.tronWeb.defaultAddress;
       var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(address)) {
+        callback = address;
+        address = this.tronWeb.defaultAddress;
+      }
+
       if (!callback) return this.injectPromise(this.getTokensIssuedByAddress, address);
       if (!this.tronWeb.isAddress(address)) return callback('Invalid address provided');
       address = this.tronWeb.address.toHex(address);
@@ -21688,6 +21726,17 @@ function () {
       var start = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
       var end = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 30;
       var callback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(end)) {
+        callback = end;
+        end = 30;
+      }
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(start)) {
+        callback = start;
+        start = 0;
+      }
+
       if (!callback) return this.injectPromise(this.getBlockRange, start, end);
       if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(start) || start < 0) return callback('Invalid start of range provided');
       if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(end) || end <= start) return callback('Invalid end of range provided');
@@ -21732,7 +21781,6 @@ function () {
       if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(limit)) {
         callback = limit;
         limit = 0;
-        offset = 0;
       }
 
       if (!callback) return this.injectPromise(this.listTokens, limit, offset);

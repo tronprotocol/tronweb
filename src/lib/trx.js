@@ -30,6 +30,11 @@ export default class Trx {
     }
 
     getBlock(block = this.tronWeb.defaultBlock, callback = false) {
+        if(utils.isFunction(block)) {
+            callback = block;
+            block = this.tronWeb.defaultBlock;            
+        }
+        
         if(!callback)
             return this.injectPromise(this.getBlock, block);
 
@@ -73,7 +78,12 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
-    getBlockTransactionCount(block, callback = false) {
+    getBlockTransactionCount(block = this.tronWeb.defaultBlock, callback = false) {
+        if(utils.isFunction(block)) {
+            callback = block;
+            block = this.tronWeb.defaultBlock;            
+        }
+
         if(!callback)
             return this.injectPromise(this.getBlockTransactionCount, block);
 
@@ -101,10 +111,9 @@ export default class Trx {
 
         if(utils.isFunction(limit)) {
             callback = limit;
-            limit = 0;
-            offset = 0;            
+            limit = 0;          
         }
-        
+
         if(!callback)
             return this.injectPromise(this.getTransactionsToAddress, address, limit, offset);
 
@@ -137,15 +146,17 @@ export default class Trx {
 
         if(utils.isFunction(limit)) {
             callback = limit;
-            limit = 0;
-            offset = 0;            
+            limit = 0;         
         }
 
         if(utils.isFunction(direction)) {
             callback = direction;
             direction = 'all';
-            limit = 30;
-            offset = 0;
+        }
+
+        if(utils.isFunction(address)) {
+            callback = address;
+            address = this.tronWeb.defaultAddress;
         }
 
         if(!callback)
@@ -191,6 +202,11 @@ export default class Trx {
     }
 
     getAccount(address = this.tronWeb.defaultAddress, callback = false) {
+        if(utils.isFunction(address)) {
+            callback = address;
+            address = this.tronWeb.defaultAddress;            
+        }
+
         if(!callback)
             return this.injectPromise(this.getAccount, address);
 
@@ -207,6 +223,11 @@ export default class Trx {
     }
 
     getBalance(address = this.tronWeb.defaultAddress, callback = false) {
+        if(utils.isFunction(address)) {
+            callback = address;
+            address = this.tronWeb.defaultAddress;            
+        }
+
         if(!callback)
             return this.injectPromise(this.getBalance, address);
 
@@ -216,6 +237,11 @@ export default class Trx {
     }
 
     getBandwidth(address = this.tronWeb.defaultAddress, callback = false) {
+        if(utils.isFunction(address)) {
+            callback = address;
+            address = this.tronWeb.defaultAddress;            
+        }
+
         if(!callback)
             return this.injectPromise(this.getBandwidth, address);
 
@@ -232,6 +258,11 @@ export default class Trx {
     }
 
     getTokensIssuedByAddress(address = this.tronWeb.defaultAddress, callback = false) {
+        if(utils.isFunction(address)) {
+            callback = address;
+            address = this.tronWeb.defaultAddress;            
+        }
+
         if(!callback)
             return this.injectPromise(this.getTokensIssuedByAddress, address);
 
@@ -285,6 +316,16 @@ export default class Trx {
     }
 
     getBlockRange(start = 0, end = 30, callback = false) {
+        if(utils.isFunction(end)) {
+            callback = end;
+            end = 30;            
+        }
+
+        if(utils.isFunction(start)) {
+            callback = start;
+            start = 0;
+        }
+
         if(!callback)
             return this.injectPromise(this.getBlockRange, start, end);
 
@@ -319,8 +360,7 @@ export default class Trx {
 
         if(utils.isFunction(limit)) {
             callback = limit;
-            limit = 0;
-            offset = 0;            
+            limit = 0;  
         }
         
         if(!callback)

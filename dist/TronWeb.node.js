@@ -485,6 +485,11 @@ class Trx {
   }
 
   getBlock(block = this.tronWeb.defaultBlock, callback = false) {
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(block)) {
+      callback = block;
+      block = this.tronWeb.defaultBlock;
+    }
+
     if (!callback) return this.injectPromise(this.getBlock, block);
     if (block === false) return callback('No block identifier provided');
     if (block == 'earliest') block = 0;
@@ -512,7 +517,12 @@ class Trx {
     }).catch(err => callback(err));
   }
 
-  getBlockTransactionCount(block, callback = false) {
+  getBlockTransactionCount(block = this.tronWeb.defaultBlock, callback = false) {
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(block)) {
+      callback = block;
+      block = this.tronWeb.defaultBlock;
+    }
+
     if (!callback) return this.injectPromise(this.getBlockTransactionCount, block);
     this.getBlock(block).then(({
       transactions = []
@@ -539,7 +549,6 @@ class Trx {
     if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(limit)) {
       callback = limit;
       limit = 0;
-      offset = 0;
     }
 
     if (!callback) return this.injectPromise(this.getTransactionsToAddress, address, limit, offset);
@@ -571,14 +580,16 @@ class Trx {
     if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(limit)) {
       callback = limit;
       limit = 0;
-      offset = 0;
     }
 
     if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(direction)) {
       callback = direction;
       direction = 'all';
-      limit = 30;
-      offset = 0;
+    }
+
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(address)) {
+      callback = address;
+      address = this.tronWeb.defaultAddress;
     }
 
     if (!callback) return this.injectPromise(this.getTransactionsRelated, address, direction, limit, offset);
@@ -612,6 +623,11 @@ class Trx {
   }
 
   getAccount(address = this.tronWeb.defaultAddress, callback = false) {
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(address)) {
+      callback = address;
+      address = this.tronWeb.defaultAddress;
+    }
+
     if (!callback) return this.injectPromise(this.getAccount, address);
     if (!this.tronWeb.isAddress(address)) return callback('Invalid address provided');
     address = this.tronWeb.address.toHex(address);
@@ -623,6 +639,11 @@ class Trx {
   }
 
   getBalance(address = this.tronWeb.defaultAddress, callback = false) {
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(address)) {
+      callback = address;
+      address = this.tronWeb.defaultAddress;
+    }
+
     if (!callback) return this.injectPromise(this.getBalance, address);
     this.getAccount(address).then(({
       balance = 0
@@ -632,6 +653,11 @@ class Trx {
   }
 
   getBandwidth(address = this.tronWeb.defaultAddress, callback = false) {
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(address)) {
+      callback = address;
+      address = this.tronWeb.defaultAddress;
+    }
+
     if (!callback) return this.injectPromise(this.getBandwidth, address);
     if (!this.tronWeb.isAddress(address)) return callback('Invalid address provided');
     address = this.tronWeb.address.toHex(address);
@@ -648,6 +674,11 @@ class Trx {
   }
 
   getTokensIssuedByAddress(address = this.tronWeb.defaultAddress, callback = false) {
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(address)) {
+      callback = address;
+      address = this.tronWeb.defaultAddress;
+    }
+
     if (!callback) return this.injectPromise(this.getTokensIssuedByAddress, address);
     if (!this.tronWeb.isAddress(address)) return callback('Invalid address provided');
     address = this.tronWeb.address.toHex(address);
@@ -692,6 +723,16 @@ class Trx {
   }
 
   getBlockRange(start = 0, end = 30, callback = false) {
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(end)) {
+      callback = end;
+      end = 30;
+    }
+
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(start)) {
+      callback = start;
+      start = 0;
+    }
+
     if (!callback) return this.injectPromise(this.getBlockRange, start, end);
     if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(start) || start < 0) return callback('Invalid start of range provided');
     if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(end) || end <= start) return callback('Invalid end of range provided');
@@ -723,7 +764,6 @@ class Trx {
     if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(limit)) {
       callback = limit;
       limit = 0;
-      offset = 0;
     }
 
     if (!callback) return this.injectPromise(this.listTokens, limit, offset);
