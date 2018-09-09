@@ -232,4 +232,15 @@ export default class Trx {
             });
         }).catch(err => callback(err));
     }
+
+    listNodes(callback = false) {
+        if(!callback)
+            return this.injectPromise(this.listNodes);
+
+        this.tronWeb.fullNode.request('wallet/listnodes').then(({ nodes = [] }) => {
+            callback(null, nodes.map(({ address: { host, port } }) => (
+                `${this.tronWeb.toUtf8(host)}:${port}`
+            )));
+        }).catch(err => callback(err));
+    }
 };

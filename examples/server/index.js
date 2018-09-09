@@ -107,6 +107,13 @@ const app = async () => {
         console.log('- Token Name: TestToken');
         console.log('- Token:\n' + JSON.stringify(token, null, 2), '\n');
     console.groupEnd();
+
+    const nodeList = await tronWeb.trx.listNodes();
+
+    console.group('List of full nodes');
+        console.log('- Node Count:', nodeList.length);
+        console.log('- Nodes:', JSON.stringify(nodeList), '\n');
+    console.groupEnd();
 };
 
 app();

@@ -21620,6 +21620,26 @@ function () {
         return callback(err);
       });
     }
+  }, {
+    key: "listNodes",
+    value: function listNodes() {
+      var _this3 = this;
+
+      var callback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      if (!callback) return this.injectPromise(this.listNodes);
+      this.tronWeb.fullNode.request('wallet/listnodes').then(function (_ref6) {
+        var _ref6$nodes = _ref6.nodes,
+            nodes = _ref6$nodes === void 0 ? [] : _ref6$nodes;
+        callback(null, nodes.map(function (_ref7) {
+          var _ref7$address = _ref7.address,
+              host = _ref7$address.host,
+              port = _ref7$address.port;
+          return "".concat(_this3.tronWeb.toUtf8(host), ":").concat(port);
+        }));
+      }).catch(function (err) {
+        return callback(err);
+      });
+    }
   }]);
 
   return Trx;
