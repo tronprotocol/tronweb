@@ -143,14 +143,9 @@ export function byte2hexStr(byte) {
 }
 
 export function byteArray2hexStr(byteArray) {
-    let str = "";
-    
-    for (let i = 0; i < (byteArray.length - 1); i++)
-        str += byte2hexStr(byteArray[i]);
-
-    str += byte2hexStr(byteArray[i]);
-
-    return str;
+    return byteArray.reduce((string, byte) => {
+        return string + byte2hexStr(byte);
+    }, '');
 }
 
 export function base64DecodeFromString(string64) {

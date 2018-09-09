@@ -61,7 +61,6 @@ export function signTransaction(priKeyBytes, transaction) {
     return transaction;
 }
 
-
 export function arrayToBase64String(a) {
     return btoa(String.fromCharCode(...a));
 }
@@ -139,7 +138,6 @@ export function isAddressValid(base58Str) {
         
     if (base58Str.length !== ADDRESS_SIZE)
         return false;
-        
 
     let address = decode58(base58Str);
 

@@ -120,16 +120,39 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 class TronWeb {
-  constructor(fullNode, solidityNode, eventServer = false) {
+  constructor(fullNode, solidityNode, eventServer = false, privateKey = false) {
     this.setFullNode(fullNode);
     this.setSolidityNode(solidityNode);
     this.setEventServer(eventServer);
     this.providers = lib_providers__WEBPACK_IMPORTED_MODULE_1__["default"];
     this.BigNumber = bignumber_js__WEBPACK_IMPORTED_MODULE_4___default.a;
+    this.defaultPrivateKey = false;
+    this.defaultAddress = false;
+    ['sha3', 'toHex', 'toUtf8', 'fromUtf8', 'toAscii', 'fromAscii', 'toDecimal', 'fromDecimal', 'toSun', 'fromSun', 'toBigNumber', 'isAddress', 'compile', 'createAccount', 'address'].forEach(key => {
+      this[key] = TronWeb[key];
+    });
+    if (privateKey) this.setPrivateKey(privateKey);
     this.transactionBuilder = new lib_transactionBuilder__WEBPACK_IMPORTED_MODULE_5__["default"](this);
     this.trx = new lib_trx__WEBPACK_IMPORTED_MODULE_6__["default"](this);
     this.witness = new lib_witness__WEBPACK_IMPORTED_MODULE_7__["default"](this);
     this.injectPromise = utils__WEBPACK_IMPORTED_MODULE_2__["default"].promiseInjector(this);
+  }
+
+  setPrivateKey(privateKey) {
+    // Set address first as it clears the private key
+    this.setAddress(this.address.fromPrivateKey(privateKey)); // TODO: Validate private key
+
+    this.defaultPrivateKey = privateKey;
+  }
+
+  setAddress(address) {
+    // Validates converted addresses too
+    if (!this.isAddress(address)) throw new Error('Invalid address provided');
+    this.defaultPrivateKey = false;
+    this.defaultAddress = {
+      hex: this.address.toHex(address),
+      base58: this.address.fromHex(address)
+    };
   }
 
   isValidProvider(provider) {
@@ -175,72 +198,6 @@ class TronWeb {
   } // TODO
 
 
-  sha3(string, options = {}) {// encoding: hex if string is hex
-  }
-
-  toHex(val) {
-    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isBoolean(val)) return this.fromDecimal(+val);
-    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isBigNumber(val)) return this.fromDecimal(val);
-    if (typeof val === 'object') return this.fromUtf8(JSON.stringify(val));
-
-    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isString(val)) {
-      if (val.indexOf('-0x') === 0) return this.fromDecimal(val);
-      if (val.indexOf('0x') === 0) return val;
-      if (!isFinite(val)) return this.fromUtf8(val);
-    }
-
-    return this.fromDecimal(val);
-  }
-
-  toUtf8(hex) {
-    return Buffer.from(hex, 'hex').toString('utf8');
-  }
-
-  fromUtf8(string) {
-    return Buffer.from(string, 'utf8').toString('hex');
-  }
-
-  toAscii(hex) {
-    return Buffer.from(hex, 'hex').toString('ascii');
-  }
-
-  fromAscii(string, padding) {
-    return Buffer.from(string, 'ascii').toString('hex').padEnd(padding, '0');
-  }
-
-  toDecimal(value) {
-    return this.toBigNumber(value).toNumber();
-  }
-
-  fromDecimal(value) {
-    const number = this.toBigNumber(value);
-    const result = number.toString(16);
-    return number.lessThan(0) ? '-0x' + result.substr(1) : '0x' + result;
-  }
-
-  fromSun(sun) {
-    const trx = this.toBigNumber(trx).div(1000000);
-    return utils__WEBPACK_IMPORTED_MODULE_2__["default"].isBigNumber(sun) ? trx : trx.toString(10);
-  }
-
-  toSun(trx) {
-    const sun = this.toBigNumber(trx).times(1000000);
-    return utils__WEBPACK_IMPORTED_MODULE_2__["default"].isBigNumber(trx) ? sun : sun.toString(10);
-  }
-
-  toBigNumber(amount = 0) {
-    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isBigNumber(amount)) return amount;
-    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isString(amount) && (amount.indexOf('0x') === 0 || amount.indexOf('-0x') === 0)) return new bignumber_js__WEBPACK_IMPORTED_MODULE_4___default.a(amount.replace('0x', ''), 16);
-    return new bignumber_js__WEBPACK_IMPORTED_MODULE_4___default.a(amount.toString(10), 10);
-  } // TODO
-
-
-  isAddress(hex) {} // TODO
-
-
-  compile(solditySource) {} // TODO
-
-
   getEventResult(contractAddress, eventName, blockNumber, callback = false) {
     if (!callback) return this.injectPromise(this.getEventResult, contractAddress, eventName, blockNumber);
   } // TODO
@@ -248,12 +205,108 @@ class TronWeb {
 
   getEventByTransacionID(transactionID, callback = false) {
     if (!callback) return this.injectPromise(this.getEventByTransacionID, transactionID);
+  }
+
+  static get address() {
+    return {
+      fromHex(address) {
+        if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isHex(address)) return address;
+        return utils__WEBPACK_IMPORTED_MODULE_2__["default"].crypto.getBase58CheckAddress(utils__WEBPACK_IMPORTED_MODULE_2__["default"].code.hexStr2byteArray(address));
+      },
+
+      toHex(address) {
+        if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isHex(address)) return address;
+        return utils__WEBPACK_IMPORTED_MODULE_2__["default"].code.byteArray2hexStr(utils__WEBPACK_IMPORTED_MODULE_2__["default"].crypto.decodeBase58Address(address));
+      },
+
+      fromPrivateKey(privateKey) {
+        try {
+          return utils__WEBPACK_IMPORTED_MODULE_2__["default"].crypto.pkToAddress(privateKey);
+        } catch (_unused) {
+          return false;
+        }
+      }
+
+    };
   } // TODO
 
 
-  createAccount(callback = false) {
-    if (!callback) return this.injectPromise(this.createAccount);
-    callback(null, utils__WEBPACK_IMPORTED_MODULE_2__["default"].accounts.generateAccount());
+  static sha3(string, options = {}) {// encoding: hex if string is hex
+  }
+
+  static toHex(val) {
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isBoolean(val)) return TronWeb.fromDecimal(+val);
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isBigNumber(val)) return TronWeb.fromDecimal(val);
+    if (typeof val === 'object') return TronWeb.fromUtf8(JSON.stringify(val));
+
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isString(val)) {
+      if (val.indexOf('-0x') === 0) return TronWeb.fromDecimal(val);
+      if (val.indexOf('0x') === 0) return val;
+      if (!isFinite(val)) return TronWeb.fromUtf8(val);
+    }
+
+    return TronWeb.fromDecimal(val);
+  }
+
+  static toUtf8(hex) {
+    return Buffer.from(hex, 'hex').toString('utf8');
+  }
+
+  static fromUtf8(string) {
+    return Buffer.from(string, 'utf8').toString('hex');
+  }
+
+  static toAscii(hex) {
+    return Buffer.from(hex, 'hex').toString('ascii');
+  }
+
+  static fromAscii(string, padding) {
+    return Buffer.from(string, 'ascii').toString('hex').padEnd(padding, '0');
+  }
+
+  static toDecimal(value) {
+    return TronWeb.toBigNumber(value).toNumber();
+  }
+
+  static fromDecimal(value) {
+    const number = TronWeb.toBigNumber(value);
+    const result = number.toString(16);
+    return number.lessThan(0) ? '-0x' + result.substr(1) : '0x' + result;
+  }
+
+  static fromSun(sun) {
+    const trx = TronWeb.toBigNumber(trx).div(1000000);
+    return utils__WEBPACK_IMPORTED_MODULE_2__["default"].isBigNumber(sun) ? trx : trx.toString(10);
+  }
+
+  static toSun(trx) {
+    const sun = TronWeb.toBigNumber(trx).times(1000000);
+    return utils__WEBPACK_IMPORTED_MODULE_2__["default"].isBigNumber(trx) ? sun : sun.toString(10);
+  }
+
+  static toBigNumber(amount = 0) {
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isBigNumber(amount)) return amount;
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isString(amount) && (amount.indexOf('0x') === 0 || amount.indexOf('-0x') === 0)) return new bignumber_js__WEBPACK_IMPORTED_MODULE_4___default.a(amount.replace('0x', ''), 16);
+    return new bignumber_js__WEBPACK_IMPORTED_MODULE_4___default.a(amount.toString(10), 10);
+  }
+
+  static isAddress(address = false) {
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isString(address)) return false; // Convert HEX to Base58
+
+    if (address.length === 42) {
+      return TronWeb.isAddress(utils__WEBPACK_IMPORTED_MODULE_2__["default"].crypto.getBase58CheckAddress(utils__WEBPACK_IMPORTED_MODULE_2__["default"].code.hexStr2byteArray(address)));
+    }
+
+    return utils__WEBPACK_IMPORTED_MODULE_2__["default"].crypto.isAddressValid(address);
+  } // TODO
+
+
+  static compile(solditySource) {}
+
+  static async createAccount(callback = false) {
+    const account = utils__WEBPACK_IMPORTED_MODULE_2__["default"].accounts.generateAccount();
+    if (callback) callback(null, account);
+    return account;
   }
 
   async isConnected(callback = false) {
@@ -427,21 +480,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var source_map_support_register__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! source-map-support/register */ "source-map-support/register");
 /* harmony import */ var source_map_support_register__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(source_map_support_register__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _bytes__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./bytes */ "./src/utils/bytes.js");
-/* harmony import */ var _code__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./code */ "./src/utils/code.js");
-/* harmony import */ var _crypto__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./crypto */ "./src/utils/crypto.js");
-
+/* harmony import */ var _crypto__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./crypto */ "./src/utils/crypto.js");
 
 
 
 function generateAccount() {
-  let priKeyBytes = Object(_crypto__WEBPACK_IMPORTED_MODULE_3__["genPriKey"])();
-  let addressBytes = Object(_crypto__WEBPACK_IMPORTED_MODULE_3__["getAddressFromPriKey"])(priKeyBytes);
-  let address = Object(_crypto__WEBPACK_IMPORTED_MODULE_3__["getBase58CheckAddress"])(addressBytes);
-  let password = Object(_code__WEBPACK_IMPORTED_MODULE_2__["base64EncodeToString"])(priKeyBytes);
-  let privateKey = Object(_bytes__WEBPACK_IMPORTED_MODULE_1__["byteArray2hexStr"])(priKeyBytes);
+  const priKeyBytes = Object(_crypto__WEBPACK_IMPORTED_MODULE_2__["genPriKey"])();
+  const pubKeyBytes = Object(_crypto__WEBPACK_IMPORTED_MODULE_2__["getPubKeyFromPriKey"])(priKeyBytes);
+  const addressBytes = Object(_crypto__WEBPACK_IMPORTED_MODULE_2__["getAddressFromPriKey"])(priKeyBytes);
+  const privateKey = Object(_bytes__WEBPACK_IMPORTED_MODULE_1__["byteArray2hexStr"])(priKeyBytes);
+  const publicKey = Object(_bytes__WEBPACK_IMPORTED_MODULE_1__["byteArray2hexStr"])(pubKeyBytes);
   return {
     privateKey,
-    address
+    publicKey,
+    address: {
+      base58: Object(_crypto__WEBPACK_IMPORTED_MODULE_2__["getBase58CheckAddress"])(addressBytes),
+      hex: Object(_bytes__WEBPACK_IMPORTED_MODULE_1__["byteArray2hexStr"])(addressBytes)
+    }
   };
 }
 
@@ -957,12 +1012,9 @@ function byte2hexStr(byte) {
   return str;
 }
 function byteArray2hexStr(byteArray) {
-  let str = "";
-
-  for (let i = 0; i < byteArray.length - 1; i++) str += byte2hexStr(byteArray[i]);
-
-  str += byte2hexStr(byteArray[i]);
-  return str;
+  return byteArray.reduce((string, byte) => {
+    return string + byte2hexStr(byte);
+  }, '');
 }
 function base64DecodeFromString(string64) {
   const b = new _base64__WEBPACK_IMPORTED_MODULE_1__["Base64"]();
@@ -1283,10 +1335,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _base58__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./base58 */ "./src/utils/base58.js");
 /* harmony import */ var _bytes__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./bytes */ "./src/utils/bytes.js");
 /* harmony import */ var _crypto__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./crypto */ "./src/utils/crypto.js");
-/* harmony import */ var validator__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! validator */ "validator");
-/* harmony import */ var validator__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(validator__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var bignumber_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! bignumber.js */ "bignumber.js");
-/* harmony import */ var bignumber_js__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(bignumber_js__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var _code__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./code */ "./src/utils/code.js");
+/* harmony import */ var validator__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! validator */ "validator");
+/* harmony import */ var validator__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(validator__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var bignumber_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! bignumber.js */ "bignumber.js");
+/* harmony import */ var bignumber_js__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(bignumber_js__WEBPACK_IMPORTED_MODULE_7__);
+
 
 
 
@@ -1296,7 +1350,7 @@ __webpack_require__.r(__webpack_exports__);
 
 const utils = {
   isValidURL(url) {
-    return validator__WEBPACK_IMPORTED_MODULE_5___default.a.isURL(url, {
+    return validator__WEBPACK_IMPORTED_MODULE_6___default.a.isURL(url, {
       protocols: ['http', 'https']
     });
   },
@@ -1322,7 +1376,7 @@ const utils = {
   },
 
   isBigNumber(number) {
-    return number && (number instanceof bignumber_js__WEBPACK_IMPORTED_MODULE_6___default.a || number.constructor && number.constructor.name === 'BigNumber');
+    return number && (number instanceof bignumber_js__WEBPACK_IMPORTED_MODULE_7___default.a || number.constructor && number.constructor.name === 'BigNumber');
   },
 
   isString(string) {
@@ -1331,6 +1385,10 @@ const utils = {
 
   isFunction(obj) {
     return typeof obj === 'function';
+  },
+
+  isHex(string) {
+    return typeof string === 'string' && !isNaN(parseInt(string, 16));
   },
 
   hasProperty(obj, property) {
@@ -1359,6 +1417,7 @@ const utils = {
 
 };
 /* harmony default export */ __webpack_exports__["default"] = ({ ...utils,
+  code: _code__WEBPACK_IMPORTED_MODULE_5__,
   accounts: _accounts__WEBPACK_IMPORTED_MODULE_1__,
   base58: _base58__WEBPACK_IMPORTED_MODULE_2__,
   bytes: _bytes__WEBPACK_IMPORTED_MODULE_3__,

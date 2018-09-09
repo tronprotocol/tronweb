@@ -20725,11 +20725,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var lib_transactionBuilder__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! lib/transactionBuilder */ "./src/lib/transactionBuilder.js");
 /* harmony import */ var lib_trx__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! lib/trx */ "./src/lib/trx.js");
 /* harmony import */ var lib_witness__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! lib/witness */ "./src/lib/witness.js");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -20751,7 +20751,10 @@ var TronWeb =
 /*#__PURE__*/
 function () {
   function TronWeb(fullNode, solidityNode) {
+    var _this = this;
+
     var eventServer = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+    var privateKey = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
     _classCallCheck(this, TronWeb);
 
@@ -20760,6 +20763,12 @@ function () {
     this.setEventServer(eventServer);
     this.providers = lib_providers__WEBPACK_IMPORTED_MODULE_0__["default"];
     this.BigNumber = bignumber_js__WEBPACK_IMPORTED_MODULE_3___default.a;
+    this.defaultPrivateKey = false;
+    this.defaultAddress = false;
+    ['sha3', 'toHex', 'toUtf8', 'fromUtf8', 'toAscii', 'fromAscii', 'toDecimal', 'fromDecimal', 'toSun', 'fromSun', 'toBigNumber', 'isAddress', 'compile', 'createAccount', 'address'].forEach(function (key) {
+      _this[key] = TronWeb[key];
+    });
+    if (privateKey) this.setPrivateKey(privateKey);
     this.transactionBuilder = new lib_transactionBuilder__WEBPACK_IMPORTED_MODULE_4__["default"](this);
     this.trx = new lib_trx__WEBPACK_IMPORTED_MODULE_5__["default"](this);
     this.witness = new lib_witness__WEBPACK_IMPORTED_MODULE_6__["default"](this);
@@ -20767,6 +20776,25 @@ function () {
   }
 
   _createClass(TronWeb, [{
+    key: "setPrivateKey",
+    value: function setPrivateKey(privateKey) {
+      // Set address first as it clears the private key
+      this.setAddress(this.address.fromPrivateKey(privateKey)); // TODO: Validate private key
+
+      this.defaultPrivateKey = privateKey;
+    }
+  }, {
+    key: "setAddress",
+    value: function setAddress(address) {
+      // Validates converted addresses too
+      if (!this.isAddress(address)) throw new Error('Invalid address provided');
+      this.defaultPrivateKey = false;
+      this.defaultAddress = {
+        hex: this.address.toHex(address),
+        base58: this.address.fromHex(address)
+      };
+    }
+  }, {
     key: "isValidProvider",
     value: function isValidProvider(provider) {
       return Object.values(lib_providers__WEBPACK_IMPORTED_MODULE_0__["default"]).some(function (knownProvider) {
@@ -20821,88 +20849,6 @@ function () {
     } // TODO
 
   }, {
-    key: "sha3",
-    value: function sha3(string) {// encoding: hex if string is hex
-
-      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-    }
-  }, {
-    key: "toHex",
-    value: function toHex(val) {
-      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isBoolean(val)) return this.fromDecimal(+val);
-      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isBigNumber(val)) return this.fromDecimal(val);
-      if (_typeof(val) === 'object') return this.fromUtf8(JSON.stringify(val));
-
-      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isString(val)) {
-        if (val.indexOf('-0x') === 0) return this.fromDecimal(val);
-        if (val.indexOf('0x') === 0) return val;
-        if (!isFinite(val)) return this.fromUtf8(val);
-      }
-
-      return this.fromDecimal(val);
-    }
-  }, {
-    key: "toUtf8",
-    value: function toUtf8(hex) {
-      return Buffer.from(hex, 'hex').toString('utf8');
-    }
-  }, {
-    key: "fromUtf8",
-    value: function fromUtf8(string) {
-      return Buffer.from(string, 'utf8').toString('hex');
-    }
-  }, {
-    key: "toAscii",
-    value: function toAscii(hex) {
-      return Buffer.from(hex, 'hex').toString('ascii');
-    }
-  }, {
-    key: "fromAscii",
-    value: function fromAscii(string, padding) {
-      return Buffer.from(string, 'ascii').toString('hex').padEnd(padding, '0');
-    }
-  }, {
-    key: "toDecimal",
-    value: function toDecimal(value) {
-      return this.toBigNumber(value).toNumber();
-    }
-  }, {
-    key: "fromDecimal",
-    value: function fromDecimal(value) {
-      var number = this.toBigNumber(value);
-      var result = number.toString(16);
-      return number.lessThan(0) ? '-0x' + result.substr(1) : '0x' + result;
-    }
-  }, {
-    key: "fromSun",
-    value: function fromSun(sun) {
-      var trx = this.toBigNumber(trx).div(1000000);
-      return utils__WEBPACK_IMPORTED_MODULE_1__["default"].isBigNumber(sun) ? trx : trx.toString(10);
-    }
-  }, {
-    key: "toSun",
-    value: function toSun(trx) {
-      var sun = this.toBigNumber(trx).times(1000000);
-      return utils__WEBPACK_IMPORTED_MODULE_1__["default"].isBigNumber(trx) ? sun : sun.toString(10);
-    }
-  }, {
-    key: "toBigNumber",
-    value: function toBigNumber() {
-      var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isBigNumber(amount)) return amount;
-      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isString(amount) && (amount.indexOf('0x') === 0 || amount.indexOf('-0x') === 0)) return new bignumber_js__WEBPACK_IMPORTED_MODULE_3___default.a(amount.replace('0x', ''), 16);
-      return new bignumber_js__WEBPACK_IMPORTED_MODULE_3___default.a(amount.toString(10), 10);
-    } // TODO
-
-  }, {
-    key: "isAddress",
-    value: function isAddress(hex) {} // TODO
-
-  }, {
-    key: "compile",
-    value: function compile(solditySource) {} // TODO
-
-  }, {
     key: "getEventResult",
     value: function getEventResult(contractAddress, eventName, blockNumber) {
       var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
@@ -20914,14 +20860,6 @@ function () {
     value: function getEventByTransacionID(transactionID) {
       var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
       if (!callback) return this.injectPromise(this.getEventByTransacionID, transactionID);
-    } // TODO
-
-  }, {
-    key: "createAccount",
-    value: function createAccount() {
-      var callback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-      if (!callback) return this.injectPromise(this.createAccount);
-      callback(null, utils__WEBPACK_IMPORTED_MODULE_1__["default"].accounts.generateAccount());
     }
   }, {
     key: "isConnected",
@@ -20980,6 +20918,147 @@ function () {
         return _isConnected.apply(this, arguments);
       };
     }()
+  }], [{
+    key: "sha3",
+    // TODO
+    value: function sha3(string) {// encoding: hex if string is hex
+
+      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    }
+  }, {
+    key: "toHex",
+    value: function toHex(val) {
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isBoolean(val)) return TronWeb.fromDecimal(+val);
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isBigNumber(val)) return TronWeb.fromDecimal(val);
+      if (_typeof(val) === 'object') return TronWeb.fromUtf8(JSON.stringify(val));
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isString(val)) {
+        if (val.indexOf('-0x') === 0) return TronWeb.fromDecimal(val);
+        if (val.indexOf('0x') === 0) return val;
+        if (!isFinite(val)) return TronWeb.fromUtf8(val);
+      }
+
+      return TronWeb.fromDecimal(val);
+    }
+  }, {
+    key: "toUtf8",
+    value: function toUtf8(hex) {
+      return Buffer.from(hex, 'hex').toString('utf8');
+    }
+  }, {
+    key: "fromUtf8",
+    value: function fromUtf8(string) {
+      return Buffer.from(string, 'utf8').toString('hex');
+    }
+  }, {
+    key: "toAscii",
+    value: function toAscii(hex) {
+      return Buffer.from(hex, 'hex').toString('ascii');
+    }
+  }, {
+    key: "fromAscii",
+    value: function fromAscii(string, padding) {
+      return Buffer.from(string, 'ascii').toString('hex').padEnd(padding, '0');
+    }
+  }, {
+    key: "toDecimal",
+    value: function toDecimal(value) {
+      return TronWeb.toBigNumber(value).toNumber();
+    }
+  }, {
+    key: "fromDecimal",
+    value: function fromDecimal(value) {
+      var number = TronWeb.toBigNumber(value);
+      var result = number.toString(16);
+      return number.lessThan(0) ? '-0x' + result.substr(1) : '0x' + result;
+    }
+  }, {
+    key: "fromSun",
+    value: function fromSun(sun) {
+      var trx = TronWeb.toBigNumber(trx).div(1000000);
+      return utils__WEBPACK_IMPORTED_MODULE_1__["default"].isBigNumber(sun) ? trx : trx.toString(10);
+    }
+  }, {
+    key: "toSun",
+    value: function toSun(trx) {
+      var sun = TronWeb.toBigNumber(trx).times(1000000);
+      return utils__WEBPACK_IMPORTED_MODULE_1__["default"].isBigNumber(trx) ? sun : sun.toString(10);
+    }
+  }, {
+    key: "toBigNumber",
+    value: function toBigNumber() {
+      var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isBigNumber(amount)) return amount;
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isString(amount) && (amount.indexOf('0x') === 0 || amount.indexOf('-0x') === 0)) return new bignumber_js__WEBPACK_IMPORTED_MODULE_3___default.a(amount.replace('0x', ''), 16);
+      return new bignumber_js__WEBPACK_IMPORTED_MODULE_3___default.a(amount.toString(10), 10);
+    }
+  }, {
+    key: "isAddress",
+    value: function isAddress() {
+      var address = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isString(address)) return false; // Convert HEX to Base58
+
+      if (address.length === 42) {
+        return TronWeb.isAddress(utils__WEBPACK_IMPORTED_MODULE_1__["default"].crypto.getBase58CheckAddress(utils__WEBPACK_IMPORTED_MODULE_1__["default"].code.hexStr2byteArray(address)));
+      }
+
+      return utils__WEBPACK_IMPORTED_MODULE_1__["default"].crypto.isAddressValid(address);
+    } // TODO
+
+  }, {
+    key: "compile",
+    value: function compile(solditySource) {}
+  }, {
+    key: "createAccount",
+    value: function () {
+      var _createAccount = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee2() {
+        var callback,
+            account,
+            _args2 = arguments;
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                callback = _args2.length > 0 && _args2[0] !== undefined ? _args2[0] : false;
+                account = utils__WEBPACK_IMPORTED_MODULE_1__["default"].accounts.generateAccount();
+                if (callback) callback(null, account);
+                return _context2.abrupt("return", account);
+
+              case 4:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      return function createAccount() {
+        return _createAccount.apply(this, arguments);
+      };
+    }()
+  }, {
+    key: "address",
+    get: function get() {
+      return {
+        fromHex: function fromHex(address) {
+          if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isHex(address)) return address;
+          return utils__WEBPACK_IMPORTED_MODULE_1__["default"].crypto.getBase58CheckAddress(utils__WEBPACK_IMPORTED_MODULE_1__["default"].code.hexStr2byteArray(address));
+        },
+        toHex: function toHex(address) {
+          if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isHex(address)) return address;
+          return utils__WEBPACK_IMPORTED_MODULE_1__["default"].code.byteArray2hexStr(utils__WEBPACK_IMPORTED_MODULE_1__["default"].crypto.decodeBase58Address(address));
+        },
+        fromPrivateKey: function fromPrivateKey(privateKey) {
+          try {
+            return utils__WEBPACK_IMPORTED_MODULE_1__["default"].crypto.pkToAddress(privateKey);
+          } catch (_unused) {
+            return false;
+          }
+        }
+      };
+    }
   }]);
 
   return TronWeb;
@@ -21205,20 +21284,22 @@ var Witness = function Witness() {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "generateAccount", function() { return generateAccount; });
 /* harmony import */ var _bytes__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./bytes */ "./src/utils/bytes.js");
-/* harmony import */ var _code__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./code */ "./src/utils/code.js");
-/* harmony import */ var _crypto__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./crypto */ "./src/utils/crypto.js");
-
+/* harmony import */ var _crypto__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./crypto */ "./src/utils/crypto.js");
 
 
 function generateAccount() {
-  var priKeyBytes = Object(_crypto__WEBPACK_IMPORTED_MODULE_2__["genPriKey"])();
-  var addressBytes = Object(_crypto__WEBPACK_IMPORTED_MODULE_2__["getAddressFromPriKey"])(priKeyBytes);
-  var address = Object(_crypto__WEBPACK_IMPORTED_MODULE_2__["getBase58CheckAddress"])(addressBytes);
-  var password = Object(_code__WEBPACK_IMPORTED_MODULE_1__["base64EncodeToString"])(priKeyBytes);
+  var priKeyBytes = Object(_crypto__WEBPACK_IMPORTED_MODULE_1__["genPriKey"])();
+  var pubKeyBytes = Object(_crypto__WEBPACK_IMPORTED_MODULE_1__["getPubKeyFromPriKey"])(priKeyBytes);
+  var addressBytes = Object(_crypto__WEBPACK_IMPORTED_MODULE_1__["getAddressFromPriKey"])(priKeyBytes);
   var privateKey = Object(_bytes__WEBPACK_IMPORTED_MODULE_0__["byteArray2hexStr"])(priKeyBytes);
+  var publicKey = Object(_bytes__WEBPACK_IMPORTED_MODULE_0__["byteArray2hexStr"])(pubKeyBytes);
   return {
     privateKey: privateKey,
-    address: address
+    publicKey: publicKey,
+    address: {
+      base58: Object(_crypto__WEBPACK_IMPORTED_MODULE_1__["getBase58CheckAddress"])(addressBytes),
+      hex: Object(_bytes__WEBPACK_IMPORTED_MODULE_0__["byteArray2hexStr"])(addressBytes)
+    }
   };
 }
 
@@ -21650,8 +21731,8 @@ function stringToBytes(str) {
   var c;
   len = str.length;
 
-  for (var _i = 0; _i < len; _i++) {
-    c = str.charCodeAt(_i);
+  for (var i = 0; i < len; i++) {
+    c = str.charCodeAt(i);
 
     if (c >= 0x010000 && c <= 0x10FFFF) {
       bytes.push(c >> 18 & 0x07 | 0xF0);
@@ -21674,23 +21755,21 @@ function bytesToString(arr) {
   if (typeof arr === 'string') return arr;
   var str = '';
 
-  for (var _i2 = 0; _i2 < arr.length; _i2++) {
-    var one = arr[_i2].toString(2);
-
+  for (var i = 0; i < arr.length; i++) {
+    var one = arr[i].toString(2);
     var v = one.match(/^1+?(?=0)/);
 
     if (v && one.length == 8) {
       var bytesLength = v[0].length;
-
-      var store = arr[_i2].toString(2).slice(7 - bytesLength);
+      var store = arr[i].toString(2).slice(7 - bytesLength);
 
       for (var st = 1; st < bytesLength; st++) {
-        store += arr[st + _i2].toString(2).slice(2);
+        store += arr[st + i].toString(2).slice(2);
       }
 
       str += String.fromCharCode(parseInt(store, 2));
-      _i2 += bytesLength - 1;
-    } else str += String.fromCharCode(arr[_i2]);
+      i += bytesLength - 1;
+    } else str += String.fromCharCode(arr[i]);
   }
 
   return str;
@@ -21699,8 +21778,8 @@ function hextoString(hex) {
   var arr = hex.split("");
   var out = "";
 
-  for (var _i3 = 0; _i3 < arr.length / 2; _i3++) {
-    var tmp = "0x".concat(arr[_i3 * 2]).concat(arr[_i3 * 2 + 1]);
+  for (var i = 0; i < arr.length / 2; i++) {
+    var tmp = "0x".concat(arr[i * 2]).concat(arr[i * 2 + 1]);
     var charValue = String.fromCharCode(tmp);
     out += charValue;
   }
@@ -21725,8 +21804,8 @@ function hexStr2byteArray(str) {
   var j = 0;
   var k = 0;
 
-  for (var _i4 = 0; _i4 < str.length; _i4++) {
-    var c = str.charAt(_i4);
+  for (var i = 0; i < str.length; i++) {
+    var c = str.charAt(i);
 
     if (isHexChar(c)) {
       d <<= 4;
@@ -21750,14 +21829,9 @@ function byte2hexStr(byte) {
   return str;
 }
 function byteArray2hexStr(byteArray) {
-  var str = "";
-
-  for (var _i5 = 0; _i5 < byteArray.length - 1; _i5++) {
-    str += byte2hexStr(byteArray[_i5]);
-  }
-
-  str += byte2hexStr(byteArray[i]);
-  return str;
+  return byteArray.reduce(function (string, byte) {
+    return string + byte2hexStr(byte);
+  }, '');
 }
 function base64DecodeFromString(string64) {
   var b = new _base64__WEBPACK_IMPORTED_MODULE_0__["Base64"]();
@@ -22081,10 +22155,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _base58__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./base58 */ "./src/utils/base58.js");
 /* harmony import */ var _bytes__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./bytes */ "./src/utils/bytes.js");
 /* harmony import */ var _crypto__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./crypto */ "./src/utils/crypto.js");
-/* harmony import */ var validator__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! validator */ "./node_modules/validator/index.js");
-/* harmony import */ var validator__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(validator__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var bignumber_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! bignumber.js */ "./node_modules/bignumber.js/bignumber.js");
-/* harmony import */ var bignumber_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(bignumber_js__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _code__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./code */ "./src/utils/code.js");
+/* harmony import */ var validator__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! validator */ "./node_modules/validator/index.js");
+/* harmony import */ var validator__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(validator__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var bignumber_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! bignumber.js */ "./node_modules/bignumber.js/bignumber.js");
+/* harmony import */ var bignumber_js__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(bignumber_js__WEBPACK_IMPORTED_MODULE_6__);
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -22095,9 +22170,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
+
 var utils = {
   isValidURL: function isValidURL(url) {
-    return validator__WEBPACK_IMPORTED_MODULE_4___default.a.isURL(url, {
+    return validator__WEBPACK_IMPORTED_MODULE_5___default.a.isURL(url, {
       protocols: ['http', 'https']
     });
   },
@@ -22118,13 +22194,16 @@ var utils = {
     return typeof bool === 'boolean';
   },
   isBigNumber: function isBigNumber(number) {
-    return number && (number instanceof bignumber_js__WEBPACK_IMPORTED_MODULE_5___default.a || number.constructor && number.constructor.name === 'BigNumber');
+    return number && (number instanceof bignumber_js__WEBPACK_IMPORTED_MODULE_6___default.a || number.constructor && number.constructor.name === 'BigNumber');
   },
   isString: function isString(string) {
     return typeof string === 'string' || string && string.constructor && string.constructor.name === 'String';
   },
   isFunction: function isFunction(obj) {
     return typeof obj === 'function';
+  },
+  isHex: function isHex(string) {
+    return typeof string === 'string' && !isNaN(parseInt(string, 16));
   },
   hasProperty: function hasProperty(obj, property) {
     return Object.prototype.hasOwnProperty.call(obj, property);
@@ -22164,6 +22243,7 @@ var utils = {
   }
 };
 /* harmony default export */ __webpack_exports__["default"] = (_objectSpread({}, utils, {
+  code: _code__WEBPACK_IMPORTED_MODULE_4__,
   accounts: _accounts__WEBPACK_IMPORTED_MODULE_0__,
   base58: _base58__WEBPACK_IMPORTED_MODULE_1__,
   bytes: _bytes__WEBPACK_IMPORTED_MODULE_2__,

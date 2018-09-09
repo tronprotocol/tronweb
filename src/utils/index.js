@@ -2,6 +2,7 @@ import * as accounts from './accounts';
 import * as base58 from './base58';
 import * as bytes from './bytes';
 import * as crypto from './crypto';
+import * as code from './code';
 
 import validator from 'validator';
 import BigNumber from 'bignumber.js';
@@ -45,6 +46,10 @@ const utils = {
         return typeof obj === 'function';
     },
 
+    isHex(string) {
+        return typeof string === 'string' && !isNaN(parseInt(string, 16));
+    },
+
     hasProperty(obj, property) {
         return Object.prototype.hasOwnProperty.call(obj, property);
     },
@@ -74,6 +79,7 @@ const utils = {
 
 export default {
     ...utils,
+    code,
     accounts,
     base58,
     bytes,

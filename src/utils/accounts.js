@@ -1,16 +1,25 @@
 import { byteArray2hexStr } from './bytes';
-import { base64EncodeToString } from './code';
-import { getBase58CheckAddress, genPriKey, getAddressFromPriKey } from './crypto';
+import { 
+    getBase58CheckAddress,
+    genPriKey,
+    getAddressFromPriKey,
+    getPubKeyFromPriKey
+} from './crypto';
 
 export function generateAccount() {
-    let priKeyBytes = genPriKey();
-    let addressBytes = getAddressFromPriKey(priKeyBytes);
-    let address = getBase58CheckAddress(addressBytes);
-    let password = base64EncodeToString(priKeyBytes);
-    let privateKey = byteArray2hexStr(priKeyBytes);
+    const priKeyBytes = genPriKey();
+    const pubKeyBytes = getPubKeyFromPriKey(priKeyBytes);
+    const addressBytes = getAddressFromPriKey(priKeyBytes);
+    
+    const privateKey = byteArray2hexStr(priKeyBytes);
+    const publicKey = byteArray2hexStr(pubKeyBytes);
 
     return {
         privateKey,
-        address
+        publicKey,
+        address: {
+            base58: getBase58CheckAddress(addressBytes),
+            hex: byteArray2hexStr(addressBytes)
+        }
     }
 }
