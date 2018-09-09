@@ -135,8 +135,20 @@ const app = async () => {
 
     console.group('List of tokens');
         console.log('- Token Count:', fullTokenList.length);
-        console.log('- Tokenss:', JSON.stringify(fullTokenList, null, 2), '\n');
+        console.log('- Tokens:', JSON.stringify(fullTokenList, null, 2), '\n');
     console.groupEnd();
+
+    // This won't call back until after the promises due to being
+    // pushed to the back of event loop
+    await tronWeb.trx.listTokens(2, (err, tokens) => {
+        if(err)
+            return console.error(err);
+
+        console.group('Partial list of tokens');
+            console.log('- Token Count:', tokens.length);
+            console.log('- Tokens:', JSON.stringify(tokens, null, 2), '\n');
+        console.groupEnd();
+    });
 };
 
 app();

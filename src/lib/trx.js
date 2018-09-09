@@ -94,6 +94,17 @@ export default class Trx {
     }
 
     getTransactionsToAddress(address = this.tronWeb.defaultAddress, limit = 30, offset = 0, callback = false) {
+        if(utils.isFunction(offset)) {
+            callback = offset;
+            offset = 0;            
+        }
+
+        if(utils.isFunction(limit)) {
+            callback = limit;
+            limit = 0;
+            offset = 0;            
+        }
+        
         if(!callback)
             return this.injectPromise(this.getTransactionsToAddress, address, limit, offset);
 
@@ -101,6 +112,17 @@ export default class Trx {
     }
 
     getTransactionsFromAddress(address = this.tronWeb.defaultAddress, limit = 30, offset = 0, callback = false) {
+        if(utils.isFunction(offset)) {
+            callback = offset;
+            offset = 0;            
+        }
+
+        if(utils.isFunction(limit)) {
+            callback = limit;
+            limit = 0;
+            offset = 0;            
+        }
+
         if(!callback)
             return this.injectPromise(this.getTransactionsFromAddress, address, limit, offset);
 
@@ -108,6 +130,24 @@ export default class Trx {
     }
 
     async getTransactionsRelated(address = this.tronWeb.defaultAddress, direction = 'all', limit = 30, offset = 0, callback = false) {
+        if(utils.isFunction(offset)) {
+            callback = offset;
+            offset = 0;            
+        }
+
+        if(utils.isFunction(limit)) {
+            callback = limit;
+            limit = 0;
+            offset = 0;            
+        }
+
+        if(utils.isFunction(direction)) {
+            callback = direction;
+            direction = 'all';
+            limit = 30;
+            offset = 0;
+        }
+
         if(!callback)
             return this.injectPromise(this.getTransactionsRelated, address, direction, limit, offset);
 
@@ -131,7 +171,7 @@ export default class Trx {
         if(!this.tronWeb.isAddress(address))
             return callback('Invalid address provided');
 
-        if(!utils.isInteger(limit) || limit < 1)
+        if(!utils.isInteger(limit) || limit < 0 || (offset && limit < 1))
             return callback('Invalid limit provided');
 
         if(!utils.isInteger(offset) || offset < 0)
@@ -271,11 +311,37 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
-    listTokens(callback = false) {
-        if(!callback)
-            return this.injectPromise(this.listTokens);
+    listTokens(limit = 0, offset = 0, callback = false) {
+        if(utils.isFunction(offset)) {
+            callback = offset;
+            offset = 0;            
+        }
 
-        this.tronWeb.fullNode.request('wallet/getassetissuelist').then(({ assetIssue = [] }) => {
+        if(utils.isFunction(limit)) {
+            callback = limit;
+            limit = 0;
+            offset = 0;            
+        }
+        
+        if(!callback)
+            return this.injectPromise(this.listTokens, limit, offset);
+
+        if(!utils.isInteger(limit) || limit < 0 || (offset && limit < 1))
+            return callback('Invalid limit provided');
+
+        if(!utils.isInteger(offset) || offset < 0)
+            return callback('Invalid offset provided');
+
+        if(!limit) {
+            return this.tronWeb.fullNode.request('wallet/getassetissuelist').then(({ assetIssue = [] }) => {
+                callback(null, assetIssue.map(token => this.parseToken(token)));
+            }).catch(err => callback(err));
+        }
+
+        this.tronWeb.fullNode.request('wallet/getpaginatedassetissuelist', {
+            offset: parseInt(offset),
+            limit: parseInt(limit)
+        }, 'post').then(({ assetIssue = [] }) => {
             callback(null, assetIssue.map(token => this.parseToken(token)));
         }).catch(err => callback(err));
     }

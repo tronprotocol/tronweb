@@ -21387,6 +21387,18 @@ function () {
       var limit = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 30;
       var offset = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
       var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(offset)) {
+        callback = offset;
+        offset = 0;
+      }
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(limit)) {
+        callback = limit;
+        limit = 0;
+        offset = 0;
+      }
+
       if (!callback) return this.injectPromise(this.getTransactionsToAddress, address, limit, offset);
       return this.getTransactionsRelated(address, 'to', limit, offset, callback);
     }
@@ -21397,6 +21409,18 @@ function () {
       var limit = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 30;
       var offset = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
       var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(offset)) {
+        callback = offset;
+        offset = 0;
+      }
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(limit)) {
+        callback = limit;
+        limit = 0;
+        offset = 0;
+      }
+
       if (!callback) return this.injectPromise(this.getTransactionsFromAddress, address, limit, offset);
       return this.getTransactionsRelated(address, 'from', limit, offset, callback);
     }
@@ -21424,37 +21448,55 @@ function () {
                 offset = _args.length > 3 && _args[3] !== undefined ? _args[3] : 0;
                 callback = _args.length > 4 && _args[4] !== undefined ? _args[4] : false;
 
+                if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(offset)) {
+                  callback = offset;
+                  offset = 0;
+                }
+
+                if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(limit)) {
+                  callback = limit;
+                  limit = 0;
+                  offset = 0;
+                }
+
+                if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(direction)) {
+                  callback = direction;
+                  direction = 'all';
+                  limit = 30;
+                  offset = 0;
+                }
+
                 if (callback) {
-                  _context.next = 7;
+                  _context.next = 10;
                   break;
                 }
 
                 return _context.abrupt("return", this.injectPromise(this.getTransactionsRelated, address, direction, limit, offset));
 
-              case 7:
+              case 10:
                 if (['to', 'from', 'all'].includes(direction)) {
-                  _context.next = 9;
+                  _context.next = 12;
                   break;
                 }
 
                 return _context.abrupt("return", callback('Invalid direction provided: Expected "to", "from" or "all"'));
 
-              case 9:
+              case 12:
                 if (!(direction == 'all')) {
-                  _context.next = 23;
+                  _context.next = 26;
                   break;
                 }
 
-                _context.prev = 10;
-                _context.next = 13;
+                _context.prev = 13;
+                _context.next = 16;
                 return this.getTransactionsRelated(address, 'from', limit, offset);
 
-              case 13:
+              case 16:
                 from = _context.sent;
-                _context.next = 16;
+                _context.next = 19;
                 return this.getTransactionsRelated(address, 'to', limit, offset);
 
-              case 16:
+              case 19:
                 to = _context.sent;
                 callback(null, _toConsumableArray(from.map(function (tx) {
                   return tx.direction = 'from', tx;
@@ -21463,39 +21505,39 @@ function () {
                 }))).sort(function (a, b) {
                   return b.raw_data.timestamp - a.raw_data.timestamp;
                 }));
-                _context.next = 23;
+                _context.next = 26;
                 break;
 
-              case 20:
-                _context.prev = 20;
-                _context.t0 = _context["catch"](10);
+              case 23:
+                _context.prev = 23;
+                _context.t0 = _context["catch"](13);
                 return _context.abrupt("return", callback(_context.t0));
 
-              case 23:
+              case 26:
                 if (this.tronWeb.isAddress(address)) {
-                  _context.next = 25;
+                  _context.next = 28;
                   break;
                 }
 
                 return _context.abrupt("return", callback('Invalid address provided'));
 
-              case 25:
-                if (!(!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(limit) || limit < 1)) {
-                  _context.next = 27;
+              case 28:
+                if (!(!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(limit) || limit < 0 || offset && limit < 1)) {
+                  _context.next = 30;
                   break;
                 }
 
                 return _context.abrupt("return", callback('Invalid limit provided'));
 
-              case 27:
+              case 30:
                 if (!(!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(offset) || offset < 0)) {
-                  _context.next = 29;
+                  _context.next = 32;
                   break;
                 }
 
                 return _context.abrupt("return", callback('Invalid offset provided'));
 
-              case 29:
+              case 32:
                 address = this.tronWeb.address.toHex(address);
                 this.tronWeb.solidityNode.request("walletextension/gettransactions".concat(direction, "this"), {
                   account: {
@@ -21510,12 +21552,12 @@ function () {
                   return callback(err);
                 });
 
-              case 31:
+              case 34:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, this, [[10, 20]]);
+        }, _callee, this, [[13, 23]]);
       }));
 
       return function getTransactionsRelated() {
@@ -21678,11 +21720,43 @@ function () {
     value: function listTokens() {
       var _this4 = this;
 
-      var callback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-      if (!callback) return this.injectPromise(this.listTokens);
-      this.tronWeb.fullNode.request('wallet/getassetissuelist').then(function (_ref10) {
-        var _ref10$assetIssue = _ref10.assetIssue,
-            assetIssue = _ref10$assetIssue === void 0 ? [] : _ref10$assetIssue;
+      var limit = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+      var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+      var callback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(offset)) {
+        callback = offset;
+        offset = 0;
+      }
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(limit)) {
+        callback = limit;
+        limit = 0;
+        offset = 0;
+      }
+
+      if (!callback) return this.injectPromise(this.listTokens, limit, offset);
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(limit) || limit < 0 || offset && limit < 1) return callback('Invalid limit provided');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(offset) || offset < 0) return callback('Invalid offset provided');
+
+      if (!limit) {
+        return this.tronWeb.fullNode.request('wallet/getassetissuelist').then(function (_ref10) {
+          var _ref10$assetIssue = _ref10.assetIssue,
+              assetIssue = _ref10$assetIssue === void 0 ? [] : _ref10$assetIssue;
+          callback(null, assetIssue.map(function (token) {
+            return _this4.parseToken(token);
+          }));
+        }).catch(function (err) {
+          return callback(err);
+        });
+      }
+
+      this.tronWeb.fullNode.request('wallet/getpaginatedassetissuelist', {
+        offset: parseInt(offset),
+        limit: parseInt(limit)
+      }, 'post').then(function (_ref11) {
+        var _ref11$assetIssue = _ref11.assetIssue,
+            assetIssue = _ref11$assetIssue === void 0 ? [] : _ref11$assetIssue;
         callback(null, assetIssue.map(function (token) {
           return _this4.parseToken(token);
         }));

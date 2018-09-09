@@ -531,16 +531,56 @@ class Trx {
   }
 
   getTransactionsToAddress(address = this.tronWeb.defaultAddress, limit = 30, offset = 0, callback = false) {
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(offset)) {
+      callback = offset;
+      offset = 0;
+    }
+
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(limit)) {
+      callback = limit;
+      limit = 0;
+      offset = 0;
+    }
+
     if (!callback) return this.injectPromise(this.getTransactionsToAddress, address, limit, offset);
     return this.getTransactionsRelated(address, 'to', limit, offset, callback);
   }
 
   getTransactionsFromAddress(address = this.tronWeb.defaultAddress, limit = 30, offset = 0, callback = false) {
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(offset)) {
+      callback = offset;
+      offset = 0;
+    }
+
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(limit)) {
+      callback = limit;
+      limit = 0;
+      offset = 0;
+    }
+
     if (!callback) return this.injectPromise(this.getTransactionsFromAddress, address, limit, offset);
     return this.getTransactionsRelated(address, 'from', limit, offset, callback);
   }
 
   async getTransactionsRelated(address = this.tronWeb.defaultAddress, direction = 'all', limit = 30, offset = 0, callback = false) {
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(offset)) {
+      callback = offset;
+      offset = 0;
+    }
+
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(limit)) {
+      callback = limit;
+      limit = 0;
+      offset = 0;
+    }
+
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(direction)) {
+      callback = direction;
+      direction = 'all';
+      limit = 30;
+      offset = 0;
+    }
+
     if (!callback) return this.injectPromise(this.getTransactionsRelated, address, direction, limit, offset);
     if (!['to', 'from', 'all'].includes(direction)) return callback('Invalid direction provided: Expected "to", "from" or "all"');
 
@@ -555,7 +595,7 @@ class Trx {
     }
 
     if (!this.tronWeb.isAddress(address)) return callback('Invalid address provided');
-    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(limit) || limit < 1) return callback('Invalid limit provided');
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(limit) || limit < 0 || offset && limit < 1) return callback('Invalid limit provided');
     if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(offset) || offset < 0) return callback('Invalid offset provided');
     address = this.tronWeb.address.toHex(address);
     this.tronWeb.solidityNode.request(`walletextension/gettransactions${direction}this`, {
@@ -674,9 +714,34 @@ class Trx {
     }).catch(err => callback(err));
   }
 
-  listTokens(callback = false) {
-    if (!callback) return this.injectPromise(this.listTokens);
-    this.tronWeb.fullNode.request('wallet/getassetissuelist').then(({
+  listTokens(limit = 0, offset = 0, callback = false) {
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(offset)) {
+      callback = offset;
+      offset = 0;
+    }
+
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(limit)) {
+      callback = limit;
+      limit = 0;
+      offset = 0;
+    }
+
+    if (!callback) return this.injectPromise(this.listTokens, limit, offset);
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(limit) || limit < 0 || offset && limit < 1) return callback('Invalid limit provided');
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(offset) || offset < 0) return callback('Invalid offset provided');
+
+    if (!limit) {
+      return this.tronWeb.fullNode.request('wallet/getassetissuelist').then(({
+        assetIssue = []
+      }) => {
+        callback(null, assetIssue.map(token => this.parseToken(token)));
+      }).catch(err => callback(err));
+    }
+
+    this.tronWeb.fullNode.request('wallet/getpaginatedassetissuelist', {
+      offset: parseInt(offset),
+      limit: parseInt(limit)
+    }, 'post').then(({
       assetIssue = []
     }) => {
       callback(null, assetIssue.map(token => this.parseToken(token)));
