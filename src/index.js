@@ -2,6 +2,7 @@ import providers from 'lib/providers';
 import utils from 'utils';
 import axios from 'axios';
 import BigNumber from 'bignumber.js';
+import { sha3_256 } from 'js-sha3';
 
 import TransactionBuilder from 'lib/transactionBuilder';
 import Trx from 'lib/trx';
@@ -12,6 +13,12 @@ export default class TronWeb {
     static BigNumber = BigNumber;
     
     constructor(fullNode, solidityNode, eventServer = false, privateKey = false) {
+        if(utils.isString(fullNode))
+            fullNode = new providers.HttpProvider(fullNode);
+
+        if(utils.isString(solidityNode))
+            solidityNode = new providers.HttpProvider(solidityNode);
+
         this.setFullNode(fullNode);
         this.setSolidityNode(solidityNode);
         this.setEventServer(eventServer);
@@ -159,9 +166,8 @@ export default class TronWeb {
         }
     }
 
-    // TODO
-    static sha3(string, options = {}) {
-        // encoding: hex if string is hex
+    static sha3(string) {
+        return sha3_256(string);
     }
 
     static toHex(val) {
