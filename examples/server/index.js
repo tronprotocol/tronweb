@@ -93,6 +93,13 @@ const app = async () => {
         console.log('- Address: 4144abc6018aec80cf05e3ac94376d6cd76da1b112');
         console.log('- Bandwidth:', bandwidth, '\n');
     console.groupEnd();
+
+    const tokens = await tronWeb.trx.getTokensIssuedByAddress('TSZRsyxQrTFrjpAoqsPJj1pS4pacBnsBx1');
+
+    console.group('Tokens from address');
+        console.log('- Owner Address: TSZRsyxQrTFrjpAoqsPJj1pS4pacBnsBx1');
+        console.log('- Tokens:\n' + JSON.stringify(tokens, null, 2), '\n');
+    console.groupEnd();
 };
 
 app();

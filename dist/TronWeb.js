@@ -21256,6 +21256,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Trx; });
 /* harmony import */ var index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! index */ "./src/index.js");
 /* harmony import */ var utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! utils */ "./src/utils/index.js");
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
@@ -21558,6 +21562,37 @@ function () {
             _ref4$NetLimit = _ref4.NetLimit,
             NetLimit = _ref4$NetLimit === void 0 ? 0 : _ref4$NetLimit;
         callback(null, freeNetLimit - freeNetUsed + (NetLimit - NetUsed));
+      }).catch(function (err) {
+        return callback(err);
+      });
+    }
+  }, {
+    key: "getTokensFromAddress",
+    value: function getTokensFromAddress() {
+      var _this = this;
+
+      var address = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.tronWeb.defaultAddress;
+      var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      if (!callback) return this.injectPromise(this.getTokensFromAddress, address);
+      if (!this.tronWeb.isAddress(address)) return callback('Invalid address provided');
+      address = this.tronWeb.address.toHex(address);
+      this.tronWeb.fullNode.request('wallet/getassetissuebyaccount', {
+        address: address
+      }, 'post').then(function (_ref5) {
+        var _ref5$assetIssue = _ref5.assetIssue,
+            assetIssue = _ref5$assetIssue === void 0 ? false : _ref5$assetIssue;
+        if (!assetIssue) return callback(null, {});
+        var tokens = assetIssue.map(function (token) {
+          return _objectSpread({}, token, {
+            name: _this.tronWeb.toUtf8(token.name),
+            abbr: token.abbr && _this.tronWeb.toUtf8(token.abbr),
+            description: token.description && _this.tronWeb.toUtf8(token.description),
+            url: token.url && _this.tronWeb.toUtf8(token.url)
+          });
+        }).reduce(function (tokens, token) {
+          return tokens[token.name] = token, tokens;
+        }, {});
+        callback(null, tokens);
       }).catch(function (err) {
         return callback(err);
       });

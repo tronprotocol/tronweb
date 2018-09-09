@@ -180,4 +180,33 @@ export default class Trx {
             callback(null, (freeNetLimit - freeNetUsed) + (NetLimit - NetUsed));
         }).catch(err => callback(err));
     }
+
+    getTokensIssuedByAddress(address = this.tronWeb.defaultAddress, callback = false) {
+        if(!callback)
+            return this.injectPromise(this.getTokensIssuedByAddress, address);
+
+        if(!this.tronWeb.isAddress(address))
+            return callback('Invalid address provided');
+
+        address = this.tronWeb.address.toHex(address);
+
+        this.tronWeb.fullNode.request('wallet/getassetissuebyaccount', {
+            address
+        }, 'post').then(({ assetIssue = false }) => {
+            if(!assetIssue)
+                return callback(null, {});
+
+            const tokens = assetIssue.map(token => ({
+                ...token,
+                name: this.tronWeb.toUtf8(token.name),
+                abbr: token.abbr && this.tronWeb.toUtf8(token.abbr),
+                description: token.description && this.tronWeb.toUtf8(token.description),
+                url: token.url && this.tronWeb.toUtf8(token.url)
+            })).reduce((tokens, token) => {
+                return tokens[token.name] = token, tokens;
+            }, {});
+
+            callback(null, tokens);
+        }).catch(err => callback(err));
+    }
 };
