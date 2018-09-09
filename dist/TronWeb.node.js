@@ -598,8 +598,8 @@ class Trx {
     }).catch(err => callback(err));
   }
 
-  getTokensFromAddress(address = this.tronWeb.defaultAddress, callback = false) {
-    if (!callback) return this.injectPromise(this.getTokensFromAddress, address);
+  getTokensIssuedByAddress(address = this.tronWeb.defaultAddress, callback = false) {
+    if (!callback) return this.injectPromise(this.getTokensIssuedByAddress, address);
     if (!this.tronWeb.isAddress(address)) return callback('Invalid address provided');
     address = this.tronWeb.address.toHex(address);
     this.tronWeb.fullNode.request('wallet/getassetissuebyaccount', {
@@ -617,6 +617,22 @@ class Trx {
         return tokens[token.name] = token, tokens;
       }, {});
       callback(null, tokens);
+    }).catch(err => callback(err));
+  }
+
+  getTokenFromID(tokenID = false, callback = false) {
+    if (!callback) return this.injectPromise(this.getTokenFromID, tokenID);
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isString(tokenID) || !tokenID.length) return callback('Invalid token ID provided');
+    this.tronWeb.fullNode.request('wallet/getassetissuebyname', {
+      value: this.tronWeb.fromUtf8(tokenID)
+    }, 'post').then(token => {
+      if (!token.name) return callback('Token does not exist');
+      callback(null, { ...token,
+        name: this.tronWeb.toUtf8(token.name),
+        abbr: token.abbr && this.tronWeb.toUtf8(token.abbr),
+        description: token.description && this.tronWeb.toUtf8(token.description),
+        url: token.url && this.tronWeb.toUtf8(token.url)
+      });
     }).catch(err => callback(err));
   }
 

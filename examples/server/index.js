@@ -100,6 +100,13 @@ const app = async () => {
         console.log('- Owner Address: TSZRsyxQrTFrjpAoqsPJj1pS4pacBnsBx1');
         console.log('- Tokens:\n' + JSON.stringify(tokens, null, 2), '\n');
     console.groupEnd();
+
+    const token = await tronWeb.trx.getTokenFromID('TestToken');
+
+    console.group('Tokens from its name');
+        console.log('- Token Name: TestToken');
+        console.log('- Token:\n' + JSON.stringify(token, null, 2), '\n');
+    console.groupEnd();
 };
 
 app();

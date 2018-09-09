@@ -209,4 +209,27 @@ export default class Trx {
             callback(null, tokens);
         }).catch(err => callback(err));
     }
+
+    getTokenFromID(tokenID = false, callback = false) {
+        if(!callback)
+            return this.injectPromise(this.getTokenFromID, tokenID);
+
+        if(!utils.isString(tokenID) || !tokenID.length)
+            return callback('Invalid token ID provided');
+
+        this.tronWeb.fullNode.request('wallet/getassetissuebyname', {
+            value: this.tronWeb.fromUtf8(tokenID)
+        }, 'post').then(token => {
+            if(!token.name)
+                return callback('Token does not exist');
+                
+            callback(null, {
+                ...token,
+                name: this.tronWeb.toUtf8(token.name),
+                abbr: token.abbr && this.tronWeb.toUtf8(token.abbr),
+                description: token.description && this.tronWeb.toUtf8(token.description),
+                url: token.url && this.tronWeb.toUtf8(token.url)
+            });
+        }).catch(err => callback(err));
+    }
 };

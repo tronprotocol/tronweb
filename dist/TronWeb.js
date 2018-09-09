@@ -21567,13 +21567,13 @@ function () {
       });
     }
   }, {
-    key: "getTokensFromAddress",
-    value: function getTokensFromAddress() {
+    key: "getTokensIssuedByAddress",
+    value: function getTokensIssuedByAddress() {
       var _this = this;
 
       var address = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.tronWeb.defaultAddress;
       var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-      if (!callback) return this.injectPromise(this.getTokensFromAddress, address);
+      if (!callback) return this.injectPromise(this.getTokensIssuedByAddress, address);
       if (!this.tronWeb.isAddress(address)) return callback('Invalid address provided');
       address = this.tronWeb.address.toHex(address);
       this.tronWeb.fullNode.request('wallet/getassetissuebyaccount', {
@@ -21593,6 +21593,29 @@ function () {
           return tokens[token.name] = token, tokens;
         }, {});
         callback(null, tokens);
+      }).catch(function (err) {
+        return callback(err);
+      });
+    }
+  }, {
+    key: "getTokenFromID",
+    value: function getTokenFromID() {
+      var _this2 = this;
+
+      var tokenID = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      if (!callback) return this.injectPromise(this.getTokenFromID, tokenID);
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isString(tokenID) || !tokenID.length) return callback('Invalid token ID provided');
+      this.tronWeb.fullNode.request('wallet/getassetissuebyname', {
+        value: this.tronWeb.fromUtf8(tokenID)
+      }, 'post').then(function (token) {
+        if (!token.name) return callback('Token does not exist');
+        callback(null, _objectSpread({}, token, {
+          name: _this2.tronWeb.toUtf8(token.name),
+          abbr: token.abbr && _this2.tronWeb.toUtf8(token.abbr),
+          description: token.description && _this2.tronWeb.toUtf8(token.description),
+          url: token.url && _this2.tronWeb.toUtf8(token.url)
+        }));
       }).catch(function (err) {
         return callback(err);
       });
