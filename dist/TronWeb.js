@@ -21408,7 +21408,7 @@ function () {
 
       if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(limit)) {
         callback = limit;
-        limit = 0;
+        limit = 30;
       }
 
       if (!callback) return this.injectPromise(this.getTransactionsToAddress, address, limit, offset);
@@ -21429,8 +21429,7 @@ function () {
 
       if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(limit)) {
         callback = limit;
-        limit = 0;
-        offset = 0;
+        limit = 30;
       }
 
       if (!callback) return this.injectPromise(this.getTransactionsFromAddress, address, limit, offset);
@@ -21467,7 +21466,7 @@ function () {
 
                 if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(limit)) {
                   callback = limit;
-                  limit = 0;
+                  limit = 30;
                 }
 
                 if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(direction)) {
@@ -21808,6 +21807,20 @@ function () {
         callback(null, assetIssue.map(function (token) {
           return _this4.parseToken(token);
         }));
+      }).catch(function (err) {
+        return callback(err);
+      });
+    }
+  }, {
+    key: "timeUntilNextVoteCycle",
+    value: function timeUntilNextVoteCycle() {
+      var callback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      if (!callback) return this.injectPromise(this.timeUntilNextVoteCycle);
+      this.tronWeb.fullNode.request('wallet/getnextmaintenancetime').then(function (_ref12) {
+        var _ref12$num = _ref12.num,
+            num = _ref12$num === void 0 ? -1 : _ref12$num;
+        if (num == -1) return callback('Failed to get time until next vote cycle');
+        callback(null, Math.floor(num / 1000));
       }).catch(function (err) {
         return callback(err);
       });

@@ -149,6 +149,13 @@ const app = async () => {
             console.log('- Tokens:', JSON.stringify(tokens, null, 2), '\n');
         console.groupEnd();
     });
+
+    const nextVoteCycle = await tronWeb.trx.timeUntilNextVoteCycle();
+
+    console.group('Next vote cycle');
+        console.log('- Time Remaining:', nextVoteCycle + 'ms');
+        console.log('- Occurs At:', new Date(Date.now() + nextVoteCycle), '\n');
+    console.groupEnd();
 };
 
 app();

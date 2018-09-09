@@ -384,4 +384,16 @@ export default class Trx {
             callback(null, assetIssue.map(token => this.parseToken(token)));
         }).catch(err => callback(err));
     }
+
+    timeUntilNextVoteCycle(callback = false) {
+        if(!callback)
+            return this.injectPromise(this.timeUntilNextVoteCycle);
+
+        this.tronWeb.fullNode.request('wallet/getnextmaintenancetime').then(({ num = -1 }) => {
+            if(num == -1)
+                return callback('Failed to get time until next vote cycle');
+
+            callback(null, Math.floor(num / 1000));
+        }).catch(err => callback(err));
+    }
 };

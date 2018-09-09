@@ -548,7 +548,7 @@ class Trx {
 
     if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(limit)) {
       callback = limit;
-      limit = 0;
+      limit = 30;
     }
 
     if (!callback) return this.injectPromise(this.getTransactionsToAddress, address, limit, offset);
@@ -563,8 +563,7 @@ class Trx {
 
     if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(limit)) {
       callback = limit;
-      limit = 0;
-      offset = 0;
+      limit = 30;
     }
 
     if (!callback) return this.injectPromise(this.getTransactionsFromAddress, address, limit, offset);
@@ -579,7 +578,7 @@ class Trx {
 
     if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(limit)) {
       callback = limit;
-      limit = 0;
+      limit = 30;
     }
 
     if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(direction)) {
@@ -785,6 +784,16 @@ class Trx {
       assetIssue = []
     }) => {
       callback(null, assetIssue.map(token => this.parseToken(token)));
+    }).catch(err => callback(err));
+  }
+
+  timeUntilNextVoteCycle(callback = false) {
+    if (!callback) return this.injectPromise(this.timeUntilNextVoteCycle);
+    this.tronWeb.fullNode.request('wallet/getnextmaintenancetime').then(({
+      num = -1
+    }) => {
+      if (num == -1) return callback('Failed to get time until next vote cycle');
+      callback(null, Math.floor(num / 1000));
     }).catch(err => callback(err));
   }
 
