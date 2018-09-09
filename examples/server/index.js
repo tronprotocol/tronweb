@@ -156,6 +156,15 @@ const app = async () => {
         console.log('- Time Remaining:', nextVoteCycle + 'ms');
         console.log('- Occurs At:', new Date(Date.now() + nextVoteCycle), '\n');
     console.groupEnd();
+
+    const contract = await tronWeb.trx.getContract('4137dfaa7bde6855e980d985297c164df5ee3fa05b');
+
+    console.group('Contract from node');
+        console.log('- Contract Address: 4137dfaa7bde6855e980d985297c164df5ee3fa05b');
+        console.log('- Origin Address:', contract.origin_address);
+        console.log('- Bytecode:', contract.bytecode);
+        console.log('- ABI:\n' + JSON.stringify(contract.abi, null, 2), '\n');
+    console.groupEnd();
 };
 
 app();

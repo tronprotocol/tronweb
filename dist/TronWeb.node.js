@@ -797,6 +797,18 @@ class Trx {
     }).catch(err => callback(err));
   }
 
+  getContract(contractAddress, callback = false) {
+    if (!callback) return this.injectPromise(this.getContract, contractAddress);
+    if (!this.tronWeb.isAddress(contractAddress)) return callback('Invalid contract address provided');
+    contractAddress = this.tronWeb.address.toHex(contractAddress);
+    this.tronWeb.fullNode.request('wallet/getcontract', {
+      value: contractAddress
+    }).then(contract => {
+      if (contract.Error) return callback('Contract does not exist');
+      callback(null, contract);
+    }).catch(err => callback(err));
+  }
+
 }
 ;
 

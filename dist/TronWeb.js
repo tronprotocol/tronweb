@@ -21825,6 +21825,22 @@ function () {
         return callback(err);
       });
     }
+  }, {
+    key: "getContract",
+    value: function getContract(contractAddress) {
+      var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      if (!callback) return this.injectPromise(this.getContract, contractAddress);
+      if (!this.tronWeb.isAddress(contractAddress)) return callback('Invalid contract address provided');
+      contractAddress = this.tronWeb.address.toHex(contractAddress);
+      this.tronWeb.fullNode.request('wallet/getcontract', {
+        value: contractAddress
+      }).then(function (contract) {
+        if (contract.Error) return callback('Contract does not exist');
+        callback(null, contract);
+      }).catch(function (err) {
+        return callback(err);
+      });
+    }
   }]);
 
   return Trx;
