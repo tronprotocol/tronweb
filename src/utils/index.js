@@ -50,6 +50,12 @@ const utils = {
         return typeof string === 'string' && !isNaN(parseInt(string, 16));
     },
 
+    isInteger(number) {
+        return Number.isInteger(
+            Number(number)
+        );
+    },
+
     hasProperty(obj, property) {
         return Object.prototype.hasOwnProperty.call(obj, property);
     },

@@ -126,6 +126,7 @@ class TronWeb {
     this.setEventServer(eventServer);
     this.providers = lib_providers__WEBPACK_IMPORTED_MODULE_1__["default"];
     this.BigNumber = bignumber_js__WEBPACK_IMPORTED_MODULE_4___default.a;
+    this.defaultBlock = false;
     this.defaultPrivateKey = false;
     this.defaultAddress = false;
     ['sha3', 'toHex', 'toUtf8', 'fromUtf8', 'toAscii', 'fromAscii', 'toDecimal', 'fromDecimal', 'toSun', 'fromSun', 'toBigNumber', 'isAddress', 'compile', 'createAccount', 'address'].forEach(key => {
@@ -138,6 +139,12 @@ class TronWeb {
     this.injectPromise = utils__WEBPACK_IMPORTED_MODULE_2__["default"].promiseInjector(this);
   }
 
+  setDefaultBlock(blockID = false) {
+    if (blockID === false) this.defaultBlockID = false;
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(blockID) || !blockID) throw new Error('Invalid block ID provided');
+    this.defaultBlock = +blockID;
+  }
+
   setPrivateKey(privateKey) {
     // Set address first as it clears the private key
     this.setAddress(this.address.fromPrivateKey(privateKey)); // TODO: Validate private key
@@ -146,7 +153,6 @@ class TronWeb {
   }
 
   setAddress(address) {
-    // Validates converted addresses too
     if (!this.isAddress(address)) throw new Error('Invalid address provided');
     this.defaultPrivateKey = false;
     this.defaultAddress = {
@@ -1389,6 +1395,10 @@ const utils = {
 
   isHex(string) {
     return typeof string === 'string' && !isNaN(parseInt(string, 16));
+  },
+
+  isInteger(number) {
+    return Number.isInteger(Number(number));
   },
 
   hasProperty(obj, property) {

@@ -2,7 +2,7 @@ const path = require('path');
 const externals = require('webpack-node-externals');
 
 const basePlugins = [
-    'babel-plugin-transform-numeric-separator',
+    '@babel/plugin-proposal-numeric-separator',
     '@babel/plugin-proposal-class-properties'
 ];
 

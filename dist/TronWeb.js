@@ -20763,6 +20763,7 @@ function () {
     this.setEventServer(eventServer);
     this.providers = lib_providers__WEBPACK_IMPORTED_MODULE_0__["default"];
     this.BigNumber = bignumber_js__WEBPACK_IMPORTED_MODULE_3___default.a;
+    this.defaultBlock = false;
     this.defaultPrivateKey = false;
     this.defaultAddress = false;
     ['sha3', 'toHex', 'toUtf8', 'fromUtf8', 'toAscii', 'fromAscii', 'toDecimal', 'fromDecimal', 'toSun', 'fromSun', 'toBigNumber', 'isAddress', 'compile', 'createAccount', 'address'].forEach(function (key) {
@@ -20776,6 +20777,14 @@ function () {
   }
 
   _createClass(TronWeb, [{
+    key: "setDefaultBlock",
+    value: function setDefaultBlock() {
+      var blockID = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      if (blockID === false) this.defaultBlockID = false;
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(blockID) || !blockID) throw new Error('Invalid block ID provided');
+      this.defaultBlock = +blockID;
+    }
+  }, {
     key: "setPrivateKey",
     value: function setPrivateKey(privateKey) {
       // Set address first as it clears the private key
@@ -20786,7 +20795,6 @@ function () {
   }, {
     key: "setAddress",
     value: function setAddress(address) {
-      // Validates converted addresses too
       if (!this.isAddress(address)) throw new Error('Invalid address provided');
       this.defaultPrivateKey = false;
       this.defaultAddress = {
@@ -22204,6 +22212,9 @@ var utils = {
   },
   isHex: function isHex(string) {
     return typeof string === 'string' && !isNaN(parseInt(string, 16));
+  },
+  isInteger: function isInteger(number) {
+    return Number.isInteger(Number(number));
   },
   hasProperty: function hasProperty(obj, property) {
     return Object.prototype.hasOwnProperty.call(obj, property);

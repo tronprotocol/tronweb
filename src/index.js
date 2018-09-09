@@ -19,6 +19,7 @@ export default class TronWeb {
         this.providers = providers;
         this.BigNumber = BigNumber;
 
+        this.defaultBlock = false;
         this.defaultPrivateKey = false;
         this.defaultAddress = false;
         
@@ -39,6 +40,16 @@ export default class TronWeb {
         this.witness = new Witness(this);
 
         this.injectPromise = utils.promiseInjector(this);
+    }
+
+    setDefaultBlock(blockID = false) {
+        if(blockID === false)
+            this.defaultBlockID = false;
+
+        if(!utils.isInteger(blockID) || !blockID)
+            throw new Error('Invalid block ID provided');
+
+        this.defaultBlock = +blockID;
     }
 
     setPrivateKey(privateKey) {
