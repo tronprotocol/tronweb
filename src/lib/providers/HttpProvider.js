@@ -38,9 +38,9 @@ export default class HttpProvider {
     }
 
     async isConnected(statusPage = this.statusPage) {
-        return this.instance.get(statusPage).then(({ data }) => {
+        return this.request(statusPage).then(data => {
             return utils.hasProperties(data, 'blockID', 'block_header');
-        }).catch(err => false);
+        }).catch(() => false);
     }
 
     request(url, payload = {}, method = 'get') {

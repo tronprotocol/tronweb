@@ -23,7 +23,9 @@ const app = async () => {
     if(!connected)
         return;
 
-    console.log('Starting application');
+    const account = await tronWeb.createAccount();
+
+    console.log('Generated account', { account });
 };
 
 app();

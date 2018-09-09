@@ -176,6 +176,8 @@ export default class TronWeb {
     createAccount(callback = false) {
         if(!callback)
             return this.injectPromise(this.createAccount);
+
+        callback(null, utils.accounts.generateAccount());
     }
 
     async isConnected(callback = false) {

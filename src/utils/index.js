@@ -1,6 +1,7 @@
-// import here, export them all as property of default
-// i.e. utils.accounts.generateAccount()
-// or utils.isValidURL()
+import * as accounts from './accounts';
+import * as base58 from './base58';
+import * as bytes from './bytes';
+import * as crypto from './crypto';
 
 import validator from 'validator';
 import BigNumber from 'bignumber.js';
@@ -72,5 +73,9 @@ const utils = {
 }
 
 export default {
-    ...utils
+    ...utils,
+    accounts,
+    base58,
+    bytes,
+    crypto
 };
