@@ -261,4 +261,13 @@ export default class Trx {
             callback(null, block);
         }).catch(err => callback(err));
     }
+
+    listSuperRepresentatives(callback = false) {
+        if(!callback)
+            return this.injectPromise(this.listSuperRepresentatives);
+
+        this.tronWeb.fullNode.request('wallet/listwitnesses').then(({ witnesses = [] }) => {
+            callback(null, witnesses);
+        }).catch(err => callback(err));
+    }
 };

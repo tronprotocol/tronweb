@@ -123,6 +123,13 @@ const app = async () => {
             return block.block_header.raw_data.number || 0;
         }), '\n');
     console.groupEnd();
+
+    const superRepresentatives = await tronWeb.trx.listSuperRepresentatives();
+
+    console.group('List of super representatives');
+        console.log('- SR Count:', superRepresentatives.length);
+        console.log('- SRs:', JSON.stringify(superRepresentatives, null, 2), '\n');
+    console.groupEnd();
 };
 
 app();

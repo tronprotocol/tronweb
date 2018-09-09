@@ -21651,11 +21651,24 @@ function () {
       if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(end) || end <= start) return callback('Invalid end of range provided');
       this.tronWeb.fullNode.request('wallet/getblockbylimitnext', {
         startNum: parseInt(start),
-        endNum: parseInt(end)
+        endNum: parseInt(end) + 1
       }, 'post').then(function (_ref8) {
         var _ref8$block = _ref8.block,
             block = _ref8$block === void 0 ? [] : _ref8$block;
         callback(null, block);
+      }).catch(function (err) {
+        return callback(err);
+      });
+    }
+  }, {
+    key: "listSuperRepresentatives",
+    value: function listSuperRepresentatives() {
+      var callback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      if (!callback) return this.injectPromise(this.listSuperRepresentatives);
+      this.tronWeb.fullNode.request('wallet/listwitnesses').then(function (_ref9) {
+        var _ref9$witnesses = _ref9.witnesses,
+            witnesses = _ref9$witnesses === void 0 ? [] : _ref9$witnesses;
+        callback(null, witnesses);
       }).catch(function (err) {
         return callback(err);
       });

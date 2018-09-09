@@ -657,11 +657,20 @@ class Trx {
     if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(end) || end <= start) return callback('Invalid end of range provided');
     this.tronWeb.fullNode.request('wallet/getblockbylimitnext', {
       startNum: parseInt(start),
-      endNum: parseInt(end)
+      endNum: parseInt(end) + 1
     }, 'post').then(({
       block = []
     }) => {
       callback(null, block);
+    }).catch(err => callback(err));
+  }
+
+  listSuperRepresentatives(callback = false) {
+    if (!callback) return this.injectPromise(this.listSuperRepresentatives);
+    this.tronWeb.fullNode.request('wallet/listwitnesses').then(({
+      witnesses = []
+    }) => {
+      callback(null, witnesses);
     }).catch(err => callback(err));
   }
 
