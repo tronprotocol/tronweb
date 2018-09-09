@@ -674,6 +674,15 @@ class Trx {
     }).catch(err => callback(err));
   }
 
+  listTokens(callback = false) {
+    if (!callback) return this.injectPromise(this.listTokens);
+    this.tronWeb.fullNode.request('wallet/getassetissuelist').then(({
+      assetIssue = []
+    }) => {
+      callback(null, assetIssue.map(token => this.parseToken(token)));
+    }).catch(err => callback(err));
+  }
+
 }
 ;
 

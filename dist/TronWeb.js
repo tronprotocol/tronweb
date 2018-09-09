@@ -21673,6 +21673,23 @@ function () {
         return callback(err);
       });
     }
+  }, {
+    key: "listTokens",
+    value: function listTokens() {
+      var _this4 = this;
+
+      var callback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      if (!callback) return this.injectPromise(this.listTokens);
+      this.tronWeb.fullNode.request('wallet/getassetissuelist').then(function (_ref10) {
+        var _ref10$assetIssue = _ref10.assetIssue,
+            assetIssue = _ref10$assetIssue === void 0 ? [] : _ref10$assetIssue;
+        callback(null, assetIssue.map(function (token) {
+          return _this4.parseToken(token);
+        }));
+      }).catch(function (err) {
+        return callback(err);
+      });
+    }
   }]);
 
   return Trx;

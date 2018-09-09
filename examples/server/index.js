@@ -130,6 +130,13 @@ const app = async () => {
         console.log('- SR Count:', superRepresentatives.length);
         console.log('- SRs:', JSON.stringify(superRepresentatives, null, 2), '\n');
     console.groupEnd();
+
+    const fullTokenList = await tronWeb.trx.listTokens();
+
+    console.group('List of tokens');
+        console.log('- Token Count:', fullTokenList.length);
+        console.log('- Tokenss:', JSON.stringify(fullTokenList, null, 2), '\n');
+    console.groupEnd();
 };
 
 app();
