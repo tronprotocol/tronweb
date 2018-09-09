@@ -79,6 +79,13 @@ const app = async () => {
         console.log('- Address: 4144abc6018aec80cf05e3ac94376d6cd76da1b112');
         console.log('- Account:\n' + JSON.stringify(accountInfo, null, 2), '\n');
     console.groupEnd();
+
+    const balance = await tronWeb.trx.getBalance('TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1');
+
+    console.group('Account balance');
+        console.log('- Address: TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1');
+        console.log('- Balance:', balance, '\n');
+    console.groupEnd();
 };
 
 app();

@@ -21514,10 +21514,26 @@ function () {
       var address = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.tronWeb.defaultAddress;
       var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
       if (!callback) return this.injectPromise(this.getAccount, address);
+      if (!this.tronWeb.isAddress(address)) return callback('Invalid address provided');
+      address = this.tronWeb.address.toHex(address);
       this.tronWeb.solidityNode.request('walletsolidity/getaccount', {
         address: address
       }, 'post').then(function (account) {
         callback(null, account);
+      }).catch(function (err) {
+        return callback(err);
+      });
+    }
+  }, {
+    key: "getBalance",
+    value: function getBalance() {
+      var address = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.tronWeb.defaultAddress;
+      var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      if (!callback) return this.injectPromise(this.getBalance, address);
+      this.getAccount(address).then(function (_ref3) {
+        var _ref3$balance = _ref3.balance,
+            balance = _ref3$balance === void 0 ? 0 : _ref3$balance;
+        callback(null, balance);
       }).catch(function (err) {
         return callback(err);
       });

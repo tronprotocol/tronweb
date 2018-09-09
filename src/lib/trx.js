@@ -144,10 +144,24 @@ export default class Trx {
         if(!callback)
             return this.injectPromise(this.getAccount, address);
 
+        if(!this.tronWeb.isAddress(address))
+            return callback('Invalid address provided');
+
+        address = this.tronWeb.address.toHex(address);
+
         this.tronWeb.solidityNode.request('walletsolidity/getaccount', {
             address
         }, 'post').then(account => {
             callback(null, account);
+        }).catch(err => callback(err));
+    }
+
+    getBalance(address = this.tronWeb.defaultAddress, callback = false) {
+        if(!callback)
+            return this.injectPromise(this.getBalance, address);
+
+        this.getAccount(address).then(({ balance = 0 }) => {
+            callback(null, balance);
         }).catch(err => callback(err));
     }
 };
