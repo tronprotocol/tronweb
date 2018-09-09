@@ -34,7 +34,7 @@ export default class Trx {
             callback = block;
             block = this.tronWeb.defaultBlock;            
         }
-        
+
         if(!callback)
             return this.injectPromise(this.getBlock, block);
 
@@ -111,7 +111,7 @@ export default class Trx {
 
         if(utils.isFunction(limit)) {
             callback = limit;
-            limit = 0;          
+            limit = 30;          
         }
 
         if(!callback)
@@ -128,8 +128,7 @@ export default class Trx {
 
         if(utils.isFunction(limit)) {
             callback = limit;
-            limit = 0;
-            offset = 0;            
+            limit = 30;           
         }
 
         if(!callback)
@@ -146,7 +145,7 @@ export default class Trx {
 
         if(utils.isFunction(limit)) {
             callback = limit;
-            limit = 0;         
+            limit = 30;         
         }
 
         if(utils.isFunction(direction)) {
