@@ -114,6 +114,15 @@ const app = async () => {
         console.log('- Node Count:', nodeList.length);
         console.log('- Nodes:', JSON.stringify(nodeList), '\n');
     console.groupEnd();
+
+    const blockRange = await tronWeb.trx.getBlockRange(30, 35);
+
+    console.group('Block IDs between 30 and 35');
+        console.log('- Block Range: [ 30, 35 ]');
+        console.log('- Blocks IDs:', blockRange.map(block => {
+            return block.block_header.raw_data.number || 0;
+        }), '\n');
+    console.groupEnd();
 };
 
 app();

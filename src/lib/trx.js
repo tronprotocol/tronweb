@@ -10,6 +10,16 @@ export default class Trx {
         this.injectPromise = utils.promiseInjector(this);
     }
 
+    parseToken(token) {
+        return {
+            ...token,
+            name: this.tronWeb.toUtf8(token.name),
+            abbr: token.abbr && this.tronWeb.toUtf8(token.abbr),
+            description: token.description && this.tronWeb.toUtf8(token.description),
+            url: token.url && this.tronWeb.toUtf8(token.url)
+        };
+    }
+
     getCurrentBlock(callback = false) {
         if(!callback)
             return this.injectPromise(this.getCurrentBlock);
@@ -196,13 +206,9 @@ export default class Trx {
             if(!assetIssue)
                 return callback(null, {});
 
-            const tokens = assetIssue.map(token => ({
-                ...token,
-                name: this.tronWeb.toUtf8(token.name),
-                abbr: token.abbr && this.tronWeb.toUtf8(token.abbr),
-                description: token.description && this.tronWeb.toUtf8(token.description),
-                url: token.url && this.tronWeb.toUtf8(token.url)
-            })).reduce((tokens, token) => {
+            const tokens = assetIssue.map(token => {
+                return this.parseToken(token);
+            }).reduce((tokens, token) => {
                 return tokens[token.name] = token, tokens;
             }, {});
 
@@ -223,13 +229,7 @@ export default class Trx {
             if(!token.name)
                 return callback('Token does not exist');
                 
-            callback(null, {
-                ...token,
-                name: this.tronWeb.toUtf8(token.name),
-                abbr: token.abbr && this.tronWeb.toUtf8(token.abbr),
-                description: token.description && this.tronWeb.toUtf8(token.description),
-                url: token.url && this.tronWeb.toUtf8(token.url)
-            });
+            callback(null, this.parseToken(token));
         }).catch(err => callback(err));
     }
 
@@ -241,6 +241,24 @@ export default class Trx {
             callback(null, nodes.map(({ address: { host, port } }) => (
                 `${this.tronWeb.toUtf8(host)}:${port}`
             )));
+        }).catch(err => callback(err));
+    }
+
+    getBlockRange(start = 0, end = 30, callback = false) {
+        if(!callback)
+            return this.injectPromise(this.getBlockRange, start, end);
+
+        if(!utils.isInteger(start) || start < 0)
+            return callback('Invalid start of range provided');
+
+        if(!utils.isInteger(end) || end <= start)
+            return callback('Invalid end of range provided');
+
+        this.tronWeb.fullNode.request('wallet/getblockbylimitnext', { 
+            startNum: parseInt(start),
+            endNum: parseInt(end) + 1
+        }, 'post').then(({ block = [] }) => {
+            callback(null, block);
         }).catch(err => callback(err));
     }
 };

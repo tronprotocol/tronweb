@@ -21256,10 +21256,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Trx; });
 /* harmony import */ var index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! index */ "./src/index.js");
 /* harmony import */ var utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! utils */ "./src/utils/index.js");
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
@@ -21271,6 +21267,10 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -21295,6 +21295,16 @@ function () {
   }
 
   _createClass(Trx, [{
+    key: "parseToken",
+    value: function parseToken(token) {
+      return _objectSpread({}, token, {
+        name: this.tronWeb.toUtf8(token.name),
+        abbr: token.abbr && this.tronWeb.toUtf8(token.abbr),
+        description: token.description && this.tronWeb.toUtf8(token.description),
+        url: token.url && this.tronWeb.toUtf8(token.url)
+      });
+    }
+  }, {
     key: "getCurrentBlock",
     value: function getCurrentBlock() {
       var callback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
@@ -21583,12 +21593,7 @@ function () {
             assetIssue = _ref5$assetIssue === void 0 ? false : _ref5$assetIssue;
         if (!assetIssue) return callback(null, {});
         var tokens = assetIssue.map(function (token) {
-          return _objectSpread({}, token, {
-            name: _this.tronWeb.toUtf8(token.name),
-            abbr: token.abbr && _this.tronWeb.toUtf8(token.abbr),
-            description: token.description && _this.tronWeb.toUtf8(token.description),
-            url: token.url && _this.tronWeb.toUtf8(token.url)
-          });
+          return _this.parseToken(token);
         }).reduce(function (tokens, token) {
           return tokens[token.name] = token, tokens;
         }, {});
@@ -21610,12 +21615,7 @@ function () {
         value: this.tronWeb.fromUtf8(tokenID)
       }, 'post').then(function (token) {
         if (!token.name) return callback('Token does not exist');
-        callback(null, _objectSpread({}, token, {
-          name: _this2.tronWeb.toUtf8(token.name),
-          abbr: token.abbr && _this2.tronWeb.toUtf8(token.abbr),
-          description: token.description && _this2.tronWeb.toUtf8(token.description),
-          url: token.url && _this2.tronWeb.toUtf8(token.url)
-        }));
+        callback(null, _this2.parseToken(token));
       }).catch(function (err) {
         return callback(err);
       });
@@ -21636,6 +21636,26 @@ function () {
               port = _ref7$address.port;
           return "".concat(_this3.tronWeb.toUtf8(host), ":").concat(port);
         }));
+      }).catch(function (err) {
+        return callback(err);
+      });
+    }
+  }, {
+    key: "getBlockRange",
+    value: function getBlockRange() {
+      var start = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+      var end = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 30;
+      var callback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+      if (!callback) return this.injectPromise(this.getBlockRange, start, end);
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(start) || start < 0) return callback('Invalid start of range provided');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(end) || end <= start) return callback('Invalid end of range provided');
+      this.tronWeb.fullNode.request('wallet/getblockbylimitnext', {
+        startNum: parseInt(start),
+        endNum: parseInt(end)
+      }, 'post').then(function (_ref8) {
+        var _ref8$block = _ref8.block,
+            block = _ref8$block === void 0 ? [] : _ref8$block;
+        callback(null, block);
       }).catch(function (err) {
         return callback(err);
       });

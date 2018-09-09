@@ -468,6 +468,15 @@ class Trx {
     this.injectPromise = utils__WEBPACK_IMPORTED_MODULE_2__["default"].promiseInjector(this);
   }
 
+  parseToken(token) {
+    return { ...token,
+      name: this.tronWeb.toUtf8(token.name),
+      abbr: token.abbr && this.tronWeb.toUtf8(token.abbr),
+      description: token.description && this.tronWeb.toUtf8(token.description),
+      url: token.url && this.tronWeb.toUtf8(token.url)
+    };
+  }
+
   getCurrentBlock(callback = false) {
     if (!callback) return this.injectPromise(this.getCurrentBlock);
     this.tronWeb.fullNode.request('wallet/getnowblock').then(block => {
@@ -608,12 +617,9 @@ class Trx {
       assetIssue = false
     }) => {
       if (!assetIssue) return callback(null, {});
-      const tokens = assetIssue.map(token => ({ ...token,
-        name: this.tronWeb.toUtf8(token.name),
-        abbr: token.abbr && this.tronWeb.toUtf8(token.abbr),
-        description: token.description && this.tronWeb.toUtf8(token.description),
-        url: token.url && this.tronWeb.toUtf8(token.url)
-      })).reduce((tokens, token) => {
+      const tokens = assetIssue.map(token => {
+        return this.parseToken(token);
+      }).reduce((tokens, token) => {
         return tokens[token.name] = token, tokens;
       }, {});
       callback(null, tokens);
@@ -627,12 +633,7 @@ class Trx {
       value: this.tronWeb.fromUtf8(tokenID)
     }, 'post').then(token => {
       if (!token.name) return callback('Token does not exist');
-      callback(null, { ...token,
-        name: this.tronWeb.toUtf8(token.name),
-        abbr: token.abbr && this.tronWeb.toUtf8(token.abbr),
-        description: token.description && this.tronWeb.toUtf8(token.description),
-        url: token.url && this.tronWeb.toUtf8(token.url)
-      });
+      callback(null, this.parseToken(token));
     }).catch(err => callback(err));
   }
 
@@ -647,6 +648,20 @@ class Trx {
           port
         }
       }) => `${this.tronWeb.toUtf8(host)}:${port}`));
+    }).catch(err => callback(err));
+  }
+
+  getBlockRange(start = 0, end = 30, callback = false) {
+    if (!callback) return this.injectPromise(this.getBlockRange, start, end);
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(start) || start < 0) return callback('Invalid start of range provided');
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(end) || end <= start) return callback('Invalid end of range provided');
+    this.tronWeb.fullNode.request('wallet/getblockbylimitnext', {
+      startNum: parseInt(start),
+      endNum: parseInt(end)
+    }, 'post').then(({
+      block = []
+    }) => {
+      callback(null, block);
     }).catch(err => callback(err));
   }
 
