@@ -50,8 +50,8 @@ export default class TronWeb {
     }
 
     setDefaultBlock(blockID = false) {
-        if(blockID === false)
-            this.defaultBlockID = false;
+        if(blockID === false || blockID == 'latest' || blockID == 'earliest')
+            return this.defaultBlock = blockID;
 
         if(!utils.isInteger(blockID) || !blockID)
             throw new Error('Invalid block ID provided');

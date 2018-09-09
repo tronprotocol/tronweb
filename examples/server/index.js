@@ -1,10 +1,10 @@
 const TronWeb = require('../../dist/TronWeb.node.js'); // require('tronweb');
 const HttpProvider = TronWeb.providers.HttpProvider;
 
-const fullNode = new HttpProvider('http://159.69.37.73:8090');
-const solidityNode = new HttpProvider('http://159.69.37.73:8091');
+const fullNode = new HttpProvider('http://rpc.tron.watch:8090'); // http://159.69.37.73:8090
+const solidityNode = new HttpProvider('http://rpc.tron.watch:8091'); // http://159.69.37.73:8091
 const eventServer = 'http://47.90.203.178:18891';
-const privateKey = 'D053CA8A0FFD6F284D2FE67FC0CCE0E59D109D09A3D271DB4E2C1C64AD760806';
+const privateKey = '4d141598bde726f8681d584ea51d5e930bc40e214c172f89d4ebb5d58dfdfe50';
 
 const app = async () => {
     const tronWeb = new TronWeb(
@@ -13,6 +13,8 @@ const app = async () => {
         eventServer,
         privateKey
     );
+
+    tronWeb.setDefaultBlock('latest');
 
     const nodes = await tronWeb.isConnected();
     const connected = !Object.entries(nodes).map(([ name, connected ]) => {
@@ -36,6 +38,46 @@ const app = async () => {
             console.log('- Hex:   ', account.address.hex);
             console.log('- Valid: ', isValid, '\n')
         console.groupEnd();
+    console.groupEnd();
+
+    const currentBlock = await tronWeb.trx.getCurrentBlock();
+
+    console.group('Current block');
+        console.log(JSON.stringify(currentBlock, null, 2), '\n');
+    console.groupEnd();
+
+    // You can use latest, earliest, a block hash or block number
+    const previousBlock = await tronWeb.trx.getBlock('79136');
+
+    console.group('Previous block #79136');
+        console.log(JSON.stringify(previousBlock, null, 2), '\n');
+    console.groupEnd();
+
+    const genesisBlockCount = await tronWeb.trx.getBlockTransactionCount('earliest');
+
+    console.group('Genesis Block Transaction Count');
+        console.log('Transactions:', genesisBlockCount, '\n');
+    console.groupEnd();
+
+    const transaction = await tronWeb.trx.getTransaction('134d90066bf262c0f1fb490bde165ce46aeb74230cf7c91031e5521744816853');
+
+    console.group('Transaction');
+        console.log('- Hash:', transaction.txID);
+        console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
+    console.groupEnd();
+
+    const transactions = await tronWeb.trx.getTransactionsRelated('TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1', 'all');
+
+    console.group('Transactions relating to address');
+        console.log('- Address: TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1');
+        console.log('- Transactions:\n' + JSON.stringify(transactions, null, 2), '\n');
+    console.groupEnd();
+
+    const accountInfo = await tronWeb.trx.getAccount('4144abc6018aec80cf05e3ac94376d6cd76da1b112');
+
+    console.group('Account information');
+        console.log('- Address: 4144abc6018aec80cf05e3ac94376d6cd76da1b112');
+        console.log('- Account:\n' + JSON.stringify(accountInfo, null, 2), '\n');
     console.groupEnd();
 };
 

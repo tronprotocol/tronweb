@@ -105,9 +105,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
 /* harmony import */ var bignumber_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! bignumber.js */ "bignumber.js");
 /* harmony import */ var bignumber_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(bignumber_js__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var lib_transactionBuilder__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! lib/transactionBuilder */ "./src/lib/transactionBuilder.js");
-/* harmony import */ var lib_trx__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! lib/trx */ "./src/lib/trx.js");
-/* harmony import */ var lib_witness__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! lib/witness */ "./src/lib/witness.js");
+/* harmony import */ var js_sha3__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! js-sha3 */ "js-sha3");
+/* harmony import */ var js_sha3__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(js_sha3__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var lib_transactionBuilder__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! lib/transactionBuilder */ "./src/lib/transactionBuilder.js");
+/* harmony import */ var lib_trx__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! lib/trx */ "./src/lib/trx.js");
+/* harmony import */ var lib_witness__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! lib/witness */ "./src/lib/witness.js");
 
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -119,8 +121,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
+
 class TronWeb {
   constructor(fullNode, solidityNode, eventServer = false, privateKey = false) {
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isString(fullNode)) fullNode = new lib_providers__WEBPACK_IMPORTED_MODULE_1__["default"].HttpProvider(fullNode);
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isString(solidityNode)) solidityNode = new lib_providers__WEBPACK_IMPORTED_MODULE_1__["default"].HttpProvider(solidityNode);
     this.setFullNode(fullNode);
     this.setSolidityNode(solidityNode);
     this.setEventServer(eventServer);
@@ -133,14 +138,14 @@ class TronWeb {
       this[key] = TronWeb[key];
     });
     if (privateKey) this.setPrivateKey(privateKey);
-    this.transactionBuilder = new lib_transactionBuilder__WEBPACK_IMPORTED_MODULE_5__["default"](this);
-    this.trx = new lib_trx__WEBPACK_IMPORTED_MODULE_6__["default"](this);
-    this.witness = new lib_witness__WEBPACK_IMPORTED_MODULE_7__["default"](this);
+    this.transactionBuilder = new lib_transactionBuilder__WEBPACK_IMPORTED_MODULE_6__["default"](this);
+    this.trx = new lib_trx__WEBPACK_IMPORTED_MODULE_7__["default"](this);
+    this.witness = new lib_witness__WEBPACK_IMPORTED_MODULE_8__["default"](this);
     this.injectPromise = utils__WEBPACK_IMPORTED_MODULE_2__["default"].promiseInjector(this);
   }
 
   setDefaultBlock(blockID = false) {
-    if (blockID === false) this.defaultBlockID = false;
+    if (blockID === false || blockID == 'latest' || blockID == 'earliest') return this.defaultBlock = blockID;
     if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(blockID) || !blockID) throw new Error('Invalid block ID provided');
     this.defaultBlock = +blockID;
   }
@@ -234,10 +239,10 @@ class TronWeb {
       }
 
     };
-  } // TODO
+  }
 
-
-  static sha3(string, options = {}) {// encoding: hex if string is hex
+  static sha3(string) {
+    return Object(js_sha3__WEBPACK_IMPORTED_MODULE_5__["sha3_256"])(string);
   }
 
   static toHex(val) {
@@ -451,8 +456,123 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Trx; });
 /* harmony import */ var source_map_support_register__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! source-map-support/register */ "source-map-support/register");
 /* harmony import */ var source_map_support_register__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(source_map_support_register__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! index */ "./src/index.js");
+/* harmony import */ var utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! utils */ "./src/utils/index.js");
 
-class Trx {}
+
+
+class Trx {
+  constructor(tronWeb = false) {
+    if (!tronWeb || !tronWeb instanceof index__WEBPACK_IMPORTED_MODULE_1__["default"]) throw new Error('Expected instance of TronWeb');
+    this.tronWeb = tronWeb;
+    this.injectPromise = utils__WEBPACK_IMPORTED_MODULE_2__["default"].promiseInjector(this);
+  }
+
+  getCurrentBlock(callback = false) {
+    if (!callback) return this.injectPromise(this.getCurrentBlock);
+    this.tronWeb.fullNode.request('wallet/getnowblock').then(block => {
+      callback(null, block);
+    }).catch(err => callback(err));
+  }
+
+  getBlock(block = this.tronWeb.defaultBlock, callback = false) {
+    if (!callback) return this.injectPromise(this.getBlock, block);
+    if (block === false) return callback('No block identifier provided');
+    if (block == 'earliest') block = 0;
+    if (block == 'latest') return this.getCurrentBlock(callback);
+    if (isNaN(block) && utils__WEBPACK_IMPORTED_MODULE_2__["default"].isHex(block)) return this.getBlockByHash(block, callback);
+    this.getBlockByNumber(block, callback);
+  }
+
+  getBlockByHash(blockHash, callback = false) {
+    if (!callback) return this.injectPromise(this.getBlockByHash, blockHash);
+    this.tronWeb.fullNode.request('wallet/getblockbyid', {
+      value: blockHash
+    }, 'post').then(block => {
+      callback(null, block);
+    }).catch(err => callback(err));
+  }
+
+  getBlockByNumber(blockID, callback = false) {
+    if (!callback) return this.injectPromise(this.getBlockByNumber, blockID);
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(blockID) || blockID < 0) return callback('Invalid block number provided');
+    this.tronWeb.fullNode.request('wallet/getblockbynum', {
+      num: parseInt(blockID)
+    }, 'post').then(block => {
+      callback(null, block);
+    }).catch(err => callback(err));
+  }
+
+  getBlockTransactionCount(block, callback = false) {
+    if (!callback) return this.injectPromise(this.getBlockTransactionCount, block);
+    this.getBlock(block).then(({
+      transactions = []
+    }) => {
+      callback(null, transactions.length);
+    }).catch(err => callback(err));
+  }
+
+  getTransaction(transactionID, callback = false) {
+    if (!callback) return this.injectPromise(this.getTransaction, transactionID);
+    this.tronWeb.fullNode.request('wallet/gettransactionbyid', {
+      value: transactionID
+    }, 'post').then(transaction => {
+      callback(null, transaction);
+    }).catch(err => callback(err));
+  }
+
+  getTransactionsToAddress(address = this.tronWeb.defaultAddress, limit = 30, offset = 0, callback = false) {
+    if (!callback) return this.injectPromise(this.getTransactionsToAddress, address, limit, offset);
+    return this.getTransactionsRelated(address, 'to', limit, offset, callback);
+  }
+
+  getTransactionsFromAddress(address = this.tronWeb.defaultAddress, limit = 30, offset = 0, callback = false) {
+    if (!callback) return this.injectPromise(this.getTransactionsFromAddress, address, limit, offset);
+    return this.getTransactionsRelated(address, 'from', limit, offset, callback);
+  }
+
+  async getTransactionsRelated(address = this.tronWeb.defaultAddress, direction = 'all', limit = 30, offset = 0, callback = false) {
+    if (!callback) return this.injectPromise(this.getTransactionsRelated, address, direction, limit, offset);
+    if (!['to', 'from', 'all'].includes(direction)) return callback('Invalid direction provided: Expected "to", "from" or "all"');
+
+    if (direction == 'all') {
+      try {
+        const from = await this.getTransactionsRelated(address, 'from', limit, offset);
+        const to = await this.getTransactionsRelated(address, 'to', limit, offset);
+        callback(null, [...from.map(tx => (tx.direction = 'from', tx)), ...to.map(tx => (tx.direction = 'to', tx))].sort((a, b) => b.raw_data.timestamp - a.raw_data.timestamp));
+      } catch (ex) {
+        return callback(ex);
+      }
+    }
+
+    if (!this.tronWeb.isAddress(address)) return callback('Invalid address provided');
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(limit) || limit < 1) return callback('Invalid limit provided');
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(offset) || offset < 0) return callback('Invalid offset provided');
+    address = this.tronWeb.address.toHex(address);
+    this.tronWeb.solidityNode.request(`walletextension/gettransactions${direction}this`, {
+      account: {
+        address
+      },
+      offset,
+      limit
+    }, 'post').then(({
+      transaction
+    }) => {
+      callback(null, transaction);
+    }).catch(err => callback(err));
+  }
+
+  getAccount(address = this.tronWeb.defaultAddress, callback = false) {
+    if (!callback) return this.injectPromise(this.getAccount, address);
+    this.tronWeb.solidityNode.request('walletsolidity/getaccount', {
+      address
+    }, 'post').then(account => {
+      callback(null, account);
+    }).catch(err => callback(err));
+  }
+
+}
+;
 
 /***/ }),
 
