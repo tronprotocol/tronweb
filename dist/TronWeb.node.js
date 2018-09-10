@@ -542,6 +542,22 @@ class TransactionBuilder {
     }).catch(err => callback(err));
   }
 
+  unfreezeBalance(address = this.tronWeb.defaultAddress.hex, callback = false) {
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(address)) {
+      callback = address;
+      address = this.tronWeb.defaultAddress.hex;
+    }
+
+    if (!callback) return this.injectPromise(this.unfreezeBalance, address);
+    if (!this.tronWeb.isAddress(address)) return callback('Invalid address provided');
+    this.tronWeb.fullNode.request('wallet/unfreezebalance', {
+      owner_address: this.tronWeb.address.toHex(address)
+    }, 'post').then(transaction => {
+      if (transaction.Error) return callback(transaction.Error);
+      callback(null, transaction);
+    }).catch(err => callback(err));
+  }
+
   sendAsset(...args) {
     return this.sendToken(...args);
   }

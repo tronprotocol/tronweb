@@ -195,6 +195,13 @@ const app = async () => {
         console.log('- Address: TYkfNHvpfwU7iX2hUpXQ7pjRY7Lg6SEZ96');;
         console.log('- Transaction:\n' + JSON.stringify(freezeBalance, null, 2), '\n');
     console.groupEnd();
+
+    const unfreezeBalance = await tronWeb.transactionBuilder.unfreezeBalance('TYkfNHvpfwU7iX2hUpXQ7pjRY7Lg6SEZ96');
+
+    console.group('Unsigned unfreezeBalance balance transaction');
+        console.log('- Address: TYkfNHvpfwU7iX2hUpXQ7pjRY7Lg6SEZ96');;
+        console.log('- Transaction:\n' + JSON.stringify(unfreezeBalance, null, 2), '\n');
+    console.groupEnd();
 };
 
 app();
