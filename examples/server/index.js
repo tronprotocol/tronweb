@@ -188,6 +188,13 @@ const app = async () => {
         console.log('- Token: BetterToken');
         console.log('- Transaction:\n' + JSON.stringify(purchaseToken, null, 2), '\n');
     console.groupEnd();
+
+    const freezeBalance = await tronWeb.transactionBuilder.freezeBalance('TYkfNHvpfwU7iX2hUpXQ7pjRY7Lg6SEZ96', 20000000);
+
+    console.group('Unsigned freeze balance transaction');
+        console.log('- Address: TYkfNHvpfwU7iX2hUpXQ7pjRY7Lg6SEZ96');;
+        console.log('- Transaction:\n' + JSON.stringify(freezeBalance, null, 2), '\n');
+    console.groupEnd();
 };
 
 app();

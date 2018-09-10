@@ -21265,13 +21265,13 @@ function () {
       var amount = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
       var from = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this.tronWeb.defaultAddress.hex;
       var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-      if (!callback) return this.injectPromise(this.sendTrx, to, amount, from);
 
       if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(from)) {
         callback = from;
         from = this.tronWeb.defaultAddress.hex;
       }
 
+      if (!callback) return this.injectPromise(this.sendTrx, to, amount, from);
       if (!this.tronWeb.isAddress(to)) return callback('Invalid recipient address provided');
       if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(amount) || amount <= 0) return callback('Invalid amount provided');
       if (!this.tronWeb.isAddress(from)) return callback('Invalid origin address provided');
@@ -21297,13 +21297,13 @@ function () {
       var tokenID = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
       var from = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : this.tronWeb.defaultAddress.hex;
       var callback = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
-      if (!callback) return this.injectPromise(this.sendToken, to, amount, tokenID, from);
 
       if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(from)) {
         callback = from;
         from = this.tronWeb.defaultAddress.hex;
       }
 
+      if (!callback) return this.injectPromise(this.sendToken, to, amount, tokenID, from);
       if (!this.tronWeb.isAddress(to)) return callback('Invalid recipient address provided');
       if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(amount) || amount <= 0) return callback('Invalid amount provided');
       if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isString(tokenID) || !tokenID.length) return callback('Invalid token ID provided');
@@ -21332,13 +21332,13 @@ function () {
       var amount = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
       var buyer = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : this.tronWeb.defaultAddress.hex;
       var callback = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
-      if (!callback) return this.injectPromise(this.purchaseToken, issuerAddress, tokenID, amount, buyer);
 
       if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(buyer)) {
         callback = buyer;
         buyer = this.tronWeb.defaultAddress.hex;
       }
 
+      if (!callback) return this.injectPromise(this.purchaseToken, issuerAddress, tokenID, amount, buyer);
       if (!this.tronWeb.isAddress(issuerAddress)) return callback('Invalid issuer address provided');
       if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isString(tokenID) || !tokenID.length) return callback('Invalid token ID provided');
       if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(amount) || amount <= 0) return callback('Invalid amount provided');
@@ -21348,6 +21348,34 @@ function () {
         owner_address: this.tronWeb.address.toHex(buyer),
         asset_name: this.tronWeb.fromUtf8(tokenID),
         amount: parseInt(amount)
+      }, 'post').then(function (transaction) {
+        if (transaction.Error) return callback(transaction.Error);
+        callback(null, transaction);
+      }).catch(function (err) {
+        return callback(err);
+      });
+    }
+  }, {
+    key: "freezeBalance",
+    value: function freezeBalance() {
+      var address = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.tronWeb.defaultAddress.hex;
+      var amount = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+      var duration = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 3;
+      var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(duration)) {
+        callback = duration;
+        duration = 3;
+      }
+
+      if (!callback) return this.injectPromise(this.freezeBalance, address, amount, duration);
+      if (!this.tronWeb.isAddress(address)) return callback('Invalid address provided');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(amount) || amount <= 0) return callback('Invalid amount provided');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(duration) || duration < 3) return callback('Invalid duration provided, minimum of 3 days');
+      this.tronWeb.fullNode.request('wallet/freezebalance', {
+        owner_address: this.tronWeb.address.toHex(address),
+        frozen_balance: parseInt(amount),
+        frozen_duration: parseInt(duration)
       }, 'post').then(function (transaction) {
         if (transaction.Error) return callback(transaction.Error);
         callback(null, transaction);

@@ -452,13 +452,12 @@ class TransactionBuilder {
   }
 
   sendTrx(to = false, amount = 0, from = this.tronWeb.defaultAddress.hex, callback = false) {
-    if (!callback) return this.injectPromise(this.sendTrx, to, amount, from);
-
     if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(from)) {
       callback = from;
       from = this.tronWeb.defaultAddress.hex;
     }
 
+    if (!callback) return this.injectPromise(this.sendTrx, to, amount, from);
     if (!this.tronWeb.isAddress(to)) return callback('Invalid recipient address provided');
     if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(amount) || amount <= 0) return callback('Invalid amount provided');
     if (!this.tronWeb.isAddress(from)) return callback('Invalid origin address provided');
@@ -476,13 +475,12 @@ class TransactionBuilder {
   }
 
   sendToken(to = false, amount = 0, tokenID = false, from = this.tronWeb.defaultAddress.hex, callback = false) {
-    if (!callback) return this.injectPromise(this.sendToken, to, amount, tokenID, from);
-
     if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(from)) {
       callback = from;
       from = this.tronWeb.defaultAddress.hex;
     }
 
+    if (!callback) return this.injectPromise(this.sendToken, to, amount, tokenID, from);
     if (!this.tronWeb.isAddress(to)) return callback('Invalid recipient address provided');
     if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(amount) || amount <= 0) return callback('Invalid amount provided');
     if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isString(tokenID) || !tokenID.length) return callback('Invalid token ID provided');
@@ -503,13 +501,12 @@ class TransactionBuilder {
   }
 
   purchaseToken(issuerAddress = false, tokenID = false, amount = 0, buyer = this.tronWeb.defaultAddress.hex, callback = false) {
-    if (!callback) return this.injectPromise(this.purchaseToken, issuerAddress, tokenID, amount, buyer);
-
     if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(buyer)) {
       callback = buyer;
       buyer = this.tronWeb.defaultAddress.hex;
     }
 
+    if (!callback) return this.injectPromise(this.purchaseToken, issuerAddress, tokenID, amount, buyer);
     if (!this.tronWeb.isAddress(issuerAddress)) return callback('Invalid issuer address provided');
     if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isString(tokenID) || !tokenID.length) return callback('Invalid token ID provided');
     if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(amount) || amount <= 0) return callback('Invalid amount provided');
@@ -519,6 +516,26 @@ class TransactionBuilder {
       owner_address: this.tronWeb.address.toHex(buyer),
       asset_name: this.tronWeb.fromUtf8(tokenID),
       amount: parseInt(amount)
+    }, 'post').then(transaction => {
+      if (transaction.Error) return callback(transaction.Error);
+      callback(null, transaction);
+    }).catch(err => callback(err));
+  }
+
+  freezeBalance(address = this.tronWeb.defaultAddress.hex, amount = 0, duration = 3, callback = false) {
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(duration)) {
+      callback = duration;
+      duration = 3;
+    }
+
+    if (!callback) return this.injectPromise(this.freezeBalance, address, amount, duration);
+    if (!this.tronWeb.isAddress(address)) return callback('Invalid address provided');
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(amount) || amount <= 0) return callback('Invalid amount provided');
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(duration) || duration < 3) return callback('Invalid duration provided, minimum of 3 days');
+    this.tronWeb.fullNode.request('wallet/freezebalance', {
+      owner_address: this.tronWeb.address.toHex(address),
+      frozen_balance: parseInt(amount),
+      frozen_duration: parseInt(duration)
     }, 'post').then(transaction => {
       if (transaction.Error) return callback(transaction.Error);
       callback(null, transaction);
