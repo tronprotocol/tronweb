@@ -33,7 +33,9 @@ export function parseAbi(abiArray,{owner_address,contract_address}){
                         paramOutputTypes.push(itemOutput.type);
                     })
                     function_selector += `(${paramInputTypes.join(',')})`;
-                    params.push(paramInputTypes, paramInputValues);
+                    if(paramInputTypes.length>0){
+                        params.push(paramInputTypes, paramInputValues);
+                    }
                     for (let i = 0; i < arguments.length; i++) {
                         if (typeof arguments[i] == 'object') {
                             otherParams = arguments[i];
@@ -50,9 +52,9 @@ export function parseAbi(abiArray,{owner_address,contract_address}){
                         call_value: otherParams.call_value,
                     }
                     if(otherParams.fee_limit>100000000 || otherParams.fee_limit<0){
-                        throw "fee_limit should be set between 0 and 1000000000";
+                        throw new Error("fee_limit should be set between 0 and 1000000000");
                     }
-                    let res = await _this.triggerSmartContract(triggerCallBackParams);
+                    let res = await _this.triggerSmartContract(contract_address,function_selector,otherParams.call_value,otherParams.fee_limit,owner_address,params);
                     if (res.constant_result) {
                         let coder = new utils.AbiCoder();
                         if (res.constant_result.length) {
@@ -78,12 +80,12 @@ export function parseAbi(abiArray,{owner_address,contract_address}){
                     let _self = this;
                     return {
                         async fn(){
-                            let {data} =await  _this.getEventResult({
+                            let {data} =await  _this.getEventResult(
                                 contractAddress,
                                 eventName,
                                 blockNum,
                                 transactionId
-                            })
+                            )
                             return data;
                         },
                         watch(callback){
@@ -117,7 +119,7 @@ export function parseAbi(abiArray,{owner_address,contract_address}){
         })
         return returnObj;
     }catch(err){
-        console.err(err);
+        console.error(err);
         return false;
     }
     

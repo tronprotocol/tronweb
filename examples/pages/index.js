@@ -71,7 +71,7 @@ class Index extends React.Component{
         })
     }
     async generateAddressOnClient(){
-        const res = await tronWeb.generateAddressOnClient();
+        const res = await tronWeb.generateAccount();
         this.setState({
             data:res
         })

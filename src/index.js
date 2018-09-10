@@ -29,12 +29,11 @@ class TronWeb {
         return stringUtf8toHex(str);
     }
 
-    fromHex(hex) {
+    fromHex(shex) {
         // For converting addresses
-        if(hex.length == 42 && hex.substr(0, 2) === '41')
-            return hexString2Address(sHex);
-
-        return hexString2Utf8(sHex);
+        if(shex.length == 42 && shex.substr(0, 2) === '41')
+            return hexString2Address(shex);
+        return hexString2Utf8(shex);
     }
 
     // TODO: Ideally you would parse the URL to make sure it's valid
@@ -157,7 +156,7 @@ class TronWeb {
         const signedTransaction = await this.signTransaction(transaction, privateKey, 0);
         const response = await this.sendRawTransaction(signedTransaction);
         
-        return { ...response, signedTransaction };
+        return Object.assign(response, signedTransaction);
     }
 
     /**
@@ -612,17 +611,19 @@ class TronWeb {
      * @param {number} [bandwidthLimit=0] Optional percentage of the issuer's bandwidth that users of the contract can use
      * @return {object} transaction
      **/
-    async createDeployContractTransaction(abi, bytecode, feeLimit, address, callValue = 0, bandwidthLimit = 0) {
-        const payable = JSON.parse(abi).some(v => v.payable);
-
+    async deployContract(abi, bytecode, feeLimit, address, callValue = 0, bandwidthLimit = 0) {
+        const payable = JSON.parse(abi).some(v => {
+            if(v.type=='constructor' && v.payable)
+                return v.payable
+        });
         if(feeLimit > 1000000000)
             throw new Error('fee_limit must not be greater than 1000000000');
 
-        if(payable && callValue <= 0)
+        if(payable && callValue == 0)
             throw new Error('call_value must be greater than 0 if contract is type payable');
         
-        if(payable && callValue)
-            throw new Error('call_value can only be greater than 0 if contract is type payable');
+        if(!payable && callValue>0)
+            throw new Error('call_value can only equal to 0 if contract type isn‘t payable');
 
         const { data } = await xhr.post(`${this.apiUrl}/wallet/deploycontract`, {
             owner_address: address2HexString(address),            
@@ -655,26 +656,25 @@ class TronWeb {
      * @param {array} [parameters=[]] Optional parameters to pass to the function
      * @return {object} transaction
      **/
-    async createTriggerContractTransaction(contractAddress, functionSelector, callValue, feeLimit, address, parameters = []) {
+    async triggerSmartContract(contractAddress, functionSelector, callValue, feeLimit, address, parameters = []) {
+        let coder = new utils.AbiCoder();
+        let parameter;
         functionSelector = functionSelector.replace(/\s*/g, '');
-
-        if(parameters || parameters.length) {
+        if(parameters && parameters.length) {
             const encoder = new utils.AbiCoder();
             const [ types, values ] = parameters;
-
-            types.forEach((itemType, index ) => {
+            types && types.forEach((itemType, index ) => {
                 if(itemType == 'address')
                     values[index] = address2HexString(values[index]).replace(/^(41)/, '0x');
             });
-
-            parameter = encoder.encode(paramTypes, paramValues).replace(/^(0x)/, '');
+            parameter = encoder.encode(parameters[0], parameters[1]).replace(/^(0x)/, '');
         }
 
         const { data } = await xhr.post(`${this.apiUrl}/wallet/triggersmartcontract`,{
             contract_address: address2HexString(contractAddress),
             owner_address: address2HexString(address),
             function_selector: functionSelector,
-            parameter: parameters,
+            parameter,
             fee_limit: feeLimit,
             call_value: callValue
         });
@@ -727,7 +727,7 @@ class TronWeb {
                     contract_address                        
                 });
 
-                return { address: contract_address, ...abiObj };
+                return Object.assign({ address: contract_address},abiObj);
             },
             new: async function(options, pk) {
                 const bytecode = options.data;
@@ -736,16 +736,7 @@ class TronWeb {
                 const call_value = options.call_value;
                 const consume_user_resource_percent = options.consume_user_resource_percent;
                 const abi =JSON.stringify(abiArray);
-
-                const res = await _this.deployContract({
-                    abi,
-                    bytecode,
-                    fee_limit,
-                    call_value,
-                    owner_address,
-                    consume_user_resource_percent
-                });
-
+                const res = await _this.deployContract(abi,bytecode,fee_limit,owner_address,call_value,consume_user_resource_percent);
                 if(res) {
                     const returnRes = { 
                         transactionHash: res.txID, 
@@ -760,10 +751,9 @@ class TronWeb {
                             returnRes.broadCast = true;
                     }
 
-                    return { ...(await this.at(returnRes.address)), ...returnRes }; 
+                    return Object.assign(await this.at(returnRes.address),returnRes); 
                 }
-                
-                return res;             
+                return res;      
             }
         }
     }
@@ -814,6 +804,22 @@ class TronWeb {
                 return returnWarn;
             }
         }
+    }
+
+    /**
+     * Freeze TRX, gain bandwidth, gain voting rights or energy
+     * @param {string} owner_address,{float} frozen_balance,{int} frozen_duration,{string} resource
+     * @return {object} transaction
+     * */
+    async freezeBalance(owner_address,frozen_balance,frozen_duration,resource='BANDWIDTH'){
+        owner_address = address2HexString(owner_address);
+        let {data} = await xhr.post(`${this.apiUrl}/wallet/freezebalance`,{
+            owner_address,
+            frozen_balance,
+            frozen_duration,
+            resource
+        })
+        return data;
     }
 
     trxToSun(trxCount) {
