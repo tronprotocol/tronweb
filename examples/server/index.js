@@ -180,6 +180,14 @@ const app = async () => {
         console.log('- Token: TestToken_1');
         console.log('- Transaction:\n' + JSON.stringify(sendToken, null, 2), '\n');
     console.groupEnd();
+    
+    const purchaseToken = await tronWeb.transactionBuilder.purchaseToken('TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1', 'TestToken_1', 10);
+
+    console.group('Unsigned purchase token transaction');
+        console.log('- Token Owner: TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1');
+        console.log('- Token: TestToken_1');
+        console.log('- Transaction:\n' + JSON.stringify(purchaseToken, null, 2), '\n');
+    console.groupEnd();
 };
 
 app();

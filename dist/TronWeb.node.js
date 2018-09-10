@@ -502,6 +502,29 @@ class TransactionBuilder {
     }).catch(err => callback(err));
   }
 
+  purchaseToken(issuerAddress = false, tokenID = false, amount = 0, buyer = this.tronWeb.defaultAddress.hex, callback = false) {
+    if (!callback) return this.injectPromise(this.purchaseToken, issuerAddress, tokenID, amount, buyer);
+
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(buyer)) {
+      callback = buyer;
+      buyer = this.tronWeb.defaultAddress.hex;
+    }
+
+    if (!this.tronWeb.isAddress(issuerAddress)) return callback('Invalid issuer address provided');
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isString(tokenID) || !tokenID.length) return callback('Invalid token ID provided');
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(amount) || amount <= 0) return callback('Invalid amount provided');
+    if (!this.tronWeb.isAddress(buyer)) return callback('Invalid buyer address provided');
+    this.tronWeb.fullNode.request('wallet/transferasset', {
+      to_address: this.tronWeb.address.toHex(issuerAddress),
+      owner_address: this.tronWeb.address.toHex(buyer),
+      asset_name: this.tronWeb.fromUtf8(tokenID),
+      amount: parseInt(amount)
+    }, 'post').then(transaction => {
+      if (transaction.Error) return callback(transaction.Error);
+      callback(null, transaction);
+    }).catch(err => callback(err));
+  }
+
   sendAsset(...args) {
     return this.sendToken(...args);
   }
