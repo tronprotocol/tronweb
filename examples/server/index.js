@@ -165,6 +165,13 @@ const app = async () => {
         console.log('- Bytecode:', contract.bytecode);
         console.log('- ABI:\n' + JSON.stringify(contract.abi, null, 2), '\n');
     console.groupEnd();
+
+    const sendTransaction = await tronWeb.transactionBuilder.sendTrx('TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1', 10);
+
+    console.group('Unsigned send transaction');
+        console.log('- Recipient: TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1');
+        console.log('- Transaction:\n' + JSON.stringify(sendTransaction, null, 2), '\n');
+    console.groupEnd();
 };
 
 app();

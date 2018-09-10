@@ -439,8 +439,51 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return TransactionBuilder; });
 /* harmony import */ var source_map_support_register__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! source-map-support/register */ "source-map-support/register");
 /* harmony import */ var source_map_support_register__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(source_map_support_register__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! index */ "./src/index.js");
+/* harmony import */ var utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! utils */ "./src/utils/index.js");
 
-class TransactionBuilder {}
+
+
+class TransactionBuilder {
+  constructor(tronWeb = false) {
+    if (!tronWeb || !tronWeb instanceof index__WEBPACK_IMPORTED_MODULE_1__["default"]) throw new Error('Expected instance of TronWeb');
+    this.tronWeb = tronWeb;
+    this.injectPromise = utils__WEBPACK_IMPORTED_MODULE_2__["default"].promiseInjector(this);
+  }
+
+  sendTrx(to = false, amount = 0, from = this.tronWeb.defaultAddress.hex, callback = false) {
+    if (!callback) return this.injectPromise(this.sendTrx, to, amount, from);
+
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(from)) {
+      callback = from;
+      from = this.tronWeb.defaultAddress.hex;
+    }
+
+    if (!this.tronWeb.isAddress(to)) return callback('Invalid recipient address provided');
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(amount) || amount <= 0) return callback('Invalid amount provided');
+    if (!this.tronWeb.isAddress(from)) return callback('Invalid origin address provided');
+    console.log({
+      to,
+      from
+    });
+    to = this.tronWeb.address.toHex(to);
+    from = this.tronWeb.address.toHex(from);
+    console.log({
+      to,
+      from
+    });
+    if (to === from) return callback('Cannot transfer TRX to the same account');
+    this.tronWeb.fullNode.request('wallet/createtransaction', {
+      to_address: to,
+      owner_address: from,
+      amount: parseInt(amount)
+    }, 'post').then(transaction => {
+      if (transaction.Error) return callback(transaction.Error);
+      callback(null, transaction);
+    }).catch(err => callback(err));
+  }
+
+}
 
 /***/ }),
 
@@ -540,7 +583,7 @@ class Trx {
     }).catch(err => callback(err));
   }
 
-  getTransactionsToAddress(address = this.tronWeb.defaultAddress, limit = 30, offset = 0, callback = false) {
+  getTransactionsToAddress(address = this.tronWeb.defaultAddress.hex, limit = 30, offset = 0, callback = false) {
     if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(offset)) {
       callback = offset;
       offset = 0;
@@ -555,7 +598,7 @@ class Trx {
     return this.getTransactionsRelated(address, 'to', limit, offset, callback);
   }
 
-  getTransactionsFromAddress(address = this.tronWeb.defaultAddress, limit = 30, offset = 0, callback = false) {
+  getTransactionsFromAddress(address = this.tronWeb.defaultAddress.hex, limit = 30, offset = 0, callback = false) {
     if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(offset)) {
       callback = offset;
       offset = 0;
@@ -570,7 +613,7 @@ class Trx {
     return this.getTransactionsRelated(address, 'from', limit, offset, callback);
   }
 
-  async getTransactionsRelated(address = this.tronWeb.defaultAddress, direction = 'all', limit = 30, offset = 0, callback = false) {
+  async getTransactionsRelated(address = this.tronWeb.defaultAddress.hex, direction = 'all', limit = 30, offset = 0, callback = false) {
     if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(offset)) {
       callback = offset;
       offset = 0;
@@ -588,7 +631,7 @@ class Trx {
 
     if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(address)) {
       callback = address;
-      address = this.tronWeb.defaultAddress;
+      address = this.tronWeb.defaultAddress.hex;
     }
 
     if (!callback) return this.injectPromise(this.getTransactionsRelated, address, direction, limit, offset);
@@ -621,10 +664,10 @@ class Trx {
     }).catch(err => callback(err));
   }
 
-  getAccount(address = this.tronWeb.defaultAddress, callback = false) {
+  getAccount(address = this.tronWeb.defaultAddress.hex, callback = false) {
     if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(address)) {
       callback = address;
-      address = this.tronWeb.defaultAddress;
+      address = this.tronWeb.defaultAddress.hex;
     }
 
     if (!callback) return this.injectPromise(this.getAccount, address);
@@ -637,10 +680,10 @@ class Trx {
     }).catch(err => callback(err));
   }
 
-  getBalance(address = this.tronWeb.defaultAddress, callback = false) {
+  getBalance(address = this.tronWeb.defaultAddress.hex, callback = false) {
     if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(address)) {
       callback = address;
-      address = this.tronWeb.defaultAddress;
+      address = this.tronWeb.defaultAddress.hex;
     }
 
     if (!callback) return this.injectPromise(this.getBalance, address);
@@ -651,10 +694,10 @@ class Trx {
     }).catch(err => callback(err));
   }
 
-  getBandwidth(address = this.tronWeb.defaultAddress, callback = false) {
+  getBandwidth(address = this.tronWeb.defaultAddress.hex, callback = false) {
     if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(address)) {
       callback = address;
-      address = this.tronWeb.defaultAddress;
+      address = this.tronWeb.defaultAddress.hex;
     }
 
     if (!callback) return this.injectPromise(this.getBandwidth, address);
@@ -672,10 +715,10 @@ class Trx {
     }).catch(err => callback(err));
   }
 
-  getTokensIssuedByAddress(address = this.tronWeb.defaultAddress, callback = false) {
+  getTokensIssuedByAddress(address = this.tronWeb.defaultAddress.hex, callback = false) {
     if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(address)) {
       callback = address;
-      address = this.tronWeb.defaultAddress;
+      address = this.tronWeb.defaultAddress.hex;
     }
 
     if (!callback) return this.injectPromise(this.getTokensIssuedByAddress, address);

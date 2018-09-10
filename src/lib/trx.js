@@ -103,7 +103,7 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
-    getTransactionsToAddress(address = this.tronWeb.defaultAddress, limit = 30, offset = 0, callback = false) {
+    getTransactionsToAddress(address = this.tronWeb.defaultAddress.hex, limit = 30, offset = 0, callback = false) {
         if(utils.isFunction(offset)) {
             callback = offset;
             offset = 0;            
@@ -120,7 +120,7 @@ export default class Trx {
         return this.getTransactionsRelated(address, 'to', limit, offset, callback);
     }
 
-    getTransactionsFromAddress(address = this.tronWeb.defaultAddress, limit = 30, offset = 0, callback = false) {
+    getTransactionsFromAddress(address = this.tronWeb.defaultAddress.hex, limit = 30, offset = 0, callback = false) {
         if(utils.isFunction(offset)) {
             callback = offset;
             offset = 0;            
@@ -137,7 +137,7 @@ export default class Trx {
         return this.getTransactionsRelated(address, 'from', limit, offset, callback);
     }
 
-    async getTransactionsRelated(address = this.tronWeb.defaultAddress, direction = 'all', limit = 30, offset = 0, callback = false) {
+    async getTransactionsRelated(address = this.tronWeb.defaultAddress.hex, direction = 'all', limit = 30, offset = 0, callback = false) {
         if(utils.isFunction(offset)) {
             callback = offset;
             offset = 0;            
@@ -155,7 +155,7 @@ export default class Trx {
 
         if(utils.isFunction(address)) {
             callback = address;
-            address = this.tronWeb.defaultAddress;
+            address = this.tronWeb.defaultAddress.hex;
         }
 
         if(!callback)
@@ -200,10 +200,10 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
-    getAccount(address = this.tronWeb.defaultAddress, callback = false) {
+    getAccount(address = this.tronWeb.defaultAddress.hex, callback = false) {
         if(utils.isFunction(address)) {
             callback = address;
-            address = this.tronWeb.defaultAddress;            
+            address = this.tronWeb.defaultAddress.hex;            
         }
 
         if(!callback)
@@ -221,10 +221,10 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
-    getBalance(address = this.tronWeb.defaultAddress, callback = false) {
+    getBalance(address = this.tronWeb.defaultAddress.hex, callback = false) {
         if(utils.isFunction(address)) {
             callback = address;
-            address = this.tronWeb.defaultAddress;            
+            address = this.tronWeb.defaultAddress.hex;            
         }
 
         if(!callback)
@@ -235,10 +235,10 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
-    getBandwidth(address = this.tronWeb.defaultAddress, callback = false) {
+    getBandwidth(address = this.tronWeb.defaultAddress.hex, callback = false) {
         if(utils.isFunction(address)) {
             callback = address;
-            address = this.tronWeb.defaultAddress;            
+            address = this.tronWeb.defaultAddress.hex;            
         }
 
         if(!callback)
@@ -256,10 +256,10 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
-    getTokensIssuedByAddress(address = this.tronWeb.defaultAddress, callback = false) {
+    getTokensIssuedByAddress(address = this.tronWeb.defaultAddress.hex, callback = false) {
         if(utils.isFunction(address)) {
             callback = address;
-            address = this.tronWeb.defaultAddress;            
+            address = this.tronWeb.defaultAddress.hex;            
         }
 
         if(!callback)
