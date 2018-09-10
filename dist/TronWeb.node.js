@@ -444,6 +444,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var source_map_support_register__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(source_map_support_register__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! index */ "./src/index.js");
 /* harmony import */ var utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! utils */ "./src/utils/index.js");
+/* harmony import */ var ethers__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ethers */ "ethers");
+/* harmony import */ var ethers__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(ethers__WEBPACK_IMPORTED_MODULE_3__);
+
 
 
 
@@ -677,6 +680,80 @@ class TransactionBuilder {
       bytecode
     }, 'post').then(transaction => {
       if (transaction.Error) return callback(transaction.Error);
+      callback(null, transaction);
+    }).catch(err => callback(err));
+  }
+
+  triggerSmartContract(contractAddress, functionSelector, feeLimit, callValue = 0, parameters = [], issuerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(issuerAddress)) {
+      callback = issuerAddress;
+      issuerAddress = this.tronWeb.defaultAddress.hex;
+    }
+
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(parameters)) {
+      callback = parameters;
+      parameters = [];
+      issuerAddress = this.tronWeb.defaultAddress.hex;
+    }
+
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(callValue)) {
+      callback = callValue;
+      callValue = 0;
+      parameters = [];
+      issuerAddress = this.tronWeb.defaultAddress.hex;
+    }
+
+    if (!callback) {
+      return this.injectPromise(this.triggerSmartContract, contractAddress, functionSelector, feeLimit, callValue, parameters, issuerAddress);
+    }
+
+    if (!this.tronWeb.isAddress(contractAddress)) return callback('Invalid contract address provided');
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isString(functionSelector) || !functionSelector.length) return callback('Invalid function selector provided');
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(callValue) || callValue < 0) return callback('Invalid call value provided');
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(feeLimit) || feeLimit <= 0 || feeLimit > 1000000000) return callback('Invalid fee limit provided');
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isArray(parameters)) return callback('Invalid parameters provided');
+    if (!this.tronWeb.isAddress(issuerAddress)) return callback('Invalid issuer address provided');
+    functionSelector = functionSelector.replace('/\s*/g', '');
+
+    if (parameters.length) {
+      const abiCoder = new ethers__WEBPACK_IMPORTED_MODULE_3___default.a.utils.AbiCoder();
+      const types = [];
+      const values = [];
+
+      for (let i = 0; i < parameters.length; i++) {
+        let {
+          type,
+          value
+        } = parameters[i];
+        if (!type || !utils__WEBPACK_IMPORTED_MODULE_2__["default"].isString(type) || !type.length) return callback('Invalid parameter type provided: ' + type);
+        if (!value) return callback('Invalid parameter value provided: ' + value);
+        if (type == 'address') value = this.tronWeb.address.toHex(value).replace(/^(41)/, '0x');
+        types.push(type);
+        values.push(value);
+      }
+
+      try {
+        parameters = abiCoder.encode(types, values).replace(/^(0x)/, '');
+      } catch (ex) {
+        return callback(ex);
+      }
+    } else parameters = '';
+
+    this.tronWeb.fullNode.request('wallet/triggersmartcontract', {
+      contract_address: this.tronWeb.address.toHex(contractAddress),
+      owner_address: this.tronWeb.address.toHex(issuerAddress),
+      function_selector: functionSelector,
+      fee_limit: parseInt(feeLimit),
+      call_value: parseInt(callValue),
+      parameter: parameters
+    }, 'post').then(transaction => {
+      if (transaction.Error) return callback(transaction.Error);
+
+      if (transaction.result.code && transaction.result.message) {
+        return callback(this.tronWeb.toUtf8(transaction.result.message));
+      }
+
+      if (!transaction.result.result) return callback(transaction);
       callback(null, transaction);
     }).catch(err => callback(err));
   }
@@ -2073,6 +2150,17 @@ module.exports = require("bignumber.js");
 /***/ (function(module, exports) {
 
 module.exports = require("elliptic");
+
+/***/ }),
+
+/***/ "ethers":
+/*!*************************!*\
+  !*** external "ethers" ***!
+  \*************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("ethers");
 
 /***/ }),
 

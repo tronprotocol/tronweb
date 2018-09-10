@@ -249,6 +249,25 @@ const app = async () => {
             console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
         console.groupEnd();
     }); 
+
+    tronWeb.transactionBuilder.triggerSmartContract(
+        '413c8143e98b3e2fe1b1a8fb82b34557505a752390',
+        'multiply(int256,int256)',
+        30000,
+        0,
+        [
+            { type: 'int256', value: 1 },
+            { type: 'int256', value: 1 }
+        ],
+    (err, transaction) => {
+        if(err)
+            return console.error(err);
+
+        console.group('Unsigned trigger smart contract transaction');
+            console.log('- Contract Address: 413c8143e98b3e2fe1b1a8fb82b34557505a752390');
+            console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
+        console.groupEnd();
+    }); 
 };
 
 app();

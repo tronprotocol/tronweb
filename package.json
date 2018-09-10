@@ -12,6 +12,7 @@
         "axios": "^0.18.0",
         "bignumber.js": "^7.2.1",
         "elliptic": "^6.4.1",
+        "ethers": "^3.0.27",
         "js-sha3": "^0.8.0",
         "jssha": "^2.3.1",
         "source-map-support": "^0.5.9",

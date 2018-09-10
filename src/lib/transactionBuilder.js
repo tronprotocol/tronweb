@@ -1,5 +1,6 @@
 import TronWeb from 'index';
 import utils from 'utils';
+import Ethers from 'ethers';
 
 export default class TransactionBuilder {
     constructor(tronWeb = false) {
@@ -336,6 +337,117 @@ export default class TransactionBuilder {
         }, 'post').then(transaction => {
             if(transaction.Error)
                 return callback(transaction.Error);
+
+            callback(null, transaction);
+        }).catch(err => callback(err));
+    }
+
+    triggerSmartContract(
+        contractAddress, 
+        functionSelector,
+        feeLimit,
+        callValue = 0,
+        parameters = [], 
+        issuerAddress = this.tronWeb.defaultAddress.hex, 
+        callback = false
+    ) {
+        if(utils.isFunction(issuerAddress)) {
+            callback = issuerAddress;
+            issuerAddress = this.tronWeb.defaultAddress.hex;
+        }
+
+        if(utils.isFunction(parameters)) {
+            callback = parameters;
+            parameters = [];
+            issuerAddress = this.tronWeb.defaultAddress.hex;
+        }
+
+        if(utils.isFunction(callValue)) {
+            callback = callValue;
+            callValue = 0;
+            parameters = [];
+            issuerAddress = this.tronWeb.defaultAddress.hex;
+        }
+
+        if(!callback) {
+            return this.injectPromise(
+                this.triggerSmartContract, 
+                contractAddress, 
+                functionSelector, 
+                feeLimit,
+                callValue, 
+                parameters,
+                issuerAddress
+            );
+        }
+
+        if(!this.tronWeb.isAddress(contractAddress))
+            return callback('Invalid contract address provided');
+
+        if(!utils.isString(functionSelector) || !functionSelector.length)
+            return callback('Invalid function selector provided');
+
+        if(!utils.isInteger(callValue) || callValue < 0)
+            return callback('Invalid call value provided');
+
+        if(!utils.isInteger(feeLimit) || feeLimit <= 0 || feeLimit > 1_000_000_000)
+            return callback('Invalid fee limit provided');
+
+        if(!utils.isArray(parameters))
+            return callback('Invalid parameters provided');
+
+        if(!this.tronWeb.isAddress(issuerAddress))
+            return callback('Invalid issuer address provided');
+
+        functionSelector = functionSelector.replace('/\s*/g', '');
+
+        if(parameters.length) {
+            const abiCoder = new Ethers.utils.AbiCoder();
+            const types = [];
+            const values = [];
+
+            for(let i = 0; i < parameters.length; i++) {
+                let { type, value } = parameters[i];
+
+                if(!type || !utils.isString(type) || !type.length)
+                    return callback('Invalid parameter type provided: ' + type);
+
+                if(!value)
+                    return callback('Invalid parameter value provided: ' + value);
+
+                if(type == 'address')
+                    value = this.tronWeb.address.toHex(value).replace(/^(41)/, '0x');
+                    
+                types.push(type);
+                values.push(value);
+            }
+
+            try {
+                parameters = abiCoder.encode(types, values).replace(/^(0x)/, '');
+            } catch (ex) {
+                return callback(ex);
+            }
+        } else parameters = '';
+
+        this.tronWeb.fullNode.request('wallet/triggersmartcontract', {
+            contract_address: this.tronWeb.address.toHex(contractAddress),
+            owner_address: this.tronWeb.address.toHex(issuerAddress),
+            function_selector: functionSelector,
+            fee_limit: parseInt(feeLimit),
+            call_value: parseInt(callValue),
+            parameter: parameters
+        }, 'post').then(transaction => {
+            if(transaction.Error)
+                return callback(transaction.Error);
+
+            if(transaction.result.code && transaction.result.message) {
+                return callback(
+                    this.tronWeb.toUtf8(transaction.result.message)
+                );
+            }
+
+            if(!transaction.result.result)
+                return callback(transaction);
 
             callback(null, transaction);
         }).catch(err => callback(err));
