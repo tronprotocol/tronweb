@@ -21406,6 +21406,28 @@ function () {
       });
     }
   }, {
+    key: "withdrawBlockRewards",
+    value: function withdrawBlockRewards() {
+      var address = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.tronWeb.defaultAddress.hex;
+      var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(address)) {
+        callback = address;
+        address = this.tronWeb.defaultAddress.hex;
+      }
+
+      if (!callback) return this.injectPromise(this.withdrawBlockRewards, address);
+      if (!this.tronWeb.isAddress(address)) return callback('Invalid address provided');
+      this.tronWeb.fullNode.request('wallet/withdrawbalance', {
+        owner_address: this.tronWeb.address.toHex(address)
+      }, 'post').then(function (transaction) {
+        if (transaction.Error) return callback(transaction.Error);
+        callback(null, transaction);
+      }).catch(function (err) {
+        return callback(err);
+      });
+    }
+  }, {
     key: "sendAsset",
     value: function sendAsset() {
       return this.sendToken.apply(this, arguments);

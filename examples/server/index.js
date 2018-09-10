@@ -138,8 +138,6 @@ const app = async () => {
         console.log('- Tokens:', JSON.stringify(fullTokenList, null, 2), '\n');
     console.groupEnd();
 
-    // This won't call back until after the promises due to being
-    // pushed to the back of event loop
     await tronWeb.trx.listTokens(2, (err, tokens) => {
         if(err)
             return console.error(err);
@@ -196,12 +194,25 @@ const app = async () => {
         console.log('- Transaction:\n' + JSON.stringify(freezeBalance, null, 2), '\n');
     console.groupEnd();
 
-    const unfreezeBalance = await tronWeb.transactionBuilder.unfreezeBalance('TYkfNHvpfwU7iX2hUpXQ7pjRY7Lg6SEZ96');
+    tronWeb.transactionBuilder.unfreezeBalance('TYkfNHvpfwU7iX2hUpXQ7pjRY7Lg6SEZ96', (err, transaction) => {
+        if(err)
+            return console.error(err);
 
-    console.group('Unsigned unfreezeBalance balance transaction');
-        console.log('- Address: TYkfNHvpfwU7iX2hUpXQ7pjRY7Lg6SEZ96');;
-        console.log('- Transaction:\n' + JSON.stringify(unfreezeBalance, null, 2), '\n');
-    console.groupEnd();
+        console.group('Unsigned unfreeze balance transaction');
+            console.log('- Address: TYkfNHvpfwU7iX2hUpXQ7pjRY7Lg6SEZ96');
+            console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
+        console.groupEnd();
+    }); 
+    
+    tronWeb.transactionBuilder.withdrawBlockRewards('TYkfNHvpfwU7iX2hUpXQ7pjRY7Lg6SEZ96', (err, transaction) => {
+        if(err)
+            return console.error(err);
+
+        console.group('Unsigned withdraw block rewards transaction');
+            console.log('- Address: TYkfNHvpfwU7iX2hUpXQ7pjRY7Lg6SEZ96');
+            console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
+        console.groupEnd();
+    });    
 };
 
 app();
