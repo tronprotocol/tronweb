@@ -223,6 +223,18 @@ const app = async () => {
             console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
         console.groupEnd();
     });    
+
+    tronWeb.transactionBuilder.vote({
+        '41c2d52f2511808307c848b808649595f631527111': 1000000
+    }, (err, transaction) => {
+        if(err)
+            return console.error(err);
+
+        console.group('Unsigned vote for SR transaction');
+            console.log('- Super Representative: 41c2d52f2511808307c848b808649595f631527111');
+            console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
+        console.groupEnd();
+    }); 
 };
 
 app();

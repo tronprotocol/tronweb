@@ -21236,6 +21236,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return TransactionBuilder; });
 /* harmony import */ var index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! index */ "./src/index.js");
 /* harmony import */ var utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! utils */ "./src/utils/index.js");
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -21446,6 +21454,57 @@ function () {
       this.tronWeb.fullNode.request('wallet/createwitness', {
         owner_address: this.tronWeb.address.toHex(address),
         url: this.tronWeb.fromUtf8(url)
+      }, 'post').then(function (transaction) {
+        if (transaction.Error) return callback(transaction.Error);
+        callback(null, transaction);
+      }).catch(function (err) {
+        return callback(err);
+      });
+    }
+  }, {
+    key: "vote",
+    value: function vote() {
+      var _this = this;
+
+      var votes = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var voterAddress = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.tronWeb.defaultAddress.hex;
+      var callback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(voterAddress)) {
+        callback = voterAddress;
+        voterAddress = this.tronWeb.defaultAddress.hex;
+      }
+
+      if (!callback) return this.injectPromise(this.vote, votes, voterAddress);
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isObject(votes) || !Object.keys(votes).length) return callback('Invalid votes object provided');
+      if (!this.tronWeb.isAddress(voterAddress)) return callback('Invalid voter address provided');
+      var invalid = false;
+      votes = Object.entries(votes).map(function (_ref) {
+        var _ref2 = _slicedToArray(_ref, 2),
+            srAddress = _ref2[0],
+            voteCount = _ref2[1];
+
+        if (invalid) return;
+
+        if (!_this.tronWeb.isAddress(srAddress)) {
+          callback('Invalid SR address provided: ' + srAddress);
+          return invalid = true;
+        }
+
+        if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(voteCount) || voteCount <= 0) {
+          callback('Invalid vote count provided for SR: ' + srAddress);
+          return invalid = true;
+        }
+
+        return {
+          vote_address: _this.tronWeb.address.toHex(srAddress),
+          vote_count: parseInt(voteCount)
+        };
+      });
+      if (invalid) return;
+      this.tronWeb.fullNode.request('wallet/votewitnessaccount', {
+        owner_address: this.tronWeb.address.toHex(voterAddress),
+        votes: votes
       }, 'post').then(function (transaction) {
         if (transaction.Error) return callback(transaction.Error);
         callback(null, transaction);

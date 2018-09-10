@@ -593,6 +593,44 @@ class TransactionBuilder {
     }).catch(err => callback(err));
   }
 
+  vote(votes = {}, voterAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(voterAddress)) {
+      callback = voterAddress;
+      voterAddress = this.tronWeb.defaultAddress.hex;
+    }
+
+    if (!callback) return this.injectPromise(this.vote, votes, voterAddress);
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isObject(votes) || !Object.keys(votes).length) return callback('Invalid votes object provided');
+    if (!this.tronWeb.isAddress(voterAddress)) return callback('Invalid voter address provided');
+    let invalid = false;
+    votes = Object.entries(votes).map(([srAddress, voteCount]) => {
+      if (invalid) return;
+
+      if (!this.tronWeb.isAddress(srAddress)) {
+        callback('Invalid SR address provided: ' + srAddress);
+        return invalid = true;
+      }
+
+      if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(voteCount) || voteCount <= 0) {
+        callback('Invalid vote count provided for SR: ' + srAddress);
+        return invalid = true;
+      }
+
+      return {
+        vote_address: this.tronWeb.address.toHex(srAddress),
+        vote_count: parseInt(voteCount)
+      };
+    });
+    if (invalid) return;
+    this.tronWeb.fullNode.request('wallet/votewitnessaccount', {
+      owner_address: this.tronWeb.address.toHex(voterAddress),
+      votes
+    }, 'post').then(transaction => {
+      if (transaction.Error) return callback(transaction.Error);
+      callback(null, transaction);
+    }).catch(err => callback(err));
+  }
+
   sendAsset(...args) {
     return this.sendToken(...args);
   }
