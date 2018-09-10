@@ -483,12 +483,6 @@ class TransactionBuilder {
       from = this.tronWeb.defaultAddress.hex;
     }
 
-    console.log({
-      to,
-      amount,
-      tokenID,
-      from
-    });
     if (!this.tronWeb.isAddress(to)) return callback('Invalid recipient address provided');
     if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(amount) || amount <= 0) return callback('Invalid amount provided');
     if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isString(tokenID) || !tokenID.length) return callback('Invalid token ID provided');
@@ -506,6 +500,10 @@ class TransactionBuilder {
       if (transaction.Error) return callback(transaction.Error);
       callback(null, transaction);
     }).catch(err => callback(err));
+  }
+
+  sendAsset(...args) {
+    return this.sendToken(...args);
   }
 
 }

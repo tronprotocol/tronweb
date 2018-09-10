@@ -86,4 +86,8 @@ export default class TransactionBuilder {
             callback(null, transaction);
         }).catch(err => callback(err));
     }
+
+    sendAsset(...args) {
+        return this.sendToken(...args);
+    }
 }

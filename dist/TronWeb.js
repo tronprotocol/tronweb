@@ -21304,12 +21304,6 @@ function () {
         from = this.tronWeb.defaultAddress.hex;
       }
 
-      console.log({
-        to: to,
-        amount: amount,
-        tokenID: tokenID,
-        from: from
-      });
       if (!this.tronWeb.isAddress(to)) return callback('Invalid recipient address provided');
       if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(amount) || amount <= 0) return callback('Invalid amount provided');
       if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isString(tokenID) || !tokenID.length) return callback('Invalid token ID provided');
@@ -21329,6 +21323,11 @@ function () {
       }).catch(function (err) {
         return callback(err);
       });
+    }
+  }, {
+    key: "sendAsset",
+    value: function sendAsset() {
+      return this.sendToken.apply(this, arguments);
     }
   }]);
 
