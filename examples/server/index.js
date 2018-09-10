@@ -168,9 +168,17 @@ const app = async () => {
 
     const sendTransaction = await tronWeb.transactionBuilder.sendTrx('TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1', 10);
 
-    console.group('Unsigned send transaction');
+    console.group('Unsigned send TRX transaction');
         console.log('- Recipient: TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1');
         console.log('- Transaction:\n' + JSON.stringify(sendTransaction, null, 2), '\n');
+    console.groupEnd();
+
+    const sendToken = await tronWeb.transactionBuilder.sendToken('TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1', 10, 'TestToken_1');
+
+    console.group('Unsigned send token transaction');
+        console.log('- Recipient: TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1');
+        console.log('- Token: TestToken_1');
+        console.log('- Transaction:\n' + JSON.stringify(sendToken, null, 2), '\n');
     console.groupEnd();
 };
 

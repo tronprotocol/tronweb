@@ -21275,20 +21275,53 @@ function () {
       if (!this.tronWeb.isAddress(to)) return callback('Invalid recipient address provided');
       if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(amount) || amount <= 0) return callback('Invalid amount provided');
       if (!this.tronWeb.isAddress(from)) return callback('Invalid origin address provided');
-      console.log({
-        to: to,
-        from: from
-      });
       to = this.tronWeb.address.toHex(to);
       from = this.tronWeb.address.toHex(from);
-      console.log({
-        to: to,
-        from: from
-      });
       if (to === from) return callback('Cannot transfer TRX to the same account');
       this.tronWeb.fullNode.request('wallet/createtransaction', {
         to_address: to,
         owner_address: from,
+        amount: parseInt(amount)
+      }, 'post').then(function (transaction) {
+        if (transaction.Error) return callback(transaction.Error);
+        callback(null, transaction);
+      }).catch(function (err) {
+        return callback(err);
+      });
+    }
+  }, {
+    key: "sendToken",
+    value: function sendToken() {
+      var to = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      var amount = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+      var tokenID = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+      var from = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : this.tronWeb.defaultAddress.hex;
+      var callback = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
+      if (!callback) return this.injectPromise(this.sendToken, to, amount, tokenID, from);
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(from)) {
+        callback = from;
+        from = this.tronWeb.defaultAddress.hex;
+      }
+
+      console.log({
+        to: to,
+        amount: amount,
+        tokenID: tokenID,
+        from: from
+      });
+      if (!this.tronWeb.isAddress(to)) return callback('Invalid recipient address provided');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(amount) || amount <= 0) return callback('Invalid amount provided');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isString(tokenID) || !tokenID.length) return callback('Invalid token ID provided');
+      if (!this.tronWeb.isAddress(from)) return callback('Invalid origin address provided');
+      to = this.tronWeb.address.toHex(to);
+      tokenID = this.tronWeb.fromUtf8(tokenID);
+      from = this.tronWeb.address.toHex(from);
+      if (to === from) return callback('Cannot transfer tokens to the same account');
+      this.tronWeb.fullNode.request('wallet/transferasset', {
+        to_address: to,
+        owner_address: from,
+        asset_name: tokenID,
         amount: parseInt(amount)
       }, 'post').then(function (transaction) {
         if (transaction.Error) return callback(transaction.Error);
