@@ -195,6 +195,33 @@ export default class TransactionBuilder {
         }).catch(err => callback(err));
     }
 
+    applyForSR(address = this.tronWeb.defaultAddress.hex, url = false, callback = false) {
+        if(utils.isValidURL(address)) {
+            callback = url || false;
+            url = address;
+            address = this.tronWeb.defaultAddress.hex;
+        }
+        
+        if(!callback)
+            return this.injectPromise(this.applyForSR, address, url);
+
+        if(!this.tronWeb.isAddress(address))
+            return callback('Invalid address provided');
+
+        if(!utils.isValidURL(url))
+            return callback('Invalid url provided');
+        
+        this.tronWeb.fullNode.request('wallet/createwitness', {
+            owner_address: this.tronWeb.address.toHex(address),
+            url: this.tronWeb.fromUtf8(url)
+        }, 'post').then(transaction => {
+            if(transaction.Error)
+                return callback(transaction.Error);
+
+            callback(null, transaction);
+        }).catch(err => callback(err));
+    }
+
     sendAsset(...args) {
         return this.sendToken(...args);
     }

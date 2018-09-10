@@ -212,6 +212,16 @@ const app = async () => {
             console.log('- Address: TYkfNHvpfwU7iX2hUpXQ7pjRY7Lg6SEZ96');
             console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
         console.groupEnd();
+    });
+
+    tronWeb.transactionBuilder.applyForSR('https://tron.watch', (err, transaction) => {
+        if(err)
+            return console.error(err);
+
+        console.group('Unsigned apply for SR transaction');
+            console.log('- Address:', tronWeb.defaultAddress.base58);
+            console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
+        console.groupEnd();
     });    
 };
 
