@@ -181,11 +181,11 @@ const app = async () => {
         console.log('- Transaction:\n' + JSON.stringify(sendToken, null, 2), '\n');
     console.groupEnd();
     
-    const purchaseToken = await tronWeb.transactionBuilder.purchaseToken('TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1', 'TestToken_1', 10);
+    const purchaseToken = await tronWeb.transactionBuilder.purchaseToken('41a8572327f883078cdb971317f91647d0a1cd4db0', 'BetterToken', 10);
 
     console.group('Unsigned purchase token transaction');
-        console.log('- Token Owner: TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1');
-        console.log('- Token: TestToken_1');
+        console.log('- Token Owner: 41a8572327f883078cdb971317f91647d0a1cd4db0');
+        console.log('- Token: BetterToken');
         console.log('- Transaction:\n' + JSON.stringify(purchaseToken, null, 2), '\n');
     console.groupEnd();
 };

@@ -21343,7 +21343,7 @@ function () {
       if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isString(tokenID) || !tokenID.length) return callback('Invalid token ID provided');
       if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(amount) || amount <= 0) return callback('Invalid amount provided');
       if (!this.tronWeb.isAddress(buyer)) return callback('Invalid buyer address provided');
-      this.tronWeb.fullNode.request('wallet/transferasset', {
+      this.tronWeb.fullNode.request('wallet/participateassetissue', {
         to_address: this.tronWeb.address.toHex(issuerAddress),
         owner_address: this.tronWeb.address.toHex(buyer),
         asset_name: this.tronWeb.fromUtf8(tokenID),
@@ -21359,6 +21359,11 @@ function () {
     key: "sendAsset",
     value: function sendAsset() {
       return this.sendToken.apply(this, arguments);
+    }
+  }, {
+    key: "purchaseAsset",
+    value: function purchaseAsset() {
+      return this.purchaseToken.apply(this, arguments);
     }
   }]);
 

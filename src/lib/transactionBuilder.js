@@ -108,7 +108,7 @@ export default class TransactionBuilder {
         if(!this.tronWeb.isAddress(buyer))
             return callback('Invalid buyer address provided');
 
-        this.tronWeb.fullNode.request('wallet/transferasset', {
+        this.tronWeb.fullNode.request('wallet/participateassetissue', {
             to_address: this.tronWeb.address.toHex(issuerAddress),
             owner_address: this.tronWeb.address.toHex(buyer),
             asset_name: this.tronWeb.fromUtf8(tokenID),
@@ -123,5 +123,9 @@ export default class TransactionBuilder {
 
     sendAsset(...args) {
         return this.sendToken(...args);
+    }
+
+    purchaseAsset(...args) {
+        return this.purchaseToken(...args);
     }
 }
