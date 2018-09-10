@@ -20770,7 +20770,10 @@ function () {
     this.BigNumber = bignumber_js__WEBPACK_IMPORTED_MODULE_3___default.a;
     this.defaultBlock = false;
     this.defaultPrivateKey = false;
-    this.defaultAddress = false;
+    this.defaultAddress = {
+      hex: false,
+      base58: false
+    };
     ['sha3', 'toHex', 'toUtf8', 'fromUtf8', 'toAscii', 'fromAscii', 'toDecimal', 'fromDecimal', 'toSun', 'fromSun', 'toBigNumber', 'isAddress', 'compile', 'createAccount', 'address'].forEach(function (key) {
       _this[key] = TronWeb[key];
     });
@@ -21505,6 +21508,63 @@ function () {
       this.tronWeb.fullNode.request('wallet/votewitnessaccount', {
         owner_address: this.tronWeb.address.toHex(voterAddress),
         votes: votes
+      }, 'post').then(function (transaction) {
+        if (transaction.Error) return callback(transaction.Error);
+        callback(null, transaction);
+      }).catch(function (err) {
+        return callback(err);
+      });
+    }
+  }, {
+    key: "createSmartContract",
+    value: function createSmartContract() {
+      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var issuerAddress = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.tronWeb.defaultAddress.hex;
+      var callback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(issuerAddress)) {
+        callback = issuerAddress;
+        issuerAddress = this.tronWeb.defaultAddress.hex;
+      }
+
+      if (!callback) return this.injectPromise(this.createSmartContract, options, issuerAddress);
+      var _options$abi = options.abi,
+          abi = _options$abi === void 0 ? false : _options$abi,
+          _options$bytecode = options.bytecode,
+          bytecode = _options$bytecode === void 0 ? false : _options$bytecode,
+          _options$feeLimit = options.feeLimit,
+          feeLimit = _options$feeLimit === void 0 ? 0 : _options$feeLimit,
+          _options$callValue = options.callValue,
+          callValue = _options$callValue === void 0 ? 0 : _options$callValue,
+          _options$bandwidthLim = options.bandwidthLimit,
+          bandwidthLimit = _options$bandwidthLim === void 0 ? 0 : _options$bandwidthLim;
+
+      if (abi && utils__WEBPACK_IMPORTED_MODULE_1__["default"].isString(abi)) {
+        try {
+          abi = JSON.parse(abi);
+        } catch (_unused) {
+          return callback('Invalid options.abi provided');
+        }
+      }
+
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isArray(abi)) return callback('Invalid options.abi provided');
+      var payable = abi.some(function (func) {
+        return func.type == 'constructor' && func.payable;
+      });
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isHex(bytecode)) return callback('Invalid options.bytecode provided');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(feeLimit) || feeLimit <= 0 || feeLimit > 1000000000) return callback('Invalid options.feeLimit provided');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(callValue) || callValue < 0) return callback('Invalid options.callValue provided');
+      if (payable && callValue == 0) return callback('When contract is payable, options.callValue must be a positive integer');
+      if (!payable && callValue > 0) return callback('When contract is not payable, options.callValue must be 0');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(bandwidthLimit) || bandwidthLimit < 0 || bandwidthLimit > 100) return callback('Invalid options.bandwidthLimit provided');
+      if (!this.tronWeb.isAddress(issuerAddress)) return callback('Invalid issuer address provided');
+      this.tronWeb.fullNode.request('wallet/deploycontract', {
+        owner_address: this.tronWeb.address.toHex(issuerAddress),
+        fee_limit: parseInt(feeLimit),
+        call_value: parseInt(callValue),
+        consume_user_resource_percent: bandwidthLimit,
+        abi: JSON.stringify(abi),
+        bytecode: bytecode
       }, 'post').then(function (transaction) {
         if (transaction.Error) return callback(transaction.Error);
         callback(null, transaction);

@@ -234,6 +234,20 @@ const app = async () => {
             console.log('- Super Representative: 41c2d52f2511808307c848b808649595f631527111');
             console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
         console.groupEnd();
+    });
+
+    tronWeb.transactionBuilder.createSmartContract({
+        abi: [{"constant":false,"inputs":[],"name":"add","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[],"name":"subtract","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}],
+        bytecode: '6080604052600560005534801561001557600080fd5b5060c9806100246000396000f3006080604052600436106049576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680634f2be91f14604e5780636deebae3146062575b600080fd5b348015605957600080fd5b5060606076565b005b348015606d57600080fd5b5060746089565b005b6000808154809291906001019190505550565b6000808154809291906001900391905055505600a165627a7a723058206f99daf0981439d56ad42ecbcf1d432ea709c081b3af8646ae086bfb7273d5930029',
+        feeLimit: 30000
+    }, '41c2d52f2511808307c848b808649595f631527111', (err, transaction) => {
+        if(err)
+            return console.error(err);
+
+        console.group('Unsigned create smart contract transaction');
+            console.log('- Issuer Address: 41c2d52f2511808307c848b808649595f631527111');
+            console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
+        console.groupEnd();
     }); 
 };
 

@@ -273,6 +273,74 @@ export default class TransactionBuilder {
         }).catch(err => callback(err));
     }
 
+    createSmartContract(options = {}, issuerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+        if(utils.isFunction(issuerAddress)) {
+            callback = issuerAddress;
+            issuerAddress = this.tronWeb.defaultAddress.hex;
+        }
+
+        if(!callback)
+            return this.injectPromise(this.createSmartContract, options, issuerAddress);
+
+        let {
+            abi = false,
+            bytecode = false,
+            feeLimit = 0,
+            callValue = 0,
+            bandwidthLimit = 0
+        } = options;
+
+        if(abi && utils.isString(abi)) {
+            try {
+                abi = JSON.parse(abi);
+            } catch{
+                return callback('Invalid options.abi provided');
+            }
+        }
+
+        if(!utils.isArray(abi))
+            return callback('Invalid options.abi provided');
+
+        const payable = abi.some(func => {
+            return func.type == 'constructor' && func.payable;
+        });
+
+        if(!utils.isHex(bytecode))
+            return callback('Invalid options.bytecode provided');
+
+        if(!utils.isInteger(feeLimit) || feeLimit <= 0 || feeLimit > 1_000_000_000)
+            return callback('Invalid options.feeLimit provided');
+
+        if(!utils.isInteger(callValue) || callValue < 0)
+            return callback('Invalid options.callValue provided');
+
+        if(payable && callValue == 0)
+            return callback('When contract is payable, options.callValue must be a positive integer');
+
+        if(!payable && callValue > 0)
+            return callback('When contract is not payable, options.callValue must be 0');
+
+        if(!utils.isInteger(bandwidthLimit) || bandwidthLimit < 0 || bandwidthLimit > 100)
+            return callback('Invalid options.bandwidthLimit provided');
+
+        if(!this.tronWeb.isAddress(issuerAddress))
+            return callback('Invalid issuer address provided');
+
+        this.tronWeb.fullNode.request('wallet/deploycontract', {
+            owner_address: this.tronWeb.address.toHex(issuerAddress),
+            fee_limit: parseInt(feeLimit),
+            call_value: parseInt(callValue),
+            consume_user_resource_percent: bandwidthLimit,
+            abi: JSON.stringify(abi),
+            bytecode
+        }, 'post').then(transaction => {
+            if(transaction.Error)
+                return callback(transaction.Error);
+
+            callback(null, transaction);
+        }).catch(err => callback(err));
+    }
+
     sendAsset(...args) {
         return this.sendToken(...args);
     }

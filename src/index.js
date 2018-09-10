@@ -28,7 +28,10 @@ export default class TronWeb {
 
         this.defaultBlock = false;
         this.defaultPrivateKey = false;
-        this.defaultAddress = false;
+        this.defaultAddress = {
+            hex: false,
+            base58: false
+        };
         
         [
             'sha3', 'toHex', 'toUtf8', 'fromUtf8',
