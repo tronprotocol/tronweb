@@ -171,6 +171,10 @@ export default class TronWeb {
         }
     }
 
+    signTransaction(...args) {
+        return this.sign(...args);
+    }
+
     static get address() {
         return {
             fromHex(address) {
