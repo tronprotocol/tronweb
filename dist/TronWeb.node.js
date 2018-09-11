@@ -209,11 +209,25 @@ class TronWeb {
 
   currentProvider() {
     return this.currentProviders();
-  } // TODO
+  }
 
-
-  getEventResult(contractAddress, eventName, blockNumber, callback = false) {
+  getEventResult(contractAddress = false, eventName, blockNumber, callback = false) {
     if (!callback) return this.injectPromise(this.getEventResult, contractAddress, eventName, blockNumber);
+    if (!this.eventServer) callback('No event server configured');
+    const routeParams = [];
+    if (!this.isAddress(contractAddress)) return callback('Invalid contract address provided');
+    if (eventName && !contractAddress) return callback('Usage of event name filtering requires a contract address');
+    if (blockNumber && !eventName) return callback('Usage of block number filtering requires an event name');
+    if (contractAddress) routeParams.push(contractAddress);
+    if (eventName) routeParams.push(eventName);
+    if (blockNumber) routeParams.push(blockNumber);
+    return axios__WEBPACK_IMPORTED_MODULE_3___default()(`${this.eventServer}/event/contract/${routeParams.join('/')}`).then(({
+      data = false
+    }) => {
+      if (!data) return callback('Unknown error occurred');
+      if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isArray(data)) return callback(data);
+      return callback(null, data);
+    }).catch(err => callback(err.response.data || err));
   } // TODO
 
 
@@ -1315,6 +1329,10 @@ class Trx {
     } catch (ex) {
       return callback(ex);
     }
+  }
+
+  sendAsset(...args) {
+    return this.sendToken(...args);
   }
 
   send(...args) {

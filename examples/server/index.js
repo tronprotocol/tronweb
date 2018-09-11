@@ -335,6 +335,18 @@ const app = async () => {
             console.log('- Result:\n' + JSON.stringify(result, null, 2), '\n');
         console.groupEnd();
     });
+
+    tronWeb.getEventResult('TKexVE6nKujFaLZeAQh8YRVXda3gjpX1sV', 'Notify', 32162, (err, events) => {
+        if(err)
+            return console.error(err);
+
+        console.group('Event result');
+            console.log('Contract Address: TKexVE6nKujFaLZeAQh8YRVXda3gjpX1sV');
+            console.log('Event Name: Notify');
+            console.log('Block Number: 32162');
+            console.log('- Events:\n' + JSON.stringify(events, null, 2), '\n');
+        console.groupEnd();
+    });
 };
 
 app();

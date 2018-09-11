@@ -34626,13 +34626,32 @@ function () {
     key: "currentProvider",
     value: function currentProvider() {
       return this.currentProviders();
-    } // TODO
-
+    }
   }, {
     key: "getEventResult",
-    value: function getEventResult(contractAddress, eventName, blockNumber) {
+    value: function getEventResult() {
+      var contractAddress = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      var eventName = arguments.length > 1 ? arguments[1] : undefined;
+      var blockNumber = arguments.length > 2 ? arguments[2] : undefined;
       var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
       if (!callback) return this.injectPromise(this.getEventResult, contractAddress, eventName, blockNumber);
+      if (!this.eventServer) callback('No event server configured');
+      var routeParams = [];
+      if (!this.isAddress(contractAddress)) return callback('Invalid contract address provided');
+      if (eventName && !contractAddress) return callback('Usage of event name filtering requires a contract address');
+      if (blockNumber && !eventName) return callback('Usage of block number filtering requires an event name');
+      if (contractAddress) routeParams.push(contractAddress);
+      if (eventName) routeParams.push(eventName);
+      if (blockNumber) routeParams.push(blockNumber);
+      return axios__WEBPACK_IMPORTED_MODULE_2___default()("".concat(this.eventServer, "/event/contract/").concat(routeParams.join('/'))).then(function (_ref2) {
+        var _ref2$data = _ref2.data,
+            data = _ref2$data === void 0 ? false : _ref2$data;
+        if (!data) return callback('Unknown error occurred');
+        if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isArray(data)) return callback(data);
+        return callback(null, data);
+      }).catch(function (err) {
+        return callback(err.response.data || err);
+      });
     } // TODO
 
   }, {
@@ -36402,6 +36421,11 @@ function () {
         return _sendToken.apply(this, arguments);
       };
     }()
+  }, {
+    key: "sendAsset",
+    value: function sendAsset() {
+      return this.sendToken.apply(this, arguments);
+    }
   }, {
     key: "send",
     value: function send() {
