@@ -453,6 +453,126 @@ export default class TransactionBuilder {
         }).catch(err => callback(err));
     }
 
+    createToken(options = {}, issuerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+        if(utils.isFunction(issuerAddress)) {
+            callback = issuerAddress;
+            issuerAddress = this.tronWeb.defaultAddress.hex;
+        }
+
+        if(!callback)
+            return this.injectPromise(this.createToken, options, issuerAddress);
+
+        const {
+            name = false,
+            abbreviation = false,
+            description = false,
+            url = false,
+            totalSupply = 0,
+            trxRatio = 1, // How much TRX will `tokenRatio` cost?
+            tokenRatio = 1, // How many tokens will `trxRatio` afford?
+            saleStart = Date.now(),
+            saleEnd = false,            
+            freeBandwidth = 0, // The creator's "donated" bandwidth for use by token holders
+            freeBandwidthLimit = 0, // Out of `totalFreeBandwidth`, the amount each token holder get
+            frozenAmount = 0,
+            frozenDuration = 0
+        } = options;
+
+        if(!utils.isString(name) || !name.length)
+            return callback('Invalid token name provided');
+
+        if(!utils.isString(abbreviation) || !abbreviation.length)
+            return callback('Invalid token abbreviation provided');
+
+        if(!utils.isInteger(totalSupply) || totalSupply <= 0)
+            return callback('Invalid supply amount provided');
+
+        if(!utils.isInteger(trxRatio) || trxRatio <= 0)
+            return callback('TRX ratio must be a positive integer');
+
+        if(!utils.isInteger(tokenRatio) || tokenRatio <= 0)
+            return callback('Token ratio must be a positive integer');
+
+        if(!utils.isInteger(saleStart) || saleStart < Date.now())
+            return callback('Invalid sale start timestamp provided');
+
+        if(!utils.isInteger(saleEnd) || saleEnd <= saleStart)
+            return callback('Invalid sale end timestamp provided');
+
+        if(!utils.isString(description) || !description.length)
+            return callback('Invalid token description provided');
+
+        if(!utils.isString(url) || !url.length || !utils.isValidURL(url))
+            return callback('Invalid token url provided');
+
+        if(!utils.isInteger(freeBandwidth) || freeBandwidth < 0)
+            return callback('Invalid free bandwidth amount provided');
+
+        if(!utils.isInteger(freeBandwidthLimit) || freeBandwidthLimit < 0 || (freeBandwidth && !freeBandwidthLimit))
+            return callback('Invalid free bandwidth limit provided');
+
+        if(!utils.isInteger(frozenAmount) || frozenAmount < 0 || (!frozenDuration && frozenAmount))
+            return callback('Invalid frozen supply provided');
+
+        if(!utils.isInteger(frozenDuration) || frozenDuration < 0 || (frozenDuration && !frozenAmount))
+            return callback('Invalid frozen duration provided');
+
+        if(!this.tronWeb.isAddress(issuerAddress))
+            return callback('Invalid issuer address provided');
+
+        console.log({
+            owner_address: this.tronWeb.address.toHex(issuerAddress),
+            name: this.tronWeb.fromUtf8(name),
+            abbr: this.tronWeb.fromUtf8(abbreviation),
+            description: this.tronWeb.fromUtf8(description),
+            url: this.tronWeb.fromUtf8(url),
+            total_supply: parseInt(totalSupply),
+            trx_num: parseInt(trxRatio),
+            num: parseInt(tokenRatio),
+            start_time: parseInt(saleStart),
+            end_time: parseInt(saleEnd),
+            free_asset_net_limit: parseInt(freeBandwidth),
+            public_free_asset_net_limit: parseInt(freeBandwidthLimit),
+            frozen_supply: {
+                frozen_amount: parseInt(frozenAmount),
+                frozen_days: parseInt(frozenDuration)
+            }
+        });
+
+        this.tronWeb.fullNode.request('wallet/createassetissue', {
+            owner_address: this.tronWeb.address.toHex(issuerAddress),
+            name: this.tronWeb.fromUtf8(name),
+            abbr: this.tronWeb.fromUtf8(abbreviation),
+            description: this.tronWeb.fromUtf8(description),
+            url: this.tronWeb.fromUtf8(url),
+            total_supply: parseInt(totalSupply),
+            trx_num: parseInt(trxRatio),
+            num: parseInt(tokenRatio),
+            start_time: parseInt(saleStart),
+            end_time: parseInt(saleEnd),
+            free_asset_net_limit: parseInt(freeBandwidth),
+            public_free_asset_net_limit: parseInt(freeBandwidthLimit),
+            frozen_supply: {
+                frozen_amount: parseInt(frozenAmount),
+                frozen_days: parseInt(frozenDuration)
+            }
+        }, 'post').then(transaction => {
+            if(transaction.Error)
+                return callback(transaction.Error);
+
+            if(transaction.result.code && transaction.result.message) {
+                return callback(
+                    this.tronWeb.toUtf8(transaction.result.message)
+                );
+            }
+
+            if(!transaction.result.result)
+                return callback(transaction);
+
+            callback(null, transaction);
+        }).catch(err => callback(err));
+    }
+
     sendAsset(...args) {
         return this.sendToken(...args);
     }

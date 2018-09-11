@@ -35423,6 +35423,109 @@ function () {
       });
     }
   }, {
+    key: "createToken",
+    value: function createToken() {
+      var _this3 = this;
+
+      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var issuerAddress = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.tronWeb.defaultAddress.hex;
+      var callback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(issuerAddress)) {
+        callback = issuerAddress;
+        issuerAddress = this.tronWeb.defaultAddress.hex;
+      }
+
+      if (!callback) return this.injectPromise(this.createToken, options, issuerAddress);
+      var _options$name = options.name,
+          name = _options$name === void 0 ? false : _options$name,
+          _options$abbreviation = options.abbreviation,
+          abbreviation = _options$abbreviation === void 0 ? false : _options$abbreviation,
+          _options$description = options.description,
+          description = _options$description === void 0 ? false : _options$description,
+          _options$url = options.url,
+          url = _options$url === void 0 ? false : _options$url,
+          _options$totalSupply = options.totalSupply,
+          totalSupply = _options$totalSupply === void 0 ? 0 : _options$totalSupply,
+          _options$trxRatio = options.trxRatio,
+          trxRatio = _options$trxRatio === void 0 ? 1 : _options$trxRatio,
+          _options$tokenRatio = options.tokenRatio,
+          tokenRatio = _options$tokenRatio === void 0 ? 1 : _options$tokenRatio,
+          _options$saleStart = options.saleStart,
+          saleStart = _options$saleStart === void 0 ? Date.now() : _options$saleStart,
+          _options$saleEnd = options.saleEnd,
+          saleEnd = _options$saleEnd === void 0 ? false : _options$saleEnd,
+          _options$freeBandwidt = options.freeBandwidth,
+          freeBandwidth = _options$freeBandwidt === void 0 ? 0 : _options$freeBandwidt,
+          _options$freeBandwidt2 = options.freeBandwidthLimit,
+          freeBandwidthLimit = _options$freeBandwidt2 === void 0 ? 0 : _options$freeBandwidt2,
+          _options$frozenAmount = options.frozenAmount,
+          frozenAmount = _options$frozenAmount === void 0 ? 0 : _options$frozenAmount,
+          _options$frozenDurati = options.frozenDuration,
+          frozenDuration = _options$frozenDurati === void 0 ? 0 : _options$frozenDurati;
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isString(name) || !name.length) return callback('Invalid token name provided');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isString(abbreviation) || !abbreviation.length) return callback('Invalid token abbreviation provided');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(totalSupply) || totalSupply <= 0) return callback('Invalid supply amount provided');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(trxRatio) || trxRatio <= 0) return callback('TRX ratio must be a positive integer');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(tokenRatio) || tokenRatio <= 0) return callback('Token ratio must be a positive integer');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(saleStart) || saleStart < Date.now()) return callback('Invalid sale start timestamp provided');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(saleEnd) || saleEnd <= saleStart) return callback('Invalid sale end timestamp provided');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isString(description) || !description.length) return callback('Invalid token description provided');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isString(url) || !url.length || !utils__WEBPACK_IMPORTED_MODULE_1__["default"].isValidURL(url)) return callback('Invalid token url provided');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(freeBandwidth) || freeBandwidth < 0) return callback('Invalid free bandwidth amount provided');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(freeBandwidthLimit) || freeBandwidthLimit < 0 || freeBandwidth && !freeBandwidthLimit) return callback('Invalid free bandwidth limit provided');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(frozenAmount) || frozenAmount < 0 || !frozenDuration && frozenAmount) return callback('Invalid frozen supply provided');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(frozenDuration) || frozenDuration < 0 || frozenDuration && !frozenAmount) return callback('Invalid frozen duration provided');
+      if (!this.tronWeb.isAddress(issuerAddress)) return callback('Invalid issuer address provided');
+      console.log({
+        owner_address: this.tronWeb.address.toHex(issuerAddress),
+        name: this.tronWeb.fromUtf8(name),
+        abbr: this.tronWeb.fromUtf8(abbreviation),
+        description: this.tronWeb.fromUtf8(description),
+        url: this.tronWeb.fromUtf8(url),
+        total_supply: parseInt(totalSupply),
+        trx_num: parseInt(trxRatio),
+        num: parseInt(tokenRatio),
+        start_time: parseInt(saleStart),
+        end_time: parseInt(saleEnd),
+        free_asset_net_limit: parseInt(freeBandwidth),
+        public_free_asset_net_limit: parseInt(freeBandwidthLimit),
+        frozen_supply: {
+          frozen_amount: parseInt(frozenAmount),
+          frozen_days: parseInt(frozenDuration)
+        }
+      });
+      this.tronWeb.fullNode.request('wallet/createassetissue', {
+        owner_address: this.tronWeb.address.toHex(issuerAddress),
+        name: this.tronWeb.fromUtf8(name),
+        abbr: this.tronWeb.fromUtf8(abbreviation),
+        description: this.tronWeb.fromUtf8(description),
+        url: this.tronWeb.fromUtf8(url),
+        total_supply: parseInt(totalSupply),
+        trx_num: parseInt(trxRatio),
+        num: parseInt(tokenRatio),
+        start_time: parseInt(saleStart),
+        end_time: parseInt(saleEnd),
+        free_asset_net_limit: parseInt(freeBandwidth),
+        public_free_asset_net_limit: parseInt(freeBandwidthLimit),
+        frozen_supply: {
+          frozen_amount: parseInt(frozenAmount),
+          frozen_days: parseInt(frozenDuration)
+        }
+      }, 'post').then(function (transaction) {
+        if (transaction.Error) return callback(transaction.Error);
+
+        if (transaction.result.code && transaction.result.message) {
+          return callback(_this3.tronWeb.toUtf8(transaction.result.message));
+        }
+
+        if (!transaction.result.result) return callback(transaction);
+        callback(null, transaction);
+      }).catch(function (err) {
+        return callback(err);
+      });
+    }
+  }, {
     key: "sendAsset",
     value: function sendAsset() {
       return this.sendToken.apply(this, arguments);

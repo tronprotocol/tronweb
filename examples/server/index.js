@@ -267,7 +267,25 @@ const app = async () => {
             console.log('- Contract Address: 413c8143e98b3e2fe1b1a8fb82b34557505a752390');
             console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
         console.groupEnd();
-    }); 
+    });
+
+    tronWeb.transactionBuilder.createToken({
+        name: 'TestToken',
+        abbreviation: 'TTKN',
+        description: 'Useless utility token',
+        url: 'https://google.com',
+        totalSupply: 57,
+        saleEnd: Date.now() + 1000 * 60 * 60 * 24 * 30,
+        frozenAmount: 5,
+        frozenDuration: 1
+    }, (err, transaction) => {
+        if(err)
+            return console.error(err);
+
+        console.group('Unsigned create token transaction');
+            console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
+        console.groupEnd();
+    });
 };
 
 app();
