@@ -34642,6 +34642,28 @@ function () {
       if (!callback) return this.injectPromise(this.getEventByTransacionID, transactionID);
     }
   }, {
+    key: "sign",
+    value: function sign(transaction) {
+      var privateKey = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.defaultPrivateKey;
+      var callback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(privateKey)) {
+        callback = privateKey;
+        privateKey = this.defaultPrivateKey;
+      }
+
+      if (!callback) return this.injectPromise(this.sign, transaction, privateKey);
+      if (!transaction) return callback('Invalid transaction provided');
+
+      try {
+        var address = this.address.toHex(this.address.fromPrivateKey(privateKey)).toLowerCase();
+        if (address !== transaction.raw_data.contract[0].parameter.value.owner_address.toLowerCase()) return callback('Private key does not match address in transaction');
+        return callback(null, utils__WEBPACK_IMPORTED_MODULE_1__["default"].crypto.signTransaction(privateKey, transaction));
+      } catch (ex) {
+        callback(ex);
+      }
+    }
+  }, {
     key: "isConnected",
     value: function () {
       var _isConnected = _asyncToGenerator(
@@ -35540,9 +35562,6 @@ function () {
         new_public_limit: parseInt(freeBandwidthLimit)
       }, 'post').then(function (transaction) {
         if (transaction.Error) return callback(transaction.Error);
-        console.log({
-          transaction: transaction
-        });
 
         if (transaction.result && transaction.result.message) {
           return callback(_this4.tronWeb.toUtf8(transaction.result.message));
@@ -35567,6 +35586,11 @@ function () {
     key: "createAsset",
     value: function createAsset() {
       return this.createToken.apply(this, arguments);
+    }
+  }, {
+    key: "updateAsset",
+    value: function updateAsset() {
+      return this.updateToken.apply(this, arguments);
     }
   }]);
 

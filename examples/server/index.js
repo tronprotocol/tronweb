@@ -292,13 +292,19 @@ const app = async () => {
         url: 'https://improved.google.com',
         freeBandwidth: 68,
         freeBandwidthLimit: 12
-    }, (err, transaction) => {
+    }, async (err, transaction) => {
         if(err)
             return console.error(err);
 
         console.group('Unsigned update token transaction');
             console.log('- Token Name: TestToken')
             console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
+        console.groupEnd();
+
+        const signedTransaction = await tronWeb.sign(transaction);
+
+        console.group('Signed update token transaction');
+            console.log('- Transaction:\n' + JSON.stringify(signedTransaction, null, 2), '\n');
         console.groupEnd();
     });
 };
