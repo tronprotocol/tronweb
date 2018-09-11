@@ -143,38 +143,6 @@ export default class TronWeb {
             return this.injectPromise(this.getEventByTransacionID, transactionID);
     }
 
-    sign(transaction, privateKey = this.defaultPrivateKey, callback = false) {
-        if(utils.isFunction(privateKey)) {
-            callback = privateKey;
-            privateKey = this.defaultPrivateKey;
-        }
-
-        if(!callback)
-            return this.injectPromise(this.sign, transaction, privateKey);
-
-        if(!transaction)
-            return callback('Invalid transaction provided');
-
-        try {
-            const address = this.address.toHex(
-                this.address.fromPrivateKey(privateKey)
-            ).toLowerCase();
-
-            if(address !== transaction.raw_data.contract[0].parameter.value.owner_address.toLowerCase())
-                return callback('Private key does not match address in transaction');
-
-            return callback(null,
-                utils.crypto.signTransaction(privateKey, transaction)
-            );
-        } catch(ex) {
-            callback(ex);
-        }
-    }
-
-    signTransaction(...args) {
-        return this.sign(...args);
-    }
-
     static get address() {
         return {
             fromHex(address) {

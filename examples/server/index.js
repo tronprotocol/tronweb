@@ -301,7 +301,7 @@ const app = async () => {
             console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
         console.groupEnd();
 
-        const signedTransaction = await tronWeb.sign(transaction);
+        const signedTransaction = await tronWeb.trx.sign(transaction);
 
         console.group('Signed update token transaction');
             console.log('- Transaction:\n' + JSON.stringify(signedTransaction, null, 2), '\n');

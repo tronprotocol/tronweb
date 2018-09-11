@@ -415,4 +415,36 @@ export default class Trx {
             callback(null, contract);
         }).catch(err => callback(err));
     }
+
+    sign(transaction, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
+        if(utils.isFunction(privateKey)) {
+            callback = privateKey;
+            privateKey = this.tronWeb.defaultPrivateKey;
+        }
+
+        if(!callback)
+            return this.injectPromise(this.sign, transaction, privateKey);
+
+        if(!transaction)
+            return callback('Invalid transaction provided');
+
+        try {
+            const address = this.tronWeb.address.toHex(
+                this.tronWeb.address.fromPrivateKey(privateKey)
+            ).toLowerCase();
+
+            if(address !== transaction.raw_data.contract[0].parameter.value.owner_address.toLowerCase())
+                return callback('Private key does not match address in transaction');
+
+            return callback(null,
+                utils.crypto.signTransaction(privateKey, transaction)
+            );
+        } catch(ex) {
+            callback(ex);
+        }
+    }
+
+    signTransaction(...args) {
+        return this.sign(...args);
+    }
 };

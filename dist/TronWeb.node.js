@@ -221,24 +221,6 @@ class TronWeb {
     if (!callback) return this.injectPromise(this.getEventByTransacionID, transactionID);
   }
 
-  sign(transaction, privateKey = this.defaultPrivateKey, callback = false) {
-    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(privateKey)) {
-      callback = privateKey;
-      privateKey = this.defaultPrivateKey;
-    }
-
-    if (!callback) return this.injectPromise(this.sign, transaction, privateKey);
-    if (!transaction) return callback('Invalid transaction provided');
-
-    try {
-      const address = this.address.toHex(this.address.fromPrivateKey(privateKey)).toLowerCase();
-      if (address !== transaction.raw_data.contract[0].parameter.value.owner_address.toLowerCase()) return callback('Private key does not match address in transaction');
-      return callback(null, utils__WEBPACK_IMPORTED_MODULE_2__["default"].crypto.signTransaction(privateKey, transaction));
-    } catch (ex) {
-      callback(ex);
-    }
-  }
-
   static get address() {
     return {
       fromHex(address) {
@@ -1262,6 +1244,28 @@ class Trx {
       if (contract.Error) return callback('Contract does not exist');
       callback(null, contract);
     }).catch(err => callback(err));
+  }
+
+  sign(transaction, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(privateKey)) {
+      callback = privateKey;
+      privateKey = this.tronWeb.defaultPrivateKey;
+    }
+
+    if (!callback) return this.injectPromise(this.sign, transaction, privateKey);
+    if (!transaction) return callback('Invalid transaction provided');
+
+    try {
+      const address = this.tronWeb.address.toHex(this.tronWeb.address.fromPrivateKey(privateKey)).toLowerCase();
+      if (address !== transaction.raw_data.contract[0].parameter.value.owner_address.toLowerCase()) return callback('Private key does not match address in transaction');
+      return callback(null, utils__WEBPACK_IMPORTED_MODULE_2__["default"].crypto.signTransaction(privateKey, transaction));
+    } catch (ex) {
+      callback(ex);
+    }
+  }
+
+  signTransaction(...args) {
+    return this.sign(...args);
   }
 
 }
