@@ -493,6 +493,14 @@ export default class Trx {
         }
     }
 
+    send(...args) {
+        return this.sendTransaction(...args);
+    }
+
+    sendTrx(...args) {
+        return this.sendTransaction(...args);
+    }
+
     broadcast(...args) {
         return this.sendRawTransaction(...args);
     }
