@@ -36199,6 +36199,29 @@ function () {
       }
     }
   }, {
+    key: "sendRawTransaction",
+    value: function sendRawTransaction() {
+      var signedTransaction = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      if (!callback) return this.injectPromise(this.sendRawTransaction, signedTransaction);
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isObject(signedTransaction)) return callback('Invalid transaction provided');
+      if (!signedTransaction.signature || !utils__WEBPACK_IMPORTED_MODULE_1__["default"].isArray(signedTransaction.signature)) return callback('Transaction is not signed');
+      this.tronWeb.fullNode.request('wallet/broadcasttransaction', signedTransaction, 'post').then(function (result) {
+        console.log({
+          signedTransaction: signedTransaction,
+          result: result
+        });
+        callback(null, result);
+      }).catch(function (err) {
+        return callback(err);
+      });
+    }
+  }, {
+    key: "broadcast",
+    value: function broadcast() {
+      return this.sendRawTransaction.apply(this, arguments);
+    }
+  }, {
     key: "signTransaction",
     value: function signTransaction() {
       return this.sign.apply(this, arguments);

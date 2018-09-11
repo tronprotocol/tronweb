@@ -306,6 +306,15 @@ const app = async () => {
         console.group('Signed update token transaction');
             console.log('- Transaction:\n' + JSON.stringify(signedTransaction, null, 2), '\n');
         console.groupEnd();
+
+        tronWeb.trx.sendRawTransaction(signedTransaction, (err, result) => {
+            if(err)
+                return console.error(err);
+            
+            console.group('Broadcast update token transaction');
+                console.log('- Result:\n' + JSON.stringify(result, null, 2), '\n');
+            console.groupEnd();
+        });
     });
 };
 

@@ -1264,6 +1264,23 @@ class Trx {
     }
   }
 
+  sendRawTransaction(signedTransaction = false, callback = false) {
+    if (!callback) return this.injectPromise(this.sendRawTransaction, signedTransaction);
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isObject(signedTransaction)) return callback('Invalid transaction provided');
+    if (!signedTransaction.signature || !utils__WEBPACK_IMPORTED_MODULE_2__["default"].isArray(signedTransaction.signature)) return callback('Transaction is not signed');
+    this.tronWeb.fullNode.request('wallet/broadcasttransaction', signedTransaction, 'post').then(result => {
+      console.log({
+        signedTransaction,
+        result
+      });
+      callback(null, result);
+    }).catch(err => callback(err));
+  }
+
+  broadcast(...args) {
+    return this.sendRawTransaction(...args);
+  }
+
   signTransaction(...args) {
     return this.sign(...args);
   }
