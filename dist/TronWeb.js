@@ -36178,7 +36178,8 @@ function () {
     }
   }, {
     key: "sign",
-    value: function sign(transaction) {
+    value: function sign() {
+      var transaction = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
       var privateKey = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.tronWeb.defaultPrivateKey;
       var callback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
@@ -36188,7 +36189,8 @@ function () {
       }
 
       if (!callback) return this.injectPromise(this.sign, transaction, privateKey);
-      if (!transaction) return callback('Invalid transaction provided');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isObject(transaction)) return callback('Invalid transaction provided');
+      if (transaction.signature) return callback('Transaction is already signed');
 
       try {
         var address = this.tronWeb.address.toHex(this.tronWeb.address.fromPrivateKey(privateKey)).toLowerCase();
@@ -36207,15 +36209,100 @@ function () {
       if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isObject(signedTransaction)) return callback('Invalid transaction provided');
       if (!signedTransaction.signature || !utils__WEBPACK_IMPORTED_MODULE_1__["default"].isArray(signedTransaction.signature)) return callback('Transaction is not signed');
       this.tronWeb.fullNode.request('wallet/broadcasttransaction', signedTransaction, 'post').then(function (result) {
-        console.log({
-          signedTransaction: signedTransaction,
-          result: result
-        });
         callback(null, result);
       }).catch(function (err) {
         return callback(err);
       });
     }
+  }, {
+    key: "sendTransaction",
+    value: function () {
+      var _sendTransaction = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee2() {
+        var to,
+            amount,
+            privateKey,
+            callback,
+            address,
+            transaction,
+            signedTransaction,
+            result,
+            _args2 = arguments;
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                to = _args2.length > 0 && _args2[0] !== undefined ? _args2[0] : false;
+                amount = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : false;
+                privateKey = _args2.length > 2 && _args2[2] !== undefined ? _args2[2] : this.tronWeb.defaultPrivateKey;
+                callback = _args2.length > 3 && _args2[3] !== undefined ? _args2[3] : false;
+
+                if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(privateKey)) {
+                  callback = privateKey;
+                  privateKey = this.tronWeb.defaultPrivateKey;
+                }
+
+                if (callback) {
+                  _context2.next = 7;
+                  break;
+                }
+
+                return _context2.abrupt("return", this.injectPromise(this.sendTransaction, to, amount, privateKey));
+
+              case 7:
+                if (this.tronWeb.isAddress(to)) {
+                  _context2.next = 9;
+                  break;
+                }
+
+                return _context2.abrupt("return", callback('Invalid recipient provided'));
+
+              case 9:
+                if (!(!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(amount) || amount <= 0)) {
+                  _context2.next = 11;
+                  break;
+                }
+
+                return _context2.abrupt("return", callback('Invalid amount provided'));
+
+              case 11:
+                _context2.prev = 11;
+                address = this.tronWeb.address.fromPrivateKey(privateKey);
+                _context2.next = 15;
+                return this.tronWeb.transactionBuilder.sendTrx(to, amount, address);
+
+              case 15:
+                transaction = _context2.sent;
+                _context2.next = 18;
+                return this.signTransaction(transaction, privateKey);
+
+              case 18:
+                signedTransaction = _context2.sent;
+                _context2.next = 21;
+                return this.sendRawTransaction(signedTransaction);
+
+              case 21:
+                result = _context2.sent;
+                return _context2.abrupt("return", callback(null, result));
+
+              case 25:
+                _context2.prev = 25;
+                _context2.t0 = _context2["catch"](11);
+                return _context2.abrupt("return", callback(_context2.t0));
+
+              case 28:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this, [[11, 25]]);
+      }));
+
+      return function sendTransaction() {
+        return _sendTransaction.apply(this, arguments);
+      };
+    }()
   }, {
     key: "broadcast",
     value: function broadcast() {

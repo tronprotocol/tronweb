@@ -1246,14 +1246,15 @@ class Trx {
     }).catch(err => callback(err));
   }
 
-  sign(transaction, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
+  sign(transaction = false, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
     if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(privateKey)) {
       callback = privateKey;
       privateKey = this.tronWeb.defaultPrivateKey;
     }
 
     if (!callback) return this.injectPromise(this.sign, transaction, privateKey);
-    if (!transaction) return callback('Invalid transaction provided');
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isObject(transaction)) return callback('Invalid transaction provided');
+    if (transaction.signature) return callback('Transaction is already signed');
 
     try {
       const address = this.tronWeb.address.toHex(this.tronWeb.address.fromPrivateKey(privateKey)).toLowerCase();
@@ -1269,12 +1270,29 @@ class Trx {
     if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isObject(signedTransaction)) return callback('Invalid transaction provided');
     if (!signedTransaction.signature || !utils__WEBPACK_IMPORTED_MODULE_2__["default"].isArray(signedTransaction.signature)) return callback('Transaction is not signed');
     this.tronWeb.fullNode.request('wallet/broadcasttransaction', signedTransaction, 'post').then(result => {
-      console.log({
-        signedTransaction,
-        result
-      });
       callback(null, result);
     }).catch(err => callback(err));
+  }
+
+  async sendTransaction(to = false, amount = false, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(privateKey)) {
+      callback = privateKey;
+      privateKey = this.tronWeb.defaultPrivateKey;
+    }
+
+    if (!callback) return this.injectPromise(this.sendTransaction, to, amount, privateKey);
+    if (!this.tronWeb.isAddress(to)) return callback('Invalid recipient provided');
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(amount) || amount <= 0) return callback('Invalid amount provided');
+
+    try {
+      const address = this.tronWeb.address.fromPrivateKey(privateKey);
+      const transaction = await this.tronWeb.transactionBuilder.sendTrx(to, amount, address);
+      const signedTransaction = await this.signTransaction(transaction, privateKey);
+      const result = await this.sendRawTransaction(signedTransaction);
+      return callback(null, result);
+    } catch (ex) {
+      return callback(ex);
+    }
   }
 
   broadcast(...args) {

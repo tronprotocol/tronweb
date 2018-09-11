@@ -316,6 +316,15 @@ const app = async () => {
             console.groupEnd();
         });
     });
+
+    tronWeb.trx.sendTransaction('TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1', 10, (err, result) => {
+        if(err)
+            return console.error(err);
+
+        console.group('Send TRX transaction');
+            console.log('- Result:\n' + JSON.stringify(result, null, 2), '\n');
+        console.groupEnd();
+    });
 };
 
 app();
