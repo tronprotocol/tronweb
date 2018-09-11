@@ -523,6 +523,10 @@ export default class Trx {
         }
     }
 
+    sendAsset(...args) {
+        return this.sendToken(...args);
+    }
+
     send(...args) {
         return this.sendTransaction(...args);
     }
