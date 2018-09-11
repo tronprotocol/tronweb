@@ -749,7 +749,7 @@ class TransactionBuilder {
     }, 'post').then(transaction => {
       if (transaction.Error) return callback(transaction.Error);
 
-      if (transaction.result.code && transaction.result.message) {
+      if (transaction.result && transaction.result.message) {
         return callback(this.tronWeb.toUtf8(transaction.result.message));
       }
 
@@ -798,24 +798,6 @@ class TransactionBuilder {
     if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(frozenAmount) || frozenAmount < 0 || !frozenDuration && frozenAmount) return callback('Invalid frozen supply provided');
     if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(frozenDuration) || frozenDuration < 0 || frozenDuration && !frozenAmount) return callback('Invalid frozen duration provided');
     if (!this.tronWeb.isAddress(issuerAddress)) return callback('Invalid issuer address provided');
-    console.log({
-      owner_address: this.tronWeb.address.toHex(issuerAddress),
-      name: this.tronWeb.fromUtf8(name),
-      abbr: this.tronWeb.fromUtf8(abbreviation),
-      description: this.tronWeb.fromUtf8(description),
-      url: this.tronWeb.fromUtf8(url),
-      total_supply: parseInt(totalSupply),
-      trx_num: parseInt(trxRatio),
-      num: parseInt(tokenRatio),
-      start_time: parseInt(saleStart),
-      end_time: parseInt(saleEnd),
-      free_asset_net_limit: parseInt(freeBandwidth),
-      public_free_asset_net_limit: parseInt(freeBandwidthLimit),
-      frozen_supply: {
-        frozen_amount: parseInt(frozenAmount),
-        frozen_days: parseInt(frozenDuration)
-      }
-    });
     this.tronWeb.fullNode.request('wallet/createassetissue', {
       owner_address: this.tronWeb.address.toHex(issuerAddress),
       name: this.tronWeb.fromUtf8(name),
@@ -836,11 +818,48 @@ class TransactionBuilder {
     }, 'post').then(transaction => {
       if (transaction.Error) return callback(transaction.Error);
 
-      if (transaction.result.code && transaction.result.message) {
+      if (transaction.result && transaction.result.message) {
         return callback(this.tronWeb.toUtf8(transaction.result.message));
       }
 
-      if (!transaction.result.result) return callback(transaction);
+      callback(null, transaction);
+    }).catch(err => callback(err));
+  }
+
+  updateToken(options = {}, issuerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(issuerAddress)) {
+      callback = issuerAddress;
+      issuerAddress = this.tronWeb.defaultAddress.hex;
+    }
+
+    if (!callback) return this.injectPromise(this.updateToken, options, issuerAddress);
+    const {
+      description = false,
+      url = false,
+      freeBandwidth = 0,
+      // The creator's "donated" bandwidth for use by token holders
+      freeBandwidthLimit = 0 // Out of `totalFreeBandwidth`, the amount each token holder get
+
+    } = options;
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(freeBandwidth) || freeBandwidth < 0) return callback('Invalid free bandwidth amount provided');
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(freeBandwidthLimit) || freeBandwidthLimit < 0 || freeBandwidth && !freeBandwidthLimit) return callback('Invalid free bandwidth limit provided');
+    if (!this.tronWeb.isAddress(issuerAddress)) return callback('Invalid issuer address provided');
+    this.tronWeb.fullNode.request('wallet/updateasset', {
+      owner_address: this.tronWeb.address.toHex(issuerAddress),
+      description: this.tronWeb.fromUtf8(description),
+      url: this.tronWeb.fromUtf8(url),
+      new_limit: parseInt(freeBandwidth),
+      new_public_limit: parseInt(freeBandwidthLimit)
+    }, 'post').then(transaction => {
+      if (transaction.Error) return callback(transaction.Error);
+      console.log({
+        transaction
+      });
+
+      if (transaction.result && transaction.result.message) {
+        return callback(this.tronWeb.toUtf8(transaction.result.message));
+      }
+
       callback(null, transaction);
     }).catch(err => callback(err));
   }
@@ -851,6 +870,10 @@ class TransactionBuilder {
 
   purchaseAsset(...args) {
     return this.purchaseToken(...args);
+  }
+
+  createAsset(...args) {
+    return this.createToken(...args);
   }
 
 }

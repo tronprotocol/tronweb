@@ -35412,7 +35412,7 @@ function () {
       }, 'post').then(function (transaction) {
         if (transaction.Error) return callback(transaction.Error);
 
-        if (transaction.result.code && transaction.result.message) {
+        if (transaction.result && transaction.result.message) {
           return callback(_this2.tronWeb.toUtf8(transaction.result.message));
         }
 
@@ -35477,24 +35477,6 @@ function () {
       if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(frozenAmount) || frozenAmount < 0 || !frozenDuration && frozenAmount) return callback('Invalid frozen supply provided');
       if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(frozenDuration) || frozenDuration < 0 || frozenDuration && !frozenAmount) return callback('Invalid frozen duration provided');
       if (!this.tronWeb.isAddress(issuerAddress)) return callback('Invalid issuer address provided');
-      console.log({
-        owner_address: this.tronWeb.address.toHex(issuerAddress),
-        name: this.tronWeb.fromUtf8(name),
-        abbr: this.tronWeb.fromUtf8(abbreviation),
-        description: this.tronWeb.fromUtf8(description),
-        url: this.tronWeb.fromUtf8(url),
-        total_supply: parseInt(totalSupply),
-        trx_num: parseInt(trxRatio),
-        num: parseInt(tokenRatio),
-        start_time: parseInt(saleStart),
-        end_time: parseInt(saleEnd),
-        free_asset_net_limit: parseInt(freeBandwidth),
-        public_free_asset_net_limit: parseInt(freeBandwidthLimit),
-        frozen_supply: {
-          frozen_amount: parseInt(frozenAmount),
-          frozen_days: parseInt(frozenDuration)
-        }
-      });
       this.tronWeb.fullNode.request('wallet/createassetissue', {
         owner_address: this.tronWeb.address.toHex(issuerAddress),
         name: this.tronWeb.fromUtf8(name),
@@ -35515,11 +35497,57 @@ function () {
       }, 'post').then(function (transaction) {
         if (transaction.Error) return callback(transaction.Error);
 
-        if (transaction.result.code && transaction.result.message) {
+        if (transaction.result && transaction.result.message) {
           return callback(_this3.tronWeb.toUtf8(transaction.result.message));
         }
 
-        if (!transaction.result.result) return callback(transaction);
+        callback(null, transaction);
+      }).catch(function (err) {
+        return callback(err);
+      });
+    }
+  }, {
+    key: "updateToken",
+    value: function updateToken() {
+      var _this4 = this;
+
+      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var issuerAddress = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.tronWeb.defaultAddress.hex;
+      var callback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(issuerAddress)) {
+        callback = issuerAddress;
+        issuerAddress = this.tronWeb.defaultAddress.hex;
+      }
+
+      if (!callback) return this.injectPromise(this.updateToken, options, issuerAddress);
+      var _options$description2 = options.description,
+          description = _options$description2 === void 0 ? false : _options$description2,
+          _options$url2 = options.url,
+          url = _options$url2 === void 0 ? false : _options$url2,
+          _options$freeBandwidt3 = options.freeBandwidth,
+          freeBandwidth = _options$freeBandwidt3 === void 0 ? 0 : _options$freeBandwidt3,
+          _options$freeBandwidt4 = options.freeBandwidthLimit,
+          freeBandwidthLimit = _options$freeBandwidt4 === void 0 ? 0 : _options$freeBandwidt4;
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(freeBandwidth) || freeBandwidth < 0) return callback('Invalid free bandwidth amount provided');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(freeBandwidthLimit) || freeBandwidthLimit < 0 || freeBandwidth && !freeBandwidthLimit) return callback('Invalid free bandwidth limit provided');
+      if (!this.tronWeb.isAddress(issuerAddress)) return callback('Invalid issuer address provided');
+      this.tronWeb.fullNode.request('wallet/updateasset', {
+        owner_address: this.tronWeb.address.toHex(issuerAddress),
+        description: this.tronWeb.fromUtf8(description),
+        url: this.tronWeb.fromUtf8(url),
+        new_limit: parseInt(freeBandwidth),
+        new_public_limit: parseInt(freeBandwidthLimit)
+      }, 'post').then(function (transaction) {
+        if (transaction.Error) return callback(transaction.Error);
+        console.log({
+          transaction: transaction
+        });
+
+        if (transaction.result && transaction.result.message) {
+          return callback(_this4.tronWeb.toUtf8(transaction.result.message));
+        }
+
         callback(null, transaction);
       }).catch(function (err) {
         return callback(err);
@@ -35534,6 +35562,11 @@ function () {
     key: "purchaseAsset",
     value: function purchaseAsset() {
       return this.purchaseToken.apply(this, arguments);
+    }
+  }, {
+    key: "createAsset",
+    value: function createAsset() {
+      return this.createToken.apply(this, arguments);
     }
   }]);
 

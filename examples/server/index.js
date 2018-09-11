@@ -286,6 +286,21 @@ const app = async () => {
             console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
         console.groupEnd();
     });
+
+    tronWeb.transactionBuilder.updateToken({
+        description: 'Useless (TM) utility token',
+        url: 'https://improved.google.com',
+        freeBandwidth: 68,
+        freeBandwidthLimit: 12
+    }, (err, transaction) => {
+        if(err)
+            return console.error(err);
+
+        console.group('Unsigned update token transaction');
+            console.log('- Token Name: TestToken')
+            console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
+        console.groupEnd();
+    });
 };
 
 app();
