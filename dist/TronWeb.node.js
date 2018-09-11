@@ -1295,6 +1295,36 @@ class Trx {
     }
   }
 
+  async sendToken(to = false, amount = false, tokenID = false, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(privateKey)) {
+      callback = privateKey;
+      privateKey = this.tronWeb.defaultPrivateKey;
+    }
+
+    if (!callback) return this.injectPromise(this.sendToken, to, amount, tokenID, privateKey);
+    if (!this.tronWeb.isAddress(to)) return callback('Invalid recipient provided');
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(amount) || amount <= 0) return callback('Invalid amount provided');
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isString(tokenID)) return callback('Invalid token ID provided');
+
+    try {
+      const address = this.tronWeb.address.fromPrivateKey(privateKey);
+      const transaction = await this.tronWeb.transactionBuilder.sendToken(to, amount, tokenID, address);
+      const signedTransaction = await this.signTransaction(transaction, privateKey);
+      const result = await this.sendRawTransaction(signedTransaction);
+      return callback(null, result);
+    } catch (ex) {
+      return callback(ex);
+    }
+  }
+
+  send(...args) {
+    return this.sendTransaction(...args);
+  }
+
+  sendTrx(...args) {
+    return this.sendTransaction(...args);
+  }
+
   broadcast(...args) {
     return this.sendRawTransaction(...args);
   }

@@ -36304,6 +36304,115 @@ function () {
       };
     }()
   }, {
+    key: "sendToken",
+    value: function () {
+      var _sendToken = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee3() {
+        var to,
+            amount,
+            tokenID,
+            privateKey,
+            callback,
+            address,
+            transaction,
+            signedTransaction,
+            result,
+            _args3 = arguments;
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                to = _args3.length > 0 && _args3[0] !== undefined ? _args3[0] : false;
+                amount = _args3.length > 1 && _args3[1] !== undefined ? _args3[1] : false;
+                tokenID = _args3.length > 2 && _args3[2] !== undefined ? _args3[2] : false;
+                privateKey = _args3.length > 3 && _args3[3] !== undefined ? _args3[3] : this.tronWeb.defaultPrivateKey;
+                callback = _args3.length > 4 && _args3[4] !== undefined ? _args3[4] : false;
+
+                if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(privateKey)) {
+                  callback = privateKey;
+                  privateKey = this.tronWeb.defaultPrivateKey;
+                }
+
+                if (callback) {
+                  _context3.next = 8;
+                  break;
+                }
+
+                return _context3.abrupt("return", this.injectPromise(this.sendToken, to, amount, tokenID, privateKey));
+
+              case 8:
+                if (this.tronWeb.isAddress(to)) {
+                  _context3.next = 10;
+                  break;
+                }
+
+                return _context3.abrupt("return", callback('Invalid recipient provided'));
+
+              case 10:
+                if (!(!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(amount) || amount <= 0)) {
+                  _context3.next = 12;
+                  break;
+                }
+
+                return _context3.abrupt("return", callback('Invalid amount provided'));
+
+              case 12:
+                if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isString(tokenID)) {
+                  _context3.next = 14;
+                  break;
+                }
+
+                return _context3.abrupt("return", callback('Invalid token ID provided'));
+
+              case 14:
+                _context3.prev = 14;
+                address = this.tronWeb.address.fromPrivateKey(privateKey);
+                _context3.next = 18;
+                return this.tronWeb.transactionBuilder.sendToken(to, amount, tokenID, address);
+
+              case 18:
+                transaction = _context3.sent;
+                _context3.next = 21;
+                return this.signTransaction(transaction, privateKey);
+
+              case 21:
+                signedTransaction = _context3.sent;
+                _context3.next = 24;
+                return this.sendRawTransaction(signedTransaction);
+
+              case 24:
+                result = _context3.sent;
+                return _context3.abrupt("return", callback(null, result));
+
+              case 28:
+                _context3.prev = 28;
+                _context3.t0 = _context3["catch"](14);
+                return _context3.abrupt("return", callback(_context3.t0));
+
+              case 31:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this, [[14, 28]]);
+      }));
+
+      return function sendToken() {
+        return _sendToken.apply(this, arguments);
+      };
+    }()
+  }, {
+    key: "send",
+    value: function send() {
+      return this.sendTransaction.apply(this, arguments);
+    }
+  }, {
+    key: "sendTrx",
+    value: function sendTrx() {
+      return this.sendTransaction.apply(this, arguments);
+    }
+  }, {
     key: "broadcast",
     value: function broadcast() {
       return this.sendRawTransaction.apply(this, arguments);

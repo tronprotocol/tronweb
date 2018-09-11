@@ -325,6 +325,16 @@ const app = async () => {
             console.log('- Result:\n' + JSON.stringify(result, null, 2), '\n');
         console.groupEnd();
     });
+
+    tronWeb.trx.sendToken('TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1', 10, 'TestToken_1', (err, result) => {
+        if(err)
+            return console.error(err);
+
+        console.group('Send token transaction');
+            console.log('Token Name: TestToken_1');
+            console.log('- Result:\n' + JSON.stringify(result, null, 2), '\n');
+        console.groupEnd();
+    });
 };
 
 app();
