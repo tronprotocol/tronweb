@@ -347,6 +347,16 @@ const app = async () => {
             console.log('- Events:\n' + JSON.stringify(events, null, 2), '\n');
         console.groupEnd();
     });
+
+    tronWeb.getEventByTransacionID('32d7efe5f70c044bcd831f21f911209a7abf4ed0d5934b2c1b804e108008cd43', (err, events) => {
+        if(err)
+            return console.error(err);
+
+        console.group('Specific event result');
+            console.log('Transaction: 32d7efe5f70c044bcd831f21f911209a7abf4ed0d5934b2c1b804e108008cd43');
+            console.log('- Events:\n' + JSON.stringify(events, null, 2), '\n');
+        console.groupEnd();
+    });
 };
 
 app();

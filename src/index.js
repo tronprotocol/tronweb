@@ -166,13 +166,25 @@ export default class TronWeb {
                 return callback(data);
 
             return callback(null, data);
-        }).catch(err => callback(err.response.data || err));          
+        }).catch(err => callback(err.response.data || err)); 
     }
 
-    // TODO
-    getEventByTransacionID(transactionID, callback = false) {
+    getEventByTransacionID(transactionID = false, callback = false) {
         if(!callback)
             return this.injectPromise(this.getEventByTransacionID, transactionID);
+
+        if(!this.eventServer)
+            callback('No event server configured');
+
+        return axios(`${this.eventServer}/event/transaction/${transactionID}`).then(({ data = false }) => {
+            if(!data)
+                return callback('Unknown error occurred');
+
+            if(!utils.isArray(data))
+                return callback(data);
+
+            return callback(null, data);
+        }).catch(err => callback(err.response.data || err));
     }
 
     static get address() {

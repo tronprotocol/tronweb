@@ -228,11 +228,18 @@ class TronWeb {
       if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isArray(data)) return callback(data);
       return callback(null, data);
     }).catch(err => callback(err.response.data || err));
-  } // TODO
+  }
 
-
-  getEventByTransacionID(transactionID, callback = false) {
+  getEventByTransacionID(transactionID = false, callback = false) {
     if (!callback) return this.injectPromise(this.getEventByTransacionID, transactionID);
+    if (!this.eventServer) callback('No event server configured');
+    return axios__WEBPACK_IMPORTED_MODULE_3___default()(`${this.eventServer}/event/transaction/${transactionID}`).then(({
+      data = false
+    }) => {
+      if (!data) return callback('Unknown error occurred');
+      if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isArray(data)) return callback(data);
+      return callback(null, data);
+    }).catch(err => callback(err.response.data || err));
   }
 
   static get address() {

@@ -34652,13 +34652,23 @@ function () {
       }).catch(function (err) {
         return callback(err.response.data || err);
       });
-    } // TODO
-
+    }
   }, {
     key: "getEventByTransacionID",
-    value: function getEventByTransacionID(transactionID) {
+    value: function getEventByTransacionID() {
+      var transactionID = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
       var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
       if (!callback) return this.injectPromise(this.getEventByTransacionID, transactionID);
+      if (!this.eventServer) callback('No event server configured');
+      return axios__WEBPACK_IMPORTED_MODULE_2___default()("".concat(this.eventServer, "/event/transaction/").concat(transactionID)).then(function (_ref3) {
+        var _ref3$data = _ref3.data,
+            data = _ref3$data === void 0 ? false : _ref3$data;
+        if (!data) return callback('Unknown error occurred');
+        if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isArray(data)) return callback(data);
+        return callback(null, data);
+      }).catch(function (err) {
+        return callback(err.response.data || err);
+      });
     }
   }, {
     key: "isConnected",
