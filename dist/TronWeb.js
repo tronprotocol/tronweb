@@ -35702,10 +35702,12 @@ function () {
     key: "setAddress",
     value: function setAddress(address) {
       if (!this.isAddress(address)) throw new Error('Invalid address provided');
-      this.defaultPrivateKey = false;
+      var hex = this.address.toHex(address);
+      var base58 = this.address.fromHex(address);
+      if (this.defaultPrivateKey && this.address.fromPrivateKey !== hex) this.defaultPrivateKey = false;
       this.defaultAddress = {
-        hex: this.address.toHex(address),
-        base58: this.address.fromHex(address)
+        hex: hex,
+        base58: base58
       };
     }
   }, {
@@ -36596,16 +36598,24 @@ function () {
                     return _context2.abrupt("return", callback('Calling smart contracts requires you to load the contract first'));
 
                   case 13:
+                    if (!(!privateKey || !utils__WEBPACK_IMPORTED_MODULE_7__["default"].isString(privateKey))) {
+                      _context2.next = 15;
+                      break;
+                    }
+
+                    return _context2.abrupt("return", callback('Invalid private key provided'));
+
+                  case 15:
                     stateMutability = self.abi.stateMutability;
 
                     if (![STATE_MUTABILITY.PURE, STATE_MUTABILITY.VIEW].includes(stateMutability.toLowerCase())) {
-                      _context2.next = 16;
+                      _context2.next = 18;
                       break;
                     }
 
                     return _context2.abrupt("return", callback("Methods with state mutability \"".concat(stateMutability, "\" must use call()")));
 
-                  case 16:
+                  case 18:
                     options = _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_3___default()({}, defaultOptions, options);
                     parameters = args.map(function (value, index) {
                       return {
@@ -36613,49 +36623,49 @@ function () {
                         value: value
                       };
                     });
-                    _context2.prev = 18;
+                    _context2.prev = 20;
                     address = self.tronWeb.address.fromPrivateKey(privateKey);
-                    _context2.next = 22;
+                    _context2.next = 24;
                     return self.tronWeb.transactionBuilder.triggerSmartContract(self.contract.address, self.functionSelector, options.feeLimit, options.callValue, parameters, self.tronWeb.address.toHex(address));
 
-                  case 22:
+                  case 24:
                     transaction = _context2.sent;
 
                     if (!(!transaction.result || !transaction.result.result)) {
-                      _context2.next = 25;
+                      _context2.next = 27;
                       break;
                     }
 
                     return _context2.abrupt("return", callback('Unknown error: ' + JSON.stringify(transaction, null, 2)));
 
-                  case 25:
-                    _context2.next = 27;
+                  case 27:
+                    _context2.next = 29;
                     return self.tronWeb.trx.sign(transaction.transaction, privateKey);
 
-                  case 27:
+                  case 29:
                     signedTransaction = _context2.sent;
-                    _context2.next = 30;
+                    _context2.next = 32;
                     return self.tronWeb.trx.sendRawTransaction(signedTransaction);
 
-                  case 30:
+                  case 32:
                     broadcast = _context2.sent;
 
                     if (broadcast.result) {
-                      _context2.next = 33;
+                      _context2.next = 35;
                       break;
                     }
 
                     return _context2.abrupt("return", callback('Unknown error: ' + JSON.stringify(broadcast, null, 2)));
 
-                  case 33:
+                  case 35:
                     if (options.shouldPollResponse) {
-                      _context2.next = 35;
+                      _context2.next = 37;
                       break;
                     }
 
                     return _context2.abrupt("return", callback(null, signedTransaction.txID));
 
-                  case 35:
+                  case 37:
                     checkResult =
                     /*#__PURE__*/
                     function () {
@@ -36722,20 +36732,20 @@ function () {
                     }();
 
                     checkResult();
-                    _context2.next = 42;
+                    _context2.next = 44;
                     break;
 
-                  case 39:
-                    _context2.prev = 39;
-                    _context2.t0 = _context2["catch"](18);
+                  case 41:
+                    _context2.prev = 41;
+                    _context2.t0 = _context2["catch"](20);
                     return _context2.abrupt("return", callback(_context2.t0));
 
-                  case 42:
+                  case 44:
                   case "end":
                     return _context2.stop();
                 }
               }
-            }, _callee2, this, [[18, 39]]);
+            }, _callee2, this, [[20, 41]]);
           }));
 
           return function send() {
@@ -37832,7 +37842,6 @@ function () {
       this.tronWeb.solidityNode.request('walletsolidity/gettransactioninfobyid', {
         value: transactionID
       }, 'post').then(function (transaction) {
-        if (!Object.keys(transaction).length) return callback('Transaction not found');
         callback(null, transaction);
       }).catch(function (err) {
         return callback(err);

@@ -164,10 +164,12 @@ class TronWeb {
 
   setAddress(address) {
     if (!this.isAddress(address)) throw new Error('Invalid address provided');
-    this.defaultPrivateKey = false;
+    const hex = this.address.toHex(address);
+    const base58 = this.address.fromHex(address);
+    if (this.defaultPrivateKey && this.address.fromPrivateKey !== hex) this.defaultPrivateKey = false;
     this.defaultAddress = {
-      hex: this.address.toHex(address),
-      base58: this.address.fromHex(address)
+      hex,
+      base58
     };
   }
 
@@ -644,6 +646,7 @@ class Method {
         if (types.length !== args.length) throw new Error('Invalid argument count provided');
         if (!self.contract.address) return callback('Smart contract is missing address');
         if (!self.contract.deployed) return callback('Calling smart contracts requires you to load the contract first');
+        if (!privateKey || !utils__WEBPACK_IMPORTED_MODULE_2__["default"].isString(privateKey)) return callback('Invalid private key provided');
         const {
           stateMutability
         } = self.abi;
@@ -1434,7 +1437,6 @@ class Trx {
     this.tronWeb.solidityNode.request('walletsolidity/gettransactioninfobyid', {
       value: transactionID
     }, 'post').then(transaction => {
-      if (!Object.keys(transaction).length) return callback('Transaction not found');
       callback(null, transaction);
     }).catch(err => callback(err));
   }
