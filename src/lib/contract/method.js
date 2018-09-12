@@ -142,6 +142,9 @@ export default class Method {
                 if(!self.contract.deployed)
                     return callback('Calling smart contracts requires you to load the contract first');
 
+                if(!privateKey || !utils.isString(privateKey))
+                    return callback('Invalid private key provided');
+
                 const { stateMutability } = self.abi;
 
                 if([ STATE_MUTABILITY.PURE, STATE_MUTABILITY.VIEW ].includes(stateMutability.toLowerCase()))

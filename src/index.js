@@ -77,10 +77,15 @@ export default class TronWeb {
         if(!this.isAddress(address))
             throw new Error('Invalid address provided');
 
-        this.defaultPrivateKey = false;
+        const hex = this.address.toHex(address);
+        const base58 = this.address.fromHex(address);
+
+        if(this.defaultPrivateKey && this.address.fromPrivateKey !== hex)
+           this.defaultPrivateKey = false;
+
         this.defaultAddress = {
-            hex: this.address.toHex(address),
-            base58: this.address.fromHex(address)
+            hex,
+            base58
         };
     }
 
