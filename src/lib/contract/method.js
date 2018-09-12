@@ -124,7 +124,6 @@ export default class Method {
                 if(utils.isFunction(options)) {
                     callback = options;
                     options = defaultOptions;
-                    privateKey = self.tronWeb.defaultPrivateKey;
                 }
                     
                 if(!callback)
