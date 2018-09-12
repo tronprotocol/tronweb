@@ -36403,13 +36403,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/asyncToGenerator.js");
 /* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ "./node_modules/@babel/runtime/helpers/classCallCheck.js");
-/* harmony import */ var _babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @babel/runtime/helpers/createClass */ "./node_modules/@babel/runtime/helpers/createClass.js");
-/* harmony import */ var _babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var ethers__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ethers */ "./node_modules/ethers/index.js");
-/* harmony import */ var ethers__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(ethers__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var utils__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! utils */ "./src/utils/index.js");
+/* harmony import */ var _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @babel/runtime/helpers/objectSpread */ "./node_modules/@babel/runtime/helpers/objectSpread.js");
+/* harmony import */ var _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ "./node_modules/@babel/runtime/helpers/classCallCheck.js");
+/* harmony import */ var _babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @babel/runtime/helpers/createClass */ "./node_modules/@babel/runtime/helpers/createClass.js");
+/* harmony import */ var _babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var ethers__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ethers */ "./node_modules/ethers/index.js");
+/* harmony import */ var ethers__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(ethers__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var utils__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! utils */ "./src/utils/index.js");
 
 
 
@@ -36417,7 +36419,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-var abiCoder = new ethers__WEBPACK_IMPORTED_MODULE_5___default.a.utils.AbiCoder();
+
+var abiCoder = new ethers__WEBPACK_IMPORTED_MODULE_6___default.a.utils.AbiCoder();
 
 var getFunctionSelector = function getFunctionSelector(abi) {
   return abi.name + '(' + getParamTypes(abi.inputs || []).join(',') + ')';
@@ -36432,7 +36435,7 @@ var getParamTypes = function getParamTypes(params) {
 
 var decodeOutput = function decodeOutput(abi, output) {
   if (abi.some(function (output) {
-    return utils__WEBPACK_IMPORTED_MODULE_6__["default"].hasProperty(output, 'name');
+    return utils__WEBPACK_IMPORTED_MODULE_7__["default"].hasProperty(output, 'name');
   })) {
     return abiCoder.decode(abi.map(function (_ref2) {
       var name = _ref2.name;
@@ -36458,7 +36461,7 @@ var Method =
 /*#__PURE__*/
 function () {
   function Method(contract, abi) {
-    _babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_3___default()(this, Method);
+    _babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_4___default()(this, Method);
 
     this.tronWeb = contract.tronWeb;
     this.contract = contract;
@@ -36470,7 +36473,7 @@ function () {
     this.functionSelector = getFunctionSelector(abi);
   }
 
-  _babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_4___default()(Method, [{
+  _babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_5___default()(Method, [{
     key: "onMethod",
     value: function onMethod() {
       var _this = this;
@@ -36497,17 +36500,18 @@ function () {
           var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultOptions;
           var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
-          if (utils__WEBPACK_IMPORTED_MODULE_6__["default"].isFunction(options)) {
+          if (utils__WEBPACK_IMPORTED_MODULE_7__["default"].isFunction(options)) {
             callback = options;
             options = defaultOptions;
           }
 
-          if (!callback) return utils__WEBPACK_IMPORTED_MODULE_6__["default"].injectPromise(this.call.bind(this), options);
+          if (!callback) return utils__WEBPACK_IMPORTED_MODULE_7__["default"].injectPromise(this.call.bind(this), options);
           if (types.length !== args.length) return callback('Invalid argument count provided');
           if (!self.contract.address) return callback('Smart contract is missing address');
           if (!self.contract.deployed) return callback('Calling smart contracts requires you to load the contract first');
           var stateMutability = self.abi.stateMutability;
           if (![STATE_MUTABILITY.PURE, STATE_MUTABILITY.VIEW].includes(stateMutability.toLowerCase())) return callback("Methods with state mutability \"".concat(stateMutability, "\" must use send()"));
+          options = _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_3___default()({}, defaultOptions, options);
           var parameters = args.map(function (value, index) {
             return {
               type: types[index],
@@ -36516,7 +36520,7 @@ function () {
           });
           self.tronWeb.transactionBuilder.triggerSmartContract(self.contract.address, self.functionSelector, options.feeLimit, options.callValue, parameters, self.tronWeb.address.toHex(options.from), function (err, transaction) {
             if (err) return callback(err);
-            if (!utils__WEBPACK_IMPORTED_MODULE_6__["default"].hasProperty(transaction, 'constant_result')) return callback('Failed to execute');
+            if (!utils__WEBPACK_IMPORTED_MODULE_7__["default"].hasProperty(transaction, 'constant_result')) return callback('Failed to execute');
 
             try {
               var output = decodeOutput(self.outputs, '0x' + transaction.constant_result[0]);
@@ -36545,16 +36549,16 @@ function () {
               while (1) {
                 switch (_context2.prev = _context2.next) {
                   case 0:
-                    options = _args2.length > 0 && _args2[0] !== undefined ? _args2[0] : {};
+                    options = _args2.length > 0 && _args2[0] !== undefined ? _args2[0] : defaultOptions;
                     privateKey = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : self.tronWeb.defaultPrivateKey;
                     callback = _args2.length > 2 && _args2[2] !== undefined ? _args2[2] : false;
 
-                    if (utils__WEBPACK_IMPORTED_MODULE_6__["default"].isFunction(privateKey)) {
+                    if (utils__WEBPACK_IMPORTED_MODULE_7__["default"].isFunction(privateKey)) {
                       callback = privateKey;
                       privateKey = self.tronWeb.defaultPrivateKey;
                     }
 
-                    if (utils__WEBPACK_IMPORTED_MODULE_6__["default"].isFunction(options)) {
+                    if (utils__WEBPACK_IMPORTED_MODULE_7__["default"].isFunction(options)) {
                       callback = options;
                       options = defaultOptions;
                     }
@@ -36564,7 +36568,7 @@ function () {
                       break;
                     }
 
-                    return _context2.abrupt("return", utils__WEBPACK_IMPORTED_MODULE_6__["default"].injectPromise(this.send.bind(this), options, privateKey));
+                    return _context2.abrupt("return", utils__WEBPACK_IMPORTED_MODULE_7__["default"].injectPromise(this.send.bind(this), options, privateKey));
 
                   case 7:
                     if (!(types.length !== args.length)) {
@@ -36601,55 +36605,56 @@ function () {
                     return _context2.abrupt("return", callback("Methods with state mutability \"".concat(stateMutability, "\" must use call()")));
 
                   case 16:
+                    options = _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_3___default()({}, defaultOptions, options);
                     parameters = args.map(function (value, index) {
                       return {
                         type: types[index],
                         value: value
                       };
                     });
-                    _context2.prev = 17;
+                    _context2.prev = 18;
                     address = self.tronWeb.address.fromPrivateKey(privateKey);
-                    _context2.next = 21;
+                    _context2.next = 22;
                     return self.tronWeb.transactionBuilder.triggerSmartContract(self.contract.address, self.functionSelector, options.feeLimit, options.callValue, parameters, self.tronWeb.address.toHex(address));
 
-                  case 21:
+                  case 22:
                     transaction = _context2.sent;
 
                     if (!(!transaction.result || !transaction.result.result)) {
-                      _context2.next = 24;
+                      _context2.next = 25;
                       break;
                     }
 
                     return _context2.abrupt("return", callback('Unknown error: ' + JSON.stringify(transaction, null, 2)));
 
-                  case 24:
-                    _context2.next = 26;
+                  case 25:
+                    _context2.next = 27;
                     return self.tronWeb.trx.sign(transaction.transaction, privateKey);
 
-                  case 26:
+                  case 27:
                     signedTransaction = _context2.sent;
-                    _context2.next = 29;
+                    _context2.next = 30;
                     return self.tronWeb.trx.sendRawTransaction(signedTransaction);
 
-                  case 29:
+                  case 30:
                     broadcast = _context2.sent;
 
                     if (broadcast.result) {
-                      _context2.next = 32;
+                      _context2.next = 33;
                       break;
                     }
 
                     return _context2.abrupt("return", callback('Unknown error: ' + JSON.stringify(broadcast, null, 2)));
 
-                  case 32:
+                  case 33:
                     if (options.shouldPollResponse) {
-                      _context2.next = 34;
+                      _context2.next = 35;
                       break;
                     }
 
                     return _context2.abrupt("return", callback(null, signedTransaction.txID));
 
-                  case 34:
+                  case 35:
                     checkResult =
                     /*#__PURE__*/
                     function () {
@@ -36690,7 +36695,7 @@ function () {
                                 }, 3000));
 
                               case 8:
-                                if (utils__WEBPACK_IMPORTED_MODULE_6__["default"].hasProperty(output, 'contractResult')) {
+                                if (utils__WEBPACK_IMPORTED_MODULE_7__["default"].hasProperty(output, 'contractResult')) {
                                   _context.next = 10;
                                   break;
                                 }
@@ -36715,20 +36720,20 @@ function () {
                     }();
 
                     checkResult();
-                    _context2.next = 41;
+                    _context2.next = 42;
                     break;
 
-                  case 38:
-                    _context2.prev = 38;
-                    _context2.t0 = _context2["catch"](17);
+                  case 39:
+                    _context2.prev = 39;
+                    _context2.t0 = _context2["catch"](18);
                     return _context2.abrupt("return", callback(_context2.t0));
 
-                  case 41:
+                  case 42:
                   case "end":
                     return _context2.stop();
                 }
               }
-            }, _callee2, this, [[17, 38]]);
+            }, _callee2, this, [[18, 39]]);
           }));
 
           return function send() {
@@ -36751,7 +36756,7 @@ function () {
                   case 0:
                     callback = _args4.length > 0 && _args4[0] !== undefined ? _args4[0] : false;
 
-                    if (utils__WEBPACK_IMPORTED_MODULE_6__["default"].isFunction(callback)) {
+                    if (utils__WEBPACK_IMPORTED_MODULE_7__["default"].isFunction(callback)) {
                       _context4.next = 3;
                       break;
                     }

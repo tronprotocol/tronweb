@@ -86,6 +86,8 @@ export default class Method {
                 if(![ STATE_MUTABILITY.PURE, STATE_MUTABILITY.VIEW ].includes(stateMutability.toLowerCase()))
                     return callback(`Methods with state mutability "${stateMutability}" must use send()`);
 
+                options = { ...defaultOptions, ...options };
+
                 const parameters = args.map((value, index) => ({
                     type: types[index],
                     value
@@ -113,7 +115,7 @@ export default class Method {
                     }
                 });
             },
-            async send(options = {}, privateKey = self.tronWeb.defaultPrivateKey, callback = false) {
+            async send(options = defaultOptions, privateKey = self.tronWeb.defaultPrivateKey, callback = false) {
                 if(utils.isFunction(privateKey)) {
                     callback = privateKey;
                     privateKey = self.tronWeb.defaultPrivateKey;
@@ -140,6 +142,8 @@ export default class Method {
 
                 if([ STATE_MUTABILITY.PURE, STATE_MUTABILITY.VIEW ].includes(stateMutability.toLowerCase()))
                         return callback(`Methods with state mutability "${stateMutability}" must use call()`);
+
+                options = { ...defaultOptions, ...options };
 
                 const parameters = args.map((value, index) => ({
                     type: types[index],
