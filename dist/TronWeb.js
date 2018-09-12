@@ -34491,6 +34491,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var lib_transactionBuilder__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! lib/transactionBuilder */ "./src/lib/transactionBuilder.js");
 /* harmony import */ var lib_trx__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! lib/trx */ "./src/lib/trx.js");
 /* harmony import */ var lib_witness__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! lib/witness */ "./src/lib/witness.js");
+/* harmony import */ var lib_contract__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! lib/contract */ "./src/lib/contract/index.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -34504,6 +34505,7 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 
 
 
@@ -34669,6 +34671,13 @@ function () {
       }).catch(function (err) {
         return callback(err.response.data || err);
       });
+    }
+  }, {
+    key: "contract",
+    value: function contract() {
+      var abi = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+      var address = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      return new lib_contract__WEBPACK_IMPORTED_MODULE_8__["default"](this, abi, address);
     }
   }, {
     key: "isConnected",
@@ -34878,6 +34887,569 @@ _defineProperty(TronWeb, "BigNumber", bignumber_js__WEBPACK_IMPORTED_MODULE_3___
 
 ;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../node_modules/buffer/index.js */ "./node_modules/buffer/index.js").Buffer))
+
+/***/ }),
+
+/***/ "./src/lib/contract/index.js":
+/*!***********************************!*\
+  !*** ./src/lib/contract/index.js ***!
+  \***********************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Contract; });
+/* harmony import */ var index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! index */ "./src/index.js");
+/* harmony import */ var utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! utils */ "./src/utils/index.js");
+/* harmony import */ var _method__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./method */ "./src/lib/contract/method.js");
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+
+
+
+
+var Contract =
+/*#__PURE__*/
+function () {
+  function Contract() {
+    var tronWeb = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+    var abi = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+    var address = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+    _classCallCheck(this, Contract);
+
+    if (!tronWeb || !tronWeb instanceof index__WEBPACK_IMPORTED_MODULE_0__["default"]) throw new Error('Expected instance of TronWeb');
+    this.tronWeb = tronWeb;
+    this.injectPromise = utils__WEBPACK_IMPORTED_MODULE_1__["default"].promiseInjector(this);
+    this.address = address;
+    this.abi = abi;
+    this.bytecode = false;
+    this.deployed = false;
+    this.methods = {};
+    if (this.tronWeb.isAddress(address)) this.deployed = true;else this.address = false;
+    this.loadAbi(abi);
+  }
+
+  _createClass(Contract, [{
+    key: "loadAbi",
+    value: function loadAbi(abi) {
+      var _this = this;
+
+      this.abi = abi;
+      this.methods = {};
+      abi.forEach(function (func) {
+        var method = new _method__WEBPACK_IMPORTED_MODULE_2__["default"](_this, func);
+        var methodCall = method.onMethod.bind(method);
+        _this.methods[method.name] = methodCall;
+        _this.methods[method.functionSelector] = methodCall;
+        _this.methods[method.signature] = methodCall;
+      });
+    }
+  }, {
+    key: "new",
+    value: function () {
+      var _new2 = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee(options) {
+        var privateKey,
+            callback,
+            address,
+            transaction,
+            signedTransaction,
+            contract,
+            _args = arguments;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                privateKey = _args.length > 1 && _args[1] !== undefined ? _args[1] : this.tronWeb.defaultPrivateKey;
+                callback = _args.length > 2 && _args[2] !== undefined ? _args[2] : false;
+
+                if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(privateKey)) {
+                  callback = privateKey;
+                  privateKey = this.tronWeb.defaultPrivateKey;
+                }
+
+                if (callback) {
+                  _context.next = 5;
+                  break;
+                }
+
+                return _context.abrupt("return", this.injectPromise(this.new, options, privateKey));
+
+              case 5:
+                _context.prev = 5;
+                address = this.tronWeb.address.fromPrivateKey(privateKey);
+                _context.next = 9;
+                return this.tronWeb.transactionBuilder.createSmartContract(options, address);
+
+              case 9:
+                transaction = _context.sent;
+                _context.next = 12;
+                return this.tronWeb.trx.sign(transaction, privateKey);
+
+              case 12:
+                signedTransaction = _context.sent;
+                _context.next = 15;
+                return this.tronWeb.trx.sendRawTransaction(signedTransaction);
+
+              case 15:
+                contract = _context.sent;
+
+                if (contract.result) {
+                  _context.next = 18;
+                  break;
+                }
+
+                return _context.abrupt("return", callback('Unknown error: ' + JSON.stringify(contract, null, 2)));
+
+              case 18:
+                return _context.abrupt("return", this.at(signedTransaction.contract_address, callback));
+
+              case 21:
+                _context.prev = 21;
+                _context.t0 = _context["catch"](5);
+                return _context.abrupt("return", callback(_context.t0));
+
+              case 24:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this, [[5, 21]]);
+      }));
+
+      return function _new(_x) {
+        return _new2.apply(this, arguments);
+      };
+    }()
+  }, {
+    key: "at",
+    value: function () {
+      var _at = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee2(contractAddress) {
+        var callback,
+            contract,
+            _args2 = arguments;
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                callback = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : false;
+
+                if (callback) {
+                  _context2.next = 3;
+                  break;
+                }
+
+                return _context2.abrupt("return", this.injectPromise(this.at, contractAddress));
+
+              case 3:
+                _context2.prev = 3;
+                _context2.next = 6;
+                return this.tronWeb.trx.getContract(contractAddress);
+
+              case 6:
+                contract = _context2.sent;
+                if (!contract.contract_address) callback('Unknown error: ' + JSON.stringify(contract, null, 2));
+                this.address = contract.contract_address;
+                this.bytecode = contract.bytecode;
+                this.deployed = true;
+                this.loadAbi(contract.abi.entrys);
+                callback(null, this);
+                _context2.next = 20;
+                break;
+
+              case 15:
+                _context2.prev = 15;
+                _context2.t0 = _context2["catch"](3);
+
+                if (!_context2.t0.toString().includes('does not exist')) {
+                  _context2.next = 19;
+                  break;
+                }
+
+                return _context2.abrupt("return", callback('Failed to deploy contract'));
+
+              case 19:
+                return _context2.abrupt("return", callback(_context2.t0));
+
+              case 20:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this, [[3, 15]]);
+      }));
+
+      return function at(_x2) {
+        return _at.apply(this, arguments);
+      };
+    }()
+  }]);
+
+  return Contract;
+}();
+
+
+
+/***/ }),
+
+/***/ "./src/lib/contract/method.js":
+/*!************************************!*\
+  !*** ./src/lib/contract/method.js ***!
+  \************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Method; });
+/* harmony import */ var ethers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ethers */ "./node_modules/ethers/index.js");
+/* harmony import */ var ethers__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(ethers__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! utils */ "./src/utils/index.js");
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+
+
+var abiCoder = new ethers__WEBPACK_IMPORTED_MODULE_0___default.a.utils.AbiCoder();
+
+var getFunctionSelector = function getFunctionSelector(abi) {
+  return abi.name + '(' + getParamTypes(abi.inputs || []).join(',') + ')';
+};
+
+var getParamTypes = function getParamTypes(params) {
+  return params.map(function (_ref) {
+    var type = _ref.type;
+    return type;
+  });
+};
+
+var decodeOutput = function decodeOutput(abi, output) {
+  if (abi.some(function (output) {
+    return utils__WEBPACK_IMPORTED_MODULE_1__["default"].hasProperty(output, 'name');
+  })) {
+    return abiCoder.decode(abi.map(function (_ref2) {
+      var name = _ref2.name;
+      return name;
+    }), abi.map(function (_ref3) {
+      var type = _ref3.type;
+      return type;
+    }), output);
+  }
+
+  return abiCoder.decode(abi.map(function (_ref4) {
+    var type = _ref4.type;
+    return type;
+  }), output);
+};
+
+var STATE_MUTABILITY = {
+  PURE: 'pure',
+  VIEW: 'view'
+};
+
+var Method =
+/*#__PURE__*/
+function () {
+  function Method(contract, abi) {
+    _classCallCheck(this, Method);
+
+    this.tronWeb = contract.tronWeb;
+    this.contract = contract;
+    this.abi = abi;
+    this.name = abi.name;
+    this.inputs = abi.inputs || [];
+    this.outputs = abi.outputs || [];
+    this.signature = this.tronWeb.sha3(abi.name).slice(0, 8);
+    this.functionSelector = getFunctionSelector(abi);
+  }
+
+  _createClass(Method, [{
+    key: "onMethod",
+    value: function onMethod() {
+      var _this = this;
+
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      var types = getParamTypes(this.inputs);
+      if (types.length !== args.length) throw new Error('Invalid argument count provided');
+      args.forEach(function (arg, index) {
+        if (types[index] == 'address') args[index] = _this.tronWeb.address.toHex(arg).replace(/^(41)/, '0x');
+      });
+      var parameters = abiCoder.encode(types, args).replace(/^(0x)/, '');
+      var self = this;
+      var defaultOptions = {
+        feeLimit: 1000000000,
+        callValue: 0,
+        from: this.tronWeb.defaultAddress.hex,
+        // Only used for send()
+        shouldPollResponse: false // Only used for sign()
+
+      };
+      return {
+        call: function call() {
+          var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultOptions;
+          var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+          if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(options)) {
+            callback = options;
+            options = defaultOptions;
+          }
+
+          if (!callback) return utils__WEBPACK_IMPORTED_MODULE_1__["default"].injectPromise(this.call.bind(this), options);
+          if (!self.contract.address) throw new Error('Smart contract is missing address');
+          if (!self.contract.deployed) throw new Error('Calling smart contracts requires you to load the contract first');
+          var stateMutability = self.abi.stateMutability;
+          if (![STATE_MUTABILITY.PURE, STATE_MUTABILITY.VIEW].includes(stateMutability.toLowerCase())) return callback("Methods with state mutability \"".concat(stateMutability, "\" must use send()"));
+          var parameters = args.map(function (value, index) {
+            return {
+              type: types[index],
+              value: value
+            };
+          });
+          self.tronWeb.transactionBuilder.triggerSmartContract(self.contract.address, self.functionSelector, options.feeLimit, options.callValue, parameters, self.tronWeb.address.toHex(options.from), function (err, transaction) {
+            if (err) return callback(err);
+            if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].hasProperty(transaction, 'constant_result')) return callback('Failed to execute');
+
+            try {
+              var output = decodeOutput(self.outputs, '0x' + transaction.constant_result[0]);
+              return callback(null, output);
+            } catch (ex) {
+              return callback(ex);
+            }
+          });
+        },
+        send: function () {
+          var _send = _asyncToGenerator(
+          /*#__PURE__*/
+          regeneratorRuntime.mark(function _callee2() {
+            var options,
+                privateKey,
+                callback,
+                stateMutability,
+                parameters,
+                address,
+                transaction,
+                signedTransaction,
+                broadcast,
+                checkResult,
+                _args2 = arguments;
+            return regeneratorRuntime.wrap(function _callee2$(_context2) {
+              while (1) {
+                switch (_context2.prev = _context2.next) {
+                  case 0:
+                    options = _args2.length > 0 && _args2[0] !== undefined ? _args2[0] : {};
+                    privateKey = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : self.tronWeb.defaultPrivateKey;
+                    callback = _args2.length > 2 && _args2[2] !== undefined ? _args2[2] : false;
+
+                    if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(privateKey)) {
+                      callback = privateKey;
+                      privateKey = self.tronWeb.defaultPrivateKey;
+                    }
+
+                    if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(options)) {
+                      callback = options;
+                      options = defaultOptions;
+                      privateKey = self.tronWeb.defaultPrivateKey;
+                    }
+
+                    if (callback) {
+                      _context2.next = 7;
+                      break;
+                    }
+
+                    return _context2.abrupt("return", utils__WEBPACK_IMPORTED_MODULE_1__["default"].injectPromise(this.send.bind(this), options, privateKey));
+
+                  case 7:
+                    if (self.contract.address) {
+                      _context2.next = 9;
+                      break;
+                    }
+
+                    throw new Error('Smart contract is missing address');
+
+                  case 9:
+                    if (self.contract.deployed) {
+                      _context2.next = 11;
+                      break;
+                    }
+
+                    throw new Error('Calling smart contracts requires you to load the contract first');
+
+                  case 11:
+                    stateMutability = self.abi.stateMutability;
+
+                    if (![STATE_MUTABILITY.PURE, STATE_MUTABILITY.VIEW].includes(stateMutability.toLowerCase())) {
+                      _context2.next = 14;
+                      break;
+                    }
+
+                    return _context2.abrupt("return", callback("Methods with state mutability \"".concat(stateMutability, "\" must use call()")));
+
+                  case 14:
+                    parameters = args.map(function (value, index) {
+                      return {
+                        type: types[index],
+                        value: value
+                      };
+                    });
+                    _context2.prev = 15;
+                    address = self.tronWeb.address.fromPrivateKey(privateKey);
+                    _context2.next = 19;
+                    return self.tronWeb.transactionBuilder.triggerSmartContract(self.contract.address, self.functionSelector, options.feeLimit, options.callValue, parameters, self.tronWeb.address.toHex(address));
+
+                  case 19:
+                    transaction = _context2.sent;
+
+                    if (!(!transaction.result || !transaction.result.result)) {
+                      _context2.next = 22;
+                      break;
+                    }
+
+                    return _context2.abrupt("return", callback('Unknown error: ' + JSON.stringify(transaction, null, 2)));
+
+                  case 22:
+                    _context2.next = 24;
+                    return self.tronWeb.trx.sign(transaction.transaction, privateKey);
+
+                  case 24:
+                    signedTransaction = _context2.sent;
+                    _context2.next = 27;
+                    return self.tronWeb.trx.sendRawTransaction(signedTransaction);
+
+                  case 27:
+                    broadcast = _context2.sent;
+
+                    if (broadcast.result) {
+                      _context2.next = 30;
+                      break;
+                    }
+
+                    return _context2.abrupt("return", callback('Unknown error: ' + JSON.stringify(broadcast, null, 2)));
+
+                  case 30:
+                    if (options.shouldPollResponse) {
+                      _context2.next = 32;
+                      break;
+                    }
+
+                    return _context2.abrupt("return", callback(null, signedTransaction.txID));
+
+                  case 32:
+                    checkResult =
+                    /*#__PURE__*/
+                    function () {
+                      var _ref5 = _asyncToGenerator(
+                      /*#__PURE__*/
+                      regeneratorRuntime.mark(function _callee() {
+                        var index,
+                            output,
+                            decoded,
+                            _args = arguments;
+                        return regeneratorRuntime.wrap(function _callee$(_context) {
+                          while (1) {
+                            switch (_context.prev = _context.next) {
+                              case 0:
+                                index = _args.length > 0 && _args[0] !== undefined ? _args[0] : 0;
+
+                                if (!(index == 20)) {
+                                  _context.next = 3;
+                                  break;
+                                }
+
+                                return _context.abrupt("return", callback(null, signedTransaction.txID));
+
+                              case 3:
+                                _context.next = 5;
+                                return self.tronWeb.trx.getTransactionInfo(signedTransaction.txID);
+
+                              case 5:
+                                output = _context.sent;
+
+                                if (Object.keys(output).length) {
+                                  _context.next = 8;
+                                  break;
+                                }
+
+                                return _context.abrupt("return", setTimeout(function () {
+                                  checkResult(index + 1);
+                                }, 3000));
+
+                              case 8:
+                                if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].hasProperty(output, 'contractResult')) {
+                                  _context.next = 10;
+                                  break;
+                                }
+
+                                return _context.abrupt("return", callback('Failed to execute: ' + JSON.stringify(output, null, 2)));
+
+                              case 10:
+                                decoded = decodeOutput(self.outputs, '0x' + output.contractResult[0]);
+                                return _context.abrupt("return", callback(null, decoded));
+
+                              case 12:
+                              case "end":
+                                return _context.stop();
+                            }
+                          }
+                        }, _callee, this);
+                      }));
+
+                      return function checkResult() {
+                        return _ref5.apply(this, arguments);
+                      };
+                    }();
+
+                    checkResult();
+                    _context2.next = 39;
+                    break;
+
+                  case 36:
+                    _context2.prev = 36;
+                    _context2.t0 = _context2["catch"](15);
+                    return _context2.abrupt("return", callback(_context2.t0));
+
+                  case 39:
+                  case "end":
+                    return _context2.stop();
+                }
+              }
+            }, _callee2, this, [[15, 36]]);
+          }));
+
+          return function send() {
+            return _send.apply(this, arguments);
+          };
+        }()
+      };
+    }
+  }]);
+
+  return Method;
+}();
+
+
 
 /***/ }),
 
@@ -35329,7 +35901,7 @@ function () {
           _options$bytecode = options.bytecode,
           bytecode = _options$bytecode === void 0 ? false : _options$bytecode,
           _options$feeLimit = options.feeLimit,
-          feeLimit = _options$feeLimit === void 0 ? 0 : _options$feeLimit,
+          feeLimit = _options$feeLimit === void 0 ? 1000000000 : _options$feeLimit,
           _options$callValue = options.callValue,
           callValue = _options$callValue === void 0 ? 0 : _options$callValue,
           _options$bandwidthLim = options.bandwidthLimit,
@@ -35370,9 +35942,10 @@ function () {
     }
   }, {
     key: "triggerSmartContract",
-    value: function triggerSmartContract(contractAddress, functionSelector, feeLimit) {
+    value: function triggerSmartContract(contractAddress, functionSelector) {
       var _this2 = this;
 
+      var feeLimit = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1000000000;
       var callValue = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
       var parameters = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : [];
       var issuerAddress = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : this.tronWeb.defaultAddress.hex;
@@ -35750,6 +36323,19 @@ function () {
       var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
       if (!callback) return this.injectPromise(this.getTransaction, transactionID);
       this.tronWeb.fullNode.request('wallet/gettransactionbyid', {
+        value: transactionID
+      }, 'post').then(function (transaction) {
+        callback(null, transaction);
+      }).catch(function (err) {
+        return callback(err);
+      });
+    }
+  }, {
+    key: "getTransactionInfo",
+    value: function getTransactionInfo(transactionID) {
+      var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      if (!callback) return this.injectPromise(this.getTransactionInfo, transactionID);
+      this.tronWeb.solidityNode.request('walletsolidity/gettransactioninfobyid', {
         value: transactionID
       }, 'post').then(function (transaction) {
         callback(null, transaction);
@@ -36304,7 +36890,7 @@ function () {
               case 15:
                 transaction = _context2.sent;
                 _context2.next = 18;
-                return this.signTransaction(transaction, privateKey);
+                return this.sign(transaction, privateKey);
 
               case 18:
                 signedTransaction = _context2.sent;
@@ -36403,7 +36989,7 @@ function () {
               case 18:
                 transaction = _context3.sent;
                 _context3.next = 21;
-                return this.signTransaction(transaction, privateKey);
+                return this.sign(transaction, privateKey);
 
               case 21:
                 signedTransaction = _context3.sent;

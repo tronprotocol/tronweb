@@ -103,6 +103,17 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
+    getTransactionInfo(transactionID, callback = false) {
+        if(!callback)
+            return this.injectPromise(this.getTransactionInfo, transactionID);
+
+        this.tronWeb.solidityNode.request('walletsolidity/gettransactioninfobyid', { 
+            value: transactionID 
+        }, 'post').then(transaction => {
+            callback(null, transaction);
+        }).catch(err => callback(err));
+    }
+
     getTransactionsToAddress(address = this.tronWeb.defaultAddress.hex, limit = 30, offset = 0, callback = false) {
         if(utils.isFunction(offset)) {
             callback = offset;
@@ -484,7 +495,7 @@ export default class Trx {
         try {
             const address = this.tronWeb.address.fromPrivateKey(privateKey);
             const transaction = await this.tronWeb.transactionBuilder.sendTrx(to, amount, address);
-            const signedTransaction = await this.signTransaction(transaction, privateKey);
+            const signedTransaction = await this.sign(transaction, privateKey);
             const result = await this.sendRawTransaction(signedTransaction);
 
             return callback(null, result);
@@ -514,7 +525,7 @@ export default class Trx {
         try {
             const address = this.tronWeb.address.fromPrivateKey(privateKey);
             const transaction = await this.tronWeb.transactionBuilder.sendToken(to, amount, tokenID, address);
-            const signedTransaction = await this.signTransaction(transaction, privateKey);
+            const signedTransaction = await this.sign(transaction, privateKey);
             const result = await this.sendRawTransaction(signedTransaction);
 
             return callback(null, result);

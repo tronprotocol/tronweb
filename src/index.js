@@ -7,6 +7,7 @@ import { sha3_256 } from 'js-sha3';
 import TransactionBuilder from 'lib/transactionBuilder';
 import Trx from 'lib/trx';
 import Witness from 'lib/witness';
+import Contract from 'lib/contract';
 
 export default class TronWeb {
     static providers = providers;
@@ -185,6 +186,10 @@ export default class TronWeb {
 
             return callback(null, data);
         }).catch(err => callback(err.response.data || err));
+    }
+
+    contract(abi = [], address = false) {
+        return new Contract(this, abi, address);
     }
 
     static get address() {

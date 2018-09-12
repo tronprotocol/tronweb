@@ -1,15 +1,15 @@
 const TronWeb = require('../../dist/TronWeb.node.js'); // require('tronweb');
 const HttpProvider = TronWeb.providers.HttpProvider;
 
-const fullNode = new HttpProvider('http://rpc.tron.watch:8090'); // http://159.69.37.73:8090
-const solidityNode = new HttpProvider('http://rpc.tron.watch:8091'); // http://159.69.37.73:8091
+const fullNode = new HttpProvider('https://api.trongrid.io:8090');
+const solidityNode = new HttpProvider('https://api.trongrid.io:8091');
 const eventServer = 'http://47.90.203.178:18891';
-const privateKey = '4d141598bde726f8681d584ea51d5e930bc40e214c172f89d4ebb5d58dfdfe50';
+const privateKey = 'da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0';
 
 const app = async () => {
     const tronWeb = new TronWeb(
-        fullNode, 
-        solidityNode, 
+        fullNode,
+        solidityNode,
         eventServer,
         privateKey
     );
@@ -17,14 +17,14 @@ const app = async () => {
     tronWeb.setDefaultBlock('latest');
 
     const nodes = await tronWeb.isConnected();
-    const connected = !Object.entries(nodes).map(([ name, connected ]) => {
-        if(!connected)
+    const connected = !Object.entries(nodes).map(([name, connected]) => {
+        if (!connected)
             console.error(`Error: ${name} is not connected`);
 
         return connected;
     }).includes(false);
 
-    if(!connected)
+    if (!connected)
         return;
 
     const account = await tronWeb.createAccount();
@@ -155,7 +155,7 @@ const app = async () => {
         console.log('- Occurs At:', new Date(Date.now() + nextVoteCycle), '\n');
     console.groupEnd();
 
-    const contract = await tronWeb.trx.getContract('4137dfaa7bde6855e980d985297c164df5ee3fa05b');
+    const contract = await tronWeb.trx.getContract('413c8143e98b3e2fe1b1a8fb82b34557505a752390');
 
     console.group('Contract from node');
         console.log('- Contract Address: 4137dfaa7bde6855e980d985297c164df5ee3fa05b');
@@ -357,6 +357,120 @@ const app = async () => {
             console.log('- Events:\n' + JSON.stringify(events, null, 2), '\n');
         console.groupEnd();
     });
+
+    const newContract = tronWeb.contract([
+        {
+            "constant": true,
+            "inputs": [{
+                "name": "a",
+                "type": "int256"
+            }, {
+                "name": "b",
+                "type": "int256"
+            }],
+            "name": "test",
+            "outputs": [{
+                "name": "",
+                "type": "int256"
+            }],
+            "payable": false,
+            "stateMutability": "pure",
+            "type": "function"
+        }, {
+            "constant": false,
+            "inputs": [{
+                "name": "a",
+                "type": "int256"
+            }, {
+                "name": "b",
+                "type": "int256"
+            }],
+            "name": "multiply",
+            "outputs": [{
+                "name": "out",
+                "type": "int256"
+            }],
+            "payable": false,
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }, {
+            "constant": true,
+            "inputs": [],
+            "name": "getLast",
+            "outputs": [{
+                "name": "a",
+                "type": "int256"
+            }, {
+                "name": "b",
+                "type": "int256"
+            }, {
+                "name": "result",
+                "type": "int256"
+            }],
+            "payable": false,
+            "stateMutability": "view",
+            "type": "function"
+        }, {
+            "constant": true,
+            "inputs": [{
+                "name": "a",
+                "type": "int256"
+            }, {
+                "name": "b",
+                "type": "int256"
+            }],
+            "name": "test2",
+            "outputs": [{
+                "name": "",
+                "type": "int256"
+            }, {
+                "name": "",
+                "type": "int256"
+            }],
+            "payable": false,
+            "stateMutability": "pure",
+            "type": "function"
+        }, {
+            "anonymous": false,
+            "inputs": [{
+                "indexed": false,
+                "name": "a",
+                "type": "int256"
+            }, {
+                "indexed": false,
+                "name": "b",
+                "type": "int256"
+            }, {
+                "indexed": false,
+                "name": "result",
+                "type": "int256"
+            }],
+            "name": "Message",
+            "type": "event"
+        }
+    ], '415239e6057d907529c942d3e7da42150e771ab6e9');
+
+    // This is a pure function so it's only executed on the local node 
+    newContract.methods.test(12, 1000000).call().then(output => {
+        console.group('Contract "test" result');
+            console.log('- Output:', output.toString(), '\n');
+        console.groupEnd();
+
+        // This function propagates to all SRs, which can take up to 1 minute
+        return newContract.methods.multiply(12, 1000000).send({
+            shouldPollResponse: true
+        });
+    }).then(output => {
+        console.group('Contract "multiply" result');
+            console.log('- Output:', output.toString(), '\n');
+        console.groupEnd();
+
+        return newContract.methods.getLast().call();
+    }).then(output => {
+        console.group('Contract "getLast" result');
+            console.log('- Output:', output.join(', '), '\n');
+        console.groupEnd();
+    }).catch(err => console.error(err));
 };
 
 app();

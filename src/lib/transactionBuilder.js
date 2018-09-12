@@ -286,7 +286,7 @@ export default class TransactionBuilder {
         let {
             abi = false,
             bytecode = false,
-            feeLimit = 0,
+            feeLimit = 1_000_000_000,
             callValue = 0,
             bandwidthLimit = 0
         } = options;
@@ -345,7 +345,7 @@ export default class TransactionBuilder {
     triggerSmartContract(
         contractAddress, 
         functionSelector,
-        feeLimit,
+        feeLimit = 1_000_000_000,
         callValue = 0,
         parameters = [], 
         issuerAddress = this.tronWeb.defaultAddress.hex, 

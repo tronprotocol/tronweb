@@ -110,9 +110,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var lib_transactionBuilder__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! lib/transactionBuilder */ "./src/lib/transactionBuilder.js");
 /* harmony import */ var lib_trx__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! lib/trx */ "./src/lib/trx.js");
 /* harmony import */ var lib_witness__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! lib/witness */ "./src/lib/witness.js");
+/* harmony import */ var lib_contract__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! lib/contract */ "./src/lib/contract/index.js");
 
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 
 
 
@@ -242,6 +244,10 @@ class TronWeb {
     }).catch(err => callback(err.response.data || err));
   }
 
+  contract(abi = [], address = false) {
+    return new lib_contract__WEBPACK_IMPORTED_MODULE_9__["default"](this, abi, address);
+  }
+
   static get address() {
     return {
       fromHex(address) {
@@ -360,6 +366,260 @@ _defineProperty(TronWeb, "providers", lib_providers__WEBPACK_IMPORTED_MODULE_1__
 _defineProperty(TronWeb, "BigNumber", bignumber_js__WEBPACK_IMPORTED_MODULE_4___default.a);
 
 ;
+
+/***/ }),
+
+/***/ "./src/lib/contract/index.js":
+/*!***********************************!*\
+  !*** ./src/lib/contract/index.js ***!
+  \***********************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Contract; });
+/* harmony import */ var source_map_support_register__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! source-map-support/register */ "source-map-support/register");
+/* harmony import */ var source_map_support_register__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(source_map_support_register__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! index */ "./src/index.js");
+/* harmony import */ var utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! utils */ "./src/utils/index.js");
+/* harmony import */ var _method__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./method */ "./src/lib/contract/method.js");
+
+
+
+
+class Contract {
+  constructor(tronWeb = false, abi = [], address = false) {
+    if (!tronWeb || !tronWeb instanceof index__WEBPACK_IMPORTED_MODULE_1__["default"]) throw new Error('Expected instance of TronWeb');
+    this.tronWeb = tronWeb;
+    this.injectPromise = utils__WEBPACK_IMPORTED_MODULE_2__["default"].promiseInjector(this);
+    this.address = address;
+    this.abi = abi;
+    this.bytecode = false;
+    this.deployed = false;
+    this.methods = {};
+    if (this.tronWeb.isAddress(address)) this.deployed = true;else this.address = false;
+    this.loadAbi(abi);
+  }
+
+  loadAbi(abi) {
+    this.abi = abi;
+    this.methods = {};
+    abi.forEach(func => {
+      const method = new _method__WEBPACK_IMPORTED_MODULE_3__["default"](this, func);
+      const methodCall = method.onMethod.bind(method);
+      this.methods[method.name] = methodCall;
+      this.methods[method.functionSelector] = methodCall;
+      this.methods[method.signature] = methodCall;
+    });
+  }
+
+  async new(options, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(privateKey)) {
+      callback = privateKey;
+      privateKey = this.tronWeb.defaultPrivateKey;
+    }
+
+    if (!callback) return this.injectPromise(this.new, options, privateKey);
+
+    try {
+      const address = this.tronWeb.address.fromPrivateKey(privateKey);
+      const transaction = await this.tronWeb.transactionBuilder.createSmartContract(options, address);
+      const signedTransaction = await this.tronWeb.trx.sign(transaction, privateKey);
+      const contract = await this.tronWeb.trx.sendRawTransaction(signedTransaction);
+      if (!contract.result) return callback('Unknown error: ' + JSON.stringify(contract, null, 2));
+      return this.at(signedTransaction.contract_address, callback);
+    } catch (ex) {
+      return callback(ex);
+    }
+  }
+
+  async at(contractAddress, callback = false) {
+    if (!callback) return this.injectPromise(this.at, contractAddress);
+
+    try {
+      const contract = await this.tronWeb.trx.getContract(contractAddress);
+      if (!contract.contract_address) callback('Unknown error: ' + JSON.stringify(contract, null, 2));
+      this.address = contract.contract_address;
+      this.bytecode = contract.bytecode;
+      this.deployed = true;
+      this.loadAbi(contract.abi.entrys);
+      callback(null, this);
+    } catch (ex) {
+      if (ex.toString().includes('does not exist')) return callback('Failed to deploy contract');
+      return callback(ex);
+    }
+  }
+
+}
+
+/***/ }),
+
+/***/ "./src/lib/contract/method.js":
+/*!************************************!*\
+  !*** ./src/lib/contract/method.js ***!
+  \************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Method; });
+/* harmony import */ var source_map_support_register__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! source-map-support/register */ "source-map-support/register");
+/* harmony import */ var source_map_support_register__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(source_map_support_register__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var ethers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ethers */ "ethers");
+/* harmony import */ var ethers__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(ethers__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! utils */ "./src/utils/index.js");
+
+
+
+const abiCoder = new ethers__WEBPACK_IMPORTED_MODULE_1___default.a.utils.AbiCoder();
+
+const getFunctionSelector = abi => {
+  return abi.name + '(' + getParamTypes(abi.inputs || []).join(',') + ')';
+};
+
+const getParamTypes = params => {
+  return params.map(({
+    type
+  }) => type);
+};
+
+const decodeOutput = (abi, output) => {
+  if (abi.some(output => utils__WEBPACK_IMPORTED_MODULE_2__["default"].hasProperty(output, 'name'))) {
+    return abiCoder.decode(abi.map(({
+      name
+    }) => name), abi.map(({
+      type
+    }) => type), output);
+  }
+
+  return abiCoder.decode(abi.map(({
+    type
+  }) => type), output);
+};
+
+const STATE_MUTABILITY = {
+  PURE: 'pure',
+  VIEW: 'view'
+};
+class Method {
+  constructor(contract, abi) {
+    this.tronWeb = contract.tronWeb;
+    this.contract = contract;
+    this.abi = abi;
+    this.name = abi.name;
+    this.inputs = abi.inputs || [];
+    this.outputs = abi.outputs || [];
+    this.signature = this.tronWeb.sha3(abi.name).slice(0, 8);
+    this.functionSelector = getFunctionSelector(abi);
+  }
+
+  onMethod(...args) {
+    const types = getParamTypes(this.inputs);
+    if (types.length !== args.length) throw new Error('Invalid argument count provided');
+    args.forEach((arg, index) => {
+      if (types[index] == 'address') args[index] = this.tronWeb.address.toHex(arg).replace(/^(41)/, '0x');
+    });
+    const parameters = abiCoder.encode(types, args).replace(/^(0x)/, '');
+    const self = this;
+    const defaultOptions = {
+      feeLimit: 1000000000,
+      callValue: 0,
+      from: this.tronWeb.defaultAddress.hex,
+      // Only used for send()
+      shouldPollResponse: false // Only used for sign()
+
+    };
+    return {
+      call(options = defaultOptions, callback = false) {
+        if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(options)) {
+          callback = options;
+          options = defaultOptions;
+        }
+
+        if (!callback) return utils__WEBPACK_IMPORTED_MODULE_2__["default"].injectPromise(this.call.bind(this), options);
+        if (!self.contract.address) throw new Error('Smart contract is missing address');
+        if (!self.contract.deployed) throw new Error('Calling smart contracts requires you to load the contract first');
+        const {
+          stateMutability
+        } = self.abi;
+        if (![STATE_MUTABILITY.PURE, STATE_MUTABILITY.VIEW].includes(stateMutability.toLowerCase())) return callback(`Methods with state mutability "${stateMutability}" must use send()`);
+        const parameters = args.map((value, index) => ({
+          type: types[index],
+          value
+        }));
+        self.tronWeb.transactionBuilder.triggerSmartContract(self.contract.address, self.functionSelector, options.feeLimit, options.callValue, parameters, self.tronWeb.address.toHex(options.from), (err, transaction) => {
+          if (err) return callback(err);
+          if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].hasProperty(transaction, 'constant_result')) return callback('Failed to execute');
+
+          try {
+            const output = decodeOutput(self.outputs, '0x' + transaction.constant_result[0]);
+            return callback(null, output);
+          } catch (ex) {
+            return callback(ex);
+          }
+        });
+      },
+
+      async send(options = {}, privateKey = self.tronWeb.defaultPrivateKey, callback = false) {
+        if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(privateKey)) {
+          callback = privateKey;
+          privateKey = self.tronWeb.defaultPrivateKey;
+        }
+
+        if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(options)) {
+          callback = options;
+          options = defaultOptions;
+          privateKey = self.tronWeb.defaultPrivateKey;
+        }
+
+        if (!callback) return utils__WEBPACK_IMPORTED_MODULE_2__["default"].injectPromise(this.send.bind(this), options, privateKey);
+        if (!self.contract.address) throw new Error('Smart contract is missing address');
+        if (!self.contract.deployed) throw new Error('Calling smart contracts requires you to load the contract first');
+        const {
+          stateMutability
+        } = self.abi;
+        if ([STATE_MUTABILITY.PURE, STATE_MUTABILITY.VIEW].includes(stateMutability.toLowerCase())) return callback(`Methods with state mutability "${stateMutability}" must use call()`);
+        const parameters = args.map((value, index) => ({
+          type: types[index],
+          value
+        }));
+
+        try {
+          const address = self.tronWeb.address.fromPrivateKey(privateKey);
+          const transaction = await self.tronWeb.transactionBuilder.triggerSmartContract(self.contract.address, self.functionSelector, options.feeLimit, options.callValue, parameters, self.tronWeb.address.toHex(address));
+          if (!transaction.result || !transaction.result.result) return callback('Unknown error: ' + JSON.stringify(transaction, null, 2));
+          const signedTransaction = await self.tronWeb.trx.sign(transaction.transaction, privateKey);
+          const broadcast = await self.tronWeb.trx.sendRawTransaction(signedTransaction);
+          if (!broadcast.result) return callback('Unknown error: ' + JSON.stringify(broadcast, null, 2));
+          if (!options.shouldPollResponse) return callback(null, signedTransaction.txID);
+
+          const checkResult = async (index = 0) => {
+            if (index == 20) return callback(null, signedTransaction.txID);
+            const output = await self.tronWeb.trx.getTransactionInfo(signedTransaction.txID);
+
+            if (!Object.keys(output).length) {
+              return setTimeout(() => {
+                checkResult(index + 1);
+              }, 3000);
+            }
+
+            if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].hasProperty(output, 'contractResult')) return callback('Failed to execute: ' + JSON.stringify(output, null, 2));
+            const decoded = decodeOutput(self.outputs, '0x' + output.contractResult[0]);
+            return callback(null, decoded);
+          };
+
+          checkResult();
+        } catch (ex) {
+          return callback(ex);
+        }
+      }
+
+    };
+  }
+
+}
 
 /***/ }),
 
@@ -668,7 +928,7 @@ class TransactionBuilder {
     let {
       abi = false,
       bytecode = false,
-      feeLimit = 0,
+      feeLimit = 1000000000,
       callValue = 0,
       bandwidthLimit = 0
     } = options;
@@ -705,7 +965,7 @@ class TransactionBuilder {
     }).catch(err => callback(err));
   }
 
-  triggerSmartContract(contractAddress, functionSelector, feeLimit, callValue = 0, parameters = [], issuerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+  triggerSmartContract(contractAddress, functionSelector, feeLimit = 1000000000, callValue = 0, parameters = [], issuerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
     if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(issuerAddress)) {
       callback = issuerAddress;
       issuerAddress = this.tronWeb.defaultAddress.hex;
@@ -992,6 +1252,15 @@ class Trx {
   getTransaction(transactionID, callback = false) {
     if (!callback) return this.injectPromise(this.getTransaction, transactionID);
     this.tronWeb.fullNode.request('wallet/gettransactionbyid', {
+      value: transactionID
+    }, 'post').then(transaction => {
+      callback(null, transaction);
+    }).catch(err => callback(err));
+  }
+
+  getTransactionInfo(transactionID, callback = false) {
+    if (!callback) return this.injectPromise(this.getTransactionInfo, transactionID);
+    this.tronWeb.solidityNode.request('walletsolidity/gettransactioninfobyid', {
       value: transactionID
     }, 'post').then(transaction => {
       callback(null, transaction);
@@ -1308,7 +1577,7 @@ class Trx {
     try {
       const address = this.tronWeb.address.fromPrivateKey(privateKey);
       const transaction = await this.tronWeb.transactionBuilder.sendTrx(to, amount, address);
-      const signedTransaction = await this.signTransaction(transaction, privateKey);
+      const signedTransaction = await this.sign(transaction, privateKey);
       const result = await this.sendRawTransaction(signedTransaction);
       return callback(null, result);
     } catch (ex) {
@@ -1330,7 +1599,7 @@ class Trx {
     try {
       const address = this.tronWeb.address.fromPrivateKey(privateKey);
       const transaction = await this.tronWeb.transactionBuilder.sendToken(to, amount, tokenID, address);
-      const signedTransaction = await this.signTransaction(transaction, privateKey);
+      const signedTransaction = await this.sign(transaction, privateKey);
       const result = await this.sendRawTransaction(signedTransaction);
       return callback(null, result);
     } catch (ex) {
