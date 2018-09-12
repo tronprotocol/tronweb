@@ -67,28 +67,134 @@ Based on the TRON chain, Tron-Web encapsulates a layer of APIs that can be used 
 
 ``` js
   const TronWeb = require('tronweb')
-  //或是
   import TronWeb from 'tronweb'
-  const api_url = 'http://52.44.75.99:8090'  //请求的http服务地址
-  const event_server = 'http://52.44.75.99:18889' //请求合约事件服务地址
+  const api_url = 'http://52.44.75.99:8090'  //Requested http service address
+  const event_server = 'http://52.44.75.99:18889' //Requested contract event service address
   const tronWeb = new TronWeb(api_url,event_server)
-  tronWeb.defaultAccount = 'TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY';  //测试地址
-  tronWeb.defaultPk='da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0';  //测试私钥
+  tronWeb.defaultAccount = 'TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY';  //Test address
+  tronWeb.defaultPk='da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0';  //Test private key
   getBalance();
-  //因为每次调用均需要去请求http服务，不会同步获取结果，需要 ES7标准的 async 和 await
-  //获取某个地址下的账户余额
+  //Since every call needs to request http service, it will not synchronize the results. Thus, you needs ES7 standard async and wait
+  //Get the account balance under an address
   async getBalance(){
     const data = await tronWeb.getBalance(address);
     console.log(data);
   }
 
-  //或是 使用promise写法
+  //Or use promise to write
   getBalance(){
     tronWeb.getBalance(address).then(res=>{
       console.log(res);
     })
   }
 ```
+
+## FAQ
+
+1. Transaction Failure?
+
+A: fee_limit needs to set a quota (no reference value and calculation worth), not too small, otherwise the transaction can not be completed
+
+2. Incorrect parameter type?
+
+A: Ethereum can be automatically converted but TRON must strictly follow the type uint256 (unsigned integer) string. Other types must be passed strictly by type, otherwise the contract method is not executed. Currently, the front end currently types the special value. 
+
+
+
+## Tool Methods
+
+The tronweb object provides tool methods for aiding development. The tool methods only need to be instantiated and called. 
+
+### tronWeb.toBigNumber(str)
+
+- Get a very large integer 
+- arguments: *str* `string` Large integer in string format (maximum number of js that can be exceeded) 
+- return: `string`
+
+``` js
+  (()=>{
+    const str = '200000000000000000000001';
+    const t = tronWeb.toBigNumber(str);
+    console.log(t.toString(10))
+  })()
+```
+Operation result:
+<p class="demo">
+  200000000000000000000001
+</p>
+
+### tronWeb.toHex(str)
+
+- Get the hexString of an address account
+- arguments: *str*`string` string that needs to be encrypted
+- return: `string`
+
+``` js
+  (()=>{
+    const t = tronWeb.toHex('TT67rPNwgmpeimvHUMVzFfKsjL9GZ1wGw8');
+    console.log(t)
+  })()
+```
+Operation result:
+<p class="demo">
+  41BBC8C05F1B09839E72DB044A6AA57E2A5D414A10
+</p>
+
+### tronWeb.fromHex(hexString)
+
+- Restore a hexString
+- arguments: 
+  * hexString `string` String of wallet after the hexString
+- return: `string`
+
+``` js
+  (()=>{
+    const t = tronWeb.fromHex('41BBC8C05F1B09839E72DB044A6AA57E2A5D414A10');
+    console.log(t)
+  })()
+```
+Operation result:
+<p class="demo">
+    TT67rPNwgmpeimvHUMVzFfKsjL9GZ1wGw8
+</p>
+
+### tronWeb.trxToSun(trxCount)
+
+- Convert trx into sun
+- arguments: 
+  * hexString `string` trx amount
+- return: `string`
+
+``` js
+  (()=>{
+    const t = tronWeb.trxToSun(1);
+    console.log(t)
+  })()
+```
+Operation result:
+<p class="demo">
+    1000000
+</p>
+
+### tronWeb.sunToTrx(sunCount)
+
+- Convert sun to trx
+- arguments: 
+  * sunCount `string` sun amount
+- return: `string`
+
+``` js
+  (()=>{
+    const t = tronWeb.sunToTrx(1000000);
+    console.log(t)
+  })()
+```
+Operation result:
+<p class="demo">
+    1
+</p>
+
+
 
 
 # Example Usage in React or vue
