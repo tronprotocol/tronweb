@@ -683,6 +683,7 @@ class Method {
         if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(callback)) throw new Error('Expected callback to be provided');
         if (!self.contract.address) return callback('Smart contract is missing address');
         if (self.abi.type.toLowerCase() !== 'event') return callback('Invalid method type for event watching');
+        if (!self.tronWeb.eventServer) return callback('No event server configured');
         let listener = false;
         let lastBlock = false;
 

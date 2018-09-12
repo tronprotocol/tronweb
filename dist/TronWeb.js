@@ -35649,6 +35649,14 @@ function () {
                     return _context4.abrupt("return", callback('Invalid method type for event watching'));
 
                   case 7:
+                    if (self.tronWeb.eventServer) {
+                      _context4.next = 9;
+                      break;
+                    }
+
+                    return _context4.abrupt("return", callback('No event server configured'));
+
+                  case 9:
                     listener = false;
                     lastBlock = false;
 
@@ -35715,10 +35723,10 @@ function () {
                       }, 3000);
                     };
 
-                    _context4.next = 13;
+                    _context4.next = 15;
                     return getEvents();
 
-                  case 13:
+                  case 15:
                     bindListener();
                     return _context4.abrupt("return", {
                       start: bindListener(),
@@ -35729,7 +35737,7 @@ function () {
                       }
                     });
 
-                  case 15:
+                  case 17:
                   case "end":
                     return _context4.stop();
                 }

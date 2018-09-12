@@ -203,6 +203,9 @@ export default class Method {
                 if(self.abi.type.toLowerCase() !== 'event')
                     return callback('Invalid method type for event watching');
 
+                if(!self.tronWeb.eventServer)
+                    return callback('No event server configured');
+
                 let listener = false;
                 let lastBlock = false;
 
