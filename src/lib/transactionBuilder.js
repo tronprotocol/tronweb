@@ -288,7 +288,8 @@ export default class TransactionBuilder {
             bytecode = false,
             feeLimit = 1_000_000_000,
             callValue = 0,
-            bandwidthLimit = 0
+            bandwidthLimit = 0,
+            parameters = []
         } = options;
 
         if(abi && utils.isString(abi)) {
@@ -324,8 +325,39 @@ export default class TransactionBuilder {
         if(!utils.isInteger(bandwidthLimit) || bandwidthLimit < 0 || bandwidthLimit > 100)
             return callback('Invalid options.bandwidthLimit provided');
 
+        if(!utils.isArray(parameters))
+            return callback('Invalid parameters provided');
+
         if(!this.tronWeb.isAddress(issuerAddress))
             return callback('Invalid issuer address provided');
+
+        if(parameters.length) {
+            const abiCoder = new Ethers.utils.AbiCoder();
+            const types = [];
+            const values = [];
+
+            for(let i = 0; i < parameters.length; i++) {
+                let { type, value } = parameters[i];
+
+                if(!type || !utils.isString(type) || !type.length)
+                    return callback('Invalid parameter type provided: ' + type);
+
+                if(!value)
+                    return callback('Invalid parameter value provided: ' + value);
+
+                if(type == 'address')
+                    value = this.tronWeb.address.toHex(value).replace(/^(41)/, '0x');
+                    
+                types.push(type);
+                values.push(value);
+            }
+
+            try {
+                parameters = abiCoder.encode(types, values).replace(/^(0x)/, '');
+            } catch (ex) {
+                return callback(ex);
+            }
+        } else parameters = '';
 
         this.tronWeb.fullNode.request('wallet/deploycontract', {
             owner_address: this.tronWeb.address.toHex(issuerAddress),
@@ -333,7 +365,8 @@ export default class TransactionBuilder {
             call_value: parseInt(callValue),
             consume_user_resource_percent: bandwidthLimit,
             abi: JSON.stringify(abi),
-            bytecode
+            bytecode,
+            parameter: parameters
         }, 'post').then(transaction => {
             if(transaction.Error)
                 return callback(transaction.Error);
