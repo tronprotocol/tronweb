@@ -414,6 +414,12 @@ const app = async () => {
             console.log('- Output:', output.join(', '), '\n');
         console.groupEnd();       
     }).catch(err => console.error(err));
+
+    const transaction = await tronWeb.trx.getTransactionFromBlock(0, 0);
+
+    console.group('First transaction from block 0');
+        console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
+    console.groupEnd();
 };
 
 app();

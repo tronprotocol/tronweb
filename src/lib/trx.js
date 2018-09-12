@@ -92,6 +92,31 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
+    getTransactionFromBlock(block = this.tronWeb.defaultBlock, index = 0, callback = false) {
+        if(utils.isFunction(index)) {
+            callback = index;
+            index = 0;
+        }
+        
+        if(utils.isFunction(block)) {
+            callback = block;
+            block = this.tronWeb.defaultBlock;            
+        }
+
+        if(!callback)
+            return this.injectPromise(this.getTransactionFromBlock, block, index);
+
+        if(!utils.isInteger(index) || index < 0)
+            return callback('Invalid transaction index provided');
+
+        this.getBlock(block).then(({ transactions = false }) => {
+            if(!transactions || transactions.length < index)
+                return callback('Transaction not found in block');
+
+            callback(null, transactions[index]);
+        }).catch(err => callback(err));
+    }
+
     getTransaction(transactionID, callback = false) {
         if(!callback)
             return this.injectPromise(this.getTransaction, transactionID);

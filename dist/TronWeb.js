@@ -36655,6 +36655,34 @@ function () {
       });
     }
   }, {
+    key: "getTransactionFromBlock",
+    value: function getTransactionFromBlock() {
+      var block = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.tronWeb.defaultBlock;
+      var index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+      var callback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(index)) {
+        callback = index;
+        index = 0;
+      }
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(block)) {
+        callback = block;
+        block = this.tronWeb.defaultBlock;
+      }
+
+      if (!callback) return this.injectPromise(this.getTransactionFromBlock, block, index);
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(index) || index < 0) return callback('Invalid transaction index provided');
+      this.getBlock(block).then(function (_ref2) {
+        var _ref2$transactions = _ref2.transactions,
+            transactions = _ref2$transactions === void 0 ? false : _ref2$transactions;
+        if (!transactions || transactions.length < index) return callback('Transaction not found in block');
+        callback(null, transactions[index]);
+      }).catch(function (err) {
+        return callback(err);
+      });
+    }
+  }, {
     key: "getTransaction",
     value: function getTransaction(transactionID) {
       var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
@@ -36845,8 +36873,8 @@ function () {
                   },
                   offset: offset,
                   limit: limit
-                }, 'post').then(function (_ref2) {
-                  var transaction = _ref2.transaction;
+                }, 'post').then(function (_ref3) {
+                  var transaction = _ref3.transaction;
                   callback(null, transaction);
                 }).catch(function (err) {
                   return callback(err);
@@ -36898,9 +36926,9 @@ function () {
       }
 
       if (!callback) return this.injectPromise(this.getBalance, address);
-      this.getAccount(address).then(function (_ref3) {
-        var _ref3$balance = _ref3.balance,
-            balance = _ref3$balance === void 0 ? 0 : _ref3$balance;
+      this.getAccount(address).then(function (_ref4) {
+        var _ref4$balance = _ref4.balance,
+            balance = _ref4$balance === void 0 ? 0 : _ref4$balance;
         callback(null, balance);
       }).catch(function (err) {
         return callback(err);
@@ -36922,15 +36950,15 @@ function () {
       address = this.tronWeb.address.toHex(address);
       this.tronWeb.fullNode.request('wallet/getaccountnet', {
         address: address
-      }, 'post').then(function (_ref4) {
-        var _ref4$freeNetUsed = _ref4.freeNetUsed,
-            freeNetUsed = _ref4$freeNetUsed === void 0 ? 0 : _ref4$freeNetUsed,
-            _ref4$freeNetLimit = _ref4.freeNetLimit,
-            freeNetLimit = _ref4$freeNetLimit === void 0 ? 0 : _ref4$freeNetLimit,
-            _ref4$NetUsed = _ref4.NetUsed,
-            NetUsed = _ref4$NetUsed === void 0 ? 0 : _ref4$NetUsed,
-            _ref4$NetLimit = _ref4.NetLimit,
-            NetLimit = _ref4$NetLimit === void 0 ? 0 : _ref4$NetLimit;
+      }, 'post').then(function (_ref5) {
+        var _ref5$freeNetUsed = _ref5.freeNetUsed,
+            freeNetUsed = _ref5$freeNetUsed === void 0 ? 0 : _ref5$freeNetUsed,
+            _ref5$freeNetLimit = _ref5.freeNetLimit,
+            freeNetLimit = _ref5$freeNetLimit === void 0 ? 0 : _ref5$freeNetLimit,
+            _ref5$NetUsed = _ref5.NetUsed,
+            NetUsed = _ref5$NetUsed === void 0 ? 0 : _ref5$NetUsed,
+            _ref5$NetLimit = _ref5.NetLimit,
+            NetLimit = _ref5$NetLimit === void 0 ? 0 : _ref5$NetLimit;
         callback(null, freeNetLimit - freeNetUsed + (NetLimit - NetUsed));
       }).catch(function (err) {
         return callback(err);
@@ -36954,9 +36982,9 @@ function () {
       address = this.tronWeb.address.toHex(address);
       this.tronWeb.fullNode.request('wallet/getassetissuebyaccount', {
         address: address
-      }, 'post').then(function (_ref5) {
-        var _ref5$assetIssue = _ref5.assetIssue,
-            assetIssue = _ref5$assetIssue === void 0 ? false : _ref5$assetIssue;
+      }, 'post').then(function (_ref6) {
+        var _ref6$assetIssue = _ref6.assetIssue,
+            assetIssue = _ref6$assetIssue === void 0 ? false : _ref6$assetIssue;
         if (!assetIssue) return callback(null, {});
         var tokens = assetIssue.map(function (token) {
           return _this.parseToken(token);
@@ -36993,13 +37021,13 @@ function () {
 
       var callback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
       if (!callback) return this.injectPromise(this.listNodes);
-      this.tronWeb.fullNode.request('wallet/listnodes').then(function (_ref6) {
-        var _ref6$nodes = _ref6.nodes,
-            nodes = _ref6$nodes === void 0 ? [] : _ref6$nodes;
-        callback(null, nodes.map(function (_ref7) {
-          var _ref7$address = _ref7.address,
-              host = _ref7$address.host,
-              port = _ref7$address.port;
+      this.tronWeb.fullNode.request('wallet/listnodes').then(function (_ref7) {
+        var _ref7$nodes = _ref7.nodes,
+            nodes = _ref7$nodes === void 0 ? [] : _ref7$nodes;
+        callback(null, nodes.map(function (_ref8) {
+          var _ref8$address = _ref8.address,
+              host = _ref8$address.host,
+              port = _ref8$address.port;
           return "".concat(_this3.tronWeb.toUtf8(host), ":").concat(port);
         }));
       }).catch(function (err) {
@@ -37029,9 +37057,9 @@ function () {
       this.tronWeb.fullNode.request('wallet/getblockbylimitnext', {
         startNum: parseInt(start),
         endNum: parseInt(end) + 1
-      }, 'post').then(function (_ref8) {
-        var _ref8$block = _ref8.block,
-            block = _ref8$block === void 0 ? [] : _ref8$block;
+      }, 'post').then(function (_ref9) {
+        var _ref9$block = _ref9.block,
+            block = _ref9$block === void 0 ? [] : _ref9$block;
         callback(null, block);
       }).catch(function (err) {
         return callback(err);
@@ -37042,9 +37070,9 @@ function () {
     value: function listSuperRepresentatives() {
       var callback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
       if (!callback) return this.injectPromise(this.listSuperRepresentatives);
-      this.tronWeb.fullNode.request('wallet/listwitnesses').then(function (_ref9) {
-        var _ref9$witnesses = _ref9.witnesses,
-            witnesses = _ref9$witnesses === void 0 ? [] : _ref9$witnesses;
+      this.tronWeb.fullNode.request('wallet/listwitnesses').then(function (_ref10) {
+        var _ref10$witnesses = _ref10.witnesses,
+            witnesses = _ref10$witnesses === void 0 ? [] : _ref10$witnesses;
         callback(null, witnesses);
       }).catch(function (err) {
         return callback(err);
@@ -37074,9 +37102,9 @@ function () {
       if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(offset) || offset < 0) return callback('Invalid offset provided');
 
       if (!limit) {
-        return this.tronWeb.fullNode.request('wallet/getassetissuelist').then(function (_ref10) {
-          var _ref10$assetIssue = _ref10.assetIssue,
-              assetIssue = _ref10$assetIssue === void 0 ? [] : _ref10$assetIssue;
+        return this.tronWeb.fullNode.request('wallet/getassetissuelist').then(function (_ref11) {
+          var _ref11$assetIssue = _ref11.assetIssue,
+              assetIssue = _ref11$assetIssue === void 0 ? [] : _ref11$assetIssue;
           callback(null, assetIssue.map(function (token) {
             return _this4.parseToken(token);
           }));
@@ -37088,9 +37116,9 @@ function () {
       this.tronWeb.fullNode.request('wallet/getpaginatedassetissuelist', {
         offset: parseInt(offset),
         limit: parseInt(limit)
-      }, 'post').then(function (_ref11) {
-        var _ref11$assetIssue = _ref11.assetIssue,
-            assetIssue = _ref11$assetIssue === void 0 ? [] : _ref11$assetIssue;
+      }, 'post').then(function (_ref12) {
+        var _ref12$assetIssue = _ref12.assetIssue,
+            assetIssue = _ref12$assetIssue === void 0 ? [] : _ref12$assetIssue;
         callback(null, assetIssue.map(function (token) {
           return _this4.parseToken(token);
         }));
@@ -37103,9 +37131,9 @@ function () {
     value: function timeUntilNextVoteCycle() {
       var callback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
       if (!callback) return this.injectPromise(this.timeUntilNextVoteCycle);
-      this.tronWeb.fullNode.request('wallet/getnextmaintenancetime').then(function (_ref12) {
-        var _ref12$num = _ref12.num,
-            num = _ref12$num === void 0 ? -1 : _ref12$num;
+      this.tronWeb.fullNode.request('wallet/getnextmaintenancetime').then(function (_ref13) {
+        var _ref13$num = _ref13.num,
+            num = _ref13$num === void 0 ? -1 : _ref13$num;
         if (num == -1) return callback('Failed to get time until next vote cycle');
         callback(null, Math.floor(num / 1000));
       }).catch(function (err) {
