@@ -37387,7 +37387,6 @@ function () {
               type = _parameters$i.type,
               value = _parameters$i.value;
           if (!type || !utils__WEBPACK_IMPORTED_MODULE_4__["default"].isString(type) || !type.length) return callback('Invalid parameter type provided: ' + type);
-          if (!value) return callback('Invalid parameter value provided: ' + value);
           if (type == 'address') value = this.tronWeb.address.toHex(value).replace(/^(41)/, '0x');
           types.push(type);
           values.push(value);
@@ -37468,7 +37467,6 @@ function () {
               type = _parameters$i2.type,
               value = _parameters$i2.value;
           if (!type || !utils__WEBPACK_IMPORTED_MODULE_4__["default"].isString(type) || !type.length) return callback('Invalid parameter type provided: ' + type);
-          if (!value) return callback('Invalid parameter value provided: ' + value);
           if (type == 'address') value = this.tronWeb.address.toHex(value).replace(/^(41)/, '0x');
           types.push(type);
           values.push(value);

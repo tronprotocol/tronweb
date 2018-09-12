@@ -342,9 +342,6 @@ export default class TransactionBuilder {
                 if(!type || !utils.isString(type) || !type.length)
                     return callback('Invalid parameter type provided: ' + type);
 
-                if(!value)
-                    return callback('Invalid parameter value provided: ' + value);
-
                 if(type == 'address')
                     value = this.tronWeb.address.toHex(value).replace(/^(41)/, '0x');
                     
