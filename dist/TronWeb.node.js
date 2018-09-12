@@ -408,10 +408,10 @@ class Contract {
     const events = await this.tronWeb.getEventResult(this.address);
     const [latestEvent] = events.sort((a, b) => b.block - a.block);
     const newEvents = events.filter((event, index) => {
+      const duplicate = events.slice(0, index).some(priorEvent => JSON.stringify(priorEvent) == JSON.stringify(event));
+      if (duplicate) return false;
       if (!this.lastBlock) return true;
-      if (event.block <= this.lastBlock) return false; // TronGrid is currently bugged and has duplicated the events
-
-      return !events.slice(0, index).some(priorEvent => JSON.stringify(priorEvent) == JSON.stringify(event));
+      return event.block > this.lastBlock;
     });
     if (latestEvent) this.lastBlock = latestEvent.block;
     return newEvents;
@@ -581,7 +581,6 @@ class Method {
 
   onMethod(...args) {
     const types = getParamTypes(this.inputs);
-    if (types.length !== args.length) throw new Error('Invalid argument count provided');
     args.forEach((arg, index) => {
       if (types[index] == 'address') args[index] = this.tronWeb.address.toHex(arg).replace(/^(41)/, '0x');
     });
@@ -602,8 +601,9 @@ class Method {
         }
 
         if (!callback) return utils__WEBPACK_IMPORTED_MODULE_2__["default"].injectPromise(this.call.bind(this), options);
-        if (!self.contract.address) throw new Error('Smart contract is missing address');
-        if (!self.contract.deployed) throw new Error('Calling smart contracts requires you to load the contract first');
+        if (types.length !== args.length) return callback('Invalid argument count provided');
+        if (!self.contract.address) return callback('Smart contract is missing address');
+        if (!self.contract.deployed) return callback('Calling smart contracts requires you to load the contract first');
         const {
           stateMutability
         } = self.abi;
@@ -637,8 +637,9 @@ class Method {
         }
 
         if (!callback) return utils__WEBPACK_IMPORTED_MODULE_2__["default"].injectPromise(this.send.bind(this), options, privateKey);
-        if (!self.contract.address) throw new Error('Smart contract is missing address');
-        if (!self.contract.deployed) throw new Error('Calling smart contracts requires you to load the contract first');
+        if (types.length !== args.length) throw new Error('Invalid argument count provided');
+        if (!self.contract.address) return callback('Smart contract is missing address');
+        if (!self.contract.deployed) return callback('Calling smart contracts requires you to load the contract first');
         const {
           stateMutability
         } = self.abi;
@@ -676,6 +677,51 @@ class Method {
         } catch (ex) {
           return callback(ex);
         }
+      },
+
+      async watch(callback = false) {
+        if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(callback)) throw new Error('Expected callback to be provided');
+        if (!self.contract.address) return callback('Smart contract is missing address');
+        if (self.abi.type.toLowerCase() !== 'event') return callback('Invalid method type for event watching');
+        let listener = false;
+        let lastBlock = false;
+
+        const getEvents = async () => {
+          try {
+            const events = await self.tronWeb.getEventResult(self.contract.address, self.name);
+            const [latestEvent] = events.sort((a, b) => b.block - a.block);
+            const newEvents = events.filter((event, index) => {
+              const duplicate = events.slice(0, index).some(priorEvent => JSON.stringify(priorEvent) == JSON.stringify(event));
+              if (duplicate) return false;
+              if (!lastBlock) return true;
+              return event.block > lastBlock;
+            });
+            if (latestEvent) lastBlock = latestEvent.block;
+            return newEvents;
+          } catch (ex) {
+            return Promise.reject(ex);
+          }
+        };
+
+        const bindListener = () => {
+          if (listener) clearInterval(listener);
+          listener = setInterval(() => {
+            getEvents().then(events => {
+              events.forEach(event => callback(null, event));
+            }).catch(err => callback(err));
+          }, 3000);
+        };
+
+        await getEvents();
+        bindListener();
+        return {
+          start: bindListener(),
+          stop: () => {
+            if (!listener) return;
+            clearInterval(listener);
+            listener = false;
+          }
+        };
       }
 
     };

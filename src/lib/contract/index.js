@@ -31,16 +31,17 @@ export default class Contract {
         const events = await this.tronWeb.getEventResult(this.address);
         const [ latestEvent ] = events.sort((a, b) => b.block - a.block);
         const newEvents = events.filter((event, index) => {
+            const duplicate = events.slice(0, index).some(priorEvent => (
+                JSON.stringify(priorEvent) == JSON.stringify(event)
+            ));
+
+            if(duplicate)
+                return false;
+            
             if(!this.lastBlock)
                 return true;            
 
-            if(event.block <= this.lastBlock)
-                return false;
-
-            // TronGrid is currently bugged and has duplicated the events
-            return !events.slice(0, index).some(priorEvent => (
-                JSON.stringify(priorEvent) == JSON.stringify(event)
-            ));
+            return event.block > this.lastBlock;
         });
 
         if(latestEvent)

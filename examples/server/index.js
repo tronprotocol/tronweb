@@ -365,7 +365,7 @@ const app = async () => {
 
     const newContract = await tronWeb.contract().at('416b8188c438f17950b03b3b25b93a0332293c3166');
 
-    const eventListener = newContract.events(event => {
+    /*const eventListener = newContract.events(event => {
         console.group('New event received');
             console.log('- Contract Address:', event.contract);
             console.log('- Event Name:', event.name);
@@ -378,6 +378,19 @@ const app = async () => {
             return console.error('Failed to start event listener:', err);
 
         console.log('Event listener started\n');
+    });*/
+
+    newContract.methods.Message().watch((err, event) => {
+        if(err)
+            return console.error('Error with "Message" event:', err);
+
+        console.group('New event received');
+            console.log('- Contract Address:', event.contract);
+            console.log('- Event Name:', event.name);
+            console.log('- Transaction:', event.transaction);
+            console.log('- Block number:', event.block);            
+            console.log('- Result:', event.result, '\n');
+        console.groupEnd();
     });
 
     // This is a pure function so it's only executed on the local node 
@@ -387,20 +400,19 @@ const app = async () => {
         console.groupEnd();
 
         // The "send" function propagates to all SRs, which can take up to 1 minute
-        await newContract.methods.multiply(1, 1000000).send();
-        await newContract.methods.multiply(2, 1000000).send();
-        await newContract.methods.multiply(3, 1000000).send();
+        await Promise.all([
+            newContract.methods.multiply(1, 1000000).send(),
+            newContract.methods.multiply(2, 1000000).send(),
+            newContract.methods.multiply(3, 1000000).send(),
+            newContract.methods.multiply(4, 1000000).send(),
+            newContract.methods.multiply(5, 1000000).send()
+        ]);
 
         return newContract.methods.getLast().call();
     }).then(output => {
         console.group('Contract "getLast" result');
             console.log('- Output:', output.join(', '), '\n');
-        console.groupEnd();
-
-        setTimeout(() => {
-            // Give the listener time to receive events before stopping
-            eventListener.stop();
-        }, 5 * 1000);        
+        console.groupEnd();       
     }).catch(err => console.error(err));
 };
 

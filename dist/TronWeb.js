@@ -34976,12 +34976,12 @@ function () {
                   return b.block - a.block;
                 }), _events$sort2 = _slicedToArray(_events$sort, 1), latestEvent = _events$sort2[0];
                 newEvents = events.filter(function (event, index) {
-                  if (!_this.lastBlock) return true;
-                  if (event.block <= _this.lastBlock) return false; // TronGrid is currently bugged and has duplicated the events
-
-                  return !events.slice(0, index).some(function (priorEvent) {
+                  var duplicate = events.slice(0, index).some(function (priorEvent) {
                     return JSON.stringify(priorEvent) == JSON.stringify(event);
                   });
+                  if (duplicate) return false;
+                  if (!_this.lastBlock) return true;
+                  return event.block > _this.lastBlock;
                 });
                 if (latestEvent) this.lastBlock = latestEvent.block;
                 return _context.abrupt("return", newEvents);
@@ -35271,6 +35271,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var ethers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ethers */ "./node_modules/ethers/index.js");
 /* harmony import */ var ethers__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(ethers__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! utils */ "./src/utils/index.js");
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
@@ -35346,7 +35354,6 @@ function () {
       }
 
       var types = getParamTypes(this.inputs);
-      if (types.length !== args.length) throw new Error('Invalid argument count provided');
       args.forEach(function (arg, index) {
         if (types[index] == 'address') args[index] = _this.tronWeb.address.toHex(arg).replace(/^(41)/, '0x');
       });
@@ -35370,8 +35377,9 @@ function () {
           }
 
           if (!callback) return utils__WEBPACK_IMPORTED_MODULE_1__["default"].injectPromise(this.call.bind(this), options);
-          if (!self.contract.address) throw new Error('Smart contract is missing address');
-          if (!self.contract.deployed) throw new Error('Calling smart contracts requires you to load the contract first');
+          if (types.length !== args.length) return callback('Invalid argument count provided');
+          if (!self.contract.address) return callback('Smart contract is missing address');
+          if (!self.contract.deployed) return callback('Calling smart contracts requires you to load the contract first');
           var stateMutability = self.abi.stateMutability;
           if (![STATE_MUTABILITY.PURE, STATE_MUTABILITY.VIEW].includes(stateMutability.toLowerCase())) return callback("Methods with state mutability \"".concat(stateMutability, "\" must use send()"));
           var parameters = args.map(function (value, index) {
@@ -35433,81 +35441,89 @@ function () {
                     return _context2.abrupt("return", utils__WEBPACK_IMPORTED_MODULE_1__["default"].injectPromise(this.send.bind(this), options, privateKey));
 
                   case 7:
-                    if (self.contract.address) {
+                    if (!(types.length !== args.length)) {
                       _context2.next = 9;
                       break;
                     }
 
-                    throw new Error('Smart contract is missing address');
+                    throw new Error('Invalid argument count provided');
 
                   case 9:
-                    if (self.contract.deployed) {
+                    if (self.contract.address) {
                       _context2.next = 11;
                       break;
                     }
 
-                    throw new Error('Calling smart contracts requires you to load the contract first');
+                    return _context2.abrupt("return", callback('Smart contract is missing address'));
 
                   case 11:
+                    if (self.contract.deployed) {
+                      _context2.next = 13;
+                      break;
+                    }
+
+                    return _context2.abrupt("return", callback('Calling smart contracts requires you to load the contract first'));
+
+                  case 13:
                     stateMutability = self.abi.stateMutability;
 
                     if (![STATE_MUTABILITY.PURE, STATE_MUTABILITY.VIEW].includes(stateMutability.toLowerCase())) {
-                      _context2.next = 14;
+                      _context2.next = 16;
                       break;
                     }
 
                     return _context2.abrupt("return", callback("Methods with state mutability \"".concat(stateMutability, "\" must use call()")));
 
-                  case 14:
+                  case 16:
                     parameters = args.map(function (value, index) {
                       return {
                         type: types[index],
                         value: value
                       };
                     });
-                    _context2.prev = 15;
+                    _context2.prev = 17;
                     address = self.tronWeb.address.fromPrivateKey(privateKey);
-                    _context2.next = 19;
+                    _context2.next = 21;
                     return self.tronWeb.transactionBuilder.triggerSmartContract(self.contract.address, self.functionSelector, options.feeLimit, options.callValue, parameters, self.tronWeb.address.toHex(address));
 
-                  case 19:
+                  case 21:
                     transaction = _context2.sent;
 
                     if (!(!transaction.result || !transaction.result.result)) {
-                      _context2.next = 22;
+                      _context2.next = 24;
                       break;
                     }
 
                     return _context2.abrupt("return", callback('Unknown error: ' + JSON.stringify(transaction, null, 2)));
 
-                  case 22:
-                    _context2.next = 24;
+                  case 24:
+                    _context2.next = 26;
                     return self.tronWeb.trx.sign(transaction.transaction, privateKey);
 
-                  case 24:
+                  case 26:
                     signedTransaction = _context2.sent;
-                    _context2.next = 27;
+                    _context2.next = 29;
                     return self.tronWeb.trx.sendRawTransaction(signedTransaction);
 
-                  case 27:
+                  case 29:
                     broadcast = _context2.sent;
 
                     if (broadcast.result) {
-                      _context2.next = 30;
+                      _context2.next = 32;
                       break;
                     }
 
                     return _context2.abrupt("return", callback('Unknown error: ' + JSON.stringify(broadcast, null, 2)));
 
-                  case 30:
+                  case 32:
                     if (options.shouldPollResponse) {
-                      _context2.next = 32;
+                      _context2.next = 34;
                       break;
                     }
 
                     return _context2.abrupt("return", callback(null, signedTransaction.txID));
 
-                  case 32:
+                  case 34:
                     checkResult =
                     /*#__PURE__*/
                     function () {
@@ -35573,24 +35589,156 @@ function () {
                     }();
 
                     checkResult();
-                    _context2.next = 39;
+                    _context2.next = 41;
                     break;
 
-                  case 36:
-                    _context2.prev = 36;
-                    _context2.t0 = _context2["catch"](15);
+                  case 38:
+                    _context2.prev = 38;
+                    _context2.t0 = _context2["catch"](17);
                     return _context2.abrupt("return", callback(_context2.t0));
 
-                  case 39:
+                  case 41:
                   case "end":
                     return _context2.stop();
                 }
               }
-            }, _callee2, this, [[15, 36]]);
+            }, _callee2, this, [[17, 38]]);
           }));
 
           return function send() {
             return _send.apply(this, arguments);
+          };
+        }(),
+        watch: function () {
+          var _watch = _asyncToGenerator(
+          /*#__PURE__*/
+          regeneratorRuntime.mark(function _callee4() {
+            var callback,
+                listener,
+                lastBlock,
+                getEvents,
+                bindListener,
+                _args4 = arguments;
+            return regeneratorRuntime.wrap(function _callee4$(_context4) {
+              while (1) {
+                switch (_context4.prev = _context4.next) {
+                  case 0:
+                    callback = _args4.length > 0 && _args4[0] !== undefined ? _args4[0] : false;
+
+                    if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(callback)) {
+                      _context4.next = 3;
+                      break;
+                    }
+
+                    throw new Error('Expected callback to be provided');
+
+                  case 3:
+                    if (self.contract.address) {
+                      _context4.next = 5;
+                      break;
+                    }
+
+                    return _context4.abrupt("return", callback('Smart contract is missing address'));
+
+                  case 5:
+                    if (!(self.abi.type.toLowerCase() !== 'event')) {
+                      _context4.next = 7;
+                      break;
+                    }
+
+                    return _context4.abrupt("return", callback('Invalid method type for event watching'));
+
+                  case 7:
+                    listener = false;
+                    lastBlock = false;
+
+                    getEvents =
+                    /*#__PURE__*/
+                    function () {
+                      var _ref6 = _asyncToGenerator(
+                      /*#__PURE__*/
+                      regeneratorRuntime.mark(function _callee3() {
+                        var events, _events$sort, _events$sort2, latestEvent, newEvents;
+
+                        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+                          while (1) {
+                            switch (_context3.prev = _context3.next) {
+                              case 0:
+                                _context3.prev = 0;
+                                _context3.next = 3;
+                                return self.tronWeb.getEventResult(self.contract.address, self.name);
+
+                              case 3:
+                                events = _context3.sent;
+                                _events$sort = events.sort(function (a, b) {
+                                  return b.block - a.block;
+                                }), _events$sort2 = _slicedToArray(_events$sort, 1), latestEvent = _events$sort2[0];
+                                newEvents = events.filter(function (event, index) {
+                                  var duplicate = events.slice(0, index).some(function (priorEvent) {
+                                    return JSON.stringify(priorEvent) == JSON.stringify(event);
+                                  });
+                                  if (duplicate) return false;
+                                  if (!lastBlock) return true;
+                                  return event.block > lastBlock;
+                                });
+                                if (latestEvent) lastBlock = latestEvent.block;
+                                return _context3.abrupt("return", newEvents);
+
+                              case 10:
+                                _context3.prev = 10;
+                                _context3.t0 = _context3["catch"](0);
+                                return _context3.abrupt("return", Promise.reject(_context3.t0));
+
+                              case 13:
+                              case "end":
+                                return _context3.stop();
+                            }
+                          }
+                        }, _callee3, this, [[0, 10]]);
+                      }));
+
+                      return function getEvents() {
+                        return _ref6.apply(this, arguments);
+                      };
+                    }();
+
+                    bindListener = function bindListener() {
+                      if (listener) clearInterval(listener);
+                      listener = setInterval(function () {
+                        getEvents().then(function (events) {
+                          events.forEach(function (event) {
+                            return callback(null, event);
+                          });
+                        }).catch(function (err) {
+                          return callback(err);
+                        });
+                      }, 3000);
+                    };
+
+                    _context4.next = 13;
+                    return getEvents();
+
+                  case 13:
+                    bindListener();
+                    return _context4.abrupt("return", {
+                      start: bindListener(),
+                      stop: function stop() {
+                        if (!listener) return;
+                        clearInterval(listener);
+                        listener = false;
+                      }
+                    });
+
+                  case 15:
+                  case "end":
+                    return _context4.stop();
+                }
+              }
+            }, _callee4, this);
+          }));
+
+          return function watch() {
+            return _watch.apply(this, arguments);
           };
         }()
       };
