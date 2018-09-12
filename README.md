@@ -195,6 +195,98 @@ Operation result:
 </p>
 
 
+## Account Management
+
+### tronWeb.login(privateKey)
+
+- Account Login（Recieve account address via private key）
+- arguments: 
+  * privateKey `string` private key
+- return: `string` 
+
+``` js
+  (()=>{
+    const address = tronWeb.login('da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0');
+    console.log(address);
+  })()
+```
+Operation result:
+<p class="demo">
+  "TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY"
+</p> 
+
+### tronWeb.getBalance(address)
+
+- Get account balance
+- arguments: 
+  * address `string` address 
+- return: `object` 
+
+``` js
+  (()=>{
+    tronWeb.getBalance().then(
+      res=>{
+        console.log(res);
+      }
+    )
+  })()
+```
+Operation result:
+<p class="demo">
+  {
+    "address": "4149d7c89c24ab0de2830c7fdbaf0d8ab08bf28049",
+    "balance": 1000000,
+    "create_time": 1534250646000,
+    "account_resource": {}
+  }
+</p> 
+
+### tronWeb.generateAddressOnClient()
+
+- The private key and address are obtained by the local method, although the api is safer. It is recommended to use this method. 
+- arguments: null
+- return: `object` 
+
+``` js
+  (()=>{
+    tronWeb.generateAddressOnClient().then(
+      res=>{
+        console.log(res);
+      }
+    )
+  })()
+```
+Operation result:
+<p class="demo">
+  {
+    "privateKey": "5c1e390b8a88d3ab0ee5c74a456cc5c5dbd01589543abdd0e3a10ce4d4e4ddf9",
+    "address": "TDTJd2di2TKKm3DJPq5RARf9mNZL66pe1P",
+    "hexAddress": "412638b73c5a9603259d17cd9bc77aea0de3d2777c"
+  }
+</p> 
+
+### tronWeb.validateAddress(address)
+
+- 检查地址是否正确
+- arguments: 
+  * address`string`钱包地址
+- return: `object` 
+
+``` js
+  (()=>{
+    tronWeb.validateAddress(address).then(
+      res=>{
+        console.log(res);
+      }
+    )
+  })()
+```
+运行结果为：
+<p class="demo">
+  {"result": true, "message": "Hex string format"}
+</p> 
+
+
 
 
 # Example Usage in React or vue
