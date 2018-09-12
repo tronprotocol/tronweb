@@ -205,7 +205,7 @@ export default class Trx {
                 const from = await this.getTransactionsRelated(address, 'from', limit, offset);
                 const to = await this.getTransactionsRelated(address, 'to', limit, offset);
 
-                callback(null, [
+                return callback(null, [
                     ...from.map(tx => (tx.direction = 'from', tx)),
                     ...to.map(tx => (tx.direction = 'to', tx))
                 ].sort((a, b) => b.raw_data.timestamp - a.raw_data.timestamp));

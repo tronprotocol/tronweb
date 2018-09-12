@@ -36940,7 +36940,7 @@ function () {
       baseURL: host,
       timeout: timeout,
       headers: headers,
-      auth: {
+      auth: user && {
         user: user,
         password: password
       }
@@ -37945,15 +37945,13 @@ function () {
 
               case 20:
                 to = _context.sent;
-                callback(null, _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_1___default()(from.map(function (tx) {
+                return _context.abrupt("return", callback(null, _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_1___default()(from.map(function (tx) {
                   return tx.direction = 'from', tx;
                 })).concat(_babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_1___default()(to.map(function (tx) {
                   return tx.direction = 'to', tx;
                 }))).sort(function (a, b) {
                   return b.raw_data.timestamp - a.raw_data.timestamp;
-                }));
-                _context.next = 27;
-                break;
+                })));
 
               case 24:
                 _context.prev = 24;

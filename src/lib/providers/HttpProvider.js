@@ -26,7 +26,7 @@ export default class HttpProvider {
             baseURL: host,
             timeout: timeout,
             headers: headers,
-            auth: {
+            auth: user && {
                 user,
                 password
             },

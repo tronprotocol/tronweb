@@ -766,7 +766,7 @@ class HttpProvider {
       baseURL: host,
       timeout: timeout,
       headers: headers,
-      auth: {
+      auth: user && {
         user,
         password
       }
@@ -1485,7 +1485,7 @@ class Trx {
       try {
         const from = await this.getTransactionsRelated(address, 'from', limit, offset);
         const to = await this.getTransactionsRelated(address, 'to', limit, offset);
-        callback(null, [...from.map(tx => (tx.direction = 'from', tx)), ...to.map(tx => (tx.direction = 'to', tx))].sort((a, b) => b.raw_data.timestamp - a.raw_data.timestamp));
+        return callback(null, [...from.map(tx => (tx.direction = 'from', tx)), ...to.map(tx => (tx.direction = 'to', tx))].sort((a, b) => b.raw_data.timestamp - a.raw_data.timestamp));
       } catch (ex) {
         return callback(ex);
       }
