@@ -34633,8 +34633,8 @@ function () {
     key: "getEventResult",
     value: function getEventResult() {
       var contractAddress = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-      var eventName = arguments.length > 1 ? arguments[1] : undefined;
-      var blockNumber = arguments.length > 2 ? arguments[2] : undefined;
+      var eventName = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      var blockNumber = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
       var callback = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
       if (!callback) return this.injectPromise(this.getEventResult, contractAddress, eventName, blockNumber);
       if (!this.eventServer) callback('No event server configured');
@@ -34642,7 +34642,7 @@ function () {
       if (!this.isAddress(contractAddress)) return callback('Invalid contract address provided');
       if (eventName && !contractAddress) return callback('Usage of event name filtering requires a contract address');
       if (blockNumber && !eventName) return callback('Usage of block number filtering requires an event name');
-      if (contractAddress) routeParams.push(contractAddress);
+      if (contractAddress) routeParams.push(this.address.fromHex(contractAddress));
       if (eventName) routeParams.push(eventName);
       if (blockNumber) routeParams.push(blockNumber);
       return axios__WEBPACK_IMPORTED_MODULE_2___default()("".concat(this.eventServer, "/event/contract/").concat(routeParams.join('/'))).then(function (_ref2) {
@@ -34650,7 +34650,9 @@ function () {
             data = _ref2$data === void 0 ? false : _ref2$data;
         if (!data) return callback('Unknown error occurred');
         if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isArray(data)) return callback(data);
-        return callback(null, data);
+        return callback(null, data.map(function (event) {
+          return utils__WEBPACK_IMPORTED_MODULE_1__["default"].mapEvent(event);
+        }));
       }).catch(function (err) {
         return callback(err.response.data || err);
       });
@@ -34667,7 +34669,9 @@ function () {
             data = _ref3$data === void 0 ? false : _ref3$data;
         if (!data) return callback('Unknown error occurred');
         if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isArray(data)) return callback(data);
-        return callback(null, data);
+        return callback(null, data.map(function (event) {
+          return utils__WEBPACK_IMPORTED_MODULE_1__["default"].mapEvent(event);
+        }));
       }).catch(function (err) {
         return callback(err.response.data || err);
       });
@@ -34903,6 +34907,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! index */ "./src/index.js");
 /* harmony import */ var utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! utils */ "./src/utils/index.js");
 /* harmony import */ var _method__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./method */ "./src/lib/contract/method.js");
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
@@ -34932,26 +34944,138 @@ function () {
     this.injectPromise = utils__WEBPACK_IMPORTED_MODULE_1__["default"].promiseInjector(this);
     this.address = address;
     this.abi = abi;
+    this.eventListener = false;
     this.bytecode = false;
     this.deployed = false;
+    this.lastBlock = false;
     this.methods = {};
     if (this.tronWeb.isAddress(address)) this.deployed = true;else this.address = false;
     this.loadAbi(abi);
   }
 
   _createClass(Contract, [{
+    key: "_getEvents",
+    value: function () {
+      var _getEvents2 = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee() {
+        var _this = this;
+
+        var events, _events$sort, _events$sort2, latestEvent, newEvents;
+
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.next = 2;
+                return this.tronWeb.getEventResult(this.address);
+
+              case 2:
+                events = _context.sent;
+                _events$sort = events.sort(function (a, b) {
+                  return b.block - a.block;
+                }), _events$sort2 = _slicedToArray(_events$sort, 1), latestEvent = _events$sort2[0];
+                newEvents = events.filter(function (event, index) {
+                  if (!_this.lastBlock) return true;
+                  if (event.block <= _this.lastBlock) return false; // TronGrid is currently bugged and has duplicated the events
+
+                  return !events.slice(0, index).some(function (priorEvent) {
+                    return JSON.stringify(priorEvent) == JSON.stringify(event);
+                  });
+                });
+                if (latestEvent) this.lastBlock = latestEvent.block;
+                return _context.abrupt("return", newEvents);
+
+              case 7:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      return function _getEvents() {
+        return _getEvents2.apply(this, arguments);
+      };
+    }()
+  }, {
+    key: "_startEventListener",
+    value: function () {
+      var _startEventListener2 = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee2(callback) {
+        var _this2 = this;
+
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                if (this.eventListener) clearInterval(this.eventListener);
+
+                if (this.tronWeb.eventServer) {
+                  _context2.next = 3;
+                  break;
+                }
+
+                throw new Error('Event server is not configured');
+
+              case 3:
+                if (this.address) {
+                  _context2.next = 5;
+                  break;
+                }
+
+                throw new Error('Contract is not configured with an address');
+
+              case 5:
+                this.eventCallback = callback;
+                _context2.next = 8;
+                return this._getEvents();
+
+              case 8:
+                this.eventListener = setInterval(function () {
+                  _this2._getEvents().then(function (newEvents) {
+                    return newEvents.forEach(function (event) {
+                      _this2.eventCallback && _this2.eventCallback(event);
+                    });
+                  }).catch(function (err) {
+                    console.error('Failed to get event list', err);
+                  });
+                }, 3000);
+
+              case 9:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      return function _startEventListener(_x) {
+        return _startEventListener2.apply(this, arguments);
+      };
+    }()
+  }, {
+    key: "_stopEventListener",
+    value: function _stopEventListener() {
+      if (!this.eventListener) return;
+      clearInterval(this.eventListener);
+      this.eventListener = false;
+      this.eventCallback = false;
+    }
+  }, {
     key: "loadAbi",
     value: function loadAbi(abi) {
-      var _this = this;
+      var _this3 = this;
 
       this.abi = abi;
       this.methods = {};
       abi.forEach(function (func) {
-        var method = new _method__WEBPACK_IMPORTED_MODULE_2__["default"](_this, func);
+        var method = new _method__WEBPACK_IMPORTED_MODULE_2__["default"](_this3, func);
         var methodCall = method.onMethod.bind(method);
-        _this.methods[method.name] = methodCall;
-        _this.methods[method.functionSelector] = methodCall;
-        _this.methods[method.signature] = methodCall;
+        _this3.methods[method.name] = methodCall;
+        _this3.methods[method.functionSelector] = methodCall;
+        _this3.methods[method.signature] = methodCall;
       });
     }
   }, {
@@ -34959,20 +35083,20 @@ function () {
     value: function () {
       var _new2 = _asyncToGenerator(
       /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee(options) {
+      regeneratorRuntime.mark(function _callee3(options) {
         var privateKey,
             callback,
             address,
             transaction,
             signedTransaction,
             contract,
-            _args = arguments;
-        return regeneratorRuntime.wrap(function _callee$(_context) {
+            _args3 = arguments;
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
-            switch (_context.prev = _context.next) {
+            switch (_context3.prev = _context3.next) {
               case 0:
-                privateKey = _args.length > 1 && _args[1] !== undefined ? _args[1] : this.tronWeb.defaultPrivateKey;
-                callback = _args.length > 2 && _args[2] !== undefined ? _args[2] : false;
+                privateKey = _args3.length > 1 && _args3[1] !== undefined ? _args3[1] : this.tronWeb.defaultPrivateKey;
+                callback = _args3.length > 2 && _args3[2] !== undefined ? _args3[2] : false;
 
                 if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(privateKey)) {
                   callback = privateKey;
@@ -34980,55 +35104,55 @@ function () {
                 }
 
                 if (callback) {
-                  _context.next = 5;
+                  _context3.next = 5;
                   break;
                 }
 
-                return _context.abrupt("return", this.injectPromise(this.new, options, privateKey));
+                return _context3.abrupt("return", this.injectPromise(this.new, options, privateKey));
 
               case 5:
-                _context.prev = 5;
+                _context3.prev = 5;
                 address = this.tronWeb.address.fromPrivateKey(privateKey);
-                _context.next = 9;
+                _context3.next = 9;
                 return this.tronWeb.transactionBuilder.createSmartContract(options, address);
 
               case 9:
-                transaction = _context.sent;
-                _context.next = 12;
+                transaction = _context3.sent;
+                _context3.next = 12;
                 return this.tronWeb.trx.sign(transaction, privateKey);
 
               case 12:
-                signedTransaction = _context.sent;
-                _context.next = 15;
+                signedTransaction = _context3.sent;
+                _context3.next = 15;
                 return this.tronWeb.trx.sendRawTransaction(signedTransaction);
 
               case 15:
-                contract = _context.sent;
+                contract = _context3.sent;
 
                 if (contract.result) {
-                  _context.next = 18;
+                  _context3.next = 18;
                   break;
                 }
 
-                return _context.abrupt("return", callback('Unknown error: ' + JSON.stringify(contract, null, 2)));
+                return _context3.abrupt("return", callback('Unknown error: ' + JSON.stringify(contract, null, 2)));
 
               case 18:
-                return _context.abrupt("return", this.at(signedTransaction.contract_address, callback));
+                return _context3.abrupt("return", this.at(signedTransaction.contract_address, callback));
 
               case 21:
-                _context.prev = 21;
-                _context.t0 = _context["catch"](5);
-                return _context.abrupt("return", callback(_context.t0));
+                _context3.prev = 21;
+                _context3.t0 = _context3["catch"](5);
+                return _context3.abrupt("return", callback(_context3.t0));
 
               case 24:
               case "end":
-                return _context.stop();
+                return _context3.stop();
             }
           }
-        }, _callee, this, [[5, 21]]);
+        }, _callee3, this, [[5, 21]]);
       }));
 
-      return function _new(_x) {
+      return function _new(_x2) {
         return _new2.apply(this, arguments);
       };
     }()
@@ -35037,65 +35161,94 @@ function () {
     value: function () {
       var _at = _asyncToGenerator(
       /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee2(contractAddress) {
+      regeneratorRuntime.mark(function _callee4(contractAddress) {
         var callback,
             contract,
-            _args2 = arguments;
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+            _args4 = arguments;
+        return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
-            switch (_context2.prev = _context2.next) {
+            switch (_context4.prev = _context4.next) {
               case 0:
-                callback = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : false;
+                callback = _args4.length > 1 && _args4[1] !== undefined ? _args4[1] : false;
 
                 if (callback) {
-                  _context2.next = 3;
+                  _context4.next = 3;
                   break;
                 }
 
-                return _context2.abrupt("return", this.injectPromise(this.at, contractAddress));
+                return _context4.abrupt("return", this.injectPromise(this.at, contractAddress));
 
               case 3:
-                _context2.prev = 3;
-                _context2.next = 6;
+                _context4.prev = 3;
+                _context4.next = 6;
                 return this.tronWeb.trx.getContract(contractAddress);
 
               case 6:
-                contract = _context2.sent;
+                contract = _context4.sent;
                 if (!contract.contract_address) callback('Unknown error: ' + JSON.stringify(contract, null, 2));
                 this.address = contract.contract_address;
                 this.bytecode = contract.bytecode;
                 this.deployed = true;
                 this.loadAbi(contract.abi.entrys);
                 callback(null, this);
-                _context2.next = 20;
+                _context4.next = 20;
                 break;
 
               case 15:
-                _context2.prev = 15;
-                _context2.t0 = _context2["catch"](3);
+                _context4.prev = 15;
+                _context4.t0 = _context4["catch"](3);
 
-                if (!_context2.t0.toString().includes('does not exist')) {
-                  _context2.next = 19;
+                if (!_context4.t0.toString().includes('does not exist')) {
+                  _context4.next = 19;
                   break;
                 }
 
-                return _context2.abrupt("return", callback('Failed to deploy contract'));
+                return _context4.abrupt("return", callback('Contract has not been deployed on the network'));
 
               case 19:
-                return _context2.abrupt("return", callback(_context2.t0));
+                return _context4.abrupt("return", callback(_context4.t0));
 
               case 20:
               case "end":
-                return _context2.stop();
+                return _context4.stop();
             }
           }
-        }, _callee2, this, [[3, 15]]);
+        }, _callee4, this, [[3, 15]]);
       }));
 
-      return function at(_x2) {
+      return function at(_x3) {
         return _at.apply(this, arguments);
       };
     }()
+  }, {
+    key: "events",
+    value: function events() {
+      var callback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(callback)) throw new Error('Callback function expected');
+      var self = this;
+      return {
+        start: function start() {
+          var startCallback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
+          if (!startCallback) {
+            self._startEventListener(callback);
+
+            return this;
+          }
+
+          self._startEventListener(callback).then(function () {
+            startCallback();
+          }).catch(function (err) {
+            startCallback(err);
+          });
+
+          return this;
+        },
+        stop: function stop() {
+          self._stopEventListener();
+        }
+      };
+    }
   }]);
 
   return Contract;
@@ -35197,7 +35350,6 @@ function () {
       args.forEach(function (arg, index) {
         if (types[index] == 'address') args[index] = _this.tronWeb.address.toHex(arg).replace(/^(41)/, '0x');
       });
-      var parameters = abiCoder.encode(types, args).replace(/^(0x)/, '');
       var self = this;
       var defaultOptions = {
         feeLimit: 1000000000,
@@ -35271,7 +35423,6 @@ function () {
                     if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(options)) {
                       callback = options;
                       options = defaultOptions;
-                      privateKey = self.tronWeb.defaultPrivateKey;
                     }
 
                     if (callback) {
@@ -35905,7 +36056,9 @@ function () {
           _options$callValue = options.callValue,
           callValue = _options$callValue === void 0 ? 0 : _options$callValue,
           _options$bandwidthLim = options.bandwidthLimit,
-          bandwidthLimit = _options$bandwidthLim === void 0 ? 0 : _options$bandwidthLim;
+          bandwidthLimit = _options$bandwidthLim === void 0 ? 0 : _options$bandwidthLim,
+          _options$parameters = options.parameters,
+          parameters = _options$parameters === void 0 ? [] : _options$parameters;
 
       if (abi && utils__WEBPACK_IMPORTED_MODULE_1__["default"].isString(abi)) {
         try {
@@ -35925,14 +36078,40 @@ function () {
       if (payable && callValue == 0) return callback('When contract is payable, options.callValue must be a positive integer');
       if (!payable && callValue > 0) return callback('When contract is not payable, options.callValue must be 0');
       if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isInteger(bandwidthLimit) || bandwidthLimit < 0 || bandwidthLimit > 100) return callback('Invalid options.bandwidthLimit provided');
+      if (!utils__WEBPACK_IMPORTED_MODULE_1__["default"].isArray(parameters)) return callback('Invalid parameters provided');
       if (!this.tronWeb.isAddress(issuerAddress)) return callback('Invalid issuer address provided');
+
+      if (parameters.length) {
+        var abiCoder = new ethers__WEBPACK_IMPORTED_MODULE_2___default.a.utils.AbiCoder();
+        var types = [];
+        var values = [];
+
+        for (var i = 0; i < parameters.length; i++) {
+          var _parameters$i = parameters[i],
+              type = _parameters$i.type,
+              value = _parameters$i.value;
+          if (!type || !utils__WEBPACK_IMPORTED_MODULE_1__["default"].isString(type) || !type.length) return callback('Invalid parameter type provided: ' + type);
+          if (!value) return callback('Invalid parameter value provided: ' + value);
+          if (type == 'address') value = this.tronWeb.address.toHex(value).replace(/^(41)/, '0x');
+          types.push(type);
+          values.push(value);
+        }
+
+        try {
+          parameters = abiCoder.encode(types, values).replace(/^(0x)/, '');
+        } catch (ex) {
+          return callback(ex);
+        }
+      } else parameters = '';
+
       this.tronWeb.fullNode.request('wallet/deploycontract', {
         owner_address: this.tronWeb.address.toHex(issuerAddress),
         fee_limit: parseInt(feeLimit),
         call_value: parseInt(callValue),
         consume_user_resource_percent: bandwidthLimit,
         abi: JSON.stringify(abi),
-        bytecode: bytecode
+        bytecode: bytecode,
+        parameter: parameters
       }, 'post').then(function (transaction) {
         if (transaction.Error) return callback(transaction.Error);
         callback(null, transaction);
@@ -35959,14 +36138,16 @@ function () {
       if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(parameters)) {
         callback = parameters;
         parameters = [];
-        issuerAddress = this.tronWeb.defaultAddress.hex;
       }
 
       if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(callValue)) {
         callback = callValue;
         callValue = 0;
-        parameters = [];
-        issuerAddress = this.tronWeb.defaultAddress.hex;
+      }
+
+      if (utils__WEBPACK_IMPORTED_MODULE_1__["default"].isFunction(feeLimit)) {
+        callback = feeLimit;
+        feeLimit = 1000000000;
       }
 
       if (!callback) {
@@ -35987,9 +36168,9 @@ function () {
         var values = [];
 
         for (var i = 0; i < parameters.length; i++) {
-          var _parameters$i = parameters[i],
-              type = _parameters$i.type,
-              value = _parameters$i.value;
+          var _parameters$i2 = parameters[i],
+              type = _parameters$i2.type,
+              value = _parameters$i2.value;
           if (!type || !utils__WEBPACK_IMPORTED_MODULE_1__["default"].isString(type) || !type.length) return callback('Invalid parameter type provided: ' + type);
           if (!value) return callback('Invalid parameter value provided: ' + value);
           if (type == 'address') value = this.tronWeb.address.toHex(value).replace(/^(41)/, '0x');
@@ -38041,6 +38222,16 @@ var utils = {
       }
 
       return _this2.injectPromise.apply(_this2, [func.bind(scope)].concat(args));
+    };
+  },
+  mapEvent: function mapEvent(event) {
+    return {
+      block: event.block_number,
+      timestamp: event.block_timestamp,
+      contract: event.contract_address,
+      name: event.event_name,
+      transaction: event.transaction_id,
+      result: event.result
     };
   }
 };

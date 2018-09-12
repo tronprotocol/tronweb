@@ -13,8 +13,10 @@ export default class Contract {
         this.address = address;
         this.abi = abi;
 
+        this.eventListener = false;
         this.bytecode = false;        
-        this.deployed = false;     
+        this.deployed = false;
+        this.lastBlock = false;  
 
         this.methods = {};
 
@@ -23,6 +25,59 @@ export default class Contract {
         else this.address = false;
 
         this.loadAbi(abi);
+    }
+
+    async _getEvents() {
+        const events = await this.tronWeb.getEventResult(this.address);
+        const [ latestEvent ] = events.sort((a, b) => b.block - a.block);
+        const newEvents = events.filter((event, index) => {
+            if(!this.lastBlock)
+                return true;            
+
+            if(event.block <= this.lastBlock)
+                return false;
+
+            // TronGrid is currently bugged and has duplicated the events
+            return !events.slice(0, index).some(priorEvent => (
+                JSON.stringify(priorEvent) == JSON.stringify(event)
+            ));
+        });
+
+        if(latestEvent)
+            this.lastBlock = latestEvent.block;
+
+        return newEvents;
+    }
+
+    async _startEventListener(callback) {
+        if(this.eventListener)
+            clearInterval(this.eventListener);
+
+        if(!this.tronWeb.eventServer)
+            throw new Error('Event server is not configured');
+
+        if(!this.address)
+            throw new Error('Contract is not configured with an address');
+
+        this.eventCallback = callback;
+        await this._getEvents();
+
+        this.eventListener = setInterval(() => {
+            this._getEvents().then(newEvents => newEvents.forEach(event => {
+                this.eventCallback && this.eventCallback(event)
+            })).catch(err => {
+                console.error('Failed to get event list', err);
+            });
+        }, 3000);
+    }
+
+    _stopEventListener() {
+        if(!this.eventListener)
+            return;
+
+        clearInterval(this.eventListener);
+        this.eventListener = false;
+        this.eventCallback = false;
     }
 
     loadAbi(abi) {
@@ -82,9 +137,36 @@ export default class Contract {
             callback(null, this);
         } catch(ex) {
             if(ex.toString().includes('does not exist'))
-                return callback('Failed to deploy contract');
+                return callback('Contract has not been deployed on the network');
 
             return callback(ex);
         }        
+    }
+
+    events(callback = false) {
+        if(!utils.isFunction(callback))
+            throw new Error('Callback function expected');
+
+        const self = this;
+
+        return {
+            start(startCallback = false) {
+                if(!startCallback) {
+                    self._startEventListener(callback);
+                    return this;
+                }
+
+                self._startEventListener(callback).then(() => {
+                    startCallback();
+                }).catch(err => {
+                    startCallback(err)
+                });
+
+                return this;
+            },
+            stop() {
+                self._stopEventListener();
+            }
+        };
     }
 }

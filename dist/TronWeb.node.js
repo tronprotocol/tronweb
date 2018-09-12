@@ -213,14 +213,14 @@ class TronWeb {
     return this.currentProviders();
   }
 
-  getEventResult(contractAddress = false, eventName, blockNumber, callback = false) {
+  getEventResult(contractAddress = false, eventName = false, blockNumber = false, callback = false) {
     if (!callback) return this.injectPromise(this.getEventResult, contractAddress, eventName, blockNumber);
     if (!this.eventServer) callback('No event server configured');
     const routeParams = [];
     if (!this.isAddress(contractAddress)) return callback('Invalid contract address provided');
     if (eventName && !contractAddress) return callback('Usage of event name filtering requires a contract address');
     if (blockNumber && !eventName) return callback('Usage of block number filtering requires an event name');
-    if (contractAddress) routeParams.push(contractAddress);
+    if (contractAddress) routeParams.push(this.address.fromHex(contractAddress));
     if (eventName) routeParams.push(eventName);
     if (blockNumber) routeParams.push(blockNumber);
     return axios__WEBPACK_IMPORTED_MODULE_3___default()(`${this.eventServer}/event/contract/${routeParams.join('/')}`).then(({
@@ -228,7 +228,7 @@ class TronWeb {
     }) => {
       if (!data) return callback('Unknown error occurred');
       if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isArray(data)) return callback(data);
-      return callback(null, data);
+      return callback(null, data.map(event => utils__WEBPACK_IMPORTED_MODULE_2__["default"].mapEvent(event)));
     }).catch(err => callback(err.response.data || err));
   }
 
@@ -240,7 +240,7 @@ class TronWeb {
     }) => {
       if (!data) return callback('Unknown error occurred');
       if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isArray(data)) return callback(data);
-      return callback(null, data);
+      return callback(null, data.map(event => utils__WEBPACK_IMPORTED_MODULE_2__["default"].mapEvent(event)));
     }).catch(err => callback(err.response.data || err));
   }
 
@@ -395,11 +395,48 @@ class Contract {
     this.injectPromise = utils__WEBPACK_IMPORTED_MODULE_2__["default"].promiseInjector(this);
     this.address = address;
     this.abi = abi;
+    this.eventListener = false;
     this.bytecode = false;
     this.deployed = false;
+    this.lastBlock = false;
     this.methods = {};
     if (this.tronWeb.isAddress(address)) this.deployed = true;else this.address = false;
     this.loadAbi(abi);
+  }
+
+  async _getEvents() {
+    const events = await this.tronWeb.getEventResult(this.address);
+    const [latestEvent] = events.sort((a, b) => b.block - a.block);
+    const newEvents = events.filter((event, index) => {
+      if (!this.lastBlock) return true;
+      if (event.block <= this.lastBlock) return false; // TronGrid is currently bugged and has duplicated the events
+
+      return !events.slice(0, index).some(priorEvent => JSON.stringify(priorEvent) == JSON.stringify(event));
+    });
+    if (latestEvent) this.lastBlock = latestEvent.block;
+    return newEvents;
+  }
+
+  async _startEventListener(callback) {
+    if (this.eventListener) clearInterval(this.eventListener);
+    if (!this.tronWeb.eventServer) throw new Error('Event server is not configured');
+    if (!this.address) throw new Error('Contract is not configured with an address');
+    this.eventCallback = callback;
+    await this._getEvents();
+    this.eventListener = setInterval(() => {
+      this._getEvents().then(newEvents => newEvents.forEach(event => {
+        this.eventCallback && this.eventCallback(event);
+      })).catch(err => {
+        console.error('Failed to get event list', err);
+      });
+    }, 3000);
+  }
+
+  _stopEventListener() {
+    if (!this.eventListener) return;
+    clearInterval(this.eventListener);
+    this.eventListener = false;
+    this.eventCallback = false;
   }
 
   loadAbi(abi) {
@@ -446,9 +483,36 @@ class Contract {
       this.loadAbi(contract.abi.entrys);
       callback(null, this);
     } catch (ex) {
-      if (ex.toString().includes('does not exist')) return callback('Failed to deploy contract');
+      if (ex.toString().includes('does not exist')) return callback('Contract has not been deployed on the network');
       return callback(ex);
     }
+  }
+
+  events(callback = false) {
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(callback)) throw new Error('Callback function expected');
+    const self = this;
+    return {
+      start(startCallback = false) {
+        if (!startCallback) {
+          self._startEventListener(callback);
+
+          return this;
+        }
+
+        self._startEventListener(callback).then(() => {
+          startCallback();
+        }).catch(err => {
+          startCallback(err);
+        });
+
+        return this;
+      },
+
+      stop() {
+        self._stopEventListener();
+      }
+
+    };
   }
 
 }
@@ -521,7 +585,6 @@ class Method {
     args.forEach((arg, index) => {
       if (types[index] == 'address') args[index] = this.tronWeb.address.toHex(arg).replace(/^(41)/, '0x');
     });
-    const parameters = abiCoder.encode(types, args).replace(/^(0x)/, '');
     const self = this;
     const defaultOptions = {
       feeLimit: 1000000000,
@@ -571,7 +634,6 @@ class Method {
         if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(options)) {
           callback = options;
           options = defaultOptions;
-          privateKey = self.tronWeb.defaultPrivateKey;
         }
 
         if (!callback) return utils__WEBPACK_IMPORTED_MODULE_2__["default"].injectPromise(this.send.bind(this), options, privateKey);
@@ -930,7 +992,8 @@ class TransactionBuilder {
       bytecode = false,
       feeLimit = 1000000000,
       callValue = 0,
-      bandwidthLimit = 0
+      bandwidthLimit = 0,
+      parameters = []
     } = options;
 
     if (abi && utils__WEBPACK_IMPORTED_MODULE_2__["default"].isString(abi)) {
@@ -951,14 +1014,41 @@ class TransactionBuilder {
     if (payable && callValue == 0) return callback('When contract is payable, options.callValue must be a positive integer');
     if (!payable && callValue > 0) return callback('When contract is not payable, options.callValue must be 0');
     if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(bandwidthLimit) || bandwidthLimit < 0 || bandwidthLimit > 100) return callback('Invalid options.bandwidthLimit provided');
+    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isArray(parameters)) return callback('Invalid parameters provided');
     if (!this.tronWeb.isAddress(issuerAddress)) return callback('Invalid issuer address provided');
+
+    if (parameters.length) {
+      const abiCoder = new ethers__WEBPACK_IMPORTED_MODULE_3___default.a.utils.AbiCoder();
+      const types = [];
+      const values = [];
+
+      for (let i = 0; i < parameters.length; i++) {
+        let {
+          type,
+          value
+        } = parameters[i];
+        if (!type || !utils__WEBPACK_IMPORTED_MODULE_2__["default"].isString(type) || !type.length) return callback('Invalid parameter type provided: ' + type);
+        if (!value) return callback('Invalid parameter value provided: ' + value);
+        if (type == 'address') value = this.tronWeb.address.toHex(value).replace(/^(41)/, '0x');
+        types.push(type);
+        values.push(value);
+      }
+
+      try {
+        parameters = abiCoder.encode(types, values).replace(/^(0x)/, '');
+      } catch (ex) {
+        return callback(ex);
+      }
+    } else parameters = '';
+
     this.tronWeb.fullNode.request('wallet/deploycontract', {
       owner_address: this.tronWeb.address.toHex(issuerAddress),
       fee_limit: parseInt(feeLimit),
       call_value: parseInt(callValue),
       consume_user_resource_percent: bandwidthLimit,
       abi: JSON.stringify(abi),
-      bytecode
+      bytecode,
+      parameter: parameters
     }, 'post').then(transaction => {
       if (transaction.Error) return callback(transaction.Error);
       callback(null, transaction);
@@ -974,14 +1064,16 @@ class TransactionBuilder {
     if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(parameters)) {
       callback = parameters;
       parameters = [];
-      issuerAddress = this.tronWeb.defaultAddress.hex;
     }
 
     if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(callValue)) {
       callback = callValue;
       callValue = 0;
-      parameters = [];
-      issuerAddress = this.tronWeb.defaultAddress.hex;
+    }
+
+    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isFunction(feeLimit)) {
+      callback = feeLimit;
+      feeLimit = 1000000000;
     }
 
     if (!callback) {
@@ -2598,6 +2690,17 @@ const utils = {
   promiseInjector(scope) {
     return (func, ...args) => {
       return this.injectPromise(func.bind(scope), ...args);
+    };
+  },
+
+  mapEvent(event) {
+    return {
+      block: event.block_number,
+      timestamp: event.block_timestamp,
+      contract: event.contract_address,
+      name: event.event_name,
+      transaction: event.transaction_id,
+      result: event.result
     };
   }
 

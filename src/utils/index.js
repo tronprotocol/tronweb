@@ -80,6 +80,17 @@ const utils = {
         return (func, ...args) => {
             return this.injectPromise(func.bind(scope), ...args);
         }
+    },
+
+    mapEvent(event) {
+        return {
+            block: event.block_number,
+            timestamp: event.block_timestamp,
+            contract: event.contract_address,
+            name: event.event_name,
+            transaction: event.transaction_id,
+            result: event.result
+        };
     }
 }
 

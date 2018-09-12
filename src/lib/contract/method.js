@@ -57,9 +57,7 @@ export default class Method {
                 args[index] = this.tronWeb.address.toHex(arg).replace(/^(41)/, '0x')
         });
 
-        const parameters = abiCoder.encode(types, args).replace(/^(0x)/, '');
         const self = this;
-
         const defaultOptions = {
             feeLimit: 1000000000,
             callValue: 0,

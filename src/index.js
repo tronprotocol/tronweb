@@ -132,7 +132,7 @@ export default class TronWeb {
         return this.currentProviders();
     }
 
-    getEventResult(contractAddress = false, eventName, blockNumber, callback = false) {
+    getEventResult(contractAddress = false, eventName = false, blockNumber = false, callback = false) {
         if(!callback)
             return this.injectPromise(this.getEventResult, contractAddress, eventName, blockNumber);
 
@@ -151,7 +151,7 @@ export default class TronWeb {
             return callback('Usage of block number filtering requires an event name');
 
         if(contractAddress)
-            routeParams.push(contractAddress);
+            routeParams.push(this.address.fromHex(contractAddress));
 
         if(eventName)
             routeParams.push(eventName);
@@ -166,7 +166,9 @@ export default class TronWeb {
             if(!utils.isArray(data))
                 return callback(data);
 
-            return callback(null, data);
+            return callback(null, 
+                data.map(event => utils.mapEvent(event))
+            );
         }).catch(err => callback(err.response.data || err)); 
     }
 
@@ -184,7 +186,9 @@ export default class TronWeb {
             if(!utils.isArray(data))
                 return callback(data);
 
-            return callback(null, data);
+            return callback(null, 
+                data.map(event => utils.mapEvent(event))
+            );
         }).catch(err => callback(err.response.data || err));
     }
 
