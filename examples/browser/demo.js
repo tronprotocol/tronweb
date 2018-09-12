@@ -1,4 +1,3 @@
-const TronWeb = require('../../dist/TronWeb.node.js'); // require('tronweb');
 const HttpProvider = TronWeb.providers.HttpProvider;
 
 const fullNode = new HttpProvider('https://api.trongrid.io:8090');

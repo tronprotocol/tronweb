@@ -9,6 +9,7 @@
         "example": "node ./examples/server"
     },
     "dependencies": {
+        "@babel/runtime": "^7.0.0",
         "axios": "^0.18.0",
         "bignumber.js": "^7.2.1",
         "elliptic": "^6.4.1",
@@ -22,6 +23,7 @@
         "@babel/core": "^7.0.0",
         "@babel/plugin-proposal-class-properties": "^7.0.0",
         "@babel/plugin-proposal-numeric-separator": "^7.0.0",
+        "@babel/plugin-transform-runtime": "^7.0.0",
         "@babel/preset-env": "^7.0.0",
         "babel-loader": "^8.0.2",
         "babel-minify-webpack-plugin": "^0.3.1",

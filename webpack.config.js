@@ -3,7 +3,8 @@ const externals = require('webpack-node-externals');
 
 const basePlugins = [
     '@babel/plugin-proposal-numeric-separator',
-    '@babel/plugin-proposal-class-properties'
+    '@babel/plugin-proposal-class-properties',
+    '@babel/plugin-transform-runtime'
 ];
 
 const baseConfig = {
@@ -85,6 +86,7 @@ module.exports = [
             filename: 'TronWeb.js',
             library: 'TronWeb',
             libraryTarget: 'umd',
+            libraryExport: 'default',
             umdNamedDefine: true
         },
     }

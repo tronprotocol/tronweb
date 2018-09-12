@@ -97,23 +97,23 @@ module.exports =
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return TronWeb; });
-/* harmony import */ var source_map_support_register__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! source-map-support/register */ "source-map-support/register");
-/* harmony import */ var source_map_support_register__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(source_map_support_register__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var lib_providers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! lib/providers */ "./src/lib/providers/index.js");
-/* harmony import */ var utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! utils */ "./src/utils/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "axios");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var bignumber_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! bignumber.js */ "bignumber.js");
-/* harmony import */ var bignumber_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(bignumber_js__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var js_sha3__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! js-sha3 */ "js-sha3");
-/* harmony import */ var js_sha3__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(js_sha3__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var lib_transactionBuilder__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! lib/transactionBuilder */ "./src/lib/transactionBuilder.js");
-/* harmony import */ var lib_trx__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! lib/trx */ "./src/lib/trx.js");
-/* harmony import */ var lib_witness__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! lib/witness */ "./src/lib/witness.js");
-/* harmony import */ var lib_contract__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! lib/contract */ "./src/lib/contract/index.js");
+/* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/defineProperty */ "@babel/runtime/helpers/defineProperty");
+/* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var source_map_support_register__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! source-map-support/register */ "source-map-support/register");
+/* harmony import */ var source_map_support_register__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(source_map_support_register__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var lib_providers__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! lib/providers */ "./src/lib/providers/index.js");
+/* harmony import */ var utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! utils */ "./src/utils/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "axios");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var bignumber_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! bignumber.js */ "bignumber.js");
+/* harmony import */ var bignumber_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(bignumber_js__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var js_sha3__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! js-sha3 */ "js-sha3");
+/* harmony import */ var js_sha3__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(js_sha3__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var lib_transactionBuilder__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! lib/transactionBuilder */ "./src/lib/transactionBuilder.js");
+/* harmony import */ var lib_trx__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! lib/trx */ "./src/lib/trx.js");
+/* harmony import */ var lib_witness__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! lib/witness */ "./src/lib/witness.js");
+/* harmony import */ var lib_contract__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! lib/contract */ "./src/lib/contract/index.js");
 
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 
 
@@ -126,13 +126,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 class TronWeb {
   constructor(fullNode, solidityNode, eventServer = false, privateKey = false) {
-    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isString(fullNode)) fullNode = new lib_providers__WEBPACK_IMPORTED_MODULE_1__["default"].HttpProvider(fullNode);
-    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isString(solidityNode)) solidityNode = new lib_providers__WEBPACK_IMPORTED_MODULE_1__["default"].HttpProvider(solidityNode);
+    if (utils__WEBPACK_IMPORTED_MODULE_3__["default"].isString(fullNode)) fullNode = new lib_providers__WEBPACK_IMPORTED_MODULE_2__["default"].HttpProvider(fullNode);
+    if (utils__WEBPACK_IMPORTED_MODULE_3__["default"].isString(solidityNode)) solidityNode = new lib_providers__WEBPACK_IMPORTED_MODULE_2__["default"].HttpProvider(solidityNode);
     this.setFullNode(fullNode);
     this.setSolidityNode(solidityNode);
     this.setEventServer(eventServer);
-    this.providers = lib_providers__WEBPACK_IMPORTED_MODULE_1__["default"];
-    this.BigNumber = bignumber_js__WEBPACK_IMPORTED_MODULE_4___default.a;
+    this.providers = lib_providers__WEBPACK_IMPORTED_MODULE_2__["default"];
+    this.BigNumber = bignumber_js__WEBPACK_IMPORTED_MODULE_5___default.a;
     this.defaultBlock = false;
     this.defaultPrivateKey = false;
     this.defaultAddress = {
@@ -143,15 +143,15 @@ class TronWeb {
       this[key] = TronWeb[key];
     });
     if (privateKey) this.setPrivateKey(privateKey);
-    this.transactionBuilder = new lib_transactionBuilder__WEBPACK_IMPORTED_MODULE_6__["default"](this);
-    this.trx = new lib_trx__WEBPACK_IMPORTED_MODULE_7__["default"](this);
-    this.witness = new lib_witness__WEBPACK_IMPORTED_MODULE_8__["default"](this);
-    this.injectPromise = utils__WEBPACK_IMPORTED_MODULE_2__["default"].promiseInjector(this);
+    this.transactionBuilder = new lib_transactionBuilder__WEBPACK_IMPORTED_MODULE_7__["default"](this);
+    this.trx = new lib_trx__WEBPACK_IMPORTED_MODULE_8__["default"](this);
+    this.witness = new lib_witness__WEBPACK_IMPORTED_MODULE_9__["default"](this);
+    this.injectPromise = utils__WEBPACK_IMPORTED_MODULE_3__["default"].promiseInjector(this);
   }
 
   setDefaultBlock(blockID = false) {
     if (blockID === false || blockID == 'latest' || blockID == 'earliest') return this.defaultBlock = blockID;
-    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isInteger(blockID) || !blockID) throw new Error('Invalid block ID provided');
+    if (!utils__WEBPACK_IMPORTED_MODULE_3__["default"].isInteger(blockID) || !blockID) throw new Error('Invalid block ID provided');
     this.defaultBlock = +blockID;
   }
 
@@ -172,15 +172,15 @@ class TronWeb {
   }
 
   isValidProvider(provider) {
-    return Object.values(lib_providers__WEBPACK_IMPORTED_MODULE_1__["default"]).some(knownProvider => provider instanceof knownProvider);
+    return Object.values(lib_providers__WEBPACK_IMPORTED_MODULE_2__["default"]).some(knownProvider => provider instanceof knownProvider);
   }
 
   isEventServerConnected() {
     if (!this.eventServer) return false;
-    return axios__WEBPACK_IMPORTED_MODULE_3___default.a.get(this.eventServer).then(({
+    return axios__WEBPACK_IMPORTED_MODULE_4___default.a.get(this.eventServer).then(({
       data
     }) => {
-      return utils__WEBPACK_IMPORTED_MODULE_2__["default"].hasProperty(data, '_links');
+      return utils__WEBPACK_IMPORTED_MODULE_3__["default"].hasProperty(data, '_links');
     }).catch(() => false);
   }
 
@@ -197,7 +197,7 @@ class TronWeb {
   }
 
   setEventServer(eventServer = false) {
-    if (eventServer !== false && !utils__WEBPACK_IMPORTED_MODULE_2__["default"].isValidURL(eventServer)) throw new Error('Invalid URL provided for event server');
+    if (eventServer !== false && !utils__WEBPACK_IMPORTED_MODULE_3__["default"].isValidURL(eventServer)) throw new Error('Invalid URL provided for event server');
     this.eventServer = eventServer;
   }
 
@@ -223,46 +223,46 @@ class TronWeb {
     if (contractAddress) routeParams.push(this.address.fromHex(contractAddress));
     if (eventName) routeParams.push(eventName);
     if (blockNumber) routeParams.push(blockNumber);
-    return axios__WEBPACK_IMPORTED_MODULE_3___default()(`${this.eventServer}/event/contract/${routeParams.join('/')}`).then(({
+    return axios__WEBPACK_IMPORTED_MODULE_4___default()(`${this.eventServer}/event/contract/${routeParams.join('/')}`).then(({
       data = false
     }) => {
       if (!data) return callback('Unknown error occurred');
-      if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isArray(data)) return callback(data);
-      return callback(null, data.map(event => utils__WEBPACK_IMPORTED_MODULE_2__["default"].mapEvent(event)));
+      if (!utils__WEBPACK_IMPORTED_MODULE_3__["default"].isArray(data)) return callback(data);
+      return callback(null, data.map(event => utils__WEBPACK_IMPORTED_MODULE_3__["default"].mapEvent(event)));
     }).catch(err => callback(err.response.data || err));
   }
 
   getEventByTransacionID(transactionID = false, callback = false) {
     if (!callback) return this.injectPromise(this.getEventByTransacionID, transactionID);
     if (!this.eventServer) callback('No event server configured');
-    return axios__WEBPACK_IMPORTED_MODULE_3___default()(`${this.eventServer}/event/transaction/${transactionID}`).then(({
+    return axios__WEBPACK_IMPORTED_MODULE_4___default()(`${this.eventServer}/event/transaction/${transactionID}`).then(({
       data = false
     }) => {
       if (!data) return callback('Unknown error occurred');
-      if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isArray(data)) return callback(data);
-      return callback(null, data.map(event => utils__WEBPACK_IMPORTED_MODULE_2__["default"].mapEvent(event)));
+      if (!utils__WEBPACK_IMPORTED_MODULE_3__["default"].isArray(data)) return callback(data);
+      return callback(null, data.map(event => utils__WEBPACK_IMPORTED_MODULE_3__["default"].mapEvent(event)));
     }).catch(err => callback(err.response.data || err));
   }
 
   contract(abi = [], address = false) {
-    return new lib_contract__WEBPACK_IMPORTED_MODULE_9__["default"](this, abi, address);
+    return new lib_contract__WEBPACK_IMPORTED_MODULE_10__["default"](this, abi, address);
   }
 
   static get address() {
     return {
       fromHex(address) {
-        if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isHex(address)) return address;
-        return utils__WEBPACK_IMPORTED_MODULE_2__["default"].crypto.getBase58CheckAddress(utils__WEBPACK_IMPORTED_MODULE_2__["default"].code.hexStr2byteArray(address));
+        if (!utils__WEBPACK_IMPORTED_MODULE_3__["default"].isHex(address)) return address;
+        return utils__WEBPACK_IMPORTED_MODULE_3__["default"].crypto.getBase58CheckAddress(utils__WEBPACK_IMPORTED_MODULE_3__["default"].code.hexStr2byteArray(address));
       },
 
       toHex(address) {
-        if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isHex(address)) return address;
-        return utils__WEBPACK_IMPORTED_MODULE_2__["default"].code.byteArray2hexStr(utils__WEBPACK_IMPORTED_MODULE_2__["default"].crypto.decodeBase58Address(address));
+        if (utils__WEBPACK_IMPORTED_MODULE_3__["default"].isHex(address)) return address;
+        return utils__WEBPACK_IMPORTED_MODULE_3__["default"].code.byteArray2hexStr(utils__WEBPACK_IMPORTED_MODULE_3__["default"].crypto.decodeBase58Address(address));
       },
 
       fromPrivateKey(privateKey) {
         try {
-          return utils__WEBPACK_IMPORTED_MODULE_2__["default"].crypto.pkToAddress(privateKey);
+          return utils__WEBPACK_IMPORTED_MODULE_3__["default"].crypto.pkToAddress(privateKey);
         } catch (_unused) {
           return false;
         }
@@ -272,15 +272,15 @@ class TronWeb {
   }
 
   static sha3(string) {
-    return Object(js_sha3__WEBPACK_IMPORTED_MODULE_5__["sha3_256"])(string);
+    return Object(js_sha3__WEBPACK_IMPORTED_MODULE_6__["sha3_256"])(string);
   }
 
   static toHex(val) {
-    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isBoolean(val)) return TronWeb.fromDecimal(+val);
-    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isBigNumber(val)) return TronWeb.fromDecimal(val);
+    if (utils__WEBPACK_IMPORTED_MODULE_3__["default"].isBoolean(val)) return TronWeb.fromDecimal(+val);
+    if (utils__WEBPACK_IMPORTED_MODULE_3__["default"].isBigNumber(val)) return TronWeb.fromDecimal(val);
     if (typeof val === 'object') return TronWeb.fromUtf8(JSON.stringify(val));
 
-    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isString(val)) {
+    if (utils__WEBPACK_IMPORTED_MODULE_3__["default"].isString(val)) {
       if (val.indexOf('-0x') === 0) return TronWeb.fromDecimal(val);
       if (val.indexOf('0x') === 0) return val;
       if (!isFinite(val)) return TronWeb.fromUtf8(val);
@@ -317,35 +317,35 @@ class TronWeb {
 
   static fromSun(sun) {
     const trx = TronWeb.toBigNumber(trx).div(1000000);
-    return utils__WEBPACK_IMPORTED_MODULE_2__["default"].isBigNumber(sun) ? trx : trx.toString(10);
+    return utils__WEBPACK_IMPORTED_MODULE_3__["default"].isBigNumber(sun) ? trx : trx.toString(10);
   }
 
   static toSun(trx) {
     const sun = TronWeb.toBigNumber(trx).times(1000000);
-    return utils__WEBPACK_IMPORTED_MODULE_2__["default"].isBigNumber(trx) ? sun : sun.toString(10);
+    return utils__WEBPACK_IMPORTED_MODULE_3__["default"].isBigNumber(trx) ? sun : sun.toString(10);
   }
 
   static toBigNumber(amount = 0) {
-    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isBigNumber(amount)) return amount;
-    if (utils__WEBPACK_IMPORTED_MODULE_2__["default"].isString(amount) && (amount.indexOf('0x') === 0 || amount.indexOf('-0x') === 0)) return new bignumber_js__WEBPACK_IMPORTED_MODULE_4___default.a(amount.replace('0x', ''), 16);
-    return new bignumber_js__WEBPACK_IMPORTED_MODULE_4___default.a(amount.toString(10), 10);
+    if (utils__WEBPACK_IMPORTED_MODULE_3__["default"].isBigNumber(amount)) return amount;
+    if (utils__WEBPACK_IMPORTED_MODULE_3__["default"].isString(amount) && (amount.indexOf('0x') === 0 || amount.indexOf('-0x') === 0)) return new bignumber_js__WEBPACK_IMPORTED_MODULE_5___default.a(amount.replace('0x', ''), 16);
+    return new bignumber_js__WEBPACK_IMPORTED_MODULE_5___default.a(amount.toString(10), 10);
   }
 
   static isAddress(address = false) {
-    if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].isString(address)) return false; // Convert HEX to Base58
+    if (!utils__WEBPACK_IMPORTED_MODULE_3__["default"].isString(address)) return false; // Convert HEX to Base58
 
     if (address.length === 42) {
-      return TronWeb.isAddress(utils__WEBPACK_IMPORTED_MODULE_2__["default"].crypto.getBase58CheckAddress(utils__WEBPACK_IMPORTED_MODULE_2__["default"].code.hexStr2byteArray(address)));
+      return TronWeb.isAddress(utils__WEBPACK_IMPORTED_MODULE_3__["default"].crypto.getBase58CheckAddress(utils__WEBPACK_IMPORTED_MODULE_3__["default"].code.hexStr2byteArray(address)));
     }
 
-    return utils__WEBPACK_IMPORTED_MODULE_2__["default"].crypto.isAddressValid(address);
+    return utils__WEBPACK_IMPORTED_MODULE_3__["default"].crypto.isAddressValid(address);
   } // TODO
 
 
   static compile(solditySource) {}
 
   static async createAccount(callback = false) {
-    const account = utils__WEBPACK_IMPORTED_MODULE_2__["default"].accounts.generateAccount();
+    const account = utils__WEBPACK_IMPORTED_MODULE_3__["default"].accounts.generateAccount();
     if (callback) callback(null, account);
     return account;
   }
@@ -361,9 +361,9 @@ class TronWeb {
 
 }
 
-_defineProperty(TronWeb, "providers", lib_providers__WEBPACK_IMPORTED_MODULE_1__["default"]);
+_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0___default()(TronWeb, "providers", lib_providers__WEBPACK_IMPORTED_MODULE_2__["default"]);
 
-_defineProperty(TronWeb, "BigNumber", bignumber_js__WEBPACK_IMPORTED_MODULE_4___default.a);
+_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0___default()(TronWeb, "BigNumber", bignumber_js__WEBPACK_IMPORTED_MODULE_5___default.a);
 
 ;
 
@@ -2780,6 +2780,17 @@ const utils = {
   bytes: _bytes__WEBPACK_IMPORTED_MODULE_3__,
   crypto: _crypto__WEBPACK_IMPORTED_MODULE_4__
 });
+
+/***/ }),
+
+/***/ "@babel/runtime/helpers/defineProperty":
+/*!********************************************************!*\
+  !*** external "@babel/runtime/helpers/defineProperty" ***!
+  \********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("@babel/runtime/helpers/defineProperty");
 
 /***/ }),
 
