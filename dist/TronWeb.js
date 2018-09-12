@@ -36524,6 +36524,7 @@ function () {
 
             try {
               var output = decodeOutput(self.outputs, '0x' + transaction.constant_result[0]);
+              if (output.length === 1) output = output[0];
               return callback(null, output);
             } catch (ex) {
               return callback(ex);
@@ -36704,9 +36705,10 @@ function () {
 
                               case 10:
                                 decoded = decodeOutput(self.outputs, '0x' + output.contractResult[0]);
+                                if (decoded.length === 1) decoded = decoded[0];
                                 return _context.abrupt("return", callback(null, decoded));
 
-                              case 12:
+                              case 13:
                               case "end":
                                 return _context.stop();
                             }

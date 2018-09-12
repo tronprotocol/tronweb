@@ -620,7 +620,8 @@ class Method {
           if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].hasProperty(transaction, 'constant_result')) return callback('Failed to execute');
 
           try {
-            const output = decodeOutput(self.outputs, '0x' + transaction.constant_result[0]);
+            let output = decodeOutput(self.outputs, '0x' + transaction.constant_result[0]);
+            if (output.length === 1) output = output[0];
             return callback(null, output);
           } catch (ex) {
             return callback(ex);
@@ -675,7 +676,8 @@ class Method {
             }
 
             if (!utils__WEBPACK_IMPORTED_MODULE_2__["default"].hasProperty(output, 'contractResult')) return callback('Failed to execute: ' + JSON.stringify(output, null, 2));
-            const decoded = decodeOutput(self.outputs, '0x' + output.contractResult[0]);
+            let decoded = decodeOutput(self.outputs, '0x' + output.contractResult[0]);
+            if (decoded.length === 1) decoded = decoded[0];
             return callback(null, decoded);
           };
 
