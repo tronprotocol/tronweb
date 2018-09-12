@@ -1360,6 +1360,7 @@ class Trx {
     this.tronWeb.fullNode.request('wallet/getblockbyid', {
       value: blockHash
     }, 'post').then(block => {
+      if (!Object.keys(block).length) return callback('Block not found');
       callback(null, block);
     }).catch(err => callback(err));
   }
@@ -1370,6 +1371,7 @@ class Trx {
     this.tronWeb.fullNode.request('wallet/getblockbynum', {
       num: parseInt(blockID)
     }, 'post').then(block => {
+      if (!Object.keys(block).length) return callback('Block not found');
       callback(null, block);
     }).catch(err => callback(err));
   }
@@ -1414,6 +1416,7 @@ class Trx {
     this.tronWeb.fullNode.request('wallet/gettransactionbyid', {
       value: transactionID
     }, 'post').then(transaction => {
+      if (!Object.keys(transaction).length) return callback('Transaction not found');
       callback(null, transaction);
     }).catch(err => callback(err));
   }
@@ -1423,6 +1426,7 @@ class Trx {
     this.tronWeb.solidityNode.request('walletsolidity/gettransactioninfobyid', {
       value: transactionID
     }, 'post').then(transaction => {
+      if (!Object.keys(transaction).length) return callback('Transaction not found');
       callback(null, transaction);
     }).catch(err => callback(err));
   }

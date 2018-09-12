@@ -37734,6 +37734,7 @@ function () {
       this.tronWeb.fullNode.request('wallet/getblockbyid', {
         value: blockHash
       }, 'post').then(function (block) {
+        if (!Object.keys(block).length) return callback('Block not found');
         callback(null, block);
       }).catch(function (err) {
         return callback(err);
@@ -37748,6 +37749,7 @@ function () {
       this.tronWeb.fullNode.request('wallet/getblockbynum', {
         num: parseInt(blockID)
       }, 'post').then(function (block) {
+        if (!Object.keys(block).length) return callback('Block not found');
         callback(null, block);
       }).catch(function (err) {
         return callback(err);
@@ -37809,6 +37811,7 @@ function () {
       this.tronWeb.fullNode.request('wallet/gettransactionbyid', {
         value: transactionID
       }, 'post').then(function (transaction) {
+        if (!Object.keys(transaction).length) return callback('Transaction not found');
         callback(null, transaction);
       }).catch(function (err) {
         return callback(err);
@@ -37822,6 +37825,7 @@ function () {
       this.tronWeb.solidityNode.request('walletsolidity/gettransactioninfobyid', {
         value: transactionID
       }, 'post').then(function (transaction) {
+        if (!Object.keys(transaction).length) return callback('Transaction not found');
         callback(null, transaction);
       }).catch(function (err) {
         return callback(err);

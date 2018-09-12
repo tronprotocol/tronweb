@@ -46,9 +46,9 @@ const app = async () => {
     console.groupEnd();
 
     // You can use latest, earliest, a block hash or block number
-    const previousBlock = await tronWeb.trx.getBlock('79136');
+    const previousBlock = await tronWeb.trx.getBlock('0');
 
-    console.group('Previous block #79136');
+    console.group('Previous block #52');
         console.log(JSON.stringify(previousBlock, null, 2), '\n');
     console.groupEnd();
 
@@ -58,7 +58,7 @@ const app = async () => {
         console.log('Transactions:', genesisBlockCount, '\n');
     console.groupEnd();
 
-    const transaction = await tronWeb.trx.getTransaction('134d90066bf262c0f1fb490bde165ce46aeb74230cf7c91031e5521744816853');
+    const transaction = await tronWeb.trx.getTransaction('2429559770c908e262d2510592cc0948f6bdec9288c528ef5ed6a22ea75148de');
 
     console.group('Transaction');
         console.log('- Hash:', transaction.txID);
@@ -93,19 +93,20 @@ const app = async () => {
         console.log('- Bandwidth:', bandwidth, '\n');
     console.groupEnd();
 
-    const tokens = await tronWeb.trx.getTokensIssuedByAddress('TSZRsyxQrTFrjpAoqsPJj1pS4pacBnsBx1');
-
-    console.group('Tokens from address');
-        console.log('- Owner Address: TSZRsyxQrTFrjpAoqsPJj1pS4pacBnsBx1');
-        console.log('- Tokens:\n' + JSON.stringify(tokens, null, 2), '\n');
-    console.groupEnd();
-
-    const token = await tronWeb.trx.getTokenFromID('TestToken');
-
-    console.group('Tokens from its name');
-        console.log('- Token Name: TestToken');
-        console.log('- Token:\n' + JSON.stringify(token, null, 2), '\n');
-    console.groupEnd();
+    // There are no tokens on the network yet
+    // const tokens = await tronWeb.trx.getTokensIssuedByAddress('TSZRsyxQrTFrjpAoqsPJj1pS4pacBnsBx1');
+    // 
+    // console.group('Tokens from address');
+    //     console.log('- Owner Address: TSZRsyxQrTFrjpAoqsPJj1pS4pacBnsBx1');
+    //     console.log('- Tokens:\n' + JSON.stringify(tokens, null, 2), '\n');
+    // console.groupEnd();
+    // 
+    // const token = await tronWeb.trx.getTokenFromID('TestToken');
+    // 
+    // console.group('Tokens from its name');
+    //     console.log('- Token Name: TestToken');
+    //     console.log('- Token:\n' + JSON.stringify(token, null, 2), '\n');
+    // console.groupEnd();
 
     const nodeList = await tronWeb.trx.listNodes();
 
@@ -154,10 +155,10 @@ const app = async () => {
         console.log('- Occurs At:', new Date(Date.now() + nextVoteCycle), '\n');
     console.groupEnd();
 
-    const contract = await tronWeb.trx.getContract('413c8143e98b3e2fe1b1a8fb82b34557505a752390');
+    const contract = await tronWeb.trx.getContract('TBjntEor6jTdDkAETyYMtbWqHnmpVBQ99Q');
 
     console.group('Contract from node');
-        console.log('- Contract Address: 4137dfaa7bde6855e980d985297c164df5ee3fa05b');
+        console.log('- Contract Address: TBjntEor6jTdDkAETyYMtbWqHnmpVBQ99Q');
         console.log('- Origin Address:', contract.origin_address);
         console.log('- Bytecode:', contract.bytecode);
         console.log('- ABI:\n' + JSON.stringify(contract.abi, null, 2), '\n');
@@ -170,26 +171,27 @@ const app = async () => {
         console.log('- Transaction:\n' + JSON.stringify(sendTransaction, null, 2), '\n');
     console.groupEnd();
 
-    const sendToken = await tronWeb.transactionBuilder.sendToken('TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1', 10, 'TestToken_1');
+    // There are no tokens on the network yet
+    // const sendToken = await tronWeb.transactionBuilder.sendToken('TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1', 10, 'TestToken_1');
+    // 
+    // console.group('Unsigned send token transaction');
+    //     console.log('- Recipient: TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1');
+    //     console.log('- Token: TestToken_1');
+    //     console.log('- Transaction:\n' + JSON.stringify(sendToken, null, 2), '\n');
+    // console.groupEnd();
+    // 
+    // const purchaseToken = await tronWeb.transactionBuilder.purchaseToken('41a8572327f883078cdb971317f91647d0a1cd4db0', 'BetterToken', 10);
+    // 
+    // console.group('Unsigned purchase token transaction');
+    //     console.log('- Token Owner: 41a8572327f883078cdb971317f91647d0a1cd4db0');
+    //     console.log('- Token: BetterToken');
+    //     console.log('- Transaction:\n' + JSON.stringify(purchaseToken, null, 2), '\n');
+    // console.groupEnd();
 
-    console.group('Unsigned send token transaction');
-        console.log('- Recipient: TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1');
-        console.log('- Token: TestToken_1');
-        console.log('- Transaction:\n' + JSON.stringify(sendToken, null, 2), '\n');
-    console.groupEnd();
-    
-    const purchaseToken = await tronWeb.transactionBuilder.purchaseToken('41a8572327f883078cdb971317f91647d0a1cd4db0', 'BetterToken', 10);
-
-    console.group('Unsigned purchase token transaction');
-        console.log('- Token Owner: 41a8572327f883078cdb971317f91647d0a1cd4db0');
-        console.log('- Token: BetterToken');
-        console.log('- Transaction:\n' + JSON.stringify(purchaseToken, null, 2), '\n');
-    console.groupEnd();
-
-    const freezeBalance = await tronWeb.transactionBuilder.freezeBalance('TYkfNHvpfwU7iX2hUpXQ7pjRY7Lg6SEZ96', 20000000);
+    const freezeBalance = await tronWeb.transactionBuilder.freezeBalance('41928c9af0651632157ef27a2cf17ca72c575a4d21', 20000000);
 
     console.group('Unsigned freeze balance transaction');
-        console.log('- Address: TYkfNHvpfwU7iX2hUpXQ7pjRY7Lg6SEZ96');;
+        console.log('- Address: 41928c9af0651632157ef27a2cf17ca72c575a4d21');;
         console.log('- Transaction:\n' + JSON.stringify(freezeBalance, null, 2), '\n');
     console.groupEnd();
 
@@ -242,13 +244,13 @@ const app = async () => {
     }, '41c2d52f2511808307c848b808649595f631527111', (err, transaction) => {
         if(err)
             return console.error(err);
-
+    
         console.group('Unsigned create smart contract transaction');
             console.log('- Issuer Address: 41c2d52f2511808307c848b808649595f631527111');
             console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
         console.groupEnd();
-    }); 
-
+    });
+    
     tronWeb.transactionBuilder.triggerSmartContract(
         '413c8143e98b3e2fe1b1a8fb82b34557505a752390',
         'multiply(int256,int256)',
@@ -261,13 +263,13 @@ const app = async () => {
     (err, transaction) => {
         if(err)
             return console.error(err);
-
+    
         console.group('Unsigned trigger smart contract transaction');
             console.log('- Contract Address: 413c8143e98b3e2fe1b1a8fb82b34557505a752390');
             console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
         console.groupEnd();
     });
-
+  
     tronWeb.transactionBuilder.createToken({
         name: 'TestToken',
         abbreviation: 'TTKN',
@@ -362,7 +364,7 @@ const app = async () => {
         bytecode: '6080604052600080556000600155600060025534801561001e57600080fd5b506101b58061002e6000396000f3006080604052600436106100615763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166324d45ec381146100665780633c4308a8146100935780634d622831146100ae578063dbdb6f4c146100e1575b600080fd5b34801561007257600080fd5b50610081600435602435610115565b60408051918252519081900360200190f35b34801561009f57600080fd5b50610081600435602435610119565b3480156100ba57600080fd5b506100c3610172565b60408051938452602084019290925282820152519081900360600190f35b3480156100ed57600080fd5b506100fc600435602435610180565b6040805192835260208301919091528051918290030190f35b0290565b600082815560018290558282026002819055604080518581526020810185905280820183905290517f871be7ac645cb26e405787c3fc8c8b2b252833674fcb153e80e6391908cab62c9181900360600190a19392505050565b600054600154600254909192565b029060028202905600a165627a7a723058200afed89e050d3542c071881fe50faf94067330b2053cf28ea5691e24a06105270029'
     });*/
 
-    const newContract = await tronWeb.contract().at('416b8188c438f17950b03b3b25b93a0332293c3166');
+    const newContract = await tronWeb.contract().at('TKmeUnJdZ7diF7dQu8LesqFMdJgJrQLkXB');
 
     /*const eventListener = newContract.events(event => {
         console.group('New event received');
@@ -379,7 +381,7 @@ const app = async () => {
         console.log('Event listener started\n');
     });*/
 
-    newContract.methods.Message().watch((err, event) => {
+    newContract && newContract.methods.Message().watch((err, event) => {
         if(err)
             return console.error('Error with "Message" event:', err);
 
@@ -393,7 +395,7 @@ const app = async () => {
     });
 
     // This is a pure function so it's only executed on the local node 
-    newContract.methods.test(1, 1000000).call().then(async output => {
+    newContract && newContract.methods.test(1, 1000000).call().then(async output => {
         console.group('Contract "test" result');
             console.log('- Output:', output.toString(), '\n');
         console.groupEnd();
