@@ -359,14 +359,16 @@ export default class TransactionBuilder {
         if(utils.isFunction(parameters)) {
             callback = parameters;
             parameters = [];
-            issuerAddress = this.tronWeb.defaultAddress.hex;
         }
 
         if(utils.isFunction(callValue)) {
             callback = callValue;
             callValue = 0;
-            parameters = [];
-            issuerAddress = this.tronWeb.defaultAddress.hex;
+        }
+
+        if(utils.isFunction(feeLimit)) {
+            callback = feeLimit;
+            feeLimit = 1_000_000_000;
         }
 
         if(!callback) {
