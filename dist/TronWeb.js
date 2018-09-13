@@ -36821,22 +36821,35 @@ function () {
                             }, 3000));
 
                           case 8:
-                            if (utils__WEBPACK_IMPORTED_MODULE_7__["default"].hasProperty(output, 'contractResult')) {
+                            if (!(output.result && output.result == 'FAILED')) {
                               _context2.next = 10;
                               break;
                             }
 
                             return _context2.abrupt("return", callback({
-                              error: 'Failed to execute: ' + JSON.stringify(output, null, 2),
-                              transaction: signedTransaction
+                              error: _this3.tronWeb.toUtf8(output.resMessage),
+                              transaction: signedTransaction,
+                              output: output
                             }));
 
                           case 10:
+                            if (utils__WEBPACK_IMPORTED_MODULE_7__["default"].hasProperty(output, 'contractResult')) {
+                              _context2.next = 12;
+                              break;
+                            }
+
+                            return _context2.abrupt("return", callback({
+                              error: 'Failed to execute: ' + JSON.stringify(output, null, 2),
+                              transaction: signedTransaction,
+                              output: output
+                            }));
+
+                          case 12:
                             decoded = decodeOutput(_this3.outputs, '0x' + output.contractResult[0]);
                             if (decoded.length === 1) decoded = decoded[0];
                             return _context2.abrupt("return", callback(null, decoded));
 
-                          case 13:
+                          case 15:
                           case "end":
                             return _context2.stop();
                         }
