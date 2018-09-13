@@ -39684,7 +39684,7 @@ var utils = {
       var _abi$index = abi[index],
           name = _abi$index.name,
           type = _abi$index.type;
-      if (type == 'address') result = '41' + address.substr(2).toLowerCase();
+      if (type == 'address') result = '41' + result.substr(2).toLowerCase();
       obj[name] = result;
       return obj;
     }, {});

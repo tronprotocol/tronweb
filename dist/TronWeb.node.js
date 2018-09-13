@@ -2839,7 +2839,7 @@ const utils = {
         name,
         type
       } = abi[index];
-      if (type == 'address') result = '41' + address.substr(2).toLowerCase();
+      if (type == 'address') result = '41' + result.substr(2).toLowerCase();
       obj[name] = result;
       return obj;
     }, {});

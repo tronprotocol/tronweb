@@ -104,7 +104,7 @@ const utils = {
             } = abi[index];
 
             if(type == 'address')
-                result = '41' + address.substr(2).toLowerCase();
+                result = '41' + result.substr(2).toLowerCase();
 
             obj[name] = result;
 
