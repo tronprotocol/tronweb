@@ -210,7 +210,7 @@ export default class Method {
                 if(decoded.length === 1)
                     decoded = decoded[0];
 
-                return callback(null, { result: decoded });
+                return callback(null, decoded);
             }
 
             checkResult();                    
