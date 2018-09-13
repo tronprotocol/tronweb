@@ -59,55 +59,54 @@ const app = async () => {
         console.log('Transactions:', genesisBlockCount, '\n');
     console.groupEnd();
 
-    const transaction = await tronWeb.trx.getTransaction('2429559770c908e262d2510592cc0948f6bdec9288c528ef5ed6a22ea75148de');
+    tronWeb.trx.getTransaction('2429559770c908e262d2510592cc0948f6bdec9288c528ef5ed6a22ea75148de').then(transaction => {
+        console.group('Transaction');
+            console.log('- Hash:', transaction.txID);
+            console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
+        console.groupEnd();
+    }).catch(err => console.error(err));
 
-    console.group('Transaction');
-        console.log('- Hash:', transaction.txID);
-        console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
-    console.groupEnd();
+    tronWeb.trx.getTransactionsRelated('TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1', 'all').then(transactions => {
+        console.group('Transactions relating to address');
+            console.log('- Address: TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1');
+            console.log('- Transactions:\n' + JSON.stringify(transactions, null, 2), '\n');
+        console.groupEnd();
+    }).catch(err => console.error(err));
 
-    const transactions = await tronWeb.trx.getTransactionsRelated('TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1', 'all');
+    tronWeb.trx.getAccount('4144abc6018aec80cf05e3ac94376d6cd76da1b112').then(accountInfo => {
+        console.group('Account information');
+            console.log('- Address: 4144abc6018aec80cf05e3ac94376d6cd76da1b112');
+            console.log('- Account:\n' + JSON.stringify(accountInfo, null, 2), '\n');
+        console.groupEnd();
+    }).catch(err => console.error(err));
 
-    console.group('Transactions relating to address');
-        console.log('- Address: TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1');
-        console.log('- Transactions:\n' + JSON.stringify(transactions, null, 2), '\n');
-    console.groupEnd();
+    tronWeb.trx.getBalance('TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1').then(balance => {
+        console.group('Account balance');
+            console.log('- Address: TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1');
+            console.log('- Balance:', balance, '\n');
+        console.groupEnd();
+    }).catch(err => console.error(err));
 
-    const accountInfo = await tronWeb.trx.getAccount('4144abc6018aec80cf05e3ac94376d6cd76da1b112');
+    tronWeb.trx.getBandwidth('TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1').then(bandwidth => {
+        console.group('Account bandwidth');
+            console.log('- Address: 4144abc6018aec80cf05e3ac94376d6cd76da1b112');
+            console.log('- Bandwidth:', bandwidth, '\n');
+        console.groupEnd();
+    }).catch(err => console.error(err));
 
-    console.group('Account information');
-        console.log('- Address: 4144abc6018aec80cf05e3ac94376d6cd76da1b112');
-        console.log('- Account:\n' + JSON.stringify(accountInfo, null, 2), '\n');
-    console.groupEnd();
+    tronWeb.trx.getTokensIssuedByAddress('TSZRsyxQrTFrjpAoqsPJj1pS4pacBnsBx1').then(tokens => {
+        console.group('Tokens from address');
+            console.log('- Owner Address: TSZRsyxQrTFrjpAoqsPJj1pS4pacBnsBx1');
+            console.log('- Tokens:\n' + JSON.stringify(tokens, null, 2), '\n');
+        console.groupEnd();
+    }).catch(err => console.error(err));
 
-    const balance = await tronWeb.trx.getBalance('TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1');
-
-    console.group('Account balance');
-        console.log('- Address: TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1');
-        console.log('- Balance:', balance, '\n');
-    console.groupEnd();
-
-    const bandwidth = await tronWeb.trx.getBandwidth('TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1');
-
-    console.group('Account bandwidth');
-        console.log('- Address: 4144abc6018aec80cf05e3ac94376d6cd76da1b112');
-        console.log('- Bandwidth:', bandwidth, '\n');
-    console.groupEnd();
-
-    // There are no tokens on the network yet
-    // const tokens = await tronWeb.trx.getTokensIssuedByAddress('TSZRsyxQrTFrjpAoqsPJj1pS4pacBnsBx1');
-    // 
-    // console.group('Tokens from address');
-    //     console.log('- Owner Address: TSZRsyxQrTFrjpAoqsPJj1pS4pacBnsBx1');
-    //     console.log('- Tokens:\n' + JSON.stringify(tokens, null, 2), '\n');
-    // console.groupEnd();
-    // 
-    // const token = await tronWeb.trx.getTokenFromID('TestToken');
-    // 
-    // console.group('Tokens from its name');
-    //     console.log('- Token Name: TestToken');
-    //     console.log('- Token:\n' + JSON.stringify(token, null, 2), '\n');
-    // console.groupEnd();
+    tronWeb.trx.getTokenFromID('TestToken').then(token => {
+        console.group('Tokens from its name');
+            console.log('- Token Name: TestToken');
+            console.log('- Token:\n' + JSON.stringify(token, null, 2), '\n');
+        console.groupEnd();
+    }).catch(err => console.error(err));    
 
     const nodeList = await tronWeb.trx.listNodes();
 
@@ -156,14 +155,14 @@ const app = async () => {
         console.log('- Occurs At:', new Date(Date.now() + nextVoteCycle), '\n');
     console.groupEnd();
 
-    const contract = await tronWeb.trx.getContract('TBjntEor6jTdDkAETyYMtbWqHnmpVBQ99Q');
-
-    console.group('Contract from node');
-        console.log('- Contract Address: TBjntEor6jTdDkAETyYMtbWqHnmpVBQ99Q');
-        console.log('- Origin Address:', contract.origin_address);
-        console.log('- Bytecode:', contract.bytecode);
-        console.log('- ABI:\n' + JSON.stringify(contract.abi, null, 2), '\n');
-    console.groupEnd();
+    tronWeb.trx.getContract('TBjntEor6jTdDkAETyYMtbWqHnmpVBQ99Q').then(contract => {
+        console.group('Contract from node');
+            console.log('- Contract Address: TBjntEor6jTdDkAETyYMtbWqHnmpVBQ99Q');
+            console.log('- Origin Address:', contract.origin_address);
+            console.log('- Bytecode:', contract.bytecode);
+            console.log('- ABI:\n' + JSON.stringify(contract.abi, null, 2), '\n');
+        console.groupEnd();
+    }).catch(err => console.error(err));
 
     const sendTransaction = await tronWeb.transactionBuilder.sendTrx('TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1', 10);
 
@@ -360,12 +359,12 @@ const app = async () => {
         console.groupEnd();
     });
 
-    /*const newContract = await tronWeb.contract().new({
+    const newContract = await tronWeb.contract().new({
         abi: [{"constant":true,"inputs":[{"name":"a","type":"int256"},{"name":"b","type":"int256"}],"name":"test","outputs":[{"name":"","type":"int256"}],"payable":false,"stateMutability":"pure","type":"function"},{"constant":false,"inputs":[{"name":"a","type":"int256"},{"name":"b","type":"int256"}],"name":"multiply","outputs":[{"name":"out","type":"int256"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getLast","outputs":[{"name":"a","type":"int256"},{"name":"b","type":"int256"},{"name":"result","type":"int256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"a","type":"int256"},{"name":"b","type":"int256"}],"name":"test2","outputs":[{"name":"","type":"int256"},{"name":"","type":"int256"}],"payable":false,"stateMutability":"pure","type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"name":"a","type":"int256"},{"indexed":false,"name":"b","type":"int256"},{"indexed":false,"name":"result","type":"int256"}],"name":"Message","type":"event"}],
         bytecode: '6080604052600080556000600155600060025534801561001e57600080fd5b506101b58061002e6000396000f3006080604052600436106100615763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166324d45ec381146100665780633c4308a8146100935780634d622831146100ae578063dbdb6f4c146100e1575b600080fd5b34801561007257600080fd5b50610081600435602435610115565b60408051918252519081900360200190f35b34801561009f57600080fd5b50610081600435602435610119565b3480156100ba57600080fd5b506100c3610172565b60408051938452602084019290925282820152519081900360600190f35b3480156100ed57600080fd5b506100fc600435602435610180565b6040805192835260208301919091528051918290030190f35b0290565b600082815560018290558282026002819055604080518581526020810185905280820183905290517f871be7ac645cb26e405787c3fc8c8b2b252833674fcb153e80e6391908cab62c9181900360600190a19392505050565b600054600154600254909192565b029060028202905600a165627a7a723058200afed89e050d3542c071881fe50faf94067330b2053cf28ea5691e24a06105270029'
-    });*/
+    });
 
-    const newContract = await tronWeb.contract().at('TGC6vcQCGEuP6AiRiAgsY8obat1iWDHkig');
+    //const newContract = await tronWeb.contract().at('TGC6vcQCGEuP6AiRiAgsY8obat1iWDHkig');
 
     /*const eventListener = newContract.events(event => {
         console.group('New event received');
