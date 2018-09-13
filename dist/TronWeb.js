@@ -36080,6 +36080,7 @@ function () {
     this.deployed = false;
     this.lastBlock = false;
     this.methods = {};
+    this.props = [];
     if (this.tronWeb.isAddress(address)) this.deployed = true;else this.address = false;
     this.loadAbi(abi);
   }
@@ -36195,18 +36196,47 @@ function () {
       this.eventCallback = false;
     }
   }, {
+    key: "hasProperty",
+    value: function hasProperty(property) {
+      return this.hasOwnProperty(property) && !this.__proto__.hasOwnProperty(property);
+    }
+  }, {
     key: "loadAbi",
     value: function loadAbi(abi) {
       var _this3 = this;
 
       this.abi = abi;
       this.methods = {};
+      this.props.forEach(function (prop) {
+        return delete _this3[prop];
+      });
       abi.forEach(function (func) {
         var method = new _method__WEBPACK_IMPORTED_MODULE_7__["default"](_this3, func);
         var methodCall = method.onMethod.bind(method);
-        _this3.methods[method.name] = methodCall;
-        _this3.methods[method.functionSelector] = methodCall;
-        _this3.methods[method.signature] = methodCall;
+        var name = method.name,
+            functionSelector = method.functionSelector,
+            signature = method.signature;
+        _this3.methods[name] = methodCall;
+        _this3.methods[functionSelector] = methodCall;
+        _this3.methods[signature] = methodCall;
+
+        if (!_this3.hasProperty(name)) {
+          _this3[name] = methodCall;
+
+          _this3.props.push(name);
+        }
+
+        if (!_this3.hasProperty(functionSelector)) {
+          _this3[functionSelector] = methodCall;
+
+          _this3.props.push(functionSelector);
+        }
+
+        if (!_this3.hasProperty(signature)) {
+          _this3[signature] = methodCall;
+
+          _this3.props.push(signature);
+        }
       });
     }
   }, {
@@ -36804,9 +36834,7 @@ function () {
                           case 10:
                             decoded = decodeOutput(_this3.outputs, '0x' + output.contractResult[0]);
                             if (decoded.length === 1) decoded = decoded[0];
-                            return _context2.abrupt("return", callback(null, {
-                              result: decoded
-                            }));
+                            return _context2.abrupt("return", callback(null, decoded));
 
                           case 13:
                           case "end":

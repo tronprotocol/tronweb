@@ -19,6 +19,7 @@ export default class Contract {
         this.lastBlock = false;  
 
         this.methods = {};
+        this.props = [];
 
         if(this.tronWeb.isAddress(address))
             this.deployed = true;
@@ -81,17 +82,44 @@ export default class Contract {
         this.eventCallback = false;
     }
 
+    hasProperty(property) {
+        return this.hasOwnProperty(property) && !this.__proto__.hasOwnProperty(property);
+    }
+
     loadAbi(abi) {
         this.abi = abi;
         this.methods = {};
+
+        this.props.forEach(prop => delete this[prop]);
 
         abi.forEach(func => {
             const method = new Method(this, func);
             const methodCall = method.onMethod.bind(method);
 
-            this.methods[method.name] = methodCall;
-            this.methods[method.functionSelector] = methodCall;
-            this.methods[method.signature] = methodCall;
+            const {
+                name,
+                functionSelector,
+                signature
+            } = method;
+
+            this.methods[name] = methodCall;
+            this.methods[functionSelector] = methodCall;
+            this.methods[signature] = methodCall;
+
+            if(!this.hasProperty(name)) {
+                this[name] = methodCall;
+                this.props.push(name);
+            }
+
+            if(!this.hasProperty(functionSelector)) {
+                this[functionSelector] = methodCall;
+                this.props.push(functionSelector);
+            }
+
+            if(!this.hasProperty(signature)) {
+                this[signature] = methodCall;
+                this.props.push(signature);
+            }
         });
     }
 

@@ -381,7 +381,7 @@ const app = async () => {
         console.log('Event listener started\n');
     });*/
 
-    newContract && newContract.methods.Message().watch((err, event) => {
+    newContract && newContract.Message().watch((err, event) => {
         if(err)
             return console.error('Error with "Message" event:', err);
 
@@ -395,21 +395,21 @@ const app = async () => {
     });
 
     // This is a pure function so it's only executed on the local node 
-    newContract && newContract.methods.test(1, 1000000).call().then(async output => {
+    newContract && newContract.test(1, 1000000).call().then(async output => {
         console.group('Contract "test" result');
             console.log('- Output:', output.toString(), '\n');
         console.groupEnd();
 
         // The "send" function propagates to all SRs, which can take up to 1 minute
         await Promise.all([
-            newContract.methods.multiply(1, 1000000).send(),
-            newContract.methods.multiply(2, 1000000).send(),
-            newContract.methods.multiply(3, 1000000).send(),
-            newContract.methods.multiply(4, 1000000).send(),
-            newContract.methods.multiply(5, 1000000).send()
+            newContract.multiply(1, 1000000).send(),
+            newContract.multiply(2, 1000000).send(),
+            newContract.multiply(3, 1000000).send(),
+            newContract.multiply(4, 1000000).send(),
+            newContract.multiply(5, 1000000).send()
         ]);
 
-        return newContract.methods.getLast().call();
+        return newContract.getLast().call();
     }).then(output => {
         console.group('Contract "getLast" result');
             console.log('- Output:', output.join(', '), '\n');
