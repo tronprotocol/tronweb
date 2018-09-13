@@ -198,10 +198,19 @@ export default class Method {
                     }, 3000);
                 }
 
+                if(output.result && output.result == 'FAILED') {
+                    return callback({
+                        error: this.tronWeb.toUtf8(output.resMessage),
+                        transaction: signedTransaction,
+                        output
+                    });
+                }
+
                 if(!utils.hasProperty(output, 'contractResult')) {
                     return callback({
                         error: 'Failed to execute: ' + JSON.stringify(output, null, 2),
-                        transaction: signedTransaction 
+                        transaction: signedTransaction,
+                        output
                     });
                 }
 
