@@ -412,7 +412,7 @@ const app = async () => {
         return newContract.getLast().call();
     }).then(output => {
         console.group('Contract "getLast" result');
-            console.log('- Output:', output.join(', '), '\n');
+            console.log('- Output:\n' + JSON.stringify(output, null, 2), '\n');
         console.groupEnd();       
     }).catch(err => console.error(err));
 
