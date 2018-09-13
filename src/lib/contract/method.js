@@ -12,18 +12,19 @@ const getParamTypes = params => {
 }
 
 const decodeOutput = (abi, output) => {
-    if(abi.some(output => utils.hasProperty(output, 'name'))) {
-        return abiCoder.decode(
-            abi.map(({ name }) => name),
-            abi.map(({ type }) => type),
-            output
-        )
-    }
+    const names = abi.map(({ name }) => name).filter(name => !!name);
+    const types = abi.map(({ type }) => type);
 
-    return abiCoder.decode(
-        abi.map(({ type }) => type),
-        output
-    );
+    return abiCoder.decode(types, output).reduce((obj, arg, index) => {
+        if(types[index] == 'address')
+            arg = '41' + arg.substr(2).toLowerCase();
+
+        if(names.length)
+            obj[names[index]] = arg;
+        else obj.push(arg);
+
+        return obj;
+    }, names.length ? {} : []);
 };
 
 export default class Method {

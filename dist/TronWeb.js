@@ -36466,22 +36466,26 @@ var getParamTypes = function getParamTypes(params) {
 };
 
 var decodeOutput = function decodeOutput(abi, output) {
-  if (abi.some(function (output) {
-    return utils__WEBPACK_IMPORTED_MODULE_7__["default"].hasProperty(output, 'name');
-  })) {
-    return abiCoder.decode(abi.map(function (_ref2) {
-      var name = _ref2.name;
-      return name;
-    }), abi.map(function (_ref3) {
-      var type = _ref3.type;
-      return type;
-    }), output);
-  }
-
-  return abiCoder.decode(abi.map(function (_ref4) {
-    var type = _ref4.type;
+  var names = abi.map(function (_ref2) {
+    var name = _ref2.name;
+    return name;
+  }).filter(function (name) {
+    return !!name;
+  });
+  var types = abi.map(function (_ref3) {
+    var type = _ref3.type;
     return type;
-  }), output);
+  });
+  console.log(abiCoder.decode(types, output).reduce(function (obj, arg, index) {
+    if (types[index] == 'address') arg = '41' + arg.substr(2).toLowerCase();
+    if (names.length) obj[names[index]] = arg;else obj.push(arg);
+    return obj;
+  }, names.length ? {} : []));
+  return abiCoder.decode(types, output).reduce(function (obj, arg, index) {
+    if (types[index] == 'address') arg = '41' + arg.substr(2).toLowerCase();
+    if (names.length) obj[names[index]] = arg;else obj.push(arg);
+    return obj;
+  }, names.length ? {} : []);
 };
 
 var Method =
@@ -36781,7 +36785,7 @@ function () {
                 checkResult =
                 /*#__PURE__*/
                 function () {
-                  var _ref5 = _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3___default()(
+                  var _ref4 = _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3___default()(
                   /*#__PURE__*/
                   _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default.a.mark(function _callee2() {
                     var index,
@@ -36858,7 +36862,7 @@ function () {
                   }));
 
                   return function checkResult() {
-                    return _ref5.apply(this, arguments);
+                    return _ref4.apply(this, arguments);
                   };
                 }();
 
@@ -36941,7 +36945,7 @@ function () {
                 getEvents =
                 /*#__PURE__*/
                 function () {
-                  var _ref6 = _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3___default()(
+                  var _ref5 = _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_3___default()(
                   /*#__PURE__*/
                   _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default.a.mark(function _callee4() {
                     var events, _events$sort, _events$sort2, latestEvent, newEvents;
@@ -36984,7 +36988,7 @@ function () {
                   }));
 
                   return function getEvents() {
-                    return _ref6.apply(this, arguments);
+                    return _ref5.apply(this, arguments);
                   };
                 }();
 

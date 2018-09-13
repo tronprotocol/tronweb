@@ -578,17 +578,22 @@ const getParamTypes = params => {
 };
 
 const decodeOutput = (abi, output) => {
-  if (abi.some(output => utils__WEBPACK_IMPORTED_MODULE_2__["default"].hasProperty(output, 'name'))) {
-    return abiCoder.decode(abi.map(({
-      name
-    }) => name), abi.map(({
-      type
-    }) => type), output);
-  }
-
-  return abiCoder.decode(abi.map(({
+  const names = abi.map(({
+    name
+  }) => name).filter(name => !!name);
+  const types = abi.map(({
     type
-  }) => type), output);
+  }) => type);
+  console.log(abiCoder.decode(types, output).reduce((obj, arg, index) => {
+    if (types[index] == 'address') arg = '41' + arg.substr(2).toLowerCase();
+    if (names.length) obj[names[index]] = arg;else obj.push(arg);
+    return obj;
+  }, names.length ? {} : []));
+  return abiCoder.decode(types, output).reduce((obj, arg, index) => {
+    if (types[index] == 'address') arg = '41' + arg.substr(2).toLowerCase();
+    if (names.length) obj[names[index]] = arg;else obj.push(arg);
+    return obj;
+  }, names.length ? {} : []);
 };
 
 class Method {
