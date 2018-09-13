@@ -36769,7 +36769,10 @@ function () {
                               break;
                             }
 
-                            return _context2.abrupt("return", callback(null, signedTransaction.txID));
+                            return _context2.abrupt("return", callback({
+                              error: 'Cannot find result in solidity node',
+                              transaction: signedTransaction
+                            }));
 
                           case 3:
                             _context2.next = 5;
@@ -36793,12 +36796,17 @@ function () {
                               break;
                             }
 
-                            return _context2.abrupt("return", callback('Failed to execute: ' + JSON.stringify(output, null, 2)));
+                            return _context2.abrupt("return", callback({
+                              error: 'Failed to execute: ' + JSON.stringify(output, null, 2),
+                              transaction: signedTransaction
+                            }));
 
                           case 10:
                             decoded = decodeOutput(_this3.outputs, '0x' + output.contractResult[0]);
                             if (decoded.length === 1) decoded = decoded[0];
-                            return _context2.abrupt("return", callback(null, decoded));
+                            return _context2.abrupt("return", callback(null, {
+                              result: decoded
+                            }));
 
                           case 13:
                           case "end":

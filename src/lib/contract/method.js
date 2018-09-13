@@ -183,8 +183,12 @@ export default class Method {
                 return callback(null, signedTransaction.txID);
 
             const checkResult = async (index = 0) => {
-                if(index == 20)
-                    return callback(null, signedTransaction.txID);
+                if(index == 20) {
+                    return callback({ 
+                        error: 'Cannot find result in solidity node', 
+                        transaction: signedTransaction
+                    });
+                }
                 
                 const output = await this.tronWeb.trx.getTransactionInfo(signedTransaction.txID);
 
@@ -194,15 +198,19 @@ export default class Method {
                     }, 3000);
                 }
 
-                if(!utils.hasProperty(output, 'contractResult'))
-                    return callback('Failed to execute: ' + JSON.stringify(output, null, 2));
+                if(!utils.hasProperty(output, 'contractResult')) {
+                    return callback({
+                        error: 'Failed to execute: ' + JSON.stringify(output, null, 2),
+                        transaction: signedTransaction 
+                    });
+                }
 
                 let decoded = decodeOutput(this.outputs, '0x' + output.contractResult[0]);
 
                 if(decoded.length === 1)
                     decoded = decoded[0];
 
-                return callback(null, decoded);
+                return callback(null, { result: decoded });
             }
 
             checkResult();                    
