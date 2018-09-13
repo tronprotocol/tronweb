@@ -205,11 +205,11 @@ export default class TronWeb {
         return {
             fromHex(address) {
                 if(!utils.isHex(address))
-                    return address.toLowerCase();
+                    return address;
 
                 return utils.crypto.getBase58CheckAddress(
                     utils.code.hexStr2byteArray(address)
-                ).toLowerCase();
+                );
             },
             toHex(address) {
                 if(utils.isHex(address))
@@ -221,7 +221,7 @@ export default class TronWeb {
             },
             fromPrivateKey(privateKey) {
                 try {
-                    return utils.crypto.pkToAddress(privateKey).toLowerCase();
+                    return utils.crypto.pkToAddress(privateKey);
                 } catch { return false; }
             }
         }

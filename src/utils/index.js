@@ -91,6 +91,27 @@ const utils = {
             transaction: event.transaction_id,
             result: event.result
         };
+    },
+
+    parseEvent(event, { inputs: abi }) {
+        if(!event.result)
+            return event;
+
+        event.result = event.result.reduce((obj, result, index) => {
+            const {
+                name,
+                type
+            } = abi[index];
+
+            if(type == 'address')
+                result = '41' + address.substr(2).toLowerCase();
+
+            obj[name] = result;
+
+            return obj;
+        }, {});
+
+        return event;
     }
 }
 
