@@ -36198,7 +36198,7 @@ function () {
   }, {
     key: "hasProperty",
     value: function hasProperty(property) {
-      return this.hasOwnProperty(property) && !this.__proto__.hasOwnProperty(property);
+      return !this.hasOwnProperty(property) && !this.__proto__.hasOwnProperty(property);
     }
   }, {
     key: "loadAbi",
