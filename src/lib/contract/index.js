@@ -83,7 +83,7 @@ export default class Contract {
     }
 
     hasProperty(property) {
-        return !this.hasOwnProperty(property) && !this.__proto__.hasOwnProperty(property);
+        return this.hasOwnProperty(property) || this.__proto__.hasOwnProperty(property);
     }
 
     loadAbi(abi) {
