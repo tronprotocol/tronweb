@@ -45,7 +45,7 @@ export default class Method {
             feeLimit: 1000000000,
             callValue: 0,
             from: this.tronWeb.defaultAddress.hex, // Only used for send()
-            shouldPollResponse: false // Only used for sign()
+            shouldPollResponse: true // Only used for sign()
         };
     }
 
@@ -58,8 +58,8 @@ export default class Method {
         });
 
         return {
-            call: (...methodArgs) => this._call(types, args, methodArgs),
-            send: (...methodArgs) => this._send(types, args, methodArgs),
+            call: (...methodArgs) => this._call(types, args, ...methodArgs),
+            send: (...methodArgs) => this._send(types, args, ...methodArgs),
             watch: (...methodArgs) => this._watch(...methodArgs)
         }
     }

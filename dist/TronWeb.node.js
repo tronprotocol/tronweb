@@ -607,7 +607,7 @@ class Method {
       callValue: 0,
       from: this.tronWeb.defaultAddress.hex,
       // Only used for send()
-      shouldPollResponse: false // Only used for sign()
+      shouldPollResponse: true // Only used for sign()
 
     };
   }
@@ -618,8 +618,8 @@ class Method {
       if (types[index] == 'address') args[index] = this.tronWeb.address.toHex(arg).replace(/^(41)/, '0x');
     });
     return {
-      call: (...methodArgs) => this._call(types, args, methodArgs),
-      send: (...methodArgs) => this._send(types, args, methodArgs),
+      call: (...methodArgs) => this._call(types, args, ...methodArgs),
+      send: (...methodArgs) => this._send(types, args, ...methodArgs),
       watch: (...methodArgs) => this._watch(...methodArgs)
     };
   }

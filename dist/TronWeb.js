@@ -36504,7 +36504,7 @@ function () {
       callValue: 0,
       from: this.tronWeb.defaultAddress.hex,
       // Only used for send()
-      shouldPollResponse: false // Only used for sign()
+      shouldPollResponse: true // Only used for sign()
 
     };
   }
@@ -36528,14 +36528,14 @@ function () {
             methodArgs[_key2] = arguments[_key2];
           }
 
-          return _this._call(types, args, methodArgs);
+          return _this._call.apply(_this, [types, args].concat(methodArgs));
         },
         send: function send() {
           for (var _len3 = arguments.length, methodArgs = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
             methodArgs[_key3] = arguments[_key3];
           }
 
-          return _this._send(types, args, methodArgs);
+          return _this._send.apply(_this, [types, args].concat(methodArgs));
         },
         watch: function watch() {
           return _this._watch.apply(_this, arguments);
