@@ -288,7 +288,7 @@ export default class TransactionBuilder {
             bytecode = false,
             feeLimit = 1_000_000_000,
             callValue = 0,
-            bandwidthLimit = 0,
+            userFeePercentage = 0,
             parameters = []
         } = options;
 
@@ -322,7 +322,7 @@ export default class TransactionBuilder {
         if(!payable && callValue > 0)
             return callback('When contract is not payable, options.callValue must be 0');
 
-        if(!utils.isInteger(bandwidthLimit) || bandwidthLimit < 0 || bandwidthLimit > 100)
+        if(!utils.isInteger(userFeePercentage) || userFeePercentage < 0 || userFeePercentage > 100)
             return callback('Invalid options.bandwidthLimit provided');
 
         if(!utils.isArray(parameters))
@@ -360,7 +360,7 @@ export default class TransactionBuilder {
             owner_address: this.tronWeb.address.toHex(issuerAddress),
             fee_limit: parseInt(feeLimit),
             call_value: parseInt(callValue),
-            consume_user_resource_percent: bandwidthLimit,
+            consume_user_resource_percent: userFeePercentage,
             abi: JSON.stringify(abi),
             bytecode,
             parameter: parameters
