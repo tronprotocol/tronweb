@@ -174,7 +174,7 @@ export default class TronWeb {
             return callback(null, 
                 data.map(event => utils.mapEvent(event))
             );
-        }).catch(err => callback(err.response.data || err)); 
+        }).catch(err => callback((err.response && err.response.data) || err)); 
     }
 
     getEventByTransacionID(transactionID = false, callback = false) {
@@ -194,7 +194,7 @@ export default class TronWeb {
             return callback(null, 
                 data.map(event => utils.mapEvent(event))
             );
-        }).catch(err => callback(err.response.data || err));
+        }).catch(err => callback((err.response && err.response.data) || err));
     }
 
     contract(abi = [], address = false) {
