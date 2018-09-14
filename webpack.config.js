@@ -4,7 +4,8 @@ const externals = require('webpack-node-externals');
 const basePlugins = [
     '@babel/plugin-proposal-numeric-separator',
     '@babel/plugin-proposal-class-properties',
-    '@babel/plugin-transform-runtime'
+    '@babel/plugin-transform-runtime',
+    'transform-object-rest-spread'
 ];
 
 const baseConfig = {
