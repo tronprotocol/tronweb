@@ -11,12 +11,26 @@
 Then you need to instantiate the introduced TronWeb
 
 ``` js
-  import TronWeb from 'tronweb'
-  const api_url = ''  //Requested http service address
-  const tronWeb = new TronWeb(api_url)
+  import TronWeb from 'TronWeb'
+  const HttpProvider = TronWeb.providers.HttpProvider;
+  const fullNode = new HttpProvider('https://api.trongrid.io:8090');
+  const solidityNode = new HttpProvider('https://api.trongrid.io:8091');
+  const eventServer = 'https://api.trongrid.io/';
+  const privateKey = 'da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0';
+
+  let tronWeb = new TronWeb(
+      fullNode,
+      solidityNode,
+      eventServer,
+      privateKey);
 ```
 
-The main network address for our fullnode is http://api.trondapps.org and the test network address is http://testapi.trondapps.org. For custom needs, you can also set up your own private network, but you need to solve cross-domain problems. The `nginx` configuration file is as follows:
+### We provide a TRON service that you can connect to, located at 
+* Full Node - https://api.trongrid.io:8090
+* Solidity Node - https://api.trongrid.io:8091
+* Event Server - https://api.trongrid.io
+
+* You can also set up your own private network, but you need to solve cross-domain CORS. The following `nginx` configuration file will allow you to route the headers properly:
 
 ```
   upstream fullnodeapi_server {
@@ -58,19 +72,24 @@ The main network address for our fullnode is http://api.trondapps.org and the te
 
 ## What is Tron-Web?
 
-Based on the TRON chain, Tron-Web encapsulates a layer of APIs that can be used by DAPP developers or exchanges, similar to Ethereum's [web3.js](http://web3.tryblockchain.org/web3-js-in- Action.html). Tron-Web provides a set of web interfaces under the TRON ecosystem.  
+Based on the TRON chain, Tron-Web encapsulates a layer of APIs that can be used by DAPP developers or exchanges, similar to Ethereum's [web3.js](https://github.com/ethereum/web3.js/). Tron-Web provides a set of web interfaces under the TRON ecosystem.  
 
 ### Tron-Web Instance
 
 ``` js
-  const TronWeb = require('tronweb')
-  import TronWeb from 'tronweb'
-  const api_url = 'http://52.44.75.99:8090'  //Requested http service address
-  const event_server = 'http://52.44.75.99:18889' //Requested contract event service address
-  const tronWeb = new TronWeb(api_url,event_server)
-  tronWeb.defaultAccount = 'TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY';  //Test address
-  tronWeb.defaultPk='da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0';  //Test private key
-  getBalance();
+  import TronWeb from 'TronWeb'
+  const HttpProvider = TronWeb.providers.HttpProvider;
+  const fullNode = new HttpProvider('https://api.trongrid.io:8090'); //Requested full node http service address
+  const solidityNode = new HttpProvider('https://api.trongrid.io:8091'); //Requested solidity node http service address
+  const eventServer = 'https://api.trongrid.io/'; //Contract event service address
+  const privateKey = 'da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0';
+
+  let tronWeb = new TronWeb(
+      fullNode,
+      solidityNode,
+      eventServer,
+      privateKey);
+      
   //Since every call needs to request http service, it will not synchronize the results. Thus, you needs ES7 standard async and wait
   //Get the account balance under an address
   async getBalance(){
@@ -90,13 +109,11 @@ Based on the TRON chain, Tron-Web encapsulates a layer of APIs that can be used 
 
 1. Transaction Failure?
 
-A: fee_limit needs to set a quota (no reference value and calculation worth), not too small, otherwise the transaction can not be completed
+A: A fee_limit needs to be provided for the vm processing costs, otherwise the transaction can not be completed.
 
 2. Incorrect parameter type?
 
 A: Ethereum can be automatically converted but TRON must strictly follow the type uint256 (unsigned integer) string. Other types must be passed strictly by type, otherwise the contract method is not executed. Currently, the front end currently types the special value. 
-
-
 
 ## Tool Methods
 
@@ -768,64 +785,30 @@ Operation Result:
 </p>
 
 
-### tronWeb.contract(abiArray).at(contractAddress)
+### tronWeb.contract().at(contractAddress)
 
-- 调用合约
+- Call contract
 - arguments: 
-  * abiArray `array`
-  * contractAddress `string` 合约地址 
+  * contractAddress `string` Contract address as a Hex string 
 - return: `object`
 
 ``` js
   (()=>{
-    let abi = [{"constant":false,"inputs":[{"name":"number","type":"uint256"}],"name":"fibonacciNotify","outputs":[{"name":"result","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"number","type":"uint256"}],"name":"fibonacci","outputs":[{"name":"result","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"name":"input","type":"uint256"},{"indexed":false,"name":"result","type":"uint256"}],"name":"Notify","type":"event"}];
-        let myContract = tronWeb.contract(abi);
-        let contractAddress = '418be282919ce6c0ab46b183cdbefef12afaeabd82'
-        let contractInstance = await myContract.at(contractAddress);
-        let { transaction,txid,result,constant_result } = await contractInstance.fibonacciNotify(7,{
-            fee_limit:700000000000000,
-            call_value:0
-        })
-        if(!constant_result){
-            let res = await contractInstance.fibonacciNotify.sendTransaction(transaction,this.pk.value);
-            //监听事件
-            let myEvent = await contractInstance.Notify();//默认根据合约地址查询，可以输入{eventName:'',blockNum:'',transactionId:''}
-             myEvent.watch(function(err,result){
-                 let eventResult = '';
-                 result.forEach((item)=>{
-                     if(item.transaction_id ==transaction.txID){
-                         eventResult = item.result;
-                         myEvent.stopWatching();
-                     }
-                 })
-                 console.log('eventResult:',eventResult);
-             });
-        }
+        let contractInstance = tronWeb.contract().at('418be282919ce6c0ab46b183cdbefef12afaeabd82');
+        
+        let transactionID = await contractInstance.fibonacciNotify(7).send()
+        //默认根据合约地址查询，可以输入{eventName:'',blockNum:'',transactionId:''}
+        contractInstance.Notify().watch(function(err,result) {
+          let eventResult = '';
+             result.forEach((item)=> {
+                 if (item.transaction_id == transaction.txID) {
+                     eventResult = item.result;
+                     myEvent.stopWatching();
+                 }
+             })
+             console.log('eventResult:', eventResult);
+         });
   })()
-```
-
-
-
-
-
-
-
-
-
-# Example Usage in React or vue
-```
-let tronWeb = new TronWeb('https://api.trongrid.io:8090');
-tronWeb.setEventServer('https://api.trongrid.io');
-tronWeb.defaultAccount = 'TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY';
-tronWeb.defaultPk='da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0'; 
-
-async getBalance(){
-        const res = await tronWeb.getBalance(this.account.value);
-        this.setState({
-            data:res
-        })
-    }  
-
 ```
 
 
