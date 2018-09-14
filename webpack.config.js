@@ -64,8 +64,9 @@ module.exports = [
                             presets: [
                                 ['@babel/env', {
                                     targets: {
-                                        node: '8.11.4'
-                                    }
+                                        node: 6
+                                    },
+                                    forceAllTransforms: true
                                 }]
                             ],
                             plugins: [
