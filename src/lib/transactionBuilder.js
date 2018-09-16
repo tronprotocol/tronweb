@@ -323,7 +323,7 @@ export default class TransactionBuilder {
             return callback('When contract is not payable, options.callValue must be 0');
 
         if(!utils.isInteger(userFeePercentage) || userFeePercentage < 0 || userFeePercentage > 100)
-            return callback('Invalid options.bandwidthLimit provided');
+            return callback('Invalid options.userFeePercentage provided');
 
         if(!utils.isArray(parameters))
             return callback('Invalid parameters provided');
