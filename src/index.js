@@ -54,20 +54,24 @@ export default class TronWeb {
     }
 
     setDefaultBlock(blockID = false) {
-        if(blockID === false || blockID == 'latest' || blockID == 'earliest')
+        if(blockID === false || blockID == 'latest' || blockID == 'earliest' || blockID === 0)
             return this.defaultBlock = blockID;
 
         if(!utils.isInteger(blockID) || !blockID)
             throw new Error('Invalid block ID provided');
 
-        this.defaultBlock = +blockID;
+        this.defaultBlock = Math.abs(blockID);
     }
 
     setPrivateKey(privateKey) {
-        // Set address first as it clears the private key
-        this.setAddress(
-            this.address.fromPrivateKey(privateKey)
-        );
+        // Validate private key
+        try {
+            this.setAddress(
+                this.address.fromPrivateKey(privateKey)
+            );
+        } catch {
+            throw new Error('Invalid private key provided');
+        }
 
         // TODO: Validate private key
         this.defaultPrivateKey = privateKey;        
@@ -80,7 +84,7 @@ export default class TronWeb {
         const hex = this.address.toHex(address);
         const base58 = this.address.fromHex(address);
 
-        if(this.defaultPrivateKey && this.address.fromPrivateKey !== hex)
+        if(this.defaultPrivateKey && this.address.fromPrivateKey(this.defaultPrivateKey) !== base58)
            this.defaultPrivateKey = false;
 
         this.defaultAddress = {
@@ -103,6 +107,9 @@ export default class TronWeb {
     }
 
     setFullNode(fullNode) {
+        if(utils.isString(fullNode))
+            fullNode = new providers.HttpProvider(fullNode);
+
         if(!this.isValidProvider(fullNode))
             throw new Error('Invalid full node provided');
 
@@ -111,6 +118,9 @@ export default class TronWeb {
     }
 
     setSolidityNode(solidityNode) {
+        if(utils.isString(solidityNode))
+            solidityNode = new providers.HttpProvider(solidityNode);
+
         if(!this.isValidProvider(solidityNode))
             throw new Error('Invalid solidity node provided');
 
