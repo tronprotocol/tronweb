@@ -7,7 +7,9 @@
         "build": "npm run clean && webpack --config webpack.config.js --progress --colors",
         "clean": "rimraf dist",
         "example": "node ./examples/server",
-        "test": "mocha test/**/*.js"
+        "test-no-coverage": "mocha test/**/*.js",
+        "test": "istanbul cover ./node_modules/.bin/_mocha test/**/*.js",
+        "posttest": "# istanbul check-coverage --statements 85 --branches 70 --functions 85 --lines 85"
     },
     "dependencies": {
         "@babel/runtime": "^7.0.0",
@@ -31,6 +33,7 @@
         "babel-plugin-source-map-support": "^2.0.1",
         "babel-plugin-transform-object-rest-spread": "^6.26.0",
         "chai": "^4.1.2",
+        "istanbul": "^0.4.5",
         "mocha": "^5.2.0",
         "rimraf": "^2.6.2",
         "webpack": "^4.17.2",
