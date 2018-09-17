@@ -10,8 +10,8 @@ import Witness from './lib/witness';
 import Contract from './lib/contract';
 
 export default class TronWeb {
-    static providers = providers;
-    static BigNumber = BigNumber;
+    // static providers = providers;
+    // static BigNumber = BigNumber;
 
     constructor(fullNode, solidityNode, eventServer = false, privateKey = false) {
         if(utils.isString(fullNode))
@@ -69,7 +69,7 @@ export default class TronWeb {
             this.setAddress(
                 this.address.fromPrivateKey(privateKey)
             );
-        } catch {
+        } catch (err) {
             throw new Error('Invalid private key provided');
         }
 
@@ -232,7 +232,7 @@ export default class TronWeb {
             fromPrivateKey(privateKey) {
                 try {
                     return utils.crypto.pkToAddress(privateKey);
-                } catch { return false; }
+                } catch (err) { return false; }
             }
         }
     }
@@ -353,3 +353,6 @@ export default class TronWeb {
         });
     }
 };
+
+TronWeb.providers = providers;
+TronWeb.BigNumber = BigNumber;
