@@ -295,7 +295,7 @@ export default class TransactionBuilder {
         if(abi && utils.isString(abi)) {
             try {
                 abi = JSON.parse(abi);
-            } catch{
+            } catch (err) {
                 return callback('Invalid options.abi provided');
             }
         }
