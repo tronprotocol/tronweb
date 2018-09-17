@@ -1,5 +1,5 @@
 import Ethers from 'ethers';
-import utils from 'utils';
+import utils from '../../utils';
 
 const abiCoder = new Ethers.utils.AbiCoder();
 
@@ -32,7 +32,7 @@ export default class Method {
         this.tronWeb = contract.tronWeb;
         this.contract = contract;
 
-        this.abi = abi;        
+        this.abi = abi;
         this.name = abi.name;
 
         this.inputs = abi.inputs || [];
@@ -65,12 +65,12 @@ export default class Method {
         }
     }
 
-    async _call(types, args, options = {}, callback = false) {                
+    async _call(types, args, options = {}, callback = false) {
         if(utils.isFunction(options)) {
             callback = options;
             options = {};
         }
-            
+
         if(!callback)
             return this.injectPromise(this._call, types, args, options);
 
@@ -103,7 +103,7 @@ export default class Method {
             parameters,
             this.tronWeb.address.toHex(options.from),
         (err, transaction) => {
-            if(err) 
+            if(err)
                 return callback(err);
 
             if(!utils.hasProperty(transaction, 'constant_result'))
@@ -111,7 +111,7 @@ export default class Method {
 
             try {
                 let output = decodeOutput(this.outputs, '0x' + transaction.constant_result[0]);
-                
+
                 if(output.length === 1)
                     output = output[0];
 
@@ -132,7 +132,7 @@ export default class Method {
             callback = options;
             options = {};
         }
-            
+
         if(!callback)
             return this.injectPromise(this._send, types, args, options, privateKey);
 
@@ -185,12 +185,12 @@ export default class Method {
 
             const checkResult = async (index = 0) => {
                 if(index == 20) {
-                    return callback({ 
-                        error: 'Cannot find result in solidity node', 
+                    return callback({
+                        error: 'Cannot find result in solidity node',
                         transaction: signedTransaction
                     });
                 }
-                
+
                 const output = await this.tronWeb.trx.getTransactionInfo(signedTransaction.txID);
 
                 if(!Object.keys(output).length) {
@@ -223,7 +223,7 @@ export default class Method {
                 return callback(null, decoded);
             }
 
-            checkResult();                    
+            checkResult();
         } catch(ex) {
             return callback(ex);
         }
@@ -232,7 +232,7 @@ export default class Method {
     async _watch(callback = false) {
         if(!utils.isFunction(callback))
             throw new Error('Expected callback to be provided');
-        
+
         if(!this.contract.address)
             return callback('Smart contract is missing address');
 
@@ -258,7 +258,7 @@ export default class Method {
                         return false;
 
                     if(!lastBlock)
-                        return true;            
+                        return true;
 
                     return event.block > lastBlock;
                 });

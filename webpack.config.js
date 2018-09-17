@@ -44,6 +44,8 @@ const baseConfig = {
     mode: process.env.NODE_ENV
 };
 
+module.exports.baseConfig = baseConfig
+
 module.exports = [
     {
         ...baseConfig,

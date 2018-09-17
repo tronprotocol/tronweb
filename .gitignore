@@ -1,3 +1,6 @@
 node_modules
 .DS_Store
+coverage
+examples/.next
+compiled
 package-lock.json

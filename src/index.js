@@ -1,18 +1,18 @@
-import providers from 'lib/providers';
-import utils from 'utils';
+import providers from './lib/providers';
+import utils from './utils';
 import axios from 'axios';
 import BigNumber from 'bignumber.js';
 import { sha3_256 } from 'js-sha3';
 
-import TransactionBuilder from 'lib/transactionBuilder';
-import Trx from 'lib/trx';
-import Witness from 'lib/witness';
-import Contract from 'lib/contract';
+import TransactionBuilder from './lib/transactionBuilder';
+import Trx from './lib/trx';
+import Witness from './lib/witness';
+import Contract from './lib/contract';
 
 export default class TronWeb {
     static providers = providers;
     static BigNumber = BigNumber;
-    
+
     constructor(fullNode, solidityNode, eventServer = false, privateKey = false) {
         if(utils.isString(fullNode))
             fullNode = new providers.HttpProvider(fullNode);
@@ -23,7 +23,7 @@ export default class TronWeb {
         this.setFullNode(fullNode);
         this.setSolidityNode(solidityNode);
         this.setEventServer(eventServer);
-        
+
         this.providers = providers;
         this.BigNumber = BigNumber;
 
@@ -33,7 +33,7 @@ export default class TronWeb {
             hex: false,
             base58: false
         };
-        
+
         [
             'sha3', 'toHex', 'toUtf8', 'fromUtf8',
             'toAscii', 'fromAscii', 'toDecimal', 'fromDecimal',
@@ -74,7 +74,7 @@ export default class TronWeb {
         }
 
         // TODO: Validate private key
-        this.defaultPrivateKey = privateKey;        
+        this.defaultPrivateKey = privateKey;
     }
 
     setAddress(address) {
@@ -161,7 +161,7 @@ export default class TronWeb {
 
         if(eventName && !contractAddress)
             return callback('Usage of event name filtering requires a contract address');
-        
+
         if(blockNumber && !eventName)
             return callback('Usage of block number filtering requires an event name');
 
@@ -181,10 +181,10 @@ export default class TronWeb {
             if(!utils.isArray(data))
                 return callback(data);
 
-            return callback(null, 
+            return callback(null,
                 data.map(event => utils.mapEvent(event))
             );
-        }).catch(err => callback((err.response && err.response.data) || err)); 
+        }).catch(err => callback((err.response && err.response.data) || err));
     }
 
     getEventByTransacionID(transactionID = false, callback = false) {
@@ -201,7 +201,7 @@ export default class TronWeb {
             if(!utils.isArray(data))
                 return callback(data);
 
-            return callback(null, 
+            return callback(null,
                 data.map(event => utils.mapEvent(event))
             );
         }).catch(err => callback((err.response && err.response.data) || err));
@@ -293,12 +293,12 @@ export default class TronWeb {
     }
 
     static fromSun(sun) {
-        const trx = TronWeb.toBigNumber(trx).div(1_000_000);        
+        const trx = TronWeb.toBigNumber(trx).div(1000000);
         return utils.isBigNumber(sun) ? trx : trx.toString(10);
     }
 
     static toSun(trx) {
-        const sun = TronWeb.toBigNumber(trx).times(1_000_000);        
+        const sun = TronWeb.toBigNumber(trx).times(1000000);
         return utils.isBigNumber(trx) ? sun : sun.toString(10);
     }
 

@@ -1,6 +1,6 @@
 const chai = require('chai');
 const assert = chai.assert;
-const TronWeb = require('../dist/TronWeb.node.js');
+const TronWeb = require('../src');
 const HttpProvider = TronWeb.providers.HttpProvider;
 
 const FULL_NODE_API = 'https://api.trongrid.io:8090';
@@ -101,7 +101,7 @@ describe('TronWeb Instance', () => {
 
             assert.equal(tronWeb.defaultBlock, 0);
         });
-        
+
         it('should be able to clear', () => {
             const tronWeb = createInstance();
 
@@ -201,7 +201,7 @@ describe('TronWeb Instance', () => {
             const tronWeb = createInstance();
 
             tronWeb.setAddress(ADDRESS_BASE58);
-            
+
             assert.equal(tronWeb.defaultPrivateKey, PRIVATE_KEY);
         });
     });

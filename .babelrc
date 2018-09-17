@@ -1,0 +1,18 @@
+{
+//    "presets": [
+//        "es2017", "stage-0"
+//    ],
+//    "plugins": [
+////        ["babel-plugin-transform-builtin-extend", {
+////            "globals": [ "Error" ]
+////        }],
+//        "transform-optional-catch-binding",
+//        ["transform-es2015-modules-commonjs", {
+//            "allowTopLevelThis": true
+//        }],
+//        "istanbul"
+//    ]
+
+//    "babelrcRoots": "packages/*"
+}
+
