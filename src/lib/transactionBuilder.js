@@ -127,8 +127,6 @@ export default class TransactionBuilder {
             callback = duration;
             duration = 3;
         }
-        if (resource != "BANDWIDTH" && resource != "ENERGY")
-            throw new Error('resource type can only be BANDWITH or ENERGY');
             
         if(!callback)
             return this.injectPromise(this.freezeBalance, address, amount, duration);
