@@ -378,6 +378,15 @@ class Index extends React.Component{
         console.log("Function call result:", result)
     }
 
+    //29、调用合约
+    async freezeBalance(){
+        let tx = await tronWeb.transactionBuilder.freezeBalance('41928C9AF0651632157EF27A2CF17CA72C575A4D21', 20000000, 3, "BANDWIDTH");
+        let signedtx = await tronWeb.trx.sign(tx);
+        let result = await tronWeb.trx.sendRawTransaction(signedtx);
+        console.log("Function call result:", result)
+    }
+
+
     render(){
         const { data } = this.state;
         return (
@@ -525,6 +534,9 @@ class Index extends React.Component{
                                  </div>
                              </form>
                              <hr/>
+                        </div>
+                        <div>
+                            <input type="button" value="freezeBalance" onClick={()=>this.freezeBalance()}/>
                         </div>
 
 

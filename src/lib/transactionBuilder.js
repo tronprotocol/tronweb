@@ -127,9 +127,14 @@ export default class TransactionBuilder {
             callback = duration;
             duration = 3;
         }
+
+        if(utils.isFunction(resource)) {
+            callback = resource;
+            resource = "BANDWIDTH";
+        }
             
         if(!callback)
-            return this.injectPromise(this.freezeBalance, address, amount, duration);
+            return this.injectPromise(this.freezeBalance, address, amount, duration, resource);
 
         if(!this.tronWeb.isAddress(address))
             return callback('Invalid address provided');
