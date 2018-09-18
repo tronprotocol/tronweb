@@ -239,6 +239,15 @@ describe('TronWeb Instance', () => {
 
             assert.equal(isConnected, false);
         });
+
+        it('should return false if the eventServer is null', async () => {
+            const tronWeb = createInstance();
+            tronWeb.eventServer = null
+
+            const isConnected = await tronWeb.isEventServerConnected();
+
+            assert.equal(isConnected, false);
+        });
     });
 
     describe('#setFullNode()', () => {
@@ -350,4 +359,16 @@ describe('TronWeb Instance', () => {
             assert.equal(providers.eventServer, EVENT_API);
         });
     });
+
+    describe('#currentProvider()', () => {
+        it('should return the current providers', () => {
+            const tronWeb = createInstance();
+            const providers = tronWeb.currentProvider();
+
+            assert.equal(providers.fullNode.host, FULL_NODE_API);
+            assert.equal(providers.solidityNode.host, SOLIDITY_NODE_API);
+            assert.equal(providers.eventServer, EVENT_API);
+        });
+    });
+
 });
