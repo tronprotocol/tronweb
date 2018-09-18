@@ -106,7 +106,7 @@ const app = async () => {
             console.log('- Token Name: TestToken');
             console.log('- Token:\n' + JSON.stringify(token, null, 2), '\n');
         console.groupEnd();
-    }).catch(err => console.error(err));    
+    }).catch(err => console.error(err));
 
     const nodeList = await tronWeb.trx.listNodes();
 
@@ -173,15 +173,15 @@ const app = async () => {
 
     // There are no tokens on the network yet
     // const sendToken = await tronWeb.transactionBuilder.sendToken('TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1', 10, 'TestToken_1');
-    // 
+    //
     // console.group('Unsigned send token transaction');
     //     console.log('- Recipient: TGEJj8eus46QMHPgWQe1FJ2ymBXRm96fn1');
     //     console.log('- Token: TestToken_1');
     //     console.log('- Transaction:\n' + JSON.stringify(sendToken, null, 2), '\n');
     // console.groupEnd();
-    // 
+    //
     // const purchaseToken = await tronWeb.transactionBuilder.purchaseToken('41a8572327f883078cdb971317f91647d0a1cd4db0', 'BetterToken', 10);
-    // 
+    //
     // console.group('Unsigned purchase token transaction');
     //     console.log('- Token Owner: 41a8572327f883078cdb971317f91647d0a1cd4db0');
     //     console.log('- Token: BetterToken');
@@ -203,8 +203,8 @@ const app = async () => {
             console.log('- Address: TYkfNHvpfwU7iX2hUpXQ7pjRY7Lg6SEZ96');
             console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
         console.groupEnd();
-    }); 
-    
+    });
+
     tronWeb.transactionBuilder.withdrawBlockRewards('TYkfNHvpfwU7iX2hUpXQ7pjRY7Lg6SEZ96', (err, transaction) => {
         if(err)
             return console.error(err);
@@ -223,7 +223,7 @@ const app = async () => {
             console.log('- Address:', tronWeb.defaultAddress.base58);
             console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
         console.groupEnd();
-    });    
+    });
 
     tronWeb.transactionBuilder.vote({
         '41c2d52f2511808307c848b808649595f631527111': 1000000
@@ -244,13 +244,13 @@ const app = async () => {
     }, '41c2d52f2511808307c848b808649595f631527111', (err, transaction) => {
         if(err)
             return console.error(err);
-    
+
         console.group('Unsigned create smart contract transaction');
             console.log('- Issuer Address: 41c2d52f2511808307c848b808649595f631527111');
             console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
         console.groupEnd();
     });
-    
+
     tronWeb.transactionBuilder.triggerSmartContract(
         '413c8143e98b3e2fe1b1a8fb82b34557505a752390',
         'multiply(int256,int256)',
@@ -263,13 +263,13 @@ const app = async () => {
     (err, transaction) => {
         if(err)
             return console.error(err);
-    
+
         console.group('Unsigned trigger smart contract transaction');
             console.log('- Contract Address: 413c8143e98b3e2fe1b1a8fb82b34557505a752390');
             console.log('- Transaction:\n' + JSON.stringify(transaction, null, 2), '\n');
         console.groupEnd();
     });
-  
+
     tronWeb.transactionBuilder.createToken({
         name: 'TestToken',
         abbreviation: 'TTKN',
@@ -311,7 +311,7 @@ const app = async () => {
         tronWeb.trx.sendRawTransaction(signedTransaction, (err, result) => {
             if(err)
                 return console.error(err);
-            
+
             console.group('Broadcast update token transaction');
                 console.log('- Result:\n' + JSON.stringify(result, null, 2), '\n');
             console.groupEnd();
@@ -371,7 +371,7 @@ const app = async () => {
             console.log('- Contract Address:', event.contract);
             console.log('- Event Name:', event.name);
             console.log('- Transaction:', event.transaction);
-            console.log('- Block number:', event.block);            
+            console.log('- Block number:', event.block);
             console.log('- Result:', event.result, '\n');
         console.groupEnd();
     }).start(err => {
@@ -389,12 +389,12 @@ const app = async () => {
             console.log('- Contract Address:', event.contract);
             console.log('- Event Name:', event.name);
             console.log('- Transaction:', event.transaction);
-            console.log('- Block number:', event.block);            
+            console.log('- Block number:', event.block);
             console.log('- Result:', event.result, '\n');
         console.groupEnd();
     });
 
-    // This is a pure function so it's only executed on the local node 
+    // This is a pure function so it's only executed on the local node
     newContract && newContract.test(1, 1000000).call().then(async output => {
         console.group('Contract "test" result');
             console.log('- Output:', output.toString(), '\n');
@@ -413,7 +413,7 @@ const app = async () => {
     }).then(output => {
         console.group('Contract "getLast" result');
             console.log('- Output:\n' + JSON.stringify(output, null, 2), '\n');
-        console.groupEnd();       
+        console.groupEnd();
     }).catch(err => console.error(err));
 
     const firstTransaction = await tronWeb.trx.getTransactionFromBlock(0, 0);
