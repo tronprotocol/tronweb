@@ -15,19 +15,13 @@ module.exports = function (config) {
     config.set({
 
         files: [
-            // all files ending in "test"
-            // './node_modules/phantomjs-polyfill/bind-polyfill.js',
-            'test/test.js'
-            // each file acts as entry point for the webpack configuration
+            'test/src-web/test.js'
         ],
 
-        // frameworks to use
         frameworks: ['mocha'],
 
         preprocessors: {
-            // only specify one entry point
-            // and require all tests in there
-            'test/test.js': ['webpack', 'sourcemap']
+            'test/src-web/test.js': ['webpack', 'sourcemap']
         },
 
         reporters: ['spec', 'coverage'],
@@ -58,9 +52,8 @@ module.exports = function (config) {
                     {
                         test: /\.js/,
                         exclude: /(test|node_modules|bower_components)/,
-                        loader: 'istanbul-instrumenter-loader',
+                        loader: 'babel-loader',
                         options: {
-                            esModules: true,
                             presets: [
                                 ['@babel/env', {
                                     targets: {
@@ -72,7 +65,8 @@ module.exports = function (config) {
                                 }]
                             ],
                             plugins: [
-                                ...basePlugins
+                                ...basePlugins,
+                                "istanbul"
                             ]
                         },
                     }

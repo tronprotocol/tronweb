@@ -7,8 +7,9 @@
         "build": "npm run clean && webpack --config webpack.config.js --progress --colors",
         "clean": "rimraf dist",
         "example": "node ./examples/server",
-        "test": "node ./node_modules/karma/bin/karma start --single-run --browsers ChromeHeadless",
-        "posttest": "# istanbul check-coverage --statements 85 --branches 70 --functions 85 --lines 85"
+        "test-src-web": "karma start --single-run --browsers ChromeHeadless",
+        "test-dist-node": "mocha test/dist-node/**/*js",
+        "test" : "yarn run test-dist-node && yarn run test-src-web"
     },
     "dependencies": {
         "@babel/runtime": "^7.0.0",
@@ -42,6 +43,7 @@
         "babel-preset-es2017": "^6.24.1",
         "babel-preset-stage-0": "^6.24.1",
         "chai": "^4.1.2",
+        "cross-env": "^5.2.0",
         "istanbul": "^0.4.5",
         "istanbul-instrumenter-loader": "^3.0.1",
         "karma": "^3.0.0",

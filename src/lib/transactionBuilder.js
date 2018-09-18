@@ -1,5 +1,5 @@
-import TronWeb from '..';
-import utils from '../utils';
+import TronWeb from 'index';
+import utils from 'utils';
 import Ethers from 'ethers';
 
 export default class TransactionBuilder {
@@ -16,7 +16,7 @@ export default class TransactionBuilder {
             callback = from;
             from = this.tronWeb.defaultAddress.hex;
         }
-
+        
         if(!callback)
             return this.injectPromise(this.sendTrx, to, amount, from);
 
@@ -52,7 +52,7 @@ export default class TransactionBuilder {
             callback = from;
             from = this.tronWeb.defaultAddress.hex;
         }
-
+        
         if(!callback)
             return this.injectPromise(this.sendToken, to, amount, tokenID, from);
 
@@ -93,7 +93,7 @@ export default class TransactionBuilder {
             callback = buyer;
             buyer = this.tronWeb.defaultAddress.hex;
         }
-
+        
         if(!callback)
             return this.injectPromise(this.purchaseToken, issuerAddress, tokenID, amount, buyer);
 
@@ -122,14 +122,19 @@ export default class TransactionBuilder {
         }).catch(err => callback(err));
     }
 
-    freezeBalance(address = this.tronWeb.defaultAddress.hex, amount = 0, duration = 3, callback = false) {
+    freezeBalance(address = this.tronWeb.defaultAddress.hex, amount = 0, duration = 3, resource = "BANDWIDTH", callback = false) {
         if(utils.isFunction(duration)) {
             callback = duration;
             duration = 3;
         }
 
+        if(utils.isFunction(resource)) {
+            callback = resource;
+            resource = "BANDWIDTH";
+        }
+            
         if(!callback)
-            return this.injectPromise(this.freezeBalance, address, amount, duration);
+            return this.injectPromise(this.freezeBalance, address, amount, duration, resource);
 
         if(!this.tronWeb.isAddress(address))
             return callback('Invalid address provided');
@@ -143,7 +148,8 @@ export default class TransactionBuilder {
         this.tronWeb.fullNode.request('wallet/freezebalance', {
             owner_address: this.tronWeb.address.toHex(address),
             frozen_balance: parseInt(amount),
-            frozen_duration: parseInt(duration)
+            frozen_duration: parseInt(duration),
+            resource: resource
         }, 'post').then(transaction => {
             if(transaction.Error)
                 return callback(transaction.Error);
@@ -152,20 +158,26 @@ export default class TransactionBuilder {
         }).catch(err => callback(err));
     }
 
-    unfreezeBalance(address = this.tronWeb.defaultAddress.hex, callback = false) {
+    unfreezeBalance(address = this.tronWeb.defaultAddress.hex, resource = "BANDWIDTH", callback = false) {
         if(utils.isFunction(address)) {
             callback = address;
             address = this.tronWeb.defaultAddress.hex;
         }
 
+        if(utils.isFunction(resource)) {
+            callback = resource;
+            resource = "BANDWIDTH";
+        }
+
         if(!callback)
-            return this.injectPromise(this.unfreezeBalance, address);
+            return this.injectPromise(this.unfreezeBalance, address, resource);
 
         if(!this.tronWeb.isAddress(address))
             return callback('Invalid address provided');
-
+        
         this.tronWeb.fullNode.request('wallet/unfreezebalance', {
-            owner_address: this.tronWeb.address.toHex(address)
+            owner_address: this.tronWeb.address.toHex(address),
+            resource: resource
         }, 'post').then(transaction => {
             if(transaction.Error)
                 return callback(transaction.Error);
@@ -185,7 +197,7 @@ export default class TransactionBuilder {
 
         if(!this.tronWeb.isAddress(address))
             return callback('Invalid address provided');
-
+        
         this.tronWeb.fullNode.request('wallet/withdrawbalance', {
             owner_address: this.tronWeb.address.toHex(address)
         }, 'post').then(transaction => {
@@ -211,7 +223,7 @@ export default class TransactionBuilder {
 
         if(!utils.isValidURL(url))
             return callback('Invalid url provided');
-
+        
         this.tronWeb.fullNode.request('wallet/createwitness', {
             owner_address: this.tronWeb.address.toHex(address),
             url: this.tronWeb.fromUtf8(url)
@@ -286,7 +298,7 @@ export default class TransactionBuilder {
         let {
             abi = false,
             bytecode = false,
-            feeLimit = 1000000000,
+            feeLimit = 1_000_000_000,
             callValue = 0,
             userFeePercentage = 0,
             parameters = []
@@ -295,7 +307,7 @@ export default class TransactionBuilder {
         if(abi && utils.isString(abi)) {
             try {
                 abi = JSON.parse(abi);
-            } catch (err) {
+            } catch{
                 return callback('Invalid options.abi provided');
             }
         }
@@ -310,7 +322,7 @@ export default class TransactionBuilder {
         if(!utils.isHex(bytecode))
             return callback('Invalid options.bytecode provided');
 
-        if(!utils.isInteger(feeLimit) || feeLimit <= 0 || feeLimit > 1000000000)
+        if(!utils.isInteger(feeLimit) || feeLimit <= 0 || feeLimit > 1_000_000_000)
             return callback('Invalid options.feeLimit provided');
 
         if(!utils.isInteger(callValue) || callValue < 0)
@@ -344,7 +356,7 @@ export default class TransactionBuilder {
 
                 if(type == 'address')
                     value = this.tronWeb.address.toHex(value).replace(/^(41)/, '0x');
-
+                    
                 types.push(type);
                 values.push(value);
             }
@@ -373,12 +385,12 @@ export default class TransactionBuilder {
     }
 
     triggerSmartContract(
-        contractAddress,
+        contractAddress, 
         functionSelector,
-        feeLimit = 1000000000,
+        feeLimit = 1_000_000_000,
         callValue = 0,
-        parameters = [],
-        issuerAddress = this.tronWeb.defaultAddress.hex,
+        parameters = [], 
+        issuerAddress = this.tronWeb.defaultAddress.hex, 
         callback = false
     ) {
         if(utils.isFunction(issuerAddress)) {
@@ -398,16 +410,16 @@ export default class TransactionBuilder {
 
         if(utils.isFunction(feeLimit)) {
             callback = feeLimit;
-            feeLimit = 1000000000;
+            feeLimit = 1_000_000_000;
         }
 
         if(!callback) {
             return this.injectPromise(
-                this.triggerSmartContract,
-                contractAddress,
-                functionSelector,
+                this.triggerSmartContract, 
+                contractAddress, 
+                functionSelector, 
                 feeLimit,
-                callValue,
+                callValue, 
                 parameters,
                 issuerAddress
             );
@@ -422,7 +434,7 @@ export default class TransactionBuilder {
         if(!utils.isInteger(callValue) || callValue < 0)
             return callback('Invalid call value provided');
 
-        if(!utils.isInteger(feeLimit) || feeLimit <= 0 || feeLimit > 1000000000)
+        if(!utils.isInteger(feeLimit) || feeLimit <= 0 || feeLimit > 1_000_000_000)
             return callback('Invalid fee limit provided');
 
         if(!utils.isArray(parameters))
@@ -446,7 +458,7 @@ export default class TransactionBuilder {
 
                 if(type == 'address')
                     value = this.tronWeb.address.toHex(value).replace(/^(41)/, '0x');
-
+                    
                 types.push(type);
                 values.push(value);
             }
@@ -500,7 +512,7 @@ export default class TransactionBuilder {
             trxRatio = 1, // How much TRX will `tokenRatio` cost?
             tokenRatio = 1, // How many tokens will `trxRatio` afford?
             saleStart = Date.now(),
-            saleEnd = false,
+            saleEnd = false,            
             freeBandwidth = 0, // The creator's "donated" bandwidth for use by token holders
             freeBandwidthLimit = 0, // Out of `totalFreeBandwidth`, the amount each token holder get
             frozenAmount = 0,

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import utils from '../../utils';
+import utils from 'utils';
 
 export default class HttpProvider {
     constructor(host, timeout = 30000, user = false, password = false, headers = {}, statusPage = '/') {
@@ -22,7 +22,7 @@ export default class HttpProvider {
         this.headers = headers;
         this.statusPage = statusPage;
 
-        this.instance = axios.create({
+        this.instance = axios.create({            
             baseURL: host,
             timeout: timeout,
             headers: headers,

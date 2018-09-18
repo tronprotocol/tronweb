@@ -1,16 +1,7 @@
 const chai = require('chai');
 const assert = chai.assert;
-const TronWeb = require('../src').default;
-console.log()
-console.log()
-console.log()
-// console.log(i)
-console.log()
-console.log()
-console.log()
 
-
-
+const TronWeb = require('../../../src').default;
 const HttpProvider = TronWeb.providers.HttpProvider;
 
 const FULL_NODE_API = 'https://api.trongrid.io:8090';

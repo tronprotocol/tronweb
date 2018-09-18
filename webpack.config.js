@@ -41,10 +41,8 @@ const baseConfig = {
         ],
     },
     devtool: 'source-map',
-    mode: process.env.NODE_ENV
+    mode: process.env.NODE_ENV || 'production'
 };
-
-module.exports.baseConfig = baseConfig
 
 module.exports = [
     {
