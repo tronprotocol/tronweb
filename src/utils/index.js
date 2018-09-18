@@ -9,7 +9,7 @@ import BigNumber from 'bignumber.js';
 
 const utils = {
     isValidURL(url) {
-        return validator.isURL(url, {
+        return validator.isURL(url.toString(), {
             protocols: [ 'http', 'https' ]
         });
     },

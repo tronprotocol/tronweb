@@ -1,12 +1,13 @@
 {
     "name": "tronweb",
-    "version": "2.0.2",
+    "version": "2.0.3",
     "description": "JavaScript SDK that encapsulates the TRON Node HTTP API",
     "main": "dist/TronWeb.node.js",
     "scripts": {
         "build": "npm run clean && webpack --config webpack.config.js --progress --colors",
         "clean": "rimraf dist",
-        "example": "node ./examples/server"
+        "example": "node ./examples/server",
+        "test": "mocha test/**/*.js"
     },
     "dependencies": {
         "@babel/runtime": "^7.0.0",
@@ -29,6 +30,8 @@
         "babel-minify-webpack-plugin": "^0.3.1",
         "babel-plugin-source-map-support": "^2.0.1",
         "babel-plugin-transform-object-rest-spread": "^6.26.0",
+        "chai": "^4.1.2",
+        "mocha": "^5.2.0",
         "rimraf": "^2.6.2",
         "webpack": "^4.17.2",
         "webpack-cli": "^3.1.0",
