@@ -122,12 +122,12 @@ export default class TransactionBuilder {
         }).catch(err => callback(err));
     }
 
-    freezeBalance(address = this.tronWeb.defaultAddress.hex, amount = 0, duration = 3, callback = false) {
+    freezeBalance(address = this.tronWeb.defaultAddress.hex, amount = 0, duration = 3, resource = "BANDWIDTH", callback = false) {
         if(utils.isFunction(duration)) {
             callback = duration;
             duration = 3;
         }
-
+            
         if(!callback)
             return this.injectPromise(this.freezeBalance, address, amount, duration);
 
@@ -143,7 +143,8 @@ export default class TransactionBuilder {
         this.tronWeb.fullNode.request('wallet/freezebalance', {
             owner_address: this.tronWeb.address.toHex(address),
             frozen_balance: parseInt(amount),
-            frozen_duration: parseInt(duration)
+            frozen_duration: parseInt(duration),
+            resource: resource
         }, 'post').then(transaction => {
             if(transaction.Error)
                 return callback(transaction.Error);
