@@ -20,6 +20,8 @@ module.exports = function (config) {
 
         frameworks: ['mocha'],
 
+        browsers : ['ChromeHeadless', 'Firefox', 'Edge'],
+
         preprocessors: {
             'test/src-web/test.js': ['webpack', 'sourcemap']
         },
@@ -94,7 +96,9 @@ module.exports = function (config) {
             require("karma-chrome-launcher"),
             require("karma-spec-reporter"),
             require('karma-sourcemap-loader'),
-            require('karma-coverage-istanbul-reporter')
+            require('karma-coverage-istanbul-reporter'),
+            require('karma-firefox-launcher'),
+            require('karma-edge-launcher')
         ],
 
         browsers: ['ChromeHeadless']
