@@ -122,12 +122,14 @@ export default class TransactionBuilder {
         }).catch(err => callback(err));
     }
 
-    freezeBalance(address = this.tronWeb.defaultAddress.hex, amount = 0, duration = 3, resource = 0, callback = false) {
+    freezeBalance(address = this.tronWeb.defaultAddress.hex, amount = 0, duration = 3, resource = "BANDWIDTH", callback = false) {
         if(utils.isFunction(duration)) {
             callback = duration;
             duration = 3;
         }
-        var resource = resource == 1 ? "BANDWIDTH" : "ENERGY";
+        if (resource != "BANDWIDTH" && resource != "ENERGY")
+            throw new Error('resource type can only be BANDWITH or ENERGY');
+            
         if(!callback)
             return this.injectPromise(this.freezeBalance, address, amount, duration);
 
