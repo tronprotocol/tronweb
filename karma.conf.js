@@ -1,5 +1,4 @@
 const webpack = require("webpack");
-const externals = require('webpack-node-externals');
 
 const puppeteer = require('puppeteer');
 process.env.CHROME_BIN = puppeteer.executablePath();
@@ -9,8 +8,6 @@ const basePlugins = [
     '@babel/plugin-proposal-class-properties',
     '@babel/plugin-transform-runtime',
     'transform-object-rest-spread',
-    // "transform-optional-catch-binding",
-    // "transform-es2015-modules-commonjs",
     "source-map-support"
 ];
 
@@ -80,9 +77,6 @@ module.exports = function (config) {
                         },
                     }
                 ]
-                // ,
-                // enforce: 'post',
-                // }],
             },
             resolve: {
                 modules: [
@@ -91,14 +85,11 @@ module.exports = function (config) {
                 ],
             },
             mode: process.env.NODE_ENV || 'development',
-            // externals: [externals()],
             target: 'web'
         },
 
         webpackMiddleware: {
-            // webpack-dev-middleware configuration
             noInfo: true
-            // stats: 'errors-only'
         },
 
         plugins: [
