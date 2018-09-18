@@ -57,28 +57,32 @@ module.exports = function (config) {
             },
             devtool: 'inline-source-map',
             module: {
-                rules: [{
-                    test: /\.js/,
-                    exclude: /(test|node_modules|bower_components)/,
-                    loader: 'istanbul-instrumenter-loader',
-                    options: {
-                        esModules: true,
-                        presets: [
-                            ['@babel/env', {
-                                targets: {
-                                    browsers: [
-                                        '>0.25%',
-                                        'not dead'
-                                    ]
-                                }
-                            }]
-                        ],
-                        plugins: [
-                            ...basePlugins
-                        ]
-                    },
-                    enforce: 'post',
-                }],
+                rules: [
+                    {
+                        test: /\.js/,
+                        exclude: /(test|node_modules|bower_components)/,
+                        loader: 'istanbul-instrumenter-loader',
+                        options: {
+                            esModules: true,
+                            presets: [
+                                ['@babel/env', {
+                                    targets: {
+                                        browsers: [
+                                            '>0.25%',
+                                            'not dead'
+                                        ]
+                                    }
+                                }]
+                            ],
+                            plugins: [
+                                ...basePlugins
+                            ]
+                        },
+                    }
+                ]
+                // ,
+                // enforce: 'post',
+                // }],
             },
             resolve: {
                 modules: [
@@ -87,8 +91,8 @@ module.exports = function (config) {
                 ],
             },
             mode: process.env.NODE_ENV || 'development',
-            externals: [externals()],
-            target: 'node'
+            // externals: [externals()],
+            target: 'web'
         },
 
         webpackMiddleware: {
