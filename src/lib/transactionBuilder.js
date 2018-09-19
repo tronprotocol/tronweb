@@ -776,9 +776,9 @@ export default class TransactionBuilder {
             callback = ownerAddress;
             ownerAddress = this.tronWeb.defaultAddress.hex;
         }
-        
+
         if(!callback)
-            return this.injectPromise(this.deleteProposal, exchangeID, tokenName, tokenAmount, ownerAddress);
+            return this.injectPromise(this.injectExchangeTokens, exchangeID, tokenName, tokenAmount, ownerAddress);
 
         if(!this.tronWeb.isAddress(ownerAddress))
             return callback('Invalid ownerAddress provided');
@@ -789,14 +789,109 @@ export default class TransactionBuilder {
         if(!utils.isString(tokenName) || !tokenName.length)
             return callback('Invalid tokenName provided');
 
-        if(!utils.isInteger(tokenAmount) || tokenAmount < 0)
+        if(!utils.isInteger(tokenAmount) || tokenAmount < 1)
             return callback('Invalid tokenAmount provided');
 
         this.tronWeb.fullNode.request('wallet/exchangeinject', {
             owner_address: this.tronWeb.address.toHex(ownerAddress),
             exchange_id: parseInt(exchangeID),
-            token_id: tokenName,
+            token_id: this.tronWeb.fromAscii(tokenName),
             quant:parseInt(tokenAmount)
+        }, 'post').then(transaction => {
+            if(transaction.Error)
+                return callback(transaction.Error);
+
+            if(transaction.result && transaction.result.message) {
+                return callback(
+                    this.tronWeb.toUtf8(transaction.result.message)
+                );
+            }
+
+            callback(null, transaction);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Withdraws tokens from a bancor style exchange.
+     */
+    withdrawExchangeTokens(exchangeID = false, tokenName = false, tokenAmount = 0, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+        if(utils.isFunction(ownerAddress)) {
+            callback = ownerAddress;
+            ownerAddress = this.tronWeb.defaultAddress.hex;
+        }
+
+        if(!callback)
+            return this.injectPromise(this.withdrawExchangeTokens, exchangeID, tokenName, tokenAmount, ownerAddress);
+
+        if(!this.tronWeb.isAddress(ownerAddress))
+            return callback('Invalid ownerAddress provided');
+
+        if(!utils.isInteger(exchangeID) || exchangeID < 0)
+            return callback('Invalid exchangeID provided');
+
+        if(!utils.isString(tokenName) || !tokenName.length)
+            return callback('Invalid tokenName provided');
+
+        if(!utils.isInteger(tokenAmount) || tokenAmount < 1)
+            return callback('Invalid tokenAmount provided');
+
+        this.tronWeb.fullNode.request('wallet/exchangewithdraw', {
+            owner_address: this.tronWeb.address.toHex(ownerAddress),
+            exchange_id: parseInt(exchangeID),
+            token_id: this.tronWeb.fromAscii(tokenName),
+            quant:parseInt(tokenAmount)
+        }, 'post').then(transaction => {
+            if(transaction.Error)
+                return callback(transaction.Error);
+
+            if(transaction.result && transaction.result.message) {
+                return callback(
+                    this.tronWeb.toUtf8(transaction.result.message)
+                );
+            }
+
+            callback(null, transaction);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Trade tokens on a bancor style exchange.
+     */
+    tradeExchangeTokens(exchangeID = false, 
+        tokenName = false, 
+        tokenAmountSold = 0, 
+        tokenAmountExpected = 0, 
+        ownerAddress = this.tronWeb.defaultAddress.hex, 
+        callback = false) {
+        if(utils.isFunction(ownerAddress)) {
+            callback = ownerAddress;
+            ownerAddress = this.tronWeb.defaultAddress.hex;
+        }
+
+        if(!callback)
+            return this.injectPromise(this.tradeExchangeTokens, exchangeID, tokenName, tokenAmountSold, tokenAmountExpected, ownerAddress);
+
+        if(!this.tronWeb.isAddress(ownerAddress))
+            return callback('Invalid ownerAddress provided');
+
+        if(!utils.isInteger(exchangeID) || exchangeID < 0)
+            return callback('Invalid exchangeID provided');
+
+        if(!utils.isString(tokenName) || !tokenName.length)
+            return callback('Invalid tokenName provided');
+
+        if(!utils.isInteger(tokenAmountSold) || tokenAmountSold < 1)
+            return callback('Invalid tokenAmountSold provided');
+
+        if(!utils.isInteger(tokenAmountExpected) || tokenAmountExpected < 1)
+            return callback('Invalid tokenAmountExpected provided');
+
+        this.tronWeb.fullNode.request('wallet/exchangewithdraw', {
+            owner_address: this.tronWeb.address.toHex(ownerAddress),
+            exchange_id: parseInt(exchangeID),
+            token_id: this.tronWeb.fromAscii(tokenName),
+            quant:parseInt(tokenAmountSold),
+            expected:parseInt(tokenAmountExpected)
         }, 'post').then(transaction => {
             if(transaction.Error)
                 return callback(transaction.Error);
