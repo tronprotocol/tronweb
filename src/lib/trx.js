@@ -702,4 +702,33 @@ export default class Trx {
 >>>>>>> 06ae568... fix for review and bugs, adding more apis
         }).catch(err => callback(err));
     }
+
+    /**
+     * Lists all network modification proposals.
+     */
+    getExchangeByID(exchangeID = false, callback = false) {
+        if(!callback)
+            return this.injectPromise(this.getExchangeByID, address);
+
+        if(!utils.isInteger(exchangeID) || exchangeID < 0)
+            return callback('Invalid exchangeID provided');
+
+        this.tronWeb.fullNode.request('wallet/getexchangebyid', { 
+            address: this.tronWeb.address.toHex(address),
+        }, 'post').then(exchange => {
+            callback(null, exchange);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Lists all network modification proposals.
+     */
+    listExchanges(callback = false) {
+        if(!callback)
+            return this.injectPromise(this.listExchanges);
+
+        this.tronWeb.fullNode.request('wallet/listexchanges', {}, 'post').then(({ exchanges = [] }) => {
+            callback(null, resources);
+        }).catch(err => callback(err));
+    }
 };
