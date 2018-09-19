@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+current_branch=$(git symbolic-ref HEAD | sed -e 's,.*/\(.*\),\1,')
+
+if [ "master" = $current_branch ]
+then
+    read -p "You cannot push to master :-/"
+    exit 1
+fi
+
 scripts/test-dist-node.sh
 if [ $? -ne 0 ]
 then
