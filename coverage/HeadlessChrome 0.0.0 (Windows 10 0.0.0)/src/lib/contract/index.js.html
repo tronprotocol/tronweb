@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for src\lib\contract\index.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../../prettify.css" />
+    <link rel="stylesheet" href="../../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../../index.html">all files</a> / <a href="index.html">src/lib/contract/</a> index.js
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>0/109</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>0/54</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/22</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>0/106</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import TronWeb from 'index';
+import utils from 'utils';
+import Method from './method';
+&nbsp;
+export default class Contract {
+    constructor(tronWeb = false, abi = [], address = false) <span class="fstat-no" title="function not covered" >{</span>
+<span class="cstat-no" title="statement not covered" >        if(!tronWeb || !tronWeb instanceof TronWeb)</span>
+<span class="cstat-no" title="statement not covered" >            throw new Error('Expected instance of TronWeb');</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        this.tronWeb = tronWeb;</span>
+<span class="cstat-no" title="statement not covered" >        this.injectPromise = utils.promiseInjector(this);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        this.address = address;</span>
+<span class="cstat-no" title="statement not covered" >        this.abi = abi;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        this.eventListener = false;</span>
+<span class="cstat-no" title="statement not covered" >        this.bytecode = false;        </span>
+<span class="cstat-no" title="statement not covered" >        this.deployed = false;</span>
+<span class="cstat-no" title="statement not covered" >        this.lastBlock = false;  </span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        this.methods = {};</span>
+<span class="cstat-no" title="statement not covered" >        this.props = [];</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        if(this.tronWeb.isAddress(address))</span>
+<span class="cstat-no" title="statement not covered" >            this.deployed = true;</span>
+        else <span class="cstat-no" title="statement not covered" >this.address = false;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        this.loadAbi(abi);</span>
+    }
+&nbsp;
+    async _getEvents() <span class="fstat-no" title="function not covered" >{</span>
+        const events = <span class="cstat-no" title="statement not covered" >await this.tronWeb.getEventResult(this.address);</span>
+        const [ latestEvent ] = <span class="cstat-no" title="statement not covered" >events.sort((a, b) =&gt; <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >b.block - a.block)</span></span>;</span>
+        const newEvents = <span class="cstat-no" title="statement not covered" >events.filter((event, index) =&gt; <span class="fstat-no" title="function not covered" >{</span></span>
+            const duplicate = <span class="cstat-no" title="statement not covered" >events.slice(0, index).some(priorEvent =&gt; (</span>
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >                JSON.stringify(priorEvent) == JSON.stringify(event)</span></span>
+            ));
+&nbsp;
+<span class="cstat-no" title="statement not covered" >            if(duplicate)</span>
+<span class="cstat-no" title="statement not covered" >                return false;</span>
+            
+<span class="cstat-no" title="statement not covered" >            if(!this.lastBlock)</span>
+<span class="cstat-no" title="statement not covered" >                return true;            </span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >            return event.block &gt; this.lastBlock;</span>
+        });
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        if(latestEvent)</span>
+<span class="cstat-no" title="statement not covered" >            this.lastBlock = latestEvent.block;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        return newEvents;</span>
+    }
+&nbsp;
+    async _startEventListener(callback) <span class="fstat-no" title="function not covered" >{</span>
+<span class="cstat-no" title="statement not covered" >        if(this.eventListener)</span>
+<span class="cstat-no" title="statement not covered" >            clearInterval(this.eventListener);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        if(!this.tronWeb.eventServer)</span>
+<span class="cstat-no" title="statement not covered" >            throw new Error('Event server is not configured');</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        if(!this.address)</span>
+<span class="cstat-no" title="statement not covered" >            throw new Error('Contract is not configured with an address');</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        this.eventCallback = callback;</span>
+<span class="cstat-no" title="statement not covered" >        await this._getEvents();</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        this.eventListener = setInterval(() =&gt; <span class="fstat-no" title="function not covered" >{</span></span>
+<span class="cstat-no" title="statement not covered" >            this._getEvents().then(newEvents =&gt; <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >newEvents.forEach(event =&gt; <span class="fstat-no" title="function not covered" >{</span></span></span></span>
+<span class="cstat-no" title="statement not covered" >                this.eventCallback &amp;&amp; this.eventCallback(event)</span>
+            })).catch(err =&gt; <span class="fstat-no" title="function not covered" >{</span>
+<span class="cstat-no" title="statement not covered" >                console.error('Failed to get event list', err);</span>
+            });
+        }, 3000);
+    }
+&nbsp;
+    _stopEventListener() <span class="fstat-no" title="function not covered" >{</span>
+<span class="cstat-no" title="statement not covered" >        if(!this.eventListener)</span>
+<span class="cstat-no" title="statement not covered" >            return;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        clearInterval(this.eventListener);</span>
+<span class="cstat-no" title="statement not covered" >        this.eventListener = false;</span>
+<span class="cstat-no" title="statement not covered" >        this.eventCallback = false;</span>
+    }
+&nbsp;
+    hasProperty(property) <span class="fstat-no" title="function not covered" >{</span>
+<span class="cstat-no" title="statement not covered" >        return this.hasOwnProperty(property) || this.__proto__.hasOwnProperty(property);</span>
+    }
+&nbsp;
+    loadAbi(abi) <span class="fstat-no" title="function not covered" >{</span>
+<span class="cstat-no" title="statement not covered" >        this.abi = abi;</span>
+<span class="cstat-no" title="statement not covered" >        this.methods = {};</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        this.props.forEach(prop =&gt; <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >delete this[prop])</span></span>;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        abi.forEach(func =&gt; <span class="fstat-no" title="function not covered" >{</span></span>
+            const method = <span class="cstat-no" title="statement not covered" >new Method(this, func);</span>
+            const methodCall = <span class="cstat-no" title="statement not covered" >method.onMethod.bind(method);</span>
+&nbsp;
+            const {
+                name,
+                functionSelector,
+                signature
+            } = <span class="cstat-no" title="statement not covered" >method;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >            this.methods[name] = methodCall;</span>
+<span class="cstat-no" title="statement not covered" >            this.methods[functionSelector] = methodCall;</span>
+<span class="cstat-no" title="statement not covered" >            this.methods[signature] = methodCall;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >            if(!this.hasProperty(name)) {</span>
+<span class="cstat-no" title="statement not covered" >                this[name] = methodCall;</span>
+<span class="cstat-no" title="statement not covered" >                this.props.push(name);</span>
+            }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >            if(!this.hasProperty(functionSelector)) {</span>
+<span class="cstat-no" title="statement not covered" >                this[functionSelector] = methodCall;</span>
+<span class="cstat-no" title="statement not covered" >                this.props.push(functionSelector);</span>
+            }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >            if(!this.hasProperty(signature)) {</span>
+<span class="cstat-no" title="statement not covered" >                this[signature] = methodCall;</span>
+<span class="cstat-no" title="statement not covered" >                this.props.push(signature);</span>
+            }
+        });
+    }
+&nbsp;
+    async new(options, privateKey = this.tronWeb.defaultPrivateKey, callback = false) <span class="fstat-no" title="function not covered" >{</span>
+<span class="cstat-no" title="statement not covered" >        if(utils.isFunction(privateKey)) {</span>
+<span class="cstat-no" title="statement not covered" >            callback = privateKey;</span>
+<span class="cstat-no" title="statement not covered" >            privateKey = this.tronWeb.defaultPrivateKey;</span>
+        }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        if(!callback)</span>
+<span class="cstat-no" title="statement not covered" >            return this.injectPromise(this.new, options, privateKey);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        try {</span>
+            const address = <span class="cstat-no" title="statement not covered" >this.tronWeb.address.fromPrivateKey(privateKey);</span>
+            const transaction = <span class="cstat-no" title="statement not covered" >await this.tronWeb.transactionBuilder.createSmartContract(options, address);</span>
+            const signedTransaction = <span class="cstat-no" title="statement not covered" >await this.tronWeb.trx.sign(transaction, privateKey);</span>
+            const contract = <span class="cstat-no" title="statement not covered" >await this.tronWeb.trx.sendRawTransaction(signedTransaction);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >            if(!contract.result)</span>
+<span class="cstat-no" title="statement not covered" >                return callback('Unknown error: ' + JSON.stringify(contract, null, 2));</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >            return this.at(signedTransaction.contract_address, callback);</span>
+        } catch(ex) {
+<span class="cstat-no" title="statement not covered" >            return callback(ex);</span>
+        }        
+    }
+&nbsp;
+    async at(contractAddress, callback = false) <span class="fstat-no" title="function not covered" >{</span>
+<span class="cstat-no" title="statement not covered" >        if(!callback)</span>
+<span class="cstat-no" title="statement not covered" >            return this.injectPromise(this.at, contractAddress);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        try {</span>
+            const contract = <span class="cstat-no" title="statement not covered" >await this.tronWeb.trx.getContract(contractAddress);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >            if(!contract.contract_address)</span>
+<span class="cstat-no" title="statement not covered" >                callback('Unknown error: ' + JSON.stringify(contract, null, 2));</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >            this.address = contract.contract_address;</span>
+<span class="cstat-no" title="statement not covered" >            this.bytecode = contract.bytecode;</span>
+<span class="cstat-no" title="statement not covered" >            this.deployed = true;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >            this.loadAbi(contract.abi.entrys);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >            callback(null, this);</span>
+        } catch(ex) {
+<span class="cstat-no" title="statement not covered" >            if(ex.toString().includes('does not exist'))</span>
+<span class="cstat-no" title="statement not covered" >                return callback('Contract has not been deployed on the network');</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >            return callback(ex);</span>
+        }        
+    }
+&nbsp;
+    events(callback = false) <span class="fstat-no" title="function not covered" >{</span>
+<span class="cstat-no" title="statement not covered" >        if(!utils.isFunction(callback))</span>
+<span class="cstat-no" title="statement not covered" >            throw new Error('Callback function expected');</span>
+&nbsp;
+        const self = <span class="cstat-no" title="statement not covered" >this;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        return {</span>
+            start(startCallback = false) <span class="fstat-no" title="function not covered" >{</span>
+<span class="cstat-no" title="statement not covered" >                if(!startCallback) {</span>
+<span class="cstat-no" title="statement not covered" >                    self._startEventListener(callback);</span>
+<span class="cstat-no" title="statement not covered" >                    return this;</span>
+                }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >                self._startEventListener(callback).then(() =&gt; <span class="fstat-no" title="function not covered" >{</span></span>
+<span class="cstat-no" title="statement not covered" >                    startCallback();</span>
+                }).catch(err =&gt; <span class="fstat-no" title="function not covered" >{</span>
+<span class="cstat-no" title="statement not covered" >                    startCallback(err)</span>
+                });
+&nbsp;
+<span class="cstat-no" title="statement not covered" >                return this;</span>
+            },
+            stop() <span class="fstat-no" title="function not covered" >{</span>
+<span class="cstat-no" title="statement not covered" >                self._stopEventListener();</span>
+            }
+        };
+    }
+}</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Thu Sep 20 2018 00:17:07 GMT+0100 (British Summer Time)
+</div>
+</div>
+<script src="../../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../../sorter.js"></script>
+</body>
+</html>
