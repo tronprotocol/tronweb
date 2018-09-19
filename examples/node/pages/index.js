@@ -351,15 +351,7 @@ class Index extends React.Component{
             contractAddressBase58:tronWeb.address.fromHex(contractInstance.address),
         })
     }
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
     
->>>>>>> 3a97a3a... adding proposal api support + resource api
-=======
-
->>>>>>> 06ae568... fix for review and bugs, adding more apis
     //28、查询合约
     async getContract(event){
         event.preventDefault();
@@ -398,7 +390,6 @@ class Index extends React.Component{
         this.setState({
             data:res
         })
-<<<<<<< HEAD
     }
 
     async getChainParameters(){
@@ -413,14 +404,7 @@ class Index extends React.Component{
         this.setState({
             data:res
         })
-<<<<<<< HEAD
-=======
->>>>>>> 3a97a3a... adding proposal api support + resource api
-=======
->>>>>>> 06ae568... fix for review and bugs, adding more apis
     }
-
-
 
     render(){
         const { data } = this.state;

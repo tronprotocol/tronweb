@@ -612,15 +612,7 @@ export default class Trx {
         if(!callback)
             return this.injectPromise(this.listProposals);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
         this.tronWeb.fullNode.request('wallet/listproposals', {}, 'post').then(({ proposals = [] }) => {
-=======
-        this.tronWeb.fullNode.request('wallet/listproposals').then(({ proposals = [] }) => {
->>>>>>> 3a97a3a... adding proposal api support + resource api
-=======
-        this.tronWeb.fullNode.request('wallet/listproposals', {}, 'post').then(({ proposals = [] }) => {
->>>>>>> 06ae568... fix for review and bugs, adding more apis
             callback(null, proposals);
         }).catch(err => callback(err));
     }
@@ -632,18 +624,8 @@ export default class Trx {
         if(!callback)
             return this.injectPromise(this.getChainParameters);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
         this.tronWeb.fullNode.request('wallet/getchainparameters', {}, 'post').then(({ chainParameter = [] }) => {
             callback(null, chainParameter);
-=======
-        this.tronWeb.fullNode.request('wallet/getchainparameters').then(({ proposals = [] }) => {
-            callback(null, proposals);
->>>>>>> 3a97a3a... adding proposal api support + resource api
-=======
-        this.tronWeb.fullNode.request('wallet/getchainparameters', {}, 'post').then(({ chainParameter = [] }) => {
-            callback(null, chainParameter);
->>>>>>> 06ae568... fix for review and bugs, adding more apis
         }).catch(err => callback(err));
     }
 
@@ -659,47 +641,8 @@ export default class Trx {
 
         this.tronWeb.fullNode.request('wallet/getaccountresource', { 
             address: this.tronWeb.address.toHex(address),
-<<<<<<< HEAD
-<<<<<<< HEAD
         }, 'post').then(resources => {
             callback(null, resources);
-        }).catch(err => callback(err));
-    }
-
-    /**
-     * Lists all network modification proposals.
-     */
-    getExchangeByID(exchangeID = false, callback = false) {
-        if(!callback)
-            return this.injectPromise(this.getExchangeByID, address);
-
-        if(!utils.isInteger(exchangeID) || exchangeID < 0)
-            return callback('Invalid exchangeID provided');
-
-        this.tronWeb.fullNode.request('wallet/getexchangebyid', { 
-            address: this.tronWeb.address.toHex(address),
-        }, 'post').then(exchange => {
-            callback(null, exchange);
-        }).catch(err => callback(err));
-    }
-
-    /**
-     * Lists all network modification proposals.
-     */
-    listExchanges(callback = false) {
-        if(!callback)
-            return this.injectPromise(this.listExchanges);
-
-        this.tronWeb.fullNode.request('wallet/listexchanges', {}, 'post').then(({ exchanges = [] }) => {
-            callback(null, resources);
-=======
-        }, 'post').then(proposal => {
-            callback(null, proposal);
->>>>>>> 3a97a3a... adding proposal api support + resource api
-=======
-        }, 'post').then(resources => {
-            callback(null, resources);
->>>>>>> 06ae568... fix for review and bugs, adding more apis
         }).catch(err => callback(err));
     }
 
