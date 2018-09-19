@@ -15,7 +15,7 @@ module.exports = function (config) {
     config.set({
 
         files: [
-            'test/src-web/test.js'
+            'test/test.js'
         ],
 
         frameworks: ['mocha'],
@@ -23,7 +23,7 @@ module.exports = function (config) {
         browsers : ['ChromeHeadless', 'Firefox', 'Edge'],
 
         preprocessors: {
-            'test/src-web/test.js': ['webpack', 'sourcemap']
+            'test/test.js': ['webpack', 'sourcemap']
         },
 
         reporters: ['spec', 'coverage'],

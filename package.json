@@ -7,9 +7,9 @@
         "build": "npm run clean && webpack --config webpack.config.js --progress --colors",
         "clean": "rimraf dist",
         "example": "node ./examples/server",
-        "test-src-web": "karma start --single-run  --browsers ChromeHeadless,Firefox,Edge",
-        "test-dist-node": "mocha test/dist-node/**/*js",
-        "test": "yarn run test-dist-node && yarn run test-src-web"
+        "test-src-web": "scripts/test-src-web.sh",
+        "test-dist-node": "scripts/test-dist-node.sh",
+        "test": "scripts/test.sh"
     },
     "dependencies": {
         "@babel/runtime": "^7.0.0",

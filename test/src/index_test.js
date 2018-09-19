@@ -1,7 +1,9 @@
 const chai = require('chai');
 const assert = chai.assert;
 
-const TronWeb= require('../../dist/TronWeb.node');
+const testSetup = require('../../test-setup')
+const TronWeb = testSetup.TronWeb
+
 const HttpProvider = TronWeb.providers.HttpProvider;
 
 const FULL_NODE_API = 'https://api.trongrid.io:8090';
@@ -16,6 +18,7 @@ const createInstance = () => {
 }
 
 describe('TronWeb Instance', () => {
+
     describe('#constructor()', () => {
         it('should create a full instance', () => {
             const tronWeb = createInstance();
@@ -223,7 +226,9 @@ describe('TronWeb Instance', () => {
     });
 
     describe('#isEventServerConnected()', () => {
+
         it('should return true for valid event server', async () => {
+
             const tronWeb = createInstance();
             const isConnected = await tronWeb.isEventServerConnected();
 
@@ -231,6 +236,7 @@ describe('TronWeb Instance', () => {
         });
 
         it('should return false for invalid event server', async () => {
+
             const tronWeb = createInstance();
 
             tronWeb.setEventServer('https://google.co.uk');
