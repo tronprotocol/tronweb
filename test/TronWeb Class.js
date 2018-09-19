@@ -1,9 +1,7 @@
 const chai = require('chai');
+const TronWeb = require('./setup/TronWeb.js');
+
 const assert = chai.assert;
-
-const testSetup = require('../../test-setup')
-const TronWeb = testSetup.TronWeb
-
 const HttpProvider = TronWeb.providers.HttpProvider;
 
 const FULL_NODE_API = 'https://api.trongrid.io:8090';

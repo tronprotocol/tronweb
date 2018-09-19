@@ -1,6 +1,6 @@
-const webpack = require("webpack");
-
+const globby = require('globby');
 const puppeteer = require('puppeteer');
+
 process.env.CHROME_BIN = puppeteer.executablePath();
 
 const basePlugins = [
@@ -11,38 +11,28 @@ const basePlugins = [
     "source-map-support"
 ];
 
+const files = globby.sync([ './test/*.js' ]);
+
 module.exports = function (config) {
     config.set({
-
-        files: [
-            'test/test.js'
-        ],
-
-        frameworks: ['mocha'],
-
-        browsers : ['ChromeHeadless', 'Firefox', 'Edge'],
-
+        frameworks: [ 'mocha' ],
+        browsers : [ 'ChromeHeadless', 'Firefox', 'Edge' ],
         preprocessors: {
-            'test/test.js': ['webpack', 'sourcemap']
+            [ files ]: [ 'webpack', 'sourcemap' ]
         },
-
-        reporters: ['spec', 'coverage'],
-
+        reporters: [ 'spec', 'coverage' ],
         coverageReporter: {
-
             dir: 'coverage/',
             reporters: [
-                {type: 'html'},
-                {type: 'text'},
-                {type: 'text-summary'}
+                { type: 'html' },
+                { type: 'text' },
+                { type: 'text-summary' }
             ],
             instrumenterOptions: {
-                istanbul: {noCompact: true}
+                istanbul: { noCompact: true }
             }
         },
-
         webpack: {
-
             output: {
                 libraryTarget: 'umd',
                 libraryExport: 'default',
@@ -83,11 +73,9 @@ module.exports = function (config) {
             mode: process.env.NODE_ENV || 'development',
             target: 'web'
         },
-
         webpackMiddleware: {
             noInfo: true
         },
-
         plugins: [
             require("karma-webpack"),
             require("istanbul-instrumenter-loader"),
@@ -100,7 +88,6 @@ module.exports = function (config) {
             require('karma-firefox-launcher'),
             require('karma-edge-launcher')
         ],
-
-        browsers: ['ChromeHeadless']
+        files
     });
 };
