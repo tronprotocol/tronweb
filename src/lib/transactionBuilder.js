@@ -658,19 +658,26 @@ export default class TransactionBuilder {
      * Can only be created by a current Super Representative.
      */
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 06ae568... fix for review and bugs, adding more apis
     createProposal(parameters = false, issuerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
         if(utils.isFunction(issuerAddress)) {
             callback = issuerAddress;
             issuerAddress = this.tronWeb.defaultAddress.hex;
         }
 
+<<<<<<< HEAD
 =======
     createProposal(proposalIssuerAddress = this.tronWeb.defaultAddress.hex, parameters = false, callback = false) {
 >>>>>>> 3a97a3a... adding proposal api support + resource api
+=======
+>>>>>>> 06ae568... fix for review and bugs, adding more apis
         if(!parameters)
             return callback('Invalid proposal parameters provided');
 
         if(!callback)
+<<<<<<< HEAD
 <<<<<<< HEAD
             return this.injectPromise(this.createProposal, parameters, issuerAddress);
 
@@ -682,16 +689,26 @@ export default class TransactionBuilder {
         if(!this.tronWeb.isAddress(proposalIssuerAddress))
             return callback('Invalid proposalIssuerAddress provided');
 >>>>>>> 3a97a3a... adding proposal api support + resource api
+=======
+            return this.injectPromise(this.createProposal, parameters, issuerAddress);
+
+        if(!this.tronWeb.isAddress(issuerAddress))
+            return callback('Invalid issuerAddress provided');
+>>>>>>> 06ae568... fix for review and bugs, adding more apis
 
         if(!utils.isObject(parameters))
             return callback('Invalid parameters provided');
 
         this.tronWeb.fullNode.request('wallet/proposalcreate', {
 <<<<<<< HEAD
+<<<<<<< HEAD
             owner_address: this.tronWeb.address.toHex(issuerAddress),
 =======
             owner_address: this.tronWeb.address.toHex(proposalIssuerAddress),
 >>>>>>> 3a97a3a... adding proposal api support + resource api
+=======
+            owner_address: this.tronWeb.address.toHex(issuerAddress),
+>>>>>>> 06ae568... fix for review and bugs, adding more apis
             parameters: parameters
         }, 'post').then(transaction => {
             if(transaction.Error)
@@ -709,6 +726,9 @@ export default class TransactionBuilder {
 
     /**
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 06ae568... fix for review and bugs, adding more apis
      * Deletes a network modification proposal that the owner issued.
      * Only current Super Representative can vote on a proposal.
      */
@@ -745,6 +765,7 @@ export default class TransactionBuilder {
     }
 
     /**
+<<<<<<< HEAD
      * Adds a vote to an issued network modification proposal.
      * Only current Super Representative can vote on a proposal.
      */
@@ -760,20 +781,33 @@ export default class TransactionBuilder {
         if(!this.tronWeb.isAddress(voterAddress))
             return callback('Invalid voterAddress address provided');
 =======
+=======
+>>>>>>> 06ae568... fix for review and bugs, adding more apis
      * Adds a vote to an issued network modification proposal.
      * Only current Super Representative can vote on a proposal.
      */
-    voteProposal(proposalVoterAddress = this.tronWeb.defaultAddress.hex, proposalID = false, isApprovalDecision = false, callback = false) {
-        if(!callback)
-            return this.injectPromise(this.voteProposal, proposalVoterAddress, proposalID, isApprovalDecision);
+    voteProposal(proposalID = false, hasApproval = false, voterAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+        if(utils.isFunction(voterAddress)) {
+            callback = voterAddress;
+            voterAddress = this.tronWeb.defaultAddress.hex;
+        }
 
+        if(!callback)
+            return this.injectPromise(this.voteProposal, proposalID, hasApproval, voterAddress);
+
+<<<<<<< HEAD
         if(!this.tronWeb.isAddress(proposalVoterAddress))
             return callback('Invalid proposalVoterAddress address provided');
 >>>>>>> 3a97a3a... adding proposal api support + resource api
+=======
+        if(!this.tronWeb.isAddress(voterAddress))
+            return callback('Invalid voterAddress address provided');
+>>>>>>> 06ae568... fix for review and bugs, adding more apis
 
         if(!utils.isInteger(proposalID) || proposalID < 0)
             return callback('Invalid proposalID provided');
 
+<<<<<<< HEAD
 <<<<<<< HEAD
         if(!utils.isBoolean(hasApproval))
             return callback('Invalid hasApproval provided');
@@ -871,12 +905,20 @@ export default class TransactionBuilder {
 =======
         if(!utils.isString(isApprovalDecision))
             return callback('Invalid isApprovalDecision provided');
+=======
+        if(!utils.isBoolean(hasApproval))
+            return callback('Invalid hasApproval provided');
+>>>>>>> 06ae568... fix for review and bugs, adding more apis
 
         this.tronWeb.fullNode.request('wallet/proposalapprove', {
-            owner_address: this.tronWeb.address.toHex(proposalVoterAddress),
+            owner_address: this.tronWeb.address.toHex(voterAddress),
             proposal_id: parseInt(proposalID),
+<<<<<<< HEAD
             is_add_approval: isApproval
 >>>>>>> 3a97a3a... adding proposal api support + resource api
+=======
+            is_add_approval: isApproval.toString()
+>>>>>>> 06ae568... fix for review and bugs, adding more apis
         }, 'post').then(transaction => {
             if(transaction.Error)
                 return callback(transaction.Error);
@@ -892,6 +934,7 @@ export default class TransactionBuilder {
     }
 
     /**
+<<<<<<< HEAD
 <<<<<<< HEAD
      * Trade tokens on a bancor style exchange.
      */
@@ -933,21 +976,43 @@ export default class TransactionBuilder {
 =======
      * Deletes a network modification proposal that the owner issued.
      * Only current Super Representative can vote on a proposal.
+=======
+     * Adds tokens into a bancor style exchange.
+>>>>>>> 06ae568... fix for review and bugs, adding more apis
      */
-    deleteProposal(proposalIssuerAddress = this.tronWeb.defaultAddress.hex, proposalID = false, callback = false) {
+    injectExchangeTokens(exchangeID = false, tokenName = false, tokenAmount = 0, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+        if(utils.isFunction(ownerAddress)) {
+            callback = ownerAddress;
+            ownerAddress = this.tronWeb.defaultAddress.hex;
+        }
+        
         if(!callback)
-            return this.injectPromise(this.deleteProposal, proposalIssuerAddress, proposalID);
+            return this.injectPromise(this.deleteProposal, exchangeID, tokenName, tokenAmount, ownerAddress);
 
-        if(!this.tronWeb.isAddress(proposalIssuerAddress))
-            return callback('Invalid proposalIssuerAddress provided');
+        if(!this.tronWeb.isAddress(ownerAddress))
+            return callback('Invalid ownerAddress provided');
 
-        if(!utils.isInteger(proposalID) || proposalID < 0)
-            return callback('Invalid proposalID provided');
+        if(!utils.isInteger(exchangeID) || exchangeID < 0)
+            return callback('Invalid exchangeID provided');
 
+<<<<<<< HEAD
         this.tronWeb.fullNode.request('wallet/proposaldelete', {
             owner_address: this.tronWeb.address.toHex(proposalIssuerAddress),
             proposal_id: parseInt(proposalID)
 >>>>>>> 3a97a3a... adding proposal api support + resource api
+=======
+        if(!utils.isString(tokenName) || !tokenName.length)
+            return callback('Invalid tokenName provided');
+
+        if(!utils.isInteger(tokenAmount) || tokenAmount < 0)
+            return callback('Invalid tokenAmount provided');
+
+        this.tronWeb.fullNode.request('wallet/exchangeinject', {
+            owner_address: this.tronWeb.address.toHex(ownerAddress),
+            exchange_id: parseInt(exchangeID),
+            token_id: tokenName,
+            quant:parseInt(tokenAmount)
+>>>>>>> 06ae568... fix for review and bugs, adding more apis
         }, 'post').then(transaction => {
             if(transaction.Error)
                 return callback(transaction.Error);
