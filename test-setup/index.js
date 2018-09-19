@@ -1,6 +1,5 @@
 
 module.exports = {
 
-    TronWeb: require('../src').default
+    TronWeb: require('../dist/TronWeb.node')
 }
-
