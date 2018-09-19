@@ -556,15 +556,6 @@ class Index extends React.Component{
                         </div>
                         <div>
                             <input type="button" value="getAccountResources" onClick={()=>this.getAccountResources()}/>
-<<<<<<< HEAD
-                        </div>
-                        <div>
-                            <input type="button" value="getChainParameters" onClick={()=>this.getChainParameters()}/>
-                        </div>
-                        <div>
-                            <input type="button" value="listSuperRepresentatives" onClick={()=>this.listSuperRepresentatives()}/>
-=======
->>>>>>> 3a97a3a... adding proposal api support + resource api
                         </div>
                         <div>
                             <input type="button" value="getChainParameters" onClick={()=>this.getChainParameters()}/>
