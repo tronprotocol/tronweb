@@ -652,4 +652,104 @@ export default class TransactionBuilder {
     updateAsset(...args) {
         return this.updateToken(...args);
     }
+
+    /**
+     * Creates a proposal to modify the network.
+     * Can only be created by a current Super Representative.
+     */
+    createProposal(proposalIssuerAddress = this.tronWeb.defaultAddress.hex, parameters = false, callback = false) {
+        if(!parameters)
+            return callback('Invalid proposal parameters provided');
+
+        if(!callback)
+            return this.injectPromise(this.createProposal, proposalIssuerAddress, parameters);
+
+        if(!this.tronWeb.isAddress(proposalIssuerAddress))
+            return callback('Invalid proposalIssuerAddress provided');
+
+        if(!utils.isObject(parameters))
+            return callback('Invalid parameters provided');
+
+        this.tronWeb.fullNode.request('wallet/proposalcreate', {
+            owner_address: this.tronWeb.address.toHex(proposalIssuerAddress),
+            parameters: parameters
+        }, 'post').then(transaction => {
+            if(transaction.Error)
+                return callback(transaction.Error);
+
+            if(transaction.result && transaction.result.message) {
+                return callback(
+                    this.tronWeb.toUtf8(transaction.result.message)
+                );
+            }
+
+            callback(null, transaction);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Adds a vote to an issued network modification proposal.
+     * Only current Super Representative can vote on a proposal.
+     */
+    voteProposal(proposalVoterAddress = this.tronWeb.defaultAddress.hex, proposalID = false, isApprovalDecision = false, callback = false) {
+        if(!callback)
+            return this.injectPromise(this.voteProposal, proposalVoterAddress, proposalID, isApprovalDecision);
+
+        if(!this.tronWeb.isAddress(proposalVoterAddress))
+            return callback('Invalid proposalVoterAddress address provided');
+
+        if(!utils.isInteger(proposalID) || proposalID < 0)
+            return callback('Invalid proposalID provided');
+
+        if(!utils.isString(isApprovalDecision))
+            return callback('Invalid isApprovalDecision provided');
+
+        this.tronWeb.fullNode.request('wallet/proposalapprove', {
+            owner_address: this.tronWeb.address.toHex(proposalVoterAddress),
+            proposal_id: parseInt(proposalID),
+            is_add_approval: isApproval
+        }, 'post').then(transaction => {
+            if(transaction.Error)
+                return callback(transaction.Error);
+
+            if(transaction.result && transaction.result.message) {
+                return callback(
+                    this.tronWeb.toUtf8(transaction.result.message)
+                );
+            }
+
+            callback(null, transaction);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Deletes a network modification proposal that the owner issued.
+     * Only current Super Representative can vote on a proposal.
+     */
+    deleteProposal(proposalIssuerAddress = this.tronWeb.defaultAddress.hex, proposalID = false, callback = false) {
+        if(!callback)
+            return this.injectPromise(this.deleteProposal, proposalIssuerAddress, proposalID);
+
+        if(!this.tronWeb.isAddress(proposalIssuerAddress))
+            return callback('Invalid proposalIssuerAddress provided');
+
+        if(!utils.isInteger(proposalID) || proposalID < 0)
+            return callback('Invalid proposalID provided');
+
+        this.tronWeb.fullNode.request('wallet/proposaldelete', {
+            owner_address: this.tronWeb.address.toHex(proposalIssuerAddress),
+            proposal_id: parseInt(proposalID)
+        }, 'post').then(transaction => {
+            if(transaction.Error)
+                return callback(transaction.Error);
+
+            if(transaction.result && transaction.result.message) {
+                return callback(
+                    this.tronWeb.toUtf8(transaction.result.message)
+                );
+            }
+
+            callback(null, transaction);
+        }).catch(err => callback(err));
+    }
 }
