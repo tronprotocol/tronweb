@@ -612,7 +612,11 @@ export default class Trx {
         if(!callback)
             return this.injectPromise(this.listProposals);
 
+<<<<<<< HEAD
         this.tronWeb.fullNode.request('wallet/listproposals', {}, 'post').then(({ proposals = [] }) => {
+=======
+        this.tronWeb.fullNode.request('wallet/listproposals').then(({ proposals = [] }) => {
+>>>>>>> 3a97a3a... adding proposal api support + resource api
             callback(null, proposals);
         }).catch(err => callback(err));
     }
@@ -624,8 +628,13 @@ export default class Trx {
         if(!callback)
             return this.injectPromise(this.getChainParameters);
 
+<<<<<<< HEAD
         this.tronWeb.fullNode.request('wallet/getchainparameters', {}, 'post').then(({ chainParameter = [] }) => {
             callback(null, chainParameter);
+=======
+        this.tronWeb.fullNode.request('wallet/getchainparameters').then(({ proposals = [] }) => {
+            callback(null, proposals);
+>>>>>>> 3a97a3a... adding proposal api support + resource api
         }).catch(err => callback(err));
     }
 
@@ -641,6 +650,7 @@ export default class Trx {
 
         this.tronWeb.fullNode.request('wallet/getaccountresource', { 
             address: this.tronWeb.address.toHex(address),
+<<<<<<< HEAD
         }, 'post').then(resources => {
             callback(null, resources);
         }).catch(err => callback(err));
@@ -672,6 +682,10 @@ export default class Trx {
 
         this.tronWeb.fullNode.request('wallet/listexchanges', {}, 'post').then(({ exchanges = [] }) => {
             callback(null, resources);
+=======
+        }, 'post').then(proposal => {
+            callback(null, proposal);
+>>>>>>> 3a97a3a... adding proposal api support + resource api
         }).catch(err => callback(err));
     }
 };
