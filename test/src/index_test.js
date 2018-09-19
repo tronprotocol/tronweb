@@ -227,14 +227,7 @@ describe('TronWeb Instance', function () {
 
     describe('#isEventServerConnected()', function () {
 
-
-        before(function () {
-            this.timeout(5000);
-        });
-
-        after(function () {
-            this.timeout(2000);
-        });
+        this.timeout(6000);
 
         it('should return true for valid event server', async () => {
 
