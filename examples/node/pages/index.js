@@ -334,6 +334,8 @@ class Index extends React.Component{
     async deployContract(event){
         event.preventDefault();
         //部署合约
+
+        console.log(this.abi.value)
         let contractInstance = await tronWeb.contract().new({
             abi:JSON.parse(this.abi.value),
             bytecode:this.byteCode.value
@@ -349,7 +351,7 @@ class Index extends React.Component{
             contractAddressBase58:tronWeb.address.fromHex(contractInstance.address),
         })
     }
-    
+
     //28、查询合约
     async getContract(event){
         event.preventDefault();
@@ -389,6 +391,21 @@ class Index extends React.Component{
             data:res
         })
     }
+
+    async getChainParameters(){
+        let res = await tronWeb.trx.getChainParameters();
+        this.setState({
+            data:res
+        })
+    }
+
+    async listSuperRepresentatives(){
+        let res = await tronWeb.trx.listSuperRepresentatives();
+        this.setState({
+            data:res
+        })
+    }
+
 
 
     render(){
@@ -541,6 +558,12 @@ class Index extends React.Component{
                         </div>
                         <div>
                             <input type="button" value="getAccountResources" onClick={()=>this.getAccountResources()}/>
+                        </div>
+                        <div>
+                            <input type="button" value="getChainParameters" onClick={()=>this.getChainParameters()}/>
+                        </div>
+                        <div>
+                            <input type="button" value="listSuperRepresentatives" onClick={()=>this.listSuperRepresentatives()}/>
                         </div>
 
 
