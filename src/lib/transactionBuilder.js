@@ -652,4 +652,257 @@ export default class TransactionBuilder {
     updateAsset(...args) {
         return this.updateToken(...args);
     }
+
+    /**
+     * Creates a proposal to modify the network.
+     * Can only be created by a current Super Representative.
+     */
+    createProposal(parameters = false, issuerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+        if(utils.isFunction(issuerAddress)) {
+            callback = issuerAddress;
+            issuerAddress = this.tronWeb.defaultAddress.hex;
+        }
+
+        if(!parameters)
+            return callback('Invalid proposal parameters provided');
+
+        if(!callback)
+            return this.injectPromise(this.createProposal, parameters, issuerAddress);
+
+        if(!this.tronWeb.isAddress(issuerAddress))
+            return callback('Invalid issuerAddress provided');
+
+        if(!utils.isObject(parameters))
+            return callback('Invalid parameters provided');
+
+        this.tronWeb.fullNode.request('wallet/proposalcreate', {
+            owner_address: this.tronWeb.address.toHex(issuerAddress),
+            parameters: parameters
+        }, 'post').then(transaction => {
+            if(transaction.Error)
+                return callback(transaction.Error);
+
+            if(transaction.result && transaction.result.message) {
+                return callback(
+                    this.tronWeb.toUtf8(transaction.result.message)
+                );
+            }
+
+            callback(null, transaction);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Deletes a network modification proposal that the owner issued.
+     * Only current Super Representative can vote on a proposal.
+     */
+    deleteProposal(proposalID = false, issuerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+        if(utils.isFunction(issuerAddress)) {
+            callback = issuerAddress;
+            issuerAddress = this.tronWeb.defaultAddress.hex;
+        }
+        
+        if(!callback)
+            return this.injectPromise(this.deleteProposal, proposalID, issuerAddress);
+
+        if(!this.tronWeb.isAddress(issuerAddress))
+            return callback('Invalid issuerAddress provided');
+
+        if(!utils.isInteger(proposalID) || proposalID < 0)
+            return callback('Invalid proposalID provided');
+
+        this.tronWeb.fullNode.request('wallet/proposaldelete', {
+            owner_address: this.tronWeb.address.toHex(issuerAddress),
+            proposal_id: parseInt(proposalID)
+        }, 'post').then(transaction => {
+            if(transaction.Error)
+                return callback(transaction.Error);
+
+            if(transaction.result && transaction.result.message) {
+                return callback(
+                    this.tronWeb.toUtf8(transaction.result.message)
+                );
+            }
+
+            callback(null, transaction);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Adds a vote to an issued network modification proposal.
+     * Only current Super Representative can vote on a proposal.
+     */
+    voteProposal(proposalID = false, hasApproval = false, voterAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+        if(utils.isFunction(voterAddress)) {
+            callback = voterAddress;
+            voterAddress = this.tronWeb.defaultAddress.hex;
+        }
+
+        if(!callback)
+            return this.injectPromise(this.voteProposal, proposalID, hasApproval, voterAddress);
+
+        if(!this.tronWeb.isAddress(voterAddress))
+            return callback('Invalid voterAddress address provided');
+
+        if(!utils.isInteger(proposalID) || proposalID < 0)
+            return callback('Invalid proposalID provided');
+
+        if(!utils.isBoolean(hasApproval))
+            return callback('Invalid hasApproval provided');
+
+        this.tronWeb.fullNode.request('wallet/proposalapprove', {
+            owner_address: this.tronWeb.address.toHex(voterAddress),
+            proposal_id: parseInt(proposalID),
+            is_add_approval: isApproval.toString()
+        }, 'post').then(transaction => {
+            if(transaction.Error)
+                return callback(transaction.Error);
+
+            if(transaction.result && transaction.result.message) {
+                return callback(
+                    this.tronWeb.toUtf8(transaction.result.message)
+                );
+            }
+
+            callback(null, transaction);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Adds tokens into a bancor style exchange.
+     */
+    injectExchangeTokens(exchangeID = false, tokenName = false, tokenAmount = 0, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+        if(utils.isFunction(ownerAddress)) {
+            callback = ownerAddress;
+            ownerAddress = this.tronWeb.defaultAddress.hex;
+        }
+
+        if(!callback)
+            return this.injectPromise(this.injectExchangeTokens, exchangeID, tokenName, tokenAmount, ownerAddress);
+
+        if(!this.tronWeb.isAddress(ownerAddress))
+            return callback('Invalid ownerAddress provided');
+
+        if(!utils.isInteger(exchangeID) || exchangeID < 0)
+            return callback('Invalid exchangeID provided');
+
+        if(!utils.isString(tokenName) || !tokenName.length)
+            return callback('Invalid tokenName provided');
+
+        if(!utils.isInteger(tokenAmount) || tokenAmount < 1)
+            return callback('Invalid tokenAmount provided');
+
+        this.tronWeb.fullNode.request('wallet/exchangeinject', {
+            owner_address: this.tronWeb.address.toHex(ownerAddress),
+            exchange_id: parseInt(exchangeID),
+            token_id: this.tronWeb.fromAscii(tokenName),
+            quant:parseInt(tokenAmount)
+        }, 'post').then(transaction => {
+            if(transaction.Error)
+                return callback(transaction.Error);
+
+            if(transaction.result && transaction.result.message) {
+                return callback(
+                    this.tronWeb.toUtf8(transaction.result.message)
+                );
+            }
+
+            callback(null, transaction);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Withdraws tokens from a bancor style exchange.
+     */
+    withdrawExchangeTokens(exchangeID = false, tokenName = false, tokenAmount = 0, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+        if(utils.isFunction(ownerAddress)) {
+            callback = ownerAddress;
+            ownerAddress = this.tronWeb.defaultAddress.hex;
+        }
+
+        if(!callback)
+            return this.injectPromise(this.withdrawExchangeTokens, exchangeID, tokenName, tokenAmount, ownerAddress);
+
+        if(!this.tronWeb.isAddress(ownerAddress))
+            return callback('Invalid ownerAddress provided');
+
+        if(!utils.isInteger(exchangeID) || exchangeID < 0)
+            return callback('Invalid exchangeID provided');
+
+        if(!utils.isString(tokenName) || !tokenName.length)
+            return callback('Invalid tokenName provided');
+
+        if(!utils.isInteger(tokenAmount) || tokenAmount < 1)
+            return callback('Invalid tokenAmount provided');
+
+        this.tronWeb.fullNode.request('wallet/exchangewithdraw', {
+            owner_address: this.tronWeb.address.toHex(ownerAddress),
+            exchange_id: parseInt(exchangeID),
+            token_id: this.tronWeb.fromAscii(tokenName),
+            quant:parseInt(tokenAmount)
+        }, 'post').then(transaction => {
+            if(transaction.Error)
+                return callback(transaction.Error);
+
+            if(transaction.result && transaction.result.message) {
+                return callback(
+                    this.tronWeb.toUtf8(transaction.result.message)
+                );
+            }
+
+            callback(null, transaction);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Trade tokens on a bancor style exchange.
+     */
+    tradeExchangeTokens(exchangeID = false, 
+        tokenName = false, 
+        tokenAmountSold = 0, 
+        tokenAmountExpected = 0, 
+        ownerAddress = this.tronWeb.defaultAddress.hex, 
+        callback = false) {
+        if(utils.isFunction(ownerAddress)) {
+            callback = ownerAddress;
+            ownerAddress = this.tronWeb.defaultAddress.hex;
+        }
+
+        if(!callback)
+            return this.injectPromise(this.tradeExchangeTokens, exchangeID, tokenName, tokenAmountSold, tokenAmountExpected, ownerAddress);
+
+        if(!this.tronWeb.isAddress(ownerAddress))
+            return callback('Invalid ownerAddress provided');
+
+        if(!utils.isInteger(exchangeID) || exchangeID < 0)
+            return callback('Invalid exchangeID provided');
+
+        if(!utils.isString(tokenName) || !tokenName.length)
+            return callback('Invalid tokenName provided');
+
+        if(!utils.isInteger(tokenAmountSold) || tokenAmountSold < 1)
+            return callback('Invalid tokenAmountSold provided');
+
+        if(!utils.isInteger(tokenAmountExpected) || tokenAmountExpected < 1)
+            return callback('Invalid tokenAmountExpected provided');
+
+        this.tronWeb.fullNode.request('wallet/exchangewithdraw', {
+            owner_address: this.tronWeb.address.toHex(ownerAddress),
+            exchange_id: parseInt(exchangeID),
+            token_id: this.tronWeb.fromAscii(tokenName),
+            quant:parseInt(tokenAmountSold),
+            expected:parseInt(tokenAmountExpected)
+        }, 'post').then(transaction => {
+            if(transaction.Error)
+                return callback(transaction.Error);
+
+            if(transaction.result && transaction.result.message) {
+                return callback(
+                    this.tronWeb.toUtf8(transaction.result.message)
+                );
+            }
+
+            callback(null, transaction);
+        }).catch(err => callback(err));
+    }
 }

@@ -587,4 +587,91 @@ export default class Trx {
     signTransaction(...args) {
         return this.sign(...args);
     }
+
+    /**
+     * Gets a network modification proposal by ID.
+     */
+    getProposal(proposalID = false, callback = false) {
+        if(!callback)
+            return this.injectPromise(this.getProposal, proposalID);
+
+        if(!utils.isInteger(proposalID) || proposalID < 0)
+            return callback('Invalid proposalID provided');
+
+        this.tronWeb.fullNode.request('wallet/getproposalbyid', { 
+            id: parseInt(proposalID),
+        }, 'post').then(proposal => {
+            callback(null, proposal);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Lists all network modification proposals.
+     */
+    listProposals(callback = false) {
+        if(!callback)
+            return this.injectPromise(this.listProposals);
+
+        this.tronWeb.fullNode.request('wallet/listproposals', {}, 'post').then(({ proposals = [] }) => {
+            callback(null, proposals);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Lists all parameters available for network modification proposals.
+     */
+    getChainParameters(callback = false) {
+        if(!callback)
+            return this.injectPromise(this.getChainParameters);
+
+        this.tronWeb.fullNode.request('wallet/getchainparameters', {}, 'post').then(({ chainParameter = [] }) => {
+            callback(null, chainParameter);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Lists all network modification proposals.
+     */
+    getAccountResources(address = false, callback = false) {
+        if(!callback)
+            return this.injectPromise(this.getAccountResources, address);
+
+        if(!this.tronWeb.isAddress(address))
+            return callback('Invalid address provided');
+
+        this.tronWeb.fullNode.request('wallet/getaccountresource', { 
+            address: this.tronWeb.address.toHex(address),
+        }, 'post').then(resources => {
+            callback(null, resources);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Lists all network modification proposals.
+     */
+    getExchangeByID(exchangeID = false, callback = false) {
+        if(!callback)
+            return this.injectPromise(this.getExchangeByID, address);
+
+        if(!utils.isInteger(exchangeID) || exchangeID < 0)
+            return callback('Invalid exchangeID provided');
+
+        this.tronWeb.fullNode.request('wallet/getexchangebyid', { 
+            address: this.tronWeb.address.toHex(address),
+        }, 'post').then(exchange => {
+            callback(null, exchange);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Lists all network modification proposals.
+     */
+    listExchanges(callback = false) {
+        if(!callback)
+            return this.injectPromise(this.listExchanges);
+
+        this.tronWeb.fullNode.request('wallet/listexchanges', {}, 'post').then(({ exchanges = [] }) => {
+            callback(null, resources);
+        }).catch(err => callback(err));
+    }
 };

@@ -182,10 +182,12 @@ class Index extends React.Component{
     async freezeBalance(){
         const frozen_balance = Number(this.frozen_balance.value);
         const resource = this.state.resource;
-        let res = await tronWeb.freezeBalance(tronWeb.defaultAddress.base58,frozen_balance,3,resource);
+        let res = await tronWeb.transactionBuilder.freezeBalance(tronWeb.defaultAddress.base58,frozen_balance,3,resource);
+        let signedtx = await tronWeb.trx.sign(res);
+        let result = await tronWeb.trx.sendRawTransaction(signedtx);
         this.setState({
             data:res
-        })    
+        })
     }
     //8、 解冻已经技术冻结期的 TRX
     async unfreezeBalance(){
@@ -332,6 +334,8 @@ class Index extends React.Component{
     async deployContract(event){
         event.preventDefault();
         //部署合约
+
+        console.log(this.abi.value)
         let contractInstance = await tronWeb.contract().new({
             abi:JSON.parse(this.abi.value),
             bytecode:this.byteCode.value
@@ -347,14 +351,16 @@ class Index extends React.Component{
             contractAddressBase58:tronWeb.address.fromHex(contractInstance.address),
         })
     }
+    
     //28、查询合约
     async getContract(event){
         event.preventDefault();
         let res = await tronWeb.contract().at(this.contract_address.value);
         this.setState({
-            data:res
+            data:CircularJson.stringify(res)
         })
     }
+
     //29、调用合约
     async triggerContract(event){
         event.preventDefault();
@@ -378,14 +384,27 @@ class Index extends React.Component{
         console.log("Function call result:", result)
     }
 
-    //29、调用合约
-    async freezeBalance(){
-        let tx = await tronWeb.transactionBuilder.freezeBalance('41928C9AF0651632157EF27A2CF17CA72C575A4D21', 20000000, 3, "BANDWIDTH");
-        let signedtx = await tronWeb.trx.sign(tx);
-        let result = await tronWeb.trx.sendRawTransaction(signedtx);
-        console.log("Function call result:", result)
+    //30
+    async getAccountResources(){
+        let res = await tronWeb.trx.getAccountResources(tronWeb.defaultAddress.base58);
+        this.setState({
+            data:res
+        })
     }
 
+    async getChainParameters(){
+        let res = await tronWeb.trx.getChainParameters();
+        this.setState({
+            data:res
+        })
+    }
+
+    async listSuperRepresentatives(){
+        let res = await tronWeb.trx.listSuperRepresentatives();
+        this.setState({
+            data:res
+        })
+    }
 
     render(){
         const { data } = this.state;
@@ -536,7 +555,13 @@ class Index extends React.Component{
                              <hr/>
                         </div>
                         <div>
-                            <input type="button" value="freezeBalance" onClick={()=>this.freezeBalance()}/>
+                            <input type="button" value="getAccountResources" onClick={()=>this.getAccountResources()}/>
+                        </div>
+                        <div>
+                            <input type="button" value="getChainParameters" onClick={()=>this.getChainParameters()}/>
+                        </div>
+                        <div>
+                            <input type="button" value="listSuperRepresentatives" onClick={()=>this.listSuperRepresentatives()}/>
                         </div>
 
 
@@ -544,7 +569,7 @@ class Index extends React.Component{
                 </div>
 
                 <div style={{position:'fixed',left:0,top:0}}>
-                    <textarea cols="100" rows="10"  value={CircularJson.stringify(data)} onChange={()=>{}}></textarea>
+                    <textarea cols="100" rows="10"  value={stringify(data)} onChange={()=>{}}></textarea>
                 </div>
                 <style jsx>{`
 
