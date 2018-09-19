@@ -3,3 +3,4 @@ yarn.lock
 .DS_Store
 package-lock.json
 test/setup/TronWeb.js
+coverage
