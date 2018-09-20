@@ -28,6 +28,7 @@ You can run the example with `yarn example` or `npm run-script example`. Don't f
 * Full Node - https://api.trongrid.io:8090
 * Solidity Node - https://api.trongrid.io:8091
 * Event Server - https://api.trongrid.io
+* Block Explorer - https://explorer.trongrid.io
 
 * You can also set up your own private network, but you need to solve cross-domain CORS. The following `nginx` configuration file will allow you to route the headers properly:
 
