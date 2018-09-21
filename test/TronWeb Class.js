@@ -164,6 +164,20 @@ describe('TronWeb Instance', function () {
 
             assert.throws(() => tronWeb.setPrivateKey('test'), 'Invalid private key provided');
         });
+
+        it('should emit a privateKeyChanged event', function(done) {
+            this.timeout(1000);
+
+            const tronWeb = createInstance();
+            
+            tronWeb.on('privateKeyChanged', privateKey => {
+                done(
+                    assert.equal(privateKey, PRIVATE_KEY)
+                );
+            });
+
+            tronWeb.setPrivateKey(PRIVATE_KEY);
+        });
     });
 
     describe('#setAddress()', function () {
@@ -205,6 +219,21 @@ describe('TronWeb Instance', function () {
             tronWeb.setAddress(ADDRESS_BASE58);
 
             assert.equal(tronWeb.defaultPrivateKey, PRIVATE_KEY);
+        });
+
+        it('should emit an addressChanged event', function(done) {
+            this.timeout(1000);
+
+            const tronWeb = createInstance();
+            
+            tronWeb.on('addressChanged', ({ hex, base58 }) => {
+                done(
+                    assert.equal(hex, ADDRESS_HEX) &&
+                    assert.equal(base58, ADDRESS_BASE58)
+                );
+            });
+
+            tronWeb.setAddress(ADDRESS_BASE58);
         });
     });
 

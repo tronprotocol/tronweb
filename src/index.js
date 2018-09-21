@@ -68,7 +68,6 @@ export default class TronWeb extends EventEmitter {
     }
 
     setPrivateKey(privateKey) {
-        // Validate private key
         try {
             this.setAddress(
                 this.address.fromPrivateKey(privateKey)
@@ -77,8 +76,8 @@ export default class TronWeb extends EventEmitter {
             throw new Error('Invalid private key provided');
         }
 
-        // TODO: Validate private key
-        this.defaultPrivateKey = privateKey;        
+        this.defaultPrivateKey = privateKey;
+        this.emit('privateKeyChanged', privateKey);
     }
 
     setAddress(address) {
@@ -95,6 +94,8 @@ export default class TronWeb extends EventEmitter {
             hex,
             base58
         };
+
+        this.emit('addressChanged', { hex, base58 });
     }
 
     isValidProvider(provider) {
