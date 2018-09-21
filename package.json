@@ -1,6 +1,6 @@
 {
     "name": "tronweb",
-    "version": "2.0.8",
+    "version": "2.0.9",
     "description": "JavaScript SDK that encapsulates the TRON Node HTTP API",
     "main": "dist/TronWeb.node.js",
     "scripts": {
@@ -13,7 +13,7 @@
     },
     "husky": {
         "hooks": {
-            "pre-commit": "npm test"
+            "pre-push": "npm test"
         }
     },
     "dependencies": {
@@ -22,6 +22,7 @@
         "bignumber.js": "^7.2.1",
         "elliptic": "^6.4.1",
         "ethers": "^3.0.27",
+        "eventemitter3": "^3.1.0",
         "js-sha3": "^0.8.0",
         "jssha": "^2.3.1",
         "source-map-support": "^0.5.9",
@@ -31,13 +32,13 @@
         "@babel/core": "^7.0.0",
         "@babel/plugin-proposal-class-properties": "^7.0.0",
         "@babel/plugin-proposal-numeric-separator": "^7.0.0",
+        "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
         "@babel/plugin-transform-runtime": "^7.0.0",
         "@babel/preset-env": "^7.0.0",
         "babel-loader": "^8.0.2",
         "babel-minify-webpack-plugin": "^0.3.1",
         "babel-plugin-istanbul": "^5.0.1",
         "babel-plugin-source-map-support": "^2.0.1",
-        "babel-plugin-transform-object-rest-spread": "^6.26.0",
         "chai": "^4.1.2",
         "globby": "^8.0.1",
         "grunt": "^1.0.3",

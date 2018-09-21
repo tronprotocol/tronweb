@@ -2,18 +2,22 @@ import providers from 'lib/providers';
 import utils from 'utils';
 import axios from 'axios';
 import BigNumber from 'bignumber.js';
-import { sha3_256 } from 'js-sha3';
+import EventEmitter from 'eventemitter3';
 
 import TransactionBuilder from 'lib/transactionBuilder';
 import Trx from 'lib/trx';
 import Witness from 'lib/witness';
 import Contract from 'lib/contract';
 
-export default class TronWeb {
+import { sha3_256 } from 'js-sha3';
+
+export default class TronWeb extends EventEmitter {
     static providers = providers;
     static BigNumber = BigNumber;
     
     constructor(fullNode, solidityNode, eventServer = false, privateKey = false) {
+        super();
+
         if(utils.isString(fullNode))
             fullNode = new providers.HttpProvider(fullNode);
 

@@ -5,7 +5,7 @@ const basePlugins = [
     '@babel/plugin-proposal-numeric-separator',
     '@babel/plugin-proposal-class-properties',
     '@babel/plugin-transform-runtime',
-    'transform-object-rest-spread'
+    '@babel/plugin-proposal-object-rest-spread'
 ];
 
 const baseConfig = {
