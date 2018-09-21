@@ -33,12 +33,12 @@ export default class Method {
         this.contract = contract;
 
         this.abi = abi;        
-        this.name = abi.name;
+        this.name = abi.name || abi.type;
 
         this.inputs = abi.inputs || [];
         this.outputs = abi.outputs || [];
 
-        this.signature = this.tronWeb.sha3(abi.name).slice(0, 8);
+        this.signature = this.tronWeb.sha3(this.name).slice(0, 8);
         this.functionSelector = getFunctionSelector(abi);
         this.injectPromise = utils.promiseInjector(this);
 
