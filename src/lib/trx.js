@@ -461,7 +461,7 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
-    sign(transaction = false, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
+    async sign(transaction = false, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
         if(utils.isFunction(privateKey)) {
             callback = privateKey;
             privateKey = this.tronWeb.defaultPrivateKey;
