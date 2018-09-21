@@ -33,7 +33,7 @@ export default class Method {
         this.contract = contract;
 
         this.abi = abi;        
-        this.name = abi.name;
+        this.name = abi.name || (abi.name = abi.type);
 
         this.inputs = abi.inputs || [];
         this.outputs = abi.outputs || [];
