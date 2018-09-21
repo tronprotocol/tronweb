@@ -145,9 +145,6 @@ export default class Method {
         if(!this.contract.deployed)
             return callback('Calling smart contracts requires you to load the contract first');
 
-        if(!privateKey || !utils.isString(privateKey))
-            return callback('Invalid private key provided');
-
         const { stateMutability } = this.abi;
 
         if([ 'pure', 'view' ].includes(stateMutability.toLowerCase()))
@@ -161,7 +158,7 @@ export default class Method {
         }));
 
         try {
-            const address = this.tronWeb.address.fromPrivateKey(privateKey);
+            const address = privateKey ? this.tronWeb.address.fromPrivateKey(privateKey) : this.tronWeb.defaultAddress.base58;
             const transaction = await this.tronWeb.transactionBuilder.triggerSmartContract(
                 this.contract.address,
                 this.functionSelector,
@@ -174,7 +171,17 @@ export default class Method {
             if(!transaction.result || !transaction.result.result)
                 return callback('Unknown error: ' + JSON.stringify(transaction, null, 2));
 
+            // If privateKey is false, this won't be signed here. We assume sign functionality will be replaced.
             const signedTransaction = await this.tronWeb.trx.sign(transaction.transaction, privateKey);
+
+            if(!signedTransaction.signature) {
+                if (!privateKey) {
+                    return callback('Transaction was not signed properly');
+                } else {
+                    return callback('Invalid private key provided');
+                }
+            }
+
             const broadcast = await this.tronWeb.trx.sendRawTransaction(signedTransaction);
 
             if(!broadcast.result)

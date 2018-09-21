@@ -93,6 +93,10 @@ export default class Contract {
         this.props.forEach(prop => delete this[prop]);
 
         abi.forEach(func => {
+            // Don't build a method for constructor function. That's handled through contract create.
+            if (func.type.toLowerCase() === 'constructor')
+                return;
+
             const method = new Method(this, func);
             const methodCall = method.onMethod.bind(method);
 
