@@ -1,9 +1,16 @@
 const { execSync } = require('child_process');
 
 const staged = execSync('git diff --staged --name-only').toString().split('\n');
+const branch = execSync('git name-rev --name-only HEAD').toString().split('\n')[0];
+const unpushed = execSync(`git log origin/${ branch }..${ branch } --name-status`).toString().split('\n');
 
-if(!staged.includes('dist/TronWeb.js'))
-    throw new Error('Please run yarn build -p');
+const isSourceChanged = unpushed.some(logLine => logLine.includes('src/'));
+const isDistTracked = isSourceChanged ? unpushed.some(logLine => logLine.includes('dist/TronWeb.js')) : true;
+
+if(!staged.includes('dist/TronWeb.js') && !isDistTracked) {
+    console.log('Please run yarn build -p');
+    process.exit(1);
+}
 
 try {
     execSync('npm run test:node');
