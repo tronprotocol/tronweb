@@ -9,7 +9,7 @@ import Trx from 'lib/trx';
 import Witness from 'lib/witness';
 import Contract from 'lib/contract';
 
-import { sha3_256 } from 'js-sha3';
+import { keccak256 } from 'js-sha3';
 
 export default class TronWeb extends EventEmitter {
     static providers = providers;
@@ -243,7 +243,7 @@ export default class TronWeb extends EventEmitter {
     }
 
     static sha3(string) {
-        return sha3_256(string);
+        return keccak256(string);
     }
 
     static toHex(val) {

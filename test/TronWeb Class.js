@@ -406,4 +406,12 @@ describe('TronWeb Instance', function () {
         });
     });
 
+    describe('#sha3()', function() {
+        it('should match web3 sha function', function() {
+            const input = 'casa';
+            const expected = '0xc4388c0eaeca8d8b4f48786df8517bc8ca379e8cf9566af774448e46e816657d';
+
+            assert.equal(TronWeb.sha3(input), expected);
+        });
+    });
 });
