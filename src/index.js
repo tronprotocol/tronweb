@@ -242,8 +242,8 @@ export default class TronWeb extends EventEmitter {
         }
     }
 
-    static sha3(string) {
-        return '0x' + keccak256(string);
+    static sha3(string, prefix = true) {
+        return (prefix ? '0x' : '') + keccak256(string);
     }
 
     static toHex(val) {
