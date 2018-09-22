@@ -2,18 +2,22 @@ import providers from 'lib/providers';
 import utils from 'utils';
 import axios from 'axios';
 import BigNumber from 'bignumber.js';
-import { sha3_256 } from 'js-sha3';
+import EventEmitter from 'eventemitter3';
 
 import TransactionBuilder from 'lib/transactionBuilder';
 import Trx from 'lib/trx';
 import Witness from 'lib/witness';
 import Contract from 'lib/contract';
 
-export default class TronWeb {
+import { keccak256 } from 'js-sha3';
+
+export default class TronWeb extends EventEmitter {
     static providers = providers;
     static BigNumber = BigNumber;
     
     constructor(fullNode, solidityNode, eventServer = false, privateKey = false) {
+        super();
+
         if(utils.isString(fullNode))
             fullNode = new providers.HttpProvider(fullNode);
 
@@ -64,7 +68,6 @@ export default class TronWeb {
     }
 
     setPrivateKey(privateKey) {
-        // Validate private key
         try {
             this.setAddress(
                 this.address.fromPrivateKey(privateKey)
@@ -73,8 +76,8 @@ export default class TronWeb {
             throw new Error('Invalid private key provided');
         }
 
-        // TODO: Validate private key
-        this.defaultPrivateKey = privateKey;        
+        this.defaultPrivateKey = privateKey;
+        this.emit('privateKeyChanged', privateKey);
     }
 
     setAddress(address) {
@@ -91,6 +94,8 @@ export default class TronWeb {
             hex,
             base58
         };
+
+        this.emit('addressChanged', { hex, base58 });
     }
 
     isValidProvider(provider) {
@@ -237,8 +242,8 @@ export default class TronWeb {
         }
     }
 
-    static sha3(string) {
-        return sha3_256(string);
+    static sha3(string, prefix = true) {
+        return (prefix ? '0x' : '') + keccak256(string);
     }
 
     static toHex(val) {

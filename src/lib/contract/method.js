@@ -38,7 +38,7 @@ export default class Method {
         this.inputs = abi.inputs || [];
         this.outputs = abi.outputs || [];
 
-        this.signature = this.tronWeb.sha3(abi.name).slice(0, 8);
+        this.signature = this.tronWeb.sha3(abi.name, false).slice(0, 8);
         this.functionSelector = getFunctionSelector(abi);
         this.injectPromise = utils.promiseInjector(this);
 
