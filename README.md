@@ -96,16 +96,16 @@ You need to initiate a new TronWeb instance like below:
     // The majority of the function calls are asynchronus, 
     // meaning that they cannot return the result instantly.
     // These methods therefore return a promise, which you can await.
-    const balance = await tronWeb.getBalance(address);
+    const balance = await tronWeb.trx.getBalance(address);
     console.log({ balance });
 
     // You can also bind a `then` and `catch` method.
-    tronWeb.getBalance(address).then(balance => {
+    tronWeb.trx.getBalance(address).then(balance => {
         console.log({ balance });
     }).catch(err => console.error(err));
 
     // If you'd like to use a similar API to Web3, provide a callback function.
-    tronWeb.getBalance(address, (err, balance) => {
+    tronWeb.trx.getBalance(address, (err, balance) => {
         if(err)
             return console.error(err);
         
