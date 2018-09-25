@@ -15,7 +15,6 @@ You can also ship TronWeb in a Chrome extension.
 ## Installation
 
 * npm: npm install tronweb
-* bower: bower install tronweb
 
 ## Example
 You can run the example with `yarn example` or `npm run-script example`. Don't forget to run `yarn install` beforehand.
