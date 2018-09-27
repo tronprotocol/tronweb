@@ -152,9 +152,9 @@ export default class TronWeb extends EventEmitter {
         return this.currentProviders();
     }
 
-    getEventResult(contractAddress = false, eventName = false, blockNumber = false, callback = false) {
+    getEventResult(contractAddress = false, sinceTimestamp = 0, eventName = false, blockNumber = false, callback = false) {
         if(!callback)
-            return this.injectPromise(this.getEventResult, contractAddress, eventName, blockNumber);
+            return this.injectPromise(this.getEventResult, contractAddress, sinceTimestamp, eventName, blockNumber);
 
         if(!this.eventServer)
             callback('No event server configured');
@@ -179,7 +179,7 @@ export default class TronWeb extends EventEmitter {
         if(blockNumber)
             routeParams.push(blockNumber);
 
-        return axios(`${this.eventServer}/event/contract/${routeParams.join('/')}`).then(({ data = false }) => {
+        return axios(`${this.eventServer}/event/contract/${routeParams.join('/')}?since=${sinceTimestamp}`).then(({ data = false }) => {
             if(!data)
                 return callback('Unknown error occurred');
 
