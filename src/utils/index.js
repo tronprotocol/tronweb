@@ -94,22 +94,30 @@ const utils = {
     },
 
     parseEvent(event, { inputs: abi }) {
-        if(!event.result || this.isObject(event.result))
+        if(!event.result)
             return event;
 
-        event.result = event.result.reduce((obj, result, index) => {
-            const {
-                name,
-                type
-            } = abi[index];
+        if (this.isObject(event.result)) {
+            for (let obj in abi) {
+                if (obj.type == 'address' && result[obj.name])
+                    result[obj.name] = '41' + result[obj.name].substr(2).toLowerCase();
+            }
+        } else if (this.isArray(event.result)) {
+            event.result = event.result.reduce((obj, result, index) => {
+                const {
+                    name,
+                    type
+                } = abi[index];
 
-            if(type == 'address')
-                result = '41' + result.substr(2).toLowerCase();
+                if(type == 'address')
+                    result = '41' + result.substr(2).toLowerCase();
 
-            obj[name] = result;
+                obj[name] = result;
 
-            return obj;
-        }, {});
+                return obj;
+            }, {});
+        }
+
 
         return event;
     }
