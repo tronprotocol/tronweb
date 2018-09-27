@@ -94,7 +94,7 @@ const utils = {
     },
 
     parseEvent(event, { inputs: abi }) {
-        if(!event.result)
+        if(!event.result || this.isObject(event.result))
             return event;
 
         event.result = event.result.reduce((obj, result, index) => {
