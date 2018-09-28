@@ -98,9 +98,10 @@ const utils = {
             return event;
 
         if (this.isObject(event.result)) {
-            for (let obj in abi) {
-                if (obj.type == 'address' && result[obj.name])
-                    result[obj.name] = '41' + result[obj.name].substr(2).toLowerCase();
+            for (var i = 0; i < abi.length; i++) {
+                let obj = abi[i];
+                if (obj.type == 'address' && event.result[obj.name])
+                    event.result[obj.name] = '41' + event.result[obj.name].substr(2).toLowerCase();
             }
         } else if (this.isArray(event.result)) {
             event.result = event.result.reduce((obj, result, index) => {
