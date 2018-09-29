@@ -298,7 +298,7 @@ export default class TronWeb extends EventEmitter {
     }
 
     static fromSun(sun) {
-        const trx = TronWeb.toBigNumber(trx).div(1_000_000);        
+        const trx = TronWeb.toBigNumber(sun).div(1_000_000);        
         return utils.isBigNumber(sun) ? trx : trx.toString(10);
     }
 
