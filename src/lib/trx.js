@@ -689,7 +689,7 @@ export default class Trx {
             return this.injectPromise(this.listExchanges);
 
         this.tronWeb.fullNode.request('wallet/listexchanges', {}, 'post').then(({ exchanges = [] }) => {
-            callback(null, resources);
+            callback(null, exchanges);
         }).catch(err => callback(err));
     }
 };
