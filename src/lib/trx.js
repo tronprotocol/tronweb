@@ -511,14 +511,14 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
-    async sendTransaction(to = false, amount = false, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
-        if(utils.isFunction(privateKey)) {
-            callback = privateKey;
-            privateKey = this.tronWeb.defaultPrivateKey;
+    async sendTransaction(to = false, amount = false, options = {}, callback = false) {
+        if(utils.isFunction(options)) {
+            callback = options;
+            options = {};
         }
 
         if(!callback)
-            return this.injectPromise(this.sendTransaction, to, amount, privateKey);
+            return this.injectPromise(this.sendTransaction, to, amount, options);
 
         if(!this.tronWeb.isAddress(to))
             return callback('Invalid recipient provided');
@@ -526,10 +526,19 @@ export default class Trx {
         if(!utils.isInteger(amount) || amount <= 0)
             return callback('Invalid amount provided');
 
+        options = {
+            privateKey: this.tronWeb.defaultPrivateKey,
+            address: this.tronWeb.defaultAddress.hex,
+            ...options
+        };
+
+        if(!options.privateKey && !options.address)
+            return callback('Function requires either a private key or address to be set');
+
         try {
-            const address = this.tronWeb.address.fromPrivateKey(privateKey);
+            const address = options.privateKey ? this.tronWeb.address.fromPrivateKey(options.privateKey) : options.address;
             const transaction = await this.tronWeb.transactionBuilder.sendTrx(to, amount, address);
-            const signedTransaction = await this.sign(transaction, privateKey);
+            const signedTransaction = await this.sign(transaction, options.privateKey || undefined);
             const result = await this.sendRawTransaction(signedTransaction);
 
             return callback(null, result);
@@ -538,14 +547,14 @@ export default class Trx {
         }
     }
 
-    async sendToken(to = false, amount = false, tokenID = false, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
-        if(utils.isFunction(privateKey)) {
-            callback = privateKey;
-            privateKey = this.tronWeb.defaultPrivateKey;
+    async sendToken(to = false, amount = false, tokenID = false, options = {}, callback = false) {
+        if(utils.isFunction(options)) {
+            callback = options;
+            options = {};
         }
 
         if(!callback)
-            return this.injectPromise(this.sendToken, to, amount, tokenID, privateKey);
+            return this.injectPromise(this.sendToken, to, amount, tokenID, options);
 
         if(!this.tronWeb.isAddress(to))
             return callback('Invalid recipient provided');
@@ -556,10 +565,19 @@ export default class Trx {
         if(!utils.isString(tokenID))
             return callback('Invalid token ID provided');
 
+        options = {
+            privateKey: this.tronWeb.defaultPrivateKey,
+            address: this.tronWeb.defaultAddress.hex,
+            ...options
+        };
+
+        if(!options.privateKey && !options.address)
+            return callback('Function requires either a private key or address to be set');
+
         try {
-            const address = this.tronWeb.address.fromPrivateKey(privateKey);
+            const address = options.privateKey ? this.tronWeb.address.fromPrivateKey(options.privateKey) : options.address;
             const transaction = await this.tronWeb.transactionBuilder.sendToken(to, amount, tokenID, address);
-            const signedTransaction = await this.sign(transaction, privateKey);
+            const signedTransaction = await this.sign(transaction, options.privateKey || undefined);
             const result = await this.sendRawTransaction(signedTransaction);
 
             return callback(null, result);
