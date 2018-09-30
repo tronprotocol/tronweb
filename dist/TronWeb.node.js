@@ -3675,7 +3675,7 @@ function () {
       this.tronWeb.fullNode.request('wallet/listexchanges', {}, 'post').then(function (_ref16) {
         var _ref16$exchanges = _ref16.exchanges,
             exchanges = _ref16$exchanges === void 0 ? [] : _ref16$exchanges;
-        callback(null, resources);
+        callback(null, exchanges);
       }).catch(function (err) {
         return callback(err);
       });
