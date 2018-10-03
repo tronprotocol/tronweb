@@ -257,11 +257,13 @@ export default class TronWeb extends EventEmitter {
             return TronWeb.fromUtf8(JSON.stringify(val));
 
         if(utils.isString(val)) {
-            if(val.indexOf('-0x') === 0)
-                return TronWeb.fromDecimal(val);
-
-            if(val.indexOf('0x') === 0)
+            if (/^(-|)0x/.test(val))
                 return val;
+            // if(val.indexOf('-0x') === 0)
+            //     return TronWeb.fromDecimal(val); // << this returns val
+            //
+            // if(val.indexOf('0x') === 0)
+            //     return val;
 
             if(!isFinite(val))
                 return TronWeb.fromUtf8(val);
@@ -276,7 +278,7 @@ export default class TronWeb extends EventEmitter {
     }
 
     static fromUtf8(string) {
-        return Buffer.from(string, 'utf8').toString('hex');
+        return '0x' + Buffer.from(string, 'utf8').toString('hex');
     }
 
     static toAscii(hex) {
@@ -285,7 +287,7 @@ export default class TronWeb extends EventEmitter {
     }
 
     static fromAscii(string, padding) {
-        return Buffer.from(string, 'ascii').toString('hex').padEnd(padding, '0');
+        return '0x' + Buffer.from(string, 'ascii').toString('hex').padEnd(padding, '0');
     }
 
     static toDecimal(value) {
@@ -296,7 +298,7 @@ export default class TronWeb extends EventEmitter {
         const number = TronWeb.toBigNumber(value);
         const result = number.toString(16);
 
-        return number.lessThan(0) ? '-0x' + result.substr(1) : '0x' + result;
+        return number.isLessThan(0) ? '-0x' + result.substr(1) : '0x' + result;
     }
 
     static fromSun(sun) {
