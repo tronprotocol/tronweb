@@ -271,6 +271,7 @@ export default class TronWeb extends EventEmitter {
     }
 
     static toUtf8(hex) {
+        hex = hex.replace(/^0x/,'');
         return Buffer.from(hex, 'hex').toString('utf8');
     }
 
@@ -279,6 +280,7 @@ export default class TronWeb extends EventEmitter {
     }
 
     static toAscii(hex) {
+        hex = hex.replace(/^0x/,'');
         return Buffer.from(hex, 'hex').toString('ascii');
     }
 
