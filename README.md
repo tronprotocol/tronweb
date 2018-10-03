@@ -32,10 +32,10 @@ The example is at `examples/server/index.js`.
 
 ## TRON provides a private network to test with
 
-* Full Node - https://api.trongrid.io
-* Solidity Node - https://api.trongrid.io
-* Event Server - https://api.trongrid.io
-* Block Explorer - https://explorer.trongrid.io
+* Full Node - https://api.shasta.trongrid.io
+* Solidity Node - https://api.shasta.trongrid.io
+* Event Server - https://api.shasta.trongrid.io
+* Block Explorer - https://explorer.shasta.trongrid.io
 
 * You can also set up your own private network, but you need to solve cross-domain CORS. The following example in Node reads from a full node listening on 16667 and a solidity node listening on 16668, and exposes the ports 8090 and 8091 with the needed headers.
 
@@ -79,15 +79,15 @@ const TronWeb = require('TronWeb')
 Specify the API endpoints:
 ```js
 const HttpProvider = TronWeb.providers.HttpProvider;
-const fullNode = new HttpProvider('https://api.trongrid.io:8090'); // Full node http endpoint
-const solidityNode = new HttpProvider('https://api.trongrid.io:8091'); // Solidity node http endpoint
-const eventServer = 'https://api.trongrid.io/'; // Contract events http endpoint
+const fullNode = new HttpProvider('https://api.trongrid.io'); // Full node http endpoint
+const solidityNode = new HttpProvider('https://api.trongrid.io:'); // Solidity node http endpoint
+const eventServer = 'https://api.trongrid.io'; // Contract events http endpoint
 ```
 The provider above is optional, you can just use a url for the nodes instead, like here:
 
 ```js
-const fullNode = 'https://api.trongrid.io:8090';
-const solidityNode = 'https://api.trongrid.io:8091';
+const fullNode = 'https://api.trongrid.io';
+const solidityNode = 'https://api.trongrid.io';
 const eventServer = 'https://api.trongrid.io/';
 ```
 Now, instance a tronWeb object:
