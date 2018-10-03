@@ -12,8 +12,7 @@ export default class HttpProvider {
         if(!utils.isObject(headers))
             throw new Error('Invalid headers object provided');
 
-        if(host.charAt(host.length - 1) === '/')
-            host = host.substr(0, host.length - 2);
+        host = host.replace(/\/+$/,'');
 
         this.host = host;
         this.timeout = timeout;
