@@ -1,6 +1,6 @@
 ## Full Documentation
 
-(TronWeb Documentation)[https://developers.tron.network/v1.0/docs/tron-web-intro]
+[TronWeb Documentation](https://developers.tron.network/v1.0/docs/tron-web-intro)
 
 
 ## What is TronWeb?
