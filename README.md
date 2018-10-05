@@ -1,3 +1,8 @@
+## Full Documentation
+
+(TronWeb Documentation)[https://developers.tron.network/v1.0/docs/tron-web-intro]
+
+
 ## What is TronWeb?
 
 TronWeb aims to deliver a unified, seamless development experience influenced by Ethereum's [Web3](https://github.com/ethereum/web3.js/) implementation. We have taken the core of [Web3](https://github.com/ethereum/web3.js/) and expanded upon it to unlock the functionality of TRON's unique feature set along with offering new tools for integrating DApps in the browser, Node.js and IoT devices.
@@ -9,8 +14,6 @@ TronWeb aims to deliver a unified, seamless development experience influenced by
 You can access either version specifically from the `dist/` folder.
 
 TronWeb is also compatible with frontend frameworks such as Angular, React and Vue.
-
-You can also ship TronWeb in a Chrome extension.
 
 ## Installation
 
@@ -148,10 +151,4 @@ getBalance();
 
 ```
 
-
-### Documentation for TronBox 1.0
-
-Are you still using TronBox 1. You can find documentation here:
-* [English](http://doc.tron.network/en)
-* [Chinese](http://doc.tron.network/)
 
