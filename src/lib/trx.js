@@ -684,12 +684,29 @@ export default class Trx {
     /**
      * Lists all network modification proposals.
      */
-    listExchanges(callback = false) {
+    listExchanges(limit = 10, offset = 0, callback = false) {
+        if(utils.isFunction(offset)) {
+            callback = offset;
+            offset = 0;
+        } else if(utils.isFunction(limit)) {
+            callback = limit;
+            limit = 0;
+        }
         if(!callback)
-            return this.injectPromise(this.listExchanges);
+            return this.injectPromise(this.listExchanges, limit, offset);
 
-        this.tronWeb.fullNode.request('wallet/listexchanges', {}, 'post').then(({ exchanges = [] }) => {
-            callback(null, exchanges);
-        }).catch(err => callback(err));
+        if (limit == 0) {
+            this.tronWeb.fullNode.request('wallet/listexchanges', {}, 'post').then(({exchanges = []}) => {
+                callback(null, exchanges);
+            }).catch(err => callback(err));
+        } else {
+
+            this.tronWeb.fullNode.request('wallet/listexchangespaginated', {
+                limit,
+                offset
+            }, 'post').then(({exchanges = []}) => {
+                callback(null, exchanges);
+            }).catch(err => callback(err));
+        }
     }
 };
