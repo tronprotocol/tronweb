@@ -315,6 +315,8 @@ export default class TransactionBuilder {
         if(!utils.isArray(abi))
             return callback('Invalid options.abi provided');
 
+        // console.log(abi);
+
         const payable = abi.some(func => {
             return func.type == 'constructor' && func.payable;
         });
@@ -348,8 +350,17 @@ export default class TransactionBuilder {
             const types = [];
             const values = [];
 
+            let abiarr = abi;
+            var construcorParams = abiarr.find(
+                (it) => {
+                  return it.type === 'constructor';
+                }
+              ).inputs;
+
             for(let i = 0; i < parameters.length; i++) {
-                let { type, value } = parameters[i];
+                // let { type, value } = {construcorParams[i].type, parameters[i]};
+                let type = construcorParams[i].type;
+                let value = parameters[i];
 
                 if(!type || !utils.isString(type) || !type.length)
                     return callback('Invalid parameter type provided: ' + type);
