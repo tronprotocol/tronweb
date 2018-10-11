@@ -684,96 +684,29 @@ export default class Trx {
     /**
      * Lists all network modification proposals.
      */
-    listExchanges(callback = false) {
-        if(!callback)
-            return this.injectPromise(this.listExchanges);
-
-        this.tronWeb.fullNode.request('wallet/listexchanges', {}, 'post').then(({ exchanges = [] }) => {
-            callback(null, exchanges);
-        }).catch(err => callback(err));
-    }
-
-    /**
-     * Create an exchange between tokens.
-     */
-    exchangeCreate(ownerAddress = false,
-                   firstTokenID, firstTokenBalance,
-                   secondTokenID, secondTokenBalance, callback = false) {
-        if (!callback)
-            return this.injectPromise(this.exchangeCreate, address);
-
-        if (!this.tronWeb.isAddress(ownerAddress))
-            return callback('Invalid address provided');
-
-        if (!utils.isString(firstTokenID) || !firstTokenID.length
-            || !utils.isString(secondTokenID) || !secondTokenID.length)
-            return callback('Invalid token ID provided');
-
-        if (!utils.isInteger(firstTokenBalance) || firstTokenBalance <= 0
-            || !utils.isInteger(secondTokenBalance) || secondTokenBalance <= 0)
-            return callback('Invalid amount provided');
-
-        this.tronWeb.fullNode.request('wallet/exchangecreate', {
-            owner_address: this.tronWeb.address.toHex(ownerAddress),
-            first_token_id: firstTokenID,
-            first_token_balance: firstTokenBalance,
-            second_token_id: secondTokenID,
-            second_token_balance: secondTokenBalance
-        }, 'post').then(resources => {
-            callback(null, resources);
-        }).catch(err => callback(err));
-    }
-
-    /**
-     * Exchanges a transaction.
-     */
-    exchangeTransaction(ownerAddress = false, exchangeID, tokenID, quant, expected, callback = false) {
-        if (!callback)
-            return this.injectPromise(this.exchangeTransaction, address);
-
-        if (!this.tronWeb.isAddress(ownerAddress))
-            return callback('Invalid address provided');
-
-        if (!utils.isString(tokenID) || !tokenID.length)
-            return callback('Invalid token ID provided');
-
-        if (!utils.isInteger(quant) || quant <= 0)
-            return callback('Invalid quantity provided');
-
-        if (!utils.isInteger(expected) || expected < 0)
-            return callback('Invalid expected provided');
-
-        this.tronWeb.fullNode.request('wallet/exchangetransaction', {
-            owner_address: this.tronWeb.address.toHex(ownerAddress),
-            exchange_id: exchangeID,
-            token_id: tokenID,
-            quant,
-            expected
-        }, 'post').then(resources => {
-            callback(null, resources);
-        }).catch(err => callback(err));
-    }
-
-    /**
-     * Lists all network modification proposals.
-     */
-    listExchangesPaginated(limit = 10, offset = 0, callback = false) {
+    listExchanges(limit = 10, offset = 0, callback = false) {
         if(utils.isFunction(offset)) {
             callback = offset;
             offset = 0;
-        }
-        if(utils.isFunction(limit)) {
+        } else if(utils.isFunction(limit)) {
             callback = limit;
-            limit = 30;
+            limit = 0;
         }
         if(!callback)
-            return this.injectPromise(this.listExchangesPaginated);
+            return this.injectPromise(this.listExchanges, limit, offset);
 
-        this.tronWeb.fullNode.request('wallet/listexchangespaginated', {
-            limit,
-            offset
-        }, 'post').then(({ exchanges = [] }) => {
-            callback(null, exchanges);
-        }).catch(err => callback(err));
+        if (limit == 0) {
+            this.tronWeb.fullNode.request('wallet/listexchanges', {}, 'post').then(({exchanges = []}) => {
+                callback(null, exchanges);
+            }).catch(err => callback(err));
+        } else {
+
+            this.tronWeb.fullNode.request('wallet/listexchangespaginated', {
+                limit,
+                offset
+            }, 'post').then(({exchanges = []}) => {
+                callback(null, exchanges);
+            }).catch(err => callback(err));
+        }
     }
 };
