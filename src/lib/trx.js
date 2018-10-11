@@ -700,7 +700,7 @@ export default class Trx {
                    firstTokenID, firstTokenBalance,
                    secondTokenID, secondTokenBalance, callback = false) {
         if (!callback)
-            return this.injectPromise(this.getAccountResources, address);
+            return this.injectPromise(this.exchangeCreate, address);
 
         if (!this.tronWeb.isAddress(ownerAddress))
             return callback('Invalid address provided');
@@ -729,7 +729,7 @@ export default class Trx {
      */
     exchangeTransaction(ownerAddress = false, exchangeID, tokenID, quant, expected, callback = false) {
         if (!callback)
-            return this.injectPromise(this.getAccountResources, address);
+            return this.injectPromise(this.exchangeTransaction, address);
 
         if (!this.tronWeb.isAddress(ownerAddress))
             return callback('Invalid address provided');
@@ -767,7 +767,7 @@ export default class Trx {
             limit = 30;
         }
         if(!callback)
-            return this.injectPromise(this.listExchanges);
+            return this.injectPromise(this.listExchangesPaginated);
 
         this.tronWeb.fullNode.request('wallet/listexchangespaginated', {
             limit,
