@@ -303,6 +303,7 @@ export default class TransactionBuilder {
             userFeePercentage = 0,
             parameters = []
         } = options;
+        
 
         if(abi && utils.isString(abi)) {
             try {
@@ -315,7 +316,6 @@ export default class TransactionBuilder {
         if(!utils.isArray(abi))
             return callback('Invalid options.abi provided');
 
-        // console.log(abi);
 
         const payable = abi.some(func => {
             return func.type == 'constructor' && func.payable;
@@ -345,21 +345,24 @@ export default class TransactionBuilder {
         if(!this.tronWeb.isAddress(issuerAddress))
             return callback('Invalid issuer address provided');
 
-        if(parameters.length) {
+        var constructorParams = abi.find(
+            (it) => {
+                return it.type === 'constructor';
+            }
+        );
+
+
+        if(parameters.length && typeof constructorParams !== 'undefined' && constructorParams) {
+
             const abiCoder = new Ethers.utils.AbiCoder();
             const types = [];
             const values = [];
-
-            let abiarr = abi;
-            var construcorParams = abiarr.find(
-                (it) => {
-                  return it.type === 'constructor';
-                }
-              ).inputs;
+            constructorParams = constructorParams.inputs;
+            if(parameters.length != constructorParams.length)
+                return callback(`constructor needs ${constructorParams.length} but ${parameters.length} provided`);
 
             for(let i = 0; i < parameters.length; i++) {
-                // let { type, value } = {construcorParams[i].type, parameters[i]};
-                let type = construcorParams[i].type;
+                let type = constructorParams[i].type;
                 let value = parameters[i];
 
                 if(!type || !utils.isString(type) || !type.length)
@@ -377,6 +380,8 @@ export default class TransactionBuilder {
             } catch (ex) {
                 return callback(ex);
             }
+        } else if(!parameters.length && typeof constructorParams !== 'undefined' && constructorParams){
+            return callback(`constructor needs ${constructorParams.inputs.length} but ${parameters.length} provided`);
         } else parameters = '';
 
         this.tronWeb.fullNode.request('wallet/deploycontract', {
