@@ -351,7 +351,7 @@ export default class TransactionBuilder {
             }
         );
 
-        if(parameters.length && typeof constructorParams !== 'undefined' && constructorParams) {
+        if(typeof constructorParams !== 'undefined' && constructorParams) {
             const abiCoder = new Ethers.utils.AbiCoder();
             const types = [];
             const values = [];
@@ -379,8 +379,6 @@ export default class TransactionBuilder {
             } catch (ex) {
                 return callback(ex);
             }
-        } else if(!parameters.length && typeof constructorParams !== 'undefined' && constructorParams){
-            return callback(`constructor needs ${constructorParams.inputs.length} but ${parameters.length} provided`);
         } else parameters = '';
 
         this.tronWeb.fullNode.request('wallet/deploycontract', {
