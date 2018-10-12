@@ -351,13 +351,12 @@ export default class TransactionBuilder {
             }
         );
 
-
         if(parameters.length && typeof constructorParams !== 'undefined' && constructorParams) {
-
             const abiCoder = new Ethers.utils.AbiCoder();
             const types = [];
             const values = [];
             constructorParams = constructorParams.inputs;
+
             if(parameters.length != constructorParams.length)
                 return callback(`constructor needs ${constructorParams.length} but ${parameters.length} provided`);
 
