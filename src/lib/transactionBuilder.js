@@ -303,6 +303,7 @@ export default class TransactionBuilder {
             userFeePercentage = 0,
             parameters = []
         } = options;
+        
 
         if(abi && utils.isString(abi)) {
             try {
@@ -314,6 +315,7 @@ export default class TransactionBuilder {
 
         if(!utils.isArray(abi))
             return callback('Invalid options.abi provided');
+
 
         const payable = abi.some(func => {
             return func.type == 'constructor' && func.payable;
@@ -343,13 +345,24 @@ export default class TransactionBuilder {
         if(!this.tronWeb.isAddress(issuerAddress))
             return callback('Invalid issuer address provided');
 
-        if(parameters.length) {
+        var constructorParams = abi.find(
+            (it) => {
+                return it.type === 'constructor';
+            }
+        );
+
+        if(parameters.length && typeof constructorParams !== 'undefined' && constructorParams) {
             const abiCoder = new Ethers.utils.AbiCoder();
             const types = [];
             const values = [];
+            constructorParams = constructorParams.inputs;
+
+            if(parameters.length != constructorParams.length)
+                return callback(`constructor needs ${constructorParams.length} but ${parameters.length} provided`);
 
             for(let i = 0; i < parameters.length; i++) {
-                let { type, value } = parameters[i];
+                let type = constructorParams[i].type;
+                let value = parameters[i];
 
                 if(!type || !utils.isString(type) || !type.length)
                     return callback('Invalid parameter type provided: ' + type);
@@ -366,6 +379,8 @@ export default class TransactionBuilder {
             } catch (ex) {
                 return callback(ex);
             }
+        } else if(!parameters.length && typeof constructorParams !== 'undefined' && constructorParams){
+            return callback(`constructor needs ${constructorParams.inputs.length} but ${parameters.length} provided`);
         } else parameters = '';
 
         this.tronWeb.fullNode.request('wallet/deploycontract', {
@@ -903,75 +918,6 @@ export default class TransactionBuilder {
             }
 
             callback(null, transaction);
-        }).catch(err => callback(err));
-    }
-
-    /**
-     * Create an exchange between tokens.
-     */
-    exchangeCreate(ownerAddress = false,
-                   firstTokenID = false,
-                   firstTokenBalance = 0,
-                   secondTokenID = false,
-                   secondTokenBalance = 0,
-                   callback = false) {
-        if (!callback)
-            return this.injectPromise(this.exchangeCreate, ownerAddress, firstTokenID, firstTokenBalance, secondTokenID, secondTokenBalance);
-
-        if (!this.tronWeb.isAddress(ownerAddress))
-            return callback('Invalid address provided');
-
-        if (!utils.isString(firstTokenID) || !firstTokenID.length
-            || !utils.isString(secondTokenID) || !secondTokenID.length)
-            return callback('Invalid token ID provided');
-
-        if (!utils.isInteger(firstTokenBalance) || firstTokenBalance <= 0
-            || !utils.isInteger(secondTokenBalance) || secondTokenBalance <= 0)
-            return callback('Invalid amount provided');
-
-        this.tronWeb.fullNode.request('wallet/exchangecreate', {
-            owner_address: this.tronWeb.address.toHex(ownerAddress),
-            first_token_id: firstTokenID,
-            first_token_balance: firstTokenBalance,
-            second_token_id: secondTokenID,
-            second_token_balance: secondTokenBalance
-        }, 'post').then(resources => {
-            callback(null, resources);
-        }).catch(err => callback(err));
-    }
-
-    /**
-     * Exchanges a transaction.
-     */
-    exchangeTransaction(ownerAddress = false,
-                        exchangeID = false,
-                        tokenID = false,
-                        quant = 0,
-                        expected = 0,
-                        callback = false) {
-        if (!callback)
-            return this.injectPromise(this.exchangeTransaction, ownerAddress, exchangeID, tokenID, quant, expected);
-
-        if (!this.tronWeb.isAddress(ownerAddress))
-            return callback('Invalid address provided');
-
-        if (!utils.isString(tokenID) || !tokenID.length)
-            return callback('Invalid token ID provided');
-
-        if (!utils.isInteger(quant) || quant <= 0)
-            return callback('Invalid quantity provided');
-
-        if (!utils.isInteger(expected) || expected <= 0)
-            return callback('Invalid expected provided');
-
-        this.tronWeb.fullNode.request('wallet/exchangetransaction', {
-            owner_address: this.tronWeb.address.toHex(ownerAddress),
-            exchange_id: exchangeID,
-            token_id: tokenID,
-            quant,
-            expected
-        }, 'post').then(resources => {
-            callback(null, resources);
         }).catch(err => callback(err));
     }
 }
