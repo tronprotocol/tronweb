@@ -53,6 +53,7 @@ export default class TronWeb extends EventEmitter {
         this.transactionBuilder = new TransactionBuilder(this);
         this.trx = new Trx(this);
         this.witness = new Witness(this);
+        this.utils = utils;
 
         this.injectPromise = utils.promiseInjector(this);
     }
