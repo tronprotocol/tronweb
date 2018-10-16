@@ -1,4 +1,5 @@
 import Ethers from 'ethers';
+import TronWeb from 'index';
 
 const abiCoder = new Ethers.utils.AbiCoder();
 
@@ -20,4 +21,15 @@ export function decodeParams(names, types, output) {
 
         return obj;
     }, names.length ? {} : []);
+}
+
+export function encodeParams(types, values) {
+
+    for (let i =0;i<types.length;i++) {
+        if (types[i] === 'address') {
+            values[i] =  TronWeb.address.toHex(values[i]).replace(/^41/, '0x');
+        }
+    }
+
+    return abiCoder.encode(types, values);
 }
