@@ -165,11 +165,11 @@ describe('TronWeb Instance', function () {
             assert.throws(() => tronWeb.setPrivateKey('test'), 'Invalid private key provided');
         });
 
-        it('should emit a privateKeyChanged event', function(done) {
+        it('should emit a privateKeyChanged event', function (done) {
             this.timeout(1000);
 
             const tronWeb = createInstance();
-            
+
             tronWeb.on('privateKeyChanged', privateKey => {
                 done(
                     assert.equal(privateKey, PRIVATE_KEY)
@@ -221,12 +221,12 @@ describe('TronWeb Instance', function () {
             assert.equal(tronWeb.defaultPrivateKey, PRIVATE_KEY);
         });
 
-        it('should emit an addressChanged event', function(done) {
+        it('should emit an addressChanged event', function (done) {
             this.timeout(1000);
 
             const tronWeb = createInstance();
-            
-            tronWeb.on('addressChanged', ({ hex, base58 }) => {
+
+            tronWeb.on('addressChanged', ({hex, base58}) => {
                 done(
                     assert.equal(hex, ADDRESS_HEX) &&
                     assert.equal(base58, ADDRESS_BASE58)
@@ -406,12 +406,116 @@ describe('TronWeb Instance', function () {
         });
     });
 
-    describe('#sha3()', function() {
-        it('should match web3 sha function', function() {
+    describe('#sha3()', function () {
+        it('should match web3 sha function', function () {
             const input = 'casa';
             const expected = '0xc4388c0eaeca8d8b4f48786df8517bc8ca379e8cf9566af774448e46e816657d';
 
             assert.equal(TronWeb.sha3(input), expected);
+        });
+    });
+
+
+    describe('#utils.abi.decodeParams()', function () {
+        it('should decode abi coded params passing types and output', function () {
+
+            const tronWeb = createInstance();
+            // const names = [ 'string', 'string', 'uint8', 'bytes32', 'uint256' ];
+            const types = ['string', 'string', 'uint8', 'bytes32', 'uint256'];
+            const output = '0x' +
+                '00000000000000000000000000000000000000000000000000000000000000a0' +
+                '00000000000000000000000000000000000000000000000000000000000000e0' +
+                '0000000000000000000000000000000000000000000000000000000000000012' +
+                'dc03b7993bad736ad595eb9e3ba51877ac17ecc31d2355f8f270125b9427ece7' +
+                '0000000000000000000000000000000000000000000000000000000000000000' +
+                '0000000000000000000000000000000000000000000000000000000000000011' +
+                '506920446179204e30306220546f6b656e000000000000000000000000000000' +
+                '0000000000000000000000000000000000000000000000000000000000000003' +
+                '5049450000000000000000000000000000000000000000000000000000000000';
+
+            const expected = [
+                'Pi Day N00b Token',
+                'PIE',
+                18,
+                '0xdc03b7993bad736ad595eb9e3ba51877ac17ecc31d2355f8f270125b9427ece7',
+                0
+            ];
+
+
+            const result = tronWeb.utils.abi.decodeParams(types, output);
+
+            for (let i = 0; i < expected.length; i++) {
+                assert.equal(result[i], expected[i]);
+            }
+        });
+
+        it('should decode abi coded params passing names, types and output', function () {
+
+            const tronWeb = createInstance();
+            const names = ['Token', 'Graph', 'Qty', 'Bytes', 'Total'];
+            const types = ['string', 'string', 'uint8', 'bytes32', 'uint256'];
+            const output = '0x' +
+                '00000000000000000000000000000000000000000000000000000000000000a0' +
+                '00000000000000000000000000000000000000000000000000000000000000e0' +
+                '0000000000000000000000000000000000000000000000000000000000000012' +
+                'dc03b7993bad736ad595eb9e3ba51877ac17ecc31d2355f8f270125b9427ece7' +
+                '0000000000000000000000000000000000000000000000000000000000000000' +
+                '0000000000000000000000000000000000000000000000000000000000000011' +
+                '506920446179204e30306220546f6b656e000000000000000000000000000000' +
+                '0000000000000000000000000000000000000000000000000000000000000003' +
+                '5049450000000000000000000000000000000000000000000000000000000000';
+
+            const expected = {
+                Token: 'Pi Day N00b Token',
+                Graph: 'PIE',
+                Qty: 18,
+                Bytes: '0xdc03b7993bad736ad595eb9e3ba51877ac17ecc31d2355f8f270125b9427ece7',
+                Total: 0
+            };
+
+            const result = tronWeb.utils.abi.decodeParams(names, types, output);
+            for (let i in expected) {
+                assert.equal(result[i], expected[i]);
+            }
+        });
+
+        it('should throw if the string does not start with 0x', function () {
+
+            const tronWeb = createInstance();
+            const types = ['string', 'string', 'uint8', 'bytes32', 'uint256'];
+            const output =
+                '00000000000000000000000000000000000000000000000000000000000000a0' +
+                '00000000000000000000000000000000000000000000000000000000000000e0' +
+                '0000000000000000000000000000000000000000000000000000000000000012' +
+                'dc03b7993bad736ad595eb9e3ba51877ac17ecc31d2355f8f270125b9427ece7' +
+                '0000000000000000000000000000000000000000000000000000000000000000' +
+                '0000000000000000000000000000000000000000000000000000000000000011' +
+                '506920446179204e30306220546f6b656e000000000000000000000000000000' +
+                '0000000000000000000000000000000000000000000000000000000000000003' +
+                '5049450000000000000000000000000000000000000000000000000000000000';
+
+            assert.throws(() => {
+                tronWeb.utils.abi.decodeParams(types, output)
+            }, 'hex string must have 0x prefix');
+        });
+
+        it('should throw if the output format is wrong', function () {
+
+            const tronWeb = createInstance();
+            const types = ['string', 'string', 'uint8', 'bytes32', 'uint256'];
+            const output = '0x' +
+                '00000000000000000000000000000000000000000000000000000000000000a0' +
+                '00000000000000000000000000000000000000000000000000000000000000e0' +
+                '0000000000000000000000000000000000000000000000000000000000000012' +
+                'dc03b7993bad736ad595eb9e3ba51877ac17ecc31d2355f8f270125b9427ece7' +
+                '0000000000000000000000000000000000000000000000000000000000000000' +
+                '0000000000000000000000000000000000000000000000000000000000000011' +
+                '506920446179204e30306220546f6b656e000000000000000000000000000000' +
+                '5049450000000000000000000000000000000000000000000000000000000000';
+
+            assert.throws(() => {
+                tronWeb.utils.abi.decodeParams(types, output)
+            }, 'dynamic bytes count too large');
         });
     });
 });
