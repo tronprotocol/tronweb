@@ -1,6 +1,6 @@
 {
     "name": "tronweb",
-    "version": "2.0.19",
+    "version": "2.0.20",
     "description": "JavaScript SDK that encapsulates the TRON Node HTTP API",
     "main": "dist/TronWeb.node.js",
     "scripts": {
@@ -25,10 +25,10 @@
         "eventemitter3": "^3.1.0",
         "js-sha3": "^0.8.0",
         "jssha": "^2.3.1",
+        "source-map-support": "^0.5.9",
         "validator": "^10.7.1"
     },
     "devDependencies": {
-        "source-map-support": "^0.5.9",
         "@babel/core": "^7.0.0",
         "@babel/plugin-proposal-class-properties": "^7.0.0",
         "@babel/plugin-proposal-numeric-separator": "^7.0.0",
