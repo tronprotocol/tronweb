@@ -482,6 +482,27 @@ describe('TronWeb Instance', function () {
                 tronWeb.utils.abi.decodeParams(types, output)
             }, 'dynamic bytes count too large');
         });
+
+        it('should throw if the output is invalid', function () {
+
+            const tronWeb = createInstance();
+            const types = ['string'];
+            const output = '0x6630f88f000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000046173646600000000000000000000000000000000000000000000000000000000';
+
+            assert.throws(() => {
+                tronWeb.utils.abi.decodeParams(types, output)
+            }, 'The encoded string is not valid. Its length must be a multiple of 64.');
+        });
+
+        it('should decode if the output is prefixed with the method hash', function () {
+
+            const tronWeb = createInstance();
+            const types = ['string'];
+            const output = '0x6630f88f000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000046173646600000000000000000000000000000000000000000000000000000000';
+
+            const result = tronWeb.utils.abi.decodeParams(types, output, true)
+            assert.equal(result, 'asdf')
+        });
     });
 
 
@@ -525,5 +546,6 @@ describe('TronWeb Instance', function () {
                 assert.equal(result[i], expected[i]);
             }
         });
+
     });
 });
