@@ -8,6 +8,8 @@ const basePlugins = [
     '@babel/plugin-proposal-object-rest-spread'
 ];
 
+const mode = process.env.NODE_ENV || 'production'
+
 const baseConfig = {
     entry: path.resolve(__dirname, 'src', 'index.js'),
     module: {
@@ -41,8 +43,16 @@ const baseConfig = {
         ],
     },
     devtool: 'source-map',
-    mode: process.env.NODE_ENV || 'production'
+    mode
 };
+
+nodePlugins = [
+    ...basePlugins
+]
+
+if (mode === 'development') {
+    nodePlugins.push('source-map-support')
+}
 
 module.exports = [
     {
@@ -69,10 +79,7 @@ module.exports = [
                                     forceAllTransforms: true
                                 }]
                             ],
-                            plugins: [
-                                ...basePlugins,
-                                'source-map-support'
-                            ]
+                            plugins: nodePlugins
                         }
                     }
                 }
