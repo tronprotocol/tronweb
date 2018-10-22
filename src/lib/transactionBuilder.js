@@ -313,7 +313,7 @@ export default class TransactionBuilder {
                 return callback('Invalid options.abi provided');
             }
         }
-        
+        console.log(name);
         if(!utils.isArray(abi))
             return callback('Invalid options.abi provided');
 
@@ -323,8 +323,7 @@ export default class TransactionBuilder {
         });
 
         if(!utils.isHex(name))
-            name = this.tronWeb.toHex(name);
-            // return callback('Invalid options.name provided');
+            name = this.tronWeb.fromUtf8(name);
 
         if(!utils.isHex(bytecode))
             return callback('Invalid options.bytecode provided');
