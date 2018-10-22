@@ -33,7 +33,7 @@ async function deploy_contract(){
 }
 
 async function triggercontract(){
-  let contractInstance = await tronWeb.contract().at("417105035026dca8089fc3592d208ca4542d1caf63");
+  let contractInstance = await tronWeb.contract().at("41243a7eacba2e456ef23d2dccb24d218732302bea");
   //watch event 监听事件
   contractInstance["Notify"]().watch(function(err, res) {
     console.log("error " + err);
@@ -49,7 +49,7 @@ async function triggercontract(){
     shouldPollResponse: true
   }
 
-  let result  = await contractInstance.fibonacciNotify(3,2).send(args);
+  let result  = await contractInstance.fibonacciNotify(9,2).send(args);
 }
 
 async function gettransaction(){
@@ -57,5 +57,5 @@ async function gettransaction(){
   console
 }
 // getContract();
-deploy_contract();
-// triggercontract();
+// deploy_contract();
+triggercontract();
