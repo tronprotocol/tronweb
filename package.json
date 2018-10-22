@@ -1,6 +1,6 @@
 {
     "name": "tronweb",
-    "version": "2.0.20",
+    "version": "2.0.22",
     "description": "JavaScript SDK that encapsulates the TRON Node HTTP API",
     "main": "dist/TronWeb.node.js",
     "scripts": {
@@ -25,7 +25,6 @@
         "eventemitter3": "^3.1.0",
         "js-sha3": "^0.8.0",
         "jssha": "^2.3.1",
-        "source-map-support": "^0.5.9",
         "validator": "^10.7.1"
     },
     "devDependencies": {
@@ -61,6 +60,7 @@
         "mocha": "^5.2.0",
         "puppeteer": "^1.8.0",
         "rimraf": "^2.6.2",
+        "source-map-support": "^0.5.9",
         "webpack": "^4.17.2",
         "webpack-cli": "^3.1.0",
         "webpack-node-externals": "^1.7.2"
