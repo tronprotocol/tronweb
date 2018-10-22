@@ -323,7 +323,7 @@ export default class TransactionBuilder {
         });
 
         if(!utils.isHex(name))
-            name = this.tronWeb.fromUtf8(name);
+            name = this.tronWeb.toHex(name);
             // return callback('Invalid options.name provided');
 
         if(!utils.isHex(bytecode))
