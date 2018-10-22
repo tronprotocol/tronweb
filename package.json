@@ -1,6 +1,6 @@
 {
     "name": "tronweb",
-    "version": "2.0.23",
+    "version": "2.0.24",
     "description": "JavaScript SDK that encapsulates the TRON Node HTTP API",
     "main": "dist/TronWeb.node.js",
     "scripts": {
@@ -19,6 +19,7 @@
     "dependencies": {
         "@babel/runtime": "^7.0.0",
         "axios": "^0.18.0",
+        "babel-runtime": "^6.26.0",
         "bignumber.js": "^7.2.1",
         "elliptic": "^6.4.1",
         "ethers": "^3.0.27",
