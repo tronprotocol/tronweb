@@ -301,7 +301,8 @@ export default class TransactionBuilder {
             feeLimit = 1_000_000_000,
             callValue = 0,
             userFeePercentage = 0,
-            parameters = []
+            parameters = [],
+            name = "",
         } = options;
         
 
@@ -320,6 +321,9 @@ export default class TransactionBuilder {
         const payable = abi.some(func => {
             return func.type == 'constructor' && func.payable;
         });
+
+        if(!utils.isHex(name))
+            return callback('Invalid options.name provided');
 
         if(!utils.isHex(bytecode))
             return callback('Invalid options.bytecode provided');
@@ -388,7 +392,8 @@ export default class TransactionBuilder {
             consume_user_resource_percent: userFeePercentage,
             abi: JSON.stringify(abi),
             bytecode,
-            parameter: parameters
+            parameter: parameters,
+            name
         }, 'post').then(transaction => {
             if(transaction.Error)
                 return callback(transaction.Error);
