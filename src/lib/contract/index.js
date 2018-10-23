@@ -14,11 +14,12 @@ export default class Contract {
         this.abi = abi;
 
         this.eventListener = false;
-        this.bytecode = false;        
+        this.bytecode = false;
         this.deployed = false;
-        this.lastBlock = false;  
+        this.lastBlock = false;
 
         this.methods = {};
+        this.methodInstance = {};
         this.props = [];
 
         if(this.tronWeb.isAddress(address))
@@ -38,9 +39,9 @@ export default class Contract {
 
             if(duplicate)
                 return false;
-            
+
             if(!this.lastBlock)
-                return true;            
+                return true;
 
             return event.block > this.lastBlock;
         });
@@ -110,6 +111,10 @@ export default class Contract {
             this.methods[functionSelector] = methodCall;
             this.methods[signature] = methodCall;
 
+            this.methodInstance[name] = method;
+            this.methodInstance[functionSelector] = method;
+            this.methodInstance[signature] = method;
+
             if(!this.hasProperty(name)) {
                 this[name] = methodCall;
                 this.props.push(name);
@@ -125,6 +130,22 @@ export default class Contract {
                 this.props.push(signature);
             }
         });
+    }
+
+    decodeInput(data) {
+
+        const methodName = data.substring(0, 8);
+        const inputData = data.substring(8);
+
+        if (!this.methodInstance[methodName])
+            throw new Error('Contract method ' + methodName + " not found");
+
+        const methodInstance = this.methodInstance[methodName];
+
+        return {
+            name: methodInstance.name,
+            params: this.methodInstance[methodName].decodeInput(inputData),
+        }
     }
 
     async new(options, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
@@ -148,7 +169,7 @@ export default class Contract {
             return this.at(signedTransaction.contract_address, callback);
         } catch(ex) {
             return callback(ex);
-        }        
+        }
     }
 
     async at(contractAddress, callback = false) {
@@ -173,7 +194,7 @@ export default class Contract {
                 return callback('Contract has not been deployed on the network');
 
             return callback(ex);
-        }        
+        }
     }
 
     events(callback = false) {
