@@ -648,9 +648,9 @@ export default class Trx {
     }
 
     /**
-     * Lists all network modification proposals.
+     * Get the account resources
      */
-    getAccountResources(address = false, callback = false) {
+    getAccountResources(address = this.tronWeb.defaultAddress.hex, callback = false) {
         if(!callback)
             return this.injectPromise(this.getAccountResources, address);
 
@@ -665,24 +665,24 @@ export default class Trx {
     }
 
     /**
-     * Lists all network modification proposals.
+     * Get the exchange ID.
      */
     getExchangeByID(exchangeID = false, callback = false) {
         if(!callback)
-            return this.injectPromise(this.getExchangeByID, address);
+            return this.injectPromise(this.getExchangeByID, exchangeID);
 
         if(!utils.isInteger(exchangeID) || exchangeID < 0)
             return callback('Invalid exchangeID provided');
 
-        this.tronWeb.fullNode.request('wallet/getexchangebyid', { 
-            address: this.tronWeb.address.toHex(address),
+        this.tronWeb.fullNode.request('wallet/getexchangebyid', {
+            address: this.tronWeb.defaultAddress.hex,
         }, 'post').then(exchange => {
             callback(null, exchange);
         }).catch(err => callback(err));
     }
 
     /**
-     * Lists all network modification proposals.
+     * Lists the exchanges
      */
     listExchanges(callback = false) {
         if(!callback)

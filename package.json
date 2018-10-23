@@ -1,6 +1,6 @@
 {
     "name": "tronweb",
-    "version": "2.0.24",
+    "version": "2.0.25",
     "description": "JavaScript SDK that encapsulates the TRON Node HTTP API",
     "main": "dist/TronWeb.node.js",
     "scripts": {
@@ -10,11 +10,6 @@
         "test:browser": "node scripts/test-browser.js && npx karma start --single-run --browsers ChromeHeadless,Firefox,Edge",
         "test:node": "node scripts/test-node.js && npx mocha ./test/*.js",
         "test": "npm run-script test:browser && npm run-script test:node"
-    },
-    "husky": {
-        "hooks": {
-            "pre-push": "node ./scripts/pre-push.js"
-        }
     },
     "dependencies": {
         "@babel/runtime": "^7.0.0",
