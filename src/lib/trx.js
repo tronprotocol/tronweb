@@ -665,17 +665,17 @@ export default class Trx {
     }
 
     /**
-     * Lists all network modification proposals.
+     * Lists all account resources available.
      */
     getExchangeByID(exchangeID = false, callback = false) {
         if(!callback)
-            return this.injectPromise(this.getExchangeByID, address);
+            return this.injectPromise(this.getExchangeByID);
 
         if(!utils.isInteger(exchangeID) || exchangeID < 0)
             return callback('Invalid exchangeID provided');
 
-        this.tronWeb.fullNode.request('wallet/getexchangebyid', { 
-            address: this.tronWeb.address.toHex(address),
+        this.tronWeb.fullNode.request('wallet/getexchangebyid', {
+            address: this.tronWeb.defaultAddress.hex,
         }, 'post').then(exchange => {
             callback(null, exchange);
         }).catch(err => callback(err));
