@@ -2,8 +2,6 @@
   <a href="https://discord.gg/GsRgsTD">
     <img src="https://img.shields.io/badge/chat-on%20discord-brightgreen.svg">
   </a>
-    
-  
   
   <a href="https://github.com/tronprotocol/tron-web/issues">
     <img src="https://img.shields.io/github/issues/tronprotocol/tron-web.svg">
@@ -22,7 +20,7 @@
   </a>
 </p>
 
-## TronWeb
+## What is TronWeb?
 
 TronWeb aims to deliver a unified, seamless development experience influenced by Ethereum's [Web3](https://github.com/ethereum/web3.js/) implementation. We have taken the core ideas and expanded upon it to unlock the functionality of TRON's unique feature set along with offering new tools for integrating DApps in the browser, Node.js and IoT devices.
 
