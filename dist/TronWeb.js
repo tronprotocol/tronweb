@@ -41427,8 +41427,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
- // import { keccak256 } from 'js-sha3';
-// import { ec as EC } from 'elliptic';
+
+var TRX_MESSAGE_HEADER = '\x19TRON Signed Message:\n32';
+var ETH_MESSAGE_HEADER = '\x19Ethereum Signed Message:\n32';
 
 var Trx =
 /*#__PURE__*/
@@ -42038,11 +42039,11 @@ function () {
       var _verifyMessage = _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2___default()(
       /*#__PURE__*/
       _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2() {
-        var messageInput,
+        var message,
             signature,
             address,
+            useTronHeader,
             callback,
-            message,
             messageBytes,
             messageDigest,
             recovered,
@@ -42053,48 +42054,62 @@ function () {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                messageInput = _args2.length > 0 && _args2[0] !== undefined ? _args2[0] : false;
+                message = _args2.length > 0 && _args2[0] !== undefined ? _args2[0] : false;
                 signature = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : false;
                 address = _args2.length > 2 && _args2[2] !== undefined ? _args2[2] : this.tronWeb.defaultAddress.base58;
-                callback = _args2.length > 3 && _args2[3] !== undefined ? _args2[3] : false;
+                useTronHeader = _args2.length > 3 && _args2[3] !== undefined ? _args2[3] : true;
+                callback = _args2.length > 4 && _args2[4] !== undefined ? _args2[4] : false;
 
                 if (utils__WEBPACK_IMPORTED_MODULE_7__["default"].isFunction(address)) {
                   callback = address;
                   address = this.tronWeb.defaultAddress.base58;
+                  useTronHeader = true;
+                }
+
+                if (utils__WEBPACK_IMPORTED_MODULE_7__["default"].isFunction(useTronHeader)) {
+                  callback = useTronHeader;
+                  useTronHeader = true;
                 }
 
                 if (callback) {
-                  _context2.next = 7;
+                  _context2.next = 9;
                   break;
                 }
 
-                return _context2.abrupt("return", this.injectPromise(this.verifyMessage, messageInput, signature, address));
+                return _context2.abrupt("return", this.injectPromise(this.verifyMessage, message, signature, address, useTronHeader));
 
-              case 7:
-                if (messageInput.substr(0, 2) !== '0x') messageInput = '0x' + messageInput;
+              case 9:
+                if (utils__WEBPACK_IMPORTED_MODULE_7__["default"].isHex(message)) {
+                  _context2.next = 11;
+                  break;
+                }
+
+                return _context2.abrupt("return", callback('Expected hex message input'));
+
+              case 11:
+                if (message.substr(0, 2) == '0x') message = message.substring(2);
                 if (signature.substr(0, 2) == '0x') signature = signature.substr(2);
-                message = "\x19TRON Signed Message:\n32".concat(messageInput);
-                messageBytes = ethers__WEBPACK_IMPORTED_MODULE_8__["utils"].toUtf8Bytes(message);
+                messageBytes = _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_1___default()(ethers__WEBPACK_IMPORTED_MODULE_8__["utils"].toUtf8Bytes(useTronHeader ? TRX_MESSAGE_HEADER : ETH_MESSAGE_HEADER)).concat(_babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_1___default()(utils__WEBPACK_IMPORTED_MODULE_7__["default"].code.hexStr2byteArray(message)));
                 messageDigest = ethers__WEBPACK_IMPORTED_MODULE_8__["utils"].keccak256(messageBytes);
                 recovered = ethers__WEBPACK_IMPORTED_MODULE_8__["utils"].recoverAddress(messageDigest, {
-                  recoveryParam: signature.substr(0, 2) == '1c' ? 1 : 0,
-                  r: '0x' + signature.substr(2, 64),
-                  s: '0x' + signature.substr(66, 130)
+                  recoveryParam: signature.substring(128, 130) == '1c' ? 1 : 0,
+                  r: '0x' + signature.substring(0, 64),
+                  s: '0x' + signature.substring(64, 128)
                 });
                 tronAddress = '41' + recovered.substr(2);
                 base58Address = this.tronWeb.address.fromHex(tronAddress);
 
                 if (!(base58Address == this.tronWeb.address.fromHex(address))) {
-                  _context2.next = 17;
+                  _context2.next = 20;
                   break;
                 }
 
                 return _context2.abrupt("return", callback(null, true));
 
-              case 17:
+              case 20:
                 callback('Signature does not match');
 
-              case 18:
+              case 21:
               case "end":
                 return _context2.stop();
             }
@@ -42114,8 +42129,8 @@ function () {
       _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee3() {
         var transaction,
             privateKey,
+            useTronHeader,
             callback,
-            header,
             signingKey,
             messageBytes,
             messageDigest,
@@ -42130,49 +42145,54 @@ function () {
               case 0:
                 transaction = _args3.length > 0 && _args3[0] !== undefined ? _args3[0] : false;
                 privateKey = _args3.length > 1 && _args3[1] !== undefined ? _args3[1] : this.tronWeb.defaultPrivateKey;
-                callback = _args3.length > 2 && _args3[2] !== undefined ? _args3[2] : false;
+                useTronHeader = _args3.length > 2 && _args3[2] !== undefined ? _args3[2] : true;
+                callback = _args3.length > 3 && _args3[3] !== undefined ? _args3[3] : false;
 
                 if (utils__WEBPACK_IMPORTED_MODULE_7__["default"].isFunction(privateKey)) {
                   callback = privateKey;
                   privateKey = this.tronWeb.defaultPrivateKey;
+                  useTronHeader = true;
+                }
+
+                if (utils__WEBPACK_IMPORTED_MODULE_7__["default"].isFunction(useTronHeader)) {
+                  callback = useTronHeader;
+                  useTronHeader = true;
                 }
 
                 if (callback) {
-                  _context3.next = 6;
+                  _context3.next = 8;
                   break;
                 }
 
-                return _context3.abrupt("return", this.injectPromise(this.sign, transaction, privateKey));
+                return _context3.abrupt("return", this.injectPromise(this.sign, transaction, privateKey, useTronHeader));
 
-              case 6:
+              case 8:
                 if (!utils__WEBPACK_IMPORTED_MODULE_7__["default"].isString(transaction)) {
                   _context3.next = 24;
                   break;
                 }
 
-                if (transaction.substr(0, 2) == '0x') transaction = transaction.substr(2);
+                if (transaction.substring(0, 2) == '0x') transaction = transaction.substring(2);
 
                 if (utils__WEBPACK_IMPORTED_MODULE_7__["default"].isHex(transaction)) {
-                  _context3.next = 10;
+                  _context3.next = 12;
                   break;
                 }
 
                 return _context3.abrupt("return", callback('Expected hex message input'));
 
-              case 10:
-                _context3.prev = 10;
-                header = '\x19TRON Signed Message:\n32';
+              case 12:
+                _context3.prev = 12;
                 signingKey = new ethers__WEBPACK_IMPORTED_MODULE_8__["utils"].SigningKey(privateKey);
-                messageBytes = _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_1___default()(ethers__WEBPACK_IMPORTED_MODULE_8__["utils"].toUtf8Bytes(header)).concat(_babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_1___default()(utils__WEBPACK_IMPORTED_MODULE_7__["default"].code.hexStr2byteArray(transaction)));
+                messageBytes = _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_1___default()(ethers__WEBPACK_IMPORTED_MODULE_8__["utils"].toUtf8Bytes(useTronHeader ? TRX_MESSAGE_HEADER : ETH_MESSAGE_HEADER)).concat(_babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_1___default()(utils__WEBPACK_IMPORTED_MODULE_7__["default"].code.hexStr2byteArray(transaction)));
                 messageDigest = ethers__WEBPACK_IMPORTED_MODULE_8__["utils"].keccak256(messageBytes);
                 signature = signingKey.signDigest(messageDigest);
-                console.log(messageDigest);
-                signatureHex = ['0x' + Number(signature.v).toString(16), signature.r.substr(2), signature.s.substr(2)].join('');
+                signatureHex = ['0x', signature.r.substring(2), signature.s.substring(2), Number(signature.v).toString(16)].join('');
                 return _context3.abrupt("return", callback(null, signatureHex));
 
               case 21:
                 _context3.prev = 21;
-                _context3.t0 = _context3["catch"](10);
+                _context3.t0 = _context3["catch"](12);
                 callback(_context3.t0);
 
               case 24:
@@ -42215,7 +42235,7 @@ function () {
                 return _context3.stop();
             }
           }
-        }, _callee3, this, [[10, 21], [28, 35]]);
+        }, _callee3, this, [[12, 21], [28, 35]]);
       }));
 
       return function sign() {
