@@ -648,7 +648,7 @@ export default class Trx {
     }
 
     /**
-     * Lists all network modification proposals.
+     * Get the account resources
      */
     getAccountResources(address = false, callback = false) {
         if(!callback)
@@ -665,11 +665,11 @@ export default class Trx {
     }
 
     /**
-     * Lists all account resources available.
+     * Get the exchange ID.
      */
     getExchangeByID(exchangeID = false, callback = false) {
         if(!callback)
-            return this.injectPromise(this.getExchangeByID);
+            return this.injectPromise(this.getExchangeByID, exchangeID);
 
         if(!utils.isInteger(exchangeID) || exchangeID < 0)
             return callback('Invalid exchangeID provided');
@@ -682,7 +682,7 @@ export default class Trx {
     }
 
     /**
-     * Lists all network modification proposals.
+     * Lists the exchanges
      */
     listExchanges(callback = false) {
         if(!callback)
