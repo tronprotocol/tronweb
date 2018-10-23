@@ -485,7 +485,7 @@ export default class Trx {
         const messageDigest = Ethers.utils.keccak256(messageBytes);
 
         const recovered = Ethers.utils.recoverAddress(messageDigest, {
-            recoveryParam: signature.substr(0, 2) == '28' ? 1 : 0,
+            recoveryParam: signature.substr(0, 2) == '1c' ? 1 : 0,
             r: '0x' + signature.substr(2, 64),
             s: '0x' + signature.substr(66, 130)
         });
@@ -522,7 +522,7 @@ export default class Trx {
                 const signature = signingKey.signDigest(messageDigest);
 
                 const signatureHex = [
-                    '0x' + signature.v,
+                    '0x' + Number(signature.v).toString(16),
                     signature.r.substr(2),
                     signature.s.substr(2)
                 ].join('');
