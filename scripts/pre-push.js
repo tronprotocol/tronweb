@@ -16,7 +16,7 @@ try {
 } catch(ex) {
     if(ex.stdout)
         console.log(ex.stdout.toString());
-    
+
     console.log('Tests have failed. Please verify tests are passing before pushing');
     process.exit(1);
 }
