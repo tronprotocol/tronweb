@@ -650,7 +650,7 @@ export default class Trx {
     /**
      * Get the account resources
      */
-    getAccountResources(address = false, callback = false) {
+    getAccountResources(address = this.tronWeb.defaultAddress.hex, callback = false) {
         if(!callback)
             return this.injectPromise(this.getAccountResources, address);
 
