@@ -1,6 +1,6 @@
 import TronWeb from 'index';
 import utils from 'utils';
-import Ethers from 'ethers';
+import * as Ethers from 'ethers';
 
 export default class TransactionBuilder {
     constructor(tronWeb = false) {

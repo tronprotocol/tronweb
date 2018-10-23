@@ -40870,7 +40870,7 @@ function () {
       });
 
       if (typeof constructorParams !== 'undefined' && constructorParams) {
-        var abiCoder = new ethers__WEBPACK_IMPORTED_MODULE_5___default.a.utils.AbiCoder();
+        var abiCoder = new ethers__WEBPACK_IMPORTED_MODULE_5__["utils"].AbiCoder();
         var types = [];
         var values = [];
         constructorParams = constructorParams.inputs;
@@ -40951,7 +40951,7 @@ function () {
       functionSelector = functionSelector.replace('/\s*/g', '');
 
       if (parameters.length) {
-        var abiCoder = new ethers__WEBPACK_IMPORTED_MODULE_5___default.a.utils.AbiCoder();
+        var abiCoder = new ethers__WEBPACK_IMPORTED_MODULE_5__["utils"].AbiCoder();
         var types = [];
         var values = [];
 
@@ -42146,7 +42146,7 @@ function () {
 
               case 6:
                 if (!utils__WEBPACK_IMPORTED_MODULE_7__["default"].isString(transaction)) {
-                  _context3.next = 22;
+                  _context3.next = 21;
                   break;
                 }
 
@@ -42157,56 +42157,55 @@ function () {
                 messageBytes = ethers__WEBPACK_IMPORTED_MODULE_8__["utils"].toUtf8Bytes(message);
                 messageDigest = ethers__WEBPACK_IMPORTED_MODULE_8__["utils"].keccak256(messageBytes);
                 signature = signingKey.signDigest(messageDigest);
-                console.log('signer', signature);
                 signatureHex = ['0x' + signature.v, signature.r.substr(2), signature.s.substr(2)].join('');
                 return _context3.abrupt("return", callback(null, signatureHex));
 
-              case 19:
-                _context3.prev = 19;
+              case 18:
+                _context3.prev = 18;
                 _context3.t0 = _context3["catch"](8);
                 callback(_context3.t0);
 
-              case 22:
+              case 21:
                 if (utils__WEBPACK_IMPORTED_MODULE_7__["default"].isObject(transaction)) {
-                  _context3.next = 24;
+                  _context3.next = 23;
                   break;
                 }
 
                 return _context3.abrupt("return", callback('Invalid transaction provided'));
 
-              case 24:
+              case 23:
                 if (!transaction.signature) {
-                  _context3.next = 26;
+                  _context3.next = 25;
                   break;
                 }
 
                 return _context3.abrupt("return", callback('Transaction is already signed'));
 
-              case 26:
-                _context3.prev = 26;
+              case 25:
+                _context3.prev = 25;
                 _address = this.tronWeb.address.toHex(this.tronWeb.address.fromPrivateKey(privateKey)).toLowerCase();
 
                 if (!(_address !== transaction.raw_data.contract[0].parameter.value.owner_address.toLowerCase())) {
-                  _context3.next = 30;
+                  _context3.next = 29;
                   break;
                 }
 
                 return _context3.abrupt("return", callback('Private key does not match address in transaction'));
 
-              case 30:
+              case 29:
                 return _context3.abrupt("return", callback(null, utils__WEBPACK_IMPORTED_MODULE_7__["default"].crypto.signTransaction(privateKey, transaction)));
 
-              case 33:
-                _context3.prev = 33;
-                _context3.t1 = _context3["catch"](26);
+              case 32:
+                _context3.prev = 32;
+                _context3.t1 = _context3["catch"](25);
                 callback(_context3.t1);
 
-              case 36:
+              case 35:
               case "end":
                 return _context3.stop();
             }
           }
-        }, _callee3, this, [[8, 19], [26, 33]]);
+        }, _callee3, this, [[8, 18], [25, 32]]);
       }));
 
       return function sign() {
