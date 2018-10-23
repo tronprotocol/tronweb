@@ -104,11 +104,11 @@ export default class TronWeb extends EventEmitter {
     }
 
     isEventServerConnected() {
-        if(!this.eventServer)
+        if (!this.eventServer)
             return false;
 
-        return axios.get(this.eventServer).then(({ data }) => {
-            return utils.hasProperty(data, '_links');
+        return axios.get(this.eventServer.replace(/\/+$/,'') + '/events').then(({data}) => {
+            return Array.isArray(data);
         }).catch(() => false);
     }
 
