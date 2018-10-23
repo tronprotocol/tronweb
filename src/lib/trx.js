@@ -510,14 +510,17 @@ export default class Trx {
 
         // Message signing
         if(utils.isString(transaction)) {
-            if(transaction.substr(0, 2) !== '0x')
-                transaction = '0x' + transaction;
+            if(transaction.substr(0, 2) == '0x')
+                transaction = transaction.substr(2);
+
+            if(!utils.isHex(transaction))
+                return callback('Expected hex message input');
 
             try {
-                const message = `\x19TRON Signed Message:\n32${ transaction }`;
+                const header = '\x19TRON Signed Message:\n32';
                 const signingKey = new Ethers.utils.SigningKey(privateKey);
 
-                const messageBytes = Ethers.utils.toUtf8Bytes(message);
+                const messageBytes = [ ...Ethers.utils.toUtf8Bytes(header), ...utils.code.hexStr2byteArray(transaction) ];
                 const messageDigest = Ethers.utils.keccak256(messageBytes);
                 const signature = signingKey.signDigest(messageDigest);
 

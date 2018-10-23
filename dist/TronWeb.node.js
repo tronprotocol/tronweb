@@ -3299,7 +3299,7 @@ function () {
                 messageBytes = ethers__WEBPACK_IMPORTED_MODULE_9__["utils"].toUtf8Bytes(message);
                 messageDigest = ethers__WEBPACK_IMPORTED_MODULE_9__["utils"].keccak256(messageBytes);
                 recovered = ethers__WEBPACK_IMPORTED_MODULE_9__["utils"].recoverAddress(messageDigest, {
-                  recoveryParam: signature.substr(0, 2) == '28' ? 1 : 0,
+                  recoveryParam: signature.substr(0, 2) == '1c' ? 1 : 0,
                   r: '0x' + signature.substr(2, 64),
                   s: '0x' + signature.substr(66, 130)
                 });
@@ -3337,7 +3337,7 @@ function () {
         var transaction,
             privateKey,
             callback,
-            message,
+            header,
             signingKey,
             messageBytes,
             messageDigest,
@@ -3368,66 +3368,76 @@ function () {
 
               case 6:
                 if (!utils__WEBPACK_IMPORTED_MODULE_8__["default"].isString(transaction)) {
-                  _context3.next = 21;
+                  _context3.next = 24;
                   break;
                 }
 
-                if (transaction.substr(0, 2) !== '0x') transaction = '0x' + transaction;
-                _context3.prev = 8;
-                message = "\x19TRON Signed Message:\n32".concat(transaction);
+                if (transaction.substr(0, 2) == '0x') transaction = transaction.substr(2);
+
+                if (utils__WEBPACK_IMPORTED_MODULE_8__["default"].isHex(transaction)) {
+                  _context3.next = 10;
+                  break;
+                }
+
+                return _context3.abrupt("return", callback('Expected hex message input'));
+
+              case 10:
+                _context3.prev = 10;
+                header = '\x19TRON Signed Message:\n32';
                 signingKey = new ethers__WEBPACK_IMPORTED_MODULE_9__["utils"].SigningKey(privateKey);
-                messageBytes = ethers__WEBPACK_IMPORTED_MODULE_9__["utils"].toUtf8Bytes(message);
+                messageBytes = _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_1___default()(ethers__WEBPACK_IMPORTED_MODULE_9__["utils"].toUtf8Bytes(header)).concat(_babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_1___default()(utils__WEBPACK_IMPORTED_MODULE_8__["default"].code.hexStr2byteArray(transaction)));
                 messageDigest = ethers__WEBPACK_IMPORTED_MODULE_9__["utils"].keccak256(messageBytes);
                 signature = signingKey.signDigest(messageDigest);
-                signatureHex = ['0x' + signature.v, signature.r.substr(2), signature.s.substr(2)].join('');
+                console.log(messageDigest);
+                signatureHex = ['0x' + Number(signature.v).toString(16), signature.r.substr(2), signature.s.substr(2)].join('');
                 return _context3.abrupt("return", callback(null, signatureHex));
 
-              case 18:
-                _context3.prev = 18;
-                _context3.t0 = _context3["catch"](8);
+              case 21:
+                _context3.prev = 21;
+                _context3.t0 = _context3["catch"](10);
                 callback(_context3.t0);
 
-              case 21:
+              case 24:
                 if (utils__WEBPACK_IMPORTED_MODULE_8__["default"].isObject(transaction)) {
-                  _context3.next = 23;
+                  _context3.next = 26;
                   break;
                 }
 
                 return _context3.abrupt("return", callback('Invalid transaction provided'));
 
-              case 23:
+              case 26:
                 if (!transaction.signature) {
-                  _context3.next = 25;
+                  _context3.next = 28;
                   break;
                 }
 
                 return _context3.abrupt("return", callback('Transaction is already signed'));
 
-              case 25:
-                _context3.prev = 25;
+              case 28:
+                _context3.prev = 28;
                 _address = this.tronWeb.address.toHex(this.tronWeb.address.fromPrivateKey(privateKey)).toLowerCase();
 
                 if (!(_address !== transaction.raw_data.contract[0].parameter.value.owner_address.toLowerCase())) {
-                  _context3.next = 29;
+                  _context3.next = 32;
                   break;
                 }
 
                 return _context3.abrupt("return", callback('Private key does not match address in transaction'));
 
-              case 29:
+              case 32:
                 return _context3.abrupt("return", callback(null, utils__WEBPACK_IMPORTED_MODULE_8__["default"].crypto.signTransaction(privateKey, transaction)));
 
-              case 32:
-                _context3.prev = 32;
-                _context3.t1 = _context3["catch"](25);
+              case 35:
+                _context3.prev = 35;
+                _context3.t1 = _context3["catch"](28);
                 callback(_context3.t1);
 
-              case 35:
+              case 38:
               case "end":
                 return _context3.stop();
             }
           }
-        }, _callee3, this, [[8, 18], [25, 32]]);
+        }, _callee3, this, [[10, 21], [28, 35]]);
       }));
 
       return function sign() {
