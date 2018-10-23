@@ -120,6 +120,15 @@ const utils = {
         }
 
         return event;
+    },
+
+    padLeft(input, padding, amount) {
+        let res = input.toString();
+
+        while(res.length < amount)
+            res = padding + res;
+
+        return res;
     }
 }
 

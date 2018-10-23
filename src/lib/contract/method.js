@@ -1,4 +1,4 @@
-import Ethers from 'ethers';
+import * as Ethers from 'ethers';
 import utils from 'utils';
 
 const abiCoder = new Ethers.utils.AbiCoder();
