@@ -1,5 +1,9 @@
 import TronWeb from 'index';
 import utils from 'utils';
+import * as Ethers from 'ethers';
+
+// import { keccak256 } from 'js-sha3';
+// import { ec as EC } from 'elliptic';
 
 export default class Trx {
     constructor(tronWeb = false) {
@@ -461,6 +465,40 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
+    async verifyMessage(messageInput = false, signature = false, address = this.tronWeb.defaultAddress.base58, callback = false) {
+        if(utils.isFunction(address)) {
+            callback = address;
+            address = this.tronWeb.defaultAddress.base58;
+        }
+
+        if(!callback)
+            return this.injectPromise(this.verifyMessage, messageInput, signature, address);
+
+        if(messageInput.substr(0, 2) !== '0x')
+            messageInput = '0x' + messageInput;
+
+        if(signature.substr(0, 2) == '0x')
+            signature = signature.substr(2);
+
+        const message = `\x19TRON Signed Message:\n32${ messageInput }`;
+        const messageBytes = Ethers.utils.toUtf8Bytes(message);
+        const messageDigest = Ethers.utils.keccak256(messageBytes);
+
+        const recovered = Ethers.utils.recoverAddress(messageDigest, {
+            recoveryParam: signature.substr(0, 2) == '28' ? 1 : 0,
+            r: '0x' + signature.substr(2, 64),
+            s: '0x' + signature.substr(66, 130)
+        });
+
+        const tronAddress = '41' + recovered.substr(2);
+        const base58Address = this.tronWeb.address.fromHex(tronAddress);
+
+        if(base58Address == this.tronWeb.address.fromHex(address))
+            return callback(null, true);
+
+        callback('Signature does not match');
+    }
+
     async sign(transaction = false, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
         if(utils.isFunction(privateKey)) {
             callback = privateKey;
@@ -469,6 +507,31 @@ export default class Trx {
 
         if(!callback)
             return this.injectPromise(this.sign, transaction, privateKey);
+
+        // Message signing
+        if(utils.isString(transaction)) {
+            if(transaction.substr(0, 2) !== '0x')
+                transaction = '0x' + transaction;
+
+            try {
+                const message = `\x19TRON Signed Message:\n32${ transaction }`;
+                const signingKey = new Ethers.utils.SigningKey(privateKey);
+
+                const messageBytes = Ethers.utils.toUtf8Bytes(message);
+                const messageDigest = Ethers.utils.keccak256(messageBytes);
+                const signature = signingKey.signDigest(messageDigest);
+
+                const signatureHex = [
+                    '0x' + signature.v,
+                    signature.r.substr(2),
+                    signature.s.substr(2)
+                ].join('');
+
+                return callback(null, signatureHex);
+            } catch(ex) {
+                callback(ex);
+            }
+        }
 
         if(!utils.isObject(transaction))
             return callback('Invalid transaction provided');
@@ -584,6 +647,10 @@ export default class Trx {
         } catch(ex) {
             return callback(ex);
         }
+    }
+
+    signMessage(...args) {
+        return this.sign(...args);
     }
 
     sendAsset(...args) {
