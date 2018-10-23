@@ -107,7 +107,7 @@ export default class TronWeb extends EventEmitter {
         if (!this.eventServer)
             return false;
 
-        return axios.get(this.eventServer.replace(/\/+$/,'') + '/events').then(({data}) => {
+        return axios.get(this.eventServer.replace(/\/+$/,'') + '/events?size=1').then(({data}) => {
             return Array.isArray(data);
         }).catch(() => false);
     }
