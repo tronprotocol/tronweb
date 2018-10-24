@@ -556,31 +556,6 @@ export default class Trx {
             }
         }
 
-        // Message signing
-        if(utils.isString(transaction)) {
-            if(transaction.substr(0, 2) !== '0x')
-                transaction = '0x' + transaction;
-
-            try {
-                const message = `\x19TRON Signed Message:\n32${ transaction }`;
-                const signingKey = new Ethers.utils.SigningKey(privateKey);
-
-                const messageBytes = Ethers.utils.toUtf8Bytes(message);
-                const messageDigest = Ethers.utils.keccak256(messageBytes);
-                const signature = signingKey.signDigest(messageDigest);
-
-                const signatureHex = [
-                    '0x' + signature.v,
-                    signature.r.substr(2),
-                    signature.s.substr(2)
-                ].join('');
-
-                return callback(null, signatureHex);
-            } catch(ex) {
-                callback(ex);
-            }
-        }
-
         if(!utils.isObject(transaction))
             return callback('Invalid transaction provided');
 
