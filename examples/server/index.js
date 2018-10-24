@@ -1,5 +1,4 @@
-const TronWeb = require('../../dist/TronWeb.node.js'); // require('tronweb');
-const HttpProvider = TronWeb.providers.HttpProvider;
+const TronWeb = require('../../dist/TronWeb.node.js');
 
 const fullNode = 'https://api.shasta.trongrid.io';
 const solidityNode = 'https://api.shasta.trongrid.io';

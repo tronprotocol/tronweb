@@ -53,6 +53,7 @@ export default class TronWeb extends EventEmitter {
         this.transactionBuilder = new TransactionBuilder(this);
         this.trx = new Trx(this);
         this.witness = new Witness(this);
+        this.utils = utils;
 
         this.injectPromise = utils.promiseInjector(this);
     }
@@ -103,12 +104,16 @@ export default class TronWeb extends EventEmitter {
     }
 
     isEventServerConnected() {
-        if(!this.eventServer)
+        if (!this.eventServer)
             return false;
 
-        return axios.get(this.eventServer).then(({ data }) => {
-            return utils.hasProperty(data, '_links');
-        }).catch(() => false);
+        return axios.get(this.eventServer.replace(/\/+$/,'') + '/healthcheck').then(() => {
+            return true;
+        }).catch(() => {
+            return axios.get(this.eventServer.replace(/\/+$/,'') + '/events?size=1').then(({data}) => {
+                return Array.isArray(data);
+            }).catch(() => false);
+        });
     }
 
     setFullNode(fullNode) {

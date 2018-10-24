@@ -1,6 +1,28 @@
+<p align="center">
+  <a href="https://discord.gg/GsRgsTD">
+    <img src="https://img.shields.io/badge/chat-on%20discord-brightgreen.svg">
+  </a>
+  
+  <a href="https://github.com/tronprotocol/tron-web/issues">
+    <img src="https://img.shields.io/github/issues/tronprotocol/tron-web.svg">
+  </a>
+  
+  <a href="https://github.com/tronprotocol/tron-web/pulls">
+    <img src="https://img.shields.io/github/issues-pr/tronprotocol/tron-web.svg">
+  </a>
+  
+  <a href="https://github.com/tronprotocol/tron-web/graphs/contributors"> 
+    <img src="https://img.shields.io/github/contributors/tronprotocol/tron-web.svg">
+  </a>
+  
+  <a href="LICENSE">
+    <img src="https://img.shields.io/github/license/tronprotocol/tron-web.svg">
+  </a>
+</p>
+
 ## What is TronWeb?
 
-TronWeb aims to deliver a unified, seamless development experience influenced by Ethereum's [Web3](https://github.com/ethereum/web3.js/) implementation. We have taken the core of [Web3](https://github.com/ethereum/web3.js/) and expanded upon it to unlock the functionality of TRON's unique feature set along with offering new tools for integrating DApps in the browser, Node.js and IoT devices.
+TronWeb aims to deliver a unified, seamless development experience influenced by Ethereum's [Web3](https://github.com/ethereum/web3.js/) implementation. We have taken the core ideas and expanded upon it to unlock the functionality of TRON's unique feature set along with offering new tools for integrating DApps in the browser, Node.js and IoT devices.
 
 ## Compatibility
 - Version built for Node.js v6 and above

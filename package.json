@@ -11,21 +11,16 @@
         "test:node": "node scripts/test-node.js && npx mocha ./test/*.js",
         "test": "npm run-script test:browser && npm run-script test:node"
     },
-    "husky": {
-        "hooks": {
-            "pre-push": "node ./scripts/pre-push.js"
-        }
-    },
     "dependencies": {
         "@babel/runtime": "^7.0.0",
         "axios": "^0.18.0",
+        "babel-runtime": "^6.26.0",
         "bignumber.js": "^7.2.1",
         "elliptic": "^6.4.1",
         "ethers": "^4.0.7",
         "eventemitter3": "^3.1.0",
         "js-sha3": "^0.8.0",
         "jssha": "^2.3.1",
-        "source-map-support": "^0.5.9",
         "validator": "^10.7.1"
     },
     "devDependencies": {
@@ -61,6 +56,7 @@
         "mocha": "^5.2.0",
         "puppeteer": "^1.8.0",
         "rimraf": "^2.6.2",
+        "source-map-support": "^0.5.9",
         "webpack": "^4.17.2",
         "webpack-cli": "^3.1.0",
         "webpack-node-externals": "^1.7.2"

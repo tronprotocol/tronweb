@@ -301,7 +301,8 @@ export default class TransactionBuilder {
             feeLimit = 1_000_000_000,
             callValue = 0,
             userFeePercentage = 0,
-            parameters = []
+            parameters = [],
+            name = "",
         } = options;
         
 
@@ -312,7 +313,7 @@ export default class TransactionBuilder {
                 return callback('Invalid options.abi provided');
             }
         }
-
+        console.log(name);
         if(!utils.isArray(abi))
             return callback('Invalid options.abi provided');
 
@@ -320,6 +321,9 @@ export default class TransactionBuilder {
         const payable = abi.some(func => {
             return func.type == 'constructor' && func.payable;
         });
+
+        if(!utils.isHex(name))
+            name = this.tronWeb.toHex(name);
 
         if(!utils.isHex(bytecode))
             return callback('Invalid options.bytecode provided');
@@ -388,7 +392,8 @@ export default class TransactionBuilder {
             consume_user_resource_percent: userFeePercentage,
             abi: JSON.stringify(abi),
             bytecode,
-            parameter: parameters
+            parameter: parameters,
+            name
         }, 'post').then(transaction => {
             if(transaction.Error)
                 return callback(transaction.Error);

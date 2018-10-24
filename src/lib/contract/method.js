@@ -1,7 +1,4 @@
-import * as Ethers from 'ethers';
 import utils from 'utils';
-
-const abiCoder = new Ethers.utils.AbiCoder();
 
 const getFunctionSelector = abi => {
     return abi.name + '(' + getParamTypes(abi.inputs || []).join(',') + ')';
@@ -15,16 +12,7 @@ const decodeOutput = (abi, output) => {
     const names = abi.map(({ name }) => name).filter(name => !!name);
     const types = abi.map(({ type }) => type);
 
-    return abiCoder.decode(types, output).reduce((obj, arg, index) => {
-        if(types[index] == 'address')
-            arg = '41' + arg.substr(2).toLowerCase();
-
-        if(names.length)
-            obj[names[index]] = arg;
-        else obj.push(arg);
-
-        return obj;
-    }, names.length ? {} : []);
+    return utils.abi.decodeParams(names, types, output);
 };
 
 export default class Method {
