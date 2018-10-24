@@ -1,4 +1,4 @@
-import Ethers from 'ethers';
+import * as Ethers from 'ethers';
 import TronWeb from 'index';
 
 const abiCoder = new Ethers.utils.AbiCoder();
