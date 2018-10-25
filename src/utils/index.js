@@ -3,6 +3,7 @@ import * as base58 from './base58';
 import * as bytes from './bytes';
 import * as crypto from './crypto';
 import * as code from './code';
+import * as abi from './abi';
 
 import validator from 'validator';
 import BigNumber from 'bignumber.js';
@@ -100,7 +101,7 @@ const utils = {
         if (this.isObject(event.result)) {
             for (var i = 0; i < abi.length; i++) {
                 let obj = abi[i];
-                if (obj.type == 'address' && event.result[obj.name])
+                if (obj.type == 'address' && obj.name in event.result)
                     event.result[obj.name] = '41' + event.result[obj.name].substr(2).toLowerCase();
             }
         } else if (this.isArray(event.result)) {
@@ -119,8 +120,16 @@ const utils = {
             }, {});
         }
 
-
         return event;
+    },
+
+    padLeft(input, padding, amount) {
+        let res = input.toString();
+
+        while(res.length < amount)
+            res = padding + res;
+
+        return res;
     }
 }
 
@@ -130,5 +139,6 @@ export default {
     accounts,
     base58,
     bytes,
-    crypto
+    crypto,
+    abi
 };

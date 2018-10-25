@@ -1,5 +1,9 @@
 import TronWeb from 'index';
 import utils from 'utils';
+import * as Ethers from 'ethers';
+
+const TRX_MESSAGE_HEADER = '\x19TRON Signed Message:\n32';
+const ETH_MESSAGE_HEADER = '\x19Ethereum Signed Message:\n32';
 
 export default class Trx {
     constructor(tronWeb = false) {
@@ -461,14 +465,96 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
-    async sign(transaction = false, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
-        if(utils.isFunction(privateKey)) {
-            callback = privateKey;
-            privateKey = this.tronWeb.defaultPrivateKey;
+    async verifyMessage(message = false, signature = false, address = this.tronWeb.defaultAddress.base58, useTronHeader = true, callback = false) {
+        if(utils.isFunction(address)) {
+            callback = address;
+            address = this.tronWeb.defaultAddress.base58;
+            useTronHeader = true;
+        }
+
+        if(utils.isFunction(useTronHeader)) {
+            callback = useTronHeader;
+            useTronHeader = true;
         }
 
         if(!callback)
-            return this.injectPromise(this.sign, transaction, privateKey);
+            return this.injectPromise(this.verifyMessage, message, signature, address, useTronHeader);
+
+        if(!utils.isHex(message))
+            return callback('Expected hex message input');
+
+        if(message.substr(0, 2) == '0x')
+            message = message.substring(2);
+
+        if(signature.substr(0, 2) == '0x')
+            signature = signature.substr(2);
+
+        const messageBytes = [
+            ...Ethers.utils.toUtf8Bytes(useTronHeader ? TRX_MESSAGE_HEADER : ETH_MESSAGE_HEADER),
+            ...utils.code.hexStr2byteArray(message)
+        ];
+
+        const messageDigest = Ethers.utils.keccak256(messageBytes);
+        const recovered = Ethers.utils.recoverAddress(messageDigest, {
+            recoveryParam: signature.substring(128, 130) == '1c' ? 1 : 0,
+            r: '0x' + signature.substring(0, 64),
+            s: '0x' + signature.substring(64, 128)
+        });
+
+        const tronAddress = '41' + recovered.substr(2);
+        const base58Address = this.tronWeb.address.fromHex(tronAddress);
+
+        if(base58Address == this.tronWeb.address.fromHex(address))
+            return callback(null, true);
+
+        callback('Signature does not match');
+    }
+
+    async sign(transaction = false, privateKey = this.tronWeb.defaultPrivateKey, useTronHeader = true, callback = false) {
+        if(utils.isFunction(privateKey)) {
+            callback = privateKey;
+            privateKey = this.tronWeb.defaultPrivateKey;
+            useTronHeader = true;
+        }
+
+        if(utils.isFunction(useTronHeader)) {
+            callback = useTronHeader;
+            useTronHeader = true;
+        }
+
+        if(!callback)
+            return this.injectPromise(this.sign, transaction, privateKey, useTronHeader);
+
+        // Message signing
+        if(utils.isString(transaction)) {
+            if(transaction.substring(0, 2) == '0x')
+                transaction = transaction.substring(2);
+
+            if(!utils.isHex(transaction))
+                return callback('Expected hex message input');
+
+            try {
+                const signingKey = new Ethers.utils.SigningKey(privateKey);
+                const messageBytes = [
+                    ...Ethers.utils.toUtf8Bytes(useTronHeader ? TRX_MESSAGE_HEADER : ETH_MESSAGE_HEADER),
+                    ...utils.code.hexStr2byteArray(transaction)
+                ];
+
+                const messageDigest = Ethers.utils.keccak256(messageBytes);
+                const signature = signingKey.signDigest(messageDigest);
+
+                const signatureHex = [
+                    '0x',
+                    signature.r.substring(2),
+                    signature.s.substring(2),
+                    Number(signature.v).toString(16)
+                ].join('');
+
+                return callback(null, signatureHex);
+            } catch(ex) {
+                callback(ex);
+            }
+        }
 
         if(!utils.isObject(transaction))
             return callback('Invalid transaction provided');
@@ -586,6 +672,10 @@ export default class Trx {
         }
     }
 
+    signMessage(...args) {
+        return this.sign(...args);
+    }
+
     sendAsset(...args) {
         return this.sendToken(...args);
     }
@@ -648,9 +738,9 @@ export default class Trx {
     }
 
     /**
-     * Lists all network modification proposals.
+     * Get the account resources
      */
-    getAccountResources(address = false, callback = false) {
+    getAccountResources(address = this.tronWeb.defaultAddress.hex, callback = false) {
         if(!callback)
             return this.injectPromise(this.getAccountResources, address);
 
@@ -665,30 +755,114 @@ export default class Trx {
     }
 
     /**
-     * Lists all network modification proposals.
+     * Get the exchange ID.
      */
     getExchangeByID(exchangeID = false, callback = false) {
         if(!callback)
-            return this.injectPromise(this.getExchangeByID, address);
+            return this.injectPromise(this.getExchangeByID, exchangeID);
 
         if(!utils.isInteger(exchangeID) || exchangeID < 0)
             return callback('Invalid exchangeID provided');
 
-        this.tronWeb.fullNode.request('wallet/getexchangebyid', { 
-            address: this.tronWeb.address.toHex(address),
+        this.tronWeb.fullNode.request('wallet/getexchangebyid', {
+            address: this.tronWeb.defaultAddress.hex,
         }, 'post').then(exchange => {
             callback(null, exchange);
         }).catch(err => callback(err));
     }
 
     /**
-     * Lists all network modification proposals.
+     * Lists the exchanges
      */
     listExchanges(callback = false) {
         if(!callback)
             return this.injectPromise(this.listExchanges);
 
         this.tronWeb.fullNode.request('wallet/listexchanges', {}, 'post').then(({ exchanges = [] }) => {
+            callback(null, exchanges);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Create an exchange between tokens.
+     */
+    exchangeCreate(ownerAddress = false,
+                   firstTokenID, firstTokenBalance,
+                   secondTokenID, secondTokenBalance, callback = false) {
+        if (!callback)
+            return this.injectPromise(this.getAccountResources, address);
+
+        if (!this.tronWeb.isAddress(ownerAddress))
+            return callback('Invalid address provided');
+
+        if (!utils.isString(firstTokenID) || !firstTokenID.length
+            || !utils.isString(secondTokenID) || !secondTokenID.length)
+            return callback('Invalid token ID provided');
+
+        if (!utils.isInteger(firstTokenBalance) || firstTokenBalance <= 0
+            || !utils.isInteger(secondTokenBalance) || secondTokenBalance <= 0)
+            return callback('Invalid amount provided');
+
+        this.tronWeb.fullNode.request('wallet/exchangecreate', {
+            owner_address: this.tronWeb.address.toHex(ownerAddress),
+            first_token_id: firstTokenID,
+            first_token_balance: firstTokenBalance,
+            second_token_id: secondTokenID,
+            second_token_balance: secondTokenBalance
+        }, 'post').then(resources => {
+            callback(null, resources);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Exchanges a transaction.
+     */
+    exchangeTransaction(ownerAddress = false, exchangeID, tokenID, quant, expected, callback = false) {
+        if (!callback)
+            return this.injectPromise(this.getAccountResources, address);
+
+        if (!this.tronWeb.isAddress(ownerAddress))
+            return callback('Invalid address provided');
+
+        if (!utils.isString(tokenID) || !tokenID.length)
+            return callback('Invalid token ID provided');
+
+        if (!utils.isInteger(quant) || quant <= 0)
+            return callback('Invalid quantity provided');
+
+        if (!utils.isInteger(expected) || expected < 0)
+            return callback('Invalid expected provided');
+
+        this.tronWeb.fullNode.request('wallet/exchangetransaction', {
+            owner_address: this.tronWeb.address.toHex(ownerAddress),
+            exchange_id: exchangeID,
+            token_id: tokenID,
+            quant,
+            expected
+        }, 'post').then(resources => {
+            callback(null, resources);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Lists all network modification proposals.
+     */
+    listExchangesPaginated(limit = 10, offset = 0, callback = false) {
+        if(utils.isFunction(offset)) {
+            callback = offset;
+            offset = 0;
+        }
+        if(utils.isFunction(limit)) {
+            callback = limit;
+            limit = 30;
+        }
+        if(!callback)
+            return this.injectPromise(this.listExchanges);
+
+        this.tronWeb.fullNode.request('wallet/listexchangespaginated', {
+            limit,
+            offset
+        }, 'post').then(({ exchanges = [] }) => {
             callback(null, exchanges);
         }).catch(err => callback(err));
     }

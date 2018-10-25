@@ -1,6 +1,6 @@
 import TronWeb from 'index';
 import utils from 'utils';
-import Ethers from 'ethers';
+import * as Ethers from 'ethers';
 
 export default class TransactionBuilder {
     constructor(tronWeb = false) {
@@ -301,8 +301,10 @@ export default class TransactionBuilder {
             feeLimit = 1_000_000_000,
             callValue = 0,
             userFeePercentage = 0,
-            parameters = []
+            parameters = [],
+            name = "",
         } = options;
+        
 
         if(abi && utils.isString(abi)) {
             try {
@@ -311,13 +313,17 @@ export default class TransactionBuilder {
                 return callback('Invalid options.abi provided');
             }
         }
-
+        console.log(name);
         if(!utils.isArray(abi))
             return callback('Invalid options.abi provided');
+
 
         const payable = abi.some(func => {
             return func.type == 'constructor' && func.payable;
         });
+
+        if(!utils.isHex(name))
+            name = this.tronWeb.toHex(name);
 
         if(!utils.isHex(bytecode))
             return callback('Invalid options.bytecode provided');
@@ -343,13 +349,24 @@ export default class TransactionBuilder {
         if(!this.tronWeb.isAddress(issuerAddress))
             return callback('Invalid issuer address provided');
 
-        if(parameters.length) {
+        var constructorParams = abi.find(
+            (it) => {
+                return it.type === 'constructor';
+            }
+        );
+
+        if(typeof constructorParams !== 'undefined' && constructorParams) {
             const abiCoder = new Ethers.utils.AbiCoder();
             const types = [];
             const values = [];
+            constructorParams = constructorParams.inputs;
+
+            if(parameters.length != constructorParams.length)
+                return callback(`constructor needs ${constructorParams.length} but ${parameters.length} provided`);
 
             for(let i = 0; i < parameters.length; i++) {
-                let { type, value } = parameters[i];
+                let type = constructorParams[i].type;
+                let value = parameters[i];
 
                 if(!type || !utils.isString(type) || !type.length)
                     return callback('Invalid parameter type provided: ' + type);
@@ -375,7 +392,8 @@ export default class TransactionBuilder {
             consume_user_resource_percent: userFeePercentage,
             abi: JSON.stringify(abi),
             bytecode,
-            parameter: parameters
+            parameter: parameters,
+            name
         }, 'post').then(transaction => {
             if(transaction.Error)
                 return callback(transaction.Error);

@@ -53,6 +53,7 @@ export default class TronWeb extends EventEmitter {
         this.transactionBuilder = new TransactionBuilder(this);
         this.trx = new Trx(this);
         this.witness = new Witness(this);
+        this.utils = utils;
 
         this.injectPromise = utils.promiseInjector(this);
     }
@@ -103,12 +104,16 @@ export default class TronWeb extends EventEmitter {
     }
 
     isEventServerConnected() {
-        if(!this.eventServer)
+        if (!this.eventServer)
             return false;
 
-        return axios.get(this.eventServer).then(({ data }) => {
-            return utils.hasProperty(data, '_links');
-        }).catch(() => false);
+        return axios.get(this.eventServer.replace(/\/+$/,'') + '/healthcheck').then(() => {
+            return true;
+        }).catch(() => {
+            return axios.get(this.eventServer.replace(/\/+$/,'') + '/events?size=1').then(({data}) => {
+                return Array.isArray(data);
+            }).catch(() => false);
+        });
     }
 
     setFullNode(fullNode) {
@@ -257,11 +262,13 @@ export default class TronWeb extends EventEmitter {
             return TronWeb.fromUtf8(JSON.stringify(val));
 
         if(utils.isString(val)) {
-            if(val.indexOf('-0x') === 0)
-                return TronWeb.fromDecimal(val);
-
-            if(val.indexOf('0x') === 0)
+            if (/^(-|)0x/.test(val))
                 return val;
+            // if(val.indexOf('-0x') === 0)
+            //     return TronWeb.fromDecimal(val); // << this returns val
+            //
+            // if(val.indexOf('0x') === 0)
+            //     return val;
 
             if(!isFinite(val))
                 return TronWeb.fromUtf8(val);
@@ -271,19 +278,21 @@ export default class TronWeb extends EventEmitter {
     }
 
     static toUtf8(hex) {
+        hex = hex.replace(/^0x/,'');
         return Buffer.from(hex, 'hex').toString('utf8');
     }
 
     static fromUtf8(string) {
-        return Buffer.from(string, 'utf8').toString('hex');
+        return '0x' + Buffer.from(string, 'utf8').toString('hex');
     }
 
     static toAscii(hex) {
+        hex = hex.replace(/^0x/,'');
         return Buffer.from(hex, 'hex').toString('ascii');
     }
 
     static fromAscii(string, padding) {
-        return Buffer.from(string, 'ascii').toString('hex').padEnd(padding, '0');
+        return '0x' + Buffer.from(string, 'ascii').toString('hex').padEnd(padding, '0');
     }
 
     static toDecimal(value) {
@@ -294,7 +303,7 @@ export default class TronWeb extends EventEmitter {
         const number = TronWeb.toBigNumber(value);
         const result = number.toString(16);
 
-        return number.lessThan(0) ? '-0x' + result.substr(1) : '0x' + result;
+        return number.isLessThan(0) ? '-0x' + result.substr(1) : '0x' + result;
     }
 
     static fromSun(sun) {

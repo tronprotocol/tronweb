@@ -1,9 +1,8 @@
-const TronWeb = require('../../dist/TronWeb.node.js'); // require('tronweb');
-const HttpProvider = TronWeb.providers.HttpProvider;
+const TronWeb = require('../../dist/TronWeb.node.js');
 
-const fullNode = new HttpProvider('https://api.trongrid.io:8090');
-const solidityNode = new HttpProvider('https://api.trongrid.io:8091');
-const eventServer = 'https://api.trongrid.io/';
+const fullNode = 'https://api.shasta.trongrid.io';
+const solidityNode = 'https://api.shasta.trongrid.io';
+const eventServer = 'https://api.shasta.trongrid.io/';
 const privateKey = 'da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0';
 
 const app = async () => {
@@ -148,12 +147,12 @@ const app = async () => {
         console.groupEnd();
     });
 
-    const nextVoteCycle = await tronWeb.trx.timeUntilNextVoteCycle();
-
-    console.group('Next vote cycle');
-        console.log('- Time Remaining:', nextVoteCycle + 'ms');
-        console.log('- Occurs At:', new Date(Date.now() + nextVoteCycle), '\n');
-    console.groupEnd();
+    // const nextVoteCycle = await tronWeb.trx.timeUntilNextVoteCycle();
+    //
+    // console.group('Next vote cycle');
+    //     console.log('- Time Remaining:', nextVoteCycle + 'ms');
+    //     console.log('- Occurs At:', new Date(Date.now() + nextVoteCycle), '\n');
+    // console.groupEnd();
 
     tronWeb.trx.getContract('TBjntEor6jTdDkAETyYMtbWqHnmpVBQ99Q').then(contract => {
         console.group('Contract from node');
