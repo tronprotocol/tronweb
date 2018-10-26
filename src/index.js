@@ -233,7 +233,7 @@ export default class TronWeb extends EventEmitter {
             },
             toHex(address) {
                 if(utils.isHex(address))
-                    return address.toLowerCase();
+                    return address.toLowerCase().replace(/^0x/,'41');
 
                 return utils.code.byteArray2hexStr(
                     utils.crypto.decodeBase58Address(address)
@@ -264,11 +264,6 @@ export default class TronWeb extends EventEmitter {
         if(utils.isString(val)) {
             if (/^(-|)0x/.test(val))
                 return val;
-            // if(val.indexOf('-0x') === 0)
-            //     return TronWeb.fromDecimal(val); // << this returns val
-            //
-            // if(val.indexOf('0x') === 0)
-            //     return val;
 
             if(!isFinite(val))
                 return TronWeb.fromUtf8(val);
