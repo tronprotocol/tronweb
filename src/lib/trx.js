@@ -162,6 +162,8 @@ export default class Trx {
         if(!callback)
             return this.injectPromise(this.getTransactionsToAddress, address, limit, offset);
 
+        address = this.tronWeb.address.toHex(address);
+
         return this.getTransactionsRelated(address, 'to', limit, offset, callback);
     }
 
@@ -178,6 +180,8 @@ export default class Trx {
 
         if(!callback)
             return this.injectPromise(this.getTransactionsFromAddress, address, limit, offset);
+
+        address = this.tronWeb.address.toHex(address);
 
         return this.getTransactionsRelated(address, 'from', limit, offset, callback);
     }
