@@ -679,7 +679,7 @@ export default class Trx {
             return callback('Invalid exchangeID provided');
 
         this.tronWeb.fullNode.request('wallet/getexchangebyid', {
-            address: this.tronWeb.defaultAddress.hex,
+            value: exchangeID,
         }, 'post').then(exchange => {
             callback(null, exchange);
         }).catch(err => callback(err));
@@ -694,7 +694,7 @@ export default class Trx {
 
         this.tronWeb.fullNode.request('wallet/listexchanges', {}, 'post').then(({ exchanges = [] }) => {
             callback(null, exchanges);
-        }).catch(err => callback(err));
+        }, 'post').catch(err => callback(err));
     }
 
     /**
