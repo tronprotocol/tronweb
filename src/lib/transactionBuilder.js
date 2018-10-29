@@ -618,7 +618,7 @@ export default class TransactionBuilder {
         }
 
         if(!callback) {
-            return this.injectPromise(this.updateAccount, address, accountName);
+            return this.injectPromise(this.updateAccount, accountName, address);
         }
 
         if (!utils.isString(accountName) || !accountName.length) {
