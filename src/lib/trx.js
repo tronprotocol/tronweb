@@ -694,7 +694,7 @@ export default class Trx {
         }
 
         if(!callback) {
-            return this.injectPromise(this.updateAccount, privateKey, accountName);
+            return this.injectPromise(this.updateAccount, accountName, privateKey);
         }
 
         if (!utils.isString(accountName) || !accountName.length) {
@@ -703,7 +703,7 @@ export default class Trx {
 
         try {
             const address = this.tronWeb.address.fromPrivateKey(privateKey);
-            const updateAccount = await this.tronWeb.transactionBuilder.updateAccount(address, accountName);
+            const updateAccount = await this.tronWeb.transactionBuilder.updateAccount(accountName, address);
             const signedTransaction = await this.sign(updateAccount, privateKey);
             const result = await this.sendRawTransaction(signedTransaction);
 
