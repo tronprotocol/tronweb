@@ -676,6 +676,43 @@ export default class Trx {
         }
     }
 
+    /**
+     * Modify account name
+     * Note: Username is allowed to edit only once.
+     *
+     * @param privateKey - Account private Key
+     * @param accountName - name of the account
+     * @param callback
+     *
+     * @return modified Transaction Object
+     */
+    async updateAccount(accountName = false, privateKey = this.tronWeb.defaultPrivateKey,  callback = false)
+    {
+        if(utils.isFunction(privateKey)) {
+            callback = privateKey;
+            privateKey = this.tronWeb.defaultPrivateKey;
+        }
+
+        if(!callback) {
+            return this.injectPromise(this.updateAccount, accountName, privateKey);
+        }
+
+        if (!utils.isString(accountName) || !accountName.length) {
+            return callback('Name must be a string');
+        }
+
+        try {
+            const address = this.tronWeb.address.fromPrivateKey(privateKey);
+            const updateAccount = await this.tronWeb.transactionBuilder.updateAccount(accountName, address);
+            const signedTransaction = await this.sign(updateAccount, privateKey);
+            const result = await this.sendRawTransaction(signedTransaction);
+
+            return callback(null, result);
+        } catch(ex) {
+            return callback(ex);
+        }
+    }
+
     signMessage(...args) {
         return this.sign(...args);
     }

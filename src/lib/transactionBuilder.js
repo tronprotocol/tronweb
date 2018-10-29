@@ -610,6 +610,37 @@ export default class TransactionBuilder {
         }).catch(err => callback(err));
     }
 
+    updateAccount(accountName = false, address = this.tronWeb.defaultAddress.hex, callback = false)
+    {
+        if(utils.isFunction(address)) {
+            callback = address;
+            address = this.tronWeb.defaultAddress.hex;
+        }
+
+        if(!callback) {
+            return this.injectPromise(this.updateAccount, accountName, address);
+        }
+
+        if (!utils.isString(accountName) || !accountName.length) {
+            return callback('Name must be a string');
+        }
+
+        if(!this.tronWeb.isAddress(address)) {
+            return callback('Invalid origin address provided');
+        }
+
+        this.tronWeb.fullNode.request('wallet/updateaccount', {
+            account_name: stringUtf8toHex(accountName),
+            owner_address: this.tronWeb.address.toHex(address),
+        }, 'post').then(transaction => {
+
+            if(transaction.Error)
+                return callback(transaction.Error);
+
+            callback(null, transaction);
+        }).catch(err => callback(err));
+    }
+
     updateToken(options = {}, issuerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
         if(utils.isFunction(issuerAddress)) {
             callback = issuerAddress;
