@@ -322,9 +322,6 @@ export default class TransactionBuilder {
             return func.type == 'constructor' && func.payable;
         });
 
-        // if(!utils.isHex(name))
-        //     name = this.tronWeb.toHex(name);
-
         if(!utils.isHex(bytecode))
             return callback('Invalid options.bytecode provided');
 
