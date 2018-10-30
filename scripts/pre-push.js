@@ -1,4 +1,4 @@
-const { execSync } = require('child_process');
+const {execSync} = require('child_process');
 
 const branch = execSync('git name-rev --name-only HEAD').toString().split('\n')[0];
 let unpushed;
@@ -27,3 +27,4 @@ try {
     console.log('Tests have failed. Please verify tests are passing before pushing');
     process.exit(1);
 }
+
