@@ -19,7 +19,7 @@ export default class Contract {
         this.lastBlock = false;
 
         this.methods = {};
-        this.methodInstance = {};
+        this.methodInstances = {};
         this.props = [];
 
         if(this.tronWeb.isAddress(address))
@@ -111,9 +111,9 @@ export default class Contract {
             this.methods[functionSelector] = methodCall;
             this.methods[signature] = methodCall;
 
-            this.methodInstance[name] = method;
-            this.methodInstance[functionSelector] = method;
-            this.methodInstance[signature] = method;
+            this.methodInstances[name] = method;
+            this.methodInstances[functionSelector] = method;
+            this.methodInstances[signature] = method;
 
             if(!this.hasProperty(name)) {
                 this[name] = methodCall;
@@ -137,14 +137,14 @@ export default class Contract {
         const methodName = data.substring(0, 8);
         const inputData = data.substring(8);
 
-        if (!this.methodInstance[methodName])
+        if (!this.methodInstances[methodName])
             throw new Error('Contract method ' + methodName + " not found");
 
-        const methodInstance = this.methodInstance[methodName];
+        const methodInstance = this.methodInstances[methodName];
 
         return {
             name: methodInstance.name,
-            params: this.methodInstance[methodName].decodeInput(inputData),
+            params: this.methodInstances[methodName].decodeInput(inputData),
         }
     }
 
