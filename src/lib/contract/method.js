@@ -20,14 +20,14 @@ export default class Method {
         this.tronWeb = contract.tronWeb;
         this.contract = contract;
 
-        this.abi = abi;        
+        this.abi = abi;
         this.name = abi.name || (abi.name = abi.type);
 
         this.inputs = abi.inputs || [];
         this.outputs = abi.outputs || [];
 
-        this.signature = this.tronWeb.sha3(abi.name, false).slice(0, 8);
         this.functionSelector = getFunctionSelector(abi);
+        this.signature = this.tronWeb.sha3(this.functionSelector, false).slice(0, 8);
         this.injectPromise = utils.promiseInjector(this);
 
         this.defaultOptions = {
@@ -36,6 +36,10 @@ export default class Method {
             from: this.tronWeb.defaultAddress.hex, // Only used for send()
             shouldPollResponse: false // Only used for sign()
         };
+    }
+
+    decodeInput(data) {
+        return decodeOutput(this.inputs, '0x' + data);
     }
 
     onMethod(...args) {
@@ -53,12 +57,12 @@ export default class Method {
         }
     }
 
-    async _call(types, args, options = {}, callback = false) {                
+    async _call(types, args, options = {}, callback = false) {
         if(utils.isFunction(options)) {
             callback = options;
             options = {};
         }
-            
+
         if(!callback)
             return this.injectPromise(this._call, types, args, options);
 
@@ -91,7 +95,7 @@ export default class Method {
             parameters,
             this.tronWeb.address.toHex(options.from),
         (err, transaction) => {
-            if(err) 
+            if(err)
                 return callback(err);
 
             if(!utils.hasProperty(transaction, 'constant_result'))
@@ -99,7 +103,7 @@ export default class Method {
 
             try {
                 let output = decodeOutput(this.outputs, '0x' + transaction.constant_result[0]);
-                
+
                 if(output.length === 1)
                     output = output[0];
 
@@ -120,7 +124,7 @@ export default class Method {
             callback = options;
             options = {};
         }
-            
+
         if(!callback)
             return this.injectPromise(this._send, types, args, options, privateKey);
 
@@ -141,7 +145,7 @@ export default class Method {
         // If a function isn't payable, dont provide a callValue.
         if(![ 'payable' ].includes(stateMutability.toLowerCase()))
                 options.callValue = 0;
-   
+
         options = { ...this.defaultOptions, ...options };
 
         const parameters = args.map((value, index) => ({
@@ -184,12 +188,12 @@ export default class Method {
 
             const checkResult = async (index = 0) => {
                 if(index == 20) {
-                    return callback({ 
-                        error: 'Cannot find result in solidity node', 
+                    return callback({
+                        error: 'Cannot find result in solidity node',
                         transaction: signedTransaction
                     });
                 }
-                
+
                 const output = await this.tronWeb.trx.getTransactionInfo(signedTransaction.txID);
 
                 if(!Object.keys(output).length) {
@@ -222,7 +226,7 @@ export default class Method {
                 return callback(null, decoded);
             }
 
-            checkResult();                    
+            checkResult();
         } catch(ex) {
             return callback(ex);
         }
@@ -231,7 +235,7 @@ export default class Method {
     async _watch(callback = false) {
         if(!utils.isFunction(callback))
             throw new Error('Expected callback to be provided');
-        
+
         if(!this.contract.address)
             return callback('Smart contract is missing address');
 
@@ -258,7 +262,7 @@ export default class Method {
                         return false;
 
                     if(!lastBlock)
-                        return true;            
+                        return true;
 
                     return event.block > lastBlock;
                 });
