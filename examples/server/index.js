@@ -337,7 +337,6 @@ const app = async () => {
     });
 
     tronWeb.getEventResult('TKexVE6nKujFaLZeAQh8YRVXda3gjpX1sV', 'Notify', 32162, (err, events) => {
-
         if(err)
             return console.error(err);
 
@@ -350,9 +349,6 @@ const app = async () => {
     });
 
     tronWeb.getEventByTransacionID('32d7efe5f70c044bcd831f21f911209a7abf4ed0d5934b2c1b804e108008cd43', (err, events) => {
-
-
-
         if(err)
             return console.error(err);
 
