@@ -232,7 +232,12 @@ export default class Method {
         }
     }
 
-    async _watch(callback = false) {
+    async _watch(options = {}, callback = false) {
+        if(utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if(!utils.isFunction(callback))
             throw new Error('Expected callback to be provided');
 
@@ -254,6 +259,10 @@ export default class Method {
                 const events = await this.tronWeb.getEventResult(this.contract.address, sinceTimestamp, this.name);
                 const [ latestEvent ] = events.sort((a, b) => b.block - a.block);
                 const newEvents = events.filter((event, index) => {
+
+                    if (options.resourceNode && !RegExp(options.resourceNode, 'i').test(event.resourceNode))
+                        return false;
+
                     const duplicate = events.slice(0, index).some(priorEvent => (
                         JSON.stringify(priorEvent) == JSON.stringify(event)
                     ));

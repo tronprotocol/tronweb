@@ -90,7 +90,8 @@ const utils = {
             contract: event.contract_address,
             name: event.event_name,
             transaction: event.transaction_id,
-            result: event.result
+            result: event.result,
+            resourceNode: event.resource_Node
         };
     },
 
