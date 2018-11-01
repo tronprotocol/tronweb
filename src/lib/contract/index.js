@@ -29,10 +29,14 @@ export default class Contract {
         this.loadAbi(abi);
     }
 
-    async _getEvents() {
+    async _getEvents(options = {}) {
         const events = await this.tronWeb.getEventResult(this.address);
         const [ latestEvent ] = events.sort((a, b) => b.block - a.block);
         const newEvents = events.filter((event, index) => {
+
+            if (options.resourceNode && !RegExp(options.resourceNode, 'i').test(event.resourceNode))
+                return false;
+
             const duplicate = events.slice(0, index).some(priorEvent => (
                 JSON.stringify(priorEvent) == JSON.stringify(event)
             ));
@@ -52,7 +56,12 @@ export default class Contract {
         return newEvents;
     }
 
-    async _startEventListener(callback) {
+    async _startEventListener(options = {}, callback) {
+        if(utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if(this.eventListener)
             clearInterval(this.eventListener);
 
@@ -63,10 +72,10 @@ export default class Contract {
             throw new Error('Contract is not configured with an address');
 
         this.eventCallback = callback;
-        await this._getEvents();
+        await this._getEvents(options);
 
         this.eventListener = setInterval(() => {
-            this._getEvents().then(newEvents => newEvents.forEach(event => {
+            this._getEvents(options).then(newEvents => newEvents.forEach(event => {
                 this.eventCallback && this.eventCallback(event)
             })).catch(err => {
                 console.error('Failed to get event list', err);
@@ -197,7 +206,12 @@ export default class Contract {
         }
     }
 
-    events(callback = false) {
+    events(options = {}, callback = false) {
+        if(utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if(!utils.isFunction(callback))
             throw new Error('Callback function expected');
 
@@ -206,11 +220,11 @@ export default class Contract {
         return {
             start(startCallback = false) {
                 if(!startCallback) {
-                    self._startEventListener(callback);
+                    self._startEventListener(options, callback);
                     return this;
                 }
 
-                self._startEventListener(callback).then(() => {
+                self._startEventListener(options, callback).then(() => {
                     startCallback();
                 }).catch(err => {
                     startCallback(err)
