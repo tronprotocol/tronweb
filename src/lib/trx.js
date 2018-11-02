@@ -141,6 +141,20 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
+    getConfirmedTransaction(transactionID, callback = false) {
+        if(!callback)
+            return this.injectPromise(this.getConfirmedTransaction, transactionID);
+
+        this.tronWeb.solidityNode.request('walletsolidity/gettransactionbyid', {
+            value: transactionID
+        }, 'post').then(transaction => {
+            if(!Object.keys(transaction).length)
+                return callback('Transaction not found');
+
+            callback(null, transaction);
+        }).catch(err => callback(err));
+    }
+
     getTransactionInfo(transactionID, callback = false) {
         if(!callback)
             return this.injectPromise(this.getTransactionInfo, transactionID);
