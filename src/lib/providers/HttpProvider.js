@@ -21,7 +21,7 @@ export default class HttpProvider {
         this.headers = headers;
         this.statusPage = statusPage;
 
-        this.instance = axios.create({            
+        this.instance = axios.create({
             baseURL: host,
             timeout: timeout,
             headers: headers,

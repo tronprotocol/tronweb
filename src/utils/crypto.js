@@ -1,11 +1,10 @@
 import jsSHA from 'jssha';
 
-import { ADDRESS_PREFIX, ADDRESS_PREFIX_BYTE } from './address';
+import { ADDRESS_PREFIX, ADDRESS_PREFIX_BYTE, ADDRESS_SIZE } from './address';
 import { base64EncodeToString } from './code';
 import { base64DecodeFromString, hexStr2byteArray } from './code';
 import { encode58, decode58 } from './base58';
 import { keccak256 } from 'js-sha3';
-import { ADDRESS_SIZE } from './address';
 import { byte2hexStr, byteArray2hexStr } from './bytes';
 import { ec as EC } from 'elliptic';
 
@@ -47,7 +46,7 @@ export function decodeBase58Address(base58Sting) {
         return address;
     }
 
-    return hexStr2byteArray('000000000000000000000000000000000000000000');
+    throw new Error('Invalid address provided');
 }
 
 export function signTransaction(priKeyBytes, transaction) {

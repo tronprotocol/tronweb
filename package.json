@@ -4,12 +4,18 @@
     "description": "JavaScript SDK that encapsulates the TRON Node HTTP API",
     "main": "dist/TronWeb.node.js",
     "scripts": {
+        "prepare": "npm run build",
         "build": "npm run clean && webpack --config webpack.config.js --progress --colors",
         "clean": "rimraf dist",
         "example": "node ./examples/server",
         "test:browser": "node scripts/test-browser.js && npx karma start --single-run --browsers ChromeHeadless,Firefox,Edge",
         "test:node": "node scripts/test-node.js && npx mocha ./test/*.js",
         "test": "npm run-script test:browser && npm run-script test:node"
+    },
+    "husky": {
+        "hooks": {
+            "pre-push": "node ./scripts/pre-push.js"
+        }
     },
     "dependencies": {
         "@babel/runtime": "^7.0.0",

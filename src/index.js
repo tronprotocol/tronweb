@@ -6,7 +6,6 @@ import EventEmitter from 'eventemitter3';
 
 import TransactionBuilder from 'lib/transactionBuilder';
 import Trx from 'lib/trx';
-import Witness from 'lib/witness';
 import Contract from 'lib/contract';
 
 import { keccak256 } from 'js-sha3';
@@ -44,8 +43,8 @@ export default class TronWeb extends EventEmitter {
         [
             'sha3', 'toHex', 'toUtf8', 'fromUtf8',
             'toAscii', 'fromAscii', 'toDecimal', 'fromDecimal',
-            'toSun', 'fromSun', 'toBigNumber', 'isAddress',
-            'compile', 'createAccount', 'address'
+            'toSun', 'fromSun', 'toBigNumber', 'isAddress', 
+            'createAccount', 'address'
         ].forEach(key => {
             this[key] = TronWeb[key];
         });
@@ -55,15 +54,15 @@ export default class TronWeb extends EventEmitter {
 
         this.transactionBuilder = new TransactionBuilder(this);
         this.trx = new Trx(this);
-        this.witness = new Witness(this);
         this.utils = utils;
 
         this.injectPromise = utils.promiseInjector(this);
     }
 
     setDefaultBlock(blockID = false) {
-        if(blockID === false || blockID == 'latest' || blockID == 'earliest' || blockID === 0)
+        if([ false, 'latest', 'earliest', 0 ].includes(blockID)) {
             return this.defaultBlock = blockID;
+        }
 
         if(!utils.isInteger(blockID) || !blockID)
             throw new Error('Invalid block ID provided');
@@ -198,9 +197,9 @@ export default class TronWeb extends EventEmitter {
         }).catch(err => callback((err.response && err.response.data) || err)); 
     }
 
-    getEventByTransacionID(transactionID = false, callback = false) {
+    getEventByTransactionID(transactionID = false, callback = false) {
         if(!callback)
-            return this.injectPromise(this.getEventByTransacionID, transactionID);
+            return this.injectPromise(this.getEventByTransactionID, transactionID);
 
         if(!this.eventServer)
             callback('No event server configured');
@@ -234,7 +233,7 @@ export default class TronWeb extends EventEmitter {
             },
             toHex(address) {
                 if(utils.isHex(address))
-                    return address.toLowerCase();
+                    return address.toLowerCase().replace(/^0x/,'41');
 
                 return utils.code.byteArray2hexStr(
                     utils.crypto.decodeBase58Address(address)

@@ -14,11 +14,12 @@ export default class Contract {
         this.abi = abi;
 
         this.eventListener = false;
-        this.bytecode = false;        
+        this.bytecode = false;
         this.deployed = false;
-        this.lastBlock = false;  
+        this.lastBlock = false;
 
         this.methods = {};
+        this.methodInstances = {};
         this.props = [];
 
         if(this.tronWeb.isAddress(address))
@@ -28,19 +29,23 @@ export default class Contract {
         this.loadAbi(abi);
     }
 
-    async _getEvents() {
+    async _getEvents(options = {}) {
         const events = await this.tronWeb.getEventResult(this.address);
         const [ latestEvent ] = events.sort((a, b) => b.block - a.block);
         const newEvents = events.filter((event, index) => {
+
+            if (options.resourceNode && !RegExp(options.resourceNode, 'i').test(event.resourceNode))
+                return false;
+
             const duplicate = events.slice(0, index).some(priorEvent => (
                 JSON.stringify(priorEvent) == JSON.stringify(event)
             ));
 
             if(duplicate)
                 return false;
-            
+
             if(!this.lastBlock)
-                return true;            
+                return true;
 
             return event.block > this.lastBlock;
         });
@@ -51,7 +56,12 @@ export default class Contract {
         return newEvents;
     }
 
-    async _startEventListener(callback) {
+    async _startEventListener(options = {}, callback) {
+        if(utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if(this.eventListener)
             clearInterval(this.eventListener);
 
@@ -62,10 +72,10 @@ export default class Contract {
             throw new Error('Contract is not configured with an address');
 
         this.eventCallback = callback;
-        await this._getEvents();
+        await this._getEvents(options);
 
         this.eventListener = setInterval(() => {
-            this._getEvents().then(newEvents => newEvents.forEach(event => {
+            this._getEvents(options).then(newEvents => newEvents.forEach(event => {
                 this.eventCallback && this.eventCallback(event)
             })).catch(err => {
                 console.error('Failed to get event list', err);
@@ -110,6 +120,10 @@ export default class Contract {
             this.methods[functionSelector] = methodCall;
             this.methods[signature] = methodCall;
 
+            this.methodInstances[name] = method;
+            this.methodInstances[functionSelector] = method;
+            this.methodInstances[signature] = method;
+
             if(!this.hasProperty(name)) {
                 this[name] = methodCall;
                 this.props.push(name);
@@ -125,6 +139,22 @@ export default class Contract {
                 this.props.push(signature);
             }
         });
+    }
+
+    decodeInput(data) {
+
+        const methodName = data.substring(0, 8);
+        const inputData = data.substring(8);
+
+        if (!this.methodInstances[methodName])
+            throw new Error('Contract method ' + methodName + " not found");
+
+        const methodInstance = this.methodInstances[methodName];
+
+        return {
+            name: methodInstance.name,
+            params: this.methodInstances[methodName].decodeInput(inputData),
+        }
     }
 
     async new(options, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
@@ -148,7 +178,7 @@ export default class Contract {
             return this.at(signedTransaction.contract_address, callback);
         } catch(ex) {
             return callback(ex);
-        }        
+        }
     }
 
     async at(contractAddress, callback = false) {
@@ -173,10 +203,15 @@ export default class Contract {
                 return callback('Contract has not been deployed on the network');
 
             return callback(ex);
-        }        
+        }
     }
 
-    events(callback = false) {
+    events(options = {}, callback = false) {
+        if(utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if(!utils.isFunction(callback))
             throw new Error('Callback function expected');
 
@@ -185,11 +220,11 @@ export default class Contract {
         return {
             start(startCallback = false) {
                 if(!startCallback) {
-                    self._startEventListener(callback);
+                    self._startEventListener(options, callback);
                     return this;
                 }
 
-                self._startEventListener(callback).then(() => {
+                self._startEventListener(options, callback).then(() => {
                     startCallback();
                 }).catch(err => {
                     startCallback(err)

@@ -38925,11 +38925,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var eventemitter3__WEBPACK_IMPORTED_MODULE_14___default = /*#__PURE__*/__webpack_require__.n(eventemitter3__WEBPACK_IMPORTED_MODULE_14__);
 /* harmony import */ var lib_transactionBuilder__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! lib/transactionBuilder */ "./src/lib/transactionBuilder.js");
 /* harmony import */ var lib_trx__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! lib/trx */ "./src/lib/trx.js");
-/* harmony import */ var lib_witness__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! lib/witness */ "./src/lib/witness.js");
-/* harmony import */ var lib_contract__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! lib/contract */ "./src/lib/contract/index.js");
-/* harmony import */ var js_sha3__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! js-sha3 */ "./node_modules/js-sha3/src/sha3.js");
-/* harmony import */ var js_sha3__WEBPACK_IMPORTED_MODULE_19___default = /*#__PURE__*/__webpack_require__.n(js_sha3__WEBPACK_IMPORTED_MODULE_19__);
-
+/* harmony import */ var lib_contract__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! lib/contract */ "./src/lib/contract/index.js");
+/* harmony import */ var js_sha3__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! js-sha3 */ "./node_modules/js-sha3/src/sha3.js");
+/* harmony import */ var js_sha3__WEBPACK_IMPORTED_MODULE_18___default = /*#__PURE__*/__webpack_require__.n(js_sha3__WEBPACK_IMPORTED_MODULE_18__);
 
 
 
@@ -38982,13 +38980,12 @@ function (_EventEmitter) {
       hex: false,
       base58: false
     };
-    ['sha3', 'toHex', 'toUtf8', 'fromUtf8', 'toAscii', 'fromAscii', 'toDecimal', 'fromDecimal', 'toSun', 'fromSun', 'toBigNumber', 'isAddress', 'compile', 'createAccount', 'address'].forEach(function (key) {
+    ['sha3', 'toHex', 'toUtf8', 'fromUtf8', 'toAscii', 'fromAscii', 'toDecimal', 'fromDecimal', 'toSun', 'fromSun', 'toBigNumber', 'isAddress', 'createAccount', 'address'].forEach(function (key) {
       _this[key] = TronWeb[key];
     });
     if (privateKey) _this.setPrivateKey(privateKey);
     _this.transactionBuilder = new lib_transactionBuilder__WEBPACK_IMPORTED_MODULE_15__["default"](_babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_8___default()(_babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_8___default()(_this)));
     _this.trx = new lib_trx__WEBPACK_IMPORTED_MODULE_16__["default"](_babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_8___default()(_babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_8___default()(_this)));
-    _this.witness = new lib_witness__WEBPACK_IMPORTED_MODULE_17__["default"](_babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_8___default()(_babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_8___default()(_this)));
     _this.utils = utils__WEBPACK_IMPORTED_MODULE_11__["default"];
     _this.injectPromise = utils__WEBPACK_IMPORTED_MODULE_11__["default"].promiseInjector(_babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_8___default()(_babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_8___default()(_this)));
     return _this;
@@ -38998,7 +38995,11 @@ function (_EventEmitter) {
     key: "setDefaultBlock",
     value: function setDefaultBlock() {
       var blockID = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-      if (blockID === false || blockID == 'latest' || blockID == 'earliest' || blockID === 0) return this.defaultBlock = blockID;
+
+      if ([false, 'latest', 'earliest', 0].includes(blockID)) {
+        return this.defaultBlock = blockID;
+      }
+
       if (!utils__WEBPACK_IMPORTED_MODULE_11__["default"].isInteger(blockID) || !blockID) throw new Error('Invalid block ID provided');
       this.defaultBlock = Math.abs(blockID);
     }
@@ -39119,11 +39120,11 @@ function (_EventEmitter) {
       });
     }
   }, {
-    key: "getEventByTransacionID",
-    value: function getEventByTransacionID() {
+    key: "getEventByTransactionID",
+    value: function getEventByTransactionID() {
       var transactionID = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
       var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-      if (!callback) return this.injectPromise(this.getEventByTransacionID, transactionID);
+      if (!callback) return this.injectPromise(this.getEventByTransactionID, transactionID);
       if (!this.eventServer) callback('No event server configured');
       return this.eventServer.request("event/transaction/".concat(transactionID)).then(function () {
         var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
@@ -39141,7 +39142,7 @@ function (_EventEmitter) {
     value: function contract() {
       var abi = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
       var address = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-      return new lib_contract__WEBPACK_IMPORTED_MODULE_18__["default"](this, abi, address);
+      return new lib_contract__WEBPACK_IMPORTED_MODULE_17__["default"](this, abi, address);
     }
   }, {
     key: "isConnected",
@@ -39214,7 +39215,7 @@ function (_EventEmitter) {
     key: "sha3",
     value: function sha3(string) {
       var prefix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-      return (prefix ? '0x' : '') + Object(js_sha3__WEBPACK_IMPORTED_MODULE_19__["keccak256"])(string);
+      return (prefix ? '0x' : '') + Object(js_sha3__WEBPACK_IMPORTED_MODULE_18__["keccak256"])(string);
     }
   }, {
     key: "toHex",
@@ -39335,7 +39336,7 @@ function (_EventEmitter) {
           return utils__WEBPACK_IMPORTED_MODULE_11__["default"].crypto.getBase58CheckAddress(utils__WEBPACK_IMPORTED_MODULE_11__["default"].code.hexStr2byteArray(address));
         },
         toHex: function toHex(address) {
-          if (utils__WEBPACK_IMPORTED_MODULE_11__["default"].isHex(address)) return address.toLowerCase();
+          if (utils__WEBPACK_IMPORTED_MODULE_11__["default"].isHex(address)) return address.toLowerCase().replace(/^0x/, '41');
           return utils__WEBPACK_IMPORTED_MODULE_11__["default"].code.byteArray2hexStr(utils__WEBPACK_IMPORTED_MODULE_11__["default"].crypto.decodeBase58Address(address)).toLowerCase();
         },
         fromPrivateKey: function fromPrivateKey(privateKey) {
@@ -39414,6 +39415,7 @@ function () {
     this.deployed = false;
     this.lastBlock = false;
     this.methods = {};
+    this.methodInstances = {};
     this.props = [];
     if (this.tronWeb.isAddress(address)) this.deployed = true;else this.address = false;
     this.loadAbi(abi);
@@ -39427,21 +39429,29 @@ function () {
       _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
         var _this = this;
 
-        var events, _events$sort, _events$sort2, latestEvent, newEvents;
+        var options,
+            events,
+            _events$sort,
+            _events$sort2,
+            latestEvent,
+            newEvents,
+            _args = arguments;
 
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                _context.next = 2;
+                options = _args.length > 0 && _args[0] !== undefined ? _args[0] : {};
+                _context.next = 3;
                 return this.tronWeb.getEventResult(this.address);
 
-              case 2:
+              case 3:
                 events = _context.sent;
                 _events$sort = events.sort(function (a, b) {
                   return b.block - a.block;
                 }), _events$sort2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_1___default()(_events$sort, 1), latestEvent = _events$sort2[0];
                 newEvents = events.filter(function (event, index) {
+                  if (options.resourceNode && !RegExp(options.resourceNode, 'i').test(event.resourceNode)) return false;
                   var duplicate = events.slice(0, index).some(function (priorEvent) {
                     return JSON.stringify(priorEvent) == JSON.stringify(event);
                   });
@@ -39452,7 +39462,7 @@ function () {
                 if (latestEvent) this.lastBlock = latestEvent.block;
                 return _context.abrupt("return", newEvents);
 
-              case 7:
+              case 8:
               case "end":
                 return _context.stop();
             }
@@ -39469,38 +39479,49 @@ function () {
     value: function () {
       var _startEventListener2 = _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2___default()(
       /*#__PURE__*/
-      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2(callback) {
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2() {
         var _this2 = this;
 
+        var options,
+            callback,
+            _args2 = arguments;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
+                options = _args2.length > 0 && _args2[0] !== undefined ? _args2[0] : {};
+                callback = _args2.length > 1 ? _args2[1] : undefined;
+
+                if (utils__WEBPACK_IMPORTED_MODULE_6__["default"].isFunction(options)) {
+                  callback = options;
+                  options = {};
+                }
+
                 if (this.eventListener) clearInterval(this.eventListener);
 
                 if (this.tronWeb.eventServer) {
-                  _context2.next = 3;
+                  _context2.next = 6;
                   break;
                 }
 
                 throw new Error('Event server is not configured');
 
-              case 3:
+              case 6:
                 if (this.address) {
-                  _context2.next = 5;
+                  _context2.next = 8;
                   break;
                 }
 
                 throw new Error('Contract is not configured with an address');
 
-              case 5:
-                this.eventCallback = callback;
-                _context2.next = 8;
-                return this._getEvents();
-
               case 8:
+                this.eventCallback = callback;
+                _context2.next = 11;
+                return this._getEvents(options);
+
+              case 11:
                 this.eventListener = setInterval(function () {
-                  _this2._getEvents().then(function (newEvents) {
+                  _this2._getEvents(options).then(function (newEvents) {
                     return newEvents.forEach(function (event) {
                       _this2.eventCallback && _this2.eventCallback(event);
                     });
@@ -39509,7 +39530,7 @@ function () {
                   });
                 }, 3000);
 
-              case 9:
+              case 12:
               case "end":
                 return _context2.stop();
             }
@@ -39517,7 +39538,7 @@ function () {
         }, _callee2, this);
       }));
 
-      return function _startEventListener(_x) {
+      return function _startEventListener() {
         return _startEventListener2.apply(this, arguments);
       };
     }()
@@ -39555,6 +39576,9 @@ function () {
         _this3.methods[name] = methodCall;
         _this3.methods[functionSelector] = methodCall;
         _this3.methods[signature] = methodCall;
+        _this3.methodInstances[name] = method;
+        _this3.methodInstances[functionSelector] = method;
+        _this3.methodInstances[signature] = method;
 
         if (!_this3.hasProperty(name)) {
           _this3[name] = methodCall;
@@ -39574,6 +39598,18 @@ function () {
           _this3.props.push(signature);
         }
       });
+    }
+  }, {
+    key: "decodeInput",
+    value: function decodeInput(data) {
+      var methodName = data.substring(0, 8);
+      var inputData = data.substring(8);
+      if (!this.methodInstances[methodName]) throw new Error('Contract method ' + methodName + " not found");
+      var methodInstance = this.methodInstances[methodName];
+      return {
+        name: methodInstance.name,
+        params: this.methodInstances[methodName].decodeInput(inputData)
+      };
     }
   }, {
     key: "new",
@@ -39649,7 +39685,7 @@ function () {
         }, _callee3, this, [[5, 21]]);
       }));
 
-      return function _new(_x2) {
+      return function _new(_x) {
         return _new2.apply(this, arguments);
       };
     }()
@@ -39713,14 +39749,21 @@ function () {
         }, _callee4, this, [[3, 15]]);
       }));
 
-      return function at(_x3) {
+      return function at(_x2) {
         return _at.apply(this, arguments);
       };
     }()
   }, {
     key: "events",
     value: function events() {
-      var callback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      if (utils__WEBPACK_IMPORTED_MODULE_6__["default"].isFunction(options)) {
+        callback = options;
+        options = {};
+      }
+
       if (!utils__WEBPACK_IMPORTED_MODULE_6__["default"].isFunction(callback)) throw new Error('Callback function expected');
       var self = this;
       return {
@@ -39728,12 +39771,12 @@ function () {
           var startCallback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
 
           if (!startCallback) {
-            self._startEventListener(callback);
+            self._startEventListener(options, callback);
 
             return this;
           }
 
-          self._startEventListener(callback).then(function () {
+          self._startEventListener(options, callback).then(function () {
             startCallback();
           }).catch(function (err) {
             startCallback(err);
@@ -39823,8 +39866,8 @@ function () {
     this.name = abi.name || (abi.name = abi.type);
     this.inputs = abi.inputs || [];
     this.outputs = abi.outputs || [];
-    this.signature = this.tronWeb.sha3(abi.name, false).slice(0, 8);
     this.functionSelector = getFunctionSelector(abi);
+    this.signature = this.tronWeb.sha3(this.functionSelector, false).slice(0, 8);
     this.injectPromise = utils__WEBPACK_IMPORTED_MODULE_6__["default"].promiseInjector(this);
     this.defaultOptions = {
       feeLimit: 1000000000,
@@ -39837,6 +39880,11 @@ function () {
   }
 
   _babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_5___default()(Method, [{
+    key: "decodeInput",
+    value: function decodeInput(data) {
+      return decodeOutput(this.inputs, '0x' + data);
+    }
+  }, {
     key: "onMethod",
     value: function onMethod() {
       var _this = this;
@@ -39848,6 +39896,12 @@ function () {
       var types = getParamTypes(this.inputs);
       args.forEach(function (arg, index) {
         if (types[index] == 'address') args[index] = _this.tronWeb.address.toHex(arg).replace(/^(41)/, '0x');
+
+        if (types[index] == 'address[]') {
+          args[index] = args[index].map(function (address) {
+            return _this.tronWeb.address.toHex(address).replace(/^(41)/, '0x');
+          });
+        }
       });
       return {
         call: function call() {
@@ -40079,43 +40133,43 @@ function () {
                 signedTransaction = _context3.sent;
 
                 if (signedTransaction.signature) {
-                  _context3.next = 35;
+                  _context3.next = 33;
                   break;
                 }
 
                 if (privateKey) {
-                  _context3.next = 34;
+                  _context3.next = 32;
                   break;
                 }
 
                 return _context3.abrupt("return", callback('Transaction was not signed properly'));
 
-              case 34:
+              case 32:
                 return _context3.abrupt("return", callback('Invalid private key provided'));
 
-              case 35:
-                _context3.next = 37;
+              case 33:
+                _context3.next = 35;
                 return this.tronWeb.trx.sendRawTransaction(signedTransaction);
 
-              case 37:
+              case 35:
                 broadcast = _context3.sent;
 
                 if (broadcast.result) {
-                  _context3.next = 40;
+                  _context3.next = 38;
                   break;
                 }
 
                 return _context3.abrupt("return", callback('Unknown error: ' + JSON.stringify(broadcast, null, 2)));
 
-              case 40:
+              case 38:
                 if (options.shouldPollResponse) {
-                  _context3.next = 42;
+                  _context3.next = 40;
                   break;
                 }
 
                 return _context3.abrupt("return", callback(null, signedTransaction.txID));
 
-              case 42:
+              case 40:
                 checkResult =
                 /*#__PURE__*/
                 function () {
@@ -40201,20 +40255,20 @@ function () {
                 }();
 
                 checkResult();
-                _context3.next = 49;
+                _context3.next = 47;
                 break;
 
-              case 46:
-                _context3.prev = 46;
+              case 44:
+                _context3.prev = 44;
                 _context3.t0 = _context3["catch"](19);
                 return _context3.abrupt("return", callback(_context3.t0));
 
-              case 49:
+              case 47:
               case "end":
                 return _context3.stop();
             }
           }
-        }, _callee3, this, [[19, 46]]);
+        }, _callee3, this, [[19, 44]]);
       }));
 
       return function _send(_x3, _x4) {
@@ -40229,7 +40283,8 @@ function () {
       _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default.a.mark(function _callee5() {
         var _this4 = this;
 
-        var callback,
+        var options,
+            callback,
             listener,
             lastBlock,
             sinceTimestamp,
@@ -40240,40 +40295,46 @@ function () {
           while (1) {
             switch (_context5.prev = _context5.next) {
               case 0:
-                callback = _args5.length > 0 && _args5[0] !== undefined ? _args5[0] : false;
+                options = _args5.length > 0 && _args5[0] !== undefined ? _args5[0] : {};
+                callback = _args5.length > 1 && _args5[1] !== undefined ? _args5[1] : false;
+
+                if (utils__WEBPACK_IMPORTED_MODULE_6__["default"].isFunction(options)) {
+                  callback = options;
+                  options = {};
+                }
 
                 if (utils__WEBPACK_IMPORTED_MODULE_6__["default"].isFunction(callback)) {
-                  _context5.next = 3;
+                  _context5.next = 5;
                   break;
                 }
 
                 throw new Error('Expected callback to be provided');
 
-              case 3:
+              case 5:
                 if (this.contract.address) {
-                  _context5.next = 5;
+                  _context5.next = 7;
                   break;
                 }
 
                 return _context5.abrupt("return", callback('Smart contract is missing address'));
 
-              case 5:
+              case 7:
                 if (!(this.abi.type.toLowerCase() !== 'event')) {
-                  _context5.next = 7;
+                  _context5.next = 9;
                   break;
                 }
 
                 return _context5.abrupt("return", callback('Invalid method type for event watching'));
 
-              case 7:
+              case 9:
                 if (this.tronWeb.eventServer) {
-                  _context5.next = 9;
+                  _context5.next = 11;
                   break;
                 }
 
                 return _context5.abrupt("return", callback('No event server configured'));
 
-              case 9:
+              case 11:
                 listener = false;
                 lastBlock = false;
                 sinceTimestamp = new Date().getTime();
@@ -40300,6 +40361,7 @@ function () {
                               return b.block - a.block;
                             }), _events$sort2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_events$sort, 1), latestEvent = _events$sort2[0];
                             newEvents = events.filter(function (event, index) {
+                              if (options.resourceNode && !RegExp(options.resourceNode, 'i').test(event.resourceNode)) return false;
                               var duplicate = events.slice(0, index).some(function (priorEvent) {
                                 return JSON.stringify(priorEvent) == JSON.stringify(event);
                               });
@@ -40341,10 +40403,10 @@ function () {
                   }, 3000);
                 };
 
-                _context5.next = 16;
+                _context5.next = 18;
                 return getEvents();
 
-              case 16:
+              case 18:
                 bindListener();
                 return _context5.abrupt("return", {
                   start: bindListener(),
@@ -40355,7 +40417,7 @@ function () {
                   }
                 });
 
-              case 18:
+              case 20:
               case "end":
                 return _context5.stop();
             }
@@ -40657,11 +40719,16 @@ function () {
   }, {
     key: "freezeBalance",
     value: function freezeBalance() {
-      var address = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.tronWeb.defaultAddress.hex;
-      var amount = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-      var duration = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 3;
-      var resource = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : "BANDWIDTH";
+      var amount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+      var duration = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 3;
+      var resource = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "BANDWIDTH";
+      var address = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : this.tronWeb.defaultAddress.hex;
       var callback = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
+
+      if (utils__WEBPACK_IMPORTED_MODULE_4__["default"].isFunction(address)) {
+        callback = address;
+        address = this.tronWeb.defaultAddress.hex;
+      }
 
       if (utils__WEBPACK_IMPORTED_MODULE_4__["default"].isFunction(duration)) {
         callback = duration;
@@ -40673,10 +40740,11 @@ function () {
         resource = "BANDWIDTH";
       }
 
-      if (!callback) return this.injectPromise(this.freezeBalance, address, amount, duration, resource);
-      if (!this.tronWeb.isAddress(address)) return callback('Invalid address provided');
+      if (!callback) return this.injectPromise(this.freezeBalance, amount, duration, resource, address);
+      if (!['BANDWIDTH', 'ENERGY'].includes(resource)) return callback('Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"');
       if (!utils__WEBPACK_IMPORTED_MODULE_4__["default"].isInteger(amount) || amount <= 0) return callback('Invalid amount provided');
       if (!utils__WEBPACK_IMPORTED_MODULE_4__["default"].isInteger(duration) || duration < 3) return callback('Invalid duration provided, minimum of 3 days');
+      if (!this.tronWeb.isAddress(address)) return callback('Invalid address provided');
       this.tronWeb.fullNode.request('wallet/freezebalance', {
         owner_address: this.tronWeb.address.toHex(address),
         frozen_balance: parseInt(amount),
@@ -40692,8 +40760,8 @@ function () {
   }, {
     key: "unfreezeBalance",
     value: function unfreezeBalance() {
-      var address = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.tronWeb.defaultAddress.hex;
-      var resource = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "BANDWIDTH";
+      var resource = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "BANDWIDTH";
+      var address = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.tronWeb.defaultAddress.hex;
       var callback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
       if (utils__WEBPACK_IMPORTED_MODULE_4__["default"].isFunction(address)) {
@@ -40706,7 +40774,8 @@ function () {
         resource = "BANDWIDTH";
       }
 
-      if (!callback) return this.injectPromise(this.unfreezeBalance, address, resource);
+      if (!callback) return this.injectPromise(this.unfreezeBalance, resource, address);
+      if (!['BANDWIDTH', 'ENERGY'].includes(resource)) return callback('Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"');
       if (!this.tronWeb.isAddress(address)) return callback('Invalid address provided');
       this.tronWeb.fullNode.request('wallet/unfreezebalance', {
         owner_address: this.tronWeb.address.toHex(address),
@@ -40853,12 +40922,10 @@ function () {
         }
       }
 
-      console.log(name);
       if (!utils__WEBPACK_IMPORTED_MODULE_4__["default"].isArray(abi)) return callback('Invalid options.abi provided');
       var payable = abi.some(function (func) {
         return func.type == 'constructor' && func.payable;
       });
-      if (!utils__WEBPACK_IMPORTED_MODULE_4__["default"].isHex(name)) name = this.tronWeb.toHex(name);
       if (!utils__WEBPACK_IMPORTED_MODULE_4__["default"].isHex(bytecode)) return callback('Invalid options.bytecode provided');
       if (!utils__WEBPACK_IMPORTED_MODULE_4__["default"].isInteger(feeLimit) || feeLimit <= 0 || feeLimit > 1000000000) return callback('Invalid options.feeLimit provided');
       if (!utils__WEBPACK_IMPORTED_MODULE_4__["default"].isInteger(callValue) || callValue < 0) return callback('Invalid options.callValue provided');
@@ -41074,6 +41141,40 @@ function () {
           return callback(_this3.tronWeb.toUtf8(transaction.result.message));
         }
 
+        callback(null, transaction);
+      }).catch(function (err) {
+        return callback(err);
+      });
+    }
+  }, {
+    key: "updateAccount",
+    value: function updateAccount() {
+      var accountName = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      var address = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.tronWeb.defaultAddress.hex;
+      var callback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      if (utils__WEBPACK_IMPORTED_MODULE_4__["default"].isFunction(address)) {
+        callback = address;
+        address = this.tronWeb.defaultAddress.hex;
+      }
+
+      if (!callback) {
+        return this.injectPromise(this.updateAccount, accountName, address);
+      }
+
+      if (!utils__WEBPACK_IMPORTED_MODULE_4__["default"].isString(accountName) || !accountName.length) {
+        return callback('Name must be a string');
+      }
+
+      if (!this.tronWeb.isAddress(address)) {
+        return callback('Invalid origin address provided');
+      }
+
+      this.tronWeb.fullNode.request('wallet/updateaccount', {
+        account_name: this.tronWeb.fromUtf8(accountName),
+        owner_address: this.tronWeb.address.toHex(address)
+      }, 'post').then(function (transaction) {
+        if (transaction.Error) return callback(transaction.Error);
         callback(null, transaction);
       }).catch(function (err) {
         return callback(err);
@@ -41578,6 +41679,20 @@ function () {
       });
     }
   }, {
+    key: "getConfirmedTransaction",
+    value: function getConfirmedTransaction(transactionID) {
+      var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      if (!callback) return this.injectPromise(this.getConfirmedTransaction, transactionID);
+      this.tronWeb.solidityNode.request('walletsolidity/gettransactionbyid', {
+        value: transactionID
+      }, 'post').then(function (transaction) {
+        if (!Object.keys(transaction).length) return callback('Transaction not found');
+        callback(null, transaction);
+      }).catch(function (err) {
+        return callback(err);
+      });
+    }
+  }, {
     key: "getTransactionInfo",
     value: function getTransactionInfo(transactionID) {
       var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
@@ -41609,6 +41724,7 @@ function () {
       }
 
       if (!callback) return this.injectPromise(this.getTransactionsToAddress, address, limit, offset);
+      address = this.tronWeb.address.toHex(address);
       return this.getTransactionsRelated(address, 'to', limit, offset, callback);
     }
   }, {
@@ -41630,6 +41746,7 @@ function () {
       }
 
       if (!callback) return this.injectPromise(this.getTransactionsFromAddress, address, limit, offset);
+      address = this.tronWeb.address.toHex(address);
       return this.getTransactionsRelated(address, 'from', limit, offset, callback);
     }
   }, {
@@ -42289,73 +42406,77 @@ function () {
                   options = {};
                 }
 
+                if (typeof options === 'string') options = {
+                  privateKey: options
+                };
+
                 if (callback) {
-                  _context4.next = 7;
+                  _context4.next = 8;
                   break;
                 }
 
                 return _context4.abrupt("return", this.injectPromise(this.sendTransaction, to, amount, options));
 
-              case 7:
+              case 8:
                 if (this.tronWeb.isAddress(to)) {
-                  _context4.next = 9;
+                  _context4.next = 10;
                   break;
                 }
 
                 return _context4.abrupt("return", callback('Invalid recipient provided'));
 
-              case 9:
+              case 10:
                 if (!(!utils__WEBPACK_IMPORTED_MODULE_7__["default"].isInteger(amount) || amount <= 0)) {
-                  _context4.next = 11;
+                  _context4.next = 12;
                   break;
                 }
 
                 return _context4.abrupt("return", callback('Invalid amount provided'));
 
-              case 11:
+              case 12:
                 options = _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_3___default()({
                   privateKey: this.tronWeb.defaultPrivateKey,
                   address: this.tronWeb.defaultAddress.hex
                 }, options);
 
                 if (!(!options.privateKey && !options.address)) {
-                  _context4.next = 14;
+                  _context4.next = 15;
                   break;
                 }
 
                 return _context4.abrupt("return", callback('Function requires either a private key or address to be set'));
 
-              case 14:
-                _context4.prev = 14;
+              case 15:
+                _context4.prev = 15;
                 _address2 = options.privateKey ? this.tronWeb.address.fromPrivateKey(options.privateKey) : options.address;
-                _context4.next = 18;
+                _context4.next = 19;
                 return this.tronWeb.transactionBuilder.sendTrx(to, amount, _address2);
 
-              case 18:
+              case 19:
                 transaction = _context4.sent;
-                _context4.next = 21;
+                _context4.next = 22;
                 return this.sign(transaction, options.privateKey || undefined);
 
-              case 21:
+              case 22:
                 signedTransaction = _context4.sent;
-                _context4.next = 24;
+                _context4.next = 25;
                 return this.sendRawTransaction(signedTransaction);
 
-              case 24:
+              case 25:
                 result = _context4.sent;
                 return _context4.abrupt("return", callback(null, result));
 
-              case 28:
-                _context4.prev = 28;
-                _context4.t0 = _context4["catch"](14);
+              case 29:
+                _context4.prev = 29;
+                _context4.t0 = _context4["catch"](15);
                 return _context4.abrupt("return", callback(_context4.t0));
 
-              case 31:
+              case 32:
               case "end":
                 return _context4.stop();
             }
           }
-        }, _callee4, this, [[14, 28]]);
+        }, _callee4, this, [[15, 29]]);
       }));
 
       return function sendTransaction() {
@@ -42394,85 +42515,447 @@ function () {
                   options = {};
                 }
 
+                if (typeof options === 'string') options = {
+                  privateKey: options
+                };
+
                 if (callback) {
-                  _context5.next = 8;
+                  _context5.next = 9;
                   break;
                 }
 
                 return _context5.abrupt("return", this.injectPromise(this.sendToken, to, amount, tokenID, options));
 
-              case 8:
+              case 9:
                 if (this.tronWeb.isAddress(to)) {
-                  _context5.next = 10;
+                  _context5.next = 11;
                   break;
                 }
 
                 return _context5.abrupt("return", callback('Invalid recipient provided'));
 
-              case 10:
+              case 11:
                 if (!(!utils__WEBPACK_IMPORTED_MODULE_7__["default"].isInteger(amount) || amount <= 0)) {
-                  _context5.next = 12;
+                  _context5.next = 13;
                   break;
                 }
 
                 return _context5.abrupt("return", callback('Invalid amount provided'));
 
-              case 12:
+              case 13:
                 if (utils__WEBPACK_IMPORTED_MODULE_7__["default"].isString(tokenID)) {
-                  _context5.next = 14;
+                  _context5.next = 15;
                   break;
                 }
 
                 return _context5.abrupt("return", callback('Invalid token ID provided'));
 
-              case 14:
+              case 15:
                 options = _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_3___default()({
                   privateKey: this.tronWeb.defaultPrivateKey,
                   address: this.tronWeb.defaultAddress.hex
                 }, options);
 
                 if (!(!options.privateKey && !options.address)) {
-                  _context5.next = 17;
+                  _context5.next = 18;
                   break;
                 }
 
                 return _context5.abrupt("return", callback('Function requires either a private key or address to be set'));
 
-              case 17:
-                _context5.prev = 17;
+              case 18:
+                _context5.prev = 18;
                 _address3 = options.privateKey ? this.tronWeb.address.fromPrivateKey(options.privateKey) : options.address;
-                _context5.next = 21;
+                _context5.next = 22;
                 return this.tronWeb.transactionBuilder.sendToken(to, amount, tokenID, _address3);
 
-              case 21:
+              case 22:
                 transaction = _context5.sent;
-                _context5.next = 24;
+                _context5.next = 25;
                 return this.sign(transaction, options.privateKey || undefined);
 
-              case 24:
+              case 25:
                 signedTransaction = _context5.sent;
-                _context5.next = 27;
+                _context5.next = 28;
                 return this.sendRawTransaction(signedTransaction);
 
-              case 27:
+              case 28:
                 result = _context5.sent;
                 return _context5.abrupt("return", callback(null, result));
 
-              case 31:
-                _context5.prev = 31;
-                _context5.t0 = _context5["catch"](17);
+              case 32:
+                _context5.prev = 32;
+                _context5.t0 = _context5["catch"](18);
                 return _context5.abrupt("return", callback(_context5.t0));
 
-              case 34:
+              case 35:
               case "end":
                 return _context5.stop();
             }
           }
-        }, _callee5, this, [[17, 31]]);
+        }, _callee5, this, [[18, 32]]);
       }));
 
       return function sendToken() {
         return _sendToken.apply(this, arguments);
+      };
+    }()
+    /**
+         * Freezes an amount of TRX.
+         * Will give bandwidth OR Energy and TRON Power(voting rights)
+         * to the owner of the frozen tokens.
+         *
+         * @param amount - is the number of frozen trx
+         * @param duration - is the duration in days to be frozen
+         * @param resource - is the type, must be either "ENERGY" or "BANDWIDTH"
+         * @param options
+         * @param callback
+         */
+
+  }, {
+    key: "freezeBalance",
+    value: function () {
+      var _freezeBalance = _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2___default()(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee6() {
+        var amount,
+            duration,
+            resource,
+            options,
+            callback,
+            _address4,
+            freezeBalance,
+            signedTransaction,
+            result,
+            _args6 = arguments;
+
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee6$(_context6) {
+          while (1) {
+            switch (_context6.prev = _context6.next) {
+              case 0:
+                amount = _args6.length > 0 && _args6[0] !== undefined ? _args6[0] : 0;
+                duration = _args6.length > 1 && _args6[1] !== undefined ? _args6[1] : 3;
+                resource = _args6.length > 2 && _args6[2] !== undefined ? _args6[2] : "BANDWIDTH";
+                options = _args6.length > 3 && _args6[3] !== undefined ? _args6[3] : {};
+                callback = _args6.length > 4 && _args6[4] !== undefined ? _args6[4] : false;
+
+                if (utils__WEBPACK_IMPORTED_MODULE_7__["default"].isFunction(duration)) {
+                  callback = duration;
+                  duration = 3;
+                }
+
+                if (utils__WEBPACK_IMPORTED_MODULE_7__["default"].isFunction(resource)) {
+                  callback = resource;
+                  resource = "BANDWIDTH";
+                }
+
+                if (utils__WEBPACK_IMPORTED_MODULE_7__["default"].isFunction(options)) {
+                  callback = options;
+                  options = {};
+                }
+
+                if (typeof options === 'string') options = {
+                  privateKey: options
+                };
+
+                if (callback) {
+                  _context6.next = 11;
+                  break;
+                }
+
+                return _context6.abrupt("return", this.injectPromise(this.freezeBalance, amount, duration, resource, options));
+
+              case 11:
+                if (['BANDWIDTH', 'ENERGY'].includes(resource)) {
+                  _context6.next = 13;
+                  break;
+                }
+
+                return _context6.abrupt("return", callback('Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"'));
+
+              case 13:
+                if (!(!utils__WEBPACK_IMPORTED_MODULE_7__["default"].isInteger(amount) || amount <= 0)) {
+                  _context6.next = 15;
+                  break;
+                }
+
+                return _context6.abrupt("return", callback('Invalid amount provided'));
+
+              case 15:
+                if (!(!utils__WEBPACK_IMPORTED_MODULE_7__["default"].isInteger(duration) || duration < 3)) {
+                  _context6.next = 17;
+                  break;
+                }
+
+                return _context6.abrupt("return", callback('Invalid duration provided, minimum of 3 days'));
+
+              case 17:
+                options = _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_3___default()({
+                  privateKey: this.tronWeb.defaultPrivateKey,
+                  address: this.tronWeb.defaultAddress.hex
+                }, options);
+
+                if (!(!options.privateKey && !options.address)) {
+                  _context6.next = 20;
+                  break;
+                }
+
+                return _context6.abrupt("return", callback('Function requires either a private key or address to be set'));
+
+              case 20:
+                _context6.prev = 20;
+                _address4 = options.privateKey ? this.tronWeb.address.fromPrivateKey(options.privateKey) : options.address;
+                _context6.next = 24;
+                return this.tronWeb.transactionBuilder.freezeBalance(amount, duration, resource, _address4);
+
+              case 24:
+                freezeBalance = _context6.sent;
+                _context6.next = 27;
+                return this.sign(freezeBalance, options.privateKey || undefined);
+
+              case 27:
+                signedTransaction = _context6.sent;
+                _context6.next = 30;
+                return this.sendRawTransaction(signedTransaction);
+
+              case 30:
+                result = _context6.sent;
+                return _context6.abrupt("return", callback(null, result));
+
+              case 34:
+                _context6.prev = 34;
+                _context6.t0 = _context6["catch"](20);
+                return _context6.abrupt("return", callback(_context6.t0));
+
+              case 37:
+              case "end":
+                return _context6.stop();
+            }
+          }
+        }, _callee6, this, [[20, 34]]);
+      }));
+
+      return function freezeBalance() {
+        return _freezeBalance.apply(this, arguments);
+      };
+    }()
+    /**
+     * Unfreeze TRX that has passed the minimum freeze duration.
+     * Unfreezing will remove bandwidth and TRON Power.
+     *
+     * @param resource - is the type, must be either "ENERGY" or "BANDWIDTH"
+     * @param options
+     * @param callback
+     */
+
+  }, {
+    key: "unfreezeBalance",
+    value: function () {
+      var _unfreezeBalance = _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2___default()(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee7() {
+        var resource,
+            options,
+            callback,
+            _address5,
+            unfreezeBalance,
+            signedTransaction,
+            result,
+            _args7 = arguments;
+
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee7$(_context7) {
+          while (1) {
+            switch (_context7.prev = _context7.next) {
+              case 0:
+                resource = _args7.length > 0 && _args7[0] !== undefined ? _args7[0] : "BANDWIDTH";
+                options = _args7.length > 1 && _args7[1] !== undefined ? _args7[1] : {};
+                callback = _args7.length > 2 && _args7[2] !== undefined ? _args7[2] : false;
+
+                if (utils__WEBPACK_IMPORTED_MODULE_7__["default"].isFunction(resource)) {
+                  callback = resource;
+                  resource = 'BANDWIDTH';
+                }
+
+                if (utils__WEBPACK_IMPORTED_MODULE_7__["default"].isFunction(options)) {
+                  callback = options;
+                  options = {};
+                }
+
+                if (typeof options === 'string') options = {
+                  privateKey: options
+                };
+
+                if (callback) {
+                  _context7.next = 8;
+                  break;
+                }
+
+                return _context7.abrupt("return", this.injectPromise(this.unfreezeBalance, resource, options));
+
+              case 8:
+                if (['BANDWIDTH', 'ENERGY'].includes(resource)) {
+                  _context7.next = 10;
+                  break;
+                }
+
+                return _context7.abrupt("return", callback('Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"'));
+
+              case 10:
+                options = _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_3___default()({
+                  privateKey: this.tronWeb.defaultPrivateKey,
+                  address: this.tronWeb.defaultAddress.hex
+                }, options);
+
+                if (!(!options.privateKey && !options.address)) {
+                  _context7.next = 13;
+                  break;
+                }
+
+                return _context7.abrupt("return", callback('Function requires either a private key or address to be set'));
+
+              case 13:
+                _context7.prev = 13;
+                _address5 = options.privateKey ? this.tronWeb.address.fromPrivateKey(options.privateKey) : options.address;
+                _context7.next = 17;
+                return this.tronWeb.transactionBuilder.unfreezeBalance(resource, _address5);
+
+              case 17:
+                unfreezeBalance = _context7.sent;
+                _context7.next = 20;
+                return this.sign(unfreezeBalance, options.privateKey || undefined);
+
+              case 20:
+                signedTransaction = _context7.sent;
+                _context7.next = 23;
+                return this.sendRawTransaction(signedTransaction);
+
+              case 23:
+                result = _context7.sent;
+                return _context7.abrupt("return", callback(null, result));
+
+              case 27:
+                _context7.prev = 27;
+                _context7.t0 = _context7["catch"](13);
+                return _context7.abrupt("return", callback(_context7.t0));
+
+              case 30:
+              case "end":
+                return _context7.stop();
+            }
+          }
+        }, _callee7, this, [[13, 27]]);
+      }));
+
+      return function unfreezeBalance() {
+        return _unfreezeBalance.apply(this, arguments);
+      };
+    }()
+    /**
+     * Modify account name
+     * Note: Username is allowed to edit only once.
+     *
+     * @param privateKey - Account private Key
+     * @param accountName - name of the account
+     * @param callback
+     *
+     * @return modified Transaction Object
+     */
+
+  }, {
+    key: "updateAccount",
+    value: function () {
+      var _updateAccount = _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_2___default()(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee8() {
+        var accountName,
+            options,
+            callback,
+            _address6,
+            updateAccount,
+            signedTransaction,
+            result,
+            _args8 = arguments;
+
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee8$(_context8) {
+          while (1) {
+            switch (_context8.prev = _context8.next) {
+              case 0:
+                accountName = _args8.length > 0 && _args8[0] !== undefined ? _args8[0] : false;
+                options = _args8.length > 1 && _args8[1] !== undefined ? _args8[1] : {};
+                callback = _args8.length > 2 && _args8[2] !== undefined ? _args8[2] : false;
+
+                if (utils__WEBPACK_IMPORTED_MODULE_7__["default"].isFunction(options)) {
+                  callback = options;
+                  options = {};
+                }
+
+                if (typeof options === 'string') options = {
+                  privateKey: options
+                };
+
+                if (callback) {
+                  _context8.next = 7;
+                  break;
+                }
+
+                return _context8.abrupt("return", this.injectPromise(this.updateAccount, accountName, options));
+
+              case 7:
+                if (!(!utils__WEBPACK_IMPORTED_MODULE_7__["default"].isString(accountName) || !accountName.length)) {
+                  _context8.next = 9;
+                  break;
+                }
+
+                return _context8.abrupt("return", callback('Name must be a string'));
+
+              case 9:
+                options = _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_3___default()({
+                  privateKey: this.tronWeb.defaultPrivateKey,
+                  address: this.tronWeb.defaultAddress.hex
+                }, options);
+
+                if (!(!options.privateKey && !options.address)) {
+                  _context8.next = 12;
+                  break;
+                }
+
+                return _context8.abrupt("return", callback('Function requires either a private key or address to be set'));
+
+              case 12:
+                _context8.prev = 12;
+                _address6 = options.privateKey ? this.tronWeb.address.fromPrivateKey(options.privateKey) : options.address;
+                _context8.next = 16;
+                return this.tronWeb.transactionBuilder.updateAccount(accountName, _address6);
+
+              case 16:
+                updateAccount = _context8.sent;
+                _context8.next = 19;
+                return this.sign(updateAccount, options.privateKey || undefined);
+
+              case 19:
+                signedTransaction = _context8.sent;
+                _context8.next = 22;
+                return this.sendRawTransaction(signedTransaction);
+
+              case 22:
+                result = _context8.sent;
+                return _context8.abrupt("return", callback(null, result));
+
+              case 26:
+                _context8.prev = 26;
+                _context8.t0 = _context8["catch"](12);
+                return _context8.abrupt("return", callback(_context8.t0));
+
+              case 29:
+              case "end":
+                return _context8.stop();
+            }
+          }
+        }, _callee8, this, [[12, 26]]);
+      }));
+
+      return function updateAccount() {
+        return _updateAccount.apply(this, arguments);
       };
     }()
   }, {
@@ -42589,7 +43072,7 @@ function () {
       if (!callback) return this.injectPromise(this.getExchangeByID, exchangeID);
       if (!utils__WEBPACK_IMPORTED_MODULE_7__["default"].isInteger(exchangeID) || exchangeID < 0) return callback('Invalid exchangeID provided');
       this.tronWeb.fullNode.request('wallet/getexchangebyid', {
-        address: this.tronWeb.defaultAddress.hex
+        value: exchangeID
       }, 'post').then(function (exchange) {
         callback(null, exchange);
       }).catch(function (err) {
@@ -42609,7 +43092,7 @@ function () {
         var _ref16$exchanges = _ref16.exchanges,
             exchanges = _ref16$exchanges === void 0 ? [] : _ref16$exchanges;
         callback(null, exchanges);
-      }).catch(function (err) {
+      }, 'post').catch(function (err) {
         return callback(err);
       });
     }
@@ -42712,28 +43195,6 @@ function () {
 
 
 ;
-
-/***/ }),
-
-/***/ "./src/lib/witness.js":
-/*!****************************!*\
-  !*** ./src/lib/witness.js ***!
-  \****************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Witness; });
-/* harmony import */ var _babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ "./node_modules/@babel/runtime/helpers/classCallCheck.js");
-/* harmony import */ var _babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_0__);
-
-
-var Witness = function Witness() {
-  _babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_0___default()(this, Witness);
-};
-
-
 
 /***/ }),
 
@@ -43452,7 +43913,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
 function getBase58CheckAddress(addressBytes) {
   var hash0 = SHA256(addressBytes);
   var hash1 = SHA256(hash0);
@@ -43477,7 +43937,7 @@ function decodeBase58Address(base58Sting) {
     return address;
   }
 
-  return Object(_code__WEBPACK_IMPORTED_MODULE_3__["hexStr2byteArray"])('000000000000000000000000000000000000000000');
+  throw new Error('Invalid address provided');
 }
 function signTransaction(priKeyBytes, transaction) {
   if (typeof priKeyBytes === 'string') priKeyBytes = Object(_code__WEBPACK_IMPORTED_MODULE_3__["hexStr2byteArray"])(priKeyBytes);
@@ -43749,7 +44209,8 @@ var utils = {
       contract: event.contract_address,
       name: event.event_name,
       transaction: event.transaction_id,
-      result: event.result
+      result: event.result,
+      resourceNode: event.resource_Node
     };
   },
   parseEvent: function parseEvent(event, _ref) {

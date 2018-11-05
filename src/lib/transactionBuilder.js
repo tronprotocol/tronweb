@@ -122,7 +122,13 @@ export default class TransactionBuilder {
         }).catch(err => callback(err));
     }
 
-    freezeBalance(address = this.tronWeb.defaultAddress.hex, amount = 0, duration = 3, resource = "BANDWIDTH", callback = false) {
+    freezeBalance(amount = 0, duration = 3, resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, callback = false)
+    {
+        if(utils.isFunction(address)) {
+            callback = address;
+            address = this.tronWeb.defaultAddress.hex;
+        }
+
         if(utils.isFunction(duration)) {
             callback = duration;
             duration = 3;
@@ -132,18 +138,21 @@ export default class TransactionBuilder {
             callback = resource;
             resource = "BANDWIDTH";
         }
-            
-        if(!callback)
-            return this.injectPromise(this.freezeBalance, address, amount, duration, resource);
 
-        if(!this.tronWeb.isAddress(address))
-            return callback('Invalid address provided');
+        if(!callback)
+            return this.injectPromise(this.freezeBalance, amount, duration, resource, address);
+
+        if(![ 'BANDWIDTH', 'ENERGY' ].includes(resource))
+            return callback('Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"');
 
         if(!utils.isInteger(amount) || amount <= 0)
             return callback('Invalid amount provided');
 
         if(!utils.isInteger(duration) || duration < 3)
             return callback('Invalid duration provided, minimum of 3 days');
+
+        if(!this.tronWeb.isAddress(address))
+            return callback('Invalid address provided');
 
         this.tronWeb.fullNode.request('wallet/freezebalance', {
             owner_address: this.tronWeb.address.toHex(address),
@@ -158,7 +167,8 @@ export default class TransactionBuilder {
         }).catch(err => callback(err));
     }
 
-    unfreezeBalance(address = this.tronWeb.defaultAddress.hex, resource = "BANDWIDTH", callback = false) {
+    unfreezeBalance(resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, callback = false)
+    {
         if(utils.isFunction(address)) {
             callback = address;
             address = this.tronWeb.defaultAddress.hex;
@@ -170,11 +180,14 @@ export default class TransactionBuilder {
         }
 
         if(!callback)
-            return this.injectPromise(this.unfreezeBalance, address, resource);
+            return this.injectPromise(this.unfreezeBalance, resource, address);
+
+        if(![ 'BANDWIDTH', 'ENERGY' ].includes(resource))
+            return callback('Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"');
 
         if(!this.tronWeb.isAddress(address))
             return callback('Invalid address provided');
-        
+
         this.tronWeb.fullNode.request('wallet/unfreezebalance', {
             owner_address: this.tronWeb.address.toHex(address),
             resource: resource
@@ -313,7 +326,7 @@ export default class TransactionBuilder {
                 return callback('Invalid options.abi provided');
             }
         }
-        console.log(name);
+
         if(!utils.isArray(abi))
             return callback('Invalid options.abi provided');
 
@@ -321,9 +334,6 @@ export default class TransactionBuilder {
         const payable = abi.some(func => {
             return func.type == 'constructor' && func.payable;
         });
-
-        if(!utils.isHex(name))
-            name = this.tronWeb.toHex(name);
 
         if(!utils.isHex(bytecode))
             return callback('Invalid options.bytecode provided');
@@ -605,6 +615,37 @@ export default class TransactionBuilder {
                     this.tronWeb.toUtf8(transaction.result.message)
                 );
             }
+
+            callback(null, transaction);
+        }).catch(err => callback(err));
+    }
+
+    updateAccount(accountName = false, address = this.tronWeb.defaultAddress.hex, callback = false)
+    {
+        if(utils.isFunction(address)) {
+            callback = address;
+            address = this.tronWeb.defaultAddress.hex;
+        }
+
+        if(!callback) {
+            return this.injectPromise(this.updateAccount, accountName, address);
+        }
+
+        if (!utils.isString(accountName) || !accountName.length) {
+            return callback('Name must be a string');
+        }
+
+        if(!this.tronWeb.isAddress(address)) {
+            return callback('Invalid origin address provided');
+        }
+
+        this.tronWeb.fullNode.request('wallet/updateaccount', {
+            account_name: this.tronWeb.fromUtf8(accountName),
+            owner_address: this.tronWeb.address.toHex(address),
+        }, 'post').then(transaction => {
+
+            if(transaction.Error)
+                return callback(transaction.Error);
 
             callback(null, transaction);
         }).catch(err => callback(err));
