@@ -38,9 +38,7 @@ const app = async () => {
             console.log('- Valid: ', isValid, '\n')
         console.groupEnd();
     console.groupEnd();
-};
 
-const someOther = async () => {
     const currentBlock = await tronWeb.trx.getCurrentBlock();
 
     console.group('Current block');
