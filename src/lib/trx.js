@@ -808,25 +808,34 @@ export default class Trx {
      *
      * @return modified Transaction Object
      */
-    async updateAccount(accountName = false, privateKey = this.tronWeb.defaultPrivateKey,  callback = false)
+    async updateAccount(accountName = false, options = {},  callback = false)
     {
-        if(utils.isFunction(privateKey)) {
-            callback = privateKey;
-            privateKey = this.tronWeb.defaultPrivateKey;
+        if(utils.isFunction(options)) {
+            callback = options;
+            options = {};
         }
 
         if(!callback) {
-            return this.injectPromise(this.updateAccount, accountName, privateKey);
+            return this.injectPromise(this.updateAccount, accountName, options);
         }
 
         if (!utils.isString(accountName) || !accountName.length) {
             return callback('Name must be a string');
         }
 
+        options = {
+            privateKey: this.tronWeb.defaultPrivateKey,
+            address: this.tronWeb.defaultAddress.hex,
+            ...options
+        };
+
+        if(!options.privateKey && !options.address)
+            return callback('Function requires either a private key or address to be set');
+
         try {
-            const address = this.tronWeb.address.fromPrivateKey(privateKey);
+            const address = options.privateKey ? this.tronWeb.address.fromPrivateKey(options.privateKey) : options.address;
             const updateAccount = await this.tronWeb.transactionBuilder.updateAccount(accountName, address);
-            const signedTransaction = await this.sign(updateAccount, privateKey);
+            const signedTransaction = await this.sign(updateAccount, options.privateKey || undefined);
             const result = await this.sendRawTransaction(signedTransaction);
 
             return callback(null, result);
