@@ -198,9 +198,9 @@ export default class TronWeb extends EventEmitter {
         }).catch(err => callback((err.response && err.response.data) || err)); 
     }
 
-    getEventByTransacionID(transactionID = false, callback = false) {
+    getEventByTransactionID(transactionID = false, callback = false) {
         if(!callback)
-            return this.injectPromise(this.getEventByTransacionID, transactionID);
+            return this.injectPromise(this.getEventByTransactionID, transactionID);
 
         if(!this.eventServer)
             callback('No event server configured');
