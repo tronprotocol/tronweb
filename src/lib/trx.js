@@ -717,6 +717,9 @@ export default class Trx {
             callback = options;
             options = {};
         }
+        
+        if(typeof options === 'string')
+            options = { privateKey: options };
 
         if(!callback)
             return this.injectPromise(this.freezeBalance, amount, duration, resource, options);
@@ -770,6 +773,9 @@ export default class Trx {
             callback = options;
             options = {};
         }
+        
+        if(typeof options === 'string')
+            options = { privateKey: options };
 
         if(!callback)
             return this.injectPromise(this.unfreezeBalance, resource, options);
@@ -814,6 +820,9 @@ export default class Trx {
             callback = options;
             options = {};
         }
+        
+        if(typeof options === 'string')
+            options = { privateKey: options };
 
         if(!callback) {
             return this.injectPromise(this.updateAccount, accountName, options);
