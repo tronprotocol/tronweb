@@ -41,8 +41,8 @@ export default class TronWeb extends EventEmitter {
         [
             'sha3', 'toHex', 'toUtf8', 'fromUtf8',
             'toAscii', 'fromAscii', 'toDecimal', 'fromDecimal',
-            'toSun', 'fromSun', 'toBigNumber', 'isAddress',
-            'compile', 'createAccount', 'address'
+            'toSun', 'fromSun', 'toBigNumber', 'isAddress', 
+            'createAccount', 'address'
         ].forEach(key => {
             this[key] = TronWeb[key];
         });
@@ -335,11 +335,6 @@ export default class TronWeb extends EventEmitter {
         }
 
         return utils.crypto.isAddressValid(address);
-    }
-
-    // TODO
-    static compile(solditySource) {
-
     }
 
     static async createAccount(callback = false) {
