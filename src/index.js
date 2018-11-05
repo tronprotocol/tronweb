@@ -24,6 +24,9 @@ export default class TronWeb extends EventEmitter {
         if(utils.isString(solidityNode))
             solidityNode = new providers.HttpProvider(solidityNode);
 
+        if(utils.isString(eventServer))
+            eventServer = new providers.HttpProvider(eventServer);
+
         this.setFullNode(fullNode);
         this.setSolidityNode(solidityNode);
         this.setEventServer(eventServer);
@@ -103,19 +106,6 @@ export default class TronWeb extends EventEmitter {
         return Object.values(providers).some(knownProvider => provider instanceof knownProvider);
     }
 
-    isEventServerConnected() {
-        if (!this.eventServer)
-            return false;
-
-        return axios.get(this.eventServer.replace(/\/+$/,'') + '/healthcheck').then(() => {
-            return true;
-        }).catch(() => {
-            return axios.get(this.eventServer.replace(/\/+$/,'') + '/events?size=1').then(({data}) => {
-                return Array.isArray(data);
-            }).catch(() => false);
-        });
-    }
-
     setFullNode(fullNode) {
         if(utils.isString(fullNode))
             fullNode = new providers.HttpProvider(fullNode);
@@ -139,10 +129,21 @@ export default class TronWeb extends EventEmitter {
     }
 
     setEventServer(eventServer = false) {
-        if(eventServer !== false && !utils.isValidURL(eventServer))
-            throw new Error('Invalid URL provided for event server');
+        if(!eventServer)
+            return this.eventServer = false;
+
+        if(utils.isString(eventServer))
+            eventServer = new providers.HttpProvider(eventServer);
+            
+        if(!this.isValidProvider(eventServer))
+            throw new Error('Invalid event server provided');
 
         this.eventServer = eventServer;
+        this.eventServer.isConnected = () => this.eventServer.request('healthcheck').then(() => true).catch(() => (
+            this.eventServer.request('events?size=1').then(data => (
+                Array.isArray(data)
+            ))
+        )).catch(() => false);
     }
 
     currentProviders() {
@@ -184,7 +185,7 @@ export default class TronWeb extends EventEmitter {
         if(blockNumber)
             routeParams.push(blockNumber);
 
-        return axios(`${this.eventServer}/event/contract/${routeParams.join('/')}?since=${sinceTimestamp}`).then(({ data = false }) => {
+        return this.eventServer.request(`event/contract/${routeParams.join('/')}?since=${sinceTimestamp}`).then((data = false) => {
             if(!data)
                 return callback('Unknown error occurred');
 
@@ -204,7 +205,7 @@ export default class TronWeb extends EventEmitter {
         if(!this.eventServer)
             callback('No event server configured');
 
-        return axios(`${this.eventServer}/event/transaction/${transactionID}`).then(({ data = false }) => {
+        return this.eventServer.request(`event/transaction/${transactionID}`).then((data = false) => {
             if(!data)
                 return callback('Unknown error occurred');
 
@@ -264,11 +265,6 @@ export default class TronWeb extends EventEmitter {
         if(utils.isString(val)) {
             if (/^(-|)0x/.test(val))
                 return val;
-            // if(val.indexOf('-0x') === 0)
-            //     return TronWeb.fromDecimal(val); // << this returns val
-            //
-            // if(val.indexOf('0x') === 0)
-            //     return val;
 
             if(!isFinite(val))
                 return TronWeb.fromUtf8(val);
@@ -342,11 +338,6 @@ export default class TronWeb extends EventEmitter {
         return utils.crypto.isAddressValid(address);
     }
 
-    // TODO
-    static compile(solditySource) {
-
-    }
-
     static async createAccount(callback = false) {
         const account = utils.accounts.generateAccount();
 
@@ -363,7 +354,7 @@ export default class TronWeb extends EventEmitter {
         callback(null, {
             fullNode: await this.fullNode.isConnected(),
             solidityNode: await this.solidityNode.isConnected(),
-            eventServer: await this.isEventServerConnected()
+            eventServer: this.eventServer && await this.eventServer.isConnected()
         });
     }
 };

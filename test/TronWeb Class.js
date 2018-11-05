@@ -75,7 +75,7 @@ describe('TronWeb Instance', function () {
                 fullNode,
                 solidityNode,
                 '$' + EVENT_API
-            ), 'Invalid URL provided for event server');
+            ), 'Invalid URL provided to HttpProvider');
         });
     });
 
@@ -252,39 +252,6 @@ describe('TronWeb Instance', function () {
         });
     });
 
-    describe('#isEventServerConnected()', function () {
-
-        this.timeout(10000);
-
-        it('should return true for valid event server', async () => {
-
-            const tronWeb = createInstance();
-            const isConnected = await tronWeb.isEventServerConnected();
-
-            assert.equal(isConnected, true);
-        });
-
-        it('should return false for invalid event server', async () => {
-
-            const tronWeb = createInstance();
-
-            tronWeb.setEventServer('https://google.co.uk');
-
-            const isConnected = await tronWeb.isEventServerConnected();
-
-            assert.equal(isConnected, false);
-        });
-
-        it('should return false if the eventServer is null', async () => {
-            const tronWeb = createInstance();
-            tronWeb.eventServer = null
-
-            const isConnected = await tronWeb.isEventServerConnected();
-
-            assert.equal(isConnected, false);
-        });
-    });
-
     describe('#setFullNode()', function () {
         it('should accept a HttpProvider instance', function () {
             const tronWeb = createInstance();
@@ -356,7 +323,7 @@ describe('TronWeb Instance', function () {
 
             tronWeb.setEventServer(eventServer);
 
-            assert.equal(tronWeb.eventServer, eventServer);
+            assert.equal(tronWeb.eventServer.host, eventServer);
         });
 
         it('should reset the event server property', function () {
@@ -372,7 +339,7 @@ describe('TronWeb Instance', function () {
 
             assert.throws(() => {
                 tronWeb.setEventServer('test')
-            }, 'Invalid URL provided for event server');
+            }, 'Invalid URL provided to HttpProvider');
         });
 
         it('should reject an invalid URL parameter', function () {
@@ -380,7 +347,7 @@ describe('TronWeb Instance', function () {
 
             assert.throws(() => {
                 tronWeb.setEventServer({})
-            }, 'Invalid URL provided for event server');
+            }, 'Invalid event server provided');
         });
     });
 
@@ -391,7 +358,7 @@ describe('TronWeb Instance', function () {
 
             assert.equal(providers.fullNode.host, FULL_NODE_API);
             assert.equal(providers.solidityNode.host, SOLIDITY_NODE_API);
-            assert.equal(providers.eventServer, EVENT_API);
+            assert.equal(providers.eventServer.host, EVENT_API);
         });
     });
 
@@ -402,7 +369,7 @@ describe('TronWeb Instance', function () {
 
             assert.equal(providers.fullNode.host, FULL_NODE_API);
             assert.equal(providers.solidityNode.host, SOLIDITY_NODE_API);
-            assert.equal(providers.eventServer, EVENT_API);
+            assert.equal(providers.eventServer.host, EVENT_API);
         });
     });
 
