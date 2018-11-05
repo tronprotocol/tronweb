@@ -46,7 +46,7 @@ export function decodeBase58Address(base58Sting) {
         return address;
     }
 
-    return throw new Error('Invalid address provided');
+    throw new Error('Invalid address provided');
 }
 
 export function signTransaction(priKeyBytes, transaction) {
