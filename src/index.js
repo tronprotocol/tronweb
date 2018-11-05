@@ -6,7 +6,6 @@ import EventEmitter from 'eventemitter3';
 
 import TransactionBuilder from 'lib/transactionBuilder';
 import Trx from 'lib/trx';
-import Witness from 'lib/witness';
 import Contract from 'lib/contract';
 
 import { keccak256 } from 'js-sha3';
@@ -52,7 +51,6 @@ export default class TronWeb extends EventEmitter {
 
         this.transactionBuilder = new TransactionBuilder(this);
         this.trx = new Trx(this);
-        this.witness = new Witness(this);
         this.utils = utils;
 
         this.injectPromise = utils.promiseInjector(this);
