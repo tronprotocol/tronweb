@@ -46,7 +46,7 @@ export function decodeBase58Address(base58Sting) {
         return address;
     }
 
-    return hexStr2byteArray('000000000000000000000000000000000000000000');
+    throw new Error('Invalid address provided');
 }
 
 export function signTransaction(priKeyBytes, transaction) {
