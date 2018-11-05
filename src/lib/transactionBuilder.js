@@ -640,7 +640,7 @@ export default class TransactionBuilder {
         }
 
         this.tronWeb.fullNode.request('wallet/updateaccount', {
-            account_name: stringUtf8toHex(accountName),
+            account_name: this.tronWeb.fromUtf8(accountName),
             owner_address: this.tronWeb.address.toHex(address),
         }, 'post').then(transaction => {
 
