@@ -620,6 +620,9 @@ export default class Trx {
             callback = options;
             options = {};
         }
+        
+        if(typeof options === 'string')
+            options = { privateKey: options };
 
         if(!callback)
             return this.injectPromise(this.sendTransaction, to, amount, options);
@@ -656,6 +659,9 @@ export default class Trx {
             callback = options;
             options = {};
         }
+        
+        if(typeof options === 'string')
+            options = { privateKey: options };
 
         if(!callback)
             return this.injectPromise(this.sendToken, to, amount, tokenID, options);
