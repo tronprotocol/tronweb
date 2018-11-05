@@ -57,8 +57,6 @@ export default class TronWeb extends EventEmitter {
     }
 
     setDefaultBlock(blockID = false) {
-//         if(blockID === false || blockID == 'latest' || blockID == 'earliest' || blockID === 0)
-//             return this.defaultBlock = blockID;
         if([ false, 'latest', 'earliest', 0 ].includes(blockID)) {
             return this.defaultBlock = blockID;
         }
