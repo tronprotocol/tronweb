@@ -690,6 +690,114 @@ export default class Trx {
         }
     }
 
+/**
+     * Freezes an amount of TRX.
+     * Will give bandwidth OR Energy and TRON Power(voting rights)
+     * to the owner of the frozen tokens.
+     *
+     * @param amount - is the number of frozen trx
+     * @param duration - is the duration in days to be frozen
+     * @param resource - is the type, must be either "ENERGY" or "BANDWIDTH"
+     * @param options
+     * @param callback
+     */
+    async freezeBalance(amount = 0, duration = 3, resource = "BANDWIDTH", options = {}, callback = false)
+    {
+        if(utils.isFunction(duration)) {
+            callback = duration;
+            duration = 3;
+        }
+
+        if(utils.isFunction(resource)) {
+            callback = resource;
+            resource = "BANDWIDTH";
+        }
+
+        if(utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
+        if(!callback)
+            return this.injectPromise(this.freezeBalance, amount, duration, resource, options);
+
+        if(![ 'BANDWIDTH', 'ENERGY' ].includes(resource))
+            return callback('Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"');
+
+        if(!utils.isInteger(amount) || amount <= 0)
+            return callback('Invalid amount provided');
+
+        if(!utils.isInteger(duration) || duration < 3)
+            return callback('Invalid duration provided, minimum of 3 days');
+
+        options = {
+            privateKey: this.tronWeb.defaultPrivateKey,
+            address: this.tronWeb.defaultAddress.hex,
+            ...options
+        };
+
+        if(!options.privateKey && !options.address)
+            return callback('Function requires either a private key or address to be set');
+
+        try {
+            const address = options.privateKey ? this.tronWeb.address.fromPrivateKey(options.privateKey) : options.address;
+            const freezeBalance = await this.tronWeb.transactionBuilder.freezeBalance(amount, duration, resource, address);
+            const signedTransaction = await this.sign(freezeBalance, options.privateKey || undefined);
+            const result = await this.sendRawTransaction(signedTransaction);
+
+            return callback(null, result);
+        } catch(ex) {
+            return callback(ex);
+        }
+    }
+
+    /**
+     * Unfreeze TRX that has passed the minimum freeze duration.
+     * Unfreezing will remove bandwidth and TRON Power.
+     *
+     * @param resource - is the type, must be either "ENERGY" or "BANDWIDTH"
+     * @param options
+     * @param callback
+     */
+    async unfreezeBalance(resource = "BANDWIDTH", options = {}, callback = false)
+    {
+        if(utils.isFunction(resource)) {
+            callback = resource;
+            resource = 'BANDWIDTH';
+        }
+
+        if(utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
+        if(!callback)
+            return this.injectPromise(this.unfreezeBalance, resource, options);
+
+        if(![ 'BANDWIDTH', 'ENERGY' ].includes(resource))
+            return callback('Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"');
+
+        options = {
+            privateKey: this.tronWeb.defaultPrivateKey,
+            address: this.tronWeb.defaultAddress.hex,
+            ...options
+        };
+
+        if(!options.privateKey && !options.address)
+            return callback('Function requires either a private key or address to be set');
+
+        try {
+            const address = options.privateKey ? this.tronWeb.address.fromPrivateKey(options.privateKey) : options.address;
+            const unfreezeBalance = await this.tronWeb.transactionBuilder.unfreezeBalance(resource, address);
+            const signedTransaction = await this.sign(unfreezeBalance, options.privateKey || undefined);
+            const result = await this.sendRawTransaction(signedTransaction);
+
+            return callback(null, result);
+        } catch(ex) {
+            return callback(ex);
+        }
+    }
+
     /**
      * Modify account name
      * Note: Username is allowed to edit only once.
