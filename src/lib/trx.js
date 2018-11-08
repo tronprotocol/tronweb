@@ -302,6 +302,41 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
+    getUnconfirmedAccount(address = this.tronWeb.defaultAddress.hex, callback = false) {
+        if(utils.isFunction(address)) {
+            callback = address;
+            address = this.tronWeb.defaultAddress.hex;
+        }
+
+        if(!callback)
+            return this.injectPromise(this.getUnconfirmedAccount, address);
+
+        if(!this.tronWeb.isAddress(address))
+            return callback('Invalid address provided');
+
+        address = this.tronWeb.address.toHex(address);
+
+        this.tronWeb.fullNode.request('wallet/getaccount', {
+            address
+        }, 'post').then(account => {
+            callback(null, account);
+        }).catch(err => callback(err));
+    }
+
+    getUnconfirmedBalance(address = this.tronWeb.defaultAddress.hex, callback = false) {
+        if(utils.isFunction(address)) {
+            callback = address;
+            address = this.tronWeb.defaultAddress.hex;
+        }
+
+        if(!callback)
+            return this.injectPromise(this.getUnconfirmedBalance, address);
+
+        this.getUnconfirmedAccount(address).then(({ balance = 0 }) => {
+            callback(null, balance);
+        }).catch(err => callback(err));
+    }
+
     getBandwidth(address = this.tronWeb.defaultAddress.hex, callback = false) {
         if(utils.isFunction(address)) {
             callback = address;
