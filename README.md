@@ -171,11 +171,3 @@ async function getBalance() {
 getBalance();
 
 ```
-
-
-### Documentation for TronWeb 1.0
-
-Are you still using TronWeb 1 ? You can find documentation here:
-* [English](http://doc.tron.network/en)
-* [Chinese](http://doc.tron.network/)
-
