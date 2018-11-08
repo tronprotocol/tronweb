@@ -1,6 +1,5 @@
 import providers from 'lib/providers';
 import utils from 'utils';
-import axios from 'axios';
 import BigNumber from 'bignumber.js';
 import EventEmitter from 'eventemitter3';
 
