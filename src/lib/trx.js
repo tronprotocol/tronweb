@@ -1006,31 +1006,30 @@ export default class Trx {
     }
 
     /**
-     * Create an exchange between tokens.
+     * Create an exchange between a token and TRX.
      */
-    exchangeCreate(ownerAddress = false,
-                   firstTokenID, firstTokenBalance,
-                   secondTokenID, secondTokenBalance, callback = false) {
+    createTRXExchange(ownerAddress = this.tronWeb.defaultAddress.hex,
+                        tokenID, tokenBalance,
+                        trxBalance, callback = false) {
         if (!callback)
             return this.injectPromise(this.getAccountResources, address);
 
         if (!this.tronWeb.isAddress(ownerAddress))
             return callback('Invalid address provided');
 
-        if (!utils.isString(firstTokenID) || !firstTokenID.length
-            || !utils.isString(secondTokenID) || !secondTokenID.length)
+        if (!utils.isString(tokenID) || !tokenID.length)
             return callback('Invalid token ID provided');
 
-        if (!utils.isInteger(firstTokenBalance) || firstTokenBalance <= 0
-            || !utils.isInteger(secondTokenBalance) || secondTokenBalance <= 0)
+        if (!utils.isInteger(tokenBalance) || tokenBalance <= 0
+            || !utils.isInteger(trxBalance) || trxBalance <= 0)
             return callback('Invalid amount provided');
 
         this.tronWeb.fullNode.request('wallet/exchangecreate', {
             owner_address: this.tronWeb.address.toHex(ownerAddress),
-            first_token_id: firstTokenID,
-            first_token_balance: firstTokenBalance,
-            second_token_id: secondTokenID,
-            second_token_balance: secondTokenBalance
+            first_token_id: tokenID,
+            first_token_balance: tokenBalance,
+            second_token_id: '5f', // Constant for TRX.
+            second_token_balance: trxBalance
         }, 'post').then(resources => {
             callback(null, resources);
         }).catch(err => callback(err));
@@ -1039,7 +1038,7 @@ export default class Trx {
     /**
      * Exchanges a transaction.
      */
-    exchangeTransaction(ownerAddress = false, exchangeID, tokenID, quant, expected, callback = false) {
+    exchangeTransaction(ownerAddress = this.tronWeb.defaultAddress.hex, exchangeID, tokenID, quant, expected, callback = false) {
         if (!callback)
             return this.injectPromise(this.getAccountResources, address);
 
