@@ -914,46 +914,6 @@ export default class TransactionBuilder {
     }
 
     /**
-     * Adds TRX into a bancor style exchange.
-     */
-    injectExchangeTRX(exchangeID = false, trxAmount = 0, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
-        if(utils.isFunction(ownerAddress)) {
-            callback = ownerAddress;
-            ownerAddress = this.tronWeb.defaultAddress.hex;
-        }
-
-        if(!callback)
-            return this.injectPromise(this.injectExchangeTRX, exchangeID, trxAmount, ownerAddress);
-
-        if(!this.tronWeb.isAddress(ownerAddress))
-            return callback('Invalid ownerAddress provided');
-
-        if(!utils.isInteger(exchangeID) || exchangeID < 0)
-            return callback('Invalid exchangeID provided');
-
-        if(!utils.isInteger(trxAmount) || trxAmount < 1)
-            return callback('Invalid trxAmount provided');
-
-        this.tronWeb.fullNode.request('wallet/exchangeinject', {
-            owner_address: this.tronWeb.address.toHex(ownerAddress),
-            exchange_id: parseInt(exchangeID),
-            token_id: '5f', // Constant for TRX.
-            quant:parseInt(trxAmount)
-        }, 'post').then(transaction => {
-            if(transaction.Error)
-                return callback(transaction.Error);
-
-            if(transaction.result && transaction.result.message) {
-                return callback(
-                    this.tronWeb.toUtf8(transaction.result.message)
-                );
-            }
-
-            callback(null, transaction);
-        }).catch(err => callback(err));
-    }
-
-    /**
      * Withdraws tokens from a bancor style exchange.
      */
     withdrawExchangeTokens(exchangeID = false, tokenName = false, tokenAmount = 0, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
@@ -982,46 +942,6 @@ export default class TransactionBuilder {
             exchange_id: parseInt(exchangeID),
             token_id: this.tronWeb.fromUtf8(tokenName),
             quant:parseInt(tokenAmount)
-        }, 'post').then(transaction => {
-            if(transaction.Error)
-                return callback(transaction.Error);
-
-            if(transaction.result && transaction.result.message) {
-                return callback(
-                    this.tronWeb.toUtf8(transaction.result.message)
-                );
-            }
-
-            callback(null, transaction);
-        }).catch(err => callback(err));
-    }
-
-    /**
-     * Withdraws tokens from a bancor style exchange.
-     */
-    withdrawExchangeTRX(exchangeID = false, trxAmount = 0, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
-        if(utils.isFunction(ownerAddress)) {
-            callback = ownerAddress;
-            ownerAddress = this.tronWeb.defaultAddress.hex;
-        }
-
-        if(!callback)
-            return this.injectPromise(this.withdrawExchangeTokens, exchangeID, trxAmount, ownerAddress);
-
-        if(!this.tronWeb.isAddress(ownerAddress))
-            return callback('Invalid ownerAddress provided');
-
-        if(!utils.isInteger(exchangeID) || exchangeID < 0)
-            return callback('Invalid exchangeID provided');
-
-        if(!utils.isInteger(trxAmount) || trxAmount < 1)
-            return callback('Invalid trxAmount provided');
-
-        this.tronWeb.fullNode.request('wallet/exchangewithdraw', {
-            owner_address: this.tronWeb.address.toHex(ownerAddress),
-            exchange_id: parseInt(exchangeID),
-            token_id: "5f",
-            quant:parseInt(trxAmount)
         }, 'post').then(transaction => {
             if(transaction.Error)
                 return callback(transaction.Error);
