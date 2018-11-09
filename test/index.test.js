@@ -1,25 +1,17 @@
 const chai = require('chai');
-const TronWeb = require('./setup/TronWeb.js');
+const {ADDRESS_HEX, ADDRESS_BASE58, FULL_NODE_API, SOLIDITY_NODE_API, EVENT_API, PRIVATE_KEY} = require('./helpers/config').constants;
+const tronWebBuilder = require('./helpers/tronWebBuilder');
+const TronWeb = tronWebBuilder.TronWeb;
+const log = require('./helpers/log')
 
 const assert = chai.assert;
 const HttpProvider = TronWeb.providers.HttpProvider;
-
-const FULL_NODE_API = 'http://127.0.0.1:8090';
-const SOLIDITY_NODE_API = 'http://127.0.0.1:8091';
-const EVENT_API = 'http://127.0.0.1:8092';
-const PRIVATE_KEY = 'da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0';
-const ADDRESS_HEX = '41928c9af0651632157ef27a2cf17ca72c575a4d21';
-const ADDRESS_BASE58 = 'TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY';
-
-const createInstance = () => {
-    return new TronWeb(FULL_NODE_API, SOLIDITY_NODE_API, EVENT_API, PRIVATE_KEY);
-}
 
 describe('TronWeb Instance', function () {
 
     describe('#constructor()', function () {
         it('should create a full instance', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
             assert.instanceOf(tronWeb, TronWeb);
         });
 
@@ -81,7 +73,7 @@ describe('TronWeb Instance', function () {
 
     describe('#setDefaultBlock()', function () {
         it('should accept a positive integer', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
 
             tronWeb.setDefaultBlock(1);
 
@@ -89,7 +81,7 @@ describe('TronWeb Instance', function () {
         });
 
         it('should correct a negative integer', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
 
             tronWeb.setDefaultBlock(-2);
 
@@ -97,7 +89,7 @@ describe('TronWeb Instance', function () {
         });
 
         it('should accept 0', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
 
             tronWeb.setDefaultBlock(0);
 
@@ -105,7 +97,7 @@ describe('TronWeb Instance', function () {
         });
 
         it('should be able to clear', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
 
             tronWeb.setDefaultBlock();
 
@@ -113,7 +105,7 @@ describe('TronWeb Instance', function () {
         });
 
         it('should accept "earliest"', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
 
             tronWeb.setDefaultBlock('earliest');
 
@@ -121,7 +113,7 @@ describe('TronWeb Instance', function () {
         });
 
         it('should accept "latest"', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
 
             tronWeb.setDefaultBlock('latest');
 
@@ -129,13 +121,13 @@ describe('TronWeb Instance', function () {
         });
 
         it('should reject a decimal', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
 
             assert.throws(() => tronWeb.setDefaultBlock(10.2), 'Invalid block ID provided');
         });
 
         it('should reject a string', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
 
             assert.throws(() => tronWeb.setDefaultBlock('test'), 'Invalid block ID provided');
         });
@@ -168,7 +160,7 @@ describe('TronWeb Instance', function () {
         it('should emit a privateKeyChanged event', function (done) {
             this.timeout(1000);
 
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
 
             tronWeb.on('privateKeyChanged', privateKey => {
                 done(
@@ -182,7 +174,7 @@ describe('TronWeb Instance', function () {
 
     describe('#setAddress()', function () {
         it('should accept a hex address', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
 
             tronWeb.setAddress(ADDRESS_HEX);
 
@@ -191,7 +183,7 @@ describe('TronWeb Instance', function () {
         });
 
         it('should accept a base58 address', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
 
             tronWeb.setAddress(ADDRESS_BASE58);
 
@@ -200,7 +192,7 @@ describe('TronWeb Instance', function () {
         });
 
         it('should reset the private key if the address doesn\'t match', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
 
             assert.equal(tronWeb.defaultPrivateKey, PRIVATE_KEY);
 
@@ -214,7 +206,7 @@ describe('TronWeb Instance', function () {
         });
 
         it('should not reset the private key if the address matches', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
 
             tronWeb.setAddress(ADDRESS_BASE58);
 
@@ -224,7 +216,7 @@ describe('TronWeb Instance', function () {
         it('should emit an addressChanged event', function (done) {
             this.timeout(1000);
 
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
 
             tronWeb.on('addressChanged', ({hex, base58}) => {
                 done(
@@ -239,14 +231,14 @@ describe('TronWeb Instance', function () {
 
     describe('#isValidProvider()', function () {
         it('should accept a valid provider', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
             const provider = new HttpProvider(FULL_NODE_API);
 
             assert.equal(tronWeb.isValidProvider(provider), true);
         });
 
         it('should accept an invalid provider', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
 
             assert.equal(tronWeb.isValidProvider('test'), false);
         });
@@ -254,7 +246,7 @@ describe('TronWeb Instance', function () {
 
     describe('#setFullNode()', function () {
         it('should accept a HttpProvider instance', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
             const provider = new HttpProvider(FULL_NODE_API);
 
             tronWeb.setFullNode(provider);
@@ -263,7 +255,7 @@ describe('TronWeb Instance', function () {
         });
 
         it('should accept a valid URL string', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
             const provider = FULL_NODE_API;
 
             tronWeb.setFullNode(provider);
@@ -273,20 +265,20 @@ describe('TronWeb Instance', function () {
 
         it('should reject a non-string', function () {
             assert.throws(() => {
-                createInstance().setFullNode(true)
+                tronWebBuilder.createInstance().setFullNode(true)
             }, 'Invalid full node provided');
         });
 
         it('should reject an invalid URL string', function () {
             assert.throws(() => {
-                createInstance().setFullNode('test')
+                tronWebBuilder.createInstance().setFullNode('test')
             }, 'Invalid URL provided to HttpProvider');
         });
     });
 
     describe('#setSolidityNode()', function () {
         it('should accept a HttpProvider instance', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
             const provider = new HttpProvider(SOLIDITY_NODE_API);
 
             tronWeb.setSolidityNode(provider);
@@ -295,7 +287,7 @@ describe('TronWeb Instance', function () {
         });
 
         it('should accept a valid URL string', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
             const provider = SOLIDITY_NODE_API;
 
             tronWeb.setSolidityNode(provider);
@@ -305,20 +297,20 @@ describe('TronWeb Instance', function () {
 
         it('should reject a non-string', function () {
             assert.throws(() => {
-                createInstance().setSolidityNode(true)
+                tronWebBuilder.createInstance().setSolidityNode(true)
             }, 'Invalid solidity node provided');
         });
 
         it('should reject an invalid URL string', function () {
             assert.throws(() => {
-                createInstance().setSolidityNode('test')
+                tronWebBuilder.createInstance().setSolidityNode('test')
             }, 'Invalid URL provided to HttpProvider');
         });
     });
 
     describe('#setEventServer()', function () {
         it('should accept a valid URL string', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
             const eventServer = EVENT_API;
 
             tronWeb.setEventServer(eventServer);
@@ -327,7 +319,7 @@ describe('TronWeb Instance', function () {
         });
 
         it('should reset the event server property', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
 
             tronWeb.setEventServer(false);
 
@@ -335,7 +327,7 @@ describe('TronWeb Instance', function () {
         });
 
         it('should reject an invalid URL string', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
 
             assert.throws(() => {
                 tronWeb.setEventServer('test')
@@ -343,7 +335,7 @@ describe('TronWeb Instance', function () {
         });
 
         it('should reject an invalid URL parameter', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
 
             assert.throws(() => {
                 tronWeb.setEventServer({})
@@ -353,7 +345,7 @@ describe('TronWeb Instance', function () {
 
     describe('#currentProviders()', function () {
         it('should return the current providers', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
             const providers = tronWeb.currentProviders();
 
             assert.equal(providers.fullNode.host, FULL_NODE_API);
@@ -364,7 +356,7 @@ describe('TronWeb Instance', function () {
 
     describe('#currentProvider()', function () {
         it('should return the current providers', function () {
-            const tronWeb = createInstance();
+            const tronWeb = tronWebBuilder.createInstance();
             const providers = tronWeb.currentProvider();
 
             assert.equal(providers.fullNode.host, FULL_NODE_API);
@@ -383,136 +375,13 @@ describe('TronWeb Instance', function () {
     });
 
 
-    describe('#utils.abi.decodeParams()', function () {
-        it('should decode abi coded params passing types and output', function () {
-
-            const tronWeb = createInstance();
-            const types = ['string', 'string', 'uint8', 'bytes32', 'uint256'];
-            const output = '0x00000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000e00000000000000000000000000000000000000000000000000000000000000012dc03b7993bad736ad595eb9e3ba51877ac17ecc31d2355f8f270125b9427ece700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011506920446179204e30306220546f6b656e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000035049450000000000000000000000000000000000000000000000000000000000';
-
-            const expected = [
-                'Pi Day N00b Token',
-                'PIE',
-                18,
-                '0xdc03b7993bad736ad595eb9e3ba51877ac17ecc31d2355f8f270125b9427ece7',
-                0
-            ];
-
-
-            const result = tronWeb.utils.abi.decodeParams(types, output);
-
-            for (let i = 0; i < expected.length; i++) {
-                assert.equal(result[i], expected[i]);
-            }
-        });
-
-        it('should decode abi coded params passing names, types and output', function () {
-
-            const tronWeb = createInstance();
-            const names = ['Token', 'Graph', 'Qty', 'Bytes', 'Total'];
-            const types = ['string', 'string', 'uint8', 'bytes32', 'uint256'];
-            const output = '0x00000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000e00000000000000000000000000000000000000000000000000000000000000012dc03b7993bad736ad595eb9e3ba51877ac17ecc31d2355f8f270125b9427ece700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011506920446179204e30306220546f6b656e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000035049450000000000000000000000000000000000000000000000000000000000';
-
-            const expected = {
-                Token: 'Pi Day N00b Token',
-                Graph: 'PIE',
-                Qty: 18,
-                Bytes: '0xdc03b7993bad736ad595eb9e3ba51877ac17ecc31d2355f8f270125b9427ece7',
-                Total: 0
-            };
-
-            const result = tronWeb.utils.abi.decodeParams(names, types, output);
-            for (let i in expected) {
-                assert.equal(result[i], expected[i]);
-            }
-        });
-
-        it('should throw if the string does not start with 0x', function () {
-
-            const tronWeb = createInstance();
-            const types = ['string', 'string', 'uint8', 'bytes32', 'uint256'];
-            const output =
-                '00000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000e00000000000000000000000000000000000000000000000000000000000000012dc03b7993bad736ad595eb9e3ba51877ac17ecc31d2355f8f270125b9427ece700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011506920446179204e30306220546f6b656e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000035049450000000000000000000000000000000000000000000000000000000000';
-
-            assert.throws(() => {
-                tronWeb.utils.abi.decodeParams(types, output)
-            }, 'hex string must have 0x prefix');
-        });
-
-        it('should throw if the output format is wrong', function () {
-
-            const tronWeb = createInstance();
-            const types = ['string', 'string', 'uint8', 'bytes32', 'uint256'];
-            const output = '0x00000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000e00000000000000000000000000000000000000000000000000000000000000012dc03b7993bad736ad595eb9e3ba51877ac17ecc31d2355f8f270125b9427ece700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011506920446179204e30306220546f6b656e0000000000000000000000000000005049450000000000000000000000000000000000000000000000000000000000';
-
-            assert.throws(() => {
-                tronWeb.utils.abi.decodeParams(types, output)
-            }, 'dynamic bytes count too large');
-        });
-
-        it('should throw if the output is invalid', function () {
-
-            const tronWeb = createInstance();
-            const types = ['string'];
-            const output = '0x6630f88f000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000046173646600000000000000000000000000000000000000000000000000000000';
-
-            assert.throws(() => {
-                tronWeb.utils.abi.decodeParams(types, output)
-            }, 'The encoded string is not valid. Its length must be a multiple of 64.');
-        });
-
-        it('should decode if the output is prefixed with the method hash', function () {
-
-            const tronWeb = createInstance();
-            const types = ['string'];
-            const output = '0x6630f88f000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000046173646600000000000000000000000000000000000000000000000000000000';
-
-            const result = tronWeb.utils.abi.decodeParams(types, output, true)
-            assert.equal(result, 'asdf')
+    describe('#toHex()', function () {
+        it('should convert a boolean to hex', function () {
+            const input = true;
+            const expected = '0xc4388c0eaeca8d8b4f48786df8517bc8ca379e8cf9566af774448e46e816657d';
+log(TronWeb.toHex(true))
+            // assert.equal(TronWeb.toHex(true), expected);
         });
     });
 
-
-    describe('#utils.abi.encodeParams()', function () {
-        it('should encode abi coded params passing types and values', function () {
-
-            const tronWeb = createInstance();
-            const types = ['string', 'string', 'uint8', 'bytes32', 'uint256'];
-            const values = [
-                'Pi Day N00b Token',
-                'PIE',
-                18,
-                '0xdc03b7993bad736ad595eb9e3ba51877ac17ecc31d2355f8f270125b9427ece7',
-                0
-            ];
-
-            const expected = '0x00000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000e00000000000000000000000000000000000000000000000000000000000000012dc03b7993bad736ad595eb9e3ba51877ac17ecc31d2355f8f270125b9427ece700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011506920446179204e30306220546f6b656e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000035049450000000000000000000000000000000000000000000000000000000000';
-
-
-            const result = tronWeb.utils.abi.encodeParams(types, values);
-
-            for (let i = 0; i < expected.length; i++) {
-                assert.equal(result[i], expected[i]);
-            }
-        });
-
-        it('should encode abi coded params passing addresses in hex and base58 mode', function () {
-
-            const tronWeb = createInstance();
-            const types = ['string', 'address', 'address'];
-            const values = [
-                'Onwer',
-                ADDRESS_HEX,
-                ADDRESS_BASE58
-            ];
-
-            const expected = '0x0000000000000000000000000000000000000000000000000000000000000060000000000000000000000000928c9af0651632157ef27a2cf17ca72c575a4d21000000000000000000000000928c9af0651632157ef27a2cf17ca72c575a4d2100000000000000000000000000000000000000000000000000000000000000054f6e776572000000000000000000000000000000000000000000000000000000';
-            const result = tronWeb.utils.abi.encodeParams(types, values);
-
-            for (let i = 0; i < expected.length; i++) {
-                assert.equal(result[i], expected[i]);
-            }
-        });
-
-    });
 });

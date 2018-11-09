@@ -6,7 +6,7 @@ import * as code from './code';
 import * as abi from './abi';
 
 import validator from 'validator';
-import BigNumber from 'bn.js';
+import BigNumber from 'bignumber.js';
 
 const utils = {
     isValidURL(url) {

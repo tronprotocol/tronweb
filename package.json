@@ -9,7 +9,7 @@
         "clean": "rimraf dist",
         "example": "node ./examples/server",
         "test:browser": "node scripts/test-browser.js && npx karma start --single-run --browsers ChromeHeadless,Firefox,Edge",
-        "test:node": "node scripts/test-node.js && npx mocha ./test/*.js",
+        "test:node": "node scripts/test-node.js && npx mocha test/*.test.js test/**/*.test.js",
         "test": "npm run-script test:browser && npm run-script test:node"
     },
     "husky": {
@@ -62,6 +62,7 @@
         "mocha": "^5.2.0",
         "puppeteer": "^1.8.0",
         "rimraf": "^2.6.2",
+        "sleep": "^5.1.1",
         "source-map-support": "^0.5.9",
         "webpack": "^4.17.2",
         "webpack-cli": "^3.1.0",
