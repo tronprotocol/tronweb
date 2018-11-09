@@ -828,6 +828,49 @@ export default class TransactionBuilder {
     }
 
     /**
+     * Create an exchange between a token and TRX.
+     * Token Name should be a CASE SENSITIVE string. 
+     * PLEASE VERIFY THIS ON TRONSCAN.
+     */
+    createTRXExchange(tokenName, tokenBalance, trxBalance, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+        if(utils.isFunction(ownerAddress)) {
+            callback = ownerAddress;
+            ownerAddress = this.tronWeb.defaultAddress.hex;
+        }
+
+        if (!callback)
+            return this.injectPromise(this.createTRXExchange, tokenName, tokenBalance, trxBalance, ownerAddress);
+
+        if (!this.tronWeb.isAddress(ownerAddress))
+            return callback('Invalid address provided');
+
+        if (!utils.isString(tokenName) || !tokenName.length)
+            return callback('Invalid tokenName provided');
+
+        if (!utils.isInteger(tokenBalance) || tokenBalance <= 0
+            || !utils.isInteger(trxBalance) || trxBalance <= 0)
+            return callback('Invalid amount provided');
+
+        console.log({
+            owner_address: this.tronWeb.address.toHex(ownerAddress),
+            first_token_id: this.tronWeb.fromUtf8(tokenName),
+            first_token_balance: tokenBalance,
+            second_token_id: '5f', // Constant for TRX.
+            second_token_balance: trxBalance
+        })
+
+        this.tronWeb.fullNode.request('wallet/exchangecreate', {
+            owner_address: this.tronWeb.address.toHex(ownerAddress),
+            first_token_id: this.tronWeb.fromUtf8(tokenName),
+            first_token_balance: tokenBalance,
+            second_token_id: '5f', // Constant for TRX.
+            second_token_balance: trxBalance
+        }, 'post').then(resources => {
+            callback(null, resources);
+        }).catch(err => callback(err));
+    }
+
+    /**
      * Adds tokens into a bancor style exchange.
      */
     injectExchangeTokens(exchangeID = false, tokenName = false, tokenAmount = 0, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
@@ -854,8 +897,48 @@ export default class TransactionBuilder {
         this.tronWeb.fullNode.request('wallet/exchangeinject', {
             owner_address: this.tronWeb.address.toHex(ownerAddress),
             exchange_id: parseInt(exchangeID),
-            token_id: this.tronWeb.fromAscii(tokenName),
+            token_id: this.tronWeb.fromUtf8(tokenName),
             quant:parseInt(tokenAmount)
+        }, 'post').then(transaction => {
+            if(transaction.Error)
+                return callback(transaction.Error);
+
+            if(transaction.result && transaction.result.message) {
+                return callback(
+                    this.tronWeb.toUtf8(transaction.result.message)
+                );
+            }
+
+            callback(null, transaction);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Adds TRX into a bancor style exchange.
+     */
+    injectExchangeTRX(exchangeID = false, trxAmount = 0, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+        if(utils.isFunction(ownerAddress)) {
+            callback = ownerAddress;
+            ownerAddress = this.tronWeb.defaultAddress.hex;
+        }
+
+        if(!callback)
+            return this.injectPromise(this.injectExchangeTRX, exchangeID, trxAmount, ownerAddress);
+
+        if(!this.tronWeb.isAddress(ownerAddress))
+            return callback('Invalid ownerAddress provided');
+
+        if(!utils.isInteger(exchangeID) || exchangeID < 0)
+            return callback('Invalid exchangeID provided');
+
+        if(!utils.isInteger(trxAmount) || trxAmount < 1)
+            return callback('Invalid trxAmount provided');
+
+        this.tronWeb.fullNode.request('wallet/exchangeinject', {
+            owner_address: this.tronWeb.address.toHex(ownerAddress),
+            exchange_id: parseInt(exchangeID),
+            token_id: '5f', // Constant for TRX.
+            quant:parseInt(trxAmount)
         }, 'post').then(transaction => {
             if(transaction.Error)
                 return callback(transaction.Error);

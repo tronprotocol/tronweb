@@ -1006,66 +1006,6 @@ export default class Trx {
     }
 
     /**
-     * Create an exchange between a token and TRX.
-     */
-    createTRXExchange(ownerAddress = this.tronWeb.defaultAddress.hex,
-                        tokenID, tokenBalance,
-                        trxBalance, callback = false) {
-        if (!callback)
-            return this.injectPromise(this.getAccountResources, address);
-
-        if (!this.tronWeb.isAddress(ownerAddress))
-            return callback('Invalid address provided');
-
-        if (!utils.isString(tokenID) || !tokenID.length)
-            return callback('Invalid token ID provided');
-
-        if (!utils.isInteger(tokenBalance) || tokenBalance <= 0
-            || !utils.isInteger(trxBalance) || trxBalance <= 0)
-            return callback('Invalid amount provided');
-
-        this.tronWeb.fullNode.request('wallet/exchangecreate', {
-            owner_address: this.tronWeb.address.toHex(ownerAddress),
-            first_token_id: tokenID,
-            first_token_balance: tokenBalance,
-            second_token_id: '5f', // Constant for TRX.
-            second_token_balance: trxBalance
-        }, 'post').then(resources => {
-            callback(null, resources);
-        }).catch(err => callback(err));
-    }
-
-    /**
-     * Exchanges a transaction.
-     */
-    exchangeTransaction(ownerAddress = this.tronWeb.defaultAddress.hex, exchangeID, tokenID, quant, expected, callback = false) {
-        if (!callback)
-            return this.injectPromise(this.getAccountResources, address);
-
-        if (!this.tronWeb.isAddress(ownerAddress))
-            return callback('Invalid address provided');
-
-        if (!utils.isString(tokenID) || !tokenID.length)
-            return callback('Invalid token ID provided');
-
-        if (!utils.isInteger(quant) || quant <= 0)
-            return callback('Invalid quantity provided');
-
-        if (!utils.isInteger(expected) || expected < 0)
-            return callback('Invalid expected provided');
-
-        this.tronWeb.fullNode.request('wallet/exchangetransaction', {
-            owner_address: this.tronWeb.address.toHex(ownerAddress),
-            exchange_id: exchangeID,
-            token_id: tokenID,
-            quant,
-            expected
-        }, 'post').then(resources => {
-            callback(null, resources);
-        }).catch(err => callback(err));
-    }
-
-    /**
      * Lists all network modification proposals.
      */
     listExchangesPaginated(limit = 10, offset = 0, callback = false) {
