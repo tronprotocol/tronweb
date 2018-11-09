@@ -1,6 +1,6 @@
 import providers from 'lib/providers';
 import utils from 'utils';
-import BigNumber from 'bignumber.js';
+import BigNumber from 'bn.js';
 import EventEmitter from 'eventemitter3';
 
 import TransactionBuilder from 'lib/transactionBuilder';
