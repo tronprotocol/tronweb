@@ -48,7 +48,9 @@ const utils = {
     },
 
     isHex(string) {
-        return typeof string === 'string' && !isNaN(parseInt(string, 16));
+        return (typeof string === 'string'
+            && !isNaN(parseInt(string, 16))
+            && /^(0x|)[a-fA-F0-9]+$/.test(string));
     },
 
     isInteger(number) {

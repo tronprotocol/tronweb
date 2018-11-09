@@ -3,6 +3,7 @@ const {ADDRESS_HEX, ADDRESS_BASE58, FULL_NODE_API, SOLIDITY_NODE_API, EVENT_API,
 const tronWebBuilder = require('./helpers/tronWebBuilder');
 const TronWeb = tronWebBuilder.TronWeb;
 const log = require('./helpers/log')
+const BigNumber = require ('bignumber.js');
 
 const assert = chai.assert;
 const HttpProvider = TronWeb.providers.HttpProvider;
@@ -374,14 +375,49 @@ describe('TronWeb Instance', function () {
         });
     });
 
-
     describe('#toHex()', function () {
         it('should convert a boolean to hex', function () {
-            const input = true;
-            const expected = '0xc4388c0eaeca8d8b4f48786df8517bc8ca379e8cf9566af774448e46e816657d';
-log(TronWeb.toHex(true))
-            // assert.equal(TronWeb.toHex(true), expected);
+            let input = true;
+            let expected = '0x1';
+            assert.equal(TronWeb.toHex(input), expected);
+
+            input = false;
+            expected = '0x0';
+            assert.equal(TronWeb.toHex(input), expected);
         });
+
+        it('should convert a BigNumber to hex', function () {
+            let input = BigNumber('123456.7e-3');
+            let expected = '0x7b.74ea4a8c154c985f06f7';
+            assert.equal(TronWeb.toHex(input), expected);
+
+            input = new BigNumber(89273674656);
+            expected = '0x14c9202ba0';
+            assert.equal(TronWeb.toHex(input), expected);
+
+            input = BigNumber('23e89');
+            expected = '0x1210c23ede2d38fed455e938516db71cfaf3ec4a1c8f3fa92f98a60000000000000000000000';
+            assert.equal(TronWeb.toHex(input), expected);
+        });
+
+        it('should convert an object to an hex string', function () {
+            let input = { address: 'TTRjVyHu1Lv3DjBPTgzCwsjCvsQaHKQcmN'};
+            let expected = '0x7b2261646472657373223a225454526a56794875314c7633446a425054677a4377736a4376735161484b51636d4e227d';
+            assert.equal(TronWeb.toHex(input), expected);
+        });
+
+        it('should convert a string to hex', function () {
+            let input = 'salamon';
+            let expected = '0x73616c616d6f6e';
+            assert.equal(TronWeb.toHex(input), expected);
+        });
+
+        it('should leave an hex string as is', function () {
+            let input = '0x73616c616d6f6e';
+            let expected = '0x73616c616d6f6e';
+            assert.equal(TronWeb.toHex(input), expected);
+        });
+
     });
 
 });
