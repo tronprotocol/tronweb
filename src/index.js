@@ -268,25 +268,48 @@ export default class TronWeb extends EventEmitter {
                 return TronWeb.fromUtf8(val);
         }
 
-        return TronWeb.fromDecimal(val);
+        let result = TronWeb.fromDecimal(val);
+        if (result === '0xNaN') {
+            throw new Error('The passed value is not convertible to a hex string');
+        } else {
+            return result;
+        }
     }
 
     static toUtf8(hex) {
-        hex = hex.replace(/^0x/,'');
-        return Buffer.from(hex, 'hex').toString('utf8');
+        if (utils.isHex(hex)) {
+            hex = hex.replace(/^0x/, '');
+            return Buffer.from(hex, 'hex').toString('utf8');
+        } else {
+            throw new Error('The passed value is not a valid hex string');
+        }
     }
 
     static fromUtf8(string) {
-        return '0x' + Buffer.from(string, 'utf8').toString('hex');
+        let result = '0x' + Buffer.from(string, 'utf8').toString('hex');
+        if (result !== '0x' || string === '') {
+            return result;
+        } else {
+            throw new Error('The passed value is not a valid utf-8 string');
+        }
     }
 
     static toAscii(hex) {
-        hex = hex.replace(/^0x/,'');
-        return Buffer.from(hex, 'hex').toString('ascii');
+        if (utils.isHex(hex)) {
+            hex = hex.replace(/^0x/,'');
+            return Buffer.from(hex, 'hex').toString('ascii');
+        } else {
+            throw new Error('The passed value is not a valid hex string');
+        }
     }
 
     static fromAscii(string, padding) {
-        return '0x' + Buffer.from(string, 'ascii').toString('hex').padEnd(padding, '0');
+        let result =  '0x' + Buffer.from(string, 'ascii').toString('hex').padEnd(padding, '0');
+        if (result !== '0x' || string === '') {
+            return result;
+        } else {
+            throw new Error('The passed value is not a valid utf-8 string');
+        }
     }
 
     static toDecimal(value) {

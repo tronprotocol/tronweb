@@ -404,6 +404,10 @@ describe('TronWeb Instance', function () {
             let input = { address: 'TTRjVyHu1Lv3DjBPTgzCwsjCvsQaHKQcmN'};
             let expected = '0x7b2261646472657373223a225454526a56794875314c7633446a425054677a4377736a4376735161484b51636d4e227d';
             assert.equal(TronWeb.toHex(input), expected);
+
+            input = [1,2,3];
+            expected = '0x5b312c322c335d';
+            assert.equal(TronWeb.toHex(input), expected);
         });
 
         it('should convert a string to hex', function () {
@@ -416,6 +420,149 @@ describe('TronWeb Instance', function () {
             let input = '0x73616c616d6f6e';
             let expected = '0x73616c616d6f6e';
             assert.equal(TronWeb.toHex(input), expected);
+        });
+
+        it('should convert a number to an hex string', function () {
+            let input = 24354;
+            let expected = '0x5f22';
+            assert.equal(TronWeb.toHex(input), expected);
+
+            input = -423e-2;
+            expected = '-0x4.3ae147ae147ae147ae14';
+            assert.equal(TronWeb.toHex(input), expected);
+        });
+
+        it('should throw an error if the value is not convertible', function () {
+            let result;
+            try {
+                result = TronWeb.toHex(TronWeb);
+            } catch(err) {
+                assert.equal(err.message, 'The passed value is not convertible to a hex string');
+            }
+            assert.isUndefined(result);
+        });
+
+    });
+
+    describe("#toUtf8", function () {
+
+        it("should convert an hex string to utf8", function () {
+
+            let input = '0x73616c616d6f6e';
+            let expected = 'salamon';
+            assert.equal(TronWeb.toUtf8(input), expected);
+
+        });
+
+        it("should convert an hex string to utf8", function () {
+
+            let input = '0xe69cbae6a2b0e58f8ae8a18ce4b89ae8aebee5a487';
+            let expected = '机械及行业设备';
+            assert.equal(TronWeb.toUtf8(input), expected);
+
+        });
+
+        it('should throw an error if the string is not a valid hex string', function () {
+            let input = 'salamon';
+            let result;
+            try {
+                result = TronWeb.toUtf8(input);
+            } catch(err) {
+                assert.equal(err.message, 'The passed value is not a valid hex string');
+            }
+            assert.isUndefined(result);
+        });
+
+    });
+
+    describe("#fromUtf8", function () {
+
+        it("should convert an utf-8 string to hex", function () {
+
+            let input = 'salamon';
+            let expected = '0x73616c616d6f6e';
+            assert.equal(TronWeb.fromUtf8(input), expected);
+
+            input = '机械及行业设备';
+            expected = '0xe69cbae6a2b0e58f8ae8a18ce4b89ae8aebee5a487';
+            assert.equal(TronWeb.fromUtf8(input), expected);
+
+        });
+
+        it('should throw an error if the utf-8 string is not a string', function () {
+            let result;
+            try {
+                result = TronWeb.fromUtf8([]);
+            } catch(err) {
+                assert.equal(err.message, 'The passed value is not a valid utf-8 string');
+            }
+            assert.isUndefined(result);
+        });
+
+    });
+
+    describe("#toAscii", function () {
+
+        it("should convert a hex string to ascii", function () {
+
+            let input = '0x73616c616d6f6e';
+            let expected = 'salamon';
+            assert.equal(TronWeb.toAscii(input), expected);
+
+            input = '0xe69cbae6a2b0e58f8ae8a18ce4b89ae8aebee5a487';
+            expected = 'f\u001c:f"0e\u000f\nh!\fd8\u001ah.>e$\u0007';
+            assert.equal(TronWeb.toAscii(input), expected);
+
+            input = '0x1c0f0a0c';
+            expected = '\u001c\u000f\n\f';
+            assert.equal(TronWeb.toAscii(input), expected);
+
+        });
+
+        it('should throw an error if the string is not a valid hex string', function () {
+            let input = 'salamon';
+            let result;
+            try {
+                result = TronWeb.toAscii(input);
+            } catch(err) {
+                assert.equal(err.message, 'The passed value is not a valid hex string');
+            }
+            assert.isUndefined(result);
+        });
+
+    });
+
+
+    describe("#fromAscii", function () {
+
+        it("should convert an ascii string to hex", function () {
+
+            let input = 'salamon';
+            let expected = '0x73616c616d6f6e';
+            assert.equal(TronWeb.fromAscii(input), expected);
+
+            input = '\u001c\u000f\n\f';
+            expected = '0x1c0f0a0c';
+            assert.equal(TronWeb.fromAscii(input), expected);
+
+            input = 'æºæ¢°åè¡ä¸è®¾å¤';
+            expected = '0xe69cbae6a2b0e58f8ae8a18ce4b89ae8aebee5a487';
+            assert.equal(TronWeb.fromAscii(input), expected);
+
+            input = 'f\u001c:f"0e\u000f\nh!\fd8\u001ah.>e$\u0007';
+            expected = '0xe69cbae6a2b0e58f8ae8a18ce4b89ae8aebee5a487';
+            assert.equal(TronWeb.fromAscii(input), expected);
+
+        });
+
+        it('should throw an error if the utf-8 string is not a string', function () {
+            let result;
+            try {
+                result = TronWeb.fromAscii([]);
+            } catch(err) {
+                assert.equal(err.message, 'The passed value is not a valid utf-8 string');
+            }
+            assert.isUndefined(result);
         });
 
     });
