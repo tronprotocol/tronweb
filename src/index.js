@@ -286,31 +286,36 @@ export default class TronWeb extends EventEmitter {
     }
 
     static fromUtf8(string) {
-        let result = '0x' + Buffer.from(string, 'utf8').toString('hex');
-        if (result !== '0x' || string === '') {
-            return result;
-        } else {
-            throw new Error('The passed value is not a valid utf-8 string');
+        if (!utils.isString(string)) {
+            throw new Error('The passed value is not a valid utf-8 string')
         }
+        return '0x' + Buffer.from(string, 'utf8').toString('hex');
     }
 
     static toAscii(hex) {
         if (utils.isHex(hex)) {
-            hex = hex.replace(/^0x/,'');
-            return Buffer.from(hex, 'hex').toString('ascii');
+            let str = "";
+            let i = 0, l = hex.length;
+            if (hex.substring(0, 2) === '0x') {
+                i = 2;
+            }
+            for (; i < l; i+=2) {
+                let code = parseInt(hex.substr(i, 2), 16);
+                str += String.fromCharCode(code);
+            }
+            return str;
         } else {
             throw new Error('The passed value is not a valid hex string');
         }
     }
 
     static fromAscii(string, padding) {
-        let result =  '0x' + Buffer.from(string, 'ascii').toString('hex').padEnd(padding, '0');
-        if (result !== '0x' || string === '') {
-            return result;
-        } else {
-            throw new Error('The passed value is not a valid utf-8 string');
+        if (!utils.isString(string)) {
+            throw new Error('The passed value is not a valid utf-8 string')
         }
+        return '0x' + Buffer.from(string, 'ascii').toString('hex').padEnd(padding, '0');
     }
+
 
     static toDecimal(value) {
         return TronWeb.toBigNumber(value).toNumber();

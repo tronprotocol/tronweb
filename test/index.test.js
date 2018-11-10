@@ -510,13 +510,9 @@ describe('TronWeb Instance', function () {
             assert.equal(TronWeb.toAscii(input), expected);
 
             input = '0xe69cbae6a2b0e58f8ae8a18ce4b89ae8aebee5a487';
-            expected = 'f\u001c:f"0e\u000f\nh!\fd8\u001ah.>e$\u0007';
+            expected = 'æºæ¢°åè¡ä¸è®¾å¤';
+            // 'f\u001c:f"0e\u000f\nh!\fd8\u001ah.>e$\u0007';
             assert.equal(TronWeb.toAscii(input), expected);
-
-            input = '0x1c0f0a0c';
-            expected = '\u001c\u000f\n\f';
-            assert.equal(TronWeb.toAscii(input), expected);
-
         });
 
         it('should throw an error if the string is not a valid hex string', function () {
@@ -541,18 +537,9 @@ describe('TronWeb Instance', function () {
             let expected = '0x73616c616d6f6e';
             assert.equal(TronWeb.fromAscii(input), expected);
 
-            input = '\u001c\u000f\n\f';
-            expected = '0x1c0f0a0c';
-            assert.equal(TronWeb.fromAscii(input), expected);
-
             input = 'æºæ¢°åè¡ä¸è®¾å¤';
             expected = '0xe69cbae6a2b0e58f8ae8a18ce4b89ae8aebee5a487';
             assert.equal(TronWeb.fromAscii(input), expected);
-
-            // input = 'f\u001c:f"0e\u000f\nh!\fd8\u001ah.>e$\u0007';
-            // expected = '0xe69cbae6a2b0e58f8ae8a18ce4b89ae8aebee5a487';
-            // assert.equal(TronWeb.fromAscii(input), expected);
-
         });
 
         it('should throw an error if the utf-8 string is not a string', function () {
