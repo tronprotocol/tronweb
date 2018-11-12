@@ -3,7 +3,7 @@ const {ADDRESS_HEX, ADDRESS_BASE58, FULL_NODE_API, SOLIDITY_NODE_API, EVENT_API,
 const tronWebBuilder = require('./helpers/tronWebBuilder');
 const TronWeb = tronWebBuilder.TronWeb;
 const log = require('./helpers/log')
-const BigNumber = require ('bignumber.js');
+const BigNumber = require('bignumber.js');
 
 const assert = chai.assert;
 const HttpProvider = TronWeb.providers.HttpProvider;
@@ -401,11 +401,11 @@ describe('TronWeb Instance', function () {
         });
 
         it('should convert an object to an hex string', function () {
-            let input = { address: 'TTRjVyHu1Lv3DjBPTgzCwsjCvsQaHKQcmN'};
+            let input = {address: 'TTRjVyHu1Lv3DjBPTgzCwsjCvsQaHKQcmN'};
             let expected = '0x7b2261646472657373223a225454526a56794875314c7633446a425054677a4377736a4376735161484b51636d4e227d';
             assert.equal(TronWeb.toHex(input), expected);
 
-            input = [1,2,3];
+            input = [1, 2, 3];
             expected = '0x5b312c322c335d';
             assert.equal(TronWeb.toHex(input), expected);
         });
@@ -436,7 +436,7 @@ describe('TronWeb Instance', function () {
             let result;
             try {
                 result = TronWeb.toHex(TronWeb);
-            } catch(err) {
+            } catch (err) {
                 assert.equal(err.message, 'The passed value is not convertible to a hex string');
             }
             assert.isUndefined(result);
@@ -462,12 +462,12 @@ describe('TronWeb Instance', function () {
 
         });
 
-        it('should throw an error if the string is not a valid hex string', function () {
+        it('should throw an error if the string is not a valid hex string in strict mode', function () {
             let input = 'salamon';
             let result;
             try {
-                result = TronWeb.toUtf8(input);
-            } catch(err) {
+                result = TronWeb.toUtf8(input, true);
+            } catch (err) {
                 assert.equal(err.message, 'The passed value is not a valid hex string');
             }
             assert.isUndefined(result);
@@ -493,7 +493,7 @@ describe('TronWeb Instance', function () {
             let result;
             try {
                 result = TronWeb.fromUtf8([]);
-            } catch(err) {
+            } catch (err) {
                 assert.equal(err.message, 'The passed value is not a valid utf-8 string');
             }
             assert.isUndefined(result);
@@ -520,7 +520,7 @@ describe('TronWeb Instance', function () {
             let result;
             try {
                 result = TronWeb.toAscii(input);
-            } catch(err) {
+            } catch (err) {
                 assert.equal(err.message, 'The passed value is not a valid hex string');
             }
             assert.isUndefined(result);
@@ -546,12 +546,172 @@ describe('TronWeb Instance', function () {
             let result;
             try {
                 result = TronWeb.fromAscii([]);
-            } catch(err) {
+            } catch (err) {
                 assert.equal(err.message, 'The passed value is not a valid utf-8 string');
             }
             assert.isUndefined(result);
         });
 
+    });
+
+
+    describe("#toBigNumber", function () {
+
+        it("should convert a hex string to a bignumber", function () {
+
+            let input = '0x73616c61';
+            let expected = 1935764577;
+            assert.equal(TronWeb.toBigNumber(input).toNumber(), expected);
+
+
+        });
+
+        it("should convert a number to a bignumber", function () {
+
+            let input = 1935764577;
+            let expected = 1935764577;
+
+            assert.equal(TronWeb.toBigNumber(input).c[0], expected);
+        });
+
+        it("should convert a number string to a bignumber", function () {
+
+            let input = '89384775883766237763193576457709388576373';
+            let expected = [8938477588376, 62377631935764, 57709388576373];
+
+            assert.equal(TronWeb.toBigNumber(input).c[0], expected[0]);
+            assert.equal(TronWeb.toBigNumber(input).c[1], expected[1]);
+            assert.equal(TronWeb.toBigNumber(input).c[2], expected[2]);
+        });
+    });
+
+    describe("#toDecimal", function () {
+
+        it("should convert a hex string to a number", function () {
+
+            let input = '0x73616c61';
+            let expected = 1935764577;
+            assert.equal(TronWeb.toDecimal(input), expected);
+        });
+
+        it("should convert a number to a bignumber", function () {
+
+            let input = 1935764577;
+            let expected = 1935764577;
+
+            assert.equal(TronWeb.toDecimal(input), expected);
+        });
+
+        it("should convert a number string to a bignumber", function () {
+
+            let input = '89384775883766237763193576457709388576373';
+            let expected = 8.938477588376623e+40;
+
+            assert.equal(TronWeb.toDecimal(input), expected);
+        });
+    });
+
+    describe("#fromDecimal", function () {
+
+        it("should convert a number to an hex string to a number", function () {
+
+            let input = 1935764577;
+            let expected = '0x73616c61';
+            assert.equal(TronWeb.fromDecimal(input), expected);
+        });
+
+        it("should convert a negative number to an hex string to a number", function () {
+
+            let input = -1935764577;
+            let expected = '-0x73616c61';
+            assert.equal(TronWeb.fromDecimal(input), expected);
+        });
+    });
+
+
+    describe("#toSun", function () {
+
+        it("should convert some trx to sun", function () {
+
+            let input = 324;
+            let expected = 324e6;
+            assert.equal(TronWeb.toSun(input), expected);
+        });
+    });
+
+
+    describe("#fromSun", function () {
+        it("should convert a negative number to an hex string to a number", function () {
+
+            let input = 3245e6;
+            let expected = 3245;
+            assert.equal(TronWeb.fromSun(input), expected);
+        });
+    });
+
+    describe("#isAddress", function () {
+        it("should verify that a string is a valid base58 address", function () {
+
+            let input = 'TYPG8VeuoVAh2hP7Vfw6ww7vK98nvXXXUG';
+            assert.equal(TronWeb.isAddress(input), true);
+        });
+
+        it("should verify that a string is an invalid base58 address", function () {
+
+            let input = 'TYPG8VeuoVAh2hP7Vfw6ww7vK98nvXXXUs';
+            assert.equal(TronWeb.isAddress(input), false);
+
+            input = 'TYPG8VeuoVAh2hP7Vfw6ww7vK98nvXXXUG89';
+            assert.equal(TronWeb.isAddress(input), false);
+
+            input = 'aYPG8VeuoVAh2hP7Vfw6ww7vK98nvXXXUG';
+            assert.equal(TronWeb.isAddress(input), false);
+        });
+
+        it("should verify that a string is a valid hex address", function () {
+
+            let input = '4165cfbd57fa4f20687b2c33f84c4f9017e5895d49';
+            assert.equal(TronWeb.isAddress(input), true);
+        });
+
+        it("should verify that a string is an invalid base58 address", function () {
+
+            let input = '0x65cfbd57fa4f20687b2c33f84c4f9017e5895d49';
+            assert.equal(TronWeb.isAddress(input), false);
+
+            input = '4165cfbd57fa4f20687b2c33f84c4f9017e589';
+            assert.equal(TronWeb.isAddress(input), false);
+
+            input = '4165cfbd57fa4f20687b2c33f84c4f9017e5895d4998';
+            assert.equal(TronWeb.isAddress(input), false);
+        });
+    });
+
+    describe("#createAccount", function () {
+        it("should create a new account", async function () {
+            const tronWeb = tronWebBuilder.createInstance();
+
+            const newAccount = await TronWeb.createAccount();
+            assert.equal(newAccount.privateKey.length, 64);
+            assert.equal(newAccount.publicKey.length, 130);
+            let address = tronWeb.address.fromPrivateKey(newAccount.privateKey);
+            assert.equal(address, newAccount.address.base58);
+
+            // TODO I wonder why the new accounts returns an uppercase address while everywhere else we returns lowercase addresses. Maybe we should unify it and let createAccount returning a lowercase
+            assert.equal(tronWeb.address.toHex(address), newAccount.address.hex.toLowerCase());
+        });
+    });
+
+    describe("#isConnected", function () {
+        it("should verify that tronWeb is connected to nodes and event server", async function () {
+            const tronWeb = tronWebBuilder.createInstance();
+            const isConnected = await tronWeb.isConnected();
+
+            assert.isTrue(isConnected.fullNode);
+            assert.isTrue(isConnected.solidityNode);
+            assert.isTrue(isConnected.eventServer);
+
+        });
     });
 
 });

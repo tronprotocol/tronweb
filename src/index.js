@@ -342,7 +342,7 @@ export default class TronWeb extends EventEmitter {
         if(utils.isBigNumber(amount))
             return amount;
 
-        if(utils.isString(amount) && (amount.indexOf('0x') === 0 || amount.indexOf('-0x') === 0))
+        if(utils.isString(amount) && /^(-|)0x/.test(amount))
             return new BigNumber(amount.replace('0x', ''), 16);
 
         return new BigNumber(amount.toString(10), 10);
