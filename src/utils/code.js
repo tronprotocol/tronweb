@@ -1,4 +1,5 @@
 import { Base64 } from './base64';
+import { byte2hexStr, bytesToString, hextoString, byteArray2hexStr, base64DecodeFromString, base64EncodeToString } from './bytes';
 
 export function bin2String(array) {
     return String.fromCharCode(...array);
@@ -46,44 +47,7 @@ export function stringToBytes(str) {
     return bytes;
 }
 
-export function bytesToString(arr) {
-    if (typeof arr === 'string')
-        return arr;
-        
-    let str = '';
-
-    for (let i = 0; i < arr.length; i++) {
-        const one = arr[i].toString(2);
-        const v = one.match(/^1+?(?=0)/);
-
-        if (v && one.length == 8) {
-            const bytesLength = v[0].length;
-            let store = arr[i].toString(2).slice(7 - bytesLength);
-
-            for (let st = 1; st < bytesLength; st++)
-                store += arr[st + i].toString(2).slice(2);
-
-            str += String.fromCharCode(parseInt(store, 2));
-            i += bytesLength - 1;
-        } else str += String.fromCharCode(arr[i]);
-    }
-
-    return str;
-}
-
-export function hextoString(hex) {
-    const arr = hex.split("");
-    let out = "";
-
-    for (let i = 0; i < arr.length / 2; i++) {
-        const tmp = `0x${arr[i * 2]}${arr[i * 2 + 1]}`;
-        const charValue = String.fromCharCode(tmp);
-
-        out += charValue;
-    }
-
-    return out
-}
+export { byte2hexStr, bytesToString, hextoString, byteArray2hexStr, base64DecodeFromString, base64EncodeToString }
 
 export function hexChar2byte(c) {
     let d = 0;
@@ -130,36 +94,6 @@ export function hexStr2byteArray(str) {
     }
 
     return byteArray;
-}
-
-export function byte2hexStr(byte) {
-    const hexByteMap = "0123456789ABCDEF";
-    let str = "";
-
-    str += hexByteMap.charAt(byte >> 4);
-    str += hexByteMap.charAt(byte & 0x0f);
-
-    return str;
-}
-
-export function byteArray2hexStr(byteArray) {
-    return byteArray.reduce((string, byte) => {
-        return string + byte2hexStr(byte);
-    }, '');
-}
-
-export function base64DecodeFromString(string64) {
-    const b = new Base64();
-    const decodeBytes = b.decodeToByteArray(string64);
-
-    return decodeBytes;
-}
-
-export function base64EncodeToString(bytes) {
-    const b = new Base64();
-    const string64 = b.encodeIgnoreUtf8(bytes);
-
-    return string64
 }
 
 //yyyy-MM-DD HH-mm-ss

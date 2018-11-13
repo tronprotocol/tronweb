@@ -433,13 +433,10 @@ describe('TronWeb Instance', function () {
         });
 
         it('should throw an error if the value is not convertible', function () {
-            let result;
-            try {
-                result = TronWeb.toHex(TronWeb);
-            } catch (err) {
-                assert.equal(err.message, 'The passed value is not convertible to a hex string');
-            }
-            assert.isUndefined(result);
+
+            assert.throws(() => {
+                TronWeb.toHex(TronWeb)
+            }, 'The passed value is not convertible to a hex string');
         });
 
     });
@@ -464,13 +461,10 @@ describe('TronWeb Instance', function () {
 
         it('should throw an error if the string is not a valid hex string in strict mode', function () {
             let input = 'salamon';
-            let result;
-            try {
-                result = TronWeb.toUtf8(input, true);
-            } catch (err) {
-                assert.equal(err.message, 'The passed value is not a valid hex string');
-            }
-            assert.isUndefined(result);
+
+            assert.throws(() => {
+                TronWeb.toUtf8(input, true)
+            }, 'The passed value is not a valid hex string');
         });
 
     });
@@ -490,13 +484,9 @@ describe('TronWeb Instance', function () {
         });
 
         it('should throw an error if the utf-8 string is not a string', function () {
-            let result;
-            try {
-                result = TronWeb.fromUtf8([]);
-            } catch (err) {
-                assert.equal(err.message, 'The passed value is not a valid utf-8 string');
-            }
-            assert.isUndefined(result);
+            assert.throws(() => {
+                TronWeb.fromUtf8([])
+            }, 'The passed value is not a valid utf-8 string');
         });
 
     });
@@ -517,13 +507,9 @@ describe('TronWeb Instance', function () {
 
         it('should throw an error if the string is not a valid hex string', function () {
             let input = 'salamon';
-            let result;
-            try {
-                result = TronWeb.toAscii(input);
-            } catch (err) {
-                assert.equal(err.message, 'The passed value is not a valid hex string');
-            }
-            assert.isUndefined(result);
+            assert.throws(() => {
+                TronWeb.toAscii(input)
+            }, 'The passed value is not a valid hex string');
         });
 
     });
@@ -543,12 +529,9 @@ describe('TronWeb Instance', function () {
 
         it('should throw an error if the utf-8 string is not a string', function () {
             let result;
-            try {
-                result = TronWeb.fromAscii([]);
-            } catch (err) {
-                assert.equal(err.message, 'The passed value is not a valid utf-8 string');
-            }
-            assert.isUndefined(result);
+            assert.throws(() => {
+                TronWeb.fromAscii([])
+            }, 'The passed value is not a valid utf-8 string');
         });
 
     });
