@@ -12,6 +12,9 @@ import { keccak256 } from 'js-sha3';
 export default class TronWeb extends EventEmitter {
     static providers = providers;
     static BigNumber = BigNumber;
+    static TransactionBuilder = TransactionBuilder;
+    static Trx = Trx;
+    static Contract = Contract;
     
     constructor(fullNode, solidityNode, eventServer = false, privateKey = false) {
         super();
@@ -354,11 +357,15 @@ export default class TronWeb extends EventEmitter {
 
         // Convert HEX to Base58
         if(address.length === 42) {
-            return TronWeb.isAddress(
-                utils.crypto.getBase58CheckAddress(
-                    utils.code.hexStr2byteArray(address)
-                )
-            );
+            try {
+                return TronWeb.isAddress(
+                    utils.crypto.getBase58CheckAddress(
+                        utils.code.hexStr2byteArray(address) // it throws an error if the address starts with 0x
+                    )
+                );
+            } catch(err) {
+                return false;
+            }
         }
 
         return utils.crypto.isAddressValid(address);

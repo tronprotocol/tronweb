@@ -1,18 +1,22 @@
-import { Base64 } from './base64';
+
 import { byte2hexStr, bytesToString, hextoString, byteArray2hexStr, base64DecodeFromString, base64EncodeToString } from './bytes';
 
 export function bin2String(array) {
-    return String.fromCharCode(...array);
+    // TODO Do we need this alias?
+    return bytesToString(array);
 }
 
-export function arrayEquals(array1, array2) {
+export function arrayEquals(array1, array2, strict) {
     if (array1.length != array2.length)
         return false;
         
     let i;
 
     for (i = 0; i < array1.length; i++) {
-        if (array1[i] != array2[i])
+        if (strict) {
+            if (array1[i] != array2[i])
+                return false;
+        } else if (JSON.stringify(array1[i]) != JSON.stringify(array2[i]))
             return false;
     }
 
@@ -20,6 +24,10 @@ export function arrayEquals(array1, array2) {
 }
 
 export function stringToBytes(str) {
+
+    if (typeof str !== 'string')
+        throw new Error('The passed string is not a string')
+
     const bytes = new Array();
     let len;
     let c;
@@ -50,7 +58,7 @@ export function stringToBytes(str) {
 export { byte2hexStr, bytesToString, hextoString, byteArray2hexStr, base64DecodeFromString, base64EncodeToString }
 
 export function hexChar2byte(c) {
-    let d = 0;
+    let d;
 
     if (c >= 'A' && c <= 'F')
         d = c.charCodeAt(0) - 'A'.charCodeAt(0) + 10;
@@ -58,8 +66,11 @@ export function hexChar2byte(c) {
         d = c.charCodeAt(0) - 'a'.charCodeAt(0) + 10;
     else if (c >= '0' && c <= '9')
         d = c.charCodeAt(0) - '0'.charCodeAt(0);
-        
-    return d;
+
+    if (typeof d === 'number')
+        return d;
+    else
+        throw new Error('The passed hex char is not a valid hex char');
 }
 
 export function isHexChar(c) {
@@ -73,6 +84,9 @@ export function isHexChar(c) {
 }
 
 export function hexStr2byteArray(str) {
+    if (typeof str !== 'string')
+        throw new Error('The passed string is not a string')
+
     const byteArray = Array();
     let d = 0;
     let j = 0;
@@ -90,7 +104,8 @@ export function hexStr2byteArray(str) {
                 byteArray[k++] = d;
                 d = 0;
             }
-        }
+        } else
+            throw new Error('The passed hex char is not a valid hex string')
     }
 
     return byteArray;
@@ -98,6 +113,10 @@ export function hexStr2byteArray(str) {
 
 //yyyy-MM-DD HH-mm-ss
 export function strToDate(str) {
+
+    if (!/^\d{4}-\d{2}-\d{2}( \d{2}-\d{2}-\d{2}|)/.test(str))
+        throw new Error('The passed date string is not valid')
+
     const tempStrs = str.split(" ");
     const dateStrs = tempStrs[0].split("-");
     const year = parseInt(dateStrs[0], 10);
@@ -106,8 +125,8 @@ export function strToDate(str) {
 
     if (tempStrs.length > 1) {
         const timeStrs = tempStrs[1].split("-");
-        const hour = parseInt(timeStrs[0], 10);
-        const minute = parseInt(timeStrs[1], 10) - 1;
+        const hour = parseInt(timeStrs[0] , 10);
+        const minute = parseInt(timeStrs[1], 10);
         const second = parseInt(timeStrs[2], 10);
 
         return new Date(year, month, day, hour, minute, second);
@@ -139,6 +158,15 @@ export function getStringType(str) {
 
     let i = 0;
 
+    // TODO Should we return 1 if someone passes a full, 42-chars long address?
+    // if (str.length == 42 && /^41/.test(str)) {
+    //     for (; i < 40; i++) {
+    //         var c = str.charAt(i+2);
+    //
+    //         if (!isHexChar(c))
+    //             break;
+    //     }
+    // } else
     if (str.length == 40) {
         for (; i < 40; i++) {
             var c = str.charAt(i);
@@ -159,13 +187,13 @@ export function getStringType(str) {
     }
 
     if (i == str.length)
-        return 2; //Alll Decimal number, BlockNumber
+        return 2; // All Decimal number, BlockNumber
 
     for (i = 0; i < str.length; i++) {
         var c = str.charAt(i);
 
         if (c > ' ')
-            return 3; //At least one visible character
+            return 3; // At least one visible character
     }
 
     return -1;

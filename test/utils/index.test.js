@@ -18,6 +18,8 @@ describe('TronWeb.utils', function () {
 
             assert.isFalse(tronWeb.utils.isValidURL('http:/some.example.com'))
 
+            assert.isFalse(tronWeb.utils.isValidURL(['http://example.com']))
+
         })
 
     });

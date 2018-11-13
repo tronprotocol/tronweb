@@ -55,17 +55,17 @@ export function hextoString(hex) {
     return out;
 }
 
-export function base64DecodeFromString(string64) {
-    return new Base64().decodeToByteArray(string64);
-}
-
 export function byteArray2hexStr(byteArray) {
     let str = '';
 
     for (let i = 0; i < (byteArray.length); i++)
         str += byte2hexStr(byteArray[i]);
-        
+
     return str;
+}
+
+export function base64DecodeFromString(string64) {
+    return new Base64().decodeToByteArray(string64);
 }
 
 export function base64EncodeToString(bytes) {

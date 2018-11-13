@@ -10,6 +10,8 @@ import BigNumber from 'bignumber.js';
 
 const utils = {
     isValidURL(url) {
+        if (typeof url !== 'string')
+            return false;
         return validator.isURL(url.toString(), {
             protocols: [ 'http', 'https' ]
         });
