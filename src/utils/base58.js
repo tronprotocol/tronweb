@@ -7,7 +7,7 @@ for (let i = 0; i < ALPHABET.length; i++)
 const BASE = 58;
 
 export function encode58(buffer) {
-    if (buffer.length === 0) 
+    if (buffer.length === 0)
         return '';
 
     let i;
@@ -41,7 +41,7 @@ export function encode58(buffer) {
 }
 
 export function decode58(string) {
-    if (string.length === 0) 
+    if (string.length === 0)
         return [];
 
     let i;

@@ -528,7 +528,6 @@ describe('TronWeb Instance', function () {
 
     });
 
-
     describe("#fromAscii", function () {
 
         it("should convert an ascii string to hex", function () {
@@ -553,7 +552,6 @@ describe('TronWeb Instance', function () {
         });
 
     });
-
 
     describe("#toBigNumber", function () {
 
@@ -697,7 +695,7 @@ describe('TronWeb Instance', function () {
             let address = tronWeb.address.fromPrivateKey(newAccount.privateKey);
             assert.equal(address, newAccount.address.base58);
 
-            // TODO I wonder why the new accounts returns an uppercase address while everywhere else we returns lowercase addresses. Maybe we should unify it and let createAccount returning a lowercase
+            // TODO The new accounts returns an uppercase address, while everywhere else we handle lowercase addresses. Maybe we should make it consistent and let createAccount returning a lowercase address
             assert.equal(tronWeb.address.toHex(address), newAccount.address.hex.toLowerCase());
         });
     });
@@ -712,6 +710,18 @@ describe('TronWeb Instance', function () {
             assert.isTrue(isConnected.eventServer);
 
         });
+    });
+
+    describe("#getEventResult", function() {
+        // TODO
+    });
+
+    describe("#getEventByTransactionID", function() {
+        // TODO
+    });
+
+    describe("#contract", function() {
+        // TODO
     });
 
 });
