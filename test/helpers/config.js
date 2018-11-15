@@ -1,5 +1,4 @@
-
-
+const { keccak256 } = require('js-sha3');
 
 module.exports = {
 
@@ -19,9 +18,7 @@ module.exports = {
         freeBandwidthLimit: 100
     },
     getTokenOptions: () => {
-        const tronWebBuilder = require('./tronWebBuilder')
-        const tronWeb = tronWebBuilder.createInstance()
-        const rnd = tronWeb.sha3(Math.random().toString()).substring(0, 4)
+        const rnd = keccak256(Math.random().toString()).substring(0, 4)
         return {
             name: `Token${rnd}`,
             abbreviation: `T${rnd.substring(2).toUpperCase()}`,
@@ -33,7 +30,7 @@ module.exports = {
             frozenDuration: 1,
             trxRatio: 30,
             tokenRatio: 4,
-            saleStart: Date.now() + 1000,
+            saleStart: Date.now() + 500,
             freeBandwidth: 100,
             freeBandwidthLimit: 1000
         }

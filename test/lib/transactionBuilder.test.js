@@ -1,6 +1,7 @@
 const chai = require('chai');
 const assert = chai.assert;
 const assertThrow = require('../helpers/assertThrow');
+const wait = require('../helpers/wait');
 const broadcaster = require('../helpers/broadcaster');
 const _ = require('lodash');
 const tronWebBuilder = require('../helpers/tronWebBuilder');
@@ -110,8 +111,6 @@ describe('TronWeb.transactionBuilder', function () {
         // This test passes only the first time because, in order to test updateToken, we broadcast the token creation
 
         it(`should allow accounts[2] to create a TestToken`, async function () {
-
-            console.log('trying to create from', accounts.b58[2])
 
             const options = getTokenOptions();
 
@@ -420,14 +419,12 @@ describe('TronWeb.transactionBuilder', function () {
 
     describe('#updateToken()', function () {
 
-        let tokenCreation
-
-        before(async function(){
+        before(async function () {
 
             const options = getTokenOptions();
             try {
-                tokenCreation = await broadcaster(tronWeb.transactionBuilder.createToken(options, accounts.b58[2]), accounts.pks[2])
-            } catch(err) {
+                await broadcaster(tronWeb.transactionBuilder.createToken(options, accounts.b58[2]), accounts.pks[2])
+            } catch (err) {
                 console.log('Token has already been created')
                 // token has already been created
             }
@@ -537,7 +534,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         });
 
-        describe('#updateAsset()', async function() {
+        describe('#updateAsset()', async function () {
             it(`should allow accounts[2] to update a TestToken`, async function () {
                 const transaction = await tronWeb.transactionBuilder.updateAsset(UPDATED_TEST_TOKEN_OPTIONS, accounts.b58[2]);
                 const parameter = transaction.raw_data.contract[0].parameter;
@@ -547,6 +544,114 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.owner_address, accounts.hex[2]);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.UpdateAssetContract');
             });
+        });
+
+    });
+
+    describe('#purchaseToken()', function () {
+
+        let tokenOptions
+
+        before(async function () {
+
+            tokenOptions = getTokenOptions();
+            try {
+                await broadcaster(tronWeb.transactionBuilder.createToken(tokenOptions, accounts.b58[3]), accounts.pks[3])
+            } catch (err) {
+                // token has already been created
+            }
+        });
+
+        it(`should allow accounts[2] to purchase a token created by accounts[3]`, async function () {
+
+            this.timeout(5000);
+            wait(3);
+
+            const transaction = await tronWeb.transactionBuilder.purchaseToken(accounts.b58[3], tokenOptions.name, 20, accounts.b58[2]);
+            const parameter = transaction.raw_data.contract[0].parameter;
+            assert.equal(transaction.txID.length, 64);
+            assert.equal(parameter.value.amount, 20);
+            assert.equal(parameter.value.asset_name, tronWeb.toHex(tokenOptions.name).substring(2));
+            assert.equal(parameter.value.owner_address, accounts.hex[2]);
+            assert.equal(parameter.value.to_address, accounts.hex[3]);
+            assert.equal(parameter.type_url, 'type.googleapis.com/protocol.ParticipateAssetIssueContract');
+        });
+
+        it("should throw if issuerAddress is invalid", async function () {
+
+            await assertThrow(
+                tronWeb.transactionBuilder.purchaseToken('sasdsadasfa', tokenOptions.name, 20, accounts.b58[2]),
+                'Invalid issuer address provided'
+            )
+
+        });
+
+        it("should throw if issuerAddress is not the right one", async function () {
+            await assertThrow(
+                tronWeb.transactionBuilder.purchaseToken(accounts.b58[4], tokenOptions.name, 20, accounts.b58[2]),
+                null,
+                'The asset is not issued by'
+            )
+        });
+
+        it("should throw if the token Id is invalid", async function () {
+
+            await assertThrow(
+                tronWeb.transactionBuilder.purchaseToken(accounts.b58[3], 123432, 20, accounts.b58[2]),
+                'Invalid token ID provided'
+            )
+        });
+
+        it("should throw if token does not exist", async function () {
+
+            await assertThrow(
+                tronWeb.transactionBuilder.purchaseToken(accounts.b58[3], 'SomeToken', 20, accounts.b58[2]),
+                null,
+                'No asset named '
+            )
+
+        });
+
+        it("should throw if buyer address is invalid", async function () {
+
+            await assertThrow(
+                tronWeb.transactionBuilder.purchaseToken(accounts.b58[3], tokenOptions.name, 20, 'sasdadasdas'),
+                'Invalid buyer address provided'
+            )
+
+        });
+
+        it("should throw if amount is invalid", async function () {
+
+            await assertThrow(
+                tronWeb.transactionBuilder.purchaseToken(accounts.b58[3], tokenOptions.name, -3, accounts.b58[2]),
+                'Invalid amount provided'
+            )
+
+            await assertThrow(
+                tronWeb.transactionBuilder.purchaseToken(accounts.b58[3], tokenOptions.name, "some-amount", accounts.b58[2]),
+                'Invalid amount provided'
+            )
+
+        });
+
+
+    });
+
+    describe('#sendToken()', function () {
+
+        let tokenOptions
+
+        before(async function () {
+
+            tokenOptions = getTokenOptions();
+            try {
+                await broadcaster(tronWeb.transactionBuilder.createToken(tokenOptions, accounts.b58[3]), accounts.pks[3])
+                wait(3);
+                await broadcaster(tronWeb.transactionBuilder.purchaseToken(accounts.b58[3], tokenOptions.name, 20, accounts.b58[2]), accounts.pks[2])
+            } catch (err) {
+                // token has already been created
+            }
         });
 
     });
