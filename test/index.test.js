@@ -1,5 +1,5 @@
 const chai = require('chai');
-const {ADDRESS_HEX, ADDRESS_BASE58, FULL_NODE_API, SOLIDITY_NODE_API, EVENT_API, PRIVATE_KEY} = require('./helpers/config').constants;
+const {ADDRESS_HEX, ADDRESS_BASE58, FULL_NODE_API, SOLIDITY_NODE_API, EVENT_API, PRIVATE_KEY} = require('./helpers/config');
 const tronWebBuilder = require('./helpers/tronWebBuilder');
 const TronWeb = tronWebBuilder.TronWeb;
 const log = require('./helpers/log')
@@ -9,6 +9,7 @@ const assert = chai.assert;
 const HttpProvider = TronWeb.providers.HttpProvider;
 
 describe('TronWeb Instance', function () {
+
 
     describe('#constructor()', function () {
         it('should create a full instance', function () {

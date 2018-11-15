@@ -667,6 +667,12 @@ export default class TransactionBuilder {
             freeBandwidthLimit = 0 // Out of `totalFreeBandwidth`, the amount each token holder get
         } = options;
 
+        if(!utils.isString(description) || !description.length)
+            return callback('Invalid token description provided');
+
+        if(!utils.isString(url) || !url.length || !utils.isValidURL(url))
+            return callback('Invalid token url provided');
+
         if(!utils.isInteger(freeBandwidth) || freeBandwidth < 0)
             return callback('Invalid free bandwidth amount provided');
 

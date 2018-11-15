@@ -1,5 +1,5 @@
 const chai = require('chai');
-const {FULL_NODE_API} = require('../helpers/config').constants;
+const {FULL_NODE_API} = require('../helpers/config');
 const assertThrow = require('../helpers/assertThrow');
 const tronWebBuilder = require('../helpers/tronWebBuilder');
 const TronWeb = tronWebBuilder.TronWeb;
@@ -75,7 +75,7 @@ describe('TronWeb.lib.providers', async function () {
         it('should throw if the route is missed or returns an error', async function () {
             const provider = new TronWeb.providers.HttpProvider(FULL_NODE_API);
 
-            assertThrow(provider.request('/wallet/some-fun'),
+            await assertThrow(provider.request('/wallet/some-fun'),
                 'Request failed with status code 404');
 
         });

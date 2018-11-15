@@ -1,5 +1,5 @@
 const chai = require('chai');
-const {ADDRESS_HEX, ADDRESS_BASE58} = require('../helpers/config').constants;
+const {ADDRESS_HEX, ADDRESS_BASE58} = require('../helpers/config');
 const tronWebBuilder = require('../helpers/tronWebBuilder');
 
 const assert = chai.assert;
