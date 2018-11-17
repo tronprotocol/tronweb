@@ -10,7 +10,7 @@ const _ = require('lodash');
 const tronWebBuilder = require('../helpers/tronWebBuilder');
 const TronWeb = tronWebBuilder.TronWeb;
 const config = require('../helpers/config');
-const {ADDRESS_HEX, ADDRESS_BASE58, UPDATED_TEST_TOKEN_OPTIONS} = config;
+const {ADDRESS_HEX, ADDRESS_BASE58, UPDATED_TEST_TOKEN_OPTIONS, PRIVATE_KEY} = config;
 const getTokenOptions = config.getTokenOptions;
 
 describe('TronWeb.transactionBuilder', function () {
@@ -758,8 +758,69 @@ describe('TronWeb.transactionBuilder', function () {
 
         })
 
+        it("should throw if issuer address is invalid", async function () {
+
+            await assertThrow(
+                tronWeb.transactionBuilder.createProposal(parameters, 'sadasdsffdgdf'),
+                'Invalid issuerAddress provided'
+            )
+
+        });
+
+
+        it("should throw if the issuer address is not an SR", async function () {
+
+            await assertThrow(
+                tronWeb.transactionBuilder.createProposal(parameters, accounts.b58[0]),
+                null,
+                `Witness[${accounts.hex[0]}] not exists`
+            )
+
+        });
+
+        // TODO Complete throws
 
     });
+
+
+    describe("#deleteProposal", async function () {
+
+
+        let proposals;
+
+        before(async function () {
+
+            this.timeout(20000)
+
+            let parameters = [{"key": 0, "value": 100000}, {"key": 1, "value": 2}]
+
+            await broadcaster(tronWeb.transactionBuilder.createProposal(parameters, ADDRESS_BASE58), PRIVATE_KEY)
+
+            proposals = await tronWeb.trx.listProposals();
+
+        })
+
+        after(async function () {
+            proposals = await tronWeb.trx.listProposals();
+            for (let proposal of proposals) {
+                await broadcaster(tronWeb.transactionBuilder.deleteProposal(proposal.proposal_id), PRIVATE_KEY)
+            }
+        })
+
+        it('should allow the SR to delete its own proposal', async function () {
+
+            const transaction = await tronWeb.transactionBuilder.deleteProposal(proposals[0].proposal_id)
+            const parameter = txPars(transaction);
+
+            assert.equal(parameter.value.owner_address, ADDRESS_HEX);
+            assert.equal(parameter.value.proposal_id, proposals[0].proposal_id);
+            assert.equal(parameter.type_url, 'type.googleapis.com/protocol.ProposalDeleteContract');
+
+        })
+
+    });
+
+
 
 
     describe("#freezeBalance", async function () {
@@ -777,8 +838,6 @@ describe('TronWeb.transactionBuilder', function () {
     describe("#triggerSmartContract", async function () {
     });
     describe("#deleteProposal", async function () {
-    });
-    describe("#voteProposal", async function () {
     });
     describe("#createTRXExchange", async function () {
     });

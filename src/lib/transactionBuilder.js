@@ -728,21 +728,23 @@ export default class TransactionBuilder {
             issuerAddress = this.tronWeb.defaultAddress.hex;
         }
 
-        if(!parameters)
-            return callback('Invalid proposal parameters provided');
-
         if(!callback)
             return this.injectPromise(this.createProposal, parameters, issuerAddress);
 
         if(!this.tronWeb.isAddress(issuerAddress))
             return callback('Invalid issuerAddress provided');
 
+        const invalid = 'Invalid proposal parameters provided';
+
+        if(!parameters)
+            return callback(invalid);
+
         if(!utils.isArray(parameters))
-            return callback('Invalid parameters provided');
+            return callback(invalid);
 
         for (let parameter of parameters) {
             if(!utils.isObject(parameter))
-                return callback('Invalid parameters provided');
+                return callback(invalid);
         }
 
         this.tronWeb.fullNode.request('wallet/proposalcreate', {
