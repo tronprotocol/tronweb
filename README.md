@@ -98,7 +98,7 @@ soliditynode.listen(8091);
 First off, in your javascript file, define TronWeb:
 
 ```js
-const TronWeb = require('TronWeb')
+const TronWeb = require('tronweb')
 ```
 Specify the API endpoints:
 ```js
@@ -127,7 +127,7 @@ const tronWeb = new TronWeb(
 ```
 #### A full example:
 ```js
-const TronWeb = require('TronWeb')
+const TronWeb = require('tronweb')
 
 const HttpProvider = TronWeb.providers.HttpProvider; // This provider is optional, you can just use a url for the nodes instead
 const fullNode = new HttpProvider('https://api.trongrid.io'); // Full node http endpoint

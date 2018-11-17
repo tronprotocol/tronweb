@@ -862,14 +862,6 @@ export default class TransactionBuilder {
             || !utils.isInteger(trxBalance) || trxBalance <= 0)
             return callback('Invalid amount provided');
 
-        console.log({
-            owner_address: this.tronWeb.address.toHex(ownerAddress),
-            first_token_id: this.tronWeb.fromUtf8(tokenName),
-            first_token_balance: tokenBalance,
-            second_token_id: '5f', // Constant for TRX.
-            second_token_balance: trxBalance
-        })
-
         this.tronWeb.fullNode.request('wallet/exchangecreate', {
             owner_address: this.tronWeb.address.toHex(ownerAddress),
             first_token_id: this.tronWeb.fromUtf8(tokenName),
@@ -882,7 +874,47 @@ export default class TransactionBuilder {
     }
 
     /**
+     * Create an exchange between a token and another token.
+     * DO NOT USE THIS FOR TRX.
+     * Token Names should be a CASE SENSITIVE string. 
+     * PLEASE VERIFY THIS ON TRONSCAN.
+     */
+    createTokenExchange(firstTokenName, firstTokenBalance, secondTokenName, secondTokenBalance, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+        if(utils.isFunction(ownerAddress)) {
+            callback = ownerAddress;
+            ownerAddress = this.tronWeb.defaultAddress.hex;
+        }
+
+        if (!callback)
+            return this.injectPromise(this.createTRXExchange, firstTokenName, firstTokenBalance, secondTokenName, secondTokenBalance, ownerAddress);
+
+        if (!this.tronWeb.isAddress(ownerAddress))
+            return callback('Invalid address provided');
+
+        if (!utils.isString(firstTokenName) || !firstTokenName.length)
+            return callback('Invalid firstTokenName provided');
+
+        if (!utils.isString(secondTokenName) || !secondTokenName.length)
+            return callback('Invalid secondTokenName provided');
+
+        if (!utils.isInteger(firstTokenBalance) || firstTokenBalance <= 0
+            || !utils.isInteger(secondTokenBalance) || secondTokenBalance <= 0)
+            return callback('Invalid amount provided');
+
+        this.tronWeb.fullNode.request('wallet/exchangecreate', {
+            owner_address: this.tronWeb.address.toHex(ownerAddress),
+            first_token_id: this.tronWeb.fromUtf8(firstTokenName),
+            first_token_balance: firstTokenBalance,
+            second_token_id: this.tronWeb.fromUtf8(secondTokenName),
+            second_token_balance: secondTokenBalance
+        }, 'post').then(resources => {
+            callback(null, resources);
+        }).catch(err => callback(err));
+    }
+
+    /**
      * Adds tokens into a bancor style exchange.
+     * Will add both tokens at market rate.
      */
     injectExchangeTokens(exchangeID = false, tokenName = false, tokenAmount = 0, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
         if(utils.isFunction(ownerAddress)) {
@@ -926,6 +958,7 @@ export default class TransactionBuilder {
 
     /**
      * Withdraws tokens from a bancor style exchange.
+     * Will withdraw at market rate both tokens.
      */
     withdrawExchangeTokens(exchangeID = false, tokenName = false, tokenAmount = 0, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
         if(utils.isFunction(ownerAddress)) {
@@ -969,6 +1002,7 @@ export default class TransactionBuilder {
 
     /**
      * Trade tokens on a bancor style exchange.
+     * Expected value is a validation and used to cap the total amt of token 2 spent.
      */
     tradeExchangeTokens(exchangeID = false,
         tokenName = false, 
