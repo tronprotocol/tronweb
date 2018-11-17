@@ -737,8 +737,13 @@ export default class TransactionBuilder {
         if(!this.tronWeb.isAddress(issuerAddress))
             return callback('Invalid issuerAddress provided');
 
-        if(!utils.isObject(parameters))
+        if(!utils.isArray(parameters))
             return callback('Invalid parameters provided');
+
+        for (let parameter of parameters) {
+            if(!utils.isObject(parameter))
+                return callback('Invalid parameters provided');
+        }
 
         this.tronWeb.fullNode.request('wallet/proposalcreate', {
             owner_address: this.tronWeb.address.toHex(issuerAddress),
@@ -965,7 +970,7 @@ export default class TransactionBuilder {
     /**
      * Trade tokens on a bancor style exchange.
      */
-    tradeExchangeTokens(exchangeID = false, 
+    tradeExchangeTokens(exchangeID = false,
         tokenName = false, 
         tokenAmountSold = 0, 
         tokenAmountExpected = 0, 

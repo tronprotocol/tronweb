@@ -1,4 +1,6 @@
+const chalk = require('chalk')
 const TronWeb = require('../setup/TronWeb');
+const jlog = require('./jlog')
 
 const {FULL_NODE_API, SOLIDITY_NODE_API, EVENT_API, PRIVATE_KEY} = require('./config')
 
@@ -12,11 +14,15 @@ const createInstance = () => {
 }
 
 
-// requires Tron Quickstart >= 1.1.5
+// requires Tron Quickstart > 1.1.10
 
 const newTestAccounts = async (amount) => {
     const tronWeb = createInstance();
-    return await tronWeb.fullNode.request('/admin/temporary-accounts-generation?accounts=' + amount);
+
+    console.log(chalk.blue(`Generating ${amount} new accounts...`))
+    await tronWeb.fullNode.request('/admin/temporary-accounts-generation?accounts=' + amount);
+    const lastCreated = await getTestAccounts(-1)
+    jlog(lastCreated.b58)
 }
 
 const getTestAccounts = async (block) => {
@@ -38,7 +44,7 @@ const getTestAccounts = async (block) => {
         accounts.b58.push(addr);
         accounts.hex.push(tronWeb.address.toHex(addr));
     }
-    return accounts;
+    return Promise.resolve(accounts);
 }
 
 module.exports = {

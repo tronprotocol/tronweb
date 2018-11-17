@@ -686,6 +686,9 @@ describe('TronWeb Instance', function () {
 
     describe("#isConnected", function () {
         it("should verify that tronWeb is connected to nodes and event server", async function () {
+
+            this.timeout(10000)
+
             const tronWeb = tronWebBuilder.createInstance();
             const isConnected = await tronWeb.isConnected();
 
