@@ -731,8 +731,9 @@ export default class TransactionBuilder {
         if(!this.tronWeb.isAddress(issuerAddress))
             return callback('Invalid issuerAddress provided');
 
-        if(!utils.isArray(parameters))
-            return callback('Invalid parameters provided');
+        if (!utils.isArray(parameters)) {
+            parameters = [parameters];
+        }
 
         for (let parameter of parameters) {
             if(!utils.isObject(parameter))

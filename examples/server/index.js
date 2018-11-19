@@ -1,16 +1,9 @@
 const TronWeb = require('../../dist/TronWeb.node.js');
 
-// const fullNode = 'https://api.trongrid.io';
-// const solidityNode = 'https://api.trongrid.io';
-// const eventServer = 'https://api.trongrid.io/';
-
+const fullNode = 'https://api.shasta.trongrid.io';
+const solidityNode = 'https://api.shasta.trongrid.io';
+const eventServer = 'https://api.shasta.trongrid.io/';
 const privateKey = 'da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0';
-
-
-const fullNode = 'http://127.0.0.1:8090';
-const solidityNode = 'http://127.0.0.1:8091';
-const eventServer = 'http://127.0.0.1:8092';
-
 
 const app = async () => {
     const tronWeb = new TronWeb(
@@ -19,14 +12,6 @@ const app = async () => {
         eventServer,
         privateKey
     );
-
-
-    let proposals = await tronWeb.trx.listProposals()
-
-    console.log(proposals);
-
-
-    return;
 
     tronWeb.setDefaultBlock('latest');
 
