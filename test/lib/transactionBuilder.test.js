@@ -803,7 +803,8 @@ describe('TronWeb.transactionBuilder', function () {
         after(async function () {
             proposals = await tronWeb.trx.listProposals();
             for (let proposal of proposals) {
-                await broadcaster(tronWeb.transactionBuilder.deleteProposal(proposal.proposal_id), PRIVATE_KEY)
+                if (proposal.state !== 'CANCELED')
+                    await broadcaster(tronWeb.transactionBuilder.deleteProposal(proposal.proposal_id), PRIVATE_KEY)
             }
         })
 
@@ -817,6 +818,19 @@ describe('TronWeb.transactionBuilder', function () {
             assert.equal(parameter.type_url, 'type.googleapis.com/protocol.ProposalDeleteContract');
 
         })
+
+        it('should throw trying to cancel an already canceled proposal', async function () {
+
+            await broadcaster(await tronWeb.transactionBuilder.deleteProposal(proposals[0].proposal_id));
+
+            await assertThrow(
+                tronWeb.transactionBuilder.deleteProposal(proposals[0].proposal_id),
+                null,
+                `Proposal[${proposals[0].proposal_id}] canceled`);
+
+        })
+
+        // TODO add invalid params throws
 
     });
 
