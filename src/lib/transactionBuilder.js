@@ -740,7 +740,7 @@ export default class TransactionBuilder {
             return callback(invalid);
 
         if(!utils.isArray(parameters))
-            return callback(invalid);
+            parameters = [parameters];
 
         for (let parameter of parameters) {
             if(!utils.isObject(parameter))

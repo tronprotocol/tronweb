@@ -746,7 +746,19 @@ describe('TronWeb.transactionBuilder', function () {
 
         let parameters = [{"key": 0, "value": 100000}, {"key": 1, "value": 2}]
 
-        it('should allow the SR account to create a new proposal', async function () {
+        it('should allow the SR account to create a new proposal as a single object', async function () {
+
+            const transaction = await tronWeb.transactionBuilder.createProposal(parameters[0], ADDRESS_BASE58)
+
+            const parameter = txPars(transaction);
+
+            assert.equal(parameter.value.owner_address, ADDRESS_HEX);
+            assert.equal(parameter.value.parameters[0].value, parameters[0].value);
+            assert.equal(parameter.type_url, 'type.googleapis.com/protocol.ProposalCreateContract');
+
+        })
+
+        it('should allow the SR account to create a new proposal as an array of objects', async function () {
 
             const transaction = await tronWeb.transactionBuilder.createProposal(parameters, ADDRESS_BASE58)
 
@@ -783,7 +795,7 @@ describe('TronWeb.transactionBuilder', function () {
     });
 
 
-    describe("#deleteProposal", async function () {
+    describe.only("#deleteProposal", async function () {
 
 
         let proposals;
