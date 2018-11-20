@@ -917,6 +917,7 @@ export default class TransactionBuilder {
     /**
      * Adds tokens into a bancor style exchange.
      * Will add both tokens at market rate.
+     * Use "_" for the constant value for TRX.
      */
     injectExchangeTokens(exchangeID = false, tokenName = false, tokenAmount = 0, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
         if(utils.isFunction(ownerAddress)) {
@@ -961,6 +962,7 @@ export default class TransactionBuilder {
     /**
      * Withdraws tokens from a bancor style exchange.
      * Will withdraw at market rate both tokens.
+     * Use "_" for the constant value for TRX.
      */
     withdrawExchangeTokens(exchangeID = false, tokenName = false, tokenAmount = 0, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
         if(utils.isFunction(ownerAddress)) {
@@ -1005,6 +1007,7 @@ export default class TransactionBuilder {
     /**
      * Trade tokens on a bancor style exchange.
      * Expected value is a validation and used to cap the total amt of token 2 spent.
+     * Use "_" for the constant value for TRX.
      */
     tradeExchangeTokens(exchangeID = false,
         tokenName = false, 
@@ -1035,7 +1038,7 @@ export default class TransactionBuilder {
         if(!utils.isInteger(tokenAmountExpected) || tokenAmountExpected < 1)
             return callback('Invalid tokenAmountExpected provided');
 
-        this.tronWeb.fullNode.request('wallet/exchangewithdraw', {
+        this.tronWeb.fullNode.request('wallet/exchangetransaction', {
             owner_address: this.tronWeb.address.toHex(ownerAddress),
             exchange_id: parseInt(exchangeID),
             token_id: this.tronWeb.fromAscii(tokenName),
