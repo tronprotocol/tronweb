@@ -35,18 +35,18 @@ describe('TronWeb.trx', function () {
 
     });
 
-    describe.only("#sendRawTransaction", async function () {
+    describe("#sendRawTransaction", async function () {
 
-        it('should send a transaction', async function () {
+        it('should send a transaction and verify that it has been mined', async function () {
 
             const transaction = await tronWeb.transactionBuilder.freezeBalance(100e6, 3, 'BANDWIDTH', accounts.b58[1])
 
             const signedTransaction = await tronWeb.trx.sign(transaction, accounts.pks[1]);
-            return Promise.resolve({
-                transaction,
-                signedTransaction,
-                receipt: await tronWeb.trx.sendRawTransaction(signedTransaction)
-            });
+            const receipt = await tronWeb.trx.sendRawTransaction(signedTransaction, {
+                // onConfirmation: jlog
+            })
+
+
 
 
         })
