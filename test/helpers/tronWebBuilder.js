@@ -13,8 +13,14 @@ const createInstance = () => {
     )
 }
 
+let instance
 
-// requires Tron Quickstart > 1.1.10
+const getInstance = () => {
+    if (!instance) {
+        instance = createInstance()
+    }
+    return instance
+}
 
 const newTestAccounts = async (amount) => {
     const tronWeb = createInstance();
@@ -49,6 +55,7 @@ const getTestAccounts = async (block) => {
 
 module.exports = {
     createInstance,
+    getInstance,
     newTestAccounts,
     getTestAccounts,
     TronWeb

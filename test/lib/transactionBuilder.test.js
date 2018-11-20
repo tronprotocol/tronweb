@@ -8,6 +8,7 @@ const broadcaster = require('../helpers/broadcaster');
 const pollAccountFor = require('../helpers/pollAccountFor');
 const _ = require('lodash');
 const tronWebBuilder = require('../helpers/tronWebBuilder');
+const assertEqualHex = require('../helpers/assertEqualHex');
 const TronWeb = tronWebBuilder.TronWeb;
 const config = require('../helpers/config');
 const {ADDRESS_HEX, ADDRESS_BASE58, UPDATED_TEST_TOKEN_OPTIONS, PRIVATE_KEY} = config;
@@ -121,7 +122,7 @@ describe('TronWeb.transactionBuilder', function () {
             const parameter = txPars(transaction);
             assert.equal(transaction.txID.length, 64);
             assert.equal(parameter.value.total_supply, options.totalSupply);
-            assert.equal(parameter.value.abbr, tronWeb.toHex(options.abbreviation).substring(2));
+            await assertEqualHex(parameter.value.abbr, options.abbreviation);
             assert.equal(parameter.value.owner_address, accounts.hex[2]);
             assert.equal(parameter.type_url, 'type.googleapis.com/protocol.AssetIssueContract');
         });
@@ -134,7 +135,7 @@ describe('TronWeb.transactionBuilder', function () {
             options.saleEnd = options.saleEnd.toString()
             const transaction = await tronWeb.transactionBuilder.createToken(options);
             const parameter = txPars(transaction);
-            assert.equal(parameter.value.abbr, tronWeb.toHex(options.abbreviation).substring(2));
+            await assertEqualHex(parameter.value.abbr, options.abbreviation);
         });
 
         it('should throw if an invalid name is passed', async function () {
@@ -378,7 +379,7 @@ describe('TronWeb.transactionBuilder', function () {
                 const parameter = txPars(transaction);
                 assert.equal(transaction.txID.length, 64);
                 assert.equal(parameter.value.total_supply, options.totalSupply);
-                assert.equal(parameter.value.abbr, tronWeb.toHex(options.abbreviation).substring(2));
+                await assertEqualHex(parameter.value.abbr, options.abbreviation);
                 assert.equal(parameter.value.owner_address, accounts.hex[2]);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.AssetIssueContract');
             });
@@ -395,7 +396,7 @@ describe('TronWeb.transactionBuilder', function () {
             const parameter = txPars(transaction);
 
             assert.equal(transaction.txID.length, 64);
-            assert.equal(parameter.value.account_name, tronWeb.toHex(newName).substring(2));
+            await assertEqualHex(parameter.value.account_name, newName);
             assert.equal(parameter.value.owner_address, accounts.hex[3]);
             assert.equal(parameter.type_url, 'type.googleapis.com/protocol.AccountUpdateContract');
         });
@@ -440,8 +441,8 @@ describe('TronWeb.transactionBuilder', function () {
             const transaction = await tronWeb.transactionBuilder.updateToken(UPDATED_TEST_TOKEN_OPTIONS, accounts.b58[2]);
             const parameter = txPars(transaction);
             assert.equal(transaction.txID.length, 64);
-            assert.equal(parameter.value.description, tronWeb.toHex(UPDATED_TEST_TOKEN_OPTIONS.description).substring(2));
-            assert.equal(parameter.value.url, tronWeb.toHex(UPDATED_TEST_TOKEN_OPTIONS.url).substring(2));
+            await assertEqualHex(parameter.value.description, UPDATED_TEST_TOKEN_OPTIONS.description);
+            await assertEqualHex(parameter.value.url, UPDATED_TEST_TOKEN_OPTIONS.url);
             assert.equal(parameter.value.owner_address, accounts.hex[2]);
             assert.equal(parameter.type_url, 'type.googleapis.com/protocol.UpdateAssetContract');
         });
@@ -545,8 +546,8 @@ describe('TronWeb.transactionBuilder', function () {
                 const transaction = await tronWeb.transactionBuilder.updateAsset(UPDATED_TEST_TOKEN_OPTIONS, accounts.b58[2]);
                 const parameter = txPars(transaction);
                 assert.equal(transaction.txID.length, 64);
-                assert.equal(parameter.value.description, tronWeb.toHex(UPDATED_TEST_TOKEN_OPTIONS.description).substring(2));
-                assert.equal(parameter.value.url, tronWeb.toHex(UPDATED_TEST_TOKEN_OPTIONS.url).substring(2));
+                await assertEqualHex(parameter.value.description, UPDATED_TEST_TOKEN_OPTIONS.description);
+                await assertEqualHex(parameter.value.url, UPDATED_TEST_TOKEN_OPTIONS.url);
                 assert.equal(parameter.value.owner_address, accounts.hex[2]);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.UpdateAssetContract');
             });
@@ -577,7 +578,7 @@ describe('TronWeb.transactionBuilder', function () {
             const parameter = txPars(transaction);
             assert.equal(transaction.txID.length, 64);
             assert.equal(parameter.value.amount, 20);
-            assert.equal(parameter.value.asset_name, tronWeb.toHex(tokenOptions.name).substring(2));
+            await assertEqualHex(parameter.value.asset_name, tokenOptions.name);
             assert.equal(parameter.value.owner_address, accounts.hex[2]);
             assert.equal(parameter.value.to_address, accounts.hex[3]);
             assert.equal(parameter.type_url, 'type.googleapis.com/protocol.ParticipateAssetIssueContract');
@@ -795,7 +796,7 @@ describe('TronWeb.transactionBuilder', function () {
     });
 
 
-    describe.only("#deleteProposal", async function () {
+    describe("#deleteProposal", async function () {
 
 
         let proposals;
@@ -846,31 +847,95 @@ describe('TronWeb.transactionBuilder', function () {
 
     });
 
+    describe("#applyForSR", async function () {
 
+        let url = 'https://xtron.network';
+
+        it('should allow accounts[0] to apply for SR', async function () {
+
+
+            const transaction = await tronWeb.transactionBuilder.applyForSR(accounts.b58[0], url);
+            const parameter = txPars(transaction);
+
+            assert.equal(parameter.value.owner_address, accounts.hex[0]);
+            await assertEqualHex(parameter.value.url, url);
+            assert.equal(parameter.type_url, 'type.googleapis.com/protocol.WitnessCreateContract');
+        });
+
+        // TODO add invalid params throws
+    });
 
 
     describe("#freezeBalance", async function () {
+
+        it('should allows accounts[1] to freeze its balance', async function () {
+
+            const transaction = await tronWeb.transactionBuilder.freezeBalance(100e6, 3, 'BANDWIDTH', accounts.b58[1])
+
+            const parameter = txPars(transaction);
+            // jlog(parameter)
+            assert.equal(parameter.value.owner_address, accounts.hex[1]);
+            assert.equal(parameter.value.frozen_balance, 100e6);
+            assert.equal(parameter.value.frozen_duration, 3);
+            assert.equal(parameter.type_url, 'type.googleapis.com/protocol.FreezeBalanceContract');
+        })
+
+        // TODO add invalid params throws
+
     });
+
     describe("#unfreezeBalance", async function () {
+
+        // TODO this is not fully testable because the minimum time before unfreezing is 3 days
+
     });
+
+
+    describe("#vote", async function () {
+
+        let url = 'https://xtron.network';
+        // let witnesses;
+
+        before(async function () {
+
+            await broadcaster(tronWeb.transactionBuilder.applyForSR(accounts.b58[0], url), accounts.pks[0])
+            await broadcaster(tronWeb.transactionBuilder.freezeBalance(100e6, 3, 'BANDWIDTH', accounts.b58[1]), accounts.pks[1])
+        })
+
+
+        it('should allows accounts[1] to vote for accounts[0] as SR', async function () {
+            let votes = {}
+            votes[accounts.hex[0]] = 5
+
+            const transaction = await tronWeb.transactionBuilder.vote(votes, accounts.b58[1])
+            const parameter = txPars(transaction);
+
+            assert.equal(parameter.value.owner_address, accounts.hex[1]);
+            assert.equal(parameter.value.votes[0].vote_address, accounts.hex[0]);
+            assert.equal(parameter.value.votes[0].vote_count, 5);
+            assert.equal(parameter.type_url, 'type.googleapis.com/protocol.VoteWitnessContract');
+        })
+
+    });
+
+
     describe("#withdrawBlockRewards", async function () {
     });
-    describe("#applyForSR", async function () {
-    });
-    describe("#vote", async function () {
-    });
+
     describe("#createSmartContract", async function () {
     });
+
     describe("#triggerSmartContract", async function () {
     });
-    describe("#deleteProposal", async function () {
-    });
+
     describe("#createTRXExchange", async function () {
     });
+
     describe("#injectExchangeTokens", async function () {
     });
-    describe("#withdrawExchangeTokens", async function () {
-    });
+
+    describe("#withdrawExchangeTokens", async function () {});
+
     describe("#tradeExchangeTokens", async function () {
     });
 
