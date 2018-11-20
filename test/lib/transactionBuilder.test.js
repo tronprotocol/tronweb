@@ -421,7 +421,7 @@ describe('TronWeb.transactionBuilder', function () {
 
     });
 
-    describe('#updateToken()', function () {
+    describe.only('#updateToken()', function () {
 
         let tokenOptions
 
@@ -573,6 +573,8 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it(`should allow accounts[2] to purchase a token created by accounts[3]`, async function () {
+
+            wait(1)
 
             const transaction = await tronWeb.transactionBuilder.purchaseToken(accounts.b58[3], tokenOptions.name, 20, accounts.b58[2]);
             const parameter = txPars(transaction);

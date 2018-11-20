@@ -2,6 +2,7 @@ const chai = require('chai');
 const assert = chai.assert;
 const txPars = require('../helpers/txPars');
 const jlog = require('../helpers/jlog');
+const ethUtil = require('eth-sig-util');
 const assertThrow = require('../helpers/assertThrow');
 const wait = require('../helpers/wait');
 const broadcaster = require('../helpers/broadcaster');
@@ -13,7 +14,7 @@ const TronWeb = tronWebBuilder.TronWeb;
 const config = require('../helpers/config');
 const {ADDRESS_HEX, ADDRESS_BASE58, UPDATED_TEST_TOKEN_OPTIONS, PRIVATE_KEY} = config;
 
-describe('TronWeb.trx', function () {
+describe.only('TronWeb.trx', function () {
 
     let accounts;
     let tronWeb;
@@ -35,26 +36,68 @@ describe('TronWeb.trx', function () {
 
     });
 
-    describe("#sendRawTransaction", async function () {
+    describe.only("#signTransaction", async function () {
 
-        it('should send a transaction and verify that it has been mined', async function () {
+        it('should sign a transaction', async function () {
 
             const transaction = await tronWeb.transactionBuilder.freezeBalance(100e6, 3, 'BANDWIDTH', accounts.b58[1])
-
             const signedTransaction = await tronWeb.trx.sign(transaction, accounts.pks[1]);
-            const receipt = await tronWeb.trx.sendRawTransaction(signedTransaction, {
-                // onConfirmation: jlog
-            })
 
+            console.log(JSON.stringify(signedTransaction))
 
-
+            // ethUtil.
 
         })
 
     });
 
 
-    describe("#broadcast", async function () {});
+    describe("#sendRawTransaction", async function () {
+
+        let signedTransaction
+
+        before(async function() {
+            const transaction = await tronWeb.transactionBuilder.freezeBalance(100e6, 3, 'BANDWIDTH', accounts.b58[1])
+            signedTransaction = await tronWeb.trx.sign(transaction, accounts.pks[1]);
+        })
+
+        it('should send a transaction and verify that it has been mined', function (done) {
+
+            this.timeout(20000)
+
+            tronWeb.trx.sendRawTransaction(signedTransaction, {
+                onConfirmation: (err, trs) => {
+                    assert.isTrue(trs.blockNumber > 0)
+                    done()
+                }
+            }, function () {})
+        })
+    });
+
+
+    describe("#broadcast", async function () {
+
+        let signedTransaction
+
+        before(async function() {
+            const transaction = await tronWeb.transactionBuilder.freezeBalance(100e6, 3, 'BANDWIDTH', accounts.b58[2])
+            signedTransaction = await tronWeb.trx.sign(transaction, accounts.pks[2]);
+        })
+
+        it('should send a transaction and verify that it has been mined', function (done) {
+
+            this.timeout(20000)
+
+            tronWeb.trx.broadcast(signedTransaction, {
+                onConfirmation: (err, trs) => {
+                    assert.isTrue(trs.blockNumber > 0)
+                    done()
+                }
+            }, function () {})
+        })
+    });
+
+
     describe("#freezeBalance", async function () {});
     describe("#getAccount", async function () {});
     describe("#getAccountResources", async function () {});
@@ -95,7 +138,6 @@ describe('TronWeb.trx', function () {
     describe("#sendTrx", async function () {});
     describe("#sign", async function () {});
     describe("#signMessage", async function () {});
-    describe("#signTransaction", async function () {});
     describe("#timeUntilNextVoteCycle", async function () {});
     describe("#unfreezeBalance", async function () {});
     describe("#updateAccount", async function () {});

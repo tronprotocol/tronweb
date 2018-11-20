@@ -652,16 +652,17 @@ export default class Trx {
             return callback('Transaction is not signed');
 
         this.tronWeb.fullNode.request(
-            'wallet/broadcasttransaction', 
+            'wallet/broadcasttransaction',
             signedTransaction,
             'post'
         ).then(result => {
+            result.result && (result.signedTransaction = signedTransaction);
             callback(null, result);
             if (result.result) {
                 const timeout = Date.now() + 6e4 // 1 minutes
                 const isMined = async () => {
                     let transaction = await this.tronWeb.trx.getTransactionInfo(signedTransaction.txID)
-                    if (Date.now() < timeout && utils.isObject(transaction) && !transaction.blockNumber) {
+                    if (Date.now() < timeout && (!utils.isObject(transaction) || !transaction.blockNumber)) {
                         this.tronWeb.fullNode.request(
                             'wallet/broadcasttransaction',
                             signedTransaction,
@@ -675,9 +676,6 @@ export default class Trx {
                         if (Date.now() >= timeout) {
                             err = 'Broadcast timeout'
                             transaction = null
-                        } else if (!utils.isObject(transaction)) {
-                            err = 'Dropped transaction'
-                            transaction = null
                         }
                         options.onConfirmation(err, transaction);
                     }
@@ -687,6 +685,7 @@ export default class Trx {
             }
         }).catch(err => callback(err));
     }
+
 
     async sendTransaction(to = false, amount = false, options = {}, callback = false) {
         if(utils.isFunction(options)) {
