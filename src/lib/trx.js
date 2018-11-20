@@ -633,24 +633,61 @@ export default class Trx {
         }
     }
 
-    sendRawTransaction(signedTransaction = false, callback = false) {
+    sendRawTransaction(signedTransaction = false, options = {}, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if(!callback)
-            return this.injectPromise(this.sendRawTransaction, signedTransaction);
+            return this.injectPromise(this.sendRawTransaction, signedTransaction, options);
 
         if(!utils.isObject(signedTransaction))
             return callback('Invalid transaction provided');
+
+        if(!utils.isObject(options))
+            return callback('Invalid options provided');
 
         if(!signedTransaction.signature || !utils.isArray(signedTransaction.signature))
             return callback('Transaction is not signed');
 
         this.tronWeb.fullNode.request(
-            'wallet/broadcasttransaction', 
+            'wallet/broadcasttransaction',
             signedTransaction,
             'post'
         ).then(result => {
             callback(null, result);
+            if (result.result) {
+                const timeout = Date.now() + 6e4 // 1 minutes
+                const isMined = async () => {
+                    let transaction = await this.tronWeb.trx.getTransactionInfo(signedTransaction.txID)
+                    if (Date.now() < timeout && utils.isObject(transaction) && !transaction.blockNumber) {
+                        this.tronWeb.fullNode.request(
+                            'wallet/broadcasttransaction',
+                            signedTransaction,
+                            'post'
+                        ).then(result => {
+                        }).catch(err => {
+                        });
+                        setTimeout(isMined, 5e3)
+                    } else if (options.onConfirmation) {
+                        let err = null
+                        if (Date.now() >= timeout) {
+                            err = 'Broadcast timeout'
+                            transaction = null
+                        } else if (!utils.isObject(transaction)) {
+                            err = 'Dropped transaction'
+                            transaction = null
+                        }
+                        options.onConfirmation(err, transaction);
+                    }
+                }
+
+                setTimeout(isMined, 5e3)
+            }
         }).catch(err => callback(err));
     }
+
 
     async sendTransaction(to = false, amount = false, options = {}, callback = false) {
         if(utils.isFunction(options)) {
