@@ -661,7 +661,7 @@ export default class Trx {
                 const timeout = Date.now() + 6e4 // 1 minutes
                 const isMined = async () => {
                     let transaction = await this.tronWeb.trx.getTransactionInfo(signedTransaction.txID)
-                    if (Date.now() < timeout && utils.isObject(transaction) && !transaction.blockNumber) {
+                    if (Date.now() < timeout && (!utils.isObject(transaction) || !transaction.blockNumber)) {
                         this.tronWeb.fullNode.request(
                             'wallet/broadcasttransaction',
                             signedTransaction,
@@ -674,9 +674,6 @@ export default class Trx {
                         let err = null
                         if (Date.now() >= timeout) {
                             err = 'Broadcast timeout'
-                            transaction = null
-                        } else if (!utils.isObject(transaction)) {
-                            err = 'Dropped transaction'
                             transaction = null
                         }
                         options.onConfirmation(err, transaction);
