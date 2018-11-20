@@ -233,8 +233,10 @@ export default class Trx {
         
         if(direction == 'all') {
             try {
-                const from = await this.getTransactionsRelated(address, 'from', limit, offset);
-                const to = await this.getTransactionsRelated(address, 'to', limit, offset);
+                const [from, to] = await Promise.all([
+                    this.getTransactionsRelated(address, 'from', limit, offset),
+                    this.getTransactionsRelated(address, 'to', limit, offset)
+                ])
 
                 return callback(null, [
                     ...from.map(tx => (tx.direction = 'from', tx)),
