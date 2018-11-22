@@ -656,7 +656,8 @@ export default class Trx {
             signedTransaction,
             'post'
         ).then(result => {
-            result.signedTransaction = signedTransaction;
+            if (result.result)
+                result.signedTransaction = signedTransaction;
             callback(null, result);
             if (result.result) {
                 const timeout = Date.now() + 6e4 // 1 minutes
