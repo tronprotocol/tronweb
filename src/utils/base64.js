@@ -11,7 +11,7 @@ export function Base64() {
         let enc3;
         let enc4;
         let i = 0;
-        
+
         while (i < input.length) {
             chr1 = input.charCodeAt(i++);
             chr2 = input.charCodeAt(i++);
@@ -45,7 +45,7 @@ export function Base64() {
         let enc3;
         let enc4;
         let i = 0;
-        
+
         while (i < inputBytes.length) {
             chr1 = inputBytes[i++];
             chr2 = inputBytes[i++];
@@ -96,11 +96,11 @@ export function Base64() {
 
             if (enc3 != 64)
                 output = output + String.fromCharCode(chr2);
-                
+
             if (enc4 != 64)
                 output = output + String.fromCharCode(chr3);
         }
-        
+
         return this._utf8_decode(output);
     }
 
@@ -135,7 +135,7 @@ export function Base64() {
             if (enc4 != 64)
                 output = output + String.fromCharCode(chr3);
         }
-        
+
         return this._out2ByteArray(output);
     }
 
