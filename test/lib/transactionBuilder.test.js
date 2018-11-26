@@ -421,7 +421,7 @@ describe('TronWeb.transactionBuilder', function () {
 
     });
 
-    describe.only('#updateToken()', function () {
+    describe('#updateToken()', function () {
 
         let tokenOptions
 

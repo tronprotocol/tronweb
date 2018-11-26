@@ -9,6 +9,5 @@ module.exports = async function (func, pk) {
         signedTransaction,
         receipt: await tronWeb.trx.sendRawTransaction(signedTransaction)
     };
-    console.log(result.receipt)
     return Promise.resolve(result);
 }

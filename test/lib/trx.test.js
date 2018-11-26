@@ -14,7 +14,7 @@ const TronWeb = tronWebBuilder.TronWeb;
 const config = require('../helpers/config');
 const {ADDRESS_HEX, ADDRESS_BASE58, UPDATED_TEST_TOKEN_OPTIONS, PRIVATE_KEY} = config;
 
-describe.only('TronWeb.trx', function () {
+describe('TronWeb.trx', function () {
 
     let accounts;
     let tronWeb;
@@ -36,14 +36,14 @@ describe.only('TronWeb.trx', function () {
 
     });
 
-    describe.only("#signTransaction", async function () {
+    describe("#signTransaction", async function () {
 
         it('should sign a transaction', async function () {
 
             const transaction = await tronWeb.transactionBuilder.freezeBalance(100e6, 3, 'BANDWIDTH', accounts.b58[1])
             const signedTransaction = await tronWeb.trx.sign(transaction, accounts.pks[1]);
 
-            console.log(JSON.stringify(signedTransaction))
+            // console.log(JSON.stringify(signedTransaction))
 
             // ethUtil.
 
@@ -54,24 +54,22 @@ describe.only('TronWeb.trx', function () {
 
     describe("#sendRawTransaction", async function () {
 
-        let signedTransaction
-
-        before(async function() {
-            const transaction = await tronWeb.transactionBuilder.freezeBalance(100e6, 3, 'BANDWIDTH', accounts.b58[1])
-            signedTransaction = await tronWeb.trx.sign(transaction, accounts.pks[1]);
-        })
-
-        it('should send a transaction and verify that it has been mined', function (done) {
-
-            this.timeout(20000)
-
-            tronWeb.trx.sendRawTransaction(signedTransaction, {
-                onConfirmation: (err, trs) => {
-                    assert.isTrue(trs.blockNumber > 0)
-                    done()
-                }
-            }, function () {})
-        })
+        // it('should send a transaction with data', async function () {
+        //
+        //     // TODO This fails. We want it to work.
+        //
+        //     this.timeout(20000)
+        //
+        //     const transaction = await tronWeb.transactionBuilder.freezeBalance(100e6, 3, 'BANDWIDTH', accounts.b58[1])
+        //
+        //     const someData = tronWeb.toHex('some-data').substring(2)
+        //
+        //     transaction.raw_data.data = someData
+        //     const signedTransaction = await tronWeb.trx.sign(transaction, accounts.pks[1]);
+        //     const result = await tronWeb.trx.sendRawTransaction(signedTransaction)
+        //     assert.equal(result.transaction.raw_data.data, someData)
+        //
+        // })
     });
 
 
@@ -84,16 +82,11 @@ describe.only('TronWeb.trx', function () {
             signedTransaction = await tronWeb.trx.sign(transaction, accounts.pks[2]);
         })
 
-        it('should send a transaction and verify that it has been mined', function (done) {
+        it('should broadcast a transaction', async function () {
 
             this.timeout(20000)
-
-            tronWeb.trx.broadcast(signedTransaction, {
-                onConfirmation: (err, trs) => {
-                    assert.isTrue(trs.blockNumber > 0)
-                    done()
-                }
-            }, function () {})
+            const result = await tronWeb.trx.broadcast(signedTransaction)
+            assert.equal(result.transaction.signature[0], signedTransaction.signature[0])
         })
     });
 

@@ -367,8 +367,11 @@ export default class TronWeb extends EventEmitter {
                 return false;
             }
         }
-
-        return utils.crypto.isAddressValid(address);
+        try {
+            return utils.crypto.isAddressValid(address);
+        } catch(err) {
+            return false;
+        }
     }
 
     static async createAccount(callback = false) {
