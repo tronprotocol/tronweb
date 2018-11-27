@@ -157,12 +157,28 @@ export default class TronWeb extends EventEmitter {
         return this.currentProviders();
     }
 
-    getEventResult(contractAddress = false, sinceTimestamp = 0, eventName = false, blockNumber = false, callback = false) {
+    getEventResult(contractAddress = false, sinceTimestamp = 0, eventName = false, blockNumber = false, size = 20, page = 1, callback = false) {
+
+        if(utils.isFunction(page)) {
+            callback = page;
+            page = 1;
+        }
+
+        if(utils.isFunction(size)) {
+            callback = size;
+            size = 20;
+        }
+
         if(!callback)
-            return this.injectPromise(this.getEventResult, contractAddress, sinceTimestamp, eventName, blockNumber);
+            return this.injectPromise(this.getEventResult, contractAddress, sinceTimestamp, eventName, blockNumber, size, page);
 
         if(!this.eventServer)
             callback('No event server configured');
+
+        if(size > 200) {
+            console.info('Defaulting to maximum accepted size: 200');
+            size = 200;
+        }
 
         const routeParams = [];
 
@@ -184,7 +200,7 @@ export default class TronWeb extends EventEmitter {
         if(blockNumber)
             routeParams.push(blockNumber);
 
-        return this.eventServer.request(`event/contract/${routeParams.join('/')}?since=${sinceTimestamp}`).then((data = false) => {
+        return this.eventServer.request(`event/contract/${routeParams.join('/')}?since=${sinceTimestamp}&size=${size}&page=${page}`).then((data = false) => {
             if(!data)
                 return callback('Unknown error occurred');
 
