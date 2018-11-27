@@ -173,4 +173,4 @@ getBalance();
 ```
 #### Note:
 
-For testing TronWeb API functions, it would be best to setup a private network on your local machine using the<a href="https://developers.tron.network/docs/getting-started-1" target="_blank">TRON Docker Quickstart guide</a>. The Docker guide sets up a Full Node, Solidity Node, and Event Server on your machine. You can then deploy smart contracts on your network and interact with them via TronWeb. If you wish to test TronWeb with other users, it would be best to deploy your contracts/DApps on the Shasta test network and interact from there.  
+For testing TronWeb API functions, it would be best to setup a private network on your local machine using the <a href="https://developers.tron.network/docs/getting-started-1" target="_blank">TRON Docker Quickstart guide</a>. The Docker guide sets up a Full Node, Solidity Node, and Event Server on your machine. You can then deploy smart contracts on your network and interact with them via TronWeb. If you wish to test TronWeb with other users, it would be best to deploy your contracts/DApps on the Shasta test network and interact from there.  
