@@ -170,7 +170,7 @@ export default class TronWeb extends EventEmitter {
         }
 
         if(!callback)
-            return this.injectPromise(this.getEventResult, contractAddress, sinceTimestamp, eventName, blockNumber);
+            return this.injectPromise(this.getEventResult, contractAddress, sinceTimestamp, eventName, blockNumber, size, page);
 
         if(!this.eventServer)
             callback('No event server configured');
