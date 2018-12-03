@@ -314,6 +314,7 @@ export default class TransactionBuilder {
             feeLimit = 1_000_000_000,
             callValue = 0,
             userFeePercentage = 0,
+            originEnergyLimit = 100_000,
             parameters = [],
             name = "",
         } = options;
@@ -353,6 +354,8 @@ export default class TransactionBuilder {
         if(!utils.isInteger(userFeePercentage) || userFeePercentage < 0 || userFeePercentage > 100)
             return callback('Invalid options.userFeePercentage provided');
 
+        if(!utils.isInteger(originEnergyLimit) || originEnergyLimit < 0)
+            return callback('Invalid options.originEnergyLimit provided');
         if(!utils.isArray(parameters))
             return callback('Invalid parameters provided');
 
@@ -400,6 +403,7 @@ export default class TransactionBuilder {
             fee_limit: parseInt(feeLimit),
             call_value: parseInt(callValue),
             consume_user_resource_percent: userFeePercentage,
+            origin_energy_limit: originEnergyLimit,
             abi: JSON.stringify(abi),
             bytecode,
             parameter: parameters,
