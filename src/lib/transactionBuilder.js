@@ -801,14 +801,14 @@ export default class TransactionBuilder {
      * Adds a vote to an issued network modification proposal.
      * Only current Super Representative can vote on a proposal.
      */
-    voteProposal(proposalID = false, hasApproval = false, voterAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+    voteProposal(proposalID = false, isApproval = false, voterAddress = this.tronWeb.defaultAddress.hex, callback = false) {
         if(utils.isFunction(voterAddress)) {
             callback = voterAddress;
             voterAddress = this.tronWeb.defaultAddress.hex;
         }
 
         if(!callback)
-            return this.injectPromise(this.voteProposal, proposalID, hasApproval, voterAddress);
+            return this.injectPromise(this.voteProposal, proposalID, isApproval, voterAddress);
 
         if(!this.tronWeb.isAddress(voterAddress))
             return callback('Invalid voterAddress address provided');
@@ -816,7 +816,7 @@ export default class TransactionBuilder {
         if(!utils.isInteger(proposalID) || proposalID < 0)
             return callback('Invalid proposalID provided');
 
-        if(!utils.isBoolean(hasApproval))
+        if(!utils.isBoolean(isApproval))
             return callback('Invalid hasApproval provided');
 
         this.tronWeb.fullNode.request('wallet/proposalapprove', {
