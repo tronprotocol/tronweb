@@ -314,7 +314,7 @@ export default class TransactionBuilder {
             feeLimit = 1_000_000_000,
             callValue = 0,
             userFeePercentage = 0,
-            originEnergyLimit = 100_000,
+            originEnergyLimit = 10_000_000,
             parameters = [],
             name = "",
         } = options;
