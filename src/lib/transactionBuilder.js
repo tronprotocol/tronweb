@@ -314,6 +314,7 @@ export default class TransactionBuilder {
             feeLimit = 1_000_000_000,
             callValue = 0,
             userFeePercentage = 0,
+            originEnergyLimit = 10_000_000,
             parameters = [],
             name = "",
         } = options;
@@ -353,6 +354,8 @@ export default class TransactionBuilder {
         if(!utils.isInteger(userFeePercentage) || userFeePercentage < 0 || userFeePercentage > 100)
             return callback('Invalid options.userFeePercentage provided');
 
+        if(!utils.isInteger(originEnergyLimit) || originEnergyLimit < 0)
+            return callback('Invalid options.originEnergyLimit provided');
         if(!utils.isArray(parameters))
             return callback('Invalid parameters provided');
 
@@ -400,6 +403,7 @@ export default class TransactionBuilder {
             fee_limit: parseInt(feeLimit),
             call_value: parseInt(callValue),
             consume_user_resource_percent: userFeePercentage,
+            origin_energy_limit: originEnergyLimit,
             abi: JSON.stringify(abi),
             bytecode,
             parameter: parameters,
@@ -804,14 +808,14 @@ export default class TransactionBuilder {
      * Adds a vote to an issued network modification proposal.
      * Only current Super Representative can vote on a proposal.
      */
-    voteProposal(proposalID = false, hasApproval = false, voterAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+    voteProposal(proposalID = false, isApproval = false, voterAddress = this.tronWeb.defaultAddress.hex, callback = false) {
         if(utils.isFunction(voterAddress)) {
             callback = voterAddress;
             voterAddress = this.tronWeb.defaultAddress.hex;
         }
 
         if(!callback)
-            return this.injectPromise(this.voteProposal, proposalID, hasApproval, voterAddress);
+            return this.injectPromise(this.voteProposal, proposalID, isApproval, voterAddress);
 
         if(!this.tronWeb.isAddress(voterAddress))
             return callback('Invalid voterAddress address provided');
@@ -819,13 +823,13 @@ export default class TransactionBuilder {
         if(!utils.isInteger(proposalID) || proposalID < 0)
             return callback('Invalid proposalID provided');
 
-        if(!utils.isBoolean(hasApproval))
+        if(!utils.isBoolean(isApproval))
             return callback('Invalid hasApproval provided');
 
         this.tronWeb.fullNode.request('wallet/proposalapprove', {
             owner_address: this.tronWeb.address.toHex(voterAddress),
             proposal_id: parseInt(proposalID),
-            is_add_approval: isApproval.toString()
+            is_add_approval: isApproval
         }, 'post').then(transaction => {
             if(transaction.Error)
                 return callback(transaction.Error);
