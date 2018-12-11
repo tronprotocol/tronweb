@@ -671,6 +671,12 @@ export default class TransactionBuilder {
             freeBandwidthLimit = 0 // Out of `totalFreeBandwidth`, the amount each token holder get
         } = options;
 
+        if(!utils.isString(description) || !description.length)
+            return callback('Invalid token description provided');
+
+        if(!utils.isString(url) || !url.length || !utils.isValidURL(url))
+            return callback('Invalid token url provided');
+
         if(!utils.isInteger(freeBandwidth) || freeBandwidth < 0)
             return callback('Invalid free bandwidth amount provided');
 
@@ -726,22 +732,23 @@ export default class TransactionBuilder {
             issuerAddress = this.tronWeb.defaultAddress.hex;
         }
 
-        if(!parameters)
-            return callback('Invalid proposal parameters provided');
-
         if(!callback)
             return this.injectPromise(this.createProposal, parameters, issuerAddress);
 
         if(!this.tronWeb.isAddress(issuerAddress))
             return callback('Invalid issuerAddress provided');
 
-        if (!utils.isArray(parameters)) {
+        const invalid = 'Invalid proposal parameters provided';
+
+        if(!parameters)
+            return callback(invalid);
+
+        if(!utils.isArray(parameters))
             parameters = [parameters];
-        }
 
         for (let parameter of parameters) {
             if(!utils.isObject(parameter))
-                return callback('Invalid parameters provided');
+                return callback(invalid);
         }
 
         this.tronWeb.fullNode.request('wallet/proposalcreate', {
@@ -1006,7 +1013,7 @@ export default class TransactionBuilder {
      * Expected value is a validation and used to cap the total amt of token 2 spent.
      * Use "_" for the constant value for TRX.
      */
-    tradeExchangeTokens(exchangeID = false, 
+    tradeExchangeTokens(exchangeID = false,
         tokenName = false, 
         tokenAmountSold = 0, 
         tokenAmountExpected = 0, 

@@ -1,8 +1,8 @@
 const TronWeb = require('../../dist/TronWeb.node.js');
 
-const fullNode = 'https://api.shasta.trongrid.io';
-const solidityNode = 'https://api.shasta.trongrid.io';
-const eventServer = 'https://api.shasta.trongrid.io/';
+const fullNode = 'http://127.0.0.1:8090';
+const solidityNode = 'http://127.0.0.1:8091';
+const eventServer = 'http://127.0.0.1:8092/';
 const privateKey = 'da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0';
 
 const app = async () => {
@@ -348,7 +348,7 @@ const app = async () => {
         console.groupEnd();
     });
 
-    tronWeb.getEventByTransacionID('32d7efe5f70c044bcd831f21f911209a7abf4ed0d5934b2c1b804e108008cd43', (err, events) => {
+    tronWeb.getEventByTransactionID('32d7efe5f70c044bcd831f21f911209a7abf4ed0d5934b2c1b804e108008cd43', (err, events) => {
         if(err)
             return console.error(err);
 

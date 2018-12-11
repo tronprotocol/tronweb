@@ -10,6 +10,8 @@ import BigNumber from 'bignumber.js';
 
 const utils = {
     isValidURL(url) {
+        if (typeof url !== 'string')
+            return false;
         return validator.isURL(url.toString(), {
             protocols: [ 'http', 'https' ]
         });
@@ -48,7 +50,9 @@ const utils = {
     },
 
     isHex(string) {
-        return typeof string === 'string' && !isNaN(parseInt(string, 16));
+        return (typeof string === 'string'
+            && !isNaN(parseInt(string, 16))
+            && /^(0x|)[a-fA-F0-9]+$/.test(string));
     },
 
     isInteger(number) {

@@ -662,7 +662,6 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
-
     async sendTransaction(to = false, amount = false, options = {}, callback = false) {
         if(utils.isFunction(options)) {
             callback = options;
@@ -959,6 +958,23 @@ export default class Trx {
             callback(null, proposals);
         }).catch(err => callback(err));
     }
+/*
+    this.tronWeb.fullNode.request('wallet/proposalcreate', {
+    owner_address: this.tronWeb.address.toHex(issuerAddress),
+    parameters: parameters
+}, 'post').then(transaction => {
+    if(transaction.Error)
+        return callback(transaction.Error);
+
+    if(transaction.result && transaction.result.message) {
+        return callback(
+            this.tronWeb.toUtf8(transaction.result.message)
+        );
+    }
+
+    callback(null, transaction);
+}).catch(err => callback(err));
+    */
 
     /**
      * Lists all parameters available for network modification proposals.

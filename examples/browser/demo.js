@@ -348,7 +348,7 @@ const app = async () => {
         console.groupEnd();
     });
 
-    tronWeb.getEventByTransacionID('32d7efe5f70c044bcd831f21f911209a7abf4ed0d5934b2c1b804e108008cd43', (err, events) => {
+    tronWeb.getEventByTransactionID('32d7efe5f70c044bcd831f21f911209a7abf4ed0d5934b2c1b804e108008cd43', (err, events) => {
         if(err)
             return console.error(err);
 

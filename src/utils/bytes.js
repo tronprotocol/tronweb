@@ -1,6 +1,12 @@
 import { Base64 } from './base64';
 
 export function byte2hexStr(byte) {
+    if (typeof byte !== 'number')
+        throw new Error('Input must be a number');
+
+    if (byte < 0 || byte > 255)
+        throw new Error('Input must be a byte');
+
     const hexByteMap = '0123456789ABCDEF';
 
     let str = '';
@@ -13,7 +19,7 @@ export function byte2hexStr(byte) {
 export function bytesToString(arr) {
     if (typeof arr === 'string')
         return arr;
-        
+
     let str = '';
 
     for (let i = 0; i < arr.length; i++) {
@@ -38,7 +44,7 @@ export function bytesToString(arr) {
 }
 
 export function hextoString(hex) {
-    const arr = hex.split('');
+    const arr = hex.replace(/^0x/,'').split('');
     let out = '';
 
     for (let i = 0; i < arr.length / 2; i++) {
@@ -49,15 +55,23 @@ export function hextoString(hex) {
     return out;
 }
 
-export function base64DecodeFromString(string64) {
-    return new Base64().decodeToByteArray(string64);
-}
-
 export function byteArray2hexStr(byteArray) {
     let str = '';
 
     for (let i = 0; i < (byteArray.length); i++)
         str += byte2hexStr(byteArray[i]);
-        
+
     return str;
 }
+
+export function base64DecodeFromString(string64) {
+    return new Base64().decodeToByteArray(string64);
+}
+
+export function base64EncodeToString(bytes) {
+    const b = new Base64();
+    const string64 = b.encodeIgnoreUtf8(bytes);
+
+    return string64
+}
+

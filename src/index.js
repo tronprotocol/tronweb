@@ -1,6 +1,5 @@
 import providers from 'lib/providers';
 import utils from 'utils';
-import axios from 'axios';
 import BigNumber from 'bignumber.js';
 import EventEmitter from 'eventemitter3';
 
@@ -13,6 +12,9 @@ import { keccak256 } from 'js-sha3';
 export default class TronWeb extends EventEmitter {
     static providers = providers;
     static BigNumber = BigNumber;
+    static TransactionBuilder = TransactionBuilder;
+    static Trx = Trx;
+    static Contract = Contract;
     
     constructor(fullNode, solidityNode, eventServer = false, privateKey = false) {
         super();
@@ -285,26 +287,54 @@ export default class TronWeb extends EventEmitter {
                 return TronWeb.fromUtf8(val);
         }
 
-        return TronWeb.fromDecimal(val);
+        let result = TronWeb.fromDecimal(val);
+        if (result === '0xNaN') {
+            throw new Error('The passed value is not convertible to a hex string');
+        } else {
+            return result;
+        }
     }
 
     static toUtf8(hex) {
-        hex = hex.replace(/^0x/,'');
-        return Buffer.from(hex, 'hex').toString('utf8');
+        if (utils.isHex(hex)) {
+            hex = hex.replace(/^0x/, '');
+            return Buffer.from(hex, 'hex').toString('utf8');
+        } else {
+            throw new Error('The passed value is not a valid hex string');
+        }
     }
 
     static fromUtf8(string) {
+        if (!utils.isString(string)) {
+            throw new Error('The passed value is not a valid utf-8 string')
+        }
         return '0x' + Buffer.from(string, 'utf8').toString('hex');
     }
 
     static toAscii(hex) {
-        hex = hex.replace(/^0x/,'');
-        return Buffer.from(hex, 'hex').toString('ascii');
+        if (utils.isHex(hex)) {
+            let str = "";
+            let i = 0, l = hex.length;
+            if (hex.substring(0, 2) === '0x') {
+                i = 2;
+            }
+            for (; i < l; i+=2) {
+                let code = parseInt(hex.substr(i, 2), 16);
+                str += String.fromCharCode(code);
+            }
+            return str;
+        } else {
+            throw new Error('The passed value is not a valid hex string');
+        }
     }
 
     static fromAscii(string, padding) {
+        if (!utils.isString(string)) {
+            throw new Error('The passed value is not a valid utf-8 string')
+        }
         return '0x' + Buffer.from(string, 'ascii').toString('hex').padEnd(padding, '0');
     }
+
 
     static toDecimal(value) {
         return TronWeb.toBigNumber(value).toNumber();
@@ -331,7 +361,7 @@ export default class TronWeb extends EventEmitter {
         if(utils.isBigNumber(amount))
             return amount;
 
-        if(utils.isString(amount) && (amount.indexOf('0x') === 0 || amount.indexOf('-0x') === 0))
+        if(utils.isString(amount) && /^(-|)0x/.test(amount))
             return new BigNumber(amount.replace('0x', ''), 16);
 
         return new BigNumber(amount.toString(10), 10);
@@ -343,14 +373,21 @@ export default class TronWeb extends EventEmitter {
 
         // Convert HEX to Base58
         if(address.length === 42) {
-            return TronWeb.isAddress(
-                utils.crypto.getBase58CheckAddress(
-                    utils.code.hexStr2byteArray(address)
-                )
-            );
+            try {
+                return TronWeb.isAddress(
+                    utils.crypto.getBase58CheckAddress(
+                        utils.code.hexStr2byteArray(address) // it throws an error if the address starts with 0x
+                    )
+                );
+            } catch(err) {
+                return false;
+            }
         }
-
-        return utils.crypto.isAddressValid(address);
+        try {
+            return utils.crypto.isAddressValid(address);
+        } catch(err) {
+            return false;
+        }
     }
 
     static async createAccount(callback = false) {
