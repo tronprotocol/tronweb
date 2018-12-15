@@ -1,3 +1,5 @@
+<img src="https://raw.githubusercontent.com/sullof/tron-web/add-logo/assets/TronWeb-logo.png" width="400"/>
+
 <p align="center">
   <a href="https://discord.gg/GsRgsTD">
     <img src="https://img.shields.io/badge/chat-on%20discord-brightgreen.svg">
