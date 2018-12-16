@@ -1,4 +1,6 @@
-<img src="https://raw.githubusercontent.com/sullof/tron-web/add-logo/assets/TronWeb-logo.png" width="400"/>
+<h1 align="center">
+  <img align="center" src="https://raw.githubusercontent.com/sullof/tron-web/add-logo/assets/TronWeb-logo.png" width="400"/>
+</h1>
 
 <p align="center">
   <a href="https://discord.gg/GsRgsTD">
