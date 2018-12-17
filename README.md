@@ -36,27 +36,36 @@ TronWeb aims to deliver a unified, seamless development experience influenced by
 
 You can access either version specifically from the `dist/` folder.
 
-TronWeb is also compatible with frontend frameworks such as Angular, React and Vue.
+TronWeb is also compatible with frontend frameworks such as:
+- Angular 
+- React
+- Vue.
 
 You can also ship TronWeb in a Chrome extension.
 
 ## Installation
 
+### Node.js
+```bash
+> npm install tronweb
 ```
-npm install tronweb
+
+### Yarn
+```bash
+> yarn add tronweb
 ```
 
 ## Example
 
 To look at the examples, first clone this repo, install the dependencies and run the example:
+```bash
+> git clone https://github.com/tronprotocol/tron-web.git
+> cd tron-web
+> yarn
+> yarn build -d
+> yarn example
 ```
-git clone https://github.com/tronprotocol/tron-web.git
-cd tron-web
-yarn
-yarn build -d
-yarn example
-```
-The example is at `examples/server/index.js`.
+More samples and snippets are available at [examples](examples).
 
 ## TRON provides a private network to test with
 
@@ -67,7 +76,7 @@ The example is at `examples/server/index.js`.
 
 * You can also set up your own private network, but you need to solve cross-domain CORS. The following example in Node reads from a full node listening on 16667 and a solidity node listening on 16668, and exposes the ports 8090 and 8091 with the needed headers.
 
-```
+```javascript
 var express = require('express');
 var proxy = require('http-proxy-middleware');
 
@@ -129,14 +138,16 @@ const tronWeb = new TronWeb(
     privateKey
 );
 ```
-#### A full example:
+
+### A full example:
 ```js
 const TronWeb = require('tronweb')
 
-const HttpProvider = TronWeb.providers.HttpProvider; // This provider is optional, you can just use a url for the nodes instead
+// This provider is optional, you can just use a url for the nodes instead
+const HttpProvider = TronWeb.providers.HttpProvider;
 const fullNode = new HttpProvider('https://api.trongrid.io'); // Full node http endpoint
 const solidityNode = new HttpProvider('https://api.trongrid.io'); // Solidity node http endpoint
-const eventServer = 'https://api.trongrid.io/'; // Contract events http endpoint
+const eventServer = new HttpProvider('https://api.trongrid.io'); // Contract events http endpoint
 
 const privateKey = 'da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0';
 
@@ -177,4 +188,5 @@ getBalance();
 ```
 #### Note:
 
-For testing TronWeb API functions, it would be best to setup a private network on your local machine using the <a href="https://developers.tron.network/docs/getting-started-1" target="_blank">TRON Docker Quickstart guide</a>. The Docker guide sets up a Full Node, Solidity Node, and Event Server on your machine. You can then deploy smart contracts on your network and interact with them via TronWeb. If you wish to test TronWeb with other users, it would be best to deploy your contracts/DApps on the Shasta test network and interact from there.  
+For testing TronWeb API functions, it would be best to setup a private network on your local machine using the <a href="https://developers.tron.network/docs/getting-started-1" target="_blank">TRON Docker Quickstart guide</a>. The Docker guide sets up a Full Node, Solidity Node, and Event Server on your machine. 
+You can then deploy smart contracts on your network and interact with them via TronWeb. If you wish to test TronWeb with other users, it would be best to deploy your contracts/DApps on the Shasta test network and interact from there.  
