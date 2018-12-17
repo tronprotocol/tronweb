@@ -65,7 +65,7 @@ To look at the examples, first clone this repo, install the dependencies and run
 > yarn build -d
 > yarn example
 ```
-More samples and snippets are available at [examples](examples).
+You can find more examples in the [examples](examples) directory.
 
 ## TRON provides a private network to test with
 
