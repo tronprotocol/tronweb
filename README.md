@@ -34,7 +34,7 @@ TronWeb aims to deliver a unified, seamless development experience influenced by
 - Version built for Node.js v6 and above
 - Version built for browsers with more than 0.25% market share
 
-You can access either version specifically from the `dist/` folder.
+You can access either version specifically from the [dist](dist) folder.
 
 TronWeb is also compatible with frontend frameworks such as:
 - Angular 
