@@ -312,12 +312,14 @@ export default class TransactionBuilder {
         const userFeePercentage = options.userFeePercentage || options.consume_user_resource_percent || 0;
         const originEnergyLimit = options.originEnergyLimit || options.origin_energy_limit || 10_000_000;
         const callValue = options.callValue || options.call_value || 0;
+        const tokenValue = options.tokenValue || options.token_value;
+        const tokenId = options.tokenId || options.token_id;
 
         let {
             abi = false,
             bytecode = false,
             parameters = [],
-            name = "",
+            name = ""
         } = options;
 
 
@@ -369,6 +371,12 @@ export default class TransactionBuilder {
             }
         );
 
+        if(tokenValue && !utils.isInteger(tokenValue) || tokenValue < 0)
+            return callback('Invalid options.tokenValue provided');
+
+        if(tokenId && !utils.isInteger(tokenId) || tokenValue < 0)
+            return callback('Invalid options.tokenValue provided');
+
         if(typeof constructorParams !== 'undefined' && constructorParams) {
             const abiCoder = new Ethers.utils.AbiCoder();
             const types = [];
@@ -399,7 +407,7 @@ export default class TransactionBuilder {
             }
         } else parameters = '';
 
-        this.tronWeb.fullNode.request('wallet/deploycontract', {
+        const args = {
             owner_address: this.tronWeb.address.toHex(issuerAddress),
             fee_limit: parseInt(feeLimit),
             call_value: parseInt(callValue),
@@ -409,7 +417,15 @@ export default class TransactionBuilder {
             bytecode,
             parameter: parameters,
             name
-        }, 'post').then(transaction => {
+        }
+
+        // tokenValue and tokenId can cause errors if provided when the trx10 proposal has not been approved yet. So we set them only if they are passed to the method.
+        if (tokenValue)
+            args.token_value = tokenValue
+        if (tokenId)
+            args.token_id = tokenId
+
+        this.tronWeb.fullNode.request('wallet/deploycontract', args, 'post').then(transaction => {
             if(transaction.Error)
                 return callback(transaction.Error);
 
