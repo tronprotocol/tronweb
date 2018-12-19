@@ -958,23 +958,6 @@ export default class Trx {
             callback(null, proposals);
         }).catch(err => callback(err));
     }
-/*
-    this.tronWeb.fullNode.request('wallet/proposalcreate', {
-    owner_address: this.tronWeb.address.toHex(issuerAddress),
-    parameters: parameters
-}, 'post').then(transaction => {
-    if(transaction.Error)
-        return callback(transaction.Error);
-
-    if(transaction.result && transaction.result.message) {
-        return callback(
-            this.tronWeb.toUtf8(transaction.result.message)
-        );
-    }
-
-    callback(null, transaction);
-}).catch(err => callback(err));
-    */
 
     /**
      * Lists all parameters available for network modification proposals.
@@ -1056,4 +1039,17 @@ export default class Trx {
             callback(null, exchanges);
         }).catch(err => callback(err));
     }
+
+    /**
+     * Get info about thre node
+     */
+    getNodeInfo(callback = false) {
+        if(!callback)
+            return this.injectPromise(this.getNodeInfo);
+
+        this.tronWeb.fullNode.request('wallet/getnodeinfo', {}, 'post').then(({ exchanges = [] }) => {
+            callback(null, exchanges);
+        }, 'post').catch(err => callback(err));
+    }
+
 };
