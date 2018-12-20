@@ -56,6 +56,8 @@ const utils = {
     },
 
     isInteger(number) {
+        if (number === null)
+            return false
         return Number.isInteger(
             Number(number)
         );
