@@ -943,12 +943,18 @@ export default class TransactionBuilder {
     /**
      * Update userFeePercentage.
      */
-    updateSetting(ownerAddress = this.tronWeb.defaultAddress.hex,
-                  contractAddress = false,
-                  userFeePercentage = false,
-                  callback = false) {
+    updateSetting(contractAddress = false,
+        userFeePercentage = false,
+        ownerAddress = this.tronWeb.defaultAddress.hex,
+        callback = false) {
+
+        if(utils.isFunction(ownerAddress)) {
+            callback = ownerAddress;
+            ownerAddress = this.tronWeb.defaultAddress.hex;
+        }
+
         if(!callback)
-            return this.injectPromise(this.updateSetting, ownerAddress, contractAddress, userFeePercentage);
+            return this.injectPromise(this.updateSetting, contractAddress, userFeePercentage, ownerAddress);
 
         if(!this.tronWeb.isAddress(ownerAddress))
             return callback('Invalid ownerAddress provided');
@@ -960,8 +966,8 @@ export default class TransactionBuilder {
             return callback('Invalid options.userFeePercentage provided');
 
         this.tronWeb.fullNode.request('wallet/updatesetting', {
-            owner_address: ownerAddress,
-            contract_address: contractAddress,
+            owner_address: this.tronWeb.address.toHex(ownerAddress),
+            contract_address: this.tronWeb.address.toHex(contractAddress),
             consume_user_resource_percent: userFeePercentage
         }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
     }
@@ -969,12 +975,18 @@ export default class TransactionBuilder {
     /**
      * Update energy limit.
      */
-    updateEnergyLimit(ownerAddress = this.tronWeb.defaultAddress.hex,
-                  contractAddress = false,
-                  originEnergyLimit = false,
-                  callback = false) {
+    updateEnergyLimit(contractAddress = false,
+        originEnergyLimit = false,
+        ownerAddress = this.tronWeb.defaultAddress.hex,
+        callback = false) {
+
+        if(utils.isFunction(ownerAddress)) {
+            callback = ownerAddress;
+            ownerAddress = this.tronWeb.defaultAddress.hex;
+        }
+
         if(!callback)
-            return this.injectPromise(this.updateEnergyLimit, ownerAddress, contractAddress, originEnergyLimit);
+            return this.injectPromise(this.updateEnergyLimit, contractAddress, originEnergyLimit, ownerAddress);
 
         if(!this.tronWeb.isAddress(ownerAddress))
             return callback('Invalid ownerAddress provided');
@@ -986,8 +998,8 @@ export default class TransactionBuilder {
             return callback('Invalid options.originEnergyLimit provided');
 
         this.tronWeb.fullNode.request('wallet/updateenergylimit', {
-            owner_address: ownerAddress,
-            contract_address: contractAddress,
+            owner_address: this.tronWeb.address.toHex(ownerAddress),
+            contract_address: this.tronWeb.address.toHex(contractAddress),
             origin_energy_limit: originEnergyLimit
         }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
     }

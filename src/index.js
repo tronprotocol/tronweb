@@ -192,7 +192,7 @@ export default class TronWeb extends EventEmitter {
             return callback('Invalid size provided');
 
         if(size > 200) {
-            console.info('Defaulting to maximum accepted size: 200');
+            console.warn('Defaulting to maximum accepted size: 200');
             size = 200;
         }
 
