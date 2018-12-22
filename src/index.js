@@ -177,11 +177,6 @@ export default class TronWeb extends EventEmitter {
         if(!this.eventServer)
             callback('No event server configured');
 
-        if(size > 200) {
-            console.info('Defaulting to maximum accepted size: 200');
-            size = 200;
-        }
-
         const routeParams = [];
 
         if(!this.isAddress(contractAddress))
@@ -189,7 +184,21 @@ export default class TronWeb extends EventEmitter {
 
         if(eventName && !contractAddress)
             return callback('Usage of event name filtering requires a contract address');
-        
+
+        if (!utils.isInteger(sinceTimestamp))
+            return callback('Invalid sinceTimestamp provided');
+
+        if (!utils.isInteger(size))
+            return callback('Invalid size provided');
+
+        if(size > 200) {
+            console.warn('Defaulting to maximum accepted size: 200');
+            size = 200;
+        }
+
+        if (!utils.isInteger(page))
+            return callback('Invalid page provided');
+
         if(blockNumber && !eventName)
             return callback('Usage of block number filtering requires an event name');
 
