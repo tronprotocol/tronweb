@@ -13,7 +13,7 @@ describe('TronWeb.utils', function () {
 
             const tronWeb = tronWebBuilder.createInstance();
 
-            assert.isTrue(tronWeb.utils.isValidURL('https://some.example.com:8090/casa?qe=3'))
+            assert.isTrue(tronWeb.utils.isValidURL('https://some.example.com:9090/casa?qe=3'))
             assert.isTrue(tronWeb.utils.isValidURL('www.example.com/welcome'))
 
             assert.isFalse(tronWeb.utils.isValidURL('http:/some.example.com'))

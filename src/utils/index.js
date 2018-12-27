@@ -137,6 +137,10 @@ const utils = {
             res = padding + res;
 
         return res;
+    },
+
+    isNotNullOrUndefined(val) {
+        return val !== null && typeof val !== 'undefined';
     }
 }
 
