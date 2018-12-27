@@ -520,7 +520,8 @@ export default class TransactionBuilder {
             freeBandwidth = 0, // The creator's "donated" bandwidth for use by token holders
             freeBandwidthLimit = 0, // Out of `totalFreeBandwidth`, the amount each token holder get
             frozenAmount = 0,
-            frozenDuration = 0
+            frozenDuration = 0,
+            voteScore
         } = options;
 
         if(!utils.isString(name) || !name.length)
@@ -565,6 +566,9 @@ export default class TransactionBuilder {
         if(!this.tronWeb.isAddress(issuerAddress))
             return callback('Invalid issuer address provided');
 
+        if(utils.isNotNullOrUndefined(voteScore) && (!utils.isInteger(voteScore) || voteScore < 0))
+            return callback('voteScore must be a positive integer');
+
         this.tronWeb.fullNode.request('wallet/createassetissue', {
             owner_address: this.tronWeb.address.toHex(issuerAddress),
             name: this.tronWeb.fromUtf8(name),
@@ -574,6 +578,7 @@ export default class TransactionBuilder {
             total_supply: parseInt(totalSupply),
             trx_num: parseInt(trxRatio),
             num: parseInt(tokenRatio),
+            vote_score: parseInt(voteScore),
             start_time: parseInt(saleStart),
             end_time: parseInt(saleEnd),
             free_asset_net_limit: parseInt(freeBandwidth),

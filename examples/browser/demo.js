@@ -1,7 +1,7 @@
 const HttpProvider = TronWeb.providers.HttpProvider;
 
-const fullNode = new HttpProvider('https://api.trongrid.io:8090');
-const solidityNode = new HttpProvider('https://api.trongrid.io:8091');
+const fullNode = new HttpProvider('https://api.trongrid.io:9090');
+const solidityNode = new HttpProvider('https://api.trongrid.io:9090');
 const eventServer = 'https://api.trongrid.io/';
 const privateKey = 'da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0';
 

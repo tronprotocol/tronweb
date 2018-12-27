@@ -74,7 +74,7 @@ You can find more examples in the [examples](examples) directory.
 * Event Server - https://api.shasta.trongrid.io
 * Block Explorer - https://explorer.shasta.trongrid.io
 
-* You can also set up your own private network, but you need to solve cross-domain CORS. The following example in Node reads from a full node listening on 16667 and a solidity node listening on 16668, and exposes the ports 8090 and 8091 with the needed headers.
+* You can also set up your own private network, but you need to solve cross-domain CORS. The following example in Node reads from a full node listening on 16667 and a solidity node listening on 16668, and exposes the ports 9090 and 9090 with the needed headers.
 
 ```javascript
 var express = require('express');
@@ -93,7 +93,7 @@ fullnode.use('/', proxy({
   changeOrigin: true,
   onProxyRes
 }));
-fullnode.listen(8090);
+fullnode.listen(9090);
 
 var soliditynode = express();
 soliditynode.use('/', proxy({
@@ -102,7 +102,7 @@ soliditynode.use('/', proxy({
   onProxyRes,
   onError
 }));
-soliditynode.listen(8091);
+soliditynode.listen(9090);
 ```
 
 

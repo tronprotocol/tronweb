@@ -1052,4 +1052,39 @@ export default class Trx {
         }, 'post').catch(err => callback(err));
     }
 
+
+    getTokenListByName(tokenID = false, callback = false) {
+        if(!callback)
+            return this.injectPromise(this.getTokenListByName, tokenID);
+
+        if(!utils.isString(tokenID) || !tokenID.length)
+            return callback('Invalid token ID provided');
+
+        this.tronWeb.fullNode.request('wallet/getassetissuelistbyname', {
+            value: this.tronWeb.fromUtf8(tokenID)
+        }, 'post').then(token => {
+            if(!token.name)
+                return callback('Token does not exist');
+
+            callback(null, this.parseToken(token));
+        }).catch(err => callback(err));
+    }
+
+    getTokenByID(tokenID = false, callback = false) {
+        if(!callback)
+            return this.injectPromise(this.getTokenByID, tokenID);
+
+        if(!utils.isString(tokenID) || !tokenID.length)
+            return callback('Invalid token ID provided');
+
+        this.tronWeb.fullNode.request('wallet/getassetissuebyid', {
+            value: this.tronWeb.fromUtf8(tokenID)
+        }, 'post').then(token => {
+            if(!token.name)
+                return callback('Token does not exist');
+
+            callback(null, this.parseToken(token));
+        }).catch(err => callback(err));
+    }
+
 };
