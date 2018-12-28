@@ -754,8 +754,12 @@ export default class Trx {
      * @param options
      * @param callback
      */
-    async freezeBalance(amount = 0, duration = 3, resource = "BANDWIDTH", options = {}, callback = false)
-    {
+    async freezeBalance(amount = 0, duration = 3, resource = "BANDWIDTH", options = {}, receiverAddress = undefined, callback = false)
+{
+        if(utils.isFunction(receiverAddress)) {
+            callback = receiverAddress;
+            receiverAddress = undefined;
+        }
         if(utils.isFunction(duration)) {
             callback = duration;
             duration = 3;
@@ -775,7 +779,7 @@ export default class Trx {
             options = { privateKey: options };
 
         if(!callback)
-            return this.injectPromise(this.freezeBalance, amount, duration, resource, options);
+            return this.injectPromise(this.freezeBalance, amount, duration, resource, options, receiverAddress);
 
         if(![ 'BANDWIDTH', 'ENERGY' ].includes(resource))
             return callback('Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"');
@@ -797,7 +801,7 @@ export default class Trx {
 
         try {
             const address = options.privateKey ? this.tronWeb.address.fromPrivateKey(options.privateKey) : options.address;
-            const freezeBalance = await this.tronWeb.transactionBuilder.freezeBalance(amount, duration, resource, address);
+            const freezeBalance = await this.tronWeb.transactionBuilder.freezeBalance(amount, duration, resource, address, receiverAddress);
             const signedTransaction = await this.sign(freezeBalance, options.privateKey || undefined);
             const result = await this.sendRawTransaction(signedTransaction);
 
@@ -815,8 +819,13 @@ export default class Trx {
      * @param options
      * @param callback
      */
-    async unfreezeBalance(resource = "BANDWIDTH", options = {}, callback = false)
+    async unfreezeBalance(resource = "BANDWIDTH", options = {}, receiverAddress = undefined, callback = false)
     {
+        if(utils.isFunction(receiverAddress)) {
+            callback = receiverAddress;
+            receiverAddress = undefined;
+        }
+
         if(utils.isFunction(resource)) {
             callback = resource;
             resource = 'BANDWIDTH';
@@ -831,7 +840,7 @@ export default class Trx {
             options = { privateKey: options };
 
         if(!callback)
-            return this.injectPromise(this.unfreezeBalance, resource, options);
+            return this.injectPromise(this.unfreezeBalance, resource, options, receiverAddress);
 
         if(![ 'BANDWIDTH', 'ENERGY' ].includes(resource))
             return callback('Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"');
@@ -847,7 +856,7 @@ export default class Trx {
 
         try {
             const address = options.privateKey ? this.tronWeb.address.fromPrivateKey(options.privateKey) : options.address;
-            const unfreezeBalance = await this.tronWeb.transactionBuilder.unfreezeBalance(resource, address);
+            const unfreezeBalance = await this.tronWeb.transactionBuilder.unfreezeBalance(resource, address, receiverAddress);
             const signedTransaction = await this.sign(unfreezeBalance, options.privateKey || undefined);
             const result = await this.sendRawTransaction(signedTransaction);
 

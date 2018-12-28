@@ -120,8 +120,13 @@ export default class TransactionBuilder {
         }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
     }
 
-    freezeBalance(amount = 0, duration = 3, resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, callback = false)
+    freezeBalance(amount = 0, duration = 3, resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, receiverAddress = undefined, callback = false)
     {
+        if(utils.isFunction(receiverAddress)) {
+            callback = receiverAddress;
+            receiverAddress = undefined;
+        }
+
         if(utils.isFunction(address)) {
             callback = address;
             address = this.tronWeb.defaultAddress.hex;
@@ -138,7 +143,7 @@ export default class TransactionBuilder {
         }
 
         if(!callback)
-            return this.injectPromise(this.freezeBalance, amount, duration, resource, address);
+            return this.injectPromise(this.freezeBalance, amount, duration, resource, address, receiverAddress);
 
         if(![ 'BANDWIDTH', 'ENERGY' ].includes(resource))
             return callback('Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"');
@@ -152,16 +157,30 @@ export default class TransactionBuilder {
         if(!this.tronWeb.isAddress(address))
             return callback('Invalid address provided');
 
-        this.tronWeb.fullNode.request('wallet/freezebalance', {
+        if (utils.isNotNullOrUndefined(receiverAddress) && !this.tronWeb.isAddress(receiverAddress))
+            return callback('Invalid receiver address provided');
+
+        const data = {
             owner_address: this.tronWeb.address.toHex(address),
             frozen_balance: parseInt(amount),
             frozen_duration: parseInt(duration),
             resource: resource
-        }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        }
+
+        if (utils.isNotNullOrUndefined(receiverAddress)) {
+            data.receiver_address = receiverAddress
+        }
+
+        this.tronWeb.fullNode.request('wallet/freezebalance', data, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
     }
 
-    unfreezeBalance(resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, callback = false)
+    unfreezeBalance(resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, receiverAddress = undefined, callback = false)
     {
+        if(utils.isFunction(receiverAddress)) {
+            callback = receiverAddress;
+            receiverAddress = undefined;
+        }
+
         if(utils.isFunction(address)) {
             callback = address;
             address = this.tronWeb.defaultAddress.hex;
@@ -173,7 +192,7 @@ export default class TransactionBuilder {
         }
 
         if(!callback)
-            return this.injectPromise(this.unfreezeBalance, resource, address);
+            return this.injectPromise(this.unfreezeBalance, resource, address, receiverAddress);
 
         if(![ 'BANDWIDTH', 'ENERGY' ].includes(resource))
             return callback('Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"');
@@ -181,10 +200,19 @@ export default class TransactionBuilder {
         if(!this.tronWeb.isAddress(address))
             return callback('Invalid address provided');
 
-        this.tronWeb.fullNode.request('wallet/unfreezebalance', {
+        if (utils.isNotNullOrUndefined(receiverAddress) && !this.tronWeb.isAddress(receiverAddress))
+            return callback('Invalid receiver address provided');
+
+        const data = {
             owner_address: this.tronWeb.address.toHex(address),
             resource: resource
-        }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        }
+
+        if (utils.isNotNullOrUndefined(receiverAddress)) {
+            data.receiver_address = receiverAddress
+        }
+
+        this.tronWeb.fullNode.request('wallet/unfreezebalance', data, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
     }
 
     withdrawBlockRewards(address = this.tronWeb.defaultAddress.hex, callback = false) {
