@@ -168,7 +168,7 @@ export default class TransactionBuilder {
         }
 
         if (utils.isNotNullOrUndefined(receiverAddress)) {
-            data.receiver_address = receiverAddress
+            data.receiver_address = this.tronWeb.address.toHex(receiverAddress)
         }
 
         this.tronWeb.fullNode.request('wallet/freezebalance', data, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
@@ -209,7 +209,7 @@ export default class TransactionBuilder {
         }
 
         if (utils.isNotNullOrUndefined(receiverAddress)) {
-            data.receiver_address = receiverAddress
+            data.receiver_address = this.tronWeb.address.toHex(receiverAddress)
         }
 
         this.tronWeb.fullNode.request('wallet/unfreezebalance', data, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
