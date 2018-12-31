@@ -15,6 +15,24 @@ const decodeOutput = (abi, output) => {
     return utils.abi.decodeParams(names, types, output);
 };
 
+const isReverted = (tronWeb, result) => {
+    const len = result.length
+    if(len === 0 || len % 64 === 8) {
+        let msg = 'The call have been reverted or have thrown an error.'
+        if(len !== 0) {
+            msg += ' Error message: '
+            let msg2 = ''
+            let chunk = result.substring(8)
+            for(let i = 0; i < len - 8; i += 64) {
+                msg2 += tronWeb.toUtf8(chunk.substring(i, i + 64))
+            }
+            msg += msg2.replace(/(\u0000|\u000b|\f)+/g,' ').replace(/ +/g,' ').replace(/ +$/g,'');
+        }
+        return msg
+    }
+    return false;
+}
+
 export default class Method {
     constructor(contract, abi) {
         this.tronWeb = contract.tronWeb;
@@ -108,6 +126,14 @@ export default class Method {
                     return callback('Failed to execute');
 
                 try {
+
+                    // console.log(transaction)
+
+                    let errMsg = isReverted(this.tronWeb, transaction.constant_result[0])
+                    if (utils.isString(errMsg)) {
+                        return callback(errMsg);
+                    }
+
                     let output = decodeOutput(this.outputs, '0x' + transaction.constant_result[0]);
 
                     if (output.length === 1)
@@ -161,6 +187,7 @@ export default class Method {
 
         try {
             const address = privateKey ? this.tronWeb.address.fromPrivateKey(privateKey) : this.tronWeb.defaultAddress.base58;
+
             const transaction = await this.tronWeb.transactionBuilder.triggerSmartContract(
                 this.contract.address,
                 this.functionSelector,
@@ -179,7 +206,7 @@ export default class Method {
             if (!signedTransaction.signature) {
                 if (!privateKey)
                     return callback('Transaction was not signed properly');
-                
+
                 return callback('Invalid private key provided');
             }
 
@@ -207,6 +234,8 @@ export default class Method {
                     }, 3000);
                 }
 
+                console.log(output)
+
                 if (output.result && output.result == 'FAILED') {
                     return callback({
                         error: this.tronWeb.toUtf8(output.resMessage),
@@ -221,6 +250,11 @@ export default class Method {
                         transaction: signedTransaction,
                         output
                     });
+                }
+
+                let errMsg = isReverted(this.tronWeb, output.contractResult[0])
+                if (utils.isString(errMsg)) {
+                    return callback(errMsg);
                 }
 
                 let decoded = decodeOutput(this.outputs, '0x' + output.contractResult[0]);
