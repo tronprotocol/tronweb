@@ -69,14 +69,13 @@ describe('#contract.method', function () {
         it("should revert if call getOwner(2)", async function () {
             await assertThrow(testRevert.getOwner(2).call(),
                 null,
-                'The call have been reverted or have thrown an error. Error message:  Wrong check'
+                ['The call has been reverted or has thrown an error.', 'Wrong check']
             )
         })
 
         it("should revert if call getOwner2()", async function () {
             await assertThrow(testRevert.getOwner2(2).call(),
-                null ,
-                'The call have been reverted or have thrown an error.'
+                'The call has been reverted or has thrown an error.'
             )
 
         })
