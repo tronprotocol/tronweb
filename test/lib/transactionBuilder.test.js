@@ -849,23 +849,23 @@ describe('TronWeb.transactionBuilder', function () {
 
     });
 
-    describe("#applyForSR", async function () {
-
-        let url = 'https://xtron.network';
-
-        it('should allow accounts[0] to apply for SR', async function () {
-
-
-            const transaction = await tronWeb.transactionBuilder.applyForSR(accounts.b58[0], url);
-            const parameter = txPars(transaction);
-
-            assert.equal(parameter.value.owner_address, accounts.hex[0]);
-            await assertEqualHex(parameter.value.url, url);
-            assert.equal(parameter.type_url, 'type.googleapis.com/protocol.WitnessCreateContract');
-        });
-
-        // TODO add invalid params throws
-    });
+    // describe("#applyForSR", async function () {
+    //
+    //     let url = 'https://xtron.network';
+    //
+    //     it('should allow accounts[0] to apply for SR', async function () {
+    //
+    //
+    //         const transaction = await tronWeb.transactionBuilder.applyForSR(accounts.b58[0], url);
+    //         const parameter = txPars(transaction);
+    //
+    //         assert.equal(parameter.value.owner_address, accounts.hex[0]);
+    //         await assertEqualHex(parameter.value.url, url);
+    //         assert.equal(parameter.type_url, 'type.googleapis.com/protocol.WitnessCreateContract');
+    //     });
+    //
+    //     // TODO add invalid params throws
+    // });
 
 
     describe("#freezeBalance", async function () {
@@ -893,32 +893,32 @@ describe('TronWeb.transactionBuilder', function () {
     });
 
 
-    describe("#vote", async function () {
-
-        let url = 'https://xtron.network';
-        // let witnesses;
-
-        before(async function () {
-
-            await broadcaster(tronWeb.transactionBuilder.applyForSR(accounts.b58[0], url), accounts.pks[0])
-            await broadcaster(tronWeb.transactionBuilder.freezeBalance(100e6, 3, 'BANDWIDTH', accounts.b58[1]), accounts.pks[1])
-        })
-
-
-        it('should allows accounts[1] to vote for accounts[0] as SR', async function () {
-            let votes = {}
-            votes[accounts.hex[0]] = 5
-
-            const transaction = await tronWeb.transactionBuilder.vote(votes, accounts.b58[1])
-            const parameter = txPars(transaction);
-
-            assert.equal(parameter.value.owner_address, accounts.hex[1]);
-            assert.equal(parameter.value.votes[0].vote_address, accounts.hex[0]);
-            assert.equal(parameter.value.votes[0].vote_count, 5);
-            assert.equal(parameter.type_url, 'type.googleapis.com/protocol.VoteWitnessContract');
-        })
-
-    });
+    // describe("#vote", async function () {
+    //
+    //     let url = 'https://xtron.network';
+    //     // let witnesses;
+    //
+    //     before(async function () {
+    //
+    //         await broadcaster(tronWeb.transactionBuilder.applyForSR(accounts.b58[0], url), accounts.pks[0])
+    //         await broadcaster(tronWeb.transactionBuilder.freezeBalance(100e6, 3, 'BANDWIDTH', accounts.b58[1]), accounts.pks[1])
+    //     })
+    //
+    //
+    //     it('should allows accounts[1] to vote for accounts[0] as SR', async function () {
+    //         let votes = {}
+    //         votes[accounts.hex[0]] = 5
+    //
+    //         const transaction = await tronWeb.transactionBuilder.vote(votes, accounts.b58[1])
+    //         const parameter = txPars(transaction);
+    //
+    //         assert.equal(parameter.value.owner_address, accounts.hex[1]);
+    //         assert.equal(parameter.value.votes[0].vote_address, accounts.hex[0]);
+    //         assert.equal(parameter.value.votes[0].vote_count, 5);
+    //         assert.equal(parameter.type_url, 'type.googleapis.com/protocol.VoteWitnessContract');
+    //     })
+    //
+    // });
 
 
     describe("#withdrawBlockRewards", async function () {

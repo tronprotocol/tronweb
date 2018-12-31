@@ -1,11 +1,11 @@
-const {execSync} = require('child_process');
+const {execSync, spawn} = require('child_process')
 
 const branch = execSync('git name-rev --name-only HEAD').toString().split('\n')[0];
 let unpushed;
 
 try {
     unpushed = execSync(`git log origin/${ branch }..${ branch } --name-status`).toString().split('\n');
-} catch(ex) {
+} catch (ex) {
     // the branch hasn't ever been pushed
     unpushed = execSync(`git log HEAD...origin --name-status`).toString().split('\n');
 }
@@ -18,13 +18,21 @@ if(!isDistTracked) {
     process.exit(1);
 }
 
-try {
-    execSync('yarn test:node');
-} catch(ex) {
-    if(ex.stdout)
-        console.log(ex.stdout.toString());
+let errors = false
+const test = spawn('yarn', ['test:node'])
 
-    console.log('Tests have failed. Please verify tests are passing before pushing');
-    process.exit(1);
-}
+test.stdout.on('data', function (data) {
+    process.stdout.write(data.toString())
+})
 
+test.stderr.on('data', function (data) {
+    errors = true
+    console.log('stderr: ' + data.toString())
+})
+
+test.on('exit', function (code) {
+    if(errors) {
+        console.log('Tests have failed. Please verify tests are passing before pushing');
+        process.exit(1);
+    }
+})

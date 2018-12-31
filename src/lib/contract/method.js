@@ -108,6 +108,22 @@ export default class Method {
                     return callback('Failed to execute');
 
                 try {
+
+                    const len = transaction.constant_result[0].length
+                    if(len === 0 || len % 64 === 8) {
+                        let msg = 'The call has been reverted or has thrown an error.'
+                        if(len !== 0) {
+                            msg += ' Error message: '
+                            let msg2 = ''
+                            let chunk = transaction.constant_result[0].substring(8)
+                            for(let i = 0; i < len - 8; i += 64) {
+                                msg2 += this.tronWeb.toUtf8(chunk.substring(i, i + 64))
+                            }
+                            msg += msg2.replace(/(\u0000|\u000b|\f)+/g,' ').replace(/ +/g,' ').replace(/\s+$/g,'');
+                        }
+                        return callback(msg)
+                    }
+
                     let output = decodeOutput(this.outputs, '0x' + transaction.constant_result[0]);
 
                     if (output.length === 1)
@@ -179,7 +195,7 @@ export default class Method {
             if (!signedTransaction.signature) {
                 if (!privateKey)
                     return callback('Transaction was not signed properly');
-                
+
                 return callback('Invalid private key provided');
             }
 
