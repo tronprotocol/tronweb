@@ -1056,8 +1056,8 @@ export default class Trx {
         if(!callback)
             return this.injectPromise(this.getNodeInfo);
 
-        this.tronWeb.fullNode.request('wallet/getnodeinfo', {}, 'post').then(({ exchanges = [] }) => {
-            callback(null, exchanges);
+        this.tronWeb.fullNode.request('wallet/getnodeinfo', {}, 'post').then(info => {
+            callback(null, info);
         }, 'post').catch(err => callback(err));
     }
 
