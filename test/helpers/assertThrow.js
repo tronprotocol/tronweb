@@ -16,10 +16,10 @@ module.exports = async function (func, expectedError, expectedErrorContains) {
         if(expectedError)
             assert.equal(errMsg, expectedError);
         else if(expectedErrorContains) {
-            if (!Array.isArray(expectedErrorContains)) {
+            if(!Array.isArray(expectedErrorContains)) {
                 expectedErrorContains = [expectedErrorContains]
             }
-            for (let expected of expectedErrorContains) {
+            for(let expected of expectedErrorContains) {
                 assert.notEqual(errMsg.indexOf(expected), -1)
             }
         }

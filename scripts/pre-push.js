@@ -1,4 +1,5 @@
 const {execSync, spawn} = require('child_process')
+const chalk = require('chalk')
 
 const branch = execSync('git name-rev --name-only HEAD').toString().split('\n')[0];
 let unpushed;
@@ -14,7 +15,7 @@ const isSourceChanged = unpushed.some(logLine => logLine.includes('src/'));
 const isDistTracked = isSourceChanged ? unpushed.some(logLine => logLine.includes('dist/TronWeb.js')) : true;
 
 if(!isDistTracked) {
-    console.log('Please run: yarn build');
+    console.log(chalk.red('Please run: yarn build'));
     process.exit(1);
 }
 
@@ -32,7 +33,7 @@ test.stderr.on('data', function (data) {
 
 test.on('exit', function (code) {
     if(errors) {
-        console.log('Tests have failed. Please verify tests are passing before pushing');
+        console.log(chalk.red('Tests have failed. Please verify tests are passing before pushing'));
         process.exit(1);
     }
 })

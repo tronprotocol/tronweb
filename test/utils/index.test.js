@@ -62,7 +62,7 @@ describe('TronWeb.utils', function () {
             const tronWeb = tronWebBuilder.createInstance();
 
             assert.isTrue(tronWeb.utils.isBoolean(true));
-            assert.isTrue(tronWeb.utils.isBoolean('a'==[]));
+            assert.isTrue(tronWeb.utils.isBoolean('a' == []));
 
             assert.isFalse(tronWeb.utils.isBoolean({}));
             assert.isFalse(tronWeb.utils.isBoolean("json"));
@@ -109,7 +109,8 @@ describe('TronWeb.utils', function () {
             const tronWeb = tronWebBuilder.createInstance();
 
             assert.isTrue(tronWeb.utils.isFunction(new Function()));
-            assert.isTrue(tronWeb.utils.isFunction(()=>{}));
+            assert.isTrue(tronWeb.utils.isFunction(() => {
+            }));
             assert.isTrue(tronWeb.utils.isFunction(tronWeb.utils.isFunction));
 
             assert.isFalse(tronWeb.utils.isFunction({function: new Function}));
@@ -171,10 +172,10 @@ describe('TronWeb.utils', function () {
         it('should verify that an object has a specific property', function () {
             const tronWeb = tronWebBuilder.createInstance();
 
-            assert.isTrue(tronWeb.utils.hasProperty({p:2}, 'p'));
-            assert.isFalse(tronWeb.utils.hasProperty([{p:2}], 'p'));
+            assert.isTrue(tronWeb.utils.hasProperty({p: 2}, 'p'));
+            assert.isFalse(tronWeb.utils.hasProperty([{p: 2}], 'p'));
 
-            assert.isFalse(tronWeb.utils.hasProperty({a:2},'p'));
+            assert.isFalse(tronWeb.utils.hasProperty({a: 2}, 'p'));
 
         })
 
@@ -185,9 +186,9 @@ describe('TronWeb.utils', function () {
         it('should verify that an object has some specific properties', function () {
             const tronWeb = tronWebBuilder.createInstance();
 
-            assert.isTrue(tronWeb.utils.hasProperties({p:2, s: 2}, 'p', 's'));
+            assert.isTrue(tronWeb.utils.hasProperties({p: 2, s: 2}, 'p', 's'));
 
-            assert.isFalse(tronWeb.utils.hasProperties({p:2, s: 2}, 'p', 'q'));
+            assert.isFalse(tronWeb.utils.hasProperties({p: 2, s: 2}, 'p', 'q'));
 
         })
 
@@ -220,7 +221,7 @@ describe('TronWeb.utils', function () {
             }
 
             const mapped = tronWeb.utils.mapEvent(event)
-            for (let key in mapped) {
+            for(let key in mapped) {
                 assert.equal(mapped[key], expected[key])
             }
 

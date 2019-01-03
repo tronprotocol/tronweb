@@ -120,8 +120,7 @@ export default class TransactionBuilder {
         }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
     }
 
-    freezeBalance(amount = 0, duration = 3, resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, receiverAddress = undefined, callback = false)
-    {
+    freezeBalance(amount = 0, duration = 3, resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, receiverAddress = undefined, callback = false) {
         if(utils.isFunction(receiverAddress)) {
             callback = receiverAddress;
             receiverAddress = undefined;
@@ -145,7 +144,7 @@ export default class TransactionBuilder {
         if(!callback)
             return this.injectPromise(this.freezeBalance, amount, duration, resource, address, receiverAddress);
 
-        if(![ 'BANDWIDTH', 'ENERGY' ].includes(resource))
+        if(!['BANDWIDTH', 'ENERGY'].includes(resource))
             return callback('Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"');
 
         if(!utils.isInteger(amount) || amount <= 0)
@@ -157,7 +156,7 @@ export default class TransactionBuilder {
         if(!this.tronWeb.isAddress(address))
             return callback('Invalid address provided');
 
-        if (utils.isNotNullOrUndefined(receiverAddress) && !this.tronWeb.isAddress(receiverAddress))
+        if(utils.isNotNullOrUndefined(receiverAddress) && !this.tronWeb.isAddress(receiverAddress))
             return callback('Invalid receiver address provided');
 
         const data = {
@@ -167,15 +166,14 @@ export default class TransactionBuilder {
             resource: resource
         }
 
-        if (utils.isNotNullOrUndefined(receiverAddress)) {
+        if(utils.isNotNullOrUndefined(receiverAddress)) {
             data.receiver_address = this.tronWeb.address.toHex(receiverAddress)
         }
 
         this.tronWeb.fullNode.request('wallet/freezebalance', data, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
     }
 
-    unfreezeBalance(resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, receiverAddress = undefined, callback = false)
-    {
+    unfreezeBalance(resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, receiverAddress = undefined, callback = false) {
         if(utils.isFunction(receiverAddress)) {
             callback = receiverAddress;
             receiverAddress = undefined;
@@ -194,13 +192,13 @@ export default class TransactionBuilder {
         if(!callback)
             return this.injectPromise(this.unfreezeBalance, resource, address, receiverAddress);
 
-        if(![ 'BANDWIDTH', 'ENERGY' ].includes(resource))
+        if(!['BANDWIDTH', 'ENERGY'].includes(resource))
             return callback('Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"');
 
         if(!this.tronWeb.isAddress(address))
             return callback('Invalid address provided');
 
-        if (utils.isNotNullOrUndefined(receiverAddress) && !this.tronWeb.isAddress(receiverAddress))
+        if(utils.isNotNullOrUndefined(receiverAddress) && !this.tronWeb.isAddress(receiverAddress))
             return callback('Invalid receiver address provided');
 
         const data = {
@@ -208,7 +206,7 @@ export default class TransactionBuilder {
             resource: resource
         }
 
-        if (utils.isNotNullOrUndefined(receiverAddress)) {
+        if(utils.isNotNullOrUndefined(receiverAddress)) {
             data.receiver_address = this.tronWeb.address.toHex(receiverAddress)
         }
 
@@ -271,7 +269,7 @@ export default class TransactionBuilder {
 
         let invalid = false;
 
-        votes = Object.entries(votes).map(([ srAddress, voteCount ]) => {
+        votes = Object.entries(votes).map(([srAddress, voteCount]) => {
             if(invalid)
                 return;
 
@@ -327,7 +325,7 @@ export default class TransactionBuilder {
         if(abi && utils.isString(abi)) {
             try {
                 abi = JSON.parse(abi);
-            } catch{
+            } catch {
                 return callback('Invalid options.abi provided');
             }
         }
@@ -422,9 +420,9 @@ export default class TransactionBuilder {
         }
 
         // tokenValue and tokenId can cause errors if provided when the trx10 proposal has not been approved yet. So we set them only if they are passed to the method.
-        if (tokenValue)
+        if(tokenValue)
             args.token_value = tokenValue
-        if (tokenId)
+        if(tokenId)
             args.token_id = tokenId
 
         this.tronWeb.fullNode.request('wallet/deploycontract', args, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
@@ -497,7 +495,7 @@ export default class TransactionBuilder {
             const values = [];
 
             for(let i = 0; i < parameters.length; i++) {
-                let { type, value } = parameters[i];
+                let {type, value} = parameters[i];
 
                 if(!type || !utils.isString(type) || !type.length)
                     return callback('Invalid parameter type provided: ' + type);
@@ -618,8 +616,7 @@ export default class TransactionBuilder {
         }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
     }
 
-    updateAccount(accountName = false, address = this.tronWeb.defaultAddress.hex, callback = false)
-    {
+    updateAccount(accountName = false, address = this.tronWeb.defaultAddress.hex, callback = false) {
         if(utils.isFunction(address)) {
             callback = address;
             address = this.tronWeb.defaultAddress.hex;
@@ -629,7 +626,7 @@ export default class TransactionBuilder {
             return this.injectPromise(this.updateAccount, accountName, address);
         }
 
-        if (!utils.isString(accountName) || !accountName.length) {
+        if(!utils.isString(accountName) || !accountName.length) {
             return callback('Name must be a string');
         }
 
@@ -723,7 +720,7 @@ export default class TransactionBuilder {
         if(!utils.isArray(parameters))
             parameters = [parameters];
 
-        for (let parameter of parameters) {
+        for(let parameter of parameters) {
             if(!utils.isObject(parameter))
                 return callback(invalid);
         }
@@ -799,16 +796,16 @@ export default class TransactionBuilder {
             ownerAddress = this.tronWeb.defaultAddress.hex;
         }
 
-        if (!callback)
+        if(!callback)
             return this.injectPromise(this.createTRXExchange, tokenName, tokenBalance, trxBalance, ownerAddress);
 
-        if (!this.tronWeb.isAddress(ownerAddress))
+        if(!this.tronWeb.isAddress(ownerAddress))
             return callback('Invalid address provided');
 
-        if (!utils.isString(tokenName) || !tokenName.length)
+        if(!utils.isString(tokenName) || !tokenName.length)
             return callback('Invalid tokenName provided');
 
-        if (!utils.isInteger(tokenBalance) || tokenBalance <= 0
+        if(!utils.isInteger(tokenBalance) || tokenBalance <= 0
             || !utils.isInteger(trxBalance) || trxBalance <= 0)
             return callback('Invalid amount provided');
 
@@ -835,19 +832,19 @@ export default class TransactionBuilder {
             ownerAddress = this.tronWeb.defaultAddress.hex;
         }
 
-        if (!callback)
+        if(!callback)
             return this.injectPromise(this.createTRXExchange, firstTokenName, firstTokenBalance, secondTokenName, secondTokenBalance, ownerAddress);
 
-        if (!this.tronWeb.isAddress(ownerAddress))
+        if(!this.tronWeb.isAddress(ownerAddress))
             return callback('Invalid address provided');
 
-        if (!utils.isString(firstTokenName) || !firstTokenName.length)
+        if(!utils.isString(firstTokenName) || !firstTokenName.length)
             return callback('Invalid firstTokenName provided');
 
-        if (!utils.isString(secondTokenName) || !secondTokenName.length)
+        if(!utils.isString(secondTokenName) || !secondTokenName.length)
             return callback('Invalid secondTokenName provided');
 
-        if (!utils.isInteger(firstTokenBalance) || firstTokenBalance <= 0
+        if(!utils.isInteger(firstTokenBalance) || firstTokenBalance <= 0
             || !utils.isInteger(secondTokenBalance) || secondTokenBalance <= 0)
             return callback('Invalid amount provided');
 
@@ -892,7 +889,7 @@ export default class TransactionBuilder {
             owner_address: this.tronWeb.address.toHex(ownerAddress),
             exchange_id: parseInt(exchangeID),
             token_id: this.tronWeb.fromUtf8(tokenName),
-            quant:parseInt(tokenAmount)
+            quant: parseInt(tokenAmount)
         }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
     }
 
@@ -926,7 +923,7 @@ export default class TransactionBuilder {
             owner_address: this.tronWeb.address.toHex(ownerAddress),
             exchange_id: parseInt(exchangeID),
             token_id: this.tronWeb.fromUtf8(tokenName),
-            quant:parseInt(tokenAmount)
+            quant: parseInt(tokenAmount)
         }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
     }
 
@@ -936,11 +933,11 @@ export default class TransactionBuilder {
      * Use "_" for the constant value for TRX.
      */
     tradeExchangeTokens(exchangeID = false,
-        tokenName = false,
-        tokenAmountSold = 0,
-        tokenAmountExpected = 0,
-        ownerAddress = this.tronWeb.defaultAddress.hex,
-        callback = false) {
+                        tokenName = false,
+                        tokenAmountSold = 0,
+                        tokenAmountExpected = 0,
+                        ownerAddress = this.tronWeb.defaultAddress.hex,
+                        callback = false) {
         if(utils.isFunction(ownerAddress)) {
             callback = ownerAddress;
             ownerAddress = this.tronWeb.defaultAddress.hex;
@@ -968,8 +965,8 @@ export default class TransactionBuilder {
             owner_address: this.tronWeb.address.toHex(ownerAddress),
             exchange_id: parseInt(exchangeID),
             token_id: this.tronWeb.fromAscii(tokenName),
-            quant:parseInt(tokenAmountSold),
-            expected:parseInt(tokenAmountExpected)
+            quant: parseInt(tokenAmountSold),
+            expected: parseInt(tokenAmountExpected)
         }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
     }
 
@@ -977,9 +974,9 @@ export default class TransactionBuilder {
      * Update userFeePercentage.
      */
     updateSetting(contractAddress = false,
-        userFeePercentage = false,
-        ownerAddress = this.tronWeb.defaultAddress.hex,
-        callback = false) {
+                  userFeePercentage = false,
+                  ownerAddress = this.tronWeb.defaultAddress.hex,
+                  callback = false) {
 
         if(utils.isFunction(ownerAddress)) {
             callback = ownerAddress;
@@ -1009,9 +1006,9 @@ export default class TransactionBuilder {
      * Update energy limit.
      */
     updateEnergyLimit(contractAddress = false,
-        originEnergyLimit = false,
-        ownerAddress = this.tronWeb.defaultAddress.hex,
-        callback = false) {
+                      originEnergyLimit = false,
+                      ownerAddress = this.tronWeb.defaultAddress.hex,
+                      callback = false) {
 
         if(utils.isFunction(ownerAddress)) {
             callback = ownerAddress;

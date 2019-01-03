@@ -77,7 +77,7 @@ describe('TronWeb.trx', function () {
 
         let signedTransaction
 
-        before(async function() {
+        before(async function () {
             const transaction = await tronWeb.transactionBuilder.freezeBalance(100e6, 3, 'BANDWIDTH', accounts.b58[2])
             signedTransaction = await tronWeb.trx.sign(transaction, accounts.pks[2]);
         })
@@ -91,49 +91,93 @@ describe('TronWeb.trx', function () {
     });
 
 
-    describe("#freezeBalance", async function () {});
-    describe("#getAccount", async function () {});
-    describe("#getAccountResources", async function () {});
-    describe("#getBalance", async function () {});
-    describe("#getBandwidth", async function () {});
-    describe("#getBlock", async function () {});
-    describe("#getBlockByHash", async function () {});
-    describe("#getBlockByNumber", async function () {});
-    describe("#getBlockRange", async function () {});
-    describe("#getBlockTransactionCount", async function () {});
-    describe("#getChainParameters", async function () {});
-    describe("#getConfirmedTransaction", async function () {});
-    describe("#getContract", async function () {});
-    describe("#getCurrentBlock", async function () {});
-    describe("#getExchangeByID", async function () {});
-    describe("#getProposal", async function () {});
-    describe("#getTokenFromID", async function () {});
-    describe("#getTokensIssuedByAddress", async function () {});
-    describe("#getTransaction", async function () {});
-    describe("#getTransactionFromBlock", async function () {});
-    describe("#getTransactionInfo", async function () {});
-    describe("#getTransactionsFromAddress", async function () {});
-    describe("#getTransactionsRelated", async function () {});
-    describe("#getTransactionsToAddress", async function () {});
-    describe("#getUnconfirmedAccount", async function () {});
-    describe("#getUnconfirmedBalance", async function () {});
-    describe("#listExchanges", async function () {});
-    describe("#listExchangesPaginated", async function () {});
-    describe("#listNodes", async function () {});
-    describe("#listProposals", async function () {});
-    describe("#listSuperRepresentatives", async function () {});
-    describe("#listTokens", async function () {});
-    describe("#parseToken", async function () {});
-    describe("#send", async function () {});
-    describe("#sendAsset", async function () {});
-    describe("#sendToken", async function () {});
-    describe("#sendTransaction", async function () {});
-    describe("#sendTrx", async function () {});
-    describe("#sign", async function () {});
-    describe("#signMessage", async function () {});
-    describe("#timeUntilNextVoteCycle", async function () {});
-    describe("#unfreezeBalance", async function () {});
-    describe("#updateAccount", async function () {});
-    describe("#verifyMessage", async function () {});
+    describe("#freezeBalance", async function () {
+    });
+    describe("#getAccount", async function () {
+    });
+    describe("#getAccountResources", async function () {
+    });
+    describe("#getBalance", async function () {
+    });
+    describe("#getBandwidth", async function () {
+    });
+    describe("#getBlock", async function () {
+    });
+    describe("#getBlockByHash", async function () {
+    });
+    describe("#getBlockByNumber", async function () {
+    });
+    describe("#getBlockRange", async function () {
+    });
+    describe("#getBlockTransactionCount", async function () {
+    });
+    describe("#getChainParameters", async function () {
+    });
+    describe("#getConfirmedTransaction", async function () {
+    });
+    describe("#getContract", async function () {
+    });
+    describe("#getCurrentBlock", async function () {
+    });
+    describe("#getExchangeByID", async function () {
+    });
+    describe("#getProposal", async function () {
+    });
+    describe("#getTokenFromID", async function () {
+    });
+    describe("#getTokensIssuedByAddress", async function () {
+    });
+    describe("#getTransaction", async function () {
+    });
+    describe("#getTransactionFromBlock", async function () {
+    });
+    describe("#getTransactionInfo", async function () {
+    });
+    describe("#getTransactionsFromAddress", async function () {
+    });
+    describe("#getTransactionsRelated", async function () {
+    });
+    describe("#getTransactionsToAddress", async function () {
+    });
+    describe("#getUnconfirmedAccount", async function () {
+    });
+    describe("#getUnconfirmedBalance", async function () {
+    });
+    describe("#listExchanges", async function () {
+    });
+    describe("#listExchangesPaginated", async function () {
+    });
+    describe("#listNodes", async function () {
+    });
+    describe("#listProposals", async function () {
+    });
+    describe("#listSuperRepresentatives", async function () {
+    });
+    describe("#listTokens", async function () {
+    });
+    describe("#parseToken", async function () {
+    });
+    describe("#send", async function () {
+    });
+    describe("#sendAsset", async function () {
+    });
+    describe("#sendToken", async function () {
+    });
+    describe("#sendTransaction", async function () {
+    });
+    describe("#sendTrx", async function () {
+    });
+    describe("#sign", async function () {
+    });
+    describe("#signMessage", async function () {
+    });
+    describe("#timeUntilNextVoteCycle", async function () {
+    });
+    describe("#unfreezeBalance", async function () {
+    });
+    describe("#updateAccount", async function () {
+    });
+    describe("#verifyMessage", async function () {
+    });
 
 });

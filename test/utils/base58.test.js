@@ -38,7 +38,7 @@ describe('TronWeb.utils.base58', function () {
 
             assert.equal(tronWeb.utils.base58.encode58([]), '');
             assert.equal(tronWeb.utils.base58.encode58('some string'), '');
-            assert.equal(tronWeb.utils.base58.encode58({key:1}), '1');
+            assert.equal(tronWeb.utils.base58.encode58({key: 1}), '1');
         });
     });
 
@@ -62,7 +62,7 @@ describe('TronWeb.utils.base58', function () {
             const tronWeb = tronWebBuilder.createInstance();
 
             assert.equal(JSON.stringify(tronWeb.utils.base58.decode58('')), "[]");
-            assert.equal(JSON.stringify(tronWeb.utils.base58.decode58('1')),"[0]" );
+            assert.equal(JSON.stringify(tronWeb.utils.base58.decode58('1')), "[0]");
         });
     });
 

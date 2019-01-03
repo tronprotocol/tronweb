@@ -31,10 +31,10 @@ export default class Contract {
 
     async _getEvents(options = {}) {
         const events = await this.tronWeb.getEventResult(this.address);
-        const [ latestEvent ] = events.sort((a, b) => b.block - a.block);
+        const [latestEvent] = events.sort((a, b) => b.block - a.block);
         const newEvents = events.filter((event, index) => {
 
-            if (options.resourceNode && !RegExp(options.resourceNode, 'i').test(event.resourceNode))
+            if(options.resourceNode && !RegExp(options.resourceNode, 'i').test(event.resourceNode))
                 return false;
 
             const duplicate = events.slice(0, index).some(priorEvent => (
@@ -104,7 +104,7 @@ export default class Contract {
 
         abi.forEach(func => {
             // Don't build a method for constructor function. That's handled through contract create.
-            if (func.type.toLowerCase() === 'constructor')
+            if(func.type.toLowerCase() === 'constructor')
                 return;
 
             const method = new Method(this, func);
@@ -146,7 +146,7 @@ export default class Contract {
         const methodName = data.substring(0, 8);
         const inputData = data.substring(8);
 
-        if (!this.methodInstances[methodName])
+        if(!this.methodInstances[methodName])
             throw new Error('Contract method ' + methodName + " not found");
 
         const methodInstance = this.methodInstances[methodName];
@@ -176,7 +176,7 @@ export default class Contract {
                 return callback('Unknown error: ' + JSON.stringify(contract, null, 2));
 
             return this.at(signedTransaction.contract_address, callback);
-        } catch(ex) {
+        } catch (ex) {
             return callback(ex);
         }
     }
@@ -198,7 +198,7 @@ export default class Contract {
             this.loadAbi(contract.abi.entrys);
 
             callback(null, this);
-        } catch(ex) {
+        } catch (ex) {
             if(ex.toString().includes('does not exist'))
                 return callback('Contract has not been deployed on the network');
 

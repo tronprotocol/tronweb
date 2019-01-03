@@ -10,10 +10,10 @@ import BigNumber from 'bignumber.js';
 
 const utils = {
     isValidURL(url) {
-        if (typeof url !== 'string')
+        if(typeof url !== 'string')
             return false;
         return validator.isURL(url.toString(), {
-            protocols: [ 'http', 'https' ]
+            protocols: ['http', 'https']
         });
     },
 
@@ -56,7 +56,7 @@ const utils = {
     },
 
     isInteger(number) {
-        if (number === null)
+        if(number === null)
             return false
         return Number.isInteger(
             Number(number)
@@ -101,17 +101,17 @@ const utils = {
         };
     },
 
-    parseEvent(event, { inputs: abi }) {
+    parseEvent(event, {inputs: abi}) {
         if(!event.result)
             return event;
 
-        if (this.isObject(event.result)) {
-            for (var i = 0; i < abi.length; i++) {
+        if(this.isObject(event.result)) {
+            for(var i = 0; i < abi.length; i++) {
                 let obj = abi[i];
-                if (obj.type == 'address' && obj.name in event.result)
+                if(obj.type == 'address' && obj.name in event.result)
                     event.result[obj.name] = '41' + event.result[obj.name].substr(2).toLowerCase();
             }
-        } else if (this.isArray(event.result)) {
+        } else if(this.isArray(event.result)) {
             event.result = event.result.reduce((obj, result, index) => {
                 const {
                     name,
@@ -133,7 +133,7 @@ const utils = {
     padLeft(input, padding, amount) {
         let res = input.toString();
 
-        while(res.length < amount)
+        while (res.length < amount)
             res = padding + res;
 
         return res;

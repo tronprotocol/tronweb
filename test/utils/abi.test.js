@@ -24,7 +24,7 @@ describe('TronWeb.utils.abi', function () {
 
             const result = tronWeb.utils.abi.decodeParams(types, output);
 
-            for (let i = 0; i < expected.length; i++) {
+            for(let i = 0; i < expected.length; i++) {
                 assert.equal(result[i], expected[i]);
             }
         });
@@ -45,7 +45,7 @@ describe('TronWeb.utils.abi', function () {
             };
 
             const result = tronWeb.utils.abi.decodeParams(names, types, output);
-            for (let i in expected) {
+            for(let i in expected) {
                 assert.equal(result[i], expected[i]);
             }
         });
@@ -114,7 +114,7 @@ describe('TronWeb.utils.abi', function () {
 
             const result = tronWeb.utils.abi.encodeParams(types, values);
 
-            for (let i = 0; i < expected.length; i++) {
+            for(let i = 0; i < expected.length; i++) {
                 assert.equal(result[i], expected[i]);
             }
         });
@@ -132,7 +132,7 @@ describe('TronWeb.utils.abi', function () {
             const expected = '0x0000000000000000000000000000000000000000000000000000000000000060000000000000000000000000928c9af0651632157ef27a2cf17ca72c575a4d21000000000000000000000000928c9af0651632157ef27a2cf17ca72c575a4d2100000000000000000000000000000000000000000000000000000000000000054f6e776572000000000000000000000000000000000000000000000000000000';
             const result = tronWeb.utils.abi.encodeParams(types, values);
 
-            for (let i = 0; i < expected.length; i++) {
+            for(let i = 0; i < expected.length; i++) {
                 assert.equal(result[i], expected[i]);
             }
         });

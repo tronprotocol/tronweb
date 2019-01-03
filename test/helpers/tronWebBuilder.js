@@ -16,7 +16,7 @@ const createInstance = () => {
 let instance
 
 const getInstance = () => {
-    if (!instance) {
+    if(!instance) {
         instance = createInstance()
     }
     return instance
@@ -45,7 +45,7 @@ const getTestAccounts = async (block) => {
     accounts.pks = typeof block === 'number'
         ? accountsJson.more[index].privateKeys
         : accountsJson.privateKeys;
-    for (let i = 0; i < accounts.pks.length; i++) {
+    for(let i = 0; i < accounts.pks.length; i++) {
         let addr = tronWeb.address.fromPrivateKey(accounts.pks[i]);
         accounts.b58.push(addr);
         accounts.hex.push(tronWeb.address.toHex(addr));
