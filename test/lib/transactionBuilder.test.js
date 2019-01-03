@@ -444,7 +444,7 @@ describe('TronWeb.transactionBuilder', function () {
             while (!tokenList) {
                 tokenList = await tronWeb.trx.getTokensIssuedByAddress(accounts.b58[2])
             }
-            if (isAllowSameTokenNameApproved) {
+            if(isAllowSameTokenNameApproved) {
                 tokenID = tokenList[tokenOptions.name].id
             } else {
                 tokenID = tokenList[tokenOptions.name].name
@@ -586,7 +586,7 @@ describe('TronWeb.transactionBuilder', function () {
             while (!tokenList) {
                 tokenList = await tronWeb.trx.getTokensIssuedByAddress(accounts.b58[5])
             }
-            if (isAllowSameTokenNameApproved) {
+            if(isAllowSameTokenNameApproved) {
                 tokenID = tokenList[tokenOptions.name].id
             } else {
                 tokenID = tokenList[tokenOptions.name].name
@@ -594,17 +594,17 @@ describe('TronWeb.transactionBuilder', function () {
             assert.equal(tokenList[tokenOptions.name].abbr, tokenOptions.abbreviation)
         });
 
-            it('should verify that the asset has been created', async function () {
+        it('should verify that the asset has been created', async function () {
 
-                let token
-                if (isAllowSameTokenNameApproved) {
-                    token = await tronWeb.trx.getTokenByID(tokenID)
-                    assert.equal(token.id, tokenID)
-                } else {
-                    token = await tronWeb.trx.getTokenFromID(tokenID)
-                }
-                assert.equal(token.name, tokenOptions.name)
-            })
+            let token
+            if(isAllowSameTokenNameApproved) {
+                token = await tronWeb.trx.getTokenByID(tokenID)
+                assert.equal(token.id, tokenID)
+            } else {
+                token = await tronWeb.trx.getTokenFromID(tokenID)
+            }
+            assert.equal(token.name, tokenOptions.name)
+        })
 
         it(`should allow accounts[2] to purchase a token created by accounts[5]`, async function () {
 
@@ -697,7 +697,7 @@ describe('TronWeb.transactionBuilder', function () {
                 tokenList = await tronWeb.trx.getTokensIssuedByAddress(accounts.b58[6])
             }
 
-            if (isAllowSameTokenNameApproved) {
+            if(isAllowSameTokenNameApproved) {
                 tokenID = tokenList[tokenOptions.name].id
             } else {
                 tokenID = tokenList[tokenOptions.name].name
@@ -708,7 +708,7 @@ describe('TronWeb.transactionBuilder', function () {
         it('should verify that the asset has been created', async function () {
 
             let token
-            if (isAllowSameTokenNameApproved) {
+            if(isAllowSameTokenNameApproved) {
                 token = await tronWeb.trx.getTokenByID(tokenID)
                 assert.equal(token.id, tokenID)
             } else {
@@ -864,8 +864,8 @@ describe('TronWeb.transactionBuilder', function () {
 
         after(async function () {
             proposals = await tronWeb.trx.listProposals();
-            for (let proposal of proposals) {
-                if (proposal.state !== 'CANCELED')
+            for(let proposal of proposals) {
+                if(proposal.state !== 'CANCELED')
                     await broadcaster(tronWeb.transactionBuilder.deleteProposal(proposal.proposal_id), PRIVATE_KEY)
             }
         })
@@ -983,7 +983,8 @@ describe('TronWeb.transactionBuilder', function () {
     describe("#injectExchangeTokens", async function () {
     });
 
-    describe("#withdrawExchangeTokens", async function () {});
+    describe("#withdrawExchangeTokens", async function () {
+    });
 
     describe("#tradeExchangeTokens", async function () {
     });

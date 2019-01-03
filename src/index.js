@@ -7,7 +7,7 @@ import TransactionBuilder from 'lib/transactionBuilder';
 import Trx from 'lib/trx';
 import Contract from 'lib/contract';
 
-import { keccak256 } from 'js-sha3';
+import {keccak256} from 'js-sha3';
 
 export default class TronWeb extends EventEmitter {
     static providers = providers;
@@ -15,7 +15,7 @@ export default class TronWeb extends EventEmitter {
     static TransactionBuilder = TransactionBuilder;
     static Trx = Trx;
     static Contract = Contract;
-    
+
     constructor(fullNode, solidityNode, eventServer = false, privateKey = false) {
         super();
 
@@ -31,7 +31,7 @@ export default class TronWeb extends EventEmitter {
         this.setFullNode(fullNode);
         this.setSolidityNode(solidityNode);
         this.setEventServer(eventServer);
-        
+
         this.providers = providers;
         this.BigNumber = BigNumber;
 
@@ -41,11 +41,11 @@ export default class TronWeb extends EventEmitter {
             hex: false,
             base58: false
         };
-        
+
         [
             'sha3', 'toHex', 'toUtf8', 'fromUtf8',
             'toAscii', 'fromAscii', 'toDecimal', 'fromDecimal',
-            'toSun', 'fromSun', 'toBigNumber', 'isAddress', 
+            'toSun', 'fromSun', 'toBigNumber', 'isAddress',
             'createAccount', 'address'
         ].forEach(key => {
             this[key] = TronWeb[key];
@@ -62,7 +62,7 @@ export default class TronWeb extends EventEmitter {
     }
 
     setDefaultBlock(blockID = false) {
-        if([ false, 'latest', 'earliest', 0 ].includes(blockID)) {
+        if([false, 'latest', 'earliest', 0].includes(blockID)) {
             return this.defaultBlock = blockID;
         }
 
@@ -93,14 +93,14 @@ export default class TronWeb extends EventEmitter {
         const base58 = this.address.fromHex(address);
 
         if(this.defaultPrivateKey && this.address.fromPrivateKey(this.defaultPrivateKey) !== base58)
-           this.defaultPrivateKey = false;
+            this.defaultPrivateKey = false;
 
         this.defaultAddress = {
             hex,
             base58
         };
 
-        this.emit('addressChanged', { hex, base58 });
+        this.emit('addressChanged', {hex, base58});
     }
 
     isValidProvider(provider) {
@@ -135,7 +135,7 @@ export default class TronWeb extends EventEmitter {
 
         if(utils.isString(eventServer))
             eventServer = new providers.HttpProvider(eventServer);
-            
+
         if(!this.isValidProvider(eventServer))
             throw new Error('Invalid event server provided');
 
@@ -185,10 +185,10 @@ export default class TronWeb extends EventEmitter {
         if(eventName && !contractAddress)
             return callback('Usage of event name filtering requires a contract address');
 
-        if (!utils.isInteger(sinceTimestamp))
+        if(!utils.isInteger(sinceTimestamp))
             return callback('Invalid sinceTimestamp provided');
 
-        if (!utils.isInteger(size))
+        if(!utils.isInteger(size))
             return callback('Invalid size provided');
 
         if(size > 200) {
@@ -196,7 +196,7 @@ export default class TronWeb extends EventEmitter {
             size = 200;
         }
 
-        if (!utils.isInteger(page))
+        if(!utils.isInteger(page))
             return callback('Invalid page provided');
 
         if(blockNumber && !eventName)
@@ -218,10 +218,10 @@ export default class TronWeb extends EventEmitter {
             if(!utils.isArray(data))
                 return callback(data);
 
-            return callback(null, 
+            return callback(null,
                 data.map(event => utils.mapEvent(event))
             );
-        }).catch(err => callback((err.response && err.response.data) || err)); 
+        }).catch(err => callback((err.response && err.response.data) || err));
     }
 
     getEventByTransactionID(transactionID = false, callback = false) {
@@ -238,7 +238,7 @@ export default class TronWeb extends EventEmitter {
             if(!utils.isArray(data))
                 return callback(data);
 
-            return callback(null, 
+            return callback(null,
                 data.map(event => utils.mapEvent(event))
             );
         }).catch(err => callback((err.response && err.response.data) || err));
@@ -260,7 +260,7 @@ export default class TronWeb extends EventEmitter {
             },
             toHex(address) {
                 if(utils.isHex(address))
-                    return address.toLowerCase().replace(/^0x/,'41');
+                    return address.toLowerCase().replace(/^0x/, '41');
 
                 return utils.code.byteArray2hexStr(
                     utils.crypto.decodeBase58Address(address)
@@ -269,7 +269,9 @@ export default class TronWeb extends EventEmitter {
             fromPrivateKey(privateKey) {
                 try {
                     return utils.crypto.pkToAddress(privateKey);
-                } catch { return false; }
+                } catch {
+                    return false;
+                }
             }
         }
     }
@@ -289,7 +291,7 @@ export default class TronWeb extends EventEmitter {
             return TronWeb.fromUtf8(JSON.stringify(val));
 
         if(utils.isString(val)) {
-            if (/^(-|)0x/.test(val))
+            if(/^(-|)0x/.test(val))
                 return val;
 
             if(!isFinite(val))
@@ -297,7 +299,7 @@ export default class TronWeb extends EventEmitter {
         }
 
         let result = TronWeb.fromDecimal(val);
-        if (result === '0xNaN') {
+        if(result === '0xNaN') {
             throw new Error('The passed value is not convertible to a hex string');
         } else {
             return result;
@@ -305,7 +307,7 @@ export default class TronWeb extends EventEmitter {
     }
 
     static toUtf8(hex) {
-        if (utils.isHex(hex)) {
+        if(utils.isHex(hex)) {
             hex = hex.replace(/^0x/, '');
             return Buffer.from(hex, 'hex').toString('utf8');
         } else {
@@ -314,20 +316,20 @@ export default class TronWeb extends EventEmitter {
     }
 
     static fromUtf8(string) {
-        if (!utils.isString(string)) {
+        if(!utils.isString(string)) {
             throw new Error('The passed value is not a valid utf-8 string')
         }
         return '0x' + Buffer.from(string, 'utf8').toString('hex');
     }
 
     static toAscii(hex) {
-        if (utils.isHex(hex)) {
+        if(utils.isHex(hex)) {
             let str = "";
             let i = 0, l = hex.length;
-            if (hex.substring(0, 2) === '0x') {
+            if(hex.substring(0, 2) === '0x') {
                 i = 2;
             }
-            for (; i < l; i+=2) {
+            for(; i < l; i += 2) {
                 let code = parseInt(hex.substr(i, 2), 16);
                 str += String.fromCharCode(code);
             }
@@ -338,7 +340,7 @@ export default class TronWeb extends EventEmitter {
     }
 
     static fromAscii(string, padding) {
-        if (!utils.isString(string)) {
+        if(!utils.isString(string)) {
             throw new Error('The passed value is not a valid utf-8 string')
         }
         return '0x' + Buffer.from(string, 'ascii').toString('hex').padEnd(padding, '0');
@@ -357,12 +359,12 @@ export default class TronWeb extends EventEmitter {
     }
 
     static fromSun(sun) {
-        const trx = TronWeb.toBigNumber(sun).div(1_000_000);        
+        const trx = TronWeb.toBigNumber(sun).div(1_000_000);
         return utils.isBigNumber(sun) ? trx : trx.toString(10);
     }
 
     static toSun(trx) {
-        const sun = TronWeb.toBigNumber(trx).times(1_000_000);        
+        const sun = TronWeb.toBigNumber(trx).times(1_000_000);
         return utils.isBigNumber(trx) ? sun : sun.toString(10);
     }
 
@@ -388,13 +390,13 @@ export default class TronWeb extends EventEmitter {
                         utils.code.hexStr2byteArray(address) // it throws an error if the address starts with 0x
                     )
                 );
-            } catch(err) {
+            } catch (err) {
                 return false;
             }
         }
         try {
             return utils.crypto.isAddressValid(address);
-        } catch(err) {
+        } catch (err) {
             return false;
         }
     }

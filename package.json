@@ -42,6 +42,7 @@
         "babel-plugin-istanbul": "^5.0.1",
         "babel-plugin-source-map-support": "^2.0.1",
         "chai": "^4.1.2",
+        "chalk": "^2.4.1",
         "eth-sig-util": "^2.1.0",
         "globby": "^8.0.1",
         "grunt": "^1.0.3",

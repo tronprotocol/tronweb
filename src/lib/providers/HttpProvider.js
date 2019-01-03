@@ -12,7 +12,7 @@ export default class HttpProvider {
         if(!utils.isObject(headers))
             throw new Error('Invalid headers object provided');
 
-        host = host.replace(/\/+$/,'');
+        host = host.replace(/\/+$/, '');
 
         this.host = host;
         this.timeout = timeout;
@@ -47,9 +47,9 @@ export default class HttpProvider {
 
         return this.instance.request({
             data: method == 'post' && Object.keys(payload).length ? payload : null,
-            params: method =='get' && payload,
+            params: method == 'get' && payload,
             url,
             method
-        }).then(({ data }) => data);
+        }).then(({data}) => data);
     }
 };

@@ -1,6 +1,6 @@
-const { keccak256 } = require('js-sha3');
+const {keccak256} = require('js-sha3');
 
-const fullHost = "http://127.0.0.1:"+ (process.env.HOST_PORT || 9090)
+const fullHost = "http://127.0.0.1:" + (process.env.HOST_PORT || 9090)
 
 module.exports = {
 
@@ -39,8 +39,8 @@ module.exports = {
     },
     isProposalApproved: async (tronWeb, proposal) => {
         let chainParameters = await tronWeb.trx.getChainParameters()
-        for (let param of chainParameters) {
-            if (param.key === proposal) {
+        for(let param of chainParameters) {
+            if(param.key === proposal) {
                 return param.value
             }
         }

@@ -42,7 +42,7 @@ describe('TronWeb.utils.code', function () {
 
             const a = 'Қࡀпω';
 
-            assert.isTrue(tronWeb.utils.code.arrayEquals(tronWeb.utils.code.stringToBytes('Қࡀпω'), [ 210, 154, 224, 161, 128, 208, 191, 207, 137 ], true));
+            assert.isTrue(tronWeb.utils.code.arrayEquals(tronWeb.utils.code.stringToBytes('Қࡀпω'), [210, 154, 224, 161, 128, 208, 191, 207, 137], true));
 
             // TODO We have something wrong, in fact this should be the reverse of the command above:
             assert.equal(tronWeb.utils.bytes.bytesToString([1178, 2112, 1087, 969]), 'Қࡀпω');
@@ -53,7 +53,7 @@ describe('TronWeb.utils.code', function () {
             const tronWeb = tronWebBuilder.createInstance();
 
             assert.throws(() => {
-                tronWeb.utils.code.stringToBytes([ 210, 154, 224, 161, 128, 208, 191, 207, 137 ])
+                tronWeb.utils.code.stringToBytes([210, 154, 224, 161, 128, 208, 191, 207, 137])
             }, 'The passed string is not a string');
 
             assert.throws(() => {
@@ -108,7 +108,7 @@ describe('TronWeb.utils.code', function () {
         it("should verify that an hex char is a valid hex char", async function () {
             const tronWeb = tronWebBuilder.createInstance();
 
-            assert.isTrue(tronWeb.utils.code.arrayEquals(tronWeb.utils.code.hexStr2byteArray('49206C6F7665206461726B20636F6D6564696573'), [73, 32, 108, 111, 118, 101, 32, 100, 97, 114, 107, 32, 99, 111, 109, 101, 100, 105, 101,115]));
+            assert.isTrue(tronWeb.utils.code.arrayEquals(tronWeb.utils.code.hexStr2byteArray('49206C6F7665206461726B20636F6D6564696573'), [73, 32, 108, 111, 118, 101, 32, 100, 97, 114, 107, 32, 99, 111, 109, 101, 100, 105, 101, 115]));
 
         });
 

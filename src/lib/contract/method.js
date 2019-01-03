@@ -5,12 +5,12 @@ const getFunctionSelector = abi => {
 }
 
 const getParamTypes = params => {
-    return params.map(({ type }) => type);
+    return params.map(({type}) => type);
 }
 
 const decodeOutput = (abi, output) => {
-    const names = abi.map(({ name }) => name).filter(name => !!name);
-    const types = abi.map(({ type }) => type);
+    const names = abi.map(({name}) => name).filter(name => !!name);
+    const types = abi.map(({type}) => type);
 
     return utils.abi.decodeParams(names, types, output);
 };
@@ -46,10 +46,10 @@ export default class Method {
         const types = getParamTypes(this.inputs);
 
         args.forEach((arg, index) => {
-            if (types[index] == 'address')
+            if(types[index] == 'address')
                 args[index] = this.tronWeb.address.toHex(arg).replace(/^(41)/, '0x')
 
-            if (types[index] == 'address[]') {
+            if(types[index] == 'address[]') {
                 args[index] = args[index].map(address => {
                     return this.tronWeb.address.toHex(address).replace(/^(41)/, '0x')
                 })
@@ -64,29 +64,29 @@ export default class Method {
     }
 
     async _call(types, args, options = {}, callback = false) {
-        if (utils.isFunction(options)) {
+        if(utils.isFunction(options)) {
             callback = options;
             options = {};
         }
 
-        if (!callback)
+        if(!callback)
             return this.injectPromise(this._call, types, args, options);
 
-        if (types.length !== args.length)
+        if(types.length !== args.length)
             return callback('Invalid argument count provided');
 
-        if (!this.contract.address)
+        if(!this.contract.address)
             return callback('Smart contract is missing address');
 
-        if (!this.contract.deployed)
+        if(!this.contract.deployed)
             return callback('Calling smart contracts requires you to load the contract first');
 
         const {stateMutability} = this.abi;
 
-        if (!['pure', 'view'].includes(stateMutability.toLowerCase()))
+        if(!['pure', 'view'].includes(stateMutability.toLowerCase()))
             return callback(`Methods with state mutability "${stateMutability}" must use send()`);
 
-        options = { ...this.defaultOptions, ...options };
+        options = {...this.defaultOptions, ...options};
 
         const parameters = args.map((value, index) => ({
             type: types[index],
@@ -101,10 +101,10 @@ export default class Method {
             parameters,
             this.tronWeb.address.toHex(options.from),
             (err, transaction) => {
-                if (err)
+                if(err)
                     return callback(err);
 
-                if (!utils.hasProperty(transaction, 'constant_result'))
+                if(!utils.hasProperty(transaction, 'constant_result'))
                     return callback('Failed to execute');
 
                 try {
@@ -119,14 +119,14 @@ export default class Method {
                             for(let i = 0; i < len - 8; i += 64) {
                                 msg2 += this.tronWeb.toUtf8(chunk.substring(i, i + 64))
                             }
-                            msg += msg2.replace(/(\u0000|\u000b|\f)+/g,' ').replace(/ +/g,' ').replace(/\s+$/g,'');
+                            msg += msg2.replace(/(\u0000|\u000b|\f)+/g, ' ').replace(/ +/g, ' ').replace(/\s+$/g, '');
                         }
                         return callback(msg)
                     }
 
                     let output = decodeOutput(this.outputs, '0x' + transaction.constant_result[0]);
 
-                    if (output.length === 1)
+                    if(output.length === 1)
                         output = output[0];
 
                     return callback(null, output);
@@ -137,35 +137,35 @@ export default class Method {
     }
 
     async _send(types, args, options = {}, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
-        if (utils.isFunction(privateKey)) {
+        if(utils.isFunction(privateKey)) {
             callback = privateKey;
             privateKey = this.tronWeb.defaultPrivateKey;
         }
 
-        if (utils.isFunction(options)) {
+        if(utils.isFunction(options)) {
             callback = options;
             options = {};
         }
 
-        if (!callback)
+        if(!callback)
             return this.injectPromise(this._send, types, args, options, privateKey);
 
-        if (types.length !== args.length)
+        if(types.length !== args.length)
             throw new Error('Invalid argument count provided');
 
-        if (!this.contract.address)
+        if(!this.contract.address)
             return callback('Smart contract is missing address');
 
-        if (!this.contract.deployed)
+        if(!this.contract.deployed)
             return callback('Calling smart contracts requires you to load the contract first');
 
         const {stateMutability} = this.abi;
 
-        if (['pure', 'view'].includes(stateMutability.toLowerCase()))
+        if(['pure', 'view'].includes(stateMutability.toLowerCase()))
             return callback(`Methods with state mutability "${stateMutability}" must use call()`);
 
         // If a function isn't payable, dont provide a callValue.
-        if (!['payable'].includes(stateMutability.toLowerCase()))
+        if(!['payable'].includes(stateMutability.toLowerCase()))
             options.callValue = 0;
 
         options = {...this.defaultOptions, ...options};
@@ -186,14 +186,14 @@ export default class Method {
                 this.tronWeb.address.toHex(address)
             );
 
-            if (!transaction.result || !transaction.result.result)
+            if(!transaction.result || !transaction.result.result)
                 return callback('Unknown error: ' + JSON.stringify(transaction, null, 2));
 
             // If privateKey is false, this won't be signed here. We assume sign functionality will be replaced.
             const signedTransaction = await this.tronWeb.trx.sign(transaction.transaction, privateKey);
 
-            if (!signedTransaction.signature) {
-                if (!privateKey)
+            if(!signedTransaction.signature) {
+                if(!privateKey)
                     return callback('Transaction was not signed properly');
 
                 return callback('Invalid private key provided');
@@ -201,14 +201,14 @@ export default class Method {
 
             const broadcast = await this.tronWeb.trx.sendRawTransaction(signedTransaction);
 
-            if (!broadcast.result)
+            if(!broadcast.result)
                 return callback('Unknown error: ' + JSON.stringify(broadcast, null, 2));
 
-            if (!options.shouldPollResponse)
+            if(!options.shouldPollResponse)
                 return callback(null, signedTransaction.txID);
 
             const checkResult = async (index = 0) => {
-                if (index == 20) {
+                if(index == 20) {
                     return callback({
                         error: 'Cannot find result in solidity node',
                         transaction: signedTransaction
@@ -217,13 +217,13 @@ export default class Method {
 
                 const output = await this.tronWeb.trx.getTransactionInfo(signedTransaction.txID);
 
-                if (!Object.keys(output).length) {
+                if(!Object.keys(output).length) {
                     return setTimeout(() => {
                         checkResult(index + 1);
                     }, 3000);
                 }
 
-                if (output.result && output.result == 'FAILED') {
+                if(output.result && output.result == 'FAILED') {
                     return callback({
                         error: this.tronWeb.toUtf8(output.resMessage),
                         transaction: signedTransaction,
@@ -231,7 +231,7 @@ export default class Method {
                     });
                 }
 
-                if (!utils.hasProperty(output, 'contractResult')) {
+                if(!utils.hasProperty(output, 'contractResult')) {
                     return callback({
                         error: 'Failed to execute: ' + JSON.stringify(output, null, 2),
                         transaction: signedTransaction,
@@ -241,7 +241,7 @@ export default class Method {
 
                 let decoded = decodeOutput(this.outputs, '0x' + output.contractResult[0]);
 
-                if (decoded.length === 1)
+                if(decoded.length === 1)
                     decoded = decoded[0];
 
                 return callback(null, decoded);
@@ -262,13 +262,13 @@ export default class Method {
         if(!utils.isFunction(callback))
             throw new Error('Expected callback to be provided');
 
-        if (!this.contract.address)
+        if(!this.contract.address)
             return callback('Smart contract is missing address');
 
-        if (this.abi.type.toLowerCase() !== 'event')
+        if(this.abi.type.toLowerCase() !== 'event')
             return callback('Invalid method type for event watching');
 
-        if (!this.tronWeb.eventServer)
+        if(!this.tronWeb.eventServer)
             return callback('No event server configured');
 
         let listener = false;
@@ -278,26 +278,26 @@ export default class Method {
         const getEvents = async () => {
             try {
                 const events = await this.tronWeb.getEventResult(this.contract.address, sinceTimestamp, this.name);
-                const [ latestEvent ] = events.sort((a, b) => b.block - a.block);
+                const [latestEvent] = events.sort((a, b) => b.block - a.block);
                 const newEvents = events.filter((event, index) => {
 
-                    if (options.resourceNode && !RegExp(options.resourceNode, 'i').test(event.resourceNode))
+                    if(options.resourceNode && !RegExp(options.resourceNode, 'i').test(event.resourceNode))
                         return false;
 
                     const duplicate = events.slice(0, index).some(priorEvent => (
                         JSON.stringify(priorEvent) == JSON.stringify(event)
                     ));
 
-                    if (duplicate)
+                    if(duplicate)
                         return false;
 
-                    if (!lastBlock)
+                    if(!lastBlock)
                         return true;
 
                     return event.block > lastBlock;
                 });
 
-                if (latestEvent)
+                if(latestEvent)
                     lastBlock = latestEvent.block;
 
                 return newEvents;
@@ -307,7 +307,7 @@ export default class Method {
         };
 
         const bindListener = () => {
-            if (listener)
+            if(listener)
                 clearInterval(listener);
 
             listener = setInterval(() => {
@@ -323,7 +323,7 @@ export default class Method {
         return {
             start: bindListener(),
             stop: () => {
-                if (!listener)
+                if(!listener)
                     return;
 
                 clearInterval(listener);
