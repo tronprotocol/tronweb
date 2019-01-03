@@ -9,7 +9,7 @@
         "clean": "rimraf dist",
         "example": "node ./examples/server",
         "test:browser": "node scripts/test-browser.js && npx karma start --single-run --browsers ChromeHeadless,Firefox,Edge",
-        "test:node": "node scripts/test-node.js && node test/helpers/newAccounts 5 && npx mocha 'test/**/*.test.js'",
+        "test:node": "node scripts/test-node.js && node test/helpers/newAccounts 10 && npx mocha 'test/**/*.test.js'",
         "test": "node test/helpers/newAccounts 5 && npm run-script test:browser && npm run-script test:node",
         "build:dev": "NODE_ENV=development npm run build"
     },

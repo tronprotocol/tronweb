@@ -10,21 +10,28 @@ const _ = require('lodash');
 const tronWebBuilder = require('../helpers/tronWebBuilder');
 const assertEqualHex = require('../helpers/assertEqualHex');
 const TronWeb = tronWebBuilder.TronWeb;
-const config = require('../helpers/config');
-const {ADDRESS_HEX, ADDRESS_BASE58, UPDATED_TEST_TOKEN_OPTIONS, PRIVATE_KEY} = config;
-const getTokenOptions = config.getTokenOptions;
+const {
+    ADDRESS_HEX,
+    ADDRESS_BASE58,
+    UPDATED_TEST_TOKEN_OPTIONS,
+    PRIVATE_KEY,
+    getTokenOptions,
+    isProposalApproved
+} = require('../helpers/config');
 
 describe('TronWeb.transactionBuilder', function () {
 
     let accounts;
     let tronWeb;
     let emptyAccount;
+    let isAllowSameTokenNameApproved
 
     before(async function () {
         tronWeb = tronWebBuilder.createInstance();
         // ALERT this works only with Tron Quickstart:
         accounts = await tronWebBuilder.getTestAccounts(-1);
         emptyAccount = await TronWeb.createAccount();
+        isAllowSameTokenNameApproved = await isProposalApproved(tronWeb, 'getAllowSameTokenName')
     });
 
     describe('#constructor()', function () {
@@ -424,6 +431,7 @@ describe('TronWeb.transactionBuilder', function () {
     describe('#updateToken()', function () {
 
         let tokenOptions
+        let tokenID
 
         before(async function () {
 
@@ -432,9 +440,15 @@ describe('TronWeb.transactionBuilder', function () {
             tokenOptions = getTokenOptions();
             await broadcaster(tronWeb.transactionBuilder.createToken(tokenOptions, accounts.b58[2]), accounts.pks[2])
 
-            let result = await pollAccountFor(accounts.b58[2], 'asset[0].key', tokenOptions.name)
-
-            assert.equal(result.asset[0].value, tokenOptions.totalSupply - tokenOptions.frozenAmount)
+            let tokenList
+            while (!tokenList) {
+                tokenList = await tronWeb.trx.getTokensIssuedByAddress(accounts.b58[2])
+            }
+            if (isAllowSameTokenNameApproved) {
+                tokenID = tokenList[tokenOptions.name].id
+            } else {
+                tokenID = tokenList[tokenOptions.name].name
+            }
         });
 
         it(`should allow accounts[2] to update a TestToken`, async function () {
@@ -558,6 +572,7 @@ describe('TronWeb.transactionBuilder', function () {
     describe('#purchaseToken()', function () {
 
         let tokenOptions
+        let tokenID
 
         before(async function () {
 
@@ -565,31 +580,51 @@ describe('TronWeb.transactionBuilder', function () {
 
             tokenOptions = getTokenOptions();
 
-            await broadcaster(tronWeb.transactionBuilder.createToken(tokenOptions, accounts.b58[3]), accounts.pks[3])
+            await broadcaster(tronWeb.transactionBuilder.createToken(tokenOptions, accounts.b58[5]), accounts.pks[5])
 
-            let result = await pollAccountFor(accounts.b58[3], 'asset[0].key', tokenOptions.name)
-
-            assert.equal(result.asset[0].value, tokenOptions.totalSupply - tokenOptions.frozenAmount)
+            let tokenList
+            while (!tokenList) {
+                tokenList = await tronWeb.trx.getTokensIssuedByAddress(accounts.b58[5])
+            }
+            if (isAllowSameTokenNameApproved) {
+                tokenID = tokenList[tokenOptions.name].id
+            } else {
+                tokenID = tokenList[tokenOptions.name].name
+            }
+            assert.equal(tokenList[tokenOptions.name].abbr, tokenOptions.abbreviation)
         });
 
-        it(`should allow accounts[2] to purchase a token created by accounts[3]`, async function () {
+            it('should verify that the asset has been created', async function () {
 
-            wait(1)
+                let token
+                if (isAllowSameTokenNameApproved) {
+                    token = await tronWeb.trx.getTokenByID(tokenID)
+                    assert.equal(token.id, tokenID)
+                } else {
+                    token = await tronWeb.trx.getTokenFromID(tokenID)
+                }
+                assert.equal(token.name, tokenOptions.name)
+            })
 
-            const transaction = await tronWeb.transactionBuilder.purchaseToken(accounts.b58[3], tokenOptions.name, 20, accounts.b58[2]);
+        it(`should allow accounts[2] to purchase a token created by accounts[5]`, async function () {
+
+            this.timeout(10000)
+
+            wait(4)
+
+            const transaction = await tronWeb.transactionBuilder.purchaseToken(accounts.b58[5], tokenID, 20, accounts.b58[2]);
             const parameter = txPars(transaction);
             assert.equal(transaction.txID.length, 64);
             assert.equal(parameter.value.amount, 20);
-            await assertEqualHex(parameter.value.asset_name, tokenOptions.name);
             assert.equal(parameter.value.owner_address, accounts.hex[2]);
-            assert.equal(parameter.value.to_address, accounts.hex[3]);
+            assert.equal(parameter.value.to_address, accounts.hex[5]);
             assert.equal(parameter.type_url, 'type.googleapis.com/protocol.ParticipateAssetIssueContract');
         });
 
         it("should throw if issuerAddress is invalid", async function () {
 
             await assertThrow(
-                tronWeb.transactionBuilder.purchaseToken('sasdsadasfa', tokenOptions.name, 20, accounts.b58[2]),
+                tronWeb.transactionBuilder.purchaseToken('sasdsadasfa', tokenID, 20, accounts.b58[2]),
                 'Invalid issuer address provided'
             )
 
@@ -597,7 +632,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         it("should throw if issuerAddress is not the right one", async function () {
             await assertThrow(
-                tronWeb.transactionBuilder.purchaseToken(accounts.b58[4], tokenOptions.name, 20, accounts.b58[2]),
+                tronWeb.transactionBuilder.purchaseToken(accounts.b58[4], tokenID, 20, accounts.b58[2]),
                 null,
                 'The asset is not issued by'
             )
@@ -606,7 +641,7 @@ describe('TronWeb.transactionBuilder', function () {
         it("should throw if the token Id is invalid", async function () {
 
             await assertThrow(
-                tronWeb.transactionBuilder.purchaseToken(accounts.b58[3], 123432, 20, accounts.b58[2]),
+                tronWeb.transactionBuilder.purchaseToken(accounts.b58[5], 123432, 20, accounts.b58[2]),
                 'Invalid token ID provided'
             )
         });
@@ -614,7 +649,7 @@ describe('TronWeb.transactionBuilder', function () {
         it("should throw if token does not exist", async function () {
 
             await assertThrow(
-                tronWeb.transactionBuilder.purchaseToken(accounts.b58[3], 'SomeToken', 20, accounts.b58[2]),
+                tronWeb.transactionBuilder.purchaseToken(accounts.b58[5], '1110000', 20, accounts.b58[2]),
                 null,
                 'No asset named '
             )
@@ -624,7 +659,7 @@ describe('TronWeb.transactionBuilder', function () {
         it("should throw if buyer address is invalid", async function () {
 
             await assertThrow(
-                tronWeb.transactionBuilder.purchaseToken(accounts.b58[3], tokenOptions.name, 20, 'sasdadasdas'),
+                tronWeb.transactionBuilder.purchaseToken(accounts.b58[5], tokenID, 20, 'sasdadasdas'),
                 'Invalid buyer address provided'
             )
 
@@ -633,23 +668,21 @@ describe('TronWeb.transactionBuilder', function () {
         it("should throw if amount is invalid", async function () {
 
             await assertThrow(
-                tronWeb.transactionBuilder.purchaseToken(accounts.b58[3], tokenOptions.name, -3, accounts.b58[2]),
+                tronWeb.transactionBuilder.purchaseToken(accounts.b58[5], tokenID, -3, accounts.b58[2]),
                 'Invalid amount provided'
             )
 
             await assertThrow(
-                tronWeb.transactionBuilder.purchaseToken(accounts.b58[3], tokenOptions.name, "some-amount", accounts.b58[2]),
+                tronWeb.transactionBuilder.purchaseToken(accounts.b58[5], tokenID, "some-amount", accounts.b58[2]),
                 'Invalid amount provided'
             )
-
         });
-
-
     });
 
     describe('#sendToken()', function () {
 
         let tokenOptions
+        let tokenID
 
         before(async function () {
 
@@ -657,56 +690,70 @@ describe('TronWeb.transactionBuilder', function () {
 
             tokenOptions = getTokenOptions();
 
-            await broadcaster(tronWeb.transactionBuilder.createToken(tokenOptions, accounts.b58[4]), accounts.pks[4])
+            await broadcaster(tronWeb.transactionBuilder.createToken(tokenOptions, accounts.b58[6]), accounts.pks[6])
 
-            let result = await pollAccountFor(accounts.b58[4], 'asset[0].key', tokenOptions.name)
-            assert.equal(result.asset[0].value, tokenOptions.totalSupply - tokenOptions.frozenAmount)
+            let tokenList
+            while (!tokenList) {
+                tokenList = await tronWeb.trx.getTokensIssuedByAddress(accounts.b58[6])
+            }
 
-            const amount = 50
-            wait(2)
-
-            await broadcaster(tronWeb.transactionBuilder.purchaseToken(accounts.b58[4], tokenOptions.name, amount, accounts.b58[2]), accounts.pks[2])
-            result = await pollAccountFor(accounts.b58[2], function (result) {
-                if (// if we execute only this test
-                    _.get(result, 'asset[0].key') === tokenOptions.name
-                    // if we execute all the tests
-                    || _.get(result, 'asset[1].key') === tokenOptions.name) {
-                    return true
-                }
-            })
-            const tokensAmount = amount * tokenOptions.tokenRatio / tokenOptions.trxRatio
-            assert.isTrue(result.asset[0].value === tokensAmount || result.asset[1].value === tokensAmount)
+            if (isAllowSameTokenNameApproved) {
+                tokenID = tokenList[tokenOptions.name].id
+            } else {
+                tokenID = tokenList[tokenOptions.name].name
+            }
 
         });
 
-        it("should allow accounts [4]  to send a token to accounts[1]", async function () {
+        it('should verify that the asset has been created', async function () {
 
-            const transaction = await tronWeb.transactionBuilder.sendToken(accounts.b58[1], 5, tokenOptions.name, accounts.b58[4])
+            let token
+            if (isAllowSameTokenNameApproved) {
+                token = await tronWeb.trx.getTokenByID(tokenID)
+                assert.equal(token.id, tokenID)
+            } else {
+                token = await tronWeb.trx.getTokenFromID(tokenID)
+            }
+            assert.equal(token.name, tokenOptions.name)
+        })
 
-            const parameter = txPars(transaction);
+        it("should allow accounts [7]  to send a token to accounts[1]", async function () {
 
-            assert.equal(parameter.value.amount, 5)
-            assert.equal(parameter.value.owner_address, accounts.hex[4]);
-            assert.equal(parameter.value.to_address, accounts.hex[1]);
+            this.timeout(10000)
 
-        });
+            wait(4)
 
-        it("should allow accounts [2]  to send a token to accounts[1]", async function () {
-            const transaction = await tronWeb.transactionBuilder.sendToken(accounts.b58[1], 5, tokenOptions.name, accounts.b58[2])
+            await broadcaster(tronWeb.transactionBuilder.purchaseToken(accounts.b58[6], tokenID, 50, accounts.b58[7]), accounts.pks[7])
+
+            wait(1)
+
+            const transaction = await tronWeb.transactionBuilder.sendToken(accounts.b58[1], 5, tokenID, accounts.b58[7])
 
             const parameter = txPars(transaction)
 
             assert.equal(parameter.value.amount, 5)
-            assert.equal(parameter.value.owner_address, accounts.hex[2]);
+            assert.equal(parameter.value.owner_address, accounts.hex[7]);
             assert.equal(parameter.value.to_address, accounts.hex[1]);
 
         });
 
 
+        it("should allow accounts [6]  to send a token to accounts[1]", async function () {
+
+            const transaction = await tronWeb.transactionBuilder.sendToken(accounts.b58[1], 5, tokenID, accounts.b58[6])
+
+            const parameter = txPars(transaction);
+
+            assert.equal(parameter.value.amount, 5)
+            assert.equal(parameter.value.owner_address, accounts.hex[6]);
+            assert.equal(parameter.value.to_address, accounts.hex[1]);
+
+        });
+
         it("should throw if recipient address is invalid", async function () {
 
             await assertThrow(
-                tronWeb.transactionBuilder.sendToken('sadasfdfsgdfgssa', 5, tokenOptions.name, accounts.b58[2]),
+                tronWeb.transactionBuilder.sendToken('sadasfdfsgdfgssa', 5, tokenID, accounts.b58[7]),
                 'Invalid recipient address provided'
             )
 
@@ -715,7 +762,7 @@ describe('TronWeb.transactionBuilder', function () {
         it("should throw if the token Id is invalid", async function () {
 
             await assertThrow(
-                tronWeb.transactionBuilder.sendToken(accounts.b58[1], 5, 143234, accounts.b58[2]),
+                tronWeb.transactionBuilder.sendToken(accounts.b58[1], 5, 143234, accounts.b58[7]),
                 'Invalid token ID provided'
             )
         });
@@ -723,7 +770,7 @@ describe('TronWeb.transactionBuilder', function () {
         it("should throw if origin address is invalid", async function () {
 
             await assertThrow(
-                tronWeb.transactionBuilder.sendToken(accounts.b58[1], 5, tokenOptions.name, 213253453453),
+                tronWeb.transactionBuilder.sendToken(accounts.b58[1], 5, tokenID, 213253453453),
                 'Invalid origin address provided'
             )
 
@@ -732,12 +779,12 @@ describe('TronWeb.transactionBuilder', function () {
         it("should throw if amount is invalid", async function () {
 
             await assertThrow(
-                tronWeb.transactionBuilder.sendToken(accounts.b58[1], -5, tokenOptions.name, accounts.b58[2]),
+                tronWeb.transactionBuilder.sendToken(accounts.b58[1], -5, tokenID, accounts.b58[7]),
                 'Invalid amount provided'
             )
 
             await assertThrow(
-                tronWeb.transactionBuilder.sendToken(accounts.b58[1], 'amount', tokenOptions.name, accounts.b58[2]),
+                tronWeb.transactionBuilder.sendToken(accounts.b58[1], 'amount', tokenID, accounts.b58[7]),
                 'Invalid amount provided'
             )
 

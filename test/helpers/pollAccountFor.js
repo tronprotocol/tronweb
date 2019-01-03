@@ -11,6 +11,9 @@ module.exports = async function pollAccountFor (address, property, value = false
         }
         wait(interval);
         let result = await tronWeb.trx.getAccount(address);
+
+        console.log(property, value)
+
         if (typeof property === 'string') {
             let data = _.get(result, property)
             if (data) {

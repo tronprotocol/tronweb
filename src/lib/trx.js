@@ -1087,7 +1087,7 @@ export default class Trx {
             return callback('Invalid token ID provided');
 
         this.tronWeb.fullNode.request('wallet/getassetissuebyid', {
-            value: this.tronWeb.fromUtf8(tokenID)
+            value: tokenID
         }, 'post').then(token => {
             if(!token.name)
                 return callback('Token does not exist');
