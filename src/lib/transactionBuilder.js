@@ -77,10 +77,7 @@ export default class TransactionBuilder {
             return callback('Invalid origin address provided');
 
         to = this.tronWeb.address.toHex(to);
-
-        if (!/^1[0-9]+/.test(tokenID))
-            tokenID = this.tronWeb.fromUtf8(tokenID);
-
+        tokenID = this.tronWeb.fromUtf8(tokenID);
         from = this.tronWeb.address.toHex(from);
 
         if(to === from)
@@ -115,13 +112,10 @@ export default class TransactionBuilder {
         if(!this.tronWeb.isAddress(buyer))
             return callback('Invalid buyer address provided');
 
-        if (!/^1[0-9]+/.test(tokenID))
-            tokenID = this.tronWeb.fromUtf8(tokenID);
-
         this.tronWeb.fullNode.request('wallet/participateassetissue', {
             to_address: this.tronWeb.address.toHex(issuerAddress),
             owner_address: this.tronWeb.address.toHex(buyer),
-            asset_name: tokenID,
+            asset_name: this.tronWeb.fromUtf8(tokenID),
             amount: parseInt(amount)
         }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
     }
@@ -814,16 +808,13 @@ export default class TransactionBuilder {
         if (!utils.isString(tokenName) || !tokenName.length)
             return callback('Invalid tokenName provided');
 
-        if (!/^1[0-9]+/.test(tokenName))
-            tokenName = this.tronWeb.fromUtf8(tokenName);
-
         if (!utils.isInteger(tokenBalance) || tokenBalance <= 0
             || !utils.isInteger(trxBalance) || trxBalance <= 0)
             return callback('Invalid amount provided');
 
         this.tronWeb.fullNode.request('wallet/exchangecreate', {
             owner_address: this.tronWeb.address.toHex(ownerAddress),
-            first_token_id: tokenName,
+            first_token_id: this.tronWeb.fromUtf8(tokenName),
             first_token_balance: tokenBalance,
             second_token_id: '5f', // Constant for TRX.
             second_token_balance: trxBalance
@@ -894,16 +885,13 @@ export default class TransactionBuilder {
         if(!utils.isString(tokenName) || !tokenName.length)
             return callback('Invalid tokenName provided');
 
-        if (!/^1[0-9]+/.test(tokenName))
-            tokenName = this.tronWeb.fromUtf8(tokenName);
-
         if(!utils.isInteger(tokenAmount) || tokenAmount < 1)
             return callback('Invalid tokenAmount provided');
 
         this.tronWeb.fullNode.request('wallet/exchangeinject', {
             owner_address: this.tronWeb.address.toHex(ownerAddress),
             exchange_id: parseInt(exchangeID),
-            token_id: tokenName,
+            token_id: this.tronWeb.fromUtf8(tokenName),
             quant:parseInt(tokenAmount)
         }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
     }
@@ -931,16 +919,13 @@ export default class TransactionBuilder {
         if(!utils.isString(tokenName) || !tokenName.length)
             return callback('Invalid tokenName provided');
 
-        if (!/^1[0-9]+/.test(tokenName))
-            tokenName = this.tronWeb.fromUtf8(tokenName);
-
         if(!utils.isInteger(tokenAmount) || tokenAmount < 1)
             return callback('Invalid tokenAmount provided');
 
         this.tronWeb.fullNode.request('wallet/exchangewithdraw', {
             owner_address: this.tronWeb.address.toHex(ownerAddress),
             exchange_id: parseInt(exchangeID),
-            token_id: tokenName,
+            token_id: this.tronWeb.fromUtf8(tokenName),
             quant:parseInt(tokenAmount)
         }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
     }
@@ -951,11 +936,11 @@ export default class TransactionBuilder {
      * Use "_" for the constant value for TRX.
      */
     tradeExchangeTokens(exchangeID = false,
-        tokenName = false,
-        tokenAmountSold = 0,
-        tokenAmountExpected = 0,
-        ownerAddress = this.tronWeb.defaultAddress.hex,
-        callback = false) {
+                        tokenName = false,
+                        tokenAmountSold = 0,
+                        tokenAmountExpected = 0,
+                        ownerAddress = this.tronWeb.defaultAddress.hex,
+                        callback = false) {
         if(utils.isFunction(ownerAddress)) {
             callback = ownerAddress;
             ownerAddress = this.tronWeb.defaultAddress.hex;
@@ -973,9 +958,6 @@ export default class TransactionBuilder {
         if(!utils.isString(tokenName) || !tokenName.length)
             return callback('Invalid tokenName provided');
 
-        if (!/^1[0-9]+/.test(tokenName))
-            tokenName = this.tronWeb.fromUtf8(tokenName);
-
         if(!utils.isInteger(tokenAmountSold) || tokenAmountSold < 1)
             return callback('Invalid tokenAmountSold provided');
 
@@ -985,7 +967,7 @@ export default class TransactionBuilder {
         this.tronWeb.fullNode.request('wallet/exchangetransaction', {
             owner_address: this.tronWeb.address.toHex(ownerAddress),
             exchange_id: parseInt(exchangeID),
-            token_id: tokenName,
+            token_id: this.tronWeb.fromAscii(tokenName),
             quant:parseInt(tokenAmountSold),
             expected:parseInt(tokenAmountExpected)
         }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
@@ -995,9 +977,9 @@ export default class TransactionBuilder {
      * Update userFeePercentage.
      */
     updateSetting(contractAddress = false,
-        userFeePercentage = false,
-        ownerAddress = this.tronWeb.defaultAddress.hex,
-        callback = false) {
+                  userFeePercentage = false,
+                  ownerAddress = this.tronWeb.defaultAddress.hex,
+                  callback = false) {
 
         if(utils.isFunction(ownerAddress)) {
             callback = ownerAddress;
@@ -1027,9 +1009,9 @@ export default class TransactionBuilder {
      * Update energy limit.
      */
     updateEnergyLimit(contractAddress = false,
-        originEnergyLimit = false,
-        ownerAddress = this.tronWeb.defaultAddress.hex,
-        callback = false) {
+                      originEnergyLimit = false,
+                      ownerAddress = this.tronWeb.defaultAddress.hex,
+                      callback = false) {
 
         if(utils.isFunction(ownerAddress)) {
             callback = ownerAddress;
