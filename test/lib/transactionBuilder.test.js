@@ -144,8 +144,6 @@ describe('TronWeb.transactionBuilder', function () {
                     const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.b58[8]);
                     const parameter = txPars(transaction);
 
-                    jlog(parameter)
-
                     assert.equal(transaction.txID.length, 64);
                     assert.equal(parameter.value.vote_score, options.voteScore);
                     assert.equal(parameter.value.precision, options.precision);
