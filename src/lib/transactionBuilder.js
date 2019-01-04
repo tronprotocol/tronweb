@@ -594,11 +594,11 @@ export default class TransactionBuilder {
         if(!this.tronWeb.isAddress(issuerAddress))
             return callback('Invalid issuer address provided');
 
-        if(utils.isNotNullOrUndefined(voteScore) && (!utils.isInteger(voteScore) || voteScore < 0))
-            return callback('voteScore must be a positive integer');
+        if(utils.isNotNullOrUndefined(voteScore) && (!utils.isInteger(voteScore) || voteScore <= 0))
+            return callback('voteScore must be a positive integer greater than 0');
 
-        if(utils.isNotNullOrUndefined(precision) && (!utils.isInteger(precision) || precision <= 0))
-            return callback('precision must be a positive integer');
+        if(utils.isNotNullOrUndefined(precision) && (!utils.isInteger(precision) || precision <= 0 || precision > 6))
+            return callback('precision must be a positive integer > 0 and <= 6');
 
         const data = {
             owner_address: this.tronWeb.address.toHex(issuerAddress),
@@ -618,10 +618,10 @@ export default class TransactionBuilder {
                 frozen_days: parseInt(frozenDuration)
             }
         }
-        if (precision) {
+        if (precision && !isNaN(parseInt(precision))) {
             data.precision = parseInt(precision);
         }
-        if (voteScore) {
+        if (voteScore && !isNaN(parseInt(voteScore))) {
             data.vote_score = parseInt(voteScore)
         }
 
