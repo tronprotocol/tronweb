@@ -547,7 +547,8 @@ export default class TransactionBuilder {
             freeBandwidthLimit = 0, // Out of `totalFreeBandwidth`, the amount each token holder get
             frozenAmount = 0,
             frozenDuration = 0,
-            voteScore
+            voteScore,
+            precision
         } = options;
 
         if(!utils.isString(name) || !name.length)
@@ -595,7 +596,10 @@ export default class TransactionBuilder {
         if(utils.isNotNullOrUndefined(voteScore) && (!utils.isInteger(voteScore) || voteScore < 0))
             return callback('voteScore must be a positive integer');
 
-        this.tronWeb.fullNode.request('wallet/createassetissue', {
+        if(utils.isNotNullOrUndefined(precision) && (!utils.isInteger(precision) || precision <= 0))
+            return callback('precision must be a positive integer');
+
+        const data = {
             owner_address: this.tronWeb.address.toHex(issuerAddress),
             name: this.tronWeb.fromUtf8(name),
             abbr: this.tronWeb.fromUtf8(abbreviation),
@@ -604,7 +608,6 @@ export default class TransactionBuilder {
             total_supply: parseInt(totalSupply),
             trx_num: parseInt(trxRatio),
             num: parseInt(tokenRatio),
-            vote_score: parseInt(voteScore),
             start_time: parseInt(saleStart),
             end_time: parseInt(saleEnd),
             free_asset_net_limit: parseInt(freeBandwidth),
@@ -613,7 +616,15 @@ export default class TransactionBuilder {
                 frozen_amount: parseInt(frozenAmount),
                 frozen_days: parseInt(frozenDuration)
             }
-        }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        }
+        if (precision) {
+            data.precision = parseInt(precision);
+        }
+        if (voteScore) {
+            data.vote_score = parseInt(voteScore)
+        }
+
+        this.tronWeb.fullNode.request('wallet/createassetissue', data, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
     }
 
     updateAccount(accountName = false, address = this.tronWeb.defaultAddress.hex, callback = false) {

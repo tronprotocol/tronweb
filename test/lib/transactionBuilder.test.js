@@ -125,6 +125,8 @@ describe('TronWeb.transactionBuilder', function () {
 
             const options = getTokenOptions();
 
+            console.log('accounts.b58[2]',  accounts.b58[2])
+
             const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.b58[2]);
             const parameter = txPars(transaction);
             assert.equal(transaction.txID.length, 64);
