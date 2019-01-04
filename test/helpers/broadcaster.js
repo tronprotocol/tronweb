@@ -1,8 +1,11 @@
 const tronWebBuilder = require('../helpers/tronWebBuilder');
 
-module.exports = async function (func, pk) {
+module.exports = async function (func, pk, transaction) {
     const tronWeb = tronWebBuilder.createInstance();
-    const transaction = await func;
+    if( !transaction) {
+        transaction = await
+            func;
+    }
     const signedTransaction = await tronWeb.trx.sign(transaction, pk);
     const result = {
         transaction,

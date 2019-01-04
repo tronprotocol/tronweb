@@ -142,8 +142,8 @@ describe('TronWeb.transactionBuilder', function () {
                     options.precision = 4;
 
                     const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.b58[8]);
-                    const parameter = txPars(transaction);
 
+                    const parameter = txPars(transaction);
                     assert.equal(transaction.txID.length, 64);
                     assert.equal(parameter.value.vote_score, options.voteScore);
                     assert.equal(parameter.value.precision, options.precision);
@@ -151,6 +151,16 @@ describe('TronWeb.transactionBuilder', function () {
                     await assertEqualHex(parameter.value.abbr, options.abbreviation);
                     assert.equal(parameter.value.owner_address, accounts.hex[8]);
                     assert.equal(parameter.type_url, 'type.googleapis.com/protocol.AssetIssueContract');
+
+                    await broadcaster(null, accounts.pks[8], transaction)
+
+                    const tokenList = await tronWeb.trx.getTokensIssuedByAddress(accounts.b58[8])
+                    const tokenID = tokenList[options.name].id
+                    const token = await tronWeb.trx.getTokenByID(tokenID)
+
+                    assert.equal(token.vote_score, options.voteScore);
+                    assert.equal(token.precision, options.precision);
+
                 } else {
                     this.skip()
                 }
