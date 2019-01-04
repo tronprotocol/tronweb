@@ -547,6 +547,7 @@ export default class TransactionBuilder {
             freeBandwidthLimit = 0, // Out of `totalFreeBandwidth`, the amount each token holder get
             frozenAmount = 0,
             frozenDuration = 0,
+            // for now there is no default for the following values
             voteScore,
             precision
         } = options;
