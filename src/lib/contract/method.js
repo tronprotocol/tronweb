@@ -33,6 +33,7 @@ export default class Method {
         this.defaultOptions = {
             feeLimit: 1000000000,
             callValue: 0,
+            userFeePercentage: 100,
             from: this.tronWeb.defaultAddress.hex, // Only used for send()
             shouldPollResponse: false // Only used for sign()
         };
@@ -96,8 +97,7 @@ export default class Method {
         this.tronWeb.transactionBuilder.triggerSmartContract(
             this.contract.address,
             this.functionSelector,
-            options.feeLimit,
-            options.callValue,
+            options,
             parameters,
             this.tronWeb.address.toHex(options.from),
             (err, transaction) => {
@@ -180,8 +180,7 @@ export default class Method {
             const transaction = await this.tronWeb.transactionBuilder.triggerSmartContract(
                 this.contract.address,
                 this.functionSelector,
-                options.feeLimit,
-                options.callValue,
+                options,
                 parameters,
                 this.tronWeb.address.toHex(address)
             );
