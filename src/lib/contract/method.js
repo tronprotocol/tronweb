@@ -94,11 +94,10 @@ export default class Method {
             value
         }));
 
-        this.tronWeb.transactionBuilder.triggerSmartContract(
+        this.tronWeb.transactionBuilder.triggerSmartContractV2(
             this.contract.address,
             this.functionSelector,
-            options.feeLimit,
-            options.callValue,
+            options,
             parameters,
             this.tronWeb.address.toHex(options.from),
             (err, transaction) => {
@@ -178,11 +177,10 @@ export default class Method {
 
         try {
             const address = privateKey ? this.tronWeb.address.fromPrivateKey(privateKey) : this.tronWeb.defaultAddress.base58;
-            const transaction = await this.tronWeb.transactionBuilder.triggerSmartContract(
+            const transaction = await this.tronWeb.transactionBuilder.triggerSmartContractV2(
                 this.contract.address,
                 this.functionSelector,
-                options.feeLimit,
-                options.callValue,
+                options,
                 parameters,
                 this.tronWeb.address.toHex(address)
             );

@@ -311,7 +311,7 @@ export default class TransactionBuilder {
         const userFeePercentage = options.userFeePercentage || options.consume_user_resource_percent || 0;
         const originEnergyLimit = options.originEnergyLimit || options.origin_energy_limit || 10_000_000;
         const callValue = options.callValue || options.call_value || 0;
-        const tokenValue = options.tokenValue || options.token_value;
+        const tokenValue = options.tokenValue || options.token_value || options.call_token_value;
         const tokenId = options.tokenId || options.token_id;
 
         let {
@@ -371,10 +371,10 @@ export default class TransactionBuilder {
             }
         );
 
-        if(tokenValue && !utils.isInteger(tokenValue) || tokenValue < 0)
+        if(utils.isNotNullOrUndefined(tokenValue) && (!utils.isInteger(tokenValue) || tokenValue < 0))
             return callback('Invalid options.tokenValue provided');
 
-        if(tokenId && !utils.isInteger(tokenId) || tokenValue < 0)
+        if(utils.isNotNullOrUndefined(tokenId) && (!utils.isInteger(tokenId) || tokenId < 0))
             return callback('Invalid options.tokenValue provided');
 
         if(typeof constructorParams !== 'undefined' && constructorParams) {
@@ -420,10 +420,10 @@ export default class TransactionBuilder {
         }
 
         // tokenValue and tokenId can cause errors if provided when the trx10 proposal has not been approved yet. So we set them only if they are passed to the method.
-        if(tokenValue)
-            args.token_value = tokenValue
-        if(tokenId)
-            args.token_id = tokenId
+        if(utils.isNotNullOrUndefined(tokenValue))
+            args.call_token_value = parseInt(tokenValue)
+        if(utils.isNotNullOrUndefined(tokenId))
+            args.token_id = parseInt(tokenId)
 
         this.tronWeb.fullNode.request('wallet/deploycontract', args, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
     }
@@ -437,6 +437,7 @@ export default class TransactionBuilder {
         issuerAddress = this.tronWeb.defaultAddress.hex,
         callback = false
     ) {
+
         if(utils.isFunction(issuerAddress)) {
             callback = issuerAddress;
             issuerAddress = this.tronWeb.defaultAddress.hex;
@@ -457,17 +458,61 @@ export default class TransactionBuilder {
             feeLimit = 1_000_000_000;
         }
 
+        let options = {
+            feeLimit,
+            callValue
+        }
+
+        this.triggerSmartContractV2(
+            contractAddress,
+            functionSelector,
+            options,
+            parameters,
+            issuerAddress,
+            callback
+        );
+    }
+
+    triggerSmartContractV2(
+        contractAddress,
+        functionSelector,
+        options = {},
+        parameters = [],
+        issuerAddress = this.tronWeb.defaultAddress.hex,
+        callback = false
+    ) {
+
+        if(utils.isFunction(issuerAddress)) {
+            callback = issuerAddress;
+            issuerAddress = this.tronWeb.defaultAddress.hex;
+        }
+
+        if(utils.isFunction(parameters)) {
+            callback = parameters;
+            parameters = [];
+        }
+
         if(!callback) {
             return this.injectPromise(
-                this.triggerSmartContract,
+                this.triggerSmartContractV2,
                 contractAddress,
                 functionSelector,
-                feeLimit,
-                callValue,
+                options,
                 parameters,
                 issuerAddress
             );
         }
+
+        let tokenValue = options.tokenValue || options.token_value || options.call_token_value;
+        let tokenId = options.tokenId || options.token_id;
+        let callValue = options.callValue || 0;
+        let feeLimit = options.feeLimit || 1_000_000_000;
+
+        if(utils.isNotNullOrUndefined(tokenValue) && (!utils.isInteger(tokenValue) || tokenValue < 0))
+            return callback('Invalid options.tokenValue provided');
+
+        if(utils.isNotNullOrUndefined(tokenId) && (!utils.isInteger(tokenId) || tokenId < 0))
+            return callback('Invalid options.tokenValue provided');
 
         if(!this.tronWeb.isAddress(contractAddress))
             return callback('Invalid contract address provided');
@@ -514,15 +559,23 @@ export default class TransactionBuilder {
             }
         } else parameters = '';
 
-        this.tronWeb.fullNode.request('wallet/triggersmartcontract', {
+        const args = {
             contract_address: this.tronWeb.address.toHex(contractAddress),
             owner_address: this.tronWeb.address.toHex(issuerAddress),
             function_selector: functionSelector,
             fee_limit: parseInt(feeLimit),
             call_value: parseInt(callValue),
             parameter: parameters
-        }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        };
+
+        if(utils.isNotNullOrUndefined(tokenValue))
+            args.call_token_value = parseInt(tokenValue)
+        if(utils.isNotNullOrUndefined(tokenId))
+            args.token_id = parseInt(tokenId)
+
+        this.tronWeb.fullNode.request('wallet/triggersmartcontract', args, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
     }
+
 
     createToken(options = {}, issuerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
         if(utils.isFunction(issuerAddress)) {
