@@ -307,11 +307,11 @@ export default class TransactionBuilder {
         if(!callback)
             return this.injectPromise(this.createSmartContract, options, issuerAddress);
 
-        const feeLimit = options.feeLimit || options.fee_limit || 1_000_000_000;
-        const userFeePercentage = options.userFeePercentage || options.consume_user_resource_percent || 100;
-        const originEnergyLimit = options.originEnergyLimit || options.origin_energy_limit || 10_000_000;
-        const callValue = options.callValue || options.call_value || 0;
-        const tokenValue = options.tokenValue || options.token_value || options.call_token_value;
+        const feeLimit = options.feeLimit || 1_000_000_000;
+        const userFeePercentage = options.userFeePercentage || 100;
+        const originEnergyLimit = options.originEnergyLimit || 10_000_000;
+        const callValue = options.callValue || 0;
+        const tokenValue = options.tokenValue;
         const tokenId = options.tokenId || options.token_id;
 
         let {
@@ -428,52 +428,18 @@ export default class TransactionBuilder {
         this.tronWeb.fullNode.request('wallet/deploycontract', args, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
     }
 
-    triggerSmartContract(
-        contractAddress,
-        functionSelector,
-        feeLimit = 1_000_000_000,
-        callValue = 0,
-        parameters = [],
-        issuerAddress = this.tronWeb.defaultAddress.hex,
-        callback = false
-    ) {
-
-        if(utils.isFunction(issuerAddress)) {
-            callback = issuerAddress;
-            issuerAddress = this.tronWeb.defaultAddress.hex;
+    triggerSmartContract(...params) {
+        if (typeof params[2] !== 'object') {
+            params[2] = {
+                feeLimit: params[2],
+                callValue: params[3]
+            }
+            params.splice(3,1)
         }
-
-        if(utils.isFunction(parameters)) {
-            callback = parameters;
-            parameters = [];
-        }
-
-        if(utils.isFunction(callValue)) {
-            callback = callValue;
-            callValue = 0;
-        }
-
-        if(utils.isFunction(feeLimit)) {
-            callback = feeLimit;
-            feeLimit = 1_000_000_000;
-        }
-
-        let options = {
-            feeLimit,
-            callValue
-        }
-
-        this.triggerSmartContractV2(
-            contractAddress,
-            functionSelector,
-            options,
-            parameters,
-            issuerAddress,
-            callback
-        );
+        return this._triggerSmartContract(...params);
     }
 
-    triggerSmartContractV2(
+    _triggerSmartContract(
         contractAddress,
         functionSelector,
         options = {},
@@ -494,7 +460,7 @@ export default class TransactionBuilder {
 
         if(!callback) {
             return this.injectPromise(
-                this.triggerSmartContractV2,
+                this._triggerSmartContract,
                 contractAddress,
                 functionSelector,
                 options,
@@ -503,8 +469,8 @@ export default class TransactionBuilder {
             );
         }
 
-        let tokenValue = options.tokenValue || options.token_value || options.call_token_value;
-        let tokenId = options.tokenId || options.token_id;
+        let tokenValue = options.tokenValue;
+        let tokenId = options.tokenId;
         let callValue = options.callValue || 0;
         let feeLimit = options.feeLimit || 1_000_000_000;
 
