@@ -33,6 +33,7 @@ export default class Method {
         this.defaultOptions = {
             feeLimit: 1000000000,
             callValue: 0,
+            userFeePercentage: 100,
             from: this.tronWeb.defaultAddress.hex, // Only used for send()
             shouldPollResponse: false // Only used for sign()
         };
