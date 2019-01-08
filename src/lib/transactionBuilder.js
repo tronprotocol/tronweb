@@ -308,7 +308,7 @@ export default class TransactionBuilder {
             return this.injectPromise(this.createSmartContract, options, issuerAddress);
 
         const feeLimit = options.feeLimit || options.fee_limit || 1_000_000_000;
-        const userFeePercentage = options.userFeePercentage || options.consume_user_resource_percent || 0;
+        const userFeePercentage = options.userFeePercentage || options.consume_user_resource_percent || 100;
         const originEnergyLimit = options.originEnergyLimit || options.origin_energy_limit || 10_000_000;
         const callValue = options.callValue || options.call_value || 0;
         const tokenValue = options.tokenValue || options.token_value || options.call_token_value;
