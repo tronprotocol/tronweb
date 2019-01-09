@@ -3,18 +3,6 @@ import utils from 'utils';
 import * as Ethers from 'ethers';
 
 
-const transactionResultManager = (transaction, callback) => {
-    if(transaction.Error)
-        return callback(transaction.Error);
-
-    if(transaction.result && transaction.result.message) {
-        return callback(
-            this.tronWeb.toUtf8(transaction.result.message)
-        );
-    }
-    callback(null, transaction);
-}
-
 export default class TransactionBuilder {
     constructor(tronWeb = false) {
         if(!tronWeb || !tronWeb instanceof TronWeb)
@@ -22,6 +10,18 @@ export default class TransactionBuilder {
 
         this.tronWeb = tronWeb;
         this.injectPromise = utils.promiseInjector(this);
+    }
+
+    _resultManager(transaction, callback) {
+        if(transaction.Error)
+            return callback(transaction.Error);
+
+        if(transaction.result && transaction.result.message) {
+            return callback(
+                this.tronWeb.toUtf8(transaction.result.message)
+            );
+        }
+        callback(null, transaction);
     }
 
     sendTrx(to = false, amount = 0, from = this.tronWeb.defaultAddress.hex, callback = false) {
@@ -52,7 +52,7 @@ export default class TransactionBuilder {
             to_address: to,
             owner_address: from,
             amount: parseInt(amount)
-        }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        }, 'post').then(transaction => this._resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     sendToken(to = false, amount = 0, tokenID = false, from = this.tronWeb.defaultAddress.hex, callback = false) {
@@ -88,7 +88,7 @@ export default class TransactionBuilder {
             owner_address: from,
             asset_name: tokenID,
             amount: parseInt(amount)
-        }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        }, 'post').then(transaction => this._resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     purchaseToken(issuerAddress = false, tokenID = false, amount = 0, buyer = this.tronWeb.defaultAddress.hex, callback = false) {
@@ -117,7 +117,7 @@ export default class TransactionBuilder {
             owner_address: this.tronWeb.address.toHex(buyer),
             asset_name: this.tronWeb.fromUtf8(tokenID),
             amount: parseInt(amount)
-        }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        }, 'post').then(transaction => this._resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     freezeBalance(amount = 0, duration = 3, resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, receiverAddress = undefined, callback = false) {
@@ -170,7 +170,7 @@ export default class TransactionBuilder {
             data.receiver_address = this.tronWeb.address.toHex(receiverAddress)
         }
 
-        this.tronWeb.fullNode.request('wallet/freezebalance', data, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        this.tronWeb.fullNode.request('wallet/freezebalance', data, 'post').then(transaction => this._resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     unfreezeBalance(resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, receiverAddress = undefined, callback = false) {
@@ -210,7 +210,7 @@ export default class TransactionBuilder {
             data.receiver_address = this.tronWeb.address.toHex(receiverAddress)
         }
 
-        this.tronWeb.fullNode.request('wallet/unfreezebalance', data, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        this.tronWeb.fullNode.request('wallet/unfreezebalance', data, 'post').then(transaction => this._resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     withdrawBlockRewards(address = this.tronWeb.defaultAddress.hex, callback = false) {
@@ -227,7 +227,7 @@ export default class TransactionBuilder {
 
         this.tronWeb.fullNode.request('wallet/withdrawbalance', {
             owner_address: this.tronWeb.address.toHex(address)
-        }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        }, 'post').then(transaction => this._resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     applyForSR(address = this.tronWeb.defaultAddress.hex, url = false, callback = false) {
@@ -249,7 +249,7 @@ export default class TransactionBuilder {
         this.tronWeb.fullNode.request('wallet/createwitness', {
             owner_address: this.tronWeb.address.toHex(address),
             url: this.tronWeb.fromUtf8(url)
-        }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        }, 'post').then(transaction => this._resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     vote(votes = {}, voterAddress = this.tronWeb.defaultAddress.hex, callback = false) {
@@ -295,7 +295,7 @@ export default class TransactionBuilder {
         this.tronWeb.fullNode.request('wallet/votewitnessaccount', {
             owner_address: this.tronWeb.address.toHex(voterAddress),
             votes
-        }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        }, 'post').then(transaction => this._resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     createSmartContract(options = {}, issuerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
@@ -425,7 +425,7 @@ export default class TransactionBuilder {
         if(utils.isNotNullOrUndefined(tokenId))
             args.token_id = parseInt(tokenId)
 
-        this.tronWeb.fullNode.request('wallet/deploycontract', args, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        this.tronWeb.fullNode.request('wallet/deploycontract', args, 'post').then(transaction => this._resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     triggerSmartContract(...params) {
@@ -502,7 +502,7 @@ export default class TransactionBuilder {
 
         if(parameters.length) {
             const abiCoder = new Ethers.utils.AbiCoder();
-            const types = [];
+            let types = [];
             const values = [];
 
             for(let i = 0; i < parameters.length; i++) {
@@ -519,6 +519,14 @@ export default class TransactionBuilder {
             }
 
             try {
+                // workaround for unsupported trcToken type
+                types = types.map(type => {
+                    if (/trcToken/.test(type)) {
+                        type = type.replace(/trcToken/,'uint256')
+                    }
+                    return type
+                })
+
                 parameters = abiCoder.encode(types, values).replace(/^(0x)/, '');
             } catch (ex) {
                 return callback(ex);
@@ -539,7 +547,7 @@ export default class TransactionBuilder {
         if(utils.isNotNullOrUndefined(tokenId))
             args.token_id = parseInt(tokenId)
 
-        this.tronWeb.fullNode.request('wallet/triggersmartcontract', args, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        this.tronWeb.fullNode.request('wallet/triggersmartcontract', args, 'post').then(transaction => this._resultManager(transaction, callback)).catch(err => callback(err));
     }
 
 
@@ -644,7 +652,7 @@ export default class TransactionBuilder {
             data.vote_score = parseInt(voteScore)
         }
 
-        this.tronWeb.fullNode.request('wallet/createassetissue', data, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        this.tronWeb.fullNode.request('wallet/createassetissue', data, 'post').then(transaction => this._resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     updateAccount(accountName = false, address = this.tronWeb.defaultAddress.hex, callback = false) {
@@ -668,7 +676,7 @@ export default class TransactionBuilder {
         this.tronWeb.fullNode.request('wallet/updateaccount', {
             account_name: this.tronWeb.fromUtf8(accountName),
             owner_address: this.tronWeb.address.toHex(address),
-        }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        }, 'post').then(transaction => this._resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     updateToken(options = {}, issuerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
@@ -708,7 +716,7 @@ export default class TransactionBuilder {
             url: this.tronWeb.fromUtf8(url),
             new_limit: parseInt(freeBandwidth),
             new_public_limit: parseInt(freeBandwidthLimit)
-        }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        }, 'post').then(transaction => this._resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     sendAsset(...args) {
@@ -759,7 +767,7 @@ export default class TransactionBuilder {
         this.tronWeb.fullNode.request('wallet/proposalcreate', {
             owner_address: this.tronWeb.address.toHex(issuerAddress),
             parameters: parameters
-        }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        }, 'post').then(transaction => this._resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     /**
@@ -784,7 +792,7 @@ export default class TransactionBuilder {
         this.tronWeb.fullNode.request('wallet/proposaldelete', {
             owner_address: this.tronWeb.address.toHex(issuerAddress),
             proposal_id: parseInt(proposalID)
-        }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        }, 'post').then(transaction => this._resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     /**
@@ -813,7 +821,7 @@ export default class TransactionBuilder {
             owner_address: this.tronWeb.address.toHex(voterAddress),
             proposal_id: parseInt(proposalID),
             is_add_approval: isApproval
-        }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        }, 'post').then(transaction => this._resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     /**
@@ -921,7 +929,7 @@ export default class TransactionBuilder {
             exchange_id: parseInt(exchangeID),
             token_id: this.tronWeb.fromUtf8(tokenName),
             quant: parseInt(tokenAmount)
-        }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        }, 'post').then(transaction => this._resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     /**
@@ -955,7 +963,7 @@ export default class TransactionBuilder {
             exchange_id: parseInt(exchangeID),
             token_id: this.tronWeb.fromUtf8(tokenName),
             quant: parseInt(tokenAmount)
-        }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        }, 'post').then(transaction => this._resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     /**
@@ -998,7 +1006,7 @@ export default class TransactionBuilder {
             token_id: this.tronWeb.fromAscii(tokenName),
             quant: parseInt(tokenAmountSold),
             expected: parseInt(tokenAmountExpected)
-        }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        }, 'post').then(transaction => this._resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     /**
@@ -1030,7 +1038,7 @@ export default class TransactionBuilder {
             owner_address: this.tronWeb.address.toHex(ownerAddress),
             contract_address: this.tronWeb.address.toHex(contractAddress),
             consume_user_resource_percent: userFeePercentage
-        }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        }, 'post').then(transaction => this._resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     /**
@@ -1062,6 +1070,6 @@ export default class TransactionBuilder {
             owner_address: this.tronWeb.address.toHex(ownerAddress),
             contract_address: this.tronWeb.address.toHex(contractAddress),
             origin_energy_limit: originEnergyLimit
-        }, 'post').then(transaction => transactionResultManager(transaction, callback)).catch(err => callback(err));
+        }, 'post').then(transaction => this._resultManager(transaction, callback)).catch(err => callback(err));
     }
 }
