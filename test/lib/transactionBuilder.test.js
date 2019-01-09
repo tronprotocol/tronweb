@@ -819,9 +819,7 @@ describe('TronWeb.transactionBuilder', function () {
                 tronWeb.transactionBuilder.sendToken(accounts.b58[1], 'amount', tokenID, accounts.b58[7]),
                 'Invalid amount provided'
             )
-
         });
-
     });
 
     describe("#createProposal", async function () {
