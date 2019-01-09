@@ -522,7 +522,7 @@ export default class TransactionBuilder {
                 // workaround for unsupported trcToken type
                 types = types.map(type => {
                     if (/trcToken/.test(type)) {
-                        type = type.replace(/trcToken/,'string')
+                        type = type.replace(/trcToken/,'uint256')
                     }
                     return type
                 })
