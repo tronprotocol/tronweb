@@ -502,7 +502,7 @@ export default class TransactionBuilder {
 
         if(parameters.length) {
             const abiCoder = new Ethers.utils.AbiCoder();
-            const types = [];
+            let types = [];
             const values = [];
 
             for(let i = 0; i < parameters.length; i++) {
@@ -519,6 +519,14 @@ export default class TransactionBuilder {
             }
 
             try {
+                // workaround for unsupported trcToken type
+                types = types.map(type => {
+                    if (/trcToken/.test(type)) {
+                        type = type.replace(/trcToken/,'string')
+                    }
+                    return type
+                })
+
                 parameters = abiCoder.encode(types, values).replace(/^(0x)/, '');
             } catch (ex) {
                 return callback(ex);
