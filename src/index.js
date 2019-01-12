@@ -255,7 +255,7 @@ export default class TronWeb extends EventEmitter {
                     return address;
 
                 return utils.crypto.getBase58CheckAddress(
-                    utils.code.hexStr2byteArray(address)
+                    utils.code.hexStr2byteArray(address.replace(/^0x/,'41'))
                 );
             },
             toHex(address) {

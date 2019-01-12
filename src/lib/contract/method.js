@@ -200,7 +200,7 @@ export default class Method {
 
             const broadcast = await this.tronWeb.trx.sendRawTransaction(signedTransaction);
 
-            if(!broadcast.result)
+            if(broadcast.code)
                 return callback('Unknown error: ' + JSON.stringify(broadcast, null, 2));
 
             if(!options.shouldPollResponse)
