@@ -173,7 +173,10 @@ export default class Contract {
             const contract = await this.tronWeb.trx.sendRawTransaction(signedTransaction);
 
             if(contract.code)
-                return callback('Unknown error: ' + JSON.stringify(contract, null, 2));
+                return callback({
+                    error: contract.code,
+                    message: this.tronWeb.toUtf8(contract.message)
+                })
 
             return this.at(signedTransaction.contract_address, callback);
         } catch (ex) {
