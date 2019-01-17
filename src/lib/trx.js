@@ -394,6 +394,9 @@ export default class Trx {
         if(!callback)
             return this.injectPromise(this.getTokenFromID, tokenID);
 
+        if (utils.isInteger(tokenID))
+            tokenID = tokenID.toString()
+
         if(!utils.isString(tokenID) || !tokenID.length)
             return callback('Invalid token ID provided');
 
@@ -718,6 +721,9 @@ export default class Trx {
 
         if(!utils.isInteger(amount) || amount <= 0)
             return callback('Invalid amount provided');
+
+        if (utils.isInteger(tokenID))
+            tokenID = tokenID.toString()
 
         if(!utils.isString(tokenID))
             return callback('Invalid token ID provided');
@@ -1063,6 +1069,9 @@ export default class Trx {
         if(!callback)
             return this.injectPromise(this.getTokenListByName, tokenID);
 
+        if (utils.isInteger(tokenID))
+            tokenID = tokenID.toString()
+
         if(!utils.isString(tokenID) || !tokenID.length)
             return callback('Invalid token ID provided');
 
@@ -1079,6 +1088,9 @@ export default class Trx {
     getTokenByID(tokenID = false, callback = false) {
         if(!callback)
             return this.injectPromise(this.getTokenByID, tokenID);
+
+        if (utils.isInteger(tokenID))
+            tokenID = tokenID.toString()
 
         if(!utils.isString(tokenID) || !tokenID.length)
             return callback('Invalid token ID provided');
