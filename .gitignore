@@ -5,3 +5,4 @@ package-lock.json
 test/setup/TronWeb.js
 coverage
 yarn-error.log
+/dist

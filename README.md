@@ -55,6 +55,19 @@ You can also ship TronWeb in a Chrome extension.
 > yarn add tronweb
 ```
 
+### Browser
+First, don't use the release section of this repo, it has not updated in a long time.
+
+Then easiest way to use TronWeb in a browser is to install it as above and copy the dist file to your working folder. For example:
+```
+cp node_modules/tron-web/dist/TronWeb.js ./js/tronweb.js
+```
+so that you can call it in your HTML page as
+```
+<script src="./js/tronweb.js"><script>
+```
+
+
 ## Example
 
 To look at the examples, first clone this repo, install the dependencies and run the example:
