@@ -2,6 +2,7 @@ import providers from 'lib/providers';
 import utils from 'utils';
 import BigNumber from 'bignumber.js';
 import EventEmitter from 'eventemitter3';
+import querystring from 'querystring';
 
 import TransactionBuilder from 'lib/transactionBuilder';
 import Trx from 'lib/trx';
@@ -159,20 +160,57 @@ export default class TronWeb extends EventEmitter {
         return this.currentProviders();
     }
 
-    getEventResult(contractAddress = false, sinceTimestamp = 0, eventName = false, blockNumber = false, size = 20, page = 1, callback = false) {
 
-        if(utils.isFunction(page)) {
-            callback = page;
-            page = 1;
+    getEventResult(...params) {
+
+        if (typeof params[1] !== 'object') {
+            params[1] = {
+                sinceTimestamp: params[1] || 0,
+                eventName: params[2] || false,
+                blockNumber: params[3] || false,
+                size: params[4] || 20,
+                page: params[5] || 1
+            }
+            params.splice(2, 4)
+
+            // callback:
+            if (!utils.isFunction(params[2])) {
+
+                if (utils.isFunction(params[1].page)) {
+                    params[2] = params[1].page;
+                    params[1].page = 1;
+                } else if (utils.isFunction(params[1].size)) {
+                    params[2] = params[1].size;
+                    params[1].size = 20;
+                    params[1].page = 1;
+                }
+            }
         }
 
-        if(utils.isFunction(size)) {
-            callback = size;
-            size = 20;
-        }
+        return this._getEventResult(...params);
+    }
+
+    _getEventResult(contractAddress = false, options = {}, callback = false) {
+
+        let {
+            sinceTimestamp,
+            eventName,
+            blockNumber,
+            size,
+            page,
+            onlyConfirmed,
+            onlyUnconfirmed,
+            previousLastEventFingerprint
+        } = Object.assign({
+            sinceTimestamp: 0,
+            eventName: false,
+            blockNumber: false,
+            size: 20,
+            page: 1
+        }, options)
 
         if(!callback)
-            return this.injectPromise(this.getEventResult, contractAddress, sinceTimestamp, eventName, blockNumber, size, page);
+            return this.injectPromise(this.getEventResult, contractAddress, options);
 
         if(!this.eventServer)
             callback('No event server configured');
@@ -211,7 +249,22 @@ export default class TronWeb extends EventEmitter {
         if(blockNumber)
             routeParams.push(blockNumber);
 
-        return this.eventServer.request(`event/contract/${routeParams.join('/')}?since=${sinceTimestamp}&size=${size}&page=${page}`).then((data = false) => {
+        const qs = {
+            since: sinceTimestamp,
+            size,
+            page
+        }
+
+        if(onlyConfirmed)
+            qs.onlyConfirmed = onlyConfirmed
+
+        if(onlyUnconfirmed && !onlyConfirmed)
+            qs.onlyUnconfirmed = onlyUnconfirmed
+
+        if (previousLastEventFingerprint)
+            qs.previousLastEventFingerprint = previousLastEventFingerprint
+
+        return this.eventServer.request(`event/contract/${routeParams.join('/')}?${querystring.stringify(qs)}`).then((data = false) => {
             if(!data)
                 return callback('Unknown error occurred');
 
