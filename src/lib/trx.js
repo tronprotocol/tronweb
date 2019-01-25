@@ -242,13 +242,7 @@ export default class Trx {
                     ...from.map(tx => (tx.direction = 'from', tx)),
                     ...to.map(tx => (tx.direction = 'to', tx))
                 ].sort((a, b) => {
-                    if (b.raw_data) {
-                        // soliditynode format
-                        return b.raw_data.timestamp - a.raw_data.timestamp
-                    } else {
-                        // tronscan format
-                        return b.timestamp - a.timestamp
-                    }
+                    return b.raw_data.timestamp - a.raw_data.timestamp
                 }));
             } catch (ex) {
                 return callback(ex);

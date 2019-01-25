@@ -469,10 +469,15 @@ export default class TransactionBuilder {
             );
         }
 
-        let tokenValue = options.tokenValue;
-        let tokenId = options.tokenId;
-        let callValue = options.callValue || 0;
-        let feeLimit = options.feeLimit || 1_000_000_000;
+        let {
+            tokenValue,
+            tokenId,
+            callValue,
+            feeLimit
+        } = Object.assign({
+            callValue: 0,
+            feeLimit: 1_000_000_000
+        }, options)
 
         if(utils.isNotNullOrUndefined(tokenValue) && (!utils.isInteger(tokenValue) || tokenValue < 0))
             return callback('Invalid options.tokenValue provided');
