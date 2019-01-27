@@ -877,7 +877,7 @@ export default class TransactionBuilder {
         }
 
         if(!callback)
-            return this.injectPromise(this.createTRXExchange, firstTokenName, firstTokenBalance, secondTokenName, secondTokenBalance, ownerAddress);
+            return this.injectPromise(this.createTokenExchange, firstTokenName, firstTokenBalance, secondTokenName, secondTokenBalance, ownerAddress);
 
         if(!this.tronWeb.isAddress(ownerAddress))
             return callback('Invalid address provided');
