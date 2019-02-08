@@ -130,7 +130,7 @@ Specify the API endpoints:
 ```js
 const HttpProvider = TronWeb.providers.HttpProvider;
 const fullNode = new HttpProvider('https://api.trongrid.io'); // Full node http endpoint
-const solidityNode = new HttpProvider('https://api.trongrid.io:'); // Solidity node http endpoint
+const solidityNode = new HttpProvider('https://api.trongrid.io'); // Solidity node http endpoint
 const eventServer = 'https://api.trongrid.io'; // Contract events http endpoint
 ```
 The provider above is optional, you can just use a url for the nodes instead, like here:
