@@ -99,7 +99,7 @@ export default class Method {
             this.functionSelector,
             options,
             parameters,
-            this.tronWeb.address.toHex(options.from),
+            options.from ? this.tronWeb.address.toHex(options.from) : this.tronWeb.defaultAddress.hex,
             (err, transaction) => {
                 if(err)
                     return callback(err);
