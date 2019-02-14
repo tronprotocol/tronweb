@@ -200,7 +200,8 @@ export default class TronWeb extends EventEmitter {
             page,
             onlyConfirmed,
             onlyUnconfirmed,
-            previousLastEventFingerprint
+            previousLastEventFingerprint,
+            rawResponse
         } = Object.assign({
             sinceTimestamp: 0,
             eventName: false,
@@ -272,7 +273,7 @@ export default class TronWeb extends EventEmitter {
                 return callback(data);
 
             return callback(null,
-                data.map(event => utils.mapEvent(event))
+                rawResponse === true ? data : data.map(event => utils.mapEvent(event))
             );
         }).catch(err => callback((err.response && err.response.data) || err));
     }
