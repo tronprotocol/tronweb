@@ -192,7 +192,7 @@ export default class Contract {
             const contract = await this.tronWeb.trx.getContract(contractAddress);
 
             if(!contract.contract_address)
-                callback('Unknown error: ' + JSON.stringify(contract, null, 2));
+                return callback('Unknown error: ' + JSON.stringify(contract, null, 2));
 
             this.address = contract.contract_address;
             this.bytecode = contract.bytecode;
@@ -200,7 +200,7 @@ export default class Contract {
 
             this.loadAbi(contract.abi.entrys);
 
-            callback(null, this);
+            return callback(null, this);
         } catch (ex) {
             if(ex.toString().includes('does not exist'))
                 return callback('Contract has not been deployed on the network');
