@@ -36,14 +36,17 @@ describe('TronWeb.trx', function () {
 
     });
 
-    describe("#signTransaction", async function () {
+    describe.only("#signTransaction", async function () {
 
         it('should sign a transaction', async function () {
 
             const transaction = await tronWeb.transactionBuilder.freezeBalance(100e6, 3, 'BANDWIDTH', accounts.b58[1])
-            const signedTransaction = await tronWeb.trx.sign(transaction, accounts.pks[1]);
+            let signedTransaction = await tronWeb.trx.sign(transaction, accounts.pks[1]);
 
-            // console.log(JSON.stringify(signedTransaction))
+
+            signedTransaction = await tronWeb.trx.sign(signedTransaction, accounts.pks[2])
+
+console.log(JSON.stringify(signedTransaction))
 
             // ethUtil.
 
