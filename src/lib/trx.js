@@ -619,8 +619,8 @@ export default class Trx {
         if(!utils.isObject(transaction))
             return callback('Invalid transaction provided');
 
-        if(transaction.signature)
-            return callback('Transaction is already signed');
+        // if(transaction.signature)
+        //     return callback('Transaction is already signed');
 
         try {
             const address = this.tronWeb.address.toHex(
