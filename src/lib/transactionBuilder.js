@@ -21,7 +21,8 @@ export default class TransactionBuilder {
                 this.tronWeb.toUtf8(transaction.result.message)
             );
         }
-        callback(null, transaction);
+        
+        return callback(null, transaction);
     }
 
     sendTrx(to = false, amount = 0, from = this.tronWeb.defaultAddress.hex, callback = false) {

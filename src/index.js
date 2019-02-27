@@ -214,7 +214,7 @@ export default class TronWeb extends EventEmitter {
             return this.injectPromise(this.getEventResult, contractAddress, options);
 
         if(!this.eventServer)
-            callback('No event server configured');
+            return callback('No event server configured');
 
         const routeParams = [];
 
@@ -283,7 +283,7 @@ export default class TronWeb extends EventEmitter {
             return this.injectPromise(this.getEventByTransactionID, transactionID);
 
         if(!this.eventServer)
-            callback('No event server configured');
+            return callback('No event server configured');
 
         return this.eventServer.request(`event/transaction/${transactionID}`).then((data = false) => {
             if(!data)
@@ -459,7 +459,7 @@ export default class TronWeb extends EventEmitter {
         const account = utils.accounts.generateAccount();
 
         if(callback)
-            callback(null, account);
+            return callback(null, account);
 
         return account;
     }
@@ -468,7 +468,7 @@ export default class TronWeb extends EventEmitter {
         if(!callback)
             return this.injectPromise(this.isConnected);
 
-        callback(null, {
+        return callback(null, {
             fullNode: await this.fullNode.isConnected(),
             solidityNode: await this.solidityNode.isConnected(),
             eventServer: this.eventServer && await this.eventServer.isConnected()
