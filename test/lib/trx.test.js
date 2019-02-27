@@ -36,7 +36,7 @@ describe('TronWeb.trx', function () {
 
     });
 
-    describe.only("#signTransaction", async function () {
+    describe("#multiSignTransaction", async function () {
 
         it('should sign a transaction', async function () {
 
@@ -44,11 +44,9 @@ describe('TronWeb.trx', function () {
             let signedTransaction = await tronWeb.trx.sign(transaction, accounts.pks[1]);
 
 
-            signedTransaction = await tronWeb.trx.sign(signedTransaction, accounts.pks[2])
+            signedTransaction = await tronWeb.trx.sign(signedTransaction, accounts.pks[2], null, true)
 
-console.log(JSON.stringify(signedTransaction))
-
-            // ethUtil.
+            assert.equal(signedTransaction.signature.length, 2)
 
         })
 
