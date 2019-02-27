@@ -52,7 +52,7 @@ describe('TronWeb.utils.base58', function () {
 
             const decoded = tronWeb.utils.base58.decode58(input)
 
-            assert.equal(Buffer.compare(expected, new Buffer(decoded)), 0);
+            assert.equal(Buffer.compare(expected, Buffer.from(decoded, 'utf-8')), 0);
 
         });
 
