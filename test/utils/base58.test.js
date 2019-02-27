@@ -48,7 +48,7 @@ describe('TronWeb.utils.base58', function () {
             const tronWeb = tronWebBuilder.createInstance();
 
             const input = 'cnTsZgYWJRAw';
-            const expected = new Buffer('0xbf7e698');
+            const expected = Buffer.from('0xbf7e698', 'utf-8');
 
             const decoded = tronWeb.utils.base58.decode58(input)
 
