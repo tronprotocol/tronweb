@@ -33,6 +33,15 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
+    getConfirmedCurrentBlock(callback = false) {
+        if(!callback)
+            return this.injectPromise(this.getConfirmedCurrentBlock);
+
+        this.tronWeb.solidityNode.request('walletsolidity/getnowblock').then(block => {
+            callback(null, block);
+        }).catch(err => callback(err));
+    }
+
     getBlock(block = this.tronWeb.defaultBlock, callback = false) {
         if(utils.isFunction(block)) {
             callback = block;
