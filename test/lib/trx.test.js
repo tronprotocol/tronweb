@@ -36,42 +36,21 @@ describe('TronWeb.trx', function () {
 
     });
 
-    describe("#signTransaction", async function () {
+    describe("#multiSignTransaction", async function () {
 
         it('should sign a transaction', async function () {
 
             const transaction = await tronWeb.transactionBuilder.freezeBalance(100e6, 3, 'BANDWIDTH', accounts.b58[1])
-            const signedTransaction = await tronWeb.trx.sign(transaction, accounts.pks[1]);
+            let signedTransaction = await tronWeb.trx.sign(transaction, accounts.pks[1]);
 
-            // console.log(JSON.stringify(signedTransaction))
 
-            // ethUtil.
+            signedTransaction = await tronWeb.trx.sign(signedTransaction, accounts.pks[2], null, true)
+
+            assert.equal(signedTransaction.signature.length, 2)
 
         })
 
     });
-
-
-    describe("#sendRawTransaction", async function () {
-
-        // it('should send a transaction with data', async function () {
-        //
-        //     // TODO This fails. We want it to work.
-        //
-        //     this.timeout(20000)
-        //
-        //     const transaction = await tronWeb.transactionBuilder.freezeBalance(100e6, 3, 'BANDWIDTH', accounts.b58[1])
-        //
-        //     const someData = tronWeb.toHex('some-data').substring(2)
-        //
-        //     transaction.raw_data.data = someData
-        //     const signedTransaction = await tronWeb.trx.sign(transaction, accounts.pks[1]);
-        //     const result = await tronWeb.trx.sendRawTransaction(signedTransaction)
-        //     assert.equal(result.transaction.raw_data.data, someData)
-        //
-        // })
-    });
-
 
     describe("#broadcast", async function () {
 

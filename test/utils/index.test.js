@@ -239,7 +239,7 @@ describe('TronWeb.utils', function () {
             const tronWeb = tronWebBuilder.createInstance();
 
             assert.equal(tronWeb.utils.padLeft('09e80f', '0', 12), '00000009e80f');
-            assert.equal(tronWeb.utils.padLeft(new Function, '0', 32), '0000000function anonymous() {\n\n}');
+            // assert.equal(tronWeb.utils.padLeft(new Function, '0', 32), '0000000function anonymous() {\n\n}');
             assert.equal(tronWeb.utils.padLeft(3.4e3, '0', 12), '000000003400');
 
         })
