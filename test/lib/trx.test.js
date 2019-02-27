@@ -52,28 +52,6 @@ describe('TronWeb.trx', function () {
 
     });
 
-
-    describe("#sendRawTransaction", async function () {
-
-        // it('should send a transaction with data', async function () {
-        //
-        //     // TODO This fails. We want it to work.
-        //
-        //     this.timeout(20000)
-        //
-        //     const transaction = await tronWeb.transactionBuilder.freezeBalance(100e6, 3, 'BANDWIDTH', accounts.b58[1])
-        //
-        //     const someData = tronWeb.toHex('some-data').substring(2)
-        //
-        //     transaction.raw_data.data = someData
-        //     const signedTransaction = await tronWeb.trx.sign(transaction, accounts.pks[1]);
-        //     const result = await tronWeb.trx.sendRawTransaction(signedTransaction)
-        //     assert.equal(result.transaction.raw_data.data, someData)
-        //
-        // })
-    });
-
-
     describe("#broadcast", async function () {
 
         let signedTransaction
