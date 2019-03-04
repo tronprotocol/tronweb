@@ -7,6 +7,7 @@ import querystring from 'querystring';
 import TransactionBuilder from 'lib/transactionBuilder';
 import Trx from 'lib/trx';
 import Contract from 'lib/contract';
+import Plugin from 'lib/plugin';
 
 import {keccak256} from 'js-sha3';
 
@@ -16,6 +17,7 @@ export default class TronWeb extends EventEmitter {
     static TransactionBuilder = TransactionBuilder;
     static Trx = Trx;
     static Contract = Contract;
+    static Plugin = Plugin;
 
     constructor(fullNode, solidityNode, eventServer = false, privateKey = false) {
         super();
@@ -57,6 +59,7 @@ export default class TronWeb extends EventEmitter {
 
         this.transactionBuilder = new TransactionBuilder(this);
         this.trx = new Trx(this);
+        this.plugin = new Plugin(this);
         this.utils = utils;
 
         this.injectPromise = utils.promiseInjector(this);
