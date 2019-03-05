@@ -1098,6 +1098,7 @@ export default class TransactionBuilder {
                     || !utils.isInteger(key.weight)
                     || key.weight > permissions.threshold
                     || key.weight < 1
+                    || (type === 2 && !permissions.operations)
                 ) {
                     return false
                 }
