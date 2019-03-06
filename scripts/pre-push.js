@@ -11,7 +11,7 @@ try {
     unpushed = execSync(`git log HEAD...origin --name-status`).toString().split('\n');
 }
 
-execSync('yarn build')
+console.log(execSync('yarn build').toString())
 
 // const isSourceChanged = unpushed.some(logLine => logLine.includes('src/'));
 // const isDistTracked = isSourceChanged ? unpushed.some(logLine => logLine.includes('dist/TronWeb.js')) : true;
