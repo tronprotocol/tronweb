@@ -1,6 +1,6 @@
 {
     "name": "tronweb",
-    "version": "2.2.3",
+    "version": "2.2.4",
     "description": "JavaScript SDK that encapsulates the TRON Node HTTP API",
     "main": "dist/TronWeb.node.js",
     "scripts": {
@@ -26,7 +26,6 @@
         "elliptic": "^6.4.1",
         "ethers": "^4.0.7",
         "eventemitter3": "^3.1.0",
-        "js-sha3": "^0.8.0",
         "jssha": "^2.3.1",
         "semver": "^5.6.0",
         "validator": "^10.7.1"

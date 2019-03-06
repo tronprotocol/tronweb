@@ -9,8 +9,7 @@ import TransactionBuilder from 'lib/transactionBuilder';
 import Trx from 'lib/trx';
 import Contract from 'lib/contract';
 import Plugin from 'lib/plugin';
-
-import {keccak256} from 'js-sha3';
+import * as Ethers from 'ethers';
 
 export default class TronWeb extends EventEmitter {
     static providers = providers;
@@ -336,7 +335,7 @@ export default class TronWeb extends EventEmitter {
     }
 
     static sha3(string, prefix = true) {
-        return (prefix ? '0x' : '') + keccak256(string);
+        return (prefix ? '0x' : '') + Ethers.utils.keccak256(Buffer.from(string, 'utf-8')).toString().substring(2);
     }
 
     static toHex(val) {
@@ -460,11 +459,8 @@ export default class TronWeb extends EventEmitter {
         }
     }
 
-    static async createAccount(callback = false) {
+    static createAccount() {
         const account = utils.accounts.generateAccount();
-
-        if(callback)
-            return callback(null, account);
 
         return account;
     }

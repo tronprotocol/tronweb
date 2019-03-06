@@ -21,7 +21,7 @@ export default class TransactionBuilder {
                 this.tronWeb.toUtf8(transaction.result.message)
             );
         }
-        
+
         return callback(null, transaction);
     }
 
@@ -504,7 +504,7 @@ export default class TransactionBuilder {
         if(!utils.isArray(parameters))
             return callback('Invalid parameters provided');
 
-        if(!this.tronWeb.isAddress(issuerAddress))
+        if(issuerAddress !== false && !this.tronWeb.isAddress(issuerAddress))
             return callback('Invalid issuer address provided');
 
         functionSelector = functionSelector.replace('/\s*/g', '');
@@ -1081,4 +1081,92 @@ export default class TransactionBuilder {
             origin_energy_limit: originEnergyLimit
         }, 'post').then(transaction => this._resultManager(transaction, callback)).catch(err => callback(err));
     }
+
+    checkPermissions(permissions, type) {
+        if (permissions) {
+            if (permissions.type !== type
+                || !permissions.permission_name
+                || !utils.isString(permissions.permission_name)
+                || !utils.isInteger(permissions.threshold)
+                || permissions.threshold < 1
+                || !permissions.keys
+            ) {
+                return false
+            }
+            for (let key of permissions.key) {
+                if (!this.tronWeb.isAddress(key.address)
+                    || !utils.isInteger(key.weight)
+                    || key.weight > permissions.threshold
+                    || key.weight < 1
+                    || (type === 2 && !permissions.operations)
+                ) {
+                    return false
+                }
+            }
+        }
+        return true
+    }
+
+    updateAccountPermissions(ownerAddress = this.tronWeb.defaultAddress.hex,
+                             ownerPermissions = false,
+                             witnessPermissions = false,
+                             activesPermissions = false,
+                             callback = false) {
+
+        if (utils.isFunction(activesPermissions)) {
+            callback = activesPermissions;
+            activesPermissions = false;
+        }
+
+        if (utils.isFunction(witnessPermissions)) {
+            callback = witnessPermissions;
+            witnessPermissions = activesPermissions = false;
+        }
+
+        if (utils.isFunction(ownerPermissions)) {
+            callback = ownerPermissions;
+            ownerPermissions = witnessPermissions = activesPermissions = false;
+        }
+
+        if (!callback)
+            return this.injectPromise(this.updateAccountPermissions, ownerAddress, ownerPermissions, witnessPermissions, activesPermissions);
+
+        if (!this.tronWeb.isAddress(ownerAddress))
+            return callback('Invalid ownerAddress provided');
+
+        if (!this.checkPermissions(ownerPermissions, 0)) {
+            return callback('Invalid ownerPermissions provided');
+        }
+
+        if (!this.checkPermissions(witnessPermissions, 1)) {
+            return callback('Invalid witnessPermissions provided');
+        }
+
+        if (!Array.isArray(activesPermissions)) {
+            activesPermissions = [activesPermissions]
+        }
+
+        for (let activesPermission of activesPermissions) {
+            if (!this.checkPermissions(activesPermission, 2)) {
+                return callback('Invalid activesPermissions provided');
+            }
+        }
+
+        const data = {
+            owner_address: ownerAddress
+        }
+        if (ownerPermissions) {
+            data.owner = ownerPermissions
+        }
+        if (witnessPermissions) {
+            data.witness = witnessPermissions
+        }
+        if (activesPermissions) {
+            data.actives = activesPermissions.length === 1 ? activesPermissions[0] : activesPermissions
+        }
+
+        this.tronWeb.fullNode.request('wallet/accountpermissionupdate', data, 'post').then(transaction => this._resultManager(transaction, callback)).catch(err => callback(err));
+    }
+
+
 }
