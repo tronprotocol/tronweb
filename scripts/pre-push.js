@@ -13,14 +13,6 @@ try {
 
 console.log(execSync('yarn build').toString())
 
-// const isSourceChanged = unpushed.some(logLine => logLine.includes('src/'));
-// const isDistTracked = isSourceChanged ? unpushed.some(logLine => logLine.includes('dist/TronWeb.js')) : true;
-//
-// if(!isDistTracked) {
-//     console.log(chalk.red('Please run: yarn build'));
-//     process.exit(1);
-// }
-
 let errors = false
 const test = spawn('yarn', ['test:node'])
 
