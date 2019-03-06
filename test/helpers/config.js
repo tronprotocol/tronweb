@@ -1,4 +1,4 @@
-import * as Ethers from 'ethers';
+const Ethers = require('ethers');
 
 const fullHost = "http://127.0.0.1:" + (process.env.HOST_PORT || 9090)
 
