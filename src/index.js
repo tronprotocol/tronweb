@@ -330,7 +330,7 @@ export default class TronWeb extends EventEmitter {
     }
 
     static sha3(string, prefix = true) {
-        return (prefix ? '0x' : '') + Ethers.utils.keccak256(string);
+        return (prefix ? '0x' : '') + Ethers.utils.keccak256(Buffer.from(string, 'utf-8')).toString().substring(2);
     }
 
     static toHex(val) {

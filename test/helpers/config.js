@@ -1,5 +1,3 @@
-const Ethers = require('ethers');
-
 const fullHost = "http://127.0.0.1:" + (process.env.HOST_PORT || 9090)
 
 module.exports = {
@@ -20,7 +18,7 @@ module.exports = {
         freeBandwidthLimit: 100
     },
     getTokenOptions: () => {
-        const rnd = Ethers.utils.keccak256(Math.random().toString()).substring(0, 4)
+        const rnd = Math.random().toString().substring(2, 6);
         return {
             name: `Token${rnd}`,
             abbreviation: `T${rnd.substring(2).toUpperCase()}`,

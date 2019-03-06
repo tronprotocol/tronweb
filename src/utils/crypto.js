@@ -105,7 +105,7 @@ export function computeAddress(pubBytes) {
     if(pubBytes.length === 65)
         pubBytes = pubBytes.slice(1);
 
-    const hash = Ethers.utils.keccak256(pubBytes).toString();
+    const hash = Ethers.utils.keccak256(pubBytes).toString().substring(2);
     const addressHex = ADDRESS_PREFIX + hash.substring(24);
 
     return hexStr2byteArray(addressHex);
