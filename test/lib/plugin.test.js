@@ -4,6 +4,7 @@ const assertThrow = require('../helpers/assertThrow');
 const tronWebBuilder = require('../helpers/tronWebBuilder');
 const TronWeb = tronWebBuilder.TronWeb;
 const GetNowBlock = require('../helpers/getnowblock');
+const jlog = require('../helpers/jlog')
 
 const assert = chai.assert;
 
@@ -29,8 +30,8 @@ describe('TronWeb.lib.plugin', async function () {
         it('should register the plugin GetNowBlock', async function () {
 
             tronWeb.plugin.register(GetNowBlock)
-            const result = await tronWeb.trx.getCurrentBlock()
 
+            const result = await tronWeb.trx.getCurrentBlock()
             assert.isTrue(result.fromPlugin)
 
         })

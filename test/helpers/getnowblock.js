@@ -1,12 +1,12 @@
 
 class GetNowBlock {
 
-    constructor(tronWeb = false) {
-        if (!tronWeb)
-            throw new Error('Expected instance of TronWeb');
-
-        this.tronWeb = tronWeb;
-    }
+    // constructor(tronWeb = false) {
+    //     if (!tronWeb)
+    //         throw new Error('Expected instance of TronWeb');
+    //
+    //     this.tronWeb = tronWeb;
+    // }
 
     async getLatestBlock(callback = false) {
 
@@ -21,10 +21,11 @@ class GetNowBlock {
 
     pluginInterface() {
         return {
-            supportedVersions: '^2.2.2',
-            packages: {
+            requires: '^2.2.2',
+            components: {
                 trx: {
-                    getCurrentBlock: this.getLatestBlock
+                    getCurrentBlock: this.getLatestBlock,
+                    parseToken: function () {}
                 }
             }
         }

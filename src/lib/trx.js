@@ -12,6 +12,8 @@ export default class Trx {
 
         this.tronWeb = tronWeb;
         this.injectPromise = utils.promiseInjector(this);
+
+        this.methodBlacklist = ['parseToken'];
     }
 
     parseToken(token) {

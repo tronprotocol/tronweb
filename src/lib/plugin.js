@@ -11,21 +11,36 @@ export default class Plugin {
     }
 
     async register(Plugin) {
-        let pluginInterface
-        const plugin = new Plugin(this.tronWeb)
-        if (utils.isFunction(plugin.pluginInterface)) {
-            pluginInterface = plugin.pluginInterface()
+        let pluginInterface = {
+            requires: '0.0.0',
+            components: {}
         }
-        if (semver.satisfies(TronWeb.version, pluginInterface.supportedVersions)) {
-            for (let klass in pluginInterface.packages) {
-                if (this.tronWeb.hasOwnProperty(klass)) {
-                    // method override
-                    let methods = pluginInterface.packages[klass]
+        try {
+            const plugin = new Plugin(this.tronWeb)
+            if (utils.isFunction(plugin.pluginInterface)) {
+                pluginInterface = plugin.pluginInterface()
+            }
+            if (semver.satisfies(TronWeb.version, pluginInterface.requires)) {
+                for (let component in pluginInterface.components) {
+                    if (!this.tronWeb.hasOwnProperty(component)) {
+                        // TODO implement new sub-classes
+                        continue
+                    }
+                    let methods = pluginInterface.components[component]
+                    let methodBlacklist = this.tronWeb[component].methodBlacklist
                     for (let method in methods) {
-                        this.tronWeb[klass][method] = methods[method].bind(this.tronWeb[klass])
+                        if (this.tronWeb[component][method] &&
+                        methodBlacklist.includes(method)) {
+                            console.warn(`Method ${method} cannot be overridden`)
+                        }
+                        this.tronWeb[component][method] = methods[method].bind(this.tronWeb[component])
                     }
                 }
+            } else {
+                console.warn('The plugin is not compatible with this version of TronWeb')
             }
+        } catch (err) {
+            console.error(err.message)
         }
     }
 }
