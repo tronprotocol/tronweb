@@ -3,6 +3,7 @@ import utils from 'utils';
 import BigNumber from 'bignumber.js';
 import EventEmitter from 'eventemitter3';
 import querystring from 'querystring';
+import {version} from '../package.json';
 
 import TransactionBuilder from 'lib/transactionBuilder';
 import Trx from 'lib/trx';
@@ -18,6 +19,7 @@ export default class TronWeb extends EventEmitter {
     static Trx = Trx;
     static Contract = Contract;
     static Plugin = Plugin;
+    static version = version;
 
     constructor(fullNode, solidityNode, eventServer = false, privateKey = false) {
         super();
