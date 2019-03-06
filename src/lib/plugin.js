@@ -10,38 +10,43 @@ export default class Plugin {
         this.tronWeb = tronWeb;
     }
 
-    async register(Plugin) {
+    register(Plugin) {
         let pluginInterface = {
             requires: '0.0.0',
             components: {}
         }
-        try {
-            const plugin = new Plugin(this.tronWeb)
-            if (utils.isFunction(plugin.pluginInterface)) {
-                pluginInterface = plugin.pluginInterface()
-            }
-            if (semver.satisfies(TronWeb.version, pluginInterface.requires)) {
-                for (let component in pluginInterface.components) {
-                    if (!this.tronWeb.hasOwnProperty(component)) {
-                        // TODO implement new sub-classes
+        let result = {
+            plugged: [],
+            skipped: []
+        }
+        const plugin = new Plugin(this.tronWeb)
+        if (utils.isFunction(plugin.pluginInterface)) {
+            pluginInterface = plugin.pluginInterface()
+        }
+        if (semver.satisfies(TronWeb.version, pluginInterface.requires)) {
+            for (let component in pluginInterface.components) {
+                if (!this.tronWeb.hasOwnProperty(component)) {
+                    // TODO implement new sub-classes
+                    continue
+                }
+                let methods = pluginInterface.components[component]
+                let pluginNoOverride = this.tronWeb[component].pluginNoOverride || []
+                for (let method in methods) {
+                    if (this.tronWeb[component][method] &&
+                        (pluginNoOverride.includes(method) // blacklisted methods
+                            || /^_/.test(method)) // private methods
+                    ) {
+                        result.skipped.push(method)
                         continue
                     }
-                    let methods = pluginInterface.components[component]
-                    let methodBlacklist = this.tronWeb[component].methodBlacklist
-                    for (let method in methods) {
-                        if (this.tronWeb[component][method] &&
-                        methodBlacklist.includes(method)) {
-                            console.warn(`Method ${method} cannot be overridden`)
-                        }
-                        this.tronWeb[component][method] = methods[method].bind(this.tronWeb[component])
-                    }
+                    this.tronWeb[component][method] = methods[method].bind(this.tronWeb[component])
+                    result.plugged.push(method)
                 }
-            } else {
-                console.warn('The plugin is not compatible with this version of TronWeb')
             }
-        } catch (err) {
-            console.error(err.message)
+        } else {
+            throw new Error('The plugin is not compatible with this version of TronWeb')
         }
+        return result
     }
 }
 

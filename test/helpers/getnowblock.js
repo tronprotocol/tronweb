@@ -8,7 +8,7 @@ class GetNowBlock {
     //     this.tronWeb = tronWeb;
     // }
 
-    async getLatestBlock(callback = false) {
+    async someMethod(callback = false) {
 
         if(!callback)
             return this.injectPromise(this.getCurrentBlock);
@@ -24,8 +24,16 @@ class GetNowBlock {
             requires: '^2.2.2',
             components: {
                 trx: {
-                    getCurrentBlock: this.getLatestBlock,
-                    parseToken: function () {}
+                    // will be overridden
+                    getCurrentBlock: this.someMethod,
+
+                    // will be added
+                    getLatestBlock: this.someMethod,
+
+                    // will be skipped
+                    _parseToken: function () {}
+
+
                 }
             }
         }

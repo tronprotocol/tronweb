@@ -13,10 +13,11 @@ export default class Trx {
         this.tronWeb = tronWeb;
         this.injectPromise = utils.promiseInjector(this);
 
-        this.methodBlacklist = ['parseToken'];
+        // example
+        // this.pluginNoOverride = ['_parseToken'];
     }
 
-    parseToken(token) {
+    _parseToken(token) {
         return {
             ...token,
             name: this.tronWeb.toUtf8(token.name),
@@ -394,7 +395,7 @@ export default class Trx {
                 return callback(null, {});
 
             const tokens = assetIssue.map(token => {
-                return this.parseToken(token);
+                return this._parseToken(token);
             }).reduce((tokens, token) => {
                 return tokens[token.name] = token, tokens;
             }, {});
@@ -419,7 +420,7 @@ export default class Trx {
             if(!token.name)
                 return callback('Token does not exist');
 
-            callback(null, this.parseToken(token));
+            callback(null, this._parseToken(token));
         }).catch(err => callback(err));
     }
 
@@ -493,7 +494,7 @@ export default class Trx {
 
         if(!limit) {
             return this.tronWeb.fullNode.request('wallet/getassetissuelist').then(({assetIssue = []}) => {
-                callback(null, assetIssue.map(token => this.parseToken(token)));
+                callback(null, assetIssue.map(token => this._parseToken(token)));
             }).catch(err => callback(err));
         }
 
@@ -501,7 +502,7 @@ export default class Trx {
             offset: parseInt(offset),
             limit: parseInt(limit)
         }, 'post').then(({assetIssue = []}) => {
-            callback(null, assetIssue.map(token => this.parseToken(token)));
+            callback(null, assetIssue.map(token => this._parseToken(token)));
         }).catch(err => callback(err));
     }
 
@@ -1104,7 +1105,7 @@ export default class Trx {
             if(!token.name)
                 return callback('Token does not exist');
 
-            callback(null, this.parseToken(token));
+            callback(null, this._parseToken(token));
         }).catch(err => callback(err));
     }
 
@@ -1124,7 +1125,7 @@ export default class Trx {
             if(!token.name)
                 return callback('Token does not exist');
 
-            callback(null, this.parseToken(token));
+            callback(null, this._parseToken(token));
         }).catch(err => callback(err));
     }
 
