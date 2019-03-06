@@ -12,9 +12,6 @@ export default class Trx {
 
         this.tronWeb = tronWeb;
         this.injectPromise = utils.promiseInjector(this);
-
-        // example
-        // this.pluginNoOverride = ['_parseToken'];
     }
 
     _parseToken(token) {

@@ -8,6 +8,7 @@ export default class Plugin {
         if (!tronWeb || !tronWeb instanceof TronWeb)
             throw new Error('Expected instance of TronWeb');
         this.tronWeb = tronWeb;
+        this.pluginNoOverride = ['register'];
     }
 
     register(Plugin) {
@@ -32,10 +33,10 @@ export default class Plugin {
                 let methods = pluginInterface.components[component]
                 let pluginNoOverride = this.tronWeb[component].pluginNoOverride || []
                 for (let method in methods) {
-                    if (this.tronWeb[component][method] &&
+                    if (method === 'constructor' || (this.tronWeb[component][method] &&
                         (pluginNoOverride.includes(method) // blacklisted methods
                             || /^_/.test(method)) // private methods
-                    ) {
+                    )) {
                         result.skipped.push(method)
                         continue
                     }
