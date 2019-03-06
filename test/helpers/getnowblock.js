@@ -23,7 +23,7 @@ class GetNowBlock {
 
     pluginInterface() {
         return {
-            requires: '^2.2.1',
+            requires: '^2.2.2',
             components: {
                 trx: {
                     // will be overridden
