@@ -1,6 +1,8 @@
 
 class GetNowBlock {
 
+    // In a real case, you should have this in order to allow the library to work stand-alone. But for this test, it is more clear this way.
+
     // constructor(tronWeb = false) {
     //     if (!tronWeb)
     //         throw new Error('Expected instance of TronWeb');
