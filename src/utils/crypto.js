@@ -4,9 +4,9 @@ import {ADDRESS_PREFIX, ADDRESS_PREFIX_BYTE, ADDRESS_SIZE} from './address';
 import {base64EncodeToString} from './code';
 import {base64DecodeFromString, hexStr2byteArray} from './code';
 import {encode58, decode58} from './base58';
-import {keccak256} from 'js-sha3';
 import {byte2hexStr, byteArray2hexStr} from './bytes';
 import {ec as EC} from 'elliptic';
+import * as Ethers from 'ethers';
 
 export function getBase58CheckAddress(addressBytes) {
     const hash0 = SHA256(addressBytes);
@@ -105,7 +105,7 @@ export function computeAddress(pubBytes) {
     if(pubBytes.length === 65)
         pubBytes = pubBytes.slice(1);
 
-    const hash = keccak256(pubBytes).toString();
+    const hash = Ethers.utils.keccak256(pubBytes).toString().substring(2);
     const addressHex = ADDRESS_PREFIX + hash.substring(24);
 
     return hexStr2byteArray(addressHex);
