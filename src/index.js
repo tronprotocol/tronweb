@@ -455,11 +455,8 @@ export default class TronWeb extends EventEmitter {
         }
     }
 
-    static async createAccount(callback = false) {
+    static createAccount() {
         const account = utils.accounts.generateAccount();
-
-        if(callback)
-            return callback(null, account);
 
         return account;
     }
