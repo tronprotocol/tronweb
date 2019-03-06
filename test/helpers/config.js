@@ -1,4 +1,4 @@
-const {keccak256} = require('js-sha3');
+import * as Ethers from 'ethers';
 
 const fullHost = "http://127.0.0.1:" + (process.env.HOST_PORT || 9090)
 
@@ -20,7 +20,7 @@ module.exports = {
         freeBandwidthLimit: 100
     },
     getTokenOptions: () => {
-        const rnd = keccak256(Math.random().toString()).substring(0, 4)
+        const rnd = Ethers.utils.keccak256(Math.random().toString()).substring(0, 4)
         return {
             name: `Token${rnd}`,
             abbreviation: `T${rnd.substring(2).toUpperCase()}`,
