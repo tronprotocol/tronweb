@@ -504,7 +504,7 @@ export default class TransactionBuilder {
         if(!utils.isArray(parameters))
             return callback('Invalid parameters provided');
 
-        if(!this.tronWeb.isAddress(issuerAddress))
+        if(issuerAddress !== false && !this.tronWeb.isAddress(issuerAddress))
             return callback('Invalid issuer address provided');
 
         functionSelector = functionSelector.replace('/\s*/g', '');

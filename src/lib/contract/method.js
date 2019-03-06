@@ -34,7 +34,6 @@ export default class Method {
             feeLimit: 1000000000,
             callValue: 0,
             userFeePercentage: 100,
-            from: this.tronWeb.defaultAddress.hex, // Only used for send()
             shouldPollResponse: false // Only used for sign()
         };
     }
@@ -87,8 +86,12 @@ export default class Method {
         if(!['pure', 'view'].includes(stateMutability.toLowerCase()))
             return callback(`Methods with state mutability "${stateMutability}" must use send()`);
 
-        options = {...this.defaultOptions, ...options};
-
+        options = {
+            ...this.defaultOptions,
+            from: this.tronWeb.defaultAddress.hex,
+            ...options, 
+        };
+        
         const parameters = args.map((value, index) => ({
             type: types[index],
             value
@@ -168,7 +171,11 @@ export default class Method {
         if(!['payable'].includes(stateMutability.toLowerCase()))
             options.callValue = 0;
 
-        options = {...this.defaultOptions, ...options};
+        options = {
+            ...this.defaultOptions,
+            from: this.tronWeb.defaultAddress.hex,
+            ...options, 
+        };
 
         const parameters = args.map((value, index) => ({
             type: types[index],
