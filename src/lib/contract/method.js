@@ -287,13 +287,15 @@ export default class Method {
         const getEvents = async () => {
             try {
                 const events = await this.tronWeb.getEventResult(this.contract.address, {
-                    sinceTimestamp,
+                    since: sinceTimestamp,
                     eventName: this.name,
                     sort: 'block_timestamp'
                 });
                 const [latestEvent] = events.sort((a, b) => b.block - a.block);
                 const newEvents = events.filter((event, index) => {
 
+
+                    // TODO use unconfirmed
                     if(options.resourceNode && !RegExp(options.resourceNode, 'i').test(event.resourceNode))
                         return false;
 
