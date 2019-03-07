@@ -642,7 +642,7 @@ describe('TronWeb.transactionBuilder', function () {
 
             this.timeout(10000)
 
-            wait(4)
+            await wait(4)
 
             const transaction = await tronWeb.transactionBuilder.purchaseToken(accounts.b58[5], tokenID, 20, accounts.b58[2]);
             const parameter = txPars(transaction);
@@ -753,11 +753,11 @@ describe('TronWeb.transactionBuilder', function () {
 
             this.timeout(10000)
 
-            wait(4)
+            await wait(4)
 
             await broadcaster(tronWeb.transactionBuilder.purchaseToken(accounts.b58[6], tokenID, 50, accounts.b58[7]), accounts.pks[7])
 
-            wait(1)
+            await wait(1)
 
             const transaction = await tronWeb.transactionBuilder.sendToken(accounts.b58[1], 5, tokenID, accounts.b58[7])
 

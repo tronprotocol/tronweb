@@ -40,7 +40,7 @@ describe('#contract.method', function () {
         })
 
         it("should revert if trying to set TSeFTBYCy3r2kZNYsj86G6Yz6rsmPdYdFs as the owner", async function () {
-            this.timeout(10000)
+            this.timeout(30000)
             await assertThrow(testRevert.setOwner('TSeFTBYCy3r2kZNYsj86G6Yz6rsmPdYdFs').send({shouldPollResponse: true}),
                 null,
                 'REVERT'
