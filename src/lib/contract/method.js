@@ -319,6 +319,7 @@ export default class Method {
             } catch (ex) {
                 return Promise.reject(ex);
             }
+
         };
 
         const bindListener = () => {
