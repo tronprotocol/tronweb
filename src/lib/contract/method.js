@@ -289,15 +289,25 @@ export default class Method {
                 const events = await this.tronWeb.getEventResult(this.contract.address, {
                     since: sinceTimestamp,
                     eventName: this.name,
-                    sort: 'block_timestamp'
+                    sort: 'block_timestamp',
+                    size: 50
                 });
                 const [latestEvent] = events.sort((a, b) => b.block - a.block);
                 const newEvents = events.filter((event, index) => {
 
-
-                    // TODO use unconfirmed
-                    if(options.resourceNode && !RegExp(options.resourceNode, 'i').test(event.resourceNode))
-                        return false;
+                    if(options.resourceNode) {
+                        if (/full/.test(options.resourceNode)) {
+                            if ((event.resourceNode && !/full/.test(event.resourceNode))
+                                || !event._unconfirmed) {
+                                return false
+                            }
+                        } else {
+                            if ((event.resourceNode && !/solidity/.test(event.resourceNode))
+                                || event._unconfirmed) {
+                                return false
+                            }
+                        }
+                    }
 
                     const duplicate = events.slice(0, index).some(priorEvent => (
                         JSON.stringify(priorEvent) == JSON.stringify(event)
