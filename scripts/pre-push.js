@@ -5,7 +5,7 @@ const branch = execSync('git name-rev --name-only HEAD').toString().split('\n')[
 let unpushed;
 
 try {
-    unpushed = execSync(`git log origin/${ branch }..${ branch } --name-status`).toString().split('\n');
+    unpushed = execSync(`git log origin/${branch}..${branch} --name-status`).toString().split('\n');
 } catch (ex) {
     // the branch hasn't ever been pushed
     unpushed = execSync(`git log HEAD...origin --name-status`).toString().split('\n');
@@ -20,33 +20,27 @@ build.stdout.on('data', function (data) {
 })
 
 build.stderr.on('data', function (data) {
-    errors = true
     console.log('stderr: ' + data.toString())
 })
 
 build.on('exit', function (code) {
-    if(errors) {
-        console.log(chalk.red('Tests have failed. Please verify tests are passing before pushing'));
-        process.exit(1);
-    } else {
-        const test = spawn('yarn', ['test:node'])
+    const test = spawn('yarn', ['test:node'])
 
-        test.stdout.on('data', function (data) {
-            process.stdout.write(data.toString())
-        })
+    test.stdout.on('data', function (data) {
+        process.stdout.write(data.toString())
+    })
 
-        test.stderr.on('data', function (data) {
-            errors = true
-            console.log('stderr: ' + data.toString())
-        })
+    test.stderr.on('data', function (data) {
+        errors = true
+        console.log('stderr: ' + data.toString())
+    })
 
-        test.on('exit', function (code) {
-            if(errors) {
-                console.log(chalk.red('Tests have failed. Please verify tests are passing before pushing'));
-                process.exit(1);
-            }
-        })
-    }
+    test.on('exit', function (code) {
+        if (errors) {
+            console.log(chalk.red('Tests have failed. Please verify tests are passing before pushing'));
+            process.exit(1);
+        }
+    })
 })
 
 
