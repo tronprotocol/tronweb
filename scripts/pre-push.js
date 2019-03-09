@@ -20,7 +20,7 @@ build.stdout.on('data', function (data) {
 })
 
 build.stderr.on('data', function (data) {
-    console.log('stderr: ' + data.toString())
+    // console.log('stderr: ' + data.toString())
 })
 
 build.on('exit', function (code) {
