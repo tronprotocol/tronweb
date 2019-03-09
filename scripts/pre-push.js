@@ -11,42 +11,43 @@ try {
     unpushed = execSync(`git log HEAD...origin --name-status`).toString().split('\n');
 }
 
-console.log(execSync('yarn build').toString())
-
-const test = spawn('yarn', ['test:node'])
-
-test.stdout.on('data', function (data) {
-    process.stdout.write(data.toString())
-})
-
-test.stderr.on('data', function (data) {
-    errors = true
-    console.log('stderr: ' + data.toString())
-})
-
-test.on('exit', function (code) {
-    if(errors) {
-        console.log(chalk.red('Tests have failed. Please verify tests are passing before pushing'));
-        process.exit(1);
-    }
-})
-
-
 let errors = false
-const test = spawn('yarn', ['test:node'])
 
-test.stdout.on('data', function (data) {
+const build = spawn('yarn', ['build'])
+
+build.stdout.on('data', function (data) {
     process.stdout.write(data.toString())
 })
 
-test.stderr.on('data', function (data) {
+build.stderr.on('data', function (data) {
     errors = true
     console.log('stderr: ' + data.toString())
 })
 
-test.on('exit', function (code) {
+build.on('exit', function (code) {
     if(errors) {
         console.log(chalk.red('Tests have failed. Please verify tests are passing before pushing'));
         process.exit(1);
+    } else {
+        const test = spawn('yarn', ['test:node'])
+
+        test.stdout.on('data', function (data) {
+            process.stdout.write(data.toString())
+        })
+
+        test.stderr.on('data', function (data) {
+            errors = true
+            console.log('stderr: ' + data.toString())
+        })
+
+        test.on('exit', function (code) {
+            if(errors) {
+                console.log(chalk.red('Tests have failed. Please verify tests are passing before pushing'));
+                process.exit(1);
+            }
+        })
     }
 })
+
+
+
