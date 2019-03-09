@@ -11,10 +11,26 @@ try {
     unpushed = execSync(`git log HEAD...origin --name-status`).toString().split('\n');
 }
 
-//. some change
-
-
 console.log(execSync('yarn build').toString())
+
+const test = spawn('yarn', ['test:node'])
+
+test.stdout.on('data', function (data) {
+    process.stdout.write(data.toString())
+})
+
+test.stderr.on('data', function (data) {
+    errors = true
+    console.log('stderr: ' + data.toString())
+})
+
+test.on('exit', function (code) {
+    if(errors) {
+        console.log(chalk.red('Tests have failed. Please verify tests are passing before pushing'));
+        process.exit(1);
+    }
+})
+
 
 let errors = false
 const test = spawn('yarn', ['test:node'])
