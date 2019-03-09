@@ -282,15 +282,14 @@ export default class Method {
 
         let listener = false;
         let lastBlock = false;
-        const sinceTimestamp = new Date().getTime();
 
         const getEvents = async () => {
             try {
                 const events = await this.tronWeb.getEventResult(this.contract.address, {
-                    since: sinceTimestamp,
+                    since: Date.now(),
                     eventName: this.name,
                     sort: 'block_timestamp',
-                    size: 50
+                    blockNumber: 'latest'
                 });
                 const [latestEvent] = events.sort((a, b) => b.block - a.block);
                 const newEvents = events.filter((event, index) => {

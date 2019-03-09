@@ -205,6 +205,8 @@ export default class TronWeb extends EventEmitter {
             onlyConfirmed,
             onlyUnconfirmed,
             previousLastEventFingerprint,
+            previousFingerprint,
+            fingerprint,
             rawResponse
         } = Object.assign({
             sinceTimestamp: 0,
@@ -266,8 +268,9 @@ export default class TronWeb extends EventEmitter {
         if(onlyUnconfirmed && !onlyConfirmed)
             qs.onlyUnconfirmed = onlyUnconfirmed
 
-        if (previousLastEventFingerprint)
-            qs.previousLastEventFingerprint = previousLastEventFingerprint
+        fingerprint = fingerprint || previousLastEventFingerprint || previousLastEventFingerprint
+        if (fingerprint)
+            qs.fingerprint = fingerprint
 
         return this.eventServer.request(`event/contract/${routeParams.join('/')}?${querystring.stringify(qs)}`).then((data = false) => {
             if(!data)

@@ -11,6 +11,9 @@ try {
     unpushed = execSync(`git log HEAD...origin --name-status`).toString().split('\n');
 }
 
+//. some change
+
+
 console.log(execSync('yarn build').toString())
 
 let errors = false
