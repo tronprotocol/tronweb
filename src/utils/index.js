@@ -90,15 +90,19 @@ const utils = {
     },
 
     mapEvent(event) {
-        return {
+        let data = {
             block: event.block_number,
             timestamp: event.block_timestamp,
             contract: event.contract_address,
             name: event.event_name,
             transaction: event.transaction_id,
             result: event.result,
-            resourceNode: event.resource_Node
+            resourceNode: event.resource_Node || (event._unconfirmed ? 'fullNode' : 'solidityNode')
         };
+        if (event._fingerprint) {
+            data.fingerprint = event._fingerprint;
+        }
+        return data;
     },
 
     parseEvent(event, {inputs: abi}) {

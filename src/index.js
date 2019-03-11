@@ -285,9 +285,15 @@ export default class TronWeb extends EventEmitter {
         }).catch(err => callback((err.response && err.response.data) || err));
     }
 
-    getEventByTransactionID(transactionID = false, callback = false) {
+    getEventByTransactionID(transactionID = false, options = {}, callback = false) {
+
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if(!callback)
-            return this.injectPromise(this.getEventByTransactionID, transactionID);
+            return this.injectPromise(this.getEventByTransactionID, transactionID, options);
 
         if(!this.eventServer)
             return callback('No event server configured');
@@ -300,7 +306,7 @@ export default class TronWeb extends EventEmitter {
                 return callback(data);
 
             return callback(null,
-                data.map(event => utils.mapEvent(event))
+                options.rawResponse === true ? data : data.map(event => utils.mapEvent(event))
             );
         }).catch(err => callback((err.response && err.response.data) || err));
     }
