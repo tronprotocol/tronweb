@@ -99,6 +99,9 @@ const utils = {
             result: event.result,
             resourceNode: event.resource_Node || (event._unconfirmed ? 'fullNode' : 'solidityNode')
         };
+        if (event._unconfirmed) {
+            data.unconfirmed = event._unconfirmed
+        }
         if (event._fingerprint) {
             data.fingerprint = event._fingerprint;
         }

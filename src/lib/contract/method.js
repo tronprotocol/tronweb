@@ -248,6 +248,9 @@ export default class Method {
                     });
                 }
 
+                if (options.rawResponse)
+                    return callback(null, output);
+
                 let decoded = decodeOutput(this.outputs, '0x' + output.contractResult[0]);
 
                 if (decoded.length === 1)

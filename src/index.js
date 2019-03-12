@@ -9,6 +9,7 @@ import TransactionBuilder from 'lib/transactionBuilder';
 import Trx from 'lib/trx';
 import Contract from 'lib/contract';
 import Plugin from 'lib/plugin';
+import Event from 'lib/event';
 import * as Ethers from 'ethers';
 
 export default class TronWeb extends EventEmitter {
@@ -18,6 +19,7 @@ export default class TronWeb extends EventEmitter {
     static Trx = Trx;
     static Contract = Contract;
     static Plugin = Plugin;
+    static Event = Event;
     static version = version;
 
     constructor(fullNode, solidityNode, eventServer = false, privateKey = false) {
@@ -31,6 +33,12 @@ export default class TronWeb extends EventEmitter {
 
         if(utils.isString(eventServer))
             eventServer = new providers.HttpProvider(eventServer);
+
+        this.event = new Event(this);
+        this.transactionBuilder = new TransactionBuilder(this);
+        this.trx = new Trx(this);
+        this.plugin = new Plugin(this);
+        this.utils = utils;
 
         this.setFullNode(fullNode);
         this.setSolidityNode(solidityNode);
@@ -57,11 +65,6 @@ export default class TronWeb extends EventEmitter {
 
         if(privateKey)
             this.setPrivateKey(privateKey);
-
-        this.transactionBuilder = new TransactionBuilder(this);
-        this.trx = new Trx(this);
-        this.plugin = new Plugin(this);
-        this.utils = utils;
 
         this.injectPromise = utils.promiseInjector(this);
     }
@@ -134,22 +137,8 @@ export default class TronWeb extends EventEmitter {
         this.solidityNode.setStatusPage('walletsolidity/getnowblock');
     }
 
-    setEventServer(eventServer = false) {
-        if(!eventServer)
-            return this.eventServer = false;
-
-        if(utils.isString(eventServer))
-            eventServer = new providers.HttpProvider(eventServer);
-
-        if(!this.isValidProvider(eventServer))
-            throw new Error('Invalid event server provided');
-
-        this.eventServer = eventServer;
-        this.eventServer.isConnected = () => this.eventServer.request('healthcheck').then(() => true).catch(() => (
-            this.eventServer.request('events?size=1').then(data => (
-                Array.isArray(data)
-            ))
-        )).catch(() => false);
+    setEventServer(...params) {
+        this.event.setServer(...params)
     }
 
     currentProviders() {
@@ -191,124 +180,11 @@ export default class TronWeb extends EventEmitter {
             }
         }
 
-        return this._getEventResult(...params);
+        return this.event.getEventsByContactAddress(...params);
     }
 
-    _getEventResult(contractAddress = false, options = {}, callback = false) {
-
-        let {
-            sinceTimestamp,
-            eventName,
-            blockNumber,
-            size,
-            page,
-            onlyConfirmed,
-            onlyUnconfirmed,
-            previousLastEventFingerprint,
-            previousFingerprint,
-            fingerprint,
-            rawResponse
-        } = Object.assign({
-            sinceTimestamp: 0,
-            eventName: false,
-            blockNumber: false,
-            size: 20,
-            page: 1
-        }, options)
-
-        if(!callback)
-            return this.injectPromise(this.getEventResult, contractAddress, options);
-
-        if(!this.eventServer)
-            return callback('No event server configured');
-
-        const routeParams = [];
-
-        if(!this.isAddress(contractAddress))
-            return callback('Invalid contract address provided');
-
-        if(eventName && !contractAddress)
-            return callback('Usage of event name filtering requires a contract address');
-
-        if(!utils.isInteger(sinceTimestamp))
-            return callback('Invalid sinceTimestamp provided');
-
-        if(!utils.isInteger(size))
-            return callback('Invalid size provided');
-
-        if(size > 200) {
-            console.warn('Defaulting to maximum accepted size: 200');
-            size = 200;
-        }
-
-        if(!utils.isInteger(page))
-            return callback('Invalid page provided');
-
-        if(blockNumber && !eventName)
-            return callback('Usage of block number filtering requires an event name');
-
-        if(contractAddress)
-            routeParams.push(this.address.fromHex(contractAddress));
-
-        if(eventName)
-            routeParams.push(eventName);
-
-        if(blockNumber)
-            routeParams.push(blockNumber);
-
-        const qs = {
-            since: sinceTimestamp,
-            size,
-            page
-        }
-
-        if(onlyConfirmed)
-            qs.onlyConfirmed = onlyConfirmed
-
-        if(onlyUnconfirmed && !onlyConfirmed)
-            qs.onlyUnconfirmed = onlyUnconfirmed
-
-        fingerprint = fingerprint || previousLastEventFingerprint || previousLastEventFingerprint
-        if (fingerprint)
-            qs.fingerprint = fingerprint
-
-        return this.eventServer.request(`event/contract/${routeParams.join('/')}?${querystring.stringify(qs)}`).then((data = false) => {
-            if(!data)
-                return callback('Unknown error occurred');
-
-            if(!utils.isArray(data))
-                return callback(data);
-
-            return callback(null,
-                rawResponse === true ? data : data.map(event => utils.mapEvent(event))
-            );
-        }).catch(err => callback((err.response && err.response.data) || err));
-    }
-
-    getEventByTransactionID(transactionID = false, options = {}, callback = false) {
-
-        if (utils.isFunction(options)) {
-            callback = options;
-            options = {};
-        }
-
-        if(!callback)
-            return this.injectPromise(this.getEventByTransactionID, transactionID, options);
-
-        if(!this.eventServer)
-            return callback('No event server configured');
-
-        return this.eventServer.request(`event/transaction/${transactionID}`).then((data = false) => {
-            if(!data)
-                return callback('Unknown error occurred');
-
-            if(!utils.isArray(data))
-                return callback(data);
-
-            return callback(null,
-                options.rawResponse === true ? data : data.map(event => utils.mapEvent(event))
-            );
-        }).catch(err => callback((err.response && err.response.data) || err));
+    getEventsByTransactionID(...params) {
+        return this.event.getEventsByTransactionID(...params)
     }
 
     contract(abi = [], address = false) {

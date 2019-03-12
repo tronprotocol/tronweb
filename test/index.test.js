@@ -699,14 +699,6 @@ describe('TronWeb Instance', function () {
         });
     });
 
-    describe("#getEventResult", function () {
-        // TODO
-    });
-
-    describe("#getEventByTransactionID", function () {
-        // TODO
-    });
-
     describe("#contract", function () {
         // TODO
     });
