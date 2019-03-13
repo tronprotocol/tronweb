@@ -82,6 +82,22 @@ describe('TronWeb.lib.event', async function () {
 
     describe("#getEventsByTransactionID", async function () {
 
+
+        it.skip('should emit an unconfirmed event and get it', async function () {
+
+            this.timeout(60000)
+            tronWeb.setPrivateKey(accounts.pks[1])
+            let txId = await contract.emitNow(accounts.hex[2], 2000).send({
+                from: accounts.hex[1]
+            })
+
+            let events = await tronWeb.event.getEventsByTransactionID(txId)
+
+            assert.equal(events[0].result._receiver.substring(2), accounts.hex[2].substring(2))
+            assert.equal(events[0].result._sender.substring(2), accounts.hex[1].substring(2))
+
+        })
+
         it('should emit an event and get it', async function () {
 
             this.timeout(60000)
@@ -108,7 +124,7 @@ describe('TronWeb.lib.event', async function () {
 
             this.timeout(60000)
             tronWeb.setPrivateKey(accounts.pks[3])
-            let output = await contract.emitNow(accounts.hex[4], 4000).send({
+            await contract.emitNow(accounts.hex[4], 4000).send({
                 from: accounts.hex[3],
                 shouldPollResponse: true,
                 rawResponse: true

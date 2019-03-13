@@ -296,19 +296,18 @@ export default class Method {
                     blockNumber: 'latest'
                 }
                 if (options.resourceNode) {
-                    if (/full/.test(options.resourceNode))
+                    if (/full/i.test(options.resourceNode))
                         params.onlyUnconfirmed = true
                     else
                         params.onlyConfirmed = true
                 }
 
-                const events = await this.tronWeb.getEventResult(this.contract.address, params);
+                const events = await this.tronWeb.event.getEventsByContactAddress(this.contract.address, params);
                 const [latestEvent] = events.sort((a, b) => b.block - a.block);
                 const newEvents = events.filter((event, index) => {
 
-                    if (options.resourceNode && event.resourceNode && (
-                        (/full/.test(options.resourceNode) && !/full/.test(event.resourceNode)) || (/solidity/.test(options.resourceNode) && !/solidity/.test(event.resourceNode))
-                    )) {
+                    if (options.resourceNode && event.resourceNode &&
+                        options.resourceNode.toLowerCase() !== event.resourceNode.toLowerCase()) {
                         return false
                     }
 
