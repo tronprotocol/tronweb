@@ -30,6 +30,8 @@ export default class Event {
 
         let {
             sinceTimestamp,
+            since,
+            fromTimestamp,
             eventName,
             blockNumber,
             size,
@@ -52,6 +54,8 @@ export default class Event {
         if(!callback)
             return this.injectPromise(this.getEventsByContactAddress, contractAddress, options);
 
+        fromTimestamp = fromTimestamp || sinceTimestamp || since;
+
         if(!this.tronWeb.eventServer)
             return callback('No event server configured');
 
@@ -63,8 +67,8 @@ export default class Event {
         if(eventName && !contractAddress)
             return callback('Usage of event name filtering requires a contract address');
 
-        if(!utils.isInteger(sinceTimestamp))
-            return callback('Invalid sinceTimestamp provided');
+        if(!utils.isInteger(fromTimestamp))
+            return callback('Invalid fromTimestamp provided');
 
         if(!utils.isInteger(size))
             return callback('Invalid size provided');
@@ -90,7 +94,8 @@ export default class Event {
             routeParams.push(blockNumber);
 
         const qs = {
-            since: sinceTimestamp,
+            fromTimestamp,
+            since: fromTimestamp,
             size,
             page
         }
