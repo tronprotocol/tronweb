@@ -30,12 +30,14 @@ export default class Contract {
     }
 
     async _getEvents(options = {}) {
-        const events = await this.tronWeb.getEventResult(this.address);
+        const events = await this.tronWeb.event.getEventsByContactAddress(this.address, options);
         const [latestEvent] = events.sort((a, b) => b.block - a.block);
         const newEvents = events.filter((event, index) => {
 
-            if(options.resourceNode && !RegExp(options.resourceNode, 'i').test(event.resourceNode))
-                return false;
+            if (options.resourceNode && event.resourceNode &&
+                options.resourceNode.toLowerCase() !== event.resourceNode.toLowerCase()) {
+                return false
+            }
 
             const duplicate = events.slice(0, index).some(priorEvent => (
                 JSON.stringify(priorEvent) == JSON.stringify(event)
