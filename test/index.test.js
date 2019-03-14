@@ -774,7 +774,7 @@ describe('TronWeb Instance', function () {
             })
             let events
             while (true) {
-                events = await tronWeb.getEventsByTransactionID(txId)
+                events = await tronWeb.getEventByTransactionID(txId)
                 if (events.length) {
                     break
                 }
