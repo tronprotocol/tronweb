@@ -9,7 +9,7 @@ const wait = require('../helpers/wait')
 
 const assert = chai.assert;
 
-describe('TronWeb.lib.event', async function () {
+describe.only('TronWeb.lib.event', async function () {
 
     let accounts
     let tronWeb
