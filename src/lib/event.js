@@ -67,7 +67,7 @@ export default class Event {
         if(eventName && !contractAddress)
             return callback('Usage of event name filtering requires a contract address');
 
-        if(!utils.isInteger(fromTimestamp))
+        if(typeof fromTimestamp !== 'undefined' && !utils.isInteger(fromTimestamp))
             return callback('Invalid fromTimestamp provided');
 
         if(!utils.isInteger(size))
@@ -94,10 +94,12 @@ export default class Event {
             routeParams.push(blockNumber);
 
         const qs = {
-            fromTimestamp,
-            since: fromTimestamp,
             size,
             page
+        }
+
+        if (fromTimestamp) {
+            qs.fromTimestamp = qs.since = fromTimestamp;
         }
 
         if(onlyConfirmed)
