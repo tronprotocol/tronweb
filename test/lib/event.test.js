@@ -15,6 +15,7 @@ describe('TronWeb.lib.event', async function () {
     let tronWeb
     let contractAddress
     let contract
+    let eventLength = 0
 
     before(async function () {
         tronWeb = tronWebBuilder.createInstance();
@@ -83,22 +84,30 @@ describe('TronWeb.lib.event', async function () {
     describe("#getEventsByTransactionID", async function () {
 
 
-        it.skip('should emit an unconfirmed event and get it', async function () {
+        it('should emit an unconfirmed event and get it', async function () {
 
             this.timeout(60000)
             tronWeb.setPrivateKey(accounts.pks[1])
             let txId = await contract.emitNow(accounts.hex[2], 2000).send({
                 from: accounts.hex[1]
             })
-
-            let events = await tronWeb.event.getEventsByTransactionID(txId)
+            eventLength++
+            let events
+            while(true) {
+                events = await tronWeb.event.getEventsByTransactionID(txId)
+                if (events.length) {
+                    break
+                }
+                await wait(0.5)
+            }
 
             assert.equal(events[0].result._receiver.substring(2), accounts.hex[2].substring(2))
             assert.equal(events[0].result._sender.substring(2), accounts.hex[1].substring(2))
+            assert.equal(events[0].resourceNode, 'fullNode')
 
         })
 
-        it('should emit an event and get it', async function () {
+        it('should emit an event, wait for confirmation and get it', async function () {
 
             this.timeout(60000)
             tronWeb.setPrivateKey(accounts.pks[1])
@@ -107,12 +116,21 @@ describe('TronWeb.lib.event', async function () {
                 shouldPollResponse: true,
                 rawResponse: true
             })
+            eventLength++
 
             let txId = output.id
-            let events = await tronWeb.event.getEventsByTransactionID(txId)
+            let events
+            while(true) {
+                events = await tronWeb.event.getEventsByTransactionID(txId)
+                if (events.length) {
+                    break
+                }
+                await wait(0.5)
+            }
 
             assert.equal(events[0].result._receiver.substring(2), accounts.hex[2].substring(2))
             assert.equal(events[0].result._sender.substring(2), accounts.hex[1].substring(2))
+            assert.equal(events[0].resourceNode, 'solidityNode')
 
         })
 
@@ -125,18 +143,26 @@ describe('TronWeb.lib.event', async function () {
             this.timeout(60000)
             tronWeb.setPrivateKey(accounts.pks[3])
             await contract.emitNow(accounts.hex[4], 4000).send({
-                from: accounts.hex[3],
-                shouldPollResponse: true,
-                rawResponse: true
+                from: accounts.hex[3]
             })
+            eventLength++
+            let events
+            while(true) {
+                events = await tronWeb.event.getEventsByContactAddress(contractAddress, {
+                    eventName: 'SomeEvent',
+                    sort: 'block_timestamp'
+                })
+                if (events.length === eventLength) {
+                    break
+                }
+                await wait(0.5)
+            }
 
-            let events = await tronWeb.event.getEventsByContactAddress(contractAddress, {
-                eventName: 'SomeEvent',
-                sort: 'block_timestamp'
-            })
+            const event = events[events.length - 1]
 
-            assert.equal(events[events.length - 1].result._receiver.substring(2), accounts.hex[4].substring(2))
-            assert.equal(events[events.length - 1].result._sender.substring(2), accounts.hex[3].substring(2))
+            assert.equal(event.result._receiver.substring(2), accounts.hex[4].substring(2))
+            assert.equal(event.result._sender.substring(2), accounts.hex[3].substring(2))
+            assert.equal(event.resourceNode, 'fullNode')
 
         })
 
