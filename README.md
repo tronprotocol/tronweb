@@ -60,7 +60,7 @@ First, don't use the release section of this repo, it has not updated in a long 
 
 Then easiest way to use TronWeb in a browser is to install it as above and copy the dist file to your working folder. For example:
 ```
-cp node_modules/tron-web/dist/TronWeb.js ./js/tronweb.js
+cp node_modules/tronweb/dist/TronWeb.js ./js/tronweb.js
 ```
 so that you can call it in your HTML page as
 ```
