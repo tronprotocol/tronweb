@@ -40,7 +40,8 @@ export default class Event {
             previousFingerprint,
             fingerprint,
             rawResponse,
-            sort
+            sort,
+            filters
         } = Object.assign({
             sinceTimestamp: 0,
             eventName: false,
@@ -92,7 +93,8 @@ export default class Event {
         const qs = {
             since: sinceTimestamp,
             size,
-            page
+            page,
+            filters
         }
 
         if(onlyConfirmed)
