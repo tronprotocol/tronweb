@@ -14,7 +14,7 @@
         "build:dev": "NODE_ENV=development npm run build",
         "btest": "npm run build:dev && npm run test:node"
     },
-    "husky": {
+    "husky-off": {
         "hooks": {
             "pre-push": "node ./scripts/pre-push.js"
         }
