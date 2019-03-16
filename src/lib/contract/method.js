@@ -293,13 +293,8 @@ export default class Method {
                     since: Date.now(),
                     eventName: this.name,
                     sort: 'block_timestamp',
-                    blockNumber: 'latest'
-                }
-                try {
-                    if (typeof options.filters === 'object' && Object.keys(options.filters).length > 0) {
-                        params.filters = JSON.stringify(options.filters)
-                    }
-                } catch {
+                    blockNumber: 'latest',
+                    filters: options.filters
                 }
                 if (options.resourceNode) {
                     if (/full/i.test(options.resourceNode))

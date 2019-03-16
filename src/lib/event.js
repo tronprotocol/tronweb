@@ -98,7 +98,7 @@ export default class Event {
             size,
             page
         }
-        if (typeof filters === 'string' && filters.length) {
+        if (typeof filters === 'object' && Object.keys(filters).length > 0) {
             qs.filters = filters;
         }
 
