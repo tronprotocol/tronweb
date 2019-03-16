@@ -2,7 +2,6 @@ import providers from 'lib/providers';
 import utils from 'utils';
 import BigNumber from 'bignumber.js';
 import EventEmitter from 'eventemitter3';
-import querystring from 'querystring';
 import {version} from '../package.json';
 
 import TransactionBuilder from 'lib/transactionBuilder';
@@ -24,6 +23,13 @@ export default class TronWeb extends EventEmitter {
 
     constructor(fullNode, solidityNode, eventServer = false, privateKey = false) {
         super();
+
+        if (typeof fullNode === 'object' && (fullNode.fullNode || fullNode.fullHost)) {
+            privateKey = solidityNode;
+            solidityNode = fullNode.fullHost || fullNode.solidityNode;
+            eventServer = fullNode.fullHost || fullNode.eventServer;
+            fullNode = fullNode.fullHost || fullNode.fullNode;
+        }
 
         if(utils.isString(fullNode))
             fullNode = new providers.HttpProvider(fullNode);

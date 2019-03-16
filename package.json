@@ -1,13 +1,12 @@
 {
     "name": "tronweb",
-    "version": "2.2.10",
+    "version": "2.3.0",
     "description": "JavaScript SDK that encapsulates the TRON Node HTTP API",
     "main": "dist/TronWeb.node.js",
     "scripts": {
         "prepare": "npm run build",
         "build": "npm run clean && webpack --config webpack.config.js --progress --colors",
         "clean": "rimraf dist",
-        "example": "node ./examples/server",
         "test:browser": "node scripts/test-browser.js && npx karma start --single-run --browsers ChromeHeadless,Firefox,Edge",
         "test:node": "node scripts/test-node.js && node test/helpers/newAccounts 10 && npx mocha 'test/**/*.test.js'",
         "test": "node test/helpers/newAccounts 10 && npm run-script test:browser && npm run-script test:node",

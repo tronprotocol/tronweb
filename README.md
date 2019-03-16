@@ -47,12 +47,11 @@ You can also ship TronWeb in a Chrome extension.
 
 ### Node.js
 ```bash
-> npm install tronweb
+npm install tronweb
 ```
-
-### Yarn
+or
 ```bash
-> yarn add tronweb
+yarn add tronweb
 ```
 
 ### Browser
@@ -67,57 +66,31 @@ so that you can call it in your HTML page as
 <script src="./js/tronweb.js"><script>
 ```
 
+## Testnet
 
-## Example
+Shasta is the official Tron testnet. To use it use the following endpoint:
+```
+https://api.shasta.trongrid.io
+```
+Get some Shasta TRX at https://www.trongrid.io/shasta and play with it.
+Anything you do should be explorable on https://shasta.tronscan.org
 
-To look at the examples, first clone this repo, install the dependencies and run the example:
+## Your local private network for heavy testing
+
+You can set up your own private network, running Tron Quickstart. To do it you must [install Docker](https://docs.docker.com/install/) and, when ready, run a command like
+
 ```bash
-> git clone https://github.com/tronprotocol/tron-web.git
-> cd tron-web
-> yarn
-> yarn build -d
-> yarn example
-```
-You can find more examples in the [examples](examples) directory.
-
-## TRON provides a private network to test with
-
-* Full Node - https://api.shasta.trongrid.io
-* Solidity Node - https://api.shasta.trongrid.io
-* Event Server - https://api.shasta.trongrid.io
-* Block Explorer - https://explorer.shasta.trongrid.io
-
-* You can also set up your own private network, but you need to solve cross-domain CORS. The following example in Node reads from a full node listening on 16667 and a solidity node listening on 16668, and exposes the ports 9090 and 9090 with the needed headers.
-
-```javascript
-var express = require('express');
-var proxy = require('http-proxy-middleware');
-
-function onProxyRes(proxyRes, req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,Content-Type,Accept')
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
-  console.log(req.originalUrl)
-}
-
-var fullnode = express();
-fullnode.use('/', proxy({
-  target: 'http://127.0.0.1:16667',
-  changeOrigin: true,
-  onProxyRes
-}));
-fullnode.listen(9090);
-
-var soliditynode = express();
-soliditynode.use('/', proxy({
-  target: 'http://127.0.0.1:16668',
-  changeOrigin: true,
-  onProxyRes,
-  onError
-}));
-soliditynode.listen(9090);
+docker run -it --rm \
+  -p 9090:9090 \
+  -e "defaultBalance=100000" \
+  -e "showQueryString=true" \
+  -e "showBody=true" \
+  -e "formatJson=true" \
+  --name tron \
+  trontools/quickstart
 ```
 
+[More details about Tron Quickstart on GitHub](https://github.com/tronprotocol/docker-tron-quickstart)
 
 ## Creating an Instance
 
@@ -126,80 +99,33 @@ First off, in your javascript file, define TronWeb:
 ```js
 const TronWeb = require('tronweb')
 ```
-Specify the API endpoints:
-```js
-const HttpProvider = TronWeb.providers.HttpProvider;
-const fullNode = new HttpProvider('https://api.trongrid.io'); // Full node http endpoint
-const solidityNode = new HttpProvider('https://api.trongrid.io'); // Solidity node http endpoint
-const eventServer = 'https://api.trongrid.io'; // Contract events http endpoint
-```
-The provider above is optional, you can just use a url for the nodes instead, like here:
-
-```js
-const fullNode = 'https://api.trongrid.io';
-const solidityNode = 'https://api.trongrid.io';
-const eventServer = 'https://api.trongrid.io/';
-```
-Now, instance a tronWeb object:
+The easiest way to instantiate tronWeb is to run
 ```js
 const privateKey = 'da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0';
-
-const tronWeb = new TronWeb(
-    fullNode,
-    solidityNode,
-    eventServer,
+const tronWeb = new TronWeb({
+    fullHost: 'https://api.trongrid.io'
+    },
     privateKey
-);
+)
 ```
 
-### A full example:
-```js
-const TronWeb = require('tronweb')
+## A full example
 
-// This provider is optional, you can just use a url for the nodes instead
-const HttpProvider = TronWeb.providers.HttpProvider;
-const fullNode = new HttpProvider('https://api.trongrid.io'); // Full node http endpoint
-const solidityNode = new HttpProvider('https://api.trongrid.io'); // Solidity node http endpoint
-const eventServer = new HttpProvider('https://api.trongrid.io'); // Contract events http endpoint
+The better way to understand how to work with Tron is to clone the [MetaCoin example](https://github.com/Tronbox-boxes/metacoin-box) and follow the instructions at
+https://github.com/Tronbox-boxes/metacoin-box
 
-const privateKey = 'da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0';
+## Contributions
 
-const tronWeb = new TronWeb(
-    fullNode,
-    solidityNode,
-    eventServer,
-    privateKey
-);
+In order to contribute you can
 
+* fork this repo and clone it locally
+* install the dependencies — `npm i`
+* do your changes to the code
+* build the TronWeb dist files — `npm run build`
+* run a local private network using Tron Quickstart
+* run the tests — `npm test:node`
+* push your changes and open a pull request
 
-async function getBalance() {
+## Licence
 
-    const address = 'TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY';
-
-    // The majority of the function calls are asynchronus,
-    // meaning that they cannot return the result instantly.
-    // These methods therefore return a promise, which you can await.
-    const balance = await tronWeb.trx.getBalance(address);
-    console.log({balance});
-
-    // You can also bind a `then` and `catch` method.
-    tronWeb.trx.getBalance(address).then(balance => {
-        console.log({balance});
-    }).catch(err => console.error(err));
-
-    // If you'd like to use a similar API to Web3, provide a callback function.
-    tronWeb.trx.getBalance(address, (err, balance) => {
-        if (err)
-            return console.error(err);
-
-        console.log({balance});
-    });
-}
-
-getBalance();
-
-```
-#### Note:
-
-For testing TronWeb API functions, it would be best to setup a private network on your local machine using the <a href="https://developers.tron.network/docs/getting-started-1" target="_blank">TRON Docker Quickstart guide</a>. The Docker guide sets up a Full Node, Solidity Node, and Event Server on your machine. 
-You can then deploy smart contracts on your network and interact with them via TronWeb. If you wish to test TronWeb with other users, it would be best to deploy your contracts/DApps on the Shasta test network and interact from there.  
+TronWeb is distributed under a MIT licence.
