@@ -96,8 +96,10 @@ export default class Event {
 
         const qs = {
             size,
-            page,
-            filters
+            page
+        }
+        if (typeof filters === 'string' && filters.length) {
+            qs.filters = filters;
         }
 
         if (fromTimestamp) {
