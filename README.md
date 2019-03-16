@@ -108,6 +108,16 @@ const tronWeb = new TronWeb({
     privateKey
 )
 ```
+but you can continue to use the old way:
+```js
+const tronWeb = new TronWeb({
+    fullNode,
+    solidityNode,
+    eventServer,
+    privateKey
+)
+
+```
 
 ## A full example
 
