@@ -183,7 +183,7 @@ export default class TronWeb extends EventEmitter {
         return this.event.getEventsByContactAddress(...params);
     }
 
-    getEventsByTransactionID(...params) {
+    getEventByTransactionID(...params) {
         return this.event.getEventsByTransactionID(...params)
     }
 
