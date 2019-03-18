@@ -96,8 +96,10 @@ export default class Event {
 
         const qs = {
             size,
-            page,
-            filters
+            page
+        }
+        if (typeof filters === 'object' && Object.keys(filters).length > 0) {
+            qs.filters = JSON.stringify(filters);
         }
 
         if (fromTimestamp) {

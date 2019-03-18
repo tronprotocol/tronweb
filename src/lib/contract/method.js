@@ -270,7 +270,7 @@ export default class Method {
             callback = options;
             options = {};
         }
-        
+
         if (!utils.isFunction(callback))
             throw new Error('Expected callback to be provided');
 
@@ -293,10 +293,8 @@ export default class Method {
                     since: Date.now(),
                     eventName: this.name,
                     sort: 'block_timestamp',
-                    blockNumber: 'latest'
-                }
-                if (options.filters) {
-                    params.filters = JSON.stringify(options.filters)
+                    blockNumber: 'latest',
+                    filters: options.filters
                 }
                 if (options.resourceNode) {
                     if (/full/i.test(options.resourceNode))
