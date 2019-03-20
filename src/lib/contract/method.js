@@ -285,12 +285,13 @@ export default class Method {
 
         let listener = false;
         let lastBlock = false;
+        let since = Date.now() - 1000;
 
         const getEvents = async () => {
             try {
 
                 const params = {
-                    since: Date.now(),
+                    since,
                     eventName: this.name,
                     sort: 'block_timestamp',
                     blockNumber: 'latest',
