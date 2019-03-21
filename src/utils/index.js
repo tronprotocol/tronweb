@@ -13,7 +13,8 @@ const utils = {
         if(typeof url !== 'string')
             return false;
         return validator.isURL(url.toString(), {
-            protocols: ['http', 'https']
+            protocols: ['http', 'https'],
+            require_tld: false
         });
     },
 

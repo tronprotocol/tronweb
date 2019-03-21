@@ -101,12 +101,10 @@ const TronWeb = require('tronweb')
 ```
 The easiest way to instantiate tronWeb is to run
 ```js
-const privateKey = 'da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0';
 const tronWeb = new TronWeb({
-    fullHost: 'https://api.trongrid.io'
-    },
-    privateKey
-)
+    fullHost: 'https://api.trongrid.io',
+    privateKey: '...'
+})
 ```
 but you can continue to use the old way:
 ```js
@@ -118,6 +116,29 @@ const tronWeb = new TronWeb({
 )
 
 ```
+
+Valid alternatives are:
+
+```js
+const tronWeb = new TronWeb({
+    fullHost: 'https://api.trongrid.io',
+    eventServer: 'https://api.someotherevent.io'
+  },
+  privateKey: '...'
+)
+```
+where fullHost defines fullNode and solidityNode while the eventServer is specified, and the privateKey is passed separately.
+
+```js
+const tronWeb = new TronWeb({
+    fullNode: 'https://api.trongrid.io',
+    solidityNode: 'https://api/somesolidity.io'
+    eventServer: 'https://api.somevent.io',
+    privateKey: '...'
+  }
+)
+```
+similar to the old approach
 
 ## A full example
 
@@ -135,6 +156,16 @@ In order to contribute you can
 * run a local private network using Tron Quickstart
 * run the tests — `npm test:node`
 * push your changes and open a pull request
+
+## Recent History
+
+__2.3.1__
+* Adds support for not-tld domain, like http://localhost
+* Improve the new format, allow passing the privateKey as a property in the option object
+
+__2.3.0__
+* Introduces new format to instantiate tronWeb, passing an options object instead that `fullNode`, `solidityNode` and `eventServer` as separate params
+* Fixes bug in `_watch` which causes an ethernal update of the `since` parameter
 
 ## Licence
 

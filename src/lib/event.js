@@ -6,7 +6,7 @@ import querystring from "querystring";
 export default class Event {
 
     constructor(tronWeb = false) {
-        if (!tronWeb || !tronWeb instanceof TronWeb)
+        if (!tronWeb || !(tronWeb instanceof TronWeb))
             throw new Error('Expected instance of TronWeb');
         this.tronWeb = tronWeb;
         this.injectPromise = utils.promiseInjector(this);
