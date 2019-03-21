@@ -179,7 +179,7 @@ __2.3.1__
 
 __2.3.0__
 * Introduces new format to instantiate tronWeb, passing an options object instead that `fullNode`, `solidityNode` and `eventServer` as separate params
-* Fixes bug in `_watch` which causes an ethernal update of the `since` parameter
+* Fixes bug in `_watch` which causes a continuous update of the `since` parameter
 
 ## Licence
 
