@@ -108,12 +108,7 @@ const tronWeb = new TronWeb({
 ```
 but you can continue to use the old way:
 ```js
-const tronWeb = new TronWeb({
-    fullNode,
-    solidityNode,
-    eventServer,
-    privateKey
-)
+const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, privateKey)
 
 ```
 
