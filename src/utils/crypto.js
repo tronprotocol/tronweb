@@ -19,15 +19,15 @@ export function getBase58CheckAddress(addressBytes) {
 }
 
 export function decodeBase58Address(base58Sting) {
-    if(typeof (base58Sting) != 'string')
+    if (typeof (base58Sting) != 'string')
         return false;
 
-    if(base58Sting.length <= 4)
+    if (base58Sting.length <= 4)
         return false;
 
     let address = decode58(base58Sting);
 
-    if(base58Sting.length <= 4)
+    if (base58Sting.length <= 4)
         return false;
 
     const len = address.length;
@@ -40,7 +40,7 @@ export function decodeBase58Address(base58Sting) {
     const hash1 = SHA256(hash0);
     const checkSum1 = hash1.slice(0, 4);
 
-    if(checkSum[0] == checkSum1[0] && checkSum[1] == checkSum1[1] && checkSum[2] ==
+    if (checkSum[0] == checkSum1[0] && checkSum[1] == checkSum1[1] && checkSum[2] ==
         checkSum1[2] && checkSum[3] == checkSum1[3]
     ) {
         return address;
@@ -50,7 +50,7 @@ export function decodeBase58Address(base58Sting) {
 }
 
 export function signTransaction(priKeyBytes, transaction) {
-    if(typeof priKeyBytes === 'string')
+    if (typeof priKeyBytes === 'string')
         priKeyBytes = hexStr2byteArray(priKeyBytes);
 
     const txID = transaction.txID;
@@ -59,8 +59,7 @@ export function signTransaction(priKeyBytes, transaction) {
     if (Array.isArray(transaction.signature)) {
         if (!transaction.signature.includes(signature))
             transaction.signature.push(signature);
-    }
-    else
+    } else
         transaction.signature = [signature];
     return transaction;
 }
@@ -70,7 +69,7 @@ export function arrayToBase64String(a) {
 }
 
 export function signBytes(privateKey, contents) {
-    if(typeof privateKey === 'string')
+    if (typeof privateKey === 'string')
         privateKey = hexStr2byteArray(privateKey);
 
     const hashBytes = SHA256(contents);
@@ -102,7 +101,7 @@ export function genPriKey() {
 }
 
 export function computeAddress(pubBytes) {
-    if(pubBytes.length === 65)
+    if (pubBytes.length === 65)
         pubBytes = pubBytes.slice(1);
 
     const hash = Ethers.utils.keccak256(pubBytes).toString().substring(2);
@@ -119,14 +118,14 @@ export function getAddressFromPriKey(priKeyBytes) {
 export function decode58Check(addressStr) {
     const decodeCheck = decode58(addressStr);
 
-    if(decodeCheck.length <= 4)
+    if (decodeCheck.length <= 4)
         return false;
 
     const decodeData = decodeCheck.slice(0, decodeCheck.length - 4);
     const hash0 = SHA256(decodeData);
     const hash1 = SHA256(hash0);
 
-    if(hash1[0] === decodeCheck[decodeData.length] &&
+    if (hash1[0] === decodeCheck[decodeData.length] &&
         hash1[1] === decodeCheck[decodeData.length + 1] &&
         hash1[2] === decodeCheck[decodeData.length + 2] &&
         hash1[3] === decodeCheck[decodeData.length + 3]) {
@@ -137,18 +136,18 @@ export function decode58Check(addressStr) {
 }
 
 export function isAddressValid(base58Str) {
-    if(typeof (base58Str) !== 'string')
+    if (typeof (base58Str) !== 'string')
         return false;
 
-    if(base58Str.length !== ADDRESS_SIZE)
+    if (base58Str.length !== ADDRESS_SIZE)
         return false;
 
     let address = decode58(base58Str);
 
-    if(address.length !== 25)
+    if (address.length !== 25)
         return false;
 
-    if(address[0] !== ADDRESS_PREFIX_BYTE)
+    if (address[0] !== ADDRESS_PREFIX_BYTE)
         return false;
 
     const checkSum = address.slice(21);
@@ -158,7 +157,7 @@ export function isAddressValid(base58Str) {
     const hash1 = SHA256(hash0);
     const checkSum1 = hash1.slice(0, 4);
 
-    if(checkSum[0] == checkSum1[0] && checkSum[1] == checkSum1[1] && checkSum[2] ==
+    if (checkSum[0] == checkSum1[0] && checkSum[1] == checkSum1[1] && checkSum[2] ==
         checkSum1[2] && checkSum[3] == checkSum1[3]
     ) {
         return true

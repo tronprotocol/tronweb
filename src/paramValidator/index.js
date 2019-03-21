@@ -64,9 +64,9 @@ export default class Validator {
 
                 case 'notEmptyObject':
                     if (!utils.isObject(value) || !Object.keys(value).length) {
-                    callback(this.invalid(param));
-                    return true;
-                }
+                        callback(this.invalid(param));
+                        return true;
+                    }
 
                 case 'notEqual':
                     if (normalized[names[0]] === normalized[names[1]]) {

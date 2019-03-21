@@ -6,9 +6,9 @@ const {FULL_NODE_API, SOLIDITY_NODE_API, EVENT_API, PRIVATE_KEY} = require('./co
 
 const createInstance = () => {
     return new TronWeb({
-            fullHost: FULL_NODE_API
-        },
-        PRIVATE_KEY)
+        fullHost: FULL_NODE_API,
+        privateKey: PRIVATE_KEY
+    })
 }
 
 let instance

@@ -13,11 +13,40 @@ const HttpProvider = TronWeb.providers.HttpProvider;
 
 describe('TronWeb Instance', function () {
 
-
     describe('#constructor()', function () {
         it('should create a full instance', function () {
             const tronWeb = tronWebBuilder.createInstance();
             assert.instanceOf(tronWeb, TronWeb);
+        });
+
+        it('should create an instance using an options object without private key', function () {
+            const fullNode = new HttpProvider(FULL_NODE_API);
+            const solidityNode = new HttpProvider(SOLIDITY_NODE_API);
+            const eventServer = EVENT_API;
+
+            const tronWeb = new TronWeb({
+                fullNode,
+                solidityNode,
+                eventServer
+            });
+
+            assert.equal(tronWeb.defaultPrivateKey, false);
+        });
+
+        it('should create an instance using a full options object', function () {
+            const fullNode = FULL_NODE_API;
+            const solidityNode = SOLIDITY_NODE_API;
+            const eventServer = EVENT_API;
+            const privateKey = PRIVATE_KEY;
+
+            const tronWeb = new TronWeb({
+                fullNode,
+                solidityNode,
+                eventServer,
+                privateKey
+            });
+
+            assert.equal(tronWeb.defaultPrivateKey, privateKey);
         });
 
         it('should create an instance without a private key', function () {
@@ -276,7 +305,7 @@ describe('TronWeb Instance', function () {
 
         it('should reject an invalid URL string', function () {
             assert.throws(() => {
-                tronWebBuilder.createInstance().setFullNode('test')
+                tronWebBuilder.createInstance().setFullNode('example.')
             }, 'Invalid URL provided to HttpProvider');
         });
     });
@@ -308,7 +337,7 @@ describe('TronWeb Instance', function () {
 
         it('should reject an invalid URL string', function () {
             assert.throws(() => {
-                tronWebBuilder.createInstance().setSolidityNode('test')
+                tronWebBuilder.createInstance().setSolidityNode('_localhost')
             }, 'Invalid URL provided to HttpProvider');
         });
     });
@@ -335,7 +364,7 @@ describe('TronWeb Instance', function () {
             const tronWeb = tronWebBuilder.createInstance();
 
             assert.throws(() => {
-                tronWeb.setEventServer('test')
+                tronWeb.setEventServer('test%20')
             }, 'Invalid URL provided to HttpProvider');
         });
 

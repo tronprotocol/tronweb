@@ -28,7 +28,7 @@ describe('TronWeb.lib.providers', async function () {
             ), 'Invalid URL provided to HttpProvider');
 
             assert.throws(() => new TronWeb.providers.HttpProvider(
-                'cipparolla'
+                '_localhost'
             ), 'Invalid URL provided to HttpProvider');
 
             assert.throws(() => new TronWeb.providers.HttpProvider(
