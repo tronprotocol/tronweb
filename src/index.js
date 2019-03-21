@@ -22,15 +22,16 @@ export default class TronWeb extends EventEmitter {
     static version = version;
 
     constructor(options = false,
+                // for retro-compatibility:
                 solidityNode = false, eventServer = false, privateKey = false) {
         super();
 
         let fullNode;
         if (typeof options === 'object' && (options.fullNode || options.fullHost)) {
-            privateKey = options.privateKey || solidityNode;
             fullNode = options.fullNode || options.fullHost;
             solidityNode = options.solidityNode || options.fullHost;
             eventServer = options.eventServer || options.fullHost;
+            privateKey = options.privateKey;
         } else {
             fullNode = options;
         }
