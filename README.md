@@ -171,6 +171,9 @@ In order to contribute you can
 
 ## Recent History
 
+__2.3.2__
+* Remove mixed approach instantiating tronWeb. Before you could pass the servers as an object, and the privateKey as a separate parameter. Now, you pass them either in the options object or in the params.
+
 __2.3.1__
 * Adds support for not-tld domain, like http://localhost
 * Improve the new format, allow passing the privateKey as a property in the option object
