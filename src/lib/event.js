@@ -13,13 +13,13 @@ export default class Event {
     }
 
     setServer(eventServer = false, healthcheck = 'healthcheck') {
-        if(!eventServer)
+        if (!eventServer)
             return this.tronWeb.eventServer = false;
 
-        if(utils.isString(eventServer))
+        if (utils.isString(eventServer))
             eventServer = new providers.HttpProvider(eventServer);
 
-        if(!this.tronWeb.isValidProvider(eventServer))
+        if (!this.tronWeb.isValidProvider(eventServer))
             throw new Error('Invalid event server provided');
 
         this.tronWeb.eventServer = eventServer;
@@ -52,46 +52,46 @@ export default class Event {
             page: 1
         }, options)
 
-        if(!callback)
+        if (!callback)
             return this.injectPromise(this.getEventsByContactAddress, contractAddress, options);
 
         fromTimestamp = fromTimestamp || sinceTimestamp || since;
 
-        if(!this.tronWeb.eventServer)
+        if (!this.tronWeb.eventServer)
             return callback('No event server configured');
 
         const routeParams = [];
 
-        if(!this.tronWeb.isAddress(contractAddress))
+        if (!this.tronWeb.isAddress(contractAddress))
             return callback('Invalid contract address provided');
 
-        if(eventName && !contractAddress)
+        if (eventName && !contractAddress)
             return callback('Usage of event name filtering requires a contract address');
 
-        if(typeof fromTimestamp !== 'undefined' && !utils.isInteger(fromTimestamp))
+        if (typeof fromTimestamp !== 'undefined' && !utils.isInteger(fromTimestamp))
             return callback('Invalid fromTimestamp provided');
 
-        if(!utils.isInteger(size))
+        if (!utils.isInteger(size))
             return callback('Invalid size provided');
 
-        if(size > 200) {
+        if (size > 200) {
             console.warn('Defaulting to maximum accepted size: 200');
             size = 200;
         }
 
-        if(!utils.isInteger(page))
+        if (!utils.isInteger(page))
             return callback('Invalid page provided');
 
-        if(blockNumber && !eventName)
+        if (blockNumber && !eventName)
             return callback('Usage of block number filtering requires an event name');
 
-        if(contractAddress)
+        if (contractAddress)
             routeParams.push(this.tronWeb.address.fromHex(contractAddress));
 
-        if(eventName)
+        if (eventName)
             routeParams.push(eventName);
 
-        if(blockNumber)
+        if (blockNumber)
             routeParams.push(blockNumber);
 
         const qs = {
@@ -106,13 +106,13 @@ export default class Event {
             qs.fromTimestamp = qs.since = fromTimestamp;
         }
 
-        if(onlyConfirmed)
+        if (onlyConfirmed)
             qs.onlyConfirmed = onlyConfirmed
 
-        if(onlyUnconfirmed && !onlyConfirmed)
+        if (onlyUnconfirmed && !onlyConfirmed)
             qs.onlyUnconfirmed = onlyUnconfirmed
 
-        if(sort)
+        if (sort)
             qs.sort = sort
 
         fingerprint = fingerprint || previousFingerprint || previousLastEventFingerprint
@@ -120,10 +120,10 @@ export default class Event {
             qs.fingerprint = fingerprint
 
         return this.tronWeb.eventServer.request(`event/contract/${routeParams.join('/')}?${querystring.stringify(qs)}`).then((data = false) => {
-            if(!data)
+            if (!data)
                 return callback('Unknown error occurred');
 
-            if(!utils.isArray(data))
+            if (!utils.isArray(data))
                 return callback(data);
 
             return callback(null,
@@ -140,17 +140,17 @@ export default class Event {
             options = {};
         }
 
-        if(!callback)
+        if (!callback)
             return this.injectPromise(this.getEventsByTransactionID, transactionID, options);
 
-        if(!this.tronWeb.eventServer)
+        if (!this.tronWeb.eventServer)
             return callback('No event server configured');
 
         return this.tronWeb.eventServer.request(`event/transaction/${transactionID}`).then((data = false) => {
-            if(!data)
+            if (!data)
                 return callback('Unknown error occurred');
 
-            if(!utils.isArray(data))
+            if (!utils.isArray(data))
                 return callback(data);
 
             return callback(null,

@@ -3,13 +3,13 @@ import utils from 'utils';
 
 export default class HttpProvider {
     constructor(host, timeout = 30000, user = false, password = false, headers = {}, statusPage = '/') {
-        if(!utils.isValidURL(host))
+        if (!utils.isValidURL(host))
             throw new Error('Invalid URL provided to HttpProvider');
 
-        if(isNaN(timeout) || timeout < 0)
+        if (isNaN(timeout) || timeout < 0)
             throw new Error('Invalid timeout duration provided');
 
-        if(!utils.isObject(headers))
+        if (!utils.isObject(headers))
             throw new Error('Invalid headers object provided');
 
         host = host.replace(/\/+$/, '');

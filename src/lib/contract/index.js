@@ -4,7 +4,7 @@ import Method from './method';
 
 export default class Contract {
     constructor(tronWeb = false, abi = [], address = false) {
-        if(!tronWeb || !tronWeb instanceof TronWeb)
+        if (!tronWeb || !tronWeb instanceof TronWeb)
             throw new Error('Expected instance of TronWeb');
 
         this.tronWeb = tronWeb;
@@ -22,7 +22,7 @@ export default class Contract {
         this.methodInstances = {};
         this.props = [];
 
-        if(this.tronWeb.isAddress(address))
+        if (this.tronWeb.isAddress(address))
             this.deployed = true;
         else this.address = false;
 
@@ -43,34 +43,34 @@ export default class Contract {
                 JSON.stringify(priorEvent) == JSON.stringify(event)
             ));
 
-            if(duplicate)
+            if (duplicate)
                 return false;
 
-            if(!this.lastBlock)
+            if (!this.lastBlock)
                 return true;
 
             return event.block > this.lastBlock;
         });
 
-        if(latestEvent)
+        if (latestEvent)
             this.lastBlock = latestEvent.block;
 
         return newEvents;
     }
 
     async _startEventListener(options = {}, callback) {
-        if(utils.isFunction(options)) {
+        if (utils.isFunction(options)) {
             callback = options;
             options = {};
         }
 
-        if(this.eventListener)
+        if (this.eventListener)
             clearInterval(this.eventListener);
 
-        if(!this.tronWeb.eventServer)
+        if (!this.tronWeb.eventServer)
             throw new Error('Event server is not configured');
 
-        if(!this.address)
+        if (!this.address)
             throw new Error('Contract is not configured with an address');
 
         this.eventCallback = callback;
@@ -86,7 +86,7 @@ export default class Contract {
     }
 
     _stopEventListener() {
-        if(!this.eventListener)
+        if (!this.eventListener)
             return;
 
         clearInterval(this.eventListener);
@@ -106,7 +106,7 @@ export default class Contract {
 
         abi.forEach(func => {
             // Don't build a method for constructor function. That's handled through contract create.
-            if(func.type.toLowerCase() === 'constructor')
+            if (func.type.toLowerCase() === 'constructor')
                 return;
 
             const method = new Method(this, func);
@@ -126,17 +126,17 @@ export default class Contract {
             this.methodInstances[functionSelector] = method;
             this.methodInstances[signature] = method;
 
-            if(!this.hasProperty(name)) {
+            if (!this.hasProperty(name)) {
                 this[name] = methodCall;
                 this.props.push(name);
             }
 
-            if(!this.hasProperty(functionSelector)) {
+            if (!this.hasProperty(functionSelector)) {
                 this[functionSelector] = methodCall;
                 this.props.push(functionSelector);
             }
 
-            if(!this.hasProperty(signature)) {
+            if (!this.hasProperty(signature)) {
                 this[signature] = methodCall;
                 this.props.push(signature);
             }
@@ -148,7 +148,7 @@ export default class Contract {
         const methodName = data.substring(0, 8);
         const inputData = data.substring(8);
 
-        if(!this.methodInstances[methodName])
+        if (!this.methodInstances[methodName])
             throw new Error('Contract method ' + methodName + " not found");
 
         const methodInstance = this.methodInstances[methodName];
@@ -160,12 +160,12 @@ export default class Contract {
     }
 
     async new(options, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
-        if(utils.isFunction(privateKey)) {
+        if (utils.isFunction(privateKey)) {
             callback = privateKey;
             privateKey = this.tronWeb.defaultPrivateKey;
         }
 
-        if(!callback)
+        if (!callback)
             return this.injectPromise(this.new, options, privateKey);
 
         try {
@@ -174,7 +174,7 @@ export default class Contract {
             const signedTransaction = await this.tronWeb.trx.sign(transaction, privateKey);
             const contract = await this.tronWeb.trx.sendRawTransaction(signedTransaction);
 
-            if(contract.code)
+            if (contract.code)
                 return callback({
                     error: contract.code,
                     message: this.tronWeb.toUtf8(contract.message)
@@ -187,13 +187,13 @@ export default class Contract {
     }
 
     async at(contractAddress, callback = false) {
-        if(!callback)
+        if (!callback)
             return this.injectPromise(this.at, contractAddress);
 
         try {
             const contract = await this.tronWeb.trx.getContract(contractAddress);
 
-            if(!contract.contract_address)
+            if (!contract.contract_address)
                 return callback('Unknown error: ' + JSON.stringify(contract, null, 2));
 
             this.address = contract.contract_address;
@@ -204,7 +204,7 @@ export default class Contract {
 
             return callback(null, this);
         } catch (ex) {
-            if(ex.toString().includes('does not exist'))
+            if (ex.toString().includes('does not exist'))
                 return callback('Contract has not been deployed on the network');
 
             return callback(ex);
@@ -212,19 +212,19 @@ export default class Contract {
     }
 
     events(options = {}, callback = false) {
-        if(utils.isFunction(options)) {
+        if (utils.isFunction(options)) {
             callback = options;
             options = {};
         }
 
-        if(!utils.isFunction(callback))
+        if (!utils.isFunction(callback))
             throw new Error('Callback function expected');
 
         const self = this;
 
         return {
             start(startCallback = false) {
-                if(!startCallback) {
+                if (!startCallback) {
                     self._startEventListener(options, callback);
                     return this;
                 }

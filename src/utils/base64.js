@@ -22,9 +22,9 @@ export function Base64() {
             enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
             enc4 = chr3 & 63;
 
-            if(isNaN(chr2))
+            if (isNaN(chr2))
                 enc3 = enc4 = 64;
-            else if(isNaN(chr3))
+            else if (isNaN(chr3))
                 enc4 = 64;
 
             output = output +
@@ -56,9 +56,9 @@ export function Base64() {
             enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
             enc4 = chr3 & 63;
 
-            if(isNaN(chr2))
+            if (isNaN(chr2))
                 enc3 = enc4 = 64;
-            else if(isNaN(chr3))
+            else if (isNaN(chr3))
                 enc4 = 64;
 
             output = output +
@@ -94,10 +94,10 @@ export function Base64() {
 
             output = output + String.fromCharCode(chr1);
 
-            if(enc3 != 64)
+            if (enc3 != 64)
                 output = output + String.fromCharCode(chr2);
 
-            if(enc4 != 64)
+            if (enc4 != 64)
                 output = output + String.fromCharCode(chr3);
         }
 
@@ -129,10 +129,10 @@ export function Base64() {
 
             output = output + String.fromCharCode(chr1);
 
-            if(enc3 != 64)
+            if (enc3 != 64)
                 output = output + String.fromCharCode(chr2);
 
-            if(enc4 != 64)
+            if (enc4 != 64)
                 output = output + String.fromCharCode(chr3);
         }
 
@@ -158,12 +158,12 @@ export function Base64() {
         string = string.replace(/\r\n/g, "\n");
         let utftext = "";
 
-        for(let n = 0; n < string.length; n++) {
+        for (let n = 0; n < string.length; n++) {
             const c = string.charCodeAt(n);
 
-            if(c < 128) {
+            if (c < 128) {
                 utftext += String.fromCharCode(c);
-            } else if((c > 127) && (c < 2048)) {
+            } else if ((c > 127) && (c < 2048)) {
                 utftext += String.fromCharCode((c >> 6) | 192);
                 utftext += String.fromCharCode((c & 63) | 128);
             } else {
@@ -186,10 +186,10 @@ export function Base64() {
         while (i < utftext.length) {
             c = utftext.charCodeAt(i);
 
-            if(c < 128) {
+            if (c < 128) {
                 string += String.fromCharCode(c);
                 i++;
-            } else if((c > 191) && (c < 224)) {
+            } else if ((c > 191) && (c < 224)) {
                 c2 = utftext.charCodeAt(i + 1);
                 string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
                 i += 2;
