@@ -99,41 +99,58 @@ First off, in your javascript file, define TronWeb:
 ```js
 const TronWeb = require('tronweb')
 ```
+
+When you instantiate TronWeb you can define
+
+* fullNode
+* solidityNode
+* eventServer
+* privateKey
+
+you can also set a
+
+* fullHost
+
+which works as a jolly. If you do so, though, the more precise specification has priority.
+Supposing you are using a server which provides everything, like TronGrid, you can instantiate TronWeb as:
+
 The easiest way to instantiate tronWeb is to run
 ```js
 const tronWeb = new TronWeb({
     fullHost: 'https://api.trongrid.io',
-    privateKey: '...'
+    privateKey: 'your private key'
 })
 ```
-but you can continue to use the old way:
+
+For retro-compatibility, you can continue to use the old approach, where any parameter is passed separately:
 ```js
 const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, privateKey)
 
 ```
 
-Valid alternatives are:
+If you are, for example, using a server as full and solidity node, and another server for the events, you can set it as:
 
 ```js
 const tronWeb = new TronWeb({
     fullHost: 'https://api.trongrid.io',
-    eventServer: 'https://api.someotherevent.io'
-  },
-  privateKey: '...'
-)
-```
-where fullHost defines fullNode and solidityNode while the eventServer is specified, and the privateKey is passed separately.
-
-```js
-const tronWeb = new TronWeb({
-    fullNode: 'https://api.trongrid.io',
-    solidityNode: 'https://api/somesolidity.io'
-    eventServer: 'https://api.somevent.io',
-    privateKey: '...'
+    eventServer: 'https://api.someotherevent.io',
+    privateKey: 'your private key'
   }
 )
 ```
-similar to the old approach
+
+If you are using different servers for anything, you can do
+```js
+const tronWeb = new TronWeb({
+    fullNode: 'https://some-node.tld',
+    solidityNode: 'https://some-other-node.tld'
+    eventServer: 'https://some-event-server.tld',
+    privateKey: 'your private key'
+  }
+)
+```
+
+
 
 ## A full example
 
