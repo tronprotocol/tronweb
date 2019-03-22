@@ -168,7 +168,7 @@ describe('TronWeb.lib.event', async function () {
 
     });
 
-    describe.only('#contract.method.watch', async function () {
+    describe('#contract.method.watch', async function () {
 
         it('should watch for an event', async function () {
             
