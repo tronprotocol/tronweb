@@ -42,7 +42,8 @@ export default class Event {
             previousFingerprint,
             fingerprint,
             rawResponse,
-            sort
+            sort,
+            filters
         } = Object.assign({
             sinceTimestamp: 0,
             eventName: false,
@@ -101,9 +102,6 @@ export default class Event {
         if (typeof filters === 'object' && Object.keys(filters).length > 0) {
             qs.filters = JSON.stringify(filters);
         }
-        
-        if (options.filters) 
-            qs.filters = options.filters
 
         if (fromTimestamp) {
             qs.fromTimestamp = qs.since = fromTimestamp;
