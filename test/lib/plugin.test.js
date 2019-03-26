@@ -8,7 +8,7 @@ const jlog = require('../helpers/jlog')
 
 const assert = chai.assert;
 
-describe.only('TronWeb.lib.plugin', async function () {
+describe('TronWeb.lib.plugin', async function () {
 
     let tronWeb;
 
