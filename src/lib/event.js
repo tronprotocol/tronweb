@@ -98,6 +98,7 @@ export default class Event {
             size,
             page
         }
+        
         if (typeof filters === 'object' && Object.keys(filters).length > 0) {
             qs.filters = JSON.stringify(filters);
         }

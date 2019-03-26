@@ -168,5 +168,47 @@ describe('TronWeb.lib.event', async function () {
 
     });
 
+    describe('#contract.method.watch', async function () {
 
+        it('should watch for an event', async function () {
+            
+            this.timeout(20000)
+            tronWeb.setPrivateKey(accounts.pks[3])
+
+            let watchTest = await contract.SomeEvent().watch((err, res) => {
+                if(res) {
+                    assert.equal(res.result._sender, accounts.hex[3])
+                    assert.equal(res.result._receiver, accounts.hex[4])
+                    assert.equal(res.result._amount, 4000)
+                    
+                    watchTest.stop() // Calls stop on itself when successful
+                }
+            })
+            
+            contract.emitNow(accounts.hex[4], 4000).send({
+                from: accounts.hex[3]
+            })
+
+        })
+
+        it('should only watch for an event with given filters',  async function () {
+
+            this.timeout(20000)
+            tronWeb.setPrivateKey(accounts.pks[3])
+            
+            let watchTest = await contract.SomeEvent().watch({filters: {"_amount": "4000"}}, (err, res) => {
+                if(res) { 
+                    assert.equal(res.result._sender, accounts.hex[3])
+                    assert.equal(res.result._receiver, accounts.hex[4])
+                    assert.equal(res.result._amount, 4000)
+
+                    watchTest.stop() // Calls stop on itself when successful
+                }
+            })
+            
+            contract.emitNow(accounts.hex[4], 4000).send({
+                from: accounts.hex[3]
+            })
+        })
+    })
 });
