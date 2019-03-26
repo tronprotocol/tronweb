@@ -29,13 +29,20 @@ describe('TronWeb.lib.plugin', async function () {
 
         it('should register the plugin GetNowBlock', async function () {
 
-            let result = tronWeb.plugin.register(GetNowBlock)
+            const someParameter = 'someValue'
+
+            let result = tronWeb.plugin.register(GetNowBlock, {
+                someParameter
+            })
             assert.isTrue(result.skipped.includes('_parseToken'))
             assert.isTrue(result.plugged.includes('getCurrentBlock'))
             assert.isTrue(result.plugged.includes('getLatestBlock'))
 
             result = await tronWeb.trx.getCurrentBlock()
             assert.isTrue(result.fromPlugin)
+
+            result = await tronWeb.trx.getSomeParameter()
+            assert.equal(result, someParameter)
 
         })
 

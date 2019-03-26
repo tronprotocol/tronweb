@@ -67,6 +67,7 @@ export default class Validator {
                         callback(this.invalid(param));
                         return true;
                     }
+                    break;
 
                 case 'notEqual':
                     if (normalized[names[0]] === normalized[names[1]]) {

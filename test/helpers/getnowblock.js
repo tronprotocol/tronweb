@@ -1,4 +1,6 @@
 
+let someParameter
+
 class GetNowBlock {
 
     // In a real case, you should have this in order to allow the library to work stand-alone. But for this test, it is more clear this way.
@@ -21,9 +23,16 @@ class GetNowBlock {
         }).catch(err => callback(err));
     }
 
-    pluginInterface() {
+    getSomeParameter() {
+        return someParameter;
+    }
+
+    pluginInterface(options) {
+        if (options.someParameter) {
+            someParameter = options.someParameter
+        }
         return {
-            requires: '^2.2.2',
+            requires: '^2.2.4',
             components: {
                 trx: {
                     // will be overridden
@@ -31,6 +40,7 @@ class GetNowBlock {
 
                     // will be added
                     getLatestBlock: this.someMethod,
+                    getSomeParameter: this.getSomeParameter,
 
                     // will be skipped
                     _parseToken: function () {}
