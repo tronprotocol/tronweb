@@ -11,7 +11,7 @@ export default class Plugin {
         this.pluginNoOverride = ['register'];
     }
 
-    register(Plugin) {
+    register(Plugin, options) {
         let pluginInterface = {
             requires: '0.0.0',
             components: {}
@@ -22,7 +22,7 @@ export default class Plugin {
         }
         const plugin = new Plugin(this.tronWeb)
         if (utils.isFunction(plugin.pluginInterface)) {
-            pluginInterface = plugin.pluginInterface()
+            pluginInterface = plugin.pluginInterface(options)
         }
         if (semver.satisfies(TronWeb.version, pluginInterface.requires)) {
             for (let component in pluginInterface.components) {
