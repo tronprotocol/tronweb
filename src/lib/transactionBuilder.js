@@ -142,17 +142,17 @@ export default class TransactionBuilder {
 
         if (this.validator.notValid([
             {
-                name: 'origin',
+                name: 'buyer',
                 type: 'address',
                 value: buyer
             },
             {
-                name: 'recipient',
+                name: 'issuer',
                 type: 'address',
                 value: issuerAddress
             },
             {
-                names: ['recipient', 'origin'],
+                names: ['buyer', 'issuer'],
                 type: 'notEqual',
                 msg: 'Cannot purchase tokens from same account'
             },
