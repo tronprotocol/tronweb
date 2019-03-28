@@ -75,6 +75,20 @@ export default class Validator {
                         return true;
                     }
                     break;
+
+                case 'resource':
+                    if (!['BANDWIDTH', 'ENERGY'].includes(value)) {
+                        callback(this.invalid(param));
+                        return true;
+                    }
+                    break;
+
+                case 'url':
+                    if (!utils.isValidURL(url)) {
+                        callback(this.invalid(param));
+                        return true;
+                    }
+                    break;
             }
         }
         return false;

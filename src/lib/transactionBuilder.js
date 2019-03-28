@@ -140,17 +140,35 @@ export default class TransactionBuilder {
         if (!callback)
             return this.injectPromise(this.purchaseToken, issuerAddress, tokenID, amount, buyer);
 
-        if (!this.tronWeb.isAddress(issuerAddress))
-            return callback('Invalid issuer address provided');
-
-        if (!utils.isString(tokenID) || !tokenID.length)
-            return callback('Invalid token ID provided');
-
-        if (!utils.isInteger(amount) || amount <= 0)
-            return callback('Invalid amount provided');
-
-        if (!this.tronWeb.isAddress(buyer))
-            return callback('Invalid buyer address provided');
+        if (this.validator.notValid([
+            {
+                name: 'origin',
+                type: 'address',
+                value: buyer
+            },
+            {
+                name: 'recipient',
+                type: 'address',
+                value: issuerAddress
+            },
+            {
+                names: ['recipient', 'origin'],
+                type: 'notEqual',
+                msg: 'Cannot purchase tokens from same account'
+            },
+            {
+                name: 'amount',
+                type: 'integer',
+                gt: 0,
+                value: amount
+            },
+            {
+                name: 'token ID',
+                type: 'tokenId',
+                value: tokenID
+            }
+        ], callback))
+            return;
 
         this.tronWeb.fullNode.request('wallet/participateassetissue', {
             to_address: toHex(issuerAddress),
@@ -184,21 +202,42 @@ export default class TransactionBuilder {
         if (!callback)
             return this.injectPromise(this.freezeBalance, amount, duration, resource, address, receiverAddress);
 
-        if (!['BANDWIDTH', 'ENERGY'].includes(resource))
-            return callback('Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"');
-
-        if (!utils.isInteger(amount) || amount <= 0)
-            return callback('Invalid amount provided');
-
-        if (!utils.isInteger(duration) || duration < 3)
-            return callback('Invalid duration provided, minimum of 3 days');
-
-        if (!this.tronWeb.isAddress(address))
-            return callback('Invalid address provided');
-
-        // here set `optional: true` in notValid param
-        if (utils.isNotNullOrUndefined(receiverAddress) && !this.tronWeb.isAddress(receiverAddress))
-            return callback('Invalid receiver address provided');
+        if (this.validator.notValid([
+            {
+                name: 'origin',
+                type: 'address',
+                value: address
+            },
+            {
+                name: 'recipient',
+                type: 'address',
+                value: receiverAddress
+            },
+            {
+                names: ['recipient', 'origin'],
+                type: 'notEqual',
+                msg: 'Cannot freeze balance to same account'
+            },
+            {
+                name: 'amount',
+                type: 'integer',
+                gt: 0,
+                value: amount
+            },
+            {
+                name: 'duration',
+                type: 'integer',
+                gte: 3,
+                value: duration
+            },
+            {
+                name: 'resource',
+                type: 'resource',
+                value: resource,
+                msg: 'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY'
+            }
+        ], callback))
+            return;
 
         const data = {
             owner_address: toHex(address),
@@ -233,14 +272,30 @@ export default class TransactionBuilder {
         if (!callback)
             return this.injectPromise(this.unfreezeBalance, resource, address, receiverAddress);
 
-        if (!['BANDWIDTH', 'ENERGY'].includes(resource))
-            return callback('Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"');
-
-        if (!this.tronWeb.isAddress(address))
-            return callback('Invalid address provided');
-
-        if (utils.isNotNullOrUndefined(receiverAddress) && !this.tronWeb.isAddress(receiverAddress))
-            return callback('Invalid receiver address provided');
+        if (this.validator.notValid([
+            {
+                name: 'origin',
+                type: 'address',
+                value: address
+            },
+            {
+                name: 'recipient',
+                type: 'address',
+                value: receiverAddress
+            },
+            {
+                names: ['recipient', 'origin'],
+                type: 'notEqual',
+                msg: 'Cannot unfreeze balance to same account'
+            },
+            {
+                name: 'resource',
+                type: 'resource',
+                value: resource,
+                msg: 'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY'
+            }
+        ], callback))
+            return;
 
         const data = {
             owner_address: toHex(address),
@@ -263,8 +318,14 @@ export default class TransactionBuilder {
         if (!callback)
             return this.injectPromise(this.withdrawBlockRewards, address);
 
-        if (!this.tronWeb.isAddress(address))
-            return callback('Invalid address provided');
+        if (this.validator.notValid([
+            {
+                name: 'origin',
+                type: 'address',
+                value: address
+            }
+        ], callback))
+            return;
 
         this.tronWeb.fullNode.request('wallet/withdrawbalance', {
             owner_address: toHex(address)
@@ -281,11 +342,20 @@ export default class TransactionBuilder {
         if (!callback)
             return this.injectPromise(this.applyForSR, address, url);
 
-        if (!this.tronWeb.isAddress(address))
-            return callback('Invalid address provided');
-
-        if (!utils.isValidURL(url))
-            return callback('Invalid url provided');
+        if (this.validator.notValid([
+            {
+                name: 'origin',
+                type: 'address',
+                value: address
+            },
+            {
+                name: 'url',
+                type: 'url',
+                value: url,
+                msg: 'Invalid url provided'
+            }
+        ], callback))
+            return;
 
         this.tronWeb.fullNode.request('wallet/createwitness', {
             owner_address: toHex(address),
