@@ -1154,7 +1154,7 @@ export default class TransactionBuilder {
             ) {
                 return false
             }
-            for (let key of permissions.key) {
+            for (let key of permissions.keys) {
                 if (!this.tronWeb.isAddress(key.address)
                     || !utils.isInteger(key.weight)
                     || key.weight > permissions.threshold
