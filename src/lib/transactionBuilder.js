@@ -137,6 +137,8 @@ export default class TransactionBuilder {
             buyer = this.tronWeb.defaultAddress.hex;
         }
 
+
+
         if (!callback)
             return this.injectPromise(this.purchaseToken, issuerAddress, tokenID, amount, buyer);
 
@@ -209,12 +211,13 @@ export default class TransactionBuilder {
                 value: address
             },
             {
-                name: 'recipient',
+                name: 'receiver',
                 type: 'address',
-                value: receiverAddress
+                value: receiverAddress,
+                optional: true
             },
             {
-                names: ['recipient', 'origin'],
+                names: ['receiver', 'origin'],
                 type: 'notEqual',
                 msg: 'Cannot freeze balance to same account'
             },
@@ -279,12 +282,13 @@ export default class TransactionBuilder {
                 value: address
             },
             {
-                name: 'recipient',
+                name: 'receiver',
                 type: 'address',
-                value: receiverAddress
+                value: receiverAddress,
+                optional: true
             },
             {
-                names: ['recipient', 'origin'],
+                names: ['receiver', 'origin'],
                 type: 'notEqual',
                 msg: 'Cannot unfreeze balance to same account'
             },
@@ -449,7 +453,6 @@ export default class TransactionBuilder {
             name = ""
         } = options;
 
-
         if (abi && utils.isString(abi)) {
             try {
                 abi = JSON.parse(abi);
@@ -466,51 +469,83 @@ export default class TransactionBuilder {
             return func.type == 'constructor' && func.payable;
         });
 
-        if (!utils.isHex(bytecode))
-            return callback('Invalid options.bytecode provided');
-
-        if (!utils.isInteger(feeLimit) || feeLimit <= 0 || feeLimit > 1_000_000_000)
-            return callback('Invalid options.feeLimit provided');
-        // {
-        //     name: 'fee limit',
-        //     type: 'integer',
-        //     gt: 0,
-        //     lte: 1_000_000_000,
-        //     value: feeLimit
-        // }
-
-        if (!utils.isInteger(callValue) || callValue < 0)
-            return callback('Invalid options.callValue provided');
-
-        if (payable && callValue == 0)
-            return callback('When contract is payable, options.callValue must be a positive integer');
-
-        if (!payable && callValue > 0)
-            return callback('When contract is not payable, options.callValue must be 0');
-
-        if (!utils.isInteger(userFeePercentage) || userFeePercentage < 0 || userFeePercentage > 100)
-            return callback('Invalid options.userFeePercentage provided');
-
-        if (!utils.isInteger(originEnergyLimit) || originEnergyLimit < 0 || originEnergyLimit > 10_000_000)
-            return callback('Invalid options.originEnergyLimit provided');
-
-        if (!utils.isArray(parameters))
-            return callback('Invalid parameters provided');
-
-        if (!this.tronWeb.isAddress(issuerAddress))
-            return callback('Invalid issuer address provided');
+        if (this.validator.notValid([
+            {
+                name: 'bytecode',
+                type: 'hex',
+                value: bytecode
+            },
+            {
+                name: 'feeLimit',
+                type: 'integer',
+                value: feeLimit,
+                gt: 0,
+                lte: 1_000_000_000
+            },
+            {
+                name: 'callValue',
+                type: 'integer',
+                value: callValue,
+                gte: 0
+            },
+            {
+                name: 'userFeePercentage',
+                type: 'integer',
+                value: userFeePercentage,
+                gte: 0,
+                lte: 100
+            },
+            {
+                name: 'originEnergyLimit',
+                type: 'integer',
+                value: userFeePercentage,
+                gte: 0,
+                lte: 10_000_000
+            },
+            {
+                name: 'parameters',
+                type: 'array',
+                value: parameters
+            },
+            {
+                name: 'issuer',
+                type: 'address',
+                value: issuerAddress
+            },
+            {
+                name: 'tokenValue',
+                type: 'integer',
+                value: tokenValue,
+                gte: 0,
+                optional: true
+            },
+            {
+                name: 'tokenId',
+                type: 'integer',
+                value: tokenId,
+                gte: 0,
+                optional: true
+            },
+            {
+                name: 'isPayable',
+                type: 'true',
+                value: payable && callValue == 0,
+                msg: 'When method is payable, options.callValue must be a positive integer'
+            },
+            {
+                name: 'notPayable',
+                type: 'false',
+                value: !payable && callValue > 0,
+                msg: 'When method is not payable, options.callValue must be 0'
+            }
+        ], callback))
+            return;
 
         var constructorParams = abi.find(
             (it) => {
                 return it.type === 'constructor';
             }
         );
-
-        if (utils.isNotNullOrUndefined(tokenValue) && (!utils.isInteger(tokenValue) || tokenValue < 0))
-            return callback('Invalid options.tokenValue provided');
-
-        if (utils.isNotNullOrUndefined(tokenId) && (!utils.isInteger(tokenId) || tokenId < 0))
-            return callback('Invalid options.tokenValue provided');
 
         if (typeof constructorParams !== 'undefined' && constructorParams) {
             const abiCoder = new Ethers.utils.AbiCoder();
@@ -614,29 +649,56 @@ export default class TransactionBuilder {
             feeLimit: 1_000_000_000
         }, options)
 
-        if (utils.isNotNullOrUndefined(tokenValue) && (!utils.isInteger(tokenValue) || tokenValue < 0))
-            return callback('Invalid options.tokenValue provided');
-
-        if (utils.isNotNullOrUndefined(tokenId) && (!utils.isInteger(tokenId) || tokenId < 0))
-            return callback('Invalid options.tokenValue provided');
-
-        if (!this.tronWeb.isAddress(contractAddress))
-            return callback('Invalid contract address provided');
-
-        if (!utils.isString(functionSelector) || !functionSelector.length)
-            return callback('Invalid function selector provided');
-
-        if (!utils.isInteger(callValue) || callValue < 0)
-            return callback('Invalid call value provided');
-
-        if (!utils.isInteger(feeLimit) || feeLimit <= 0 || feeLimit > 1_000_000_000)
-            return callback('Invalid fee limit provided');
-
-        if (!utils.isArray(parameters))
-            return callback('Invalid parameters provided');
-
-        if (issuerAddress !== false && !this.tronWeb.isAddress(issuerAddress))
-            return callback('Invalid issuer address provided');
+        if (this.validator.notValid([
+            {
+                name: 'feeLimit',
+                type: 'integer',
+                value: feeLimit,
+                gt: 0,
+                lte: 1_000_000_000
+            },
+            {
+                name: 'callValue',
+                type: 'integer',
+                value: callValue,
+                gte: 0
+            },
+            {
+                name: 'parameters',
+                type: 'array',
+                value: parameters
+            },
+            {
+                name: 'contract',
+                type: 'address',
+                value: contractAddress
+            },
+            {
+                name: 'issuer',
+                type: 'address',
+                value: issuerAddress
+            },
+            {
+                name: 'tokenValue',
+                type: 'integer',
+                value: tokenValue,
+                gte: 0,
+                optional: true
+            },
+            {
+                name: 'tokenId',
+                type: 'integer',
+                value: tokenId,
+                gte: 0,
+                optional: true
+            },
+            {
+                name: 'function selector',
+                type: 'not-empty-string',
+                value: functionSelector
+            }
+        ], callback))
+            return;
 
         functionSelector = functionSelector.replace('/\s*/g', '');
 
@@ -1224,7 +1286,7 @@ export default class TransactionBuilder {
             ) {
                 return false
             }
-            for (let key of permissions.key) {
+            for (let key of permissions.keys) {
                 if (!this.tronWeb.isAddress(key.address)
                     || !utils.isInteger(key.weight)
                     || key.weight > permissions.threshold

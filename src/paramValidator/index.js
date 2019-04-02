@@ -10,6 +10,7 @@ export default class Validator {
     }
 
     invalid(param) {
+        console.log(`Invalid ${param.name}${param.type === 'address' ? ' address' : ''} provided`)
         return param.msg || `Invalid ${param.name}${param.type === 'address' ? ' address' : ''} provided`;
     }
 
@@ -32,40 +33,37 @@ export default class Validator {
                 optional
             } = param;
             if (optional && !utils.isNotNullOrUndefined(value))
-                return false;
+                continue;
+            let no = false;
+            normalized[param.name] = param.value;
             switch (type) {
 
                 case 'address':
                     if (!this.tronWeb.isAddress(value)) {
-                        callback(this.invalid(param));
-                        return true;
+                        no = true;
                     }
                     normalized[name] = this.tronWeb.address.toHex(value);
                     break;
 
                 case 'integer':
                     if (!utils.isInteger(value) ||
-                        (typeof gt === 'number' && !(value > param.gt)) ||
-                        (typeof lt === 'number' && !(value < param.lt)) ||
-                        (typeof gte === 'number' && !(value >= param.gte)) ||
-                        (typeof lte === 'number' && !(value <= param.lte))) {
-                        callback(this.invalid(param));
-                        return true;
+                        (typeof gt === 'number' && value <= param.gt) ||
+                        (typeof lt === 'number' && value >= param.lt) ||
+                        (typeof gte === 'number' && value < param.gte) ||
+                        (typeof lte === 'number' && value > param.lte)) {
+                        no = true;
                     }
-                    normalized[param.name] = param.value;
                     break;
 
                 case 'tokenId':
                     if (!utils.isString(value) || !value.length) {
-                        callback(this.invalid(param));
-                        return true;
+                        no = true;
                     }
                     break;
 
                 case 'notEmptyObject':
                     if (!utils.isObject(value) || !Object.keys(value).length) {
-                        callback(this.invalid(param));
-                        return true;
+                        no = true;
                     }
                     break;
 
@@ -78,17 +76,51 @@ export default class Validator {
 
                 case 'resource':
                     if (!['BANDWIDTH', 'ENERGY'].includes(value)) {
-                        callback(this.invalid(param));
-                        return true;
+                        no = true;
                     }
                     break;
 
                 case 'url':
                     if (!utils.isValidURL(url)) {
-                        callback(this.invalid(param));
-                        return true;
+                        no = true;
                     }
                     break;
+
+                case 'hex':
+                    if (!utils.isHex(value)) {
+                        no = true;
+                    }
+                    break;
+
+                case 'array':
+                    if (!Array.isArray(value)) {
+                        no = true;
+                    }
+                    break;
+
+                case 'true':
+                    if (value !== true) {
+                        no = true;
+                    }
+                    break;
+
+                case 'false':
+                    if (value !== false) {
+                        no = true;
+                    }
+                    break;
+
+                case 'not-empty-string':
+                    if (!utils.isString(value) || !value.length) {
+                        no = true;
+                    }
+                    break;
+
+            }
+            if (no) {
+                console.log(param)
+                callback(this.invalid(param));
+                return true;
             }
         }
         return false;

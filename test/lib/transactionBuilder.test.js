@@ -653,7 +653,7 @@ describe('TronWeb.transactionBuilder', function () {
             assert.equal(parameter.type_url, 'type.googleapis.com/protocol.ParticipateAssetIssueContract');
         });
 
-        it("should throw if issuerAddress is invalid", async function () {
+        it.only("should throw if issuerAddress is invalid", async function () {
 
             await assertThrow(
                 tronWeb.transactionBuilder.purchaseToken('sasdsadasfa', tokenID, 20, accounts.b58[2]),
