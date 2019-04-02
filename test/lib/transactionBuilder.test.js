@@ -208,7 +208,7 @@ describe('TronWeb.transactionBuilder', function () {
 
             await assertThrow(
                 tronWeb.transactionBuilder.createToken(options),
-                'Invalid supply amount provided'
+                'Supply amount must be a positive integer'
             );
 
         });
@@ -327,14 +327,14 @@ describe('TronWeb.transactionBuilder', function () {
 
             await assertThrow(
                 tronWeb.transactionBuilder.createToken(options),
-                'Invalid free bandwidth amount provided'
+                'Free bandwidth amount must be a positive integer'
             );
 
             options.freeBandwidth = 'something';
 
             await assertThrow(
                 tronWeb.transactionBuilder.createToken(options),
-                'Invalid free bandwidth amount provided'
+                'Free bandwidth amount must be a positive integer'
             );
 
         });
@@ -347,14 +347,14 @@ describe('TronWeb.transactionBuilder', function () {
 
             await assertThrow(
                 tronWeb.transactionBuilder.createToken(options),
-                'Invalid free bandwidth limit provided'
+                'Free bandwidth limit must be a positive integer'
             );
 
             options.freeBandwidthLimit = 'something';
 
             await assertThrow(
                 tronWeb.transactionBuilder.createToken(options),
-                'Invalid free bandwidth limit provided'
+                'Free bandwidth limit must be a positive integer'
             );
 
         });
@@ -366,33 +366,25 @@ describe('TronWeb.transactionBuilder', function () {
 
             await assertThrow(
                 tronWeb.transactionBuilder.createToken(options),
-                'Invalid frozen supply provided'
+                'Frozen supply must be a positive integer'
             );
 
             options.frozenAmount = 'something';
 
             await assertThrow(
                 tronWeb.transactionBuilder.createToken(options),
-                'Invalid frozen supply provided'
+                'Frozen supply must be a positive integer'
             );
         });
 
-        it('should throw if frozen supply is invalid', async function () {
+        it('should throw if frozen duration is invalid', async function () {
             const options = getTokenOptions();
 
-            delete options.frozenAmount;
-
-            await assertThrow(
-                tronWeb.transactionBuilder.createToken(options),
-                'Invalid frozen duration provided'
-            );
-
-            options.frozenAmount = 10;
             options.frozenDuration = 'something';
 
             await assertThrow(
                 tronWeb.transactionBuilder.createToken(options),
-                'Invalid frozen duration provided'
+                'Frozen duration must be a positive integer'
             );
 
         });
@@ -444,7 +436,7 @@ describe('TronWeb.transactionBuilder', function () {
 
             await assertThrow(
                 tronWeb.transactionBuilder.updateAccount(123, accounts.b58[4]),
-                'Name must be a string'
+                'Invalid Name provided'
             );
 
         });
@@ -546,14 +538,14 @@ describe('TronWeb.transactionBuilder', function () {
 
             await assertThrow(
                 tronWeb.transactionBuilder.updateToken(options, accounts.hex[2]),
-                'Invalid free bandwidth amount provided'
+                'Free bandwidth amount must be a positive integer'
             );
 
             options.freeBandwidth = 'something';
 
             await assertThrow(
                 tronWeb.transactionBuilder.updateToken(options, accounts.hex[2]),
-                'Invalid free bandwidth amount provided'
+                'Free bandwidth amount must be a positive integer'
             );
 
         });
@@ -566,14 +558,14 @@ describe('TronWeb.transactionBuilder', function () {
 
             await assertThrow(
                 tronWeb.transactionBuilder.updateToken(options, accounts.hex[2]),
-                'Invalid free bandwidth limit provided'
+                'Free bandwidth limit must be a positive integer'
             );
 
             options.freeBandwidthLimit = 'something';
 
             await assertThrow(
                 tronWeb.transactionBuilder.updateToken(options, accounts.hex[2]),
-                'Invalid free bandwidth limit provided'
+                'Free bandwidth limit must be a positive integer'
             );
 
         });
@@ -653,7 +645,7 @@ describe('TronWeb.transactionBuilder', function () {
             assert.equal(parameter.type_url, 'type.googleapis.com/protocol.ParticipateAssetIssueContract');
         });
 
-        it.only("should throw if issuerAddress is invalid", async function () {
+        it("should throw if issuerAddress is invalid", async function () {
 
             await assertThrow(
                 tronWeb.transactionBuilder.purchaseToken('sasdsadasfa', tokenID, 20, accounts.b58[2]),
@@ -854,7 +846,7 @@ describe('TronWeb.transactionBuilder', function () {
 
             await assertThrow(
                 tronWeb.transactionBuilder.createProposal(parameters, 'sadasdsffdgdf'),
-                'Invalid issuerAddress provided'
+                'Invalid issuer address provided'
             )
 
         });
