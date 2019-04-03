@@ -174,7 +174,7 @@ __2.3.7__
 * Get rid of jssha to reduce the size of the package a little bit.
 
 __2.3.6__
-* Supports /wallet/getapprovedlist and /wallet/getsignweight JavaTron API.
+* Supports `/wallet/getapprovedlist` and `/wallet/getsignweight` JavaTron API.
 * Adds test for multi-sign workflow.
 
 __2.3.5__
