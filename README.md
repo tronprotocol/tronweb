@@ -171,7 +171,7 @@ In order to contribute you can
 ## Recent History
 
 __2.3.7__
-* Get rid of jssha to reduce the size of the package.
+* Get rid of jssha to reduce the size of the package a little bit.
 
 __2.3.6__
 * Supports /wallet/getapprovedlist and /wallet/getsignweight JavaTron API.
