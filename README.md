@@ -170,8 +170,24 @@ In order to contribute you can
 
 ## Recent History
 
+__2.3.7__
+* Get rid of jssha to reduce the size of the package a little bit.
+
+__2.3.6__
+* Supports `/wallet/getapprovedlist` and `/wallet/getsignweight` JavaTron API.
+* Adds test for multi-sign workflow.
+
+__2.3.5__
+* Fixes a typo in `#event.getEventsByContractAddress` naming.
+
+__2.3.4__
+* Adds options to `#plugin.register` to pass parameters to `pluginInterface`.
+
+__2.3.3__
+* Adds filters during event watching.
+
 __2.3.2__
-* Remove mixed approach instantiating tronWeb. Before you could pass the servers as an object, and the privateKey as a separate parameter. Now, you pass them either in the options object or in the params.
+* Removes mixed approach instantiating tronWeb. Before you could pass the servers as an object, and the privateKey as a separate parameter. Now, you pass them either in the options object or in the params.
 
 __2.3.1__
 * Adds support for not-tld domain, like http://localhost
