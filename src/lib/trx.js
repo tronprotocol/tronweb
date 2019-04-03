@@ -657,6 +657,56 @@ export default class Trx {
         }
     }
 
+    async getApprovedList(transaction, callback = false) {
+        if (!callback)
+            return this.injectPromise(this.getApprovedList, transaction);
+
+        if (utils.isString(transaction)) {
+            if (transaction.substring(0, 2) == '0x')
+                transaction = transaction.substring(2);
+
+            if (!utils.isHex(transaction))
+                return callback('Expected hex message input');
+        }
+
+        if (!utils.isObject(transaction))
+            return callback('Invalid transaction provided');
+
+
+        this.tronWeb.fullNode.request(
+            'wallet/getapprovedlist',
+            transaction,
+            'post'
+        ).then(result => {
+            callback(null, result);
+        }).catch(err => callback(err));
+    }
+
+    async getSignWeight(transaction, callback = false) {
+        if (!callback)
+            return this.injectPromise(this.getSignWeight, transaction);
+
+        if (utils.isString(transaction)) {
+            if (transaction.substring(0, 2) == '0x')
+                transaction = transaction.substring(2);
+
+            if (!utils.isHex(transaction))
+                return callback('Expected hex message input');
+        }
+
+        if (!utils.isObject(transaction))
+            return callback('Invalid transaction provided');
+
+
+        this.tronWeb.fullNode.request(
+            'wallet/getsignweight',
+            transaction,
+            'post'
+        ).then(result => {
+            callback(null, result);
+        }).catch(err => callback(err));
+    }
+
     sendRawTransaction(signedTransaction = false, options = {}, callback = false) {
         if (utils.isFunction(options)) {
             callback = options;
