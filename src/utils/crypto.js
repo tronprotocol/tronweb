@@ -1,5 +1,3 @@
-import jsSHA from 'jssha';
-
 import {ADDRESS_PREFIX, ADDRESS_PREFIX_BYTE, ADDRESS_SIZE} from './address';
 import {base64EncodeToString} from './code';
 import {base64DecodeFromString, hexStr2byteArray} from './code';
@@ -244,12 +242,8 @@ export function ECKeySign(hashBytes, priKeyBytes) {
 }
 
 export function SHA256(msgBytes) {
-    const shaObj = new jsSHA('SHA-256', 'HEX');
     const msgHex = byteArray2hexStr(msgBytes);
-
-    shaObj.update(msgHex);
-    const hashHex = shaObj.getHash('HEX');
-
+    const hashHex = Ethers.utils.sha256('0x' + msgHex).replace(/^0x/, '')
     return hexStr2byteArray(hashHex);
 }
 
