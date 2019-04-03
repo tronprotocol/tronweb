@@ -13,12 +13,18 @@ export default class Validator {
         return param.msg || `Invalid ${param.name}${param.type === 'address' ? ' address' : ''} provided`;
     }
 
+    notPositive(param) {
+        return `${param.name} must be a positive integer`;
+    }
+
     notEqual(param) {
         return param.msg || `${param.names[0]} can not be equal to ${param.names[1]}`;
     }
 
     notValid(params = [], callback = new Function) {
-        let normalized = {}
+
+        let normalized = {};
+        let no = false;
         for (const param of params) {
             let {
                 name,
@@ -29,43 +35,48 @@ export default class Validator {
                 lt,
                 gte,
                 lte,
+                se,
                 optional
             } = param;
             if (optional && !utils.isNotNullOrUndefined(value))
-                return false;
+                continue;
+            normalized[param.name] = param.value;
             switch (type) {
 
                 case 'address':
                     if (!this.tronWeb.isAddress(value)) {
-                        callback(this.invalid(param));
-                        return true;
+                        no = true;
+                    } else {
+                        normalized[name] = this.tronWeb.address.toHex(value);
                     }
-                    normalized[name] = this.tronWeb.address.toHex(value);
                     break;
 
                 case 'integer':
                     if (!utils.isInteger(value) ||
-                        (typeof gt === 'number' && !(value > param.gt)) ||
-                        (typeof lt === 'number' && !(value < param.lt)) ||
-                        (typeof gte === 'number' && !(value >= param.gte)) ||
-                        (typeof lte === 'number' && !(value <= param.lte))) {
-                        callback(this.invalid(param));
-                        return true;
+                        (typeof gt === 'number' && value <= param.gt) ||
+                        (typeof lt === 'number' && value >= param.lt) ||
+                        (typeof gte === 'number' && value < param.gte) ||
+                        (typeof lte === 'number' && value > param.lte)) {
+                        no = true;
                     }
-                    normalized[param.name] = param.value;
+                    break;
+
+                case 'positive-integer':
+                    if (!utils.isInteger(value) || value <= 0) {
+                        callback(this.notPositive(param));
+                        return;
+                    }
                     break;
 
                 case 'tokenId':
                     if (!utils.isString(value) || !value.length) {
-                        callback(this.invalid(param));
-                        return true;
+                        no = true;
                     }
                     break;
 
                 case 'notEmptyObject':
                     if (!utils.isObject(value) || !Object.keys(value).length) {
-                        callback(this.invalid(param));
-                        return true;
+                        no = true;
                     }
                     break;
 
@@ -75,6 +86,47 @@ export default class Validator {
                         return true;
                     }
                     break;
+
+                case 'resource':
+                    if (!['BANDWIDTH', 'ENERGY'].includes(value)) {
+                        no = true;
+                    }
+                    break;
+
+                case 'url':
+                    if (!utils.isValidURL(value)) {
+                        no = true;
+                    }
+                    break;
+
+                case 'hex':
+                    if (!utils.isHex(value)) {
+                        no = true;
+                    }
+                    break;
+
+                case 'array':
+                    if (!Array.isArray(value)) {
+                        no = true;
+                    }
+                    break;
+
+                case 'not-empty-string':
+                    if (!utils.isString(value) || !value.length) {
+                        no = true;
+                    }
+                    break;
+
+                case 'boolean':
+                    if (!utils.isBoolean(value)) {
+                        no = true;
+                    }
+                    break;
+
+            }
+            if (no) {
+                callback(this.invalid(param));
+                return true;
             }
         }
         return false;
