@@ -30,7 +30,7 @@ export default class Contract {
     }
 
     async _getEvents(options = {}) {
-        const events = await this.tronWeb.event.getEventsByContactAddress(this.address, options);
+        const events = await this.tronWeb.event.getEventsByContractAddress(this.address, options);
         const [latestEvent] = events.sort((a, b) => b.block - a.block);
         const newEvents = events.filter((event, index) => {
 

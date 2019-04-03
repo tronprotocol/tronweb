@@ -26,7 +26,7 @@ export default class Event {
         this.tronWeb.eventServer.isConnected = () => this.tronWeb.eventServer.request(healthcheck).then(() => true).catch(() => false);
     }
 
-    getEventsByContactAddress(contractAddress = false, options = {}, callback = false) {
+    getEventsByContractAddress(contractAddress = false, options = {}, callback = false) {
 
         let {
             sinceTimestamp,
@@ -53,7 +53,7 @@ export default class Event {
         }, options)
 
         if (!callback)
-            return this.injectPromise(this.getEventsByContactAddress, contractAddress, options);
+            return this.injectPromise(this.getEventsByContractAddress, contractAddress, options);
 
         fromTimestamp = fromTimestamp || sinceTimestamp || since;
 
