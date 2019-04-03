@@ -1,6 +1,6 @@
 import TronWeb from 'index';
 import utils from 'utils';
-import {utils as ethersUtils} from 'ethers';
+import {AbiCoder} from 'utils/ethersUtils';
 import Validator from 'paramValidator';
 
 let self;
@@ -541,7 +541,7 @@ export default class TransactionBuilder {
         );
 
         if (typeof constructorParams !== 'undefined' && constructorParams) {
-            const abiCoder = new ethersUtils.AbiCoder();
+            const abiCoder = new AbiCoder();
             const types = [];
             const values = [];
             constructorParams = constructorParams.inputs;
@@ -696,7 +696,7 @@ export default class TransactionBuilder {
         functionSelector = functionSelector.replace('/\s*/g', '');
 
         if (parameters.length) {
-            const abiCoder = new ethersUtils.AbiCoder();
+            const abiCoder = new AbiCoder();
             let types = [];
             const values = [];
 

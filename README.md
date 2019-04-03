@@ -149,8 +149,6 @@ const tronWeb = new TronWeb({
 )
 ```
 
-
-
 ## A full example
 
 The better way to understand how to work with Tron is to clone the [MetaCoin example](https://github.com/Tronbox-boxes/metacoin-box) and follow the instructions at

@@ -1,6 +1,6 @@
 import TronWeb from 'index';
 import utils from 'utils';
-import {utils as ethersUtils} from 'ethers';
+import {keccak256, toUtf8Bytes, recoverAddress, SigningKey} from 'utils/ethersUtils';
 
 const TRX_MESSAGE_HEADER = '\x19TRON Signed Message:\n32';
 const ETH_MESSAGE_HEADER = '\x19Ethereum Signed Message:\n32';
@@ -559,12 +559,12 @@ export default class Trx {
             signature = signature.substr(2);
 
         const messageBytes = [
-            ...ethersUtils.toUtf8Bytes(useTronHeader ? TRX_MESSAGE_HEADER : ETH_MESSAGE_HEADER),
+            ...toUtf8Bytes(useTronHeader ? TRX_MESSAGE_HEADER : ETH_MESSAGE_HEADER),
             ...utils.code.hexStr2byteArray(message)
         ];
 
-        const messageDigest = ethersUtils.keccak256(messageBytes);
-        const recovered = ethersUtils.recoverAddress(messageDigest, {
+        const messageDigest = keccak256(messageBytes);
+        const recovered = recoverAddress(messageDigest, {
             recoveryParam: signature.substring(128, 130) == '1c' ? 1 : 0,
             r: '0x' + signature.substring(0, 64),
             s: '0x' + signature.substring(64, 128)
@@ -612,13 +612,13 @@ export default class Trx {
                 return callback('Expected hex message input');
 
             try {
-                const signingKey = new ethersUtils.SigningKey(privateKey);
+                const signingKey = new SigningKey(privateKey);
                 const messageBytes = [
-                    ...ethersUtils.toUtf8Bytes(useTronHeader ? TRX_MESSAGE_HEADER : ETH_MESSAGE_HEADER),
+                    ...toUtf8Bytes(useTronHeader ? TRX_MESSAGE_HEADER : ETH_MESSAGE_HEADER),
                     ...utils.code.hexStr2byteArray(transaction)
                 ];
 
-                const messageDigest = ethersUtils.keccak256(messageBytes);
+                const messageDigest = keccak256(messageBytes);
                 const signature = signingKey.signDigest(messageDigest);
 
                 const signatureHex = [
