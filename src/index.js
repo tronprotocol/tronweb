@@ -9,7 +9,7 @@ import Trx from 'lib/trx';
 import Contract from 'lib/contract';
 import Plugin from 'lib/plugin';
 import Event from 'lib/event';
-import {utils as ethersUtils} from 'ethers';
+import {keccak256} from 'utils/ethersUtils';
 
 export default class TronWeb extends EventEmitter {
     static providers = providers;
@@ -231,7 +231,7 @@ export default class TronWeb extends EventEmitter {
     }
 
     static sha3(string, prefix = true) {
-        return (prefix ? '0x' : '') + ethersUtils.keccak256(Buffer.from(string, 'utf-8')).toString().substring(2);
+        return (prefix ? '0x' : '') + keccak256(Buffer.from(string, 'utf-8')).toString().substring(2);
     }
 
     static toHex(val) {

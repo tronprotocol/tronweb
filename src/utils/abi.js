@@ -1,7 +1,7 @@
-import {utils as ethersUtils} from 'ethers';
+import {AbiCoder} from './ethersUtils';
 import TronWeb from 'index';
 
-const abiCoder = new ethersUtils.AbiCoder();
+const abiCoder = new AbiCoder();
 
 export function decodeParams(names, types, output, ignoreMethodHash) {
 
