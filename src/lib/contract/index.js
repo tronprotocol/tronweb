@@ -106,7 +106,7 @@ export default class Contract {
 
         abi.forEach(func => {
             // Don't build a method for constructor function. That's handled through contract create.
-            if (func.type.toLowerCase() === 'constructor')
+            if (!func.type || /constructor/i.test(func.type))
                 return;
 
             const method = new Method(this, func);
