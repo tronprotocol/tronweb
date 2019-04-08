@@ -277,7 +277,7 @@ export default class Method {
         if (!this.contract.address)
             return callback('Smart contract is missing address');
 
-        if (this.abi.type.toLowerCase() !== 'event')
+        if (!this.abi.type || !/event/i.test(this.abi.type))
             return callback('Invalid method type for event watching');
 
         if (!this.tronWeb.eventServer)
