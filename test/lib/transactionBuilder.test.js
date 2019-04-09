@@ -994,7 +994,7 @@ describe('TronWeb.transactionBuilder', function () {
     });
 
 
-    describe.only("#createSmartContract", async function () {
+    describe("#createSmartContract", async function () {
 
         it('should create a smart contract with default parameters', async function () {
 
