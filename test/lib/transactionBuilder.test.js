@@ -9,6 +9,8 @@ const pollAccountFor = require('../helpers/pollAccountFor');
 const _ = require('lodash');
 const tronWebBuilder = require('../helpers/tronWebBuilder');
 const assertEqualHex = require('../helpers/assertEqualHex');
+const testRevertContract = require('../fixtures/contracts').testRevert;
+
 const TronWeb = tronWebBuilder.TronWeb;
 const {
     ADDRESS_HEX,
@@ -992,10 +994,36 @@ describe('TronWeb.transactionBuilder', function () {
     });
 
 
-    describe("#withdrawBlockRewards", async function () {
+    describe.only("#createSmartContract", async function () {
+
+        it('should create a smart contract with default parameters', async function () {
+
+            const tx = await tronWeb.transactionBuilder.createSmartContract({
+                abi: testRevertContract.abi,
+                bytecode: testRevertContract.bytecode
+            })
+            assert.equal(tx.raw_data.contract[0].parameter.value.new_contract.consume_user_resource_percent, 100);
+            assert.equal(tx.raw_data.contract[0].parameter.value.new_contract.origin_energy_limit, 1e7);
+            assert.equal(tx.raw_data.fee_limit, 1e9);
+        });
+
+        it('should create a smart contract and verify the parameters', async function () {
+
+            const tx = await tronWeb.transactionBuilder.createSmartContract({
+                abi: testRevertContract.abi,
+                bytecode: testRevertContract.bytecode,
+                userFeePercentage: 30,
+                originEnergyLimit: 9e6,
+                feeLimit: 9e8
+            })
+            assert.equal(tx.raw_data.contract[0].parameter.value.new_contract.consume_user_resource_percent, 30);
+            assert.equal(tx.raw_data.contract[0].parameter.value.new_contract.origin_energy_limit, 9e6);
+            assert.equal(tx.raw_data.fee_limit, 9e8);
+        });
     });
 
-    describe("#createSmartContract", async function () {
+
+    describe("#withdrawBlockRewards", async function () {
     });
 
     describe("#triggerSmartContract", async function () {
