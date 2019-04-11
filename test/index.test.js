@@ -105,6 +105,15 @@ describe('TronWeb Instance', function () {
         });
     });
 
+    describe('#version()', function () {
+        it('should verify that the version is available as static and non-static property', function () {
+            const tronWeb = tronWebBuilder.createInstance();
+
+            assert.equal(typeof tronWeb.version, 'string');
+            assert.equal(typeof TronWeb.version, 'string');
+        });
+    });
+
     describe('#setDefaultBlock()', function () {
         it('should accept a positive integer', function () {
             const tronWeb = tronWebBuilder.createInstance();
