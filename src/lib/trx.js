@@ -579,29 +579,22 @@ export default class Trx {
         callback('Signature does not match');
     }
 
-    async sign(transaction = false, privateKey = this.tronWeb.defaultPrivateKey, useTronHeader = true, multisig = false, callback = false) {
-
-        if (utils.isFunction(multisig)) {
-            callback = multisig;
-            multisig = false;
-        }
+    async sign(transaction = false, privateKey = this.tronWeb.defaultPrivateKey, useTronHeader = true, callback = false) {
 
         if (utils.isFunction(useTronHeader)) {
             callback = useTronHeader;
             useTronHeader = true;
-            multisig = false;
         }
 
         if (utils.isFunction(privateKey)) {
             callback = privateKey;
             privateKey = this.tronWeb.defaultPrivateKey;
             useTronHeader = true;
-            multisig = false;
         }
 
 
         if (!callback)
-            return this.injectPromise(this.sign, transaction, privateKey, useTronHeader, multisig);
+            return this.injectPromise(this.sign, transaction, privateKey, useTronHeader);
 
         // Message signing
         if (utils.isString(transaction)) {
@@ -637,18 +630,16 @@ export default class Trx {
         if (!utils.isObject(transaction))
             return callback('Invalid transaction provided');
 
-        if (!multisig && transaction.signature)
+        if (transaction.signature)
             return callback('Transaction is already signed');
 
         try {
-            if (!multisig) {
-                const address = this.tronWeb.address.toHex(
-                    this.tronWeb.address.fromPrivateKey(privateKey)
-                ).toLowerCase();
+            const address = this.tronWeb.address.toHex(
+                this.tronWeb.address.fromPrivateKey(privateKey)
+            ).toLowerCase();
 
-                if (address !== transaction.raw_data.contract[0].parameter.value.owner_address.toLowerCase())
-                    return callback('Private key does not match address in transaction');
-            }
+            if (address !== transaction.raw_data.contract[0].parameter.value.owner_address.toLowerCase())
+                return callback('Private key does not match address in transaction');
             return callback(null,
                 utils.crypto.signTransaction(privateKey, transaction)
             );
@@ -657,17 +648,64 @@ export default class Trx {
         }
     }
 
+    async multiSign(transaction = false, privateKey = this.tronWeb.defaultPrivateKey, permissionId = false, callback = false) {
+
+        if (utils.isFunction(permissionId)) {
+            callback = permissionId;
+            permissionId = 0;
+        }
+
+        if (utils.isFunction(privateKey)) {
+            callback = privateKey;
+            privateKey = this.tronWeb.defaultPrivateKey;
+            permissionId = 0;
+        }
+
+
+        if (!callback)
+            return this.injectPromise(this.multiSign, transaction, privateKey, permissionId);
+
+        if (!utils.isObject(transaction) || !transaction.raw_data || !transaction.raw_data.contract)
+            return callback('Invalid transaction provided');
+
+        // set permission id
+        transaction.raw_data.contract[0].Permission_id = permissionId;
+
+        // check if private key insides permission list
+        const address = this.tronWeb.address.toHex(this.tronWeb.address.fromPrivateKey(privateKey)).toLowerCase();
+        const signWeight = await this.getSignWeight(transaction);
+
+        if (signWeight.result.code === 'PERMISSION_ERROR') {
+            return callback(signWeight.result.message);
+        }
+
+        let foundKey = false;
+        signWeight.permission.keys.map(key => {
+            if (key.address === address)
+                foundKey = true;
+        });
+
+        if (!foundKey)
+            return callback(privateKey + ' has no permission to sign');
+
+        if (signWeight.approved_list && signWeight.approved_list.indexOf(address) != -1) {
+            return callback(privateKey + ' already sign transaction');
+        }
+
+        // reset transaction id
+        transaction.txID = signWeight.transaction.txid;
+
+        // sign
+        try {
+            return callback(null, utils.crypto.signTransaction(privateKey, transaction));
+        } catch (ex) {
+            callback(ex);
+        }
+    }
+
     async getApprovedList(transaction, callback = false) {
         if (!callback)
             return this.injectPromise(this.getApprovedList, transaction);
-
-        if (utils.isString(transaction)) {
-            if (transaction.substring(0, 2) == '0x')
-                transaction = transaction.substring(2);
-
-            if (!utils.isHex(transaction))
-                return callback('Expected hex message input');
-        }
 
         if (!utils.isObject(transaction))
             return callback('Invalid transaction provided');
@@ -685,14 +723,6 @@ export default class Trx {
     async getSignWeight(transaction, callback = false) {
         if (!callback)
             return this.injectPromise(this.getSignWeight, transaction);
-
-        if (utils.isString(transaction)) {
-            if (transaction.substring(0, 2) == '0x')
-                transaction = transaction.substring(2);
-
-            if (!utils.isHex(transaction))
-                return callback('Expected hex message input');
-        }
 
         if (!utils.isObject(transaction))
             return callback('Invalid transaction provided');
