@@ -207,9 +207,21 @@ describe('TronWeb.trx', function () {
             try {
                 const transaction = await tronWeb.transactionBuilder.sendTrx(accounts.hex[1], 10e8, accounts.hex[0]);
                 let signedTransaction = await tronWeb.trx.multiSign(transaction, accounts.pks[0], 0);
-                signedTransaction = await tronWeb.trx.multiSign(transaction, accounts.pks[0], 2);
+                await tronWeb.trx.multiSign(signedTransaction, accounts.pks[0], 2);
             } catch (e) {
                 assert.isTrue(e.indexOf('not contained of permission') != -1);
+            }
+
+        });
+
+        it('should multi-sign a transaction with wrong permission id error', async function () {
+
+            try {
+                const transaction = await tronWeb.transactionBuilder.sendTrx(accounts.hex[1], 10e8, accounts.hex[0]);
+                await tronWeb.trx.multiSign(transaction, accounts.pks[0], 1);
+            } catch (e) {
+                assert.isTrue(e.indexOf('permission isn\'t exit') != -1);
+
             }
 
         });
