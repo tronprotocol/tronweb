@@ -24,7 +24,7 @@ build.stderr.on('data', function (data) {
 })
 
 build.on('exit', function (code) {
-    const test = spawn('yarn', ['test:node'])
+    const test = spawn('yarn', ['test'])
 
     test.stdout.on('data', function (data) {
         process.stdout.write(data.toString())

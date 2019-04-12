@@ -69,7 +69,7 @@ export default class TronWeb extends EventEmitter {
             'sha3', 'toHex', 'toUtf8', 'fromUtf8',
             'toAscii', 'fromAscii', 'toDecimal', 'fromDecimal',
             'toSun', 'fromSun', 'toBigNumber', 'isAddress',
-            'createAccount', 'address'
+            'createAccount', 'address', 'version'
         ].forEach(key => {
             this[key] = TronWeb[key];
         });
