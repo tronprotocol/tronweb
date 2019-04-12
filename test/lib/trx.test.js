@@ -38,22 +38,9 @@ describe('TronWeb.trx', function () {
 
     describe("#multiSignTransaction", async function () {
 
-        it('should sign a transaction', async function () {
+        const threshold = 3;
 
-            const transaction = await tronWeb.transactionBuilder.freezeBalance(100e6, 3, 'BANDWIDTH', accounts.b58[1])
-            let signedTransaction = await tronWeb.trx.sign(transaction, accounts.pks[1]);
-
-
-            signedTransaction = await tronWeb.trx.sign(signedTransaction, accounts.pks[2], null, true)
-
-            assert.equal(signedTransaction.signature.length, 2)
-
-        })
-
-        it('should multi-sign transaction and verify weight', async function () {
-
-            const threshold = 3;
-
+        before(async function() {
             // update account permission
             let ownerAddress = accounts.hex[0];
             let ownerPk = accounts.pks[0];
@@ -83,14 +70,31 @@ describe('TronWeb.trx', function () {
             // broadcast update transaction
             const signedUpdateTransaction = await tronWeb.trx.sign(updateTransaction, ownerPk, null, false);
             await tronWeb.trx.broadcast(signedUpdateTransaction)
+        });
 
-            // create transaction and do first sign
+        it('should multi-sign a transaction by owner permission', async function () {
+
+            const transaction = await tronWeb.transactionBuilder.freezeBalance(100e6, 3, 'BANDWIDTH', accounts.b58[0])
+            let signedTransaction = await tronWeb.trx.multiSign(transaction, accounts.pks[0], 0);
+            signedTransaction = await tronWeb.trx.multiSign(signedTransaction, accounts.pks[1], 0);
+            signedTransaction = await tronWeb.trx.multiSign(signedTransaction, accounts.pks[2], 0);
+            assert.equal(signedTransaction.signature.length, 3);
+
+            // broadcast multi-sign transaction
+            const result = await tronWeb.trx.broadcast(signedTransaction);
+            assert.isTrue(result.result);
+
+        });
+
+        it('should verify weight after multi-sign by owner permission', async function () {
+
+            // create transaction and do multi-sign
             const transaction = await tronWeb.transactionBuilder.sendTrx(accounts.hex[1], 10e8, accounts.hex[0]);
 
             // sign and verify sign weight
             let signedTransaction, signWeight;
             for (let i = 0; i < threshold; i++) {
-                signedTransaction = await tronWeb.trx.sign(transaction, accounts.pks[i], null, true);
+                signedTransaction = await tronWeb.trx.multiSign(transaction, accounts.pks[i], 0);
                 signWeight = await tronWeb.trx.getSignWeight(signedTransaction);
                 if (i == threshold - 1) {
                     assert.equal(signWeight.approved_list.length, threshold);
@@ -108,7 +112,119 @@ describe('TronWeb.trx', function () {
             const result = await tronWeb.trx.broadcast(signedTransaction);
             assert.isTrue(result.result);
 
-        })
+        });
+
+        it('should multi-sign a transaction with no permission error by owner permission', async function () {
+
+            const transaction = await tronWeb.transactionBuilder.freezeBalance(100e6, 3, 'BANDWIDTH', accounts.b58[0])
+            try {
+                await tronWeb.trx.multiSign(transaction, (accounts.pks[0] + '123'), 0);
+            } catch (e) {
+                assert.isTrue(e.indexOf('has no permission to sign') != -1);
+            }
+
+        });
+
+        it('should multi-sign duplicated a transaction by owner permission', async function () {
+
+            const transaction = await tronWeb.transactionBuilder.sendTrx(accounts.hex[1], 10e8, accounts.hex[0]);
+            try {
+                let signedTransaction = await tronWeb.trx.multiSign(transaction, accounts.pks[0], 0);
+                await tronWeb.trx.multiSign(signedTransaction, accounts.pks[0], 0);
+            } catch (e) {
+                assert.isTrue(e.indexOf('already sign transaction') != -1);
+            }
+
+        });
+
+        it('should multi-sign a transaction by active permission', async function () {
+
+            const transaction = await tronWeb.transactionBuilder.sendTrx(accounts.hex[1], 10e8, accounts.hex[0]);
+            let signedTransaction = await tronWeb.trx.multiSign(transaction, accounts.pks[0], 2);
+            signedTransaction = await tronWeb.trx.multiSign(signedTransaction, accounts.pks[1], 2);
+            signedTransaction = await tronWeb.trx.multiSign(signedTransaction, accounts.pks[2], 2);
+            assert.equal(signedTransaction.signature.length, 3);
+
+            // broadcast multi-sign transaction
+            const result = await tronWeb.trx.broadcast(signedTransaction);
+            assert.isTrue(result.result);
+
+        });
+
+        it('should verify weight after multi-sign by active permission', async function () {
+
+            // create transaction and do multi-sign
+            const transaction = await tronWeb.transactionBuilder.sendTrx(accounts.hex[1], 10e8, accounts.hex[0]);
+
+            // sign and verify sign weight
+            let signedTransaction, signWeight;
+            for (let i = 0; i < threshold; i++) {
+                signedTransaction = await tronWeb.trx.multiSign(transaction, accounts.pks[i], 2);
+                signWeight = await tronWeb.trx.getSignWeight(signedTransaction);
+                if (i == threshold - 1) {
+                    assert.equal(signWeight.approved_list.length, threshold);
+                } else {
+                    assert.equal(signWeight.approved_list.length, i + 1);
+                    assert.equal(signWeight.result.code, 'NOT_ENOUGH_PERMISSION');
+                }
+            }
+
+            // get approved list
+            const approvedList = await tronWeb.trx.getApprovedList(transaction);
+            assert.isTrue(approvedList.approved_list.length === threshold);
+
+            // broadcast multi-sign transaction
+            const result = await tronWeb.trx.broadcast(signedTransaction);
+            assert.isTrue(result.result);
+
+        });
+
+        it('should multi-sign a transaction with no permission error by active permission', async function () {
+
+            const transaction = await tronWeb.transactionBuilder.sendTrx(accounts.hex[1], 10e8, accounts.hex[0]);
+            try {
+                await tronWeb.trx.multiSign(transaction, (accounts.pks[0] + '123'), 2);
+            } catch (e) {
+                assert.isTrue(e.indexOf('has no permission to sign') != -1);
+            }
+
+        });
+
+        it('should multi-sign duplicated a transaction by active permission', async function () {
+
+            const transaction = await tronWeb.transactionBuilder.sendTrx(accounts.hex[1], 10e8, accounts.hex[0]);
+            try {
+                let signedTransaction = await tronWeb.trx.multiSign(transaction, accounts.pks[0], 2);
+                await tronWeb.trx.multiSign(signedTransaction, accounts.pks[0], 2);
+            } catch (e) {
+                assert.isTrue(e.indexOf('already sign transaction') != -1);
+            }
+
+        });
+
+        it('should multi-sign a transaction with permission error by both owner and active permission', async function () {
+
+            try {
+                const transaction = await tronWeb.transactionBuilder.sendTrx(accounts.hex[1], 10e8, accounts.hex[0]);
+                let signedTransaction = await tronWeb.trx.multiSign(transaction, accounts.pks[0], 0);
+                await tronWeb.trx.multiSign(signedTransaction, accounts.pks[0], 2);
+            } catch (e) {
+                assert.isTrue(e.indexOf('not contained of permission') != -1);
+            }
+
+        });
+
+        it('should multi-sign a transaction with wrong permission id error', async function () {
+
+            try {
+                const transaction = await tronWeb.transactionBuilder.sendTrx(accounts.hex[1], 10e8, accounts.hex[0]);
+                await tronWeb.trx.multiSign(transaction, accounts.pks[0], 1);
+            } catch (e) {
+                assert.isTrue(e.indexOf('permission isn\'t exit') != -1);
+
+            }
+
+        });
 
     });
 
