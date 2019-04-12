@@ -579,22 +579,29 @@ export default class Trx {
         callback('Signature does not match');
     }
 
-    async sign(transaction = false, privateKey = this.tronWeb.defaultPrivateKey, useTronHeader = true, callback = false) {
+    async sign(transaction = false, privateKey = this.tronWeb.defaultPrivateKey, useTronHeader = true, multisig = false, callback = false) {
+
+        if (utils.isFunction(multisig)) {
+            callback = multisig;
+            multisig = false;
+        }
 
         if (utils.isFunction(useTronHeader)) {
             callback = useTronHeader;
             useTronHeader = true;
+            multisig = false;
         }
 
         if (utils.isFunction(privateKey)) {
             callback = privateKey;
             privateKey = this.tronWeb.defaultPrivateKey;
             useTronHeader = true;
+            multisig = false;
         }
 
 
         if (!callback)
-            return this.injectPromise(this.sign, transaction, privateKey, useTronHeader);
+            return this.injectPromise(this.sign, transaction, privateKey, useTronHeader, multisig);
 
         // Message signing
         if (utils.isString(transaction)) {
@@ -630,16 +637,18 @@ export default class Trx {
         if (!utils.isObject(transaction))
             return callback('Invalid transaction provided');
 
-        if (transaction.signature)
+        if (!multisig && transaction.signature)
             return callback('Transaction is already signed');
 
         try {
-            const address = this.tronWeb.address.toHex(
-                this.tronWeb.address.fromPrivateKey(privateKey)
-            ).toLowerCase();
+            if (!multisig) {
+                const address = this.tronWeb.address.toHex(
+                    this.tronWeb.address.fromPrivateKey(privateKey)
+                ).toLowerCase();
 
-            if (address !== transaction.raw_data.contract[0].parameter.value.owner_address.toLowerCase())
-                return callback('Private key does not match address in transaction');
+                if (address !== transaction.raw_data.contract[0].parameter.value.owner_address.toLowerCase())
+                    return callback('Private key does not match address in transaction');
+            }
             return callback(null,
                 utils.crypto.signTransaction(privateKey, transaction)
             );
