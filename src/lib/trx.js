@@ -746,11 +746,11 @@ export default class Trx {
         if (!utils.isObject(transaction) || !transaction.raw_data || !transaction.raw_data.contract)
             return callback('Invalid transaction provided');
 
-        if (utils.isInteger(permissionId))
+        if (utils.isInteger(permissionId)) {
             transaction.raw_data.contract[0].Permission_id = parseInt(permissionId);
-
-        if (typeof transaction.raw_data.contract.Permission_id !== 'number')
+        } else if (typeof transaction.raw_data.contract.Permission_id !== 'number') {
             transaction.raw_data.contract[0].Permission_id = 0;
+        }
 
         if (!utils.isObject(transaction))
             return callback('Invalid transaction provided');
