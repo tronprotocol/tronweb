@@ -737,7 +737,7 @@ export default class Trx {
     async getSignWeight(transaction, permissionId, callback = false) {
         if (utils.isFunction(permissionId)) {
             callback = permissionId;
-            permissionId = 0;
+            permissionId = undefined;
         }
 
         if (!callback)
@@ -748,7 +748,9 @@ export default class Trx {
 
         if (utils.isInteger(permissionId)) {
             transaction.raw_data.contract[0].Permission_id = parseInt(permissionId);
-        } else if (typeof transaction.raw_data.contract.Permission_id !== 'number') {
+        }
+
+        if (typeof transaction.raw_data.contract[0].Permission_id !== 'number') {
             transaction.raw_data.contract[0].Permission_id = 0;
         }
 
