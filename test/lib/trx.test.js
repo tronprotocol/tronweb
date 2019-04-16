@@ -92,9 +92,10 @@ describe('TronWeb.trx', function () {
             const transaction = await tronWeb.transactionBuilder.sendTrx(accounts.hex[1], 10e8, accounts.hex[0]);
 
             // sign and verify sign weight
-            let signedTransaction, signWeight;
+            let signedTransaction = transaction;
+            let signWeight;
             for (let i = 0; i < threshold; i++) {
-                signedTransaction = await tronWeb.trx.multiSign(transaction, accounts.pks[i], 0);
+                signedTransaction = await tronWeb.trx.multiSign(signedTransaction, accounts.pks[i], 0);
                 signWeight = await tronWeb.trx.getSignWeight(signedTransaction);
                 if (i == threshold - 1) {
                     assert.equal(signWeight.approved_list.length, threshold);
@@ -105,7 +106,7 @@ describe('TronWeb.trx', function () {
             }
 
             // get approved list
-            const approvedList = await tronWeb.trx.getApprovedList(transaction);
+            const approvedList = await tronWeb.trx.getApprovedList(signedTransaction);
             assert.isTrue(approvedList.approved_list.length === threshold);
 
             // broadcast multi-sign transaction
@@ -143,6 +144,7 @@ describe('TronWeb.trx', function () {
             let signedTransaction = await tronWeb.trx.multiSign(transaction, accounts.pks[0], 2);
             signedTransaction = await tronWeb.trx.multiSign(signedTransaction, accounts.pks[1], 2);
             signedTransaction = await tronWeb.trx.multiSign(signedTransaction, accounts.pks[2], 2);
+
             assert.equal(signedTransaction.signature.length, 3);
 
             // broadcast multi-sign transaction
@@ -157,10 +159,11 @@ describe('TronWeb.trx', function () {
             const transaction = await tronWeb.transactionBuilder.sendTrx(accounts.hex[1], 10e8, accounts.hex[0]);
 
             // sign and verify sign weight
-            let signedTransaction, signWeight;
+            let signedTransaction = transaction;
+            let signWeight;
             for (let i = 0; i < threshold; i++) {
-                signedTransaction = await tronWeb.trx.multiSign(transaction, accounts.pks[i], 2);
-                signWeight = await tronWeb.trx.getSignWeight(signedTransaction);
+                signedTransaction = await tronWeb.trx.multiSign(signedTransaction, accounts.pks[i], 2);
+                signWeight = await tronWeb.trx.getSignWeight(signedTransaction, 2);
                 if (i == threshold - 1) {
                     assert.equal(signWeight.approved_list.length, threshold);
                 } else {
@@ -170,7 +173,7 @@ describe('TronWeb.trx', function () {
             }
 
             // get approved list
-            const approvedList = await tronWeb.trx.getApprovedList(transaction);
+            const approvedList = await tronWeb.trx.getApprovedList(signedTransaction);
             assert.isTrue(approvedList.approved_list.length === threshold);
 
             // broadcast multi-sign transaction

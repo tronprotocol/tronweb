@@ -682,7 +682,7 @@ export default class Trx {
 
         // check if private key insides permission list
         const address = this.tronWeb.address.toHex(this.tronWeb.address.fromPrivateKey(privateKey)).toLowerCase();
-        const signWeight = await this.getSignWeight(transaction);
+        const signWeight = await this.getSignWeight(transaction, permissionId);
 
         if (signWeight.result.code === 'PERMISSION_ERROR') {
             return callback(signWeight.result.message);
@@ -701,8 +701,13 @@ export default class Trx {
             return callback(privateKey + ' already sign transaction');
         }
 
-        // reset transaction id
-        transaction.txID = signWeight.transaction.txid;
+        // reset transaction
+        if (signWeight.transaction && signWeight.transaction.transaction) {
+            transaction = signWeight.transaction.transaction;
+            transaction.raw_data.contract[0].Permission_id = permissionId;
+        } else {
+            return callback('Invalid transaction provided');
+        }
 
         // sign
         try {
@@ -729,9 +734,23 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
-    async getSignWeight(transaction, callback = false) {
+    async getSignWeight(transaction, permissionId, callback = false) {
+        if (utils.isFunction(permissionId)) {
+            callback = permissionId;
+            permissionId = undefined;
+        }
+
         if (!callback)
-            return this.injectPromise(this.getSignWeight, transaction);
+            return this.injectPromise(this.getSignWeight, transaction, permissionId);
+
+        if (!utils.isObject(transaction) || !transaction.raw_data || !transaction.raw_data.contract)
+            return callback('Invalid transaction provided');
+
+        if (utils.isInteger(permissionId)) {
+            transaction.raw_data.contract[0].Permission_id = parseInt(permissionId);
+        } else if (typeof transaction.raw_data.contract[0].Permission_id !== 'number') {
+            transaction.raw_data.contract[0].Permission_id = 0;
+        }
 
         if (!utils.isObject(transaction))
             return callback('Invalid transaction provided');
