@@ -21,7 +21,7 @@ function resultManager(transaction, callback) {
 
     if (transaction.result && transaction.result.message) {
         return callback(
-            this.tronWeb.toUtf8(transaction.result.message)
+            self.tronWeb.toUtf8(transaction.result.message)
         );
     }
 
