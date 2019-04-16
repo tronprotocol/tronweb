@@ -748,9 +748,7 @@ export default class Trx {
 
         if (utils.isInteger(permissionId)) {
             transaction.raw_data.contract[0].Permission_id = parseInt(permissionId);
-        }
-
-        if (typeof transaction.raw_data.contract[0].Permission_id !== 'number') {
+        } else if (typeof transaction.raw_data.contract[0].Permission_id !== 'number') {
             transaction.raw_data.contract[0].Permission_id = 0;
         }
 
