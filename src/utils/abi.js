@@ -1,5 +1,6 @@
 import {AbiCoder} from './ethersUtils';
 import TronWeb from 'index';
+import {ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX} from 'utils/address';
 
 const abiCoder = new AbiCoder();
 
@@ -20,7 +21,7 @@ export function decodeParams(names, types, output, ignoreMethodHash) {
 
     return abiCoder.decode(types, output).reduce((obj, arg, index) => {
         if (types[index] == 'address')
-            arg = '41' + arg.substr(2).toLowerCase();
+            arg = ADDRESS_PREFIX + arg.substr(2).toLowerCase();
 
         if (names.length)
             obj[names[index]] = arg;
@@ -34,7 +35,7 @@ export function encodeParams(types, values) {
 
     for (let i = 0; i < types.length; i++) {
         if (types[i] === 'address') {
-            values[i] = TronWeb.address.toHex(values[i]).replace(/^41/, '0x');
+            values[i] = TronWeb.address.toHex(values[i]).replace(ADDRESS_PREFIX_REGEX, '0x');
         }
     }
 
