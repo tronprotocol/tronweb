@@ -527,11 +527,11 @@ export default class TransactionBuilder {
         ], callback))
             return;
 
-        if (payable && callValue == 0)
-            return callback('When contract is payable, options.callValue must be a positive integer');
+        if (payable && callValue == 0 && tokenValue == 0)
+            return callback('When contract is payable, options.callValue or options.tokenValue must be a positive integer');
 
-        if (!payable && callValue > 0)
-            return callback('When contract is not payable, options.callValue must be 0');
+        if (!payable && (callValue > 0 || tokenValue > 0))
+            return callback('When contract is not payable, options.callValue and options.tokenValue must be 0');
 
 
         var constructorParams = abi.find(
