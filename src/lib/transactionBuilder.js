@@ -436,7 +436,7 @@ export default class TransactionBuilder {
 
         const feeLimit = options.feeLimit || 1_000_000_000;
         let userFeePercentage = options.userFeePercentage;
-        if (typeof userFeePercentage !== 'number' || !userFeePercentage) {
+        if (typeof userFeePercentage !== 'number' && !userFeePercentage) {
             userFeePercentage = 100;
         }
         const originEnergyLimit = options.originEnergyLimit || 10_000_000;
