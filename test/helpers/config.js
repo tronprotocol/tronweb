@@ -24,7 +24,7 @@ module.exports = {
             abbreviation: `T${rnd.substring(2).toUpperCase()}`,
             description: 'Useless utility token',
             url: `https://example-${rnd}.com/`,
-            totalSupply: 1000,
+            totalSupply: 100000000,
             saleEnd: Date.now() + 60000, // 1 minute
             frozenAmount: 5,
             frozenDuration: 1,
