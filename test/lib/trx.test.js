@@ -1008,9 +1008,11 @@ describe('TronWeb.trx', function () {
     describe("#sendToken", async function () {
 
         before(async function(){
+            this.timeout(10000);
             // create token for 11
             const options = getTokenOptions();
             await broadcaster(await tronWeb.transactionBuilder.createToken(options, accounts.hex[11]), accounts.pks[11]);
+            await wait(1);
         });
 
         it('should send trx by to address and verify account balance', async function () {
