@@ -587,7 +587,7 @@ describe('TronWeb.trx', function () {
     });
 
 
-    // Transaction Test (15 - 16)
+    // Transaction Test (15 - 20)
 
     describe("#send", async function () {
 
@@ -607,7 +607,7 @@ describe('TronWeb.trx', function () {
 
         it('should throw invalid amount provided error', async function () {
             await assertThrow(
-                tronWeb.trx.send(accounts.hex[12], -1, { privateKey: accounts.pks[15] }),
+                tronWeb.trx.send(accounts.hex[16], -1, { privateKey: accounts.pks[15] }),
                 'Invalid amount provided'
             );
         });
@@ -618,9 +618,9 @@ describe('TronWeb.trx', function () {
     describe("#sendTransaction", async function () {
 
         it('should send trx', async function () {
-            const balanceBefore = await tronWeb.trx.getUnconfirmedBalance(accounts.hex[16]);
-            await tronWeb.trx.sendTransaction(accounts.hex[16], 10e6, { privateKey: accounts.pks[15] });
-            const balanceAfter = await tronWeb.trx.getUnconfirmedBalance(accounts.hex[16]);
+            const balanceBefore = await tronWeb.trx.getUnconfirmedBalance(accounts.hex[17]);
+            await tronWeb.trx.sendTransaction(accounts.hex[17], 10e6, { privateKey: accounts.pks[15] });
+            const balanceAfter = await tronWeb.trx.getUnconfirmedBalance(accounts.hex[17]);
             assert.equal(balanceAfter - balanceBefore, 10e6);
         });
 
@@ -633,7 +633,7 @@ describe('TronWeb.trx', function () {
 
         it('should throw invalid amount provided error', async function () {
             await assertThrow(
-                tronWeb.trx.sendTransaction(accounts.hex[11], -1, { privateKey: accounts.pks[15] }),
+                tronWeb.trx.sendTransaction(accounts.hex[17], -1, { privateKey: accounts.pks[15] }),
                 'Invalid amount provided'
             );
         });
@@ -644,9 +644,9 @@ describe('TronWeb.trx', function () {
     describe("#sendTrx", async function () {
 
         it('should send trx', async function () {
-            const balanceBefore = await tronWeb.trx.getUnconfirmedBalance(accounts.hex[16]);
-            await tronWeb.trx.sendTrx(accounts.hex[16], 10e6, { privateKey: accounts.pks[15], address: accounts.hex[15] });
-            const balanceAfter = await tronWeb.trx.getUnconfirmedBalance(accounts.hex[16]);
+            const balanceBefore = await tronWeb.trx.getUnconfirmedBalance(accounts.hex[18]);
+            await tronWeb.trx.sendTrx(accounts.hex[18], 10e6, { privateKey: accounts.pks[15], address: accounts.hex[15] });
+            const balanceAfter = await tronWeb.trx.getUnconfirmedBalance(accounts.hex[18]);
             assert.equal(balanceAfter - balanceBefore, 10e6);
         });
 
@@ -659,7 +659,7 @@ describe('TronWeb.trx', function () {
 
         it('should throw invalid amount provided error', async function () {
             await assertThrow(
-                tronWeb.trx.sendTrx(accounts.hex[12], -1, { privateKey: accounts.pks[15] }),
+                tronWeb.trx.sendTrx(accounts.hex[18], -1, { privateKey: accounts.pks[15] }),
                 'Invalid amount provided'
             );
         });
@@ -670,16 +670,17 @@ describe('TronWeb.trx', function () {
     describe("#freezeBalance", async function () {
 
         it('should freeze balance for energy or bandwidth', async function () {
-            let accountBefore = await tronWeb.trx.getAccount(ADDRESS_HEX);
-            await tronWeb.trx.freezeBalance(10e6, 3, 'BANDWIDTH', {}, accounts.b58[15]);
-            let accountAfter = await tronWeb.trx.getUnconfirmedAccount(ADDRESS_HEX);
+            let accountBefore = await tronWeb.trx.getAccount(accounts.hex[19]);
+            await tronWeb.trx.freezeBalance(10e6, 3, 'BANDWIDTH', { privateKey: accounts.pks[19], address: accounts.hex[19] }, accounts.b58[15]);
+            let accountAfter = await tronWeb.trx.getUnconfirmedAccount(accounts.hex[19]);
             assert.equal((!accountBefore.frozen ? 0: accountBefore.frozen[0].frozen_balance) + 10e6, accountAfter.frozen[0].frozen_balance);
 
             accountBefore = accountAfter;
-            await tronWeb.trx.freezeBalance(10e6, 3, 'ENERGY', {}, accounts.b58[15]);
-            accountAfter = await tronWeb.trx.getUnconfirmedAccount(ADDRESS_HEX);
+            await tronWeb.trx.freezeBalance(10e6, 3, 'ENERGY', { privateKey: accounts.pks[19], address: accounts.hex[19] }, accounts.b58[15]);
+            accountAfter = await tronWeb.trx.getUnconfirmedAccount(accounts.hex[19]);
             assert.equal(
-                (Object.keys(accountBefore.account_resource).length === 0
+                (!accountBefore.account_resource.length ||
+                !accountBefore.account_resource.frozen_balance_for_energy
                     ? 0
                     : accountBefore.account_resource.frozen_balance_for_energy.frozen_balance) + 10e6,
                 accountAfter.account_resource.frozen_balance_for_energy.frozen_balance
