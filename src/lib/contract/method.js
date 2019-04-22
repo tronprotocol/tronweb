@@ -1,4 +1,5 @@
 import utils from 'utils';
+import {ADDRESS_PREFIX_REGEX} from 'utils/address';
 
 const getFunctionSelector = abi => {
     return abi.name + '(' + getParamTypes(abi.inputs || []).join(',') + ')';
@@ -47,11 +48,11 @@ export default class Method {
 
         args.forEach((arg, index) => {
             if (types[index] == 'address')
-                args[index] = this.tronWeb.address.toHex(arg).replace(/^(41)/, '0x')
+                args[index] = this.tronWeb.address.toHex(arg).replace(ADDRESS_PREFIX_REGEX, '0x')
 
             if (types[index] == 'address[]') {
                 args[index] = args[index].map(address => {
-                    return this.tronWeb.address.toHex(address).replace(/^(41)/, '0x')
+                    return this.tronWeb.address.toHex(address).replace(ADDRESS_PREFIX_REGEX, '0x')
                 })
             }
         });

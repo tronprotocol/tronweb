@@ -1,6 +1,7 @@
 import TronWeb from 'index';
 import utils from 'utils';
 import {keccak256, toUtf8Bytes, recoverAddress, SigningKey} from 'utils/ethersUtils';
+import {ADDRESS_PREFIX} from 'utils/address';
 
 const TRX_MESSAGE_HEADER = '\x19TRON Signed Message:\n32';
 const ETH_MESSAGE_HEADER = '\x19Ethereum Signed Message:\n32';
@@ -570,7 +571,7 @@ export default class Trx {
             s: '0x' + signature.substring(64, 128)
         });
 
-        const tronAddress = '41' + recovered.substr(2);
+        const tronAddress = ADDRESS_PREFIX + recovered.substr(2);
         const base58Address = this.tronWeb.address.fromHex(tronAddress);
 
         if (base58Address == this.tronWeb.address.fromHex(address))

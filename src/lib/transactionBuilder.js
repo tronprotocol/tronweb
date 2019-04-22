@@ -2,6 +2,7 @@ import TronWeb from 'index';
 import utils from 'utils';
 import {AbiCoder} from 'utils/ethersUtils';
 import Validator from 'paramValidator';
+import {ADDRESS_PREFIX_REGEX} from 'utils/address';
 
 let self;
 
@@ -557,7 +558,7 @@ export default class TransactionBuilder {
                     return callback('Invalid parameter type provided: ' + type);
 
                 if (type == 'address')
-                    value = toHex(value).replace(/^(41)/, '0x');
+                    value = toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
 
                 types.push(type);
                 values.push(value);
@@ -707,7 +708,7 @@ export default class TransactionBuilder {
                     return callback('Invalid parameter type provided: ' + type);
 
                 if (type == 'address')
-                    value = toHex(value).replace(/^(41)/, '0x');
+                    value = toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
 
                 types.push(type);
                 values.push(value);

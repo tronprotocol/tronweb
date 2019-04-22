@@ -7,6 +7,7 @@ import * as abi from './abi';
 
 import validator from 'validator';
 import BigNumber from 'bignumber.js';
+import {ADDRESS_PREFIX} from 'utils/address';
 
 const utils = {
     isValidURL(url) {
@@ -117,7 +118,7 @@ const utils = {
             for (var i = 0; i < abi.length; i++) {
                 let obj = abi[i];
                 if (obj.type == 'address' && obj.name in event.result)
-                    event.result[obj.name] = '41' + event.result[obj.name].substr(2).toLowerCase();
+                    event.result[obj.name] = ADDRESS_PREFIX + event.result[obj.name].substr(2).toLowerCase();
             }
         } else if (this.isArray(event.result)) {
             event.result = event.result.reduce((obj, result, index) => {
@@ -127,7 +128,7 @@ const utils = {
                 } = abi[index];
 
                 if (type == 'address')
-                    result = '41' + result.substr(2).toLowerCase();
+                    result = ADDRESS_PREFIX + result.substr(2).toLowerCase();
 
                 obj[name] = result;
 
