@@ -9,7 +9,7 @@ function log(x) {
 
 module.exports = async function (type, ...params) {
     let startTimestamp = Date.now();
-    let timeLimit = 10000;
+    let timeLimit = 5000;
     do {
         let data;
         let isFound = false;
@@ -28,6 +28,11 @@ module.exports = async function (type, ...params) {
                 case 'token': {
                     data = await tronWeb.trx.getTokensIssuedByAddress(params[0]);
                     isFound = !!Object.keys(data).length;
+                    break;
+                }
+                case 'tokenByName': {
+                    data = await tronWeb.trx.getTokenFromID(params[0]);
+                    isFound = !!data.name;
                     break;
                 }
                 case 'sendToken': {
@@ -74,7 +79,7 @@ module.exports = async function (type, ...params) {
         // console.log(...params, 'wait for chain data result: ', isFound, data, type);
         if (isFound)
             return;
-        log('waiting for unconfirmed data...');
+        log(`waiting for unconfirmed data,${type}...`);
         await wait(1);
 
     } while (Date.now() - startTimestamp < timeLimit);
