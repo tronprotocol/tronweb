@@ -945,7 +945,6 @@ describe('TronWeb.trx', function () {
 
         before(async function(){
             this.timeout(10000);
-            // create token for 10
             const options = getTokenOptions();
             const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.hex[20]);
             await broadcaster(null, accounts.pks[20], transaction);
@@ -977,7 +976,7 @@ describe('TronWeb.trx', function () {
                     'notValidAddress',
                     10e4,
                     token[Object.keys(token)[0]]['name'],
-                    { privateKey: accounts.pks[10] }
+                    { privateKey: accounts.pks[20], address: accounts.hex[20] }
                 ),
                 'Invalid recipient provided'
             );
@@ -987,10 +986,10 @@ describe('TronWeb.trx', function () {
             const token = await tronWeb.trx.getTokensIssuedByAddress(accounts.hex[20]);
             await assertThrow(
                 tronWeb.trx.sendAsset(
-                    accounts.hex[11],
+                    accounts.hex[21],
                     -10,
                     token[Object.keys(token)[0]]['name'],
-                    { privateKey: accounts.pks[10] }
+                    { privateKey: accounts.pks[20], address: accounts.hex[20] }
                 ),
                 'Invalid amount provided'
             );
@@ -1000,10 +999,10 @@ describe('TronWeb.trx', function () {
             const token = await tronWeb.trx.getTokensIssuedByAddress(accounts.hex[20]);
             await assertThrow(
                 tronWeb.trx.sendAsset(
-                    accounts.hex[11],
+                    accounts.hex[21],
                     10e4,
                     {},
-                    { privateKey: accounts.pks[10] }
+                    { privateKey: accounts.pks[20], address: accounts.hex[20] }
                 ),
                 'Invalid token ID provided'
             );
@@ -1013,10 +1012,10 @@ describe('TronWeb.trx', function () {
             const token = await tronWeb.trx.getTokensIssuedByAddress(accounts.hex[20]);
             await assertThrow(
                 tronWeb.trx.sendAsset(
-                    accounts.hex[10],
+                    accounts.hex[20],
                     10e4,
                     token[Object.keys(token)[0]]['name'],
-                    { privateKey: accounts.pks[10] }
+                    { privateKey: accounts.pks[20], address: accounts.hex[20] }
                 ),
                 'Cannot transfer tokens to the same account'
             );
@@ -1045,7 +1044,7 @@ describe('TronWeb.trx', function () {
                 accounts.hex[23],
                 10e4,
                 token[Object.keys(token)[0]]['name'],
-                { privateKey: accounts.pks[22] }
+                { privateKey: accounts.pks[22], address: accounts.hex[22] }
             );
             await waitChainData('sendToken', accounts.hex[23], !assetBefore ? 0 : assetBefore[0].value);
             const assetAfter = (await tronWeb.trx.getUnconfirmedAccount(accounts.hex[23])).asset;
@@ -1060,7 +1059,7 @@ describe('TronWeb.trx', function () {
                     'notValidAddress',
                     10e4,
                     token[Object.keys(token)[0]]['name'],
-                    { privateKey: accounts.pks[22] }
+                    { privateKey: accounts.pks[22], address: accounts.hex[22] }
                 ),
                 'Invalid recipient provided'
             );
@@ -1073,7 +1072,7 @@ describe('TronWeb.trx', function () {
                     accounts.hex[23],
                     -10,
                     token[Object.keys(token)[0]]['name'],
-                    { privateKey: accounts.pks[11] }
+                    { privateKey: accounts.pks[22], address: accounts.hex[22] }
                 ),
                 'Invalid amount provided'
             );
@@ -1086,7 +1085,7 @@ describe('TronWeb.trx', function () {
                     accounts.hex[23],
                     10e4,
                     {},
-                    { privateKey: accounts.pks[22] }
+                    { privateKey: accounts.pks[22], address: accounts.hex[22] }
                 ),
                 'Invalid token ID provided'
             );
@@ -1096,10 +1095,10 @@ describe('TronWeb.trx', function () {
             const token = await tronWeb.trx.getTokensIssuedByAddress(accounts.hex[22]);
             await assertThrow(
                 tronWeb.trx.sendAsset(
-                    accounts.hex[23],
+                    accounts.hex[22],
                     10e4,
                     token[Object.keys(token)[0]]['name'],
-                    { privateKey: accounts.pks[22] }
+                    { privateKey: accounts.pks[22], address: accounts.hex[22] }
                 ),
                 'Cannot transfer tokens to the same account'
             );
