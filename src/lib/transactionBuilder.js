@@ -827,28 +827,40 @@ export default class TransactionBuilder {
                 value: saleEnd,
                 gt: saleStart
             },
-            {
-                name: 'Free bandwidth amount',
-                type: 'positive-integer',
-                value: freeBandwidth
-            },
-            {
-                name: 'Free bandwidth limit',
-                type: 'positive-integer',
-                value: freeBandwidthLimit
-            },
-            {
-                name: 'Frozen supply',
-                type: 'positive-integer',
-                value: frozenAmount
-            },
-            {
-                name: 'Frozen duration',
-                type: 'positive-integer',
-                value: frozenDuration
-            }
+            // {
+            //     name: 'Free bandwidth amount',
+            //     type: 'positive-integer',
+            //     value: freeBandwidth
+            // },
+            // {
+            //     name: 'Free bandwidth limit',
+            //     type: 'positive-integer',
+            //     value: freeBandwidthLimit
+            // },
+            // {
+            //     name: 'Frozen supply',
+            //     type: 'positive-integer',
+            //     value: frozenAmount
+            // },
+            // {
+            //     name: 'Frozen duration',
+            //     type: 'positive-integer',
+            //     value: frozenDuration
+            // }
         ], callback))
             return;
+
+        if (!utils.isInteger(freeBandwidth) || freeBandwidth < 0)
+            return callback('Invalid free bandwidth amount provided');
+
+        if (!utils.isInteger(freeBandwidthLimit) || freeBandwidthLimit < 0 || (freeBandwidth && !freeBandwidthLimit))
+            return callback('Invalid free bandwidth limit provided');
+
+        if (!utils.isInteger(frozenAmount) || frozenAmount < 0 || (!frozenDuration && frozenAmount))
+            return callback('Invalid frozen supply provided');
+
+        if (!utils.isInteger(frozenDuration) || frozenDuration < 0 || (frozenDuration && !frozenAmount))
+            return callback('Invalid frozen duration provided');
 
         if (utils.isNotNullOrUndefined(voteScore) && (!utils.isInteger(voteScore) || voteScore <= 0))
             return callback('voteScore must be a positive integer greater than 0');
