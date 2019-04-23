@@ -18,7 +18,7 @@ module.exports = {
         freeBandwidthLimit: 100
     },
     getTokenOptions: () => {
-        const rnd = Math.random().toString().substring(2, 6);
+        const rnd = Math.random().toString(36).substr(2);
         return {
             name: `Token${rnd}`,
             abbreviation: `T${rnd.substring(2).toUpperCase()}`,
