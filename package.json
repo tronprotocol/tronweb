@@ -8,8 +8,8 @@
         "build": "npm run clean && webpack --config webpack.config.js --progress --colors",
         "clean": "rimraf dist",
         "test:browser": "node scripts/test-browser.js && npx karma start --single-run --browsers ChromeHeadless,Firefox,Edge",
-        "test": "node scripts/test-node.js && node test/helpers/newAccounts 10 && npx mocha 'test/**/*.test.js'",
-        "coverage": "node test/helpers/newAccounts 10 && npm run-script test:browser && npm run-script test:node",
+        "test": "node scripts/test-node.js && node test/helpers/newAccounts 50 && npx mocha 'test/**/*.test.js'",
+        "coverage": "node test/helpers/newAccounts 50 && npm run-script test:browser && npm run-script test:node",
         "build:dev": "NODE_ENV=development npm run build",
         "btest": "npm run build:dev && npm run test:node"
     },

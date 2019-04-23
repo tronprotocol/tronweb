@@ -18,13 +18,13 @@ module.exports = {
         freeBandwidthLimit: 100
     },
     getTokenOptions: () => {
-        const rnd = Math.random().toString().substring(2, 6);
+        const rnd = Math.random().toString(36).substr(2);
         return {
             name: `Token${rnd}`,
             abbreviation: `T${rnd.substring(2).toUpperCase()}`,
             description: 'Useless utility token',
             url: `https://example-${rnd}.com/`,
-            totalSupply: 1000,
+            totalSupply: 100000000,
             saleEnd: Date.now() + 60000, // 1 minute
             frozenAmount: 5,
             frozenDuration: 1,
