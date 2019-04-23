@@ -10,6 +10,7 @@ import Contract from 'lib/contract';
 import Plugin from 'lib/plugin';
 import Event from 'lib/event';
 import {keccak256} from 'utils/ethersUtils';
+import {ADDRESS_PREFIX} from 'utils/address';
 
 export default class TronWeb extends EventEmitter {
     static providers = providers;
@@ -209,12 +210,12 @@ export default class TronWeb extends EventEmitter {
                     return address;
 
                 return utils.crypto.getBase58CheckAddress(
-                    utils.code.hexStr2byteArray(address.replace(/^0x/, '41'))
+                    utils.code.hexStr2byteArray(address.replace(/^0x/, ADDRESS_PREFIX))
                 );
             },
             toHex(address) {
                 if (utils.isHex(address))
-                    return address.toLowerCase().replace(/^0x/, '41');
+                    return address.toLowerCase().replace(/^0x/, ADDRESS_PREFIX);
 
                 return utils.code.byteArray2hexStr(
                     utils.crypto.decodeBase58Address(address)

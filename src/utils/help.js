@@ -1,4 +1,5 @@
 import {hexStr2byteArray} from './code';
+import {ADDRESS_PREFIX} from 'utils/address';
 import {
     getBase58CheckAddress,
     decodeBase58Address,
@@ -45,7 +46,7 @@ export function stringUtf8tHex(str) {
 }
 
 export function address2HexString(sHexAddress) {
-    if (sHexAddress.length == 42 && sHexAddress.indexOf('41') == 0)
+    if (sHexAddress.length == 42 && sHexAddress.indexOf(ADDRESS_PREFIX) == 0)
         return sHexAddress;
 
     return base58ToHexString(sHexAddress)

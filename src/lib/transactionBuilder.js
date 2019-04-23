@@ -2,6 +2,7 @@ import TronWeb from 'index';
 import utils from 'utils';
 import {AbiCoder} from 'utils/ethersUtils';
 import Validator from 'paramValidator';
+import {ADDRESS_PREFIX_REGEX} from 'utils/address';
 
 let self;
 
@@ -21,7 +22,7 @@ function resultManager(transaction, callback) {
 
     if (transaction.result && transaction.result.message) {
         return callback(
-            this.tronWeb.toUtf8(transaction.result.message)
+            self.tronWeb.toUtf8(transaction.result.message)
         );
     }
 
@@ -436,7 +437,7 @@ export default class TransactionBuilder {
 
         const feeLimit = options.feeLimit || 1_000_000_000;
         let userFeePercentage = options.userFeePercentage;
-        if (typeof userFeePercentage !== 'number' || !userFeePercentage) {
+        if (typeof userFeePercentage !== 'number' && !userFeePercentage) {
             userFeePercentage = 100;
         }
         const originEnergyLimit = options.originEnergyLimit || 10_000_000;
@@ -527,11 +528,11 @@ export default class TransactionBuilder {
         ], callback))
             return;
 
-        if (payable && callValue == 0)
-            return callback('When contract is payable, options.callValue must be a positive integer');
+        if (payable && callValue == 0 && tokenValue == 0)
+            return callback('When contract is payable, options.callValue or options.tokenValue must be a positive integer');
 
-        if (!payable && callValue > 0)
-            return callback('When contract is not payable, options.callValue must be 0');
+        if (!payable && (callValue > 0 || tokenValue > 0))
+            return callback('When contract is not payable, options.callValue and options.tokenValue must be 0');
 
 
         var constructorParams = abi.find(
@@ -557,7 +558,7 @@ export default class TransactionBuilder {
                     return callback('Invalid parameter type provided: ' + type);
 
                 if (type == 'address')
-                    value = toHex(value).replace(/^(41)/, '0x');
+                    value = toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
 
                 types.push(type);
                 values.push(value);
@@ -707,7 +708,7 @@ export default class TransactionBuilder {
                     return callback('Invalid parameter type provided: ' + type);
 
                 if (type == 'address')
-                    value = toHex(value).replace(/^(41)/, '0x');
+                    value = toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
 
                 types.push(type);
                 values.push(value);
