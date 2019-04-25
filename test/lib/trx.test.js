@@ -740,21 +740,21 @@ describe('TronWeb.trx', function () {
 
             it('should throw invalid resource provided: expected "BANDWIDTH" or "ENERGY" error', async function () {
                 await assertThrow(
-                    tronWeb.trx.freezeBalance(10e8, 3, 'GAS', {}, accounts.b58[idx]),
+                    tronWeb.trx.freezeBalance(10e8, 3, 'GAS', { privateKey: accounts.pks[idx], address: accounts.hex[idx] }),
                     'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"'
                 );
             });
 
             it('should throw invalid amount provided error', async function () {
                 await assertThrow(
-                    tronWeb.trx.freezeBalance(-10, 3, 'BANDWIDTH', {}, accounts.b58[idx]),
+                    tronWeb.trx.freezeBalance(-10, 3, 'BANDWIDTH', { privateKey: accounts.pks[idx], address: accounts.hex[idx] }),
                     'Invalid amount provided'
                 );
             });
 
             it('should throw invalid duration provided, minimum of 3 days error', async function () {
                 await assertThrow(
-                    tronWeb.trx.freezeBalance(10e8, 2, 'BANDWIDTH', {}, accounts.b58[idx]),
+                    tronWeb.trx.freezeBalance(10e8, 2, 'BANDWIDTH', { privateKey: accounts.pks[idx], address: accounts.hex[idx] }),
                     'Invalid duration provided, minimum of 3 days'
                 );
             });
@@ -844,7 +844,7 @@ describe('TronWeb.trx', function () {
             before(async function(){
                 this.timeout(10000);
 
-                transaction = await tronWeb.trx.freezeBalance(10e5, 3, 'BANDWIDTH', {}, accounts.b58[idx]);
+                transaction = await tronWeb.trx.freezeBalance(10e5, 3, 'BANDWIDTH', { privateKey: accounts.pks[idx], address: accounts.hex[idx] });
                 transaction = transaction.transaction;
                 await waitChainData('tx', transaction.txID);
             });
@@ -873,7 +873,7 @@ describe('TronWeb.trx', function () {
             before(async function(){
                 this.timeout(10000);
                 // await wait(5); // wait for new clear block generated
-                transaction = await tronWeb.trx.freezeBalance(10e5, 3, 'BANDWIDTH', {}, accounts.b58[idx]);
+                transaction = await tronWeb.trx.freezeBalance(10e5, 3, 'BANDWIDTH', { privateKey: accounts.pks[idx], address: accounts.hex[idx] });
                 transaction = transaction.transaction;
                 const currBlock = await tronWeb.trx.getBlock('latest');
                 currBlockNum = currBlock.block_header.raw_data.number;
@@ -932,7 +932,7 @@ describe('TronWeb.trx', function () {
             let transaction;
 
             before(async function(){
-                transaction = await tronWeb.trx.freezeBalance(10e5, 3, 'BANDWIDTH', {}, accounts.b58[idx]);
+                transaction = await tronWeb.trx.freezeBalance(10e5, 3, 'BANDWIDTH', { privateKey: accounts.pks[idx], address: accounts.hex[idx] });
                 transaction = transaction.transaction;
             });
 
@@ -959,7 +959,7 @@ describe('TronWeb.trx', function () {
             let transaction;
 
             before(async function(){
-                transaction = await tronWeb.trx.freezeBalance(10e5, 3, 'BANDWIDTH', {}, accounts.b58[idx]);
+                transaction = await tronWeb.trx.freezeBalance(10e5, 3, 'BANDWIDTH', { privateKey: accounts.pks[idx], address: accounts.hex[idx] });
             });
 
             it('should get confirmed transaction by tx id', async function () {
