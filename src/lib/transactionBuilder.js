@@ -830,23 +830,27 @@ export default class TransactionBuilder {
             },
             {
                 name: 'Free bandwidth amount',
-                type: 'positive-integer',
-                value: freeBandwidth
+                type: 'integer',
+                value: freeBandwidth,
+                gte: 0
             },
             {
                 name: 'Free bandwidth limit',
-                type: 'positive-integer',
-                value: freeBandwidthLimit
+                type: 'integer',
+                value: freeBandwidthLimit,
+                gte: 0
             },
             {
                 name: 'Frozen supply',
-                type: 'positive-integer',
-                value: frozenAmount
+                type: 'integer',
+                value: frozenAmount,
+                gte: 0
             },
             {
                 name: 'Frozen duration',
-                type: 'positive-integer',
-                value: frozenDuration
+                type: 'integer',
+                value: frozenDuration,
+                gte: 0
             }
         ], callback))
             return;

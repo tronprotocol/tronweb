@@ -329,14 +329,14 @@ describe('TronWeb.transactionBuilder', function () {
 
             await assertThrow(
                 tronWeb.transactionBuilder.createToken(options),
-                'Free bandwidth amount must be a positive integer'
+                'Invalid Free bandwidth amount provided'
             );
 
             options.freeBandwidth = 'something';
 
             await assertThrow(
                 tronWeb.transactionBuilder.createToken(options),
-                'Free bandwidth amount must be a positive integer'
+                'Invalid Free bandwidth amount provided'
             );
 
         });
@@ -349,14 +349,14 @@ describe('TronWeb.transactionBuilder', function () {
 
             await assertThrow(
                 tronWeb.transactionBuilder.createToken(options),
-                'Free bandwidth limit must be a positive integer'
+                'Invalid Free bandwidth limit provided'
             );
 
             options.freeBandwidthLimit = 'something';
 
             await assertThrow(
                 tronWeb.transactionBuilder.createToken(options),
-                'Free bandwidth limit must be a positive integer'
+                'Invalid Free bandwidth limit provided'
             );
 
         });
@@ -368,14 +368,14 @@ describe('TronWeb.transactionBuilder', function () {
 
             await assertThrow(
                 tronWeb.transactionBuilder.createToken(options),
-                'Frozen supply must be a positive integer'
+                'Invalid Frozen supply provided'
             );
 
             options.frozenAmount = 'something';
 
             await assertThrow(
                 tronWeb.transactionBuilder.createToken(options),
-                'Frozen supply must be a positive integer'
+                'Invalid Frozen supply provided'
             );
         });
 
@@ -386,7 +386,7 @@ describe('TronWeb.transactionBuilder', function () {
 
             await assertThrow(
                 tronWeb.transactionBuilder.createToken(options),
-                'Frozen duration must be a positive integer'
+                'Invalid Frozen duration provided'
             );
 
         });
