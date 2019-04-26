@@ -6,11 +6,12 @@
     "scripts": {
         "prepare": "npm run build",
         "build": "npm run clean && webpack --config webpack.config.js --progress --colors",
-        "clean": "rimraf dist",
-        "test:browser": "node scripts/test-browser.js && npx karma start --single-run --browsers ChromeHeadless,Firefox,Edge",
-        "test": "node scripts/test-node.js && node test/helpers/newAccounts 50 && npx mocha 'test/**/*.test.js'",
-        "coverage": "node test/helpers/newAccounts 50 && npm run-script test:browser && npm run-script test:node",
         "build:dev": "NODE_ENV=development npm run build",
+        "clean": "rimraf dist",
+        "newaccount": "node scripts/test-node.js && node test/helpers/newAccounts 50",
+        "test": "node scripts/test-node.js && node test/helpers/newAccounts 50 npm run-script newaccount && npx mocha 'test/**/*.test.js'",
+        "test:browser": "npm run-script newaccount && node scripts/test-browser.js && npx karma start --single-run --browsers ChromeHeadless",
+        "coverage": "npm run-script test:browser && npm run-script test",
         "btest": "npm run build:dev && npm run test"
     },
     "husky": {
