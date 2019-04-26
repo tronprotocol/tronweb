@@ -10,7 +10,7 @@
         "clean": "rimraf dist",
         "newaccount": "node scripts/test-node.js && node test/helpers/newAccounts 50",
         "btest": "npm run build:dev && npm run test",
-        "test": "npm run-script newaccount && npx mocha 'test/**/*.test.js'",
+        "test": "node scripts/test-node.js && node test/helpers/newAccounts 50 npm run-script newaccount && npx mocha 'test/**/*.test.js'",
         "test:browser": "npm run-script newaccount && node scripts/test-browser.js && npx karma start --single-run --browsers ChromeHeadless",
         "coverage": "npm run-script test:browser && npm run-script test"
     },
