@@ -9,10 +9,10 @@
         "build:dev": "NODE_ENV=development npm run build",
         "clean": "rimraf dist",
         "newaccount": "node scripts/test-node.js && node test/helpers/newAccounts 50",
-        "btest": "npm run build:dev && npm run test",
         "test": "node scripts/test-node.js && node test/helpers/newAccounts 50 npm run-script newaccount && npx mocha 'test/**/*.test.js'",
         "test:browser": "npm run-script newaccount && node scripts/test-browser.js && npx karma start --single-run --browsers ChromeHeadless",
-        "coverage": "npm run-script test:browser && npm run-script test"
+        "coverage": "npm run-script test:browser && npm run-script test",
+        "btest": "npm run build:dev && npm run test"
     },
     "husky": {
         "hooks": {
