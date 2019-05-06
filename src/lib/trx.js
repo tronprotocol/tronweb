@@ -611,7 +611,7 @@ export default class Trx {
                 return callback('Expected hex message input');
 
             try {
-                const signatureHex = Trx.signMessage(transaction, useTronHeader, privateKey)
+                const signatureHex = Trx.signString(transaction, privateKey, useTronHeader)
                 return callback(null, signatureHex);
             } catch (ex) {
                 callback(ex);
@@ -641,7 +641,7 @@ export default class Trx {
         }
     }
 
-    static signMessage(message, useTronHeader, privateKey) {
+    static signString(message, privateKey, useTronHeader) {
         message = message.replace(/^0x/,'');
         const signingKey = new SigningKey(privateKey);
         const messageBytes = [
