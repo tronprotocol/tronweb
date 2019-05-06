@@ -641,7 +641,7 @@ export default class Trx {
         }
     }
 
-    static signString(message, privateKey, useTronHeader) {
+    static signString(message, privateKey, useTronHeader = true) {
         message = message.replace(/^0x/,'');
         const signingKey = new SigningKey(privateKey);
         const messageBytes = [
