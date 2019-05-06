@@ -4,7 +4,11 @@ function sleep(millis) {
 const chalk = require('chalk')
 
 function log(x) {
-    process.stdout.write(chalk.yellow(x))
+    if (process.stdout !== undefined) {
+        process.stdout.write(chalk.yellow(x));
+    } else {
+        console.log(chalk.yellow(x)); // used for karma
+    }
 }
 
 module.exports = async function (secs) {

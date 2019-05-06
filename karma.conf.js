@@ -11,14 +11,14 @@ const basePlugins = [
     'source-map-support'
 ];
 
-const files = globby.sync([ './test/*.js' ]);
+const files = globby.sync([ 'test/**/*.test.js' ]);
 
 module.exports = function (config) {
     config.set({
         frameworks: [ 'mocha' ],
-        browsers : [ 'ChromeHeadless', 'Firefox', 'Edge' ],
+        browsers : [ 'ChromeHeadless', /* 'Firefox'  , 'Edge' */ ],
         preprocessors: {
-            [ files ]: [ 'webpack', 'sourcemap' ]
+            'test/**/*.test.js': [ 'webpack', 'sourcemap' ]
         },
         reporters: [ 'spec', 'coverage' ],
         coverageReporter: {
@@ -42,7 +42,7 @@ module.exports = function (config) {
             module: {
                 rules: [
                     {
-                        test: /\.js/,
+                        test: /\.js$/,
                         exclude: /(test|node_modules|bower_components)/,
                         loader: 'babel-loader',
                         options: {
@@ -71,7 +71,11 @@ module.exports = function (config) {
                 ],
             },
             mode: process.env.NODE_ENV || 'development',
-            target: 'web'
+            target: 'web',
+            node: {
+                fs: "empty",
+                module: "empty"
+            }
         },
         webpackMiddleware: {
             noInfo: true
