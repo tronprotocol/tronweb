@@ -21,6 +21,7 @@ export default class TronWeb extends EventEmitter {
     static Plugin = Plugin;
     static Event = Event;
     static version = version;
+    static utils = utils;
 
     constructor(options = false,
                 // for retro-compatibility:
