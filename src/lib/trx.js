@@ -559,7 +559,7 @@ export default class Trx {
         callback('Signature does not match');
     }
 
-    static verifySignature(message, address, signature, useTronHeader) {
+    static verifySignature(message, address, signature, useTronHeader = true) {
         message = message.replace(/^0x/,'');
         signature = signature.replace(/^0x/,'');
         const messageBytes = [
