@@ -168,8 +168,8 @@ In order to contribute you can
 
 ## Recent History
 
-__2.5.1__
-* Adds static methods `Trx.signMessage` and `Trx.verifySignature
+__2.5.2__
+* Adds static methods `Trx.signString` and `Trx.verifySignature
 
 __2.5.0__
 * Allows freeBandwidth, freeBandwidthLimit, frozenAmount and frozenDuration to be zero

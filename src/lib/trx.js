@@ -559,7 +559,7 @@ export default class Trx {
         callback('Signature does not match');
     }
 
-    static verifySignature(message, address, signature, useTronHeader) {
+    static verifySignature(message, address, signature, useTronHeader = true) {
         message = message.replace(/^0x/,'');
         signature = signature.replace(/^0x/,'');
         const messageBytes = [
@@ -611,7 +611,7 @@ export default class Trx {
                 return callback('Expected hex message input');
 
             try {
-                const signatureHex = Trx.signMessage(transaction, useTronHeader, privateKey)
+                const signatureHex = Trx.signString(transaction, privateKey, useTronHeader)
                 return callback(null, signatureHex);
             } catch (ex) {
                 callback(ex);
@@ -641,7 +641,7 @@ export default class Trx {
         }
     }
 
-    static signMessage(message, useTronHeader, privateKey) {
+    static signString(message, privateKey, useTronHeader = true) {
         message = message.replace(/^0x/,'');
         const signingKey = new SigningKey(privateKey);
         const messageBytes = [
