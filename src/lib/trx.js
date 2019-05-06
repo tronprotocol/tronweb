@@ -553,12 +553,15 @@ export default class Trx {
         if (!utils.isHex(message))
             return callback('Expected hex message input');
 
-        if (message.substr(0, 2) == '0x')
-            message = message.substring(2);
+        if (Trx.verifySignature(message, address, signature, useTronHeader))
+            return callback(null, true);
 
-        if (signature.substr(0, 2) == '0x')
-            signature = signature.substr(2);
+        callback('Signature does not match');
+    }
 
+    static verifySignature(message, address, signature, useTronHeader) {
+        message = message.replace(/^0x/,'');
+        signature = signature.replace(/^0x/,'');
         const messageBytes = [
             ...toUtf8Bytes(useTronHeader ? TRX_MESSAGE_HEADER : ETH_MESSAGE_HEADER),
             ...utils.code.hexStr2byteArray(message)
@@ -572,12 +575,9 @@ export default class Trx {
         });
 
         const tronAddress = ADDRESS_PREFIX + recovered.substr(2);
-        const base58Address = this.tronWeb.address.fromHex(tronAddress);
+        const base58Address = TronWeb.address.fromHex(tronAddress);
 
-        if (base58Address == this.tronWeb.address.fromHex(address))
-            return callback(null, true);
-
-        callback('Signature does not match');
+        return base58Address == TronWeb.address.fromHex(address);
     }
 
     async sign(transaction = false, privateKey = this.tronWeb.defaultPrivateKey, useTronHeader = true, multisig = false, callback = false) {
@@ -606,29 +606,12 @@ export default class Trx {
 
         // Message signing
         if (utils.isString(transaction)) {
-            if (transaction.substring(0, 2) == '0x')
-                transaction = transaction.substring(2);
 
             if (!utils.isHex(transaction))
                 return callback('Expected hex message input');
 
             try {
-                const signingKey = new SigningKey(privateKey);
-                const messageBytes = [
-                    ...toUtf8Bytes(useTronHeader ? TRX_MESSAGE_HEADER : ETH_MESSAGE_HEADER),
-                    ...utils.code.hexStr2byteArray(transaction)
-                ];
-
-                const messageDigest = keccak256(messageBytes);
-                const signature = signingKey.signDigest(messageDigest);
-
-                const signatureHex = [
-                    '0x',
-                    signature.r.substring(2),
-                    signature.s.substring(2),
-                    Number(signature.v).toString(16)
-                ].join('');
-
+                const signatureHex = Trx.signMessage(transaction, useTronHeader, privateKey)
                 return callback(null, signatureHex);
             } catch (ex) {
                 callback(ex);
@@ -656,6 +639,27 @@ export default class Trx {
         } catch (ex) {
             callback(ex);
         }
+    }
+
+    static signMessage(message, useTronHeader, privateKey) {
+        message = message.replace(/^0x/,'');
+        const signingKey = new SigningKey(privateKey);
+        const messageBytes = [
+            ...toUtf8Bytes(useTronHeader ? TRX_MESSAGE_HEADER : ETH_MESSAGE_HEADER),
+            ...utils.code.hexStr2byteArray(message)
+        ];
+
+        const messageDigest = keccak256(messageBytes);
+        const signature = signingKey.signDigest(messageDigest);
+
+        const signatureHex = [
+            '0x',
+            signature.r.substring(2),
+            signature.s.substring(2),
+            Number(signature.v).toString(16)
+        ].join('');
+
+        return signatureHex
     }
 
     async multiSign(transaction = false, privateKey = this.tronWeb.defaultPrivateKey, permissionId = false, callback = false) {

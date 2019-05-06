@@ -168,6 +168,12 @@ In order to contribute you can
 
 ## Recent History
 
+__2.5.1__
+* Adds static methods `Trx.signMessage` and `Trx.verifySignature
+
+__2.5.0__
+* Allows freeBandwidth, freeBandwidthLimit, frozenAmount and frozenDuration to be zero
+
 __2.3.7__
 * Get rid of jssha to reduce the size of the package a little bit.
 
