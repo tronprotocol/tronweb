@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img align="center" src="https://raw.githubusercontent.com/tron-us/tron-web/master/assets/TronWeb-logo.png" width="400"/>
+  <img align="center" src="https://raw.githubusercontent.com/tron-us/tronweb/master/assets/TronWeb-logo.png" width="400"/>
 </h1>
 
 <p align="center">
@@ -7,26 +7,26 @@
     <img src="https://img.shields.io/badge/chat-on%20discord-brightgreen.svg">
   </a>
   
-  <a href="https://github.com/tron-us/tron-web/issues">
-    <img src="https://img.shields.io/github/issues/tron-us/tron-web.svg">
+  <a href="https://github.com/tron-us/tronweb/issues">
+    <img src="https://img.shields.io/github/issues/tron-us/tronweb.svg">
   </a>
   
-  <a href="https://github.com/tron-us/tron-web/pulls">
-    <img src="https://img.shields.io/github/issues-pr/tron-us/tron-web.svg">
+  <a href="https://github.com/tron-us/tronweb/pulls">
+    <img src="https://img.shields.io/github/issues-pr/tron-us/tronweb.svg">
   </a>
   
-  <a href="https://github.com/tron-us/tron-web/graphs/contributors">
-    <img src="https://img.shields.io/github/contributors/tron-us/tron-web.svg">
+  <a href="https://github.com/tron-us/tronweb/graphs/contributors">
+    <img src="https://img.shields.io/github/contributors/tron-us/tronweb.svg">
   </a>
   
   <a href="LICENSE">
-    <img src="https://img.shields.io/github/license/tron-us/tron-web.svg">
+    <img src="https://img.shields.io/github/license/tron-us/tronweb.svg">
   </a>
 </p>
 
 ## What is TronWeb?
 
-__[Tron Web - Developer Document](https://developers.tron.network/docs/tron-web-intro)__
+__[Tron Web - Developer Document](https://developers.tron.network/docs/tronweb-intro)__
 
 TronWeb aims to deliver a unified, seamless development experience influenced by Ethereum's [Web3](https://github.com/ethereum/web3.js/) implementation. We have taken the core ideas and expanded upon it to unlock the functionality of TRON's unique feature set along with offering new tools for integrating DApps in the browser, Node.js and IoT devices.
 
