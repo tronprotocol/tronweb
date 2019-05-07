@@ -76,11 +76,15 @@
     },
     "contributors": [
         {
-            "name": "TRON",
-            "url": "https://github.com/tronprotocol"
+            "name": "Francesco Sullo",
+            "url": "https://github.com/sullof"
+        },
+        {
+            "name": "TRON-US",
+            "url": "https://github.com/tron-us"
         }
     ],
-    "homepage": "https://github.com/tronprotocol/tron-web",
+    "homepage": "https://github.com/tron-us/tronweb",
     "license": "MIT",
-    "repository": "https://github.com/tronprotocol/tron-web.git"
+    "repository": "https://github.com/tron-us/tronweb.git"
 }

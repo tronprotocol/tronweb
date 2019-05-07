@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img align="center" src="https://raw.githubusercontent.com/tronprotocol/tron-web/master/assets/TronWeb-logo.png" width="400"/>
+  <img align="center" src="https://raw.githubusercontent.com/tron-us/tron-web/master/assets/TronWeb-logo.png" width="400"/>
 </h1>
 
 <p align="center">
@@ -7,20 +7,20 @@
     <img src="https://img.shields.io/badge/chat-on%20discord-brightgreen.svg">
   </a>
   
-  <a href="https://github.com/tronprotocol/tron-web/issues">
-    <img src="https://img.shields.io/github/issues/tronprotocol/tron-web.svg">
+  <a href="https://github.com/tron-us/tron-web/issues">
+    <img src="https://img.shields.io/github/issues/tron-us/tron-web.svg">
   </a>
   
-  <a href="https://github.com/tronprotocol/tron-web/pulls">
-    <img src="https://img.shields.io/github/issues-pr/tronprotocol/tron-web.svg">
+  <a href="https://github.com/tron-us/tron-web/pulls">
+    <img src="https://img.shields.io/github/issues-pr/tron-us/tron-web.svg">
   </a>
   
-  <a href="https://github.com/tronprotocol/tron-web/graphs/contributors"> 
-    <img src="https://img.shields.io/github/contributors/tronprotocol/tron-web.svg">
+  <a href="https://github.com/tron-us/tron-web/graphs/contributors">
+    <img src="https://img.shields.io/github/contributors/tron-us/tron-web.svg">
   </a>
   
   <a href="LICENSE">
-    <img src="https://img.shields.io/github/license/tronprotocol/tron-web.svg">
+    <img src="https://img.shields.io/github/license/tron-us/tron-web.svg">
   </a>
 </p>
 
@@ -90,7 +90,7 @@ docker run -it --rm \
   trontools/quickstart
 ```
 
-[More details about Tron Quickstart on GitHub](https://github.com/tronprotocol/docker-tron-quickstart)
+[More details about Tron Quickstart on GitHub](https://github.com/tron-us/docker-tron-quickstart)
 
 ## Creating an Instance
 
