@@ -1,21 +1,20 @@
+if (!process.env.SKIPPREPUSH) {
 
+    const {execSync, spawn} = require('child_process')
+    const chalk = require('chalk')
 
-const {execSync, spawn} = require('child_process')
-const chalk = require('chalk')
+    const branch = execSync('git name-rev --name-only HEAD').toString().split('\n')[0];
+    let unpushed;
 
-const branch = execSync('git name-rev --name-only HEAD').toString().split('\n')[0];
-let unpushed;
+    try {
+        unpushed = execSync(`git log origin/${branch}..${branch} --name-status`).toString().split('\n');
+    } catch (ex) {
+        // the branch hasn't ever been pushed
+        unpushed = execSync(`git log HEAD...origin --name-status`).toString().split('\n');
+    }
 
-try {
-    unpushed = execSync(`git log origin/${branch}..${branch} --name-status`).toString().split('\n');
-} catch (ex) {
-    // the branch hasn't ever been pushed
-    unpushed = execSync(`git log HEAD...origin --name-status`).toString().split('\n');
-}
+    let errors = false
 
-let errors = false
-
-if (!process.env.SKIPTESTS) {
 
     const build = spawn('yarn', ['build'])
 
