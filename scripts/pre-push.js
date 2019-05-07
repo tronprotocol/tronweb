@@ -26,7 +26,6 @@ if (!process.env.SKIPPREPUSH) {
         process.stdout.write(data.toString())
     })
 
-
     build.on('exit', function (code) {
         const test = spawn('yarn', ['test'])
 
