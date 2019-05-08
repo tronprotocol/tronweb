@@ -204,3 +204,9 @@ __2.3.0__
 ## Licence
 
 TronWeb is distributed under a MIT licence.
+
+
+-----
+
+For more historic data, check the original repo at
+[https://github.com/tronprotocol/tron-web](https://github.com/tronprotocol/tron-web)
