@@ -643,7 +643,7 @@ export default class TransactionBuilder {
             feeLimit: 1_000_000_000
         }, options)
 
-        if (this.validator.notValid([
+        const paramsToValidate = [
             {
                 name: 'feeLimit',
                 type: 'integer',
@@ -668,11 +668,6 @@ export default class TransactionBuilder {
                 value: contractAddress
             },
             {
-                name: 'issuer',
-                type: 'address',
-                value: issuerAddress
-            },
-            {
                 name: 'tokenValue',
                 type: 'integer',
                 value: tokenValue,
@@ -691,7 +686,17 @@ export default class TransactionBuilder {
                 type: 'not-empty-string',
                 value: functionSelector
             }
-        ], callback))
+        ];
+
+        if (issuerAddress !== false) {
+            paramsToValidate.push({
+                name: 'issuer',
+                type: 'address',
+                value: issuerAddress
+            });
+        };
+
+        if (this.validator.notValid(paramsToValidate, callback))
             return;
 
         functionSelector = functionSelector.replace('/\s*/g', '');
