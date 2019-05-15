@@ -168,6 +168,9 @@ In order to contribute you can
 
 ## Recent History
 
+__2.5.5__
+* Ignore `receiverAddress` during `freezeBalance` and `unfreezeBalance` if it is equal to the owner address
+
 __2.5.4__
 * Adds cache in Trx to cache Contracts locally and make the process more efficient
 
