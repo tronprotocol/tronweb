@@ -670,7 +670,8 @@ export default class TransactionBuilder {
             {
                 name: 'issuer',
                 type: 'address',
-                value: issuerAddress
+                value: issuerAddress,
+                optional: true
             },
             {
                 name: 'tokenValue',
