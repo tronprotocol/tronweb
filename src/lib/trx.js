@@ -13,6 +13,9 @@ export default class Trx {
 
         this.tronWeb = tronWeb;
         this.injectPromise = utils.promiseInjector(this);
+        this.cache = {
+            contracts: {}
+        }
     }
 
     _parseToken(token) {
@@ -523,6 +526,11 @@ export default class Trx {
         if (!this.tronWeb.isAddress(contractAddress))
             return callback('Invalid contract address provided');
 
+        if (this.cache.contracts[contractAddress]) {
+            callback(null, this.cache.contracts[contractAddress]);
+            return;
+        }
+
         contractAddress = this.tronWeb.address.toHex(contractAddress);
 
         this.tronWeb.fullNode.request('wallet/getcontract', {
@@ -530,7 +538,7 @@ export default class Trx {
         }).then(contract => {
             if (contract.Error)
                 return callback('Contract does not exist');
-
+            this.cache.contracts[contractAddress] = contract;
             callback(null, contract);
         }).catch(err => callback(err));
     }
