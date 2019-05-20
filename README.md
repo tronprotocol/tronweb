@@ -168,6 +168,9 @@ In order to contribute you can
 
 ## Recent History
 
+__2.5.6__
+* Reverse PR #6
+
 __2.5.5__
 * Ignore `receiverAddress` during `freezeBalance` and `unfreezeBalance` if it is equal to the owner address
 
