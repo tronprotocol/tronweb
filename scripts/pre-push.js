@@ -44,7 +44,6 @@ if (!process.env.SKIPPREPUSH) {
             if (errors) {
                 console.log(chalk.red('Tests have failed. Please verify tests are passing before pushing'));
                 execSync('rm -f ' + path.resolve(__dirname, '../pre-push-result'))
-                process.exit(1);
             }
         })
     })
@@ -56,4 +55,5 @@ if (!process.env.SKIPPREPUSH) {
 }
 
 execSync('git add -A && git commit --amend')
+process.exit(1);
 
