@@ -1,6 +1,8 @@
+const {execSync, spawn} = require('child_process')
+const path = require('path')
+
 if (!process.env.SKIPPREPUSH) {
 
-    const {execSync, spawn} = require('child_process')
     const chalk = require('chalk')
 
     const branch = execSync('git name-rev --name-only HEAD').toString().split('\n')[0];
@@ -41,10 +43,17 @@ if (!process.env.SKIPPREPUSH) {
         test.on('exit', function (code) {
             if (errors) {
                 console.log(chalk.red('Tests have failed. Please verify tests are passing before pushing'));
+                execSync('rm -f ' + path.resolve(__dirname, '../pre-push-result'))
                 process.exit(1);
             }
         })
     })
 
+
+
+} else {
+    execSync('echo "Test skipped" >> ' + path.resolve(__dirname, '../pre-push-result'))
 }
+
+execSync('git add -A && git commit --amend')
 
