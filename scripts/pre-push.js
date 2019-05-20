@@ -40,6 +40,7 @@ if (!process.env.SKIPPREPUSH) {
             errors = true
             console.log('stderr: ' + data.toString())
         })
+
         test.on('exit', function (code) {
             if (errors) {
                 console.log(chalk.red('Tests have failed. Please verify tests are passing before pushing'));
@@ -55,6 +56,6 @@ if (!process.env.SKIPPREPUSH) {
     fs.writeFileSync(path.resolve(__dirname, '../pre-push-result'), 'Test skipped')
 }
 
-execSync('git add -A && git commit --amend')
+execSync('git add -A && git commit --amend --no-edit')
 process.exit(1);
 
