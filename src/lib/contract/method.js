@@ -208,7 +208,7 @@ export default class Method {
 
             const broadcast = await this.tronWeb.trx.sendRawTransaction(signedTransaction);
 
-            if (broadcast.code)
+            if (broadcast.code && broadcast.message)
                 return callback({
                     error: broadcast.code,
                     message: this.tronWeb.toUtf8(broadcast.message)
