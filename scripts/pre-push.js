@@ -48,9 +48,8 @@ if (!process.env.SKIPPREPUSH) {
         })
     })
 
-
-
 } else {
+    console.log('echo "Test skipped" >> ' + path.resolve(__dirname, '../pre-push-result'))
     execSync('echo "Test skipped" >> ' + path.resolve(__dirname, '../pre-push-result'))
 }
 
