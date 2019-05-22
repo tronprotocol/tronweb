@@ -1,9 +1,10 @@
 const {execSync, spawn} = require('child_process')
 const path = require('path')
 const fs = require('fs')
+const env = require('dotenv').config()
 const resultFile = path.resolve(__dirname, '../pre-push-result')
 
-if (!process.env.SKIPPREPUSH) {
+if (!env.parsed || !env.parsed.SKIPPREPUSH) {
 
     const chalk = require('chalk')
 
