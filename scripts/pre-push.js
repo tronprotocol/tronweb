@@ -1,6 +1,7 @@
 const {execSync, spawn} = require('child_process')
 const path = require('path')
 const fs = require('fs')
+const resultFile = path.resolve(__dirname, '../pre-push-result')
 
 if (!process.env.SKIPPREPUSH) {
 
@@ -45,19 +46,18 @@ if (!process.env.SKIPPREPUSH) {
             if (errors) {
                 console.log(chalk.red('Tests have failed. Please verify tests are passing before pushing'));
                 process.exit(1);
-            } else {
-                execSync('git add -A && git commit --amend --no-edit')
             }
-            if (fs.existsSync(path.resolve(__dirname, '../pre-push-result'))) {
-                fs.unlinkSync(path.resolve(__dirname, '../pre-push-result'))
+            if (fs.existsSync(resultFile)) {
+                fs.unlinkSync(resultFile)
+                execSync('git add -A && git commit --amend --no-edit')
             }
             process.exit(0);
         })
     })
 
 } else {
-    console.log('echo "Test skipped" >> ' + path.resolve(__dirname, '../pre-push-result'))
-    fs.writeFileSync(path.resolve(__dirname, '../pre-push-result'), 'Test skipped')
+    console.log('echo "Test skipped" >> ' + resultFile)
+    fs.writeFileSync(resultFile, 'Test skipped')
     execSync('git add -A && git commit --amend --no-edit')
     process.exit(0);
 }
