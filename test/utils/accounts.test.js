@@ -8,7 +8,7 @@ describe('TronWeb.utils.accounts', function () {
 
     describe('#generateAccount()', function () {
 
-        it.only("should generate a new account", async function () {
+        it("should generate a new account", async function () {
             const tronWeb = tronWebBuilder.createInstance();
 
             const newAccount = await tronWeb.utils.accounts.generateAccount();
