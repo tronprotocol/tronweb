@@ -57,7 +57,7 @@ if (!process.env.SKIPPREPUSH) {
 
 } else {
     console.log('echo "Test skipped" >> ' + resultFile)
-    fs.writeFileSync(resultFile, 'Test skipped')
+    fs.writeFileSync(resultFile, 'Test skipped.')
     execSync('git add -A && git commit --amend --no-edit')
     process.exit(0);
 }
