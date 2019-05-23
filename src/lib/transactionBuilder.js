@@ -216,11 +216,6 @@ export default class TransactionBuilder {
                 optional: true
             },
             {
-                names: ['receiver', 'origin'],
-                type: 'notEqual',
-                msg: 'Cannot freeze balance to same account'
-            },
-            {
                 name: 'amount',
                 type: 'integer',
                 gt: 0,
@@ -248,7 +243,7 @@ export default class TransactionBuilder {
             resource: resource
         }
 
-        if (utils.isNotNullOrUndefined(receiverAddress)) {
+        if (utils.isNotNullOrUndefined(receiverAddress) && toHex(receiverAddress) !== toHex(address)) {
             data.receiver_address = toHex(receiverAddress)
         }
 
@@ -287,11 +282,6 @@ export default class TransactionBuilder {
                 optional: true
             },
             {
-                names: ['receiver', 'origin'],
-                type: 'notEqual',
-                msg: 'Cannot unfreeze balance to same account'
-            },
-            {
                 name: 'resource',
                 type: 'resource',
                 value: resource,
@@ -305,7 +295,7 @@ export default class TransactionBuilder {
             resource: resource
         }
 
-        if (utils.isNotNullOrUndefined(receiverAddress)) {
+        if (utils.isNotNullOrUndefined(receiverAddress) && toHex(receiverAddress) !== toHex(address)) {
             data.receiver_address = toHex(receiverAddress)
         }
 
