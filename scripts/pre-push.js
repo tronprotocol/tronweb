@@ -49,7 +49,7 @@ if (!process.env.SKIPPREPUSH) {
             }
             if (fs.existsSync(resultFile)) {
                 fs.unlinkSync(resultFile)
-                execSync('git add -A && git commit --amend --no-edit && git pull --rebase')
+                execSync('git add -A && git commit --amend --no-edit')
             }
             process.exit(0);
         })
@@ -58,6 +58,6 @@ if (!process.env.SKIPPREPUSH) {
 } else {
     console.log('echo "Test skipped" >> ' + resultFile)
     fs.writeFileSync(resultFile, 'Test skipped.')
-    execSync('git add -A && git commit --amend --no-edit && git pull --rebase')
+    execSync('git add -A && git commit --amend --no-edit')
     process.exit(0);
 }
