@@ -3,7 +3,7 @@ const path = require('path')
 const fs = require('fs')
 const resultFile = path.resolve(__dirname, '../pre-push-result')
 
-if (process.env.SKIPPREPUSH) {
+if (!process.env.SKIPPREPUSH) {
 
     const chalk = require('chalk')
 
