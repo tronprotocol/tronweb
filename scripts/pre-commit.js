@@ -49,8 +49,8 @@ if (!process.env.SKIPPRECOMMIT) {
             }
             if (fs.existsSync(resultFile)) {
                 fs.unlinkSync(resultFile)
-                execSync('git add -A')
             }
+            execSync('git add -A')
             process.exit(0);
         })
     })
