@@ -734,12 +734,11 @@ export default class TransactionBuilder {
 
         if (!options._isConstant) {
             args.call_value = parseInt(callValue)
+            if (utils.isNotNullOrUndefined(tokenValue))
+                args.call_token_value = parseInt(tokenValue)
+            if (utils.isNotNullOrUndefined(tokenId))
+                args.token_id = parseInt(tokenId)
         }
-
-        if (utils.isNotNullOrUndefined(tokenValue))
-            args.call_token_value = parseInt(tokenValue)
-        if (utils.isNotNullOrUndefined(tokenId))
-            args.token_id = parseInt(tokenId)
 
         this.tronWeb.fullNode.request(`wallet/trigger${options._isConstant ? 'constant' : 'smart'}contract`, args, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
