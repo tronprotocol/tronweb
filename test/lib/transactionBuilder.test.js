@@ -1046,7 +1046,7 @@ describe('TronWeb.transactionBuilder', function () {
             }
         })
 
-        it('should trigger constant contract', async function () {
+        it('should trigger constant contract successfully', async function () {
             this.timeout(10000);
 
             const contractAddress = transaction.contract_address;
