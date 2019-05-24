@@ -10,6 +10,7 @@ const _ = require('lodash');
 const tronWebBuilder = require('../helpers/tronWebBuilder');
 const assertEqualHex = require('../helpers/assertEqualHex');
 const testRevertContract = require('../fixtures/contracts').testRevert;
+const testConstantContract = require('../fixtures/contracts').testConstant;
 
 const TronWeb = tronWebBuilder.TronWeb;
 const {
@@ -1022,6 +1023,106 @@ describe('TronWeb.transactionBuilder', function () {
         });
     });
 
+
+    describe("#triggerConstantContract", async function () {
+
+        let transaction;
+        before(async function() {
+            this.timeout(20000);
+
+            transaction = await tronWeb.transactionBuilder.createSmartContract({
+                abi: testConstantContract.abi,
+                bytecode: testConstantContract.bytecode
+            }, accounts.hex[6]);
+            await broadcaster(null, accounts.pks[6], transaction);
+            while (true) {
+                const tx = await tronWeb.trx.getTransactionInfo(transaction.txID);
+                if (Object.keys(tx).length === 0) {
+                    await wait(3);
+                    continue;
+                } else {
+                    break;
+                }
+            }
+        })
+
+        it('should trigger constant contract', async function () {
+            this.timeout(10000);
+
+            const contractAddress = transaction.contract_address;
+            const issuerAddress = accounts.hex[6];
+            const functionSelector = 'testPure(uint256,uint256)';
+            const parameter = [
+                { type: 'uint256', value: 1 },
+                { type: 'uint256', value: 2 }
+            ]
+
+            transaction = await tronWeb.transactionBuilder.triggerConstantContract(contractAddress, functionSelector, {},
+                parameter, issuerAddress);
+            assert.isTrue(transaction.result.result &&
+                transaction.transaction.raw_data.contract[0].parameter.type_url === 'type.googleapis.com/protocol.TriggerSmartContract');
+            assert.equal(transaction.constant_result, '0000000000000000000000000000000000000000000000000000000000000004');
+            transaction = await broadcaster(null, accounts.pks[6], transaction.transaction);
+            assert.isTrue(transaction.receipt.result)
+        });
+    });
+
+    describe("#clearabi", async function () {
+
+        let transaction;
+        let contract;
+        before(async function() {
+            this.timeout(10000);
+
+            transaction = await tronWeb.transactionBuilder.createSmartContract({
+                abi: testConstantContract.abi,
+                bytecode: testConstantContract.bytecode
+            }, accounts.hex[7]);
+            await broadcaster(null, accounts.pks[7], transaction);
+            while (true) {
+                const tx = await tronWeb.trx.getTransactionInfo(transaction.txID);
+                if (Object.keys(tx).length === 0) {
+                    await wait(3);
+                    continue;
+                } else {
+                    break;
+                }
+            }
+        })
+
+        it('should clear contract abi', async function () {
+            this.timeout(10000);
+
+            const contractAddress = transaction.contract_address;
+            const ownerAddress = accounts.hex[7];
+
+            // verify contract abi before
+            contract = await tronWeb.trx.getContract(contractAddress);
+            assert.isTrue(Object.keys(contract.abi).length > 0)
+
+            // clear contract cache
+            tronWeb.trx.cache.contracts = {}
+
+            // clear abi
+            transaction = await tronWeb.transactionBuilder.clearABI(contractAddress, ownerAddress);
+            assert.isTrue(!transaction.visible &&
+                transaction.raw_data.contract[0].parameter.type_url === 'type.googleapis.com/protocol.ClearABIContract');
+            transaction = await broadcaster(null, accounts.pks[7], transaction);
+            assert.isTrue(transaction.receipt.result);
+
+            // verify contract abi after
+            while (true) {
+                contract = await tronWeb.trx.getContract(contractAddress);
+                if (Object.keys(contract.abi).length > 0) {
+                    await wait(3);
+                    continue;
+                } else {
+                    break;
+                }
+            }
+            assert.isTrue(Object.keys(contract.abi).length === 0);
+        });
+    });
 
     describe("#withdrawBlockRewards", async function () {
     });
