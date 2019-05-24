@@ -593,6 +593,11 @@ export default class TransactionBuilder {
         return this._triggerSmartContract(...params);
     }
 
+    triggerConstantContract(...params) {
+        params[2]._isConstant = true
+        return this.triggerSmartContract(...params);
+    }
+
     _triggerSmartContract(
         contractAddress,
         functionSelector,
@@ -724,130 +729,19 @@ export default class TransactionBuilder {
             owner_address: toHex(issuerAddress),
             function_selector: functionSelector,
             fee_limit: parseInt(feeLimit),
-            call_value: parseInt(callValue),
             parameter: parameters
         };
+
+        if (!options._isConstant) {
+            args.call_value = parseInt(callValue)
+        }
 
         if (utils.isNotNullOrUndefined(tokenValue))
             args.call_token_value = parseInt(tokenValue)
         if (utils.isNotNullOrUndefined(tokenId))
             args.token_id = parseInt(tokenId)
 
-        this.tronWeb.fullNode.request('wallet/triggersmartcontract', args, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
-    }
-
-    triggerConstantContract(...params) {
-        if (typeof params[2] !== 'object') {
-            params[2] = {
-                feeLimit: params[2]
-            }
-            params.splice(3, 1)
-        }
-        return this._triggerConstantContract(...params);
-    }
-
-    _triggerConstantContract(
-        contractAddress,
-        functionSelector,
-        options = {},
-        parameters = [],
-        issuerAddress = this.tronWeb.defaultAddress.hex,
-        callback = false
-    ) {
-
-        if (utils.isFunction(issuerAddress)) {
-            callback = issuerAddress;
-            issuerAddress = this.tronWeb.defaultAddress.hex;
-        }
-
-        if (utils.isFunction(parameters)) {
-            callback = parameters;
-            parameters = [];
-        }
-
-        if (!callback) {
-            return this.injectPromise(
-                this._triggerConstantContract,
-                contractAddress,
-                functionSelector,
-                options,
-                parameters,
-                issuerAddress
-            );
-        }
-
-        let {
-            feeLimit
-        } = Object.assign({
-            feeLimit: 1_000_000_000
-        }, options)
-
-        if (this.validator.notValid([
-            {
-                name: 'feeLimit',
-                type: 'integer',
-                value: feeLimit,
-                gt: 0,
-                lte: 1_000_000_000
-            },
-            {
-                name: 'parameters',
-                type: 'array',
-                value: parameters
-            },
-            {
-                name: 'contract',
-                type: 'address',
-                value: contractAddress
-            },
-            {
-                name: 'issuer',
-                type: 'address',
-                value: issuerAddress
-            },
-            {
-                name: 'function selector',
-                type: 'not-empty-string',
-                value: functionSelector
-            }
-        ], callback))
-            return;
-
-        functionSelector = functionSelector.replace('/\s*/g', '');
-
-        if (parameters.length) {
-            const abiCoder = new AbiCoder();
-            let types = [];
-            const values = [];
-
-            for (let i = 0; i < parameters.length; i++) {
-                let {type, value} = parameters[i];
-
-                if (!type || !utils.isString(type) || !type.length)
-                    return callback('Invalid parameter type provided: ' + type);
-
-                if (type == 'address')
-                    value = toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
-
-                types.push(type);
-                values.push(value);
-            }
-            try {
-                parameters = abiCoder.encode(types, values).replace(/^(0x)/, '');
-            } catch (ex) {
-                return callback(ex);
-            }
-        } else parameters = '';
-
-        const args = {
-            contract_address: toHex(contractAddress),
-            owner_address: toHex(issuerAddress),
-            function_selector: functionSelector,
-            fee_limit: parseInt(feeLimit),
-            parameter: parameters
-        };
-
-        this.tronWeb.fullNode.request('wallet/triggerconstantcontract', args, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
+        this.tronWeb.fullNode.request(`wallet/trigger${options._isConstant ? 'constant' : 'smart'}contract`, args, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     clearABI(contractAddress, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
