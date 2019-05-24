@@ -16,7 +16,7 @@
     },
     "husky": {
         "hooks": {
-            "pre-push": "node ./scripts/pre-push.js"
+            "pre-commit": "node ./scripts/pre-commit.js"
         }
     },
     "dependencies": {
