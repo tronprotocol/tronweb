@@ -1,9 +1,9 @@
 const {execSync, spawn} = require('child_process')
 const path = require('path')
 const fs = require('fs')
-const resultFile = path.resolve(__dirname, '../pre-push-result')
+const resultFile = path.resolve(__dirname, '../pre-commit-result')
 
-if (!process.env.SKIPPREPUSH) {
+if (!process.env.SKIPPRECOMMIT) {
 
     const chalk = require('chalk')
 
