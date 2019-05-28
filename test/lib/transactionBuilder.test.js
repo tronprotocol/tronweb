@@ -1072,7 +1072,7 @@ describe('TronWeb.transactionBuilder', function () {
         let transaction;
         let contract;
         before(async function() {
-            this.timeout(10000);
+            this.timeout(20000);
 
             transaction = await tronWeb.transactionBuilder.createSmartContract({
                 abi: testConstantContract.abi,
@@ -1099,9 +1099,6 @@ describe('TronWeb.transactionBuilder', function () {
             // verify contract abi before
             contract = await tronWeb.trx.getContract(contractAddress);
             assert.isTrue(Object.keys(contract.abi).length > 0)
-
-            // clear contract cache
-            tronWeb.trx.cache.contracts = {}
 
             // clear abi
             transaction = await tronWeb.transactionBuilder.clearABI(contractAddress, ownerAddress);

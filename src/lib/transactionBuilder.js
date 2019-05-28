@@ -757,6 +757,10 @@ export default class TransactionBuilder {
             contract_address: toHex(contractAddress),
             owner_address: toHex(ownerAddress)
         };
+
+        if (this.tronWeb.trx.cache.contracts[contractAddress]) {
+            delete this.tronWeb.trx.cache.contracts[contractAddress]
+        }
         this.tronWeb.fullNode.request('wallet/clearabi', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
 
     }
