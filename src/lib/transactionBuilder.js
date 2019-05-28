@@ -487,7 +487,7 @@ export default class TransactionBuilder {
             {
                 name: 'originEnergyLimit',
                 type: 'integer',
-                value: userFeePercentage,
+                value: originEnergyLimit,
                 gte: 0,
                 lte: 10_000_000
             },
