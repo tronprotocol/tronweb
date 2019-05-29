@@ -25,6 +25,11 @@ module.exports = async function (type, ...params) {
                     isFound = !!data.address;
                     break;
                 }
+                case 'accountById': {
+                    data = await tronWeb.trx.getUnconfirmedAccountById(params[0]);
+                    isFound = !!data.address;
+                    break;
+                }
                 case 'token': {
                     data = await tronWeb.trx.getTokensIssuedByAddress(params[0]);
                     isFound = !!Object.keys(data).length;

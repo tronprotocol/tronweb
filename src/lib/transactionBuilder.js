@@ -938,6 +938,49 @@ export default class TransactionBuilder {
         }, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
+    setAccountId(accountId, address = this.tronWeb.defaultAddress.hex, callback = false) {
+        if (utils.isFunction(address)) {
+            callback = address;
+            address = this.tronWeb.defaultAddress.hex;
+        }
+
+        if (!callback) {
+            return this.injectPromise(this.setAccountId, accountId, address);
+        }
+
+        if (accountId && utils.isString(accountId) && accountId.startsWith('0x')) {
+            accountId = accountId.slice(2);
+        }
+
+        if (this.validator.notValid([
+            {
+                name: 'accountId',
+                type: 'hex',
+                value: accountId
+            },
+            {
+                name: 'accountId',
+                type: 'string',
+                lte: 32,
+                gte: 8,
+                value: accountId
+            },
+            {
+                name: 'origin',
+                type: 'address',
+                value: address
+            }
+        ], callback))
+            return;
+
+
+
+        this.tronWeb.fullNode.request('wallet/setaccountid', {
+            account_id: accountId,
+            owner_address: toHex(address),
+        }, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
+    }
+
     updateToken(options = {}, issuerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
         if (utils.isFunction(issuerAddress)) {
             callback = issuerAddress;

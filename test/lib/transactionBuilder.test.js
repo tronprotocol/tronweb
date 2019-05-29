@@ -455,6 +455,48 @@ describe('TronWeb.transactionBuilder', function () {
 
     });
 
+    describe.only('#setAccountId()', function () {
+
+        it(`should set account id accounts[4]`, async function () {
+
+            const ids = ['abcabc110', 'testtest', 'jackieshen110'];
+
+            for (let id of ids) {
+                let accountId = TronWeb.toHex(id);
+                const transaction = await tronWeb.transactionBuilder.setAccountId(accountId, accounts.b58[4]);
+                const parameter = txPars(transaction);
+                assert.equal(transaction.txID.length, 64);
+                assert.equal(parameter.value.account_id, accountId.slice(2));
+                assert.equal(parameter.value.owner_address, accounts.hex[4]);
+                assert.equal(parameter.type_url, 'type.googleapis.com/protocol.SetAccountIdContract');
+            }
+
+        });
+
+        it('should throw invalid account id error', async function () {
+
+            // account id length should be between 8 and 32
+            const ids = ['', '12', '616161616262626231313131313131313131313131313131313131313131313131313131313131']
+            for (let id of ids) {
+                await assertThrow(
+                    tronWeb.transactionBuilder.setAccountId(id, accounts.b58[4]),
+                    'Invalid accountId provided'
+                );
+            }
+
+        });
+
+        it('should throw invalid owner address error', async function () {
+
+            await assertThrow(
+                tronWeb.transactionBuilder.setAccountId(TronWeb.toHex('testtest001'), '0xzzzww'),
+                'Invalid origin address provided'
+            );
+
+        });
+
+    });
+
     describe('#updateToken()', function () {
 
         let tokenOptions

@@ -2,6 +2,7 @@ import TronWeb from 'index';
 import utils from 'utils';
 import {keccak256, toUtf8Bytes, recoverAddress, SigningKey} from 'utils/ethersUtils';
 import {ADDRESS_PREFIX} from 'utils/address';
+import Validator from "../paramValidator";
 
 const TRX_MESSAGE_HEADER = '\x19TRON Signed Message:\n32';
 const ETH_MESSAGE_HEADER = '\x19Ethereum Signed Message:\n32';
@@ -16,6 +17,7 @@ export default class Trx {
         this.cache = {
             contracts: {}
         }
+        this.validator = new Validator(tronWeb);
     }
 
     _parseToken(token) {
@@ -305,6 +307,41 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
+    getAccountById(id = false, callback = false) {
+        if (!callback)
+            return this.injectPromise(this.getAccountById, id);
+
+        this.getAccountInfoById(id, {confirmed: true}, callback);
+    }
+
+    getAccountInfoById(id, options, callback) {
+        if (this.validator.notValid([
+            {
+                name: 'accountId',
+                type: 'hex',
+                value: id
+            },
+            {
+                name: 'accountId',
+                type: 'string',
+                lte: 32,
+                gte: 8,
+                value: id
+            }
+        ], callback))
+            return;
+
+        if (id.startsWith('0x')) {
+            id = id.slice(2);
+        }
+
+        this.tronWeb.fullNode.request(`wallet${options.confirmed ? 'solidity' : ''}/getaccountbyid`, {
+            account_id: id
+        }, 'post').then(account => {
+            callback(null, account);
+        }).catch(err => callback(err));
+    }
+
     getBalance(address = this.tronWeb.defaultAddress.hex, callback = false) {
         if (utils.isFunction(address)) {
             callback = address;
@@ -338,6 +375,13 @@ export default class Trx {
         }, 'post').then(account => {
             callback(null, account);
         }).catch(err => callback(err));
+    }
+
+    getUnconfirmedAccountById(id, callback = false) {
+        if (!callback)
+            return this.injectPromise(this.getUnconfirmedAccountById, id);
+
+        this.getAccountInfoById(id, {confirmed: false}, callback);
     }
 
     getUnconfirmedBalance(address = this.tronWeb.defaultAddress.hex, callback = false) {

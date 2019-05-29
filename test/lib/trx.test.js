@@ -69,6 +69,45 @@ describe('TronWeb.trx', function () {
         });
 
 
+        describe.only("#getConfirmedAccountById", async function () {
+
+            const idx = 11;
+            let accountId;
+
+            before(async function(){
+                this.timeout(10000);
+                accountId = TronWeb.toHex(`testtest${Math.ceil(Math.random()*100)}`);
+                const transaction = await tronWeb.transactionBuilder.setAccountId(accountId, accounts.hex[idx]);
+                await broadcaster(null, accounts.pks[idx], transaction);
+            });
+
+            it('should get confirmed account by id', async function () {
+                this.timeout(20000);
+                while (true) {
+                    const account = await tronWeb.trx.getAccountById(accountId);
+                    if (Object.keys(account).length === 0) {
+                        await wait(3);
+                        continue;
+                    } else {
+                        assert.equal(account.account_id, accountId.slice(2));
+                        break;
+                    }
+                }
+            });
+
+            it('should throw accountId is not valid error', async function () {
+                const ids = ['', '12', '616161616262626231313131313131313131313131313131313131313131313131313131313131'];
+                for (let id of ids) {
+                    await assertThrow(
+                        tronWeb.trx.getAccountById(id),
+                        'Invalid accountId provided'
+                    );
+                }
+            });
+
+        });
+
+
         describe("#getAccountResources", async function () {
 
             const idx = 10;
@@ -150,6 +189,39 @@ describe('TronWeb.trx', function () {
                     tronWeb.trx.getUnconfirmedAccount('notAnAddress'),
                     'Invalid address provided'
                 );
+            });
+
+        });
+
+
+        describe.only("#geUnconfirmedAccountById", async function () {
+
+            const idx = 10;
+
+            let accountId;
+
+            before(async function(){
+                this.timeout(10000);
+                accountId = TronWeb.toHex(`testtest${Math.ceil(Math.random()*100)}`);
+                const transaction = await tronWeb.transactionBuilder.setAccountId(accountId, accounts.hex[idx]);
+                await broadcaster(null, accounts.pks[idx], transaction);
+                await waitChainData('accountById', accountId);
+            });
+
+            it('should get unconfirmed account by id', async function () {
+
+                const account = await tronWeb.trx.getUnconfirmedAccountById(accountId);
+                assert.equal(account.account_id, accountId.slice(2));
+            });
+
+            it('should throw accountId is not valid error', async function () {
+                const ids = ['', '12', '616161616262626231313131313131313131313131313131313131313131313131313131313131'];
+                for (let id of ids) {
+                    await assertThrow(
+                        tronWeb.trx.getUnconfirmedAccountById(id),
+                        'Invalid accountId provided'
+                    );
+                }
             });
 
         });
