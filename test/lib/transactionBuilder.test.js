@@ -455,7 +455,7 @@ describe('TronWeb.transactionBuilder', function () {
 
     });
 
-    describe.only('#setAccountId()', function () {
+    describe('#setAccountId()', function () {
 
         it(`should set account id accounts[4]`, async function () {
 

@@ -69,7 +69,7 @@ describe('TronWeb.trx', function () {
         });
 
 
-        describe.only("#getConfirmedAccountById", async function () {
+        describe("#getAccountById", async function () {
 
             const idx = 11;
             let accountId;
@@ -194,7 +194,7 @@ describe('TronWeb.trx', function () {
         });
 
 
-        describe.only("#geUnconfirmedAccountById", async function () {
+        describe("#geUnconfirmedAccountById", async function () {
 
             const idx = 10;
 
