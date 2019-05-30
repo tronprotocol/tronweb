@@ -12,6 +12,8 @@ import Event from 'lib/event';
 import {keccak256} from 'utils/ethersUtils';
 import {ADDRESS_PREFIX} from 'utils/address';
 
+const DEFAULT_VERSION = '3.5';
+
 export default class TronWeb extends EventEmitter {
     static providers = providers;
     static BigNumber = BigNumber;
@@ -79,7 +81,17 @@ export default class TronWeb extends EventEmitter {
         if (privateKey)
             this.setPrivateKey(privateKey);
 
+        this.fullnodeVersion = DEFAULT_VERSION;
         this.injectPromise = utils.promiseInjector(this);
+    }
+
+    async getFullnodeVersion() {
+        try {
+            const nodeInfo = await this.trx.getNodeInfo()
+            this.fullnodeVersion = nodeInfo.configNodeInfo.codeVersion
+        } catch (err) {
+            this.fullnodeVersion = DEFAULT_VERSION;
+        }
     }
 
     setDefaultBlock(blockID = false) {
@@ -137,6 +149,8 @@ export default class TronWeb extends EventEmitter {
 
         this.fullNode = fullNode;
         this.fullNode.setStatusPage('wallet/getnowblock');
+
+        this.getFullnodeVersion();
     }
 
     setSolidityNode(solidityNode) {
