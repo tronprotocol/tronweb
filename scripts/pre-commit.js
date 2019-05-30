@@ -19,6 +19,7 @@ if (!process.env.SKIPPRECOMMIT) {
 
     let errors = false
 
+
     const build = spawn('yarn', ['build'])
 
     build.stdout.on('data', function (data) {
