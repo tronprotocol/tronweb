@@ -38,7 +38,9 @@ export default class Validator {
                 se,
                 optional
             } = param;
-            if (optional && !utils.isNotNullOrUndefined(value))
+            if (optional && (
+                !utils.isNotNullOrUndefined(value)
+                || (type !== 'boolean' && value === false)))
                 continue;
             normalized[param.name] = param.value;
             switch (type) {
