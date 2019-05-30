@@ -81,13 +81,14 @@ export default class TronWeb extends EventEmitter {
 
         this.fullnodeVersion = '3.5.x';
         this.injectPromise = utils.promiseInjector(this);
-
-        this.getFullnodeVersion();
     }
 
     async getFullnodeVersion() {
-        const nodeInfo = await this.trx.getNodeInfo()
-        this.fullnodeVersion = nodeInfo.configNodeInfo.codeVersion
+        try {
+            const nodeInfo = await this.trx.getNodeInfo()
+            this.fullnodeVersion = nodeInfo.configNodeInfo.codeVersion
+        } catch (err) {
+        }
     }
 
     setDefaultBlock(blockID = false) {
@@ -145,6 +146,8 @@ export default class TronWeb extends EventEmitter {
 
         this.fullNode = fullNode;
         this.fullNode.setStatusPage('wallet/getnowblock');
+
+        this.getFullnodeVersion();
     }
 
     setSolidityNode(solidityNode) {
