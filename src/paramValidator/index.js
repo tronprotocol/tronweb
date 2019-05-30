@@ -123,7 +123,7 @@ export default class Validator {
                     }
                     break;
                 case 'string':
-                    if (!utils.isString(value) || !value.length ||
+                    if (!utils.isString(value) ||
                         (typeof gt === 'number' && value.length <= param.gt) ||
                         (typeof lt === 'number' && value.length >= param.lt) ||
                         (typeof gte === 'number' && value.length < param.gte) ||

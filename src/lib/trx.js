@@ -335,7 +335,7 @@ export default class Trx {
             id = id.slice(2);
         }
 
-        this.tronWeb.fullNode.request(`wallet${options.confirmed ? 'solidity' : ''}/getaccountbyid`, {
+        this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(`wallet${options.confirmed ? 'solidity' : ''}/getaccountbyid`, {
             account_id: id
         }, 'post').then(account => {
             callback(null, account);
@@ -727,43 +727,48 @@ export default class Trx {
             permissionId = 0;
         }
 
-
         if (!callback)
             return this.injectPromise(this.multiSign, transaction, privateKey, permissionId);
 
         if (!utils.isObject(transaction) || !transaction.raw_data || !transaction.raw_data.contract)
             return callback('Invalid transaction provided');
 
-        // set permission id
-        transaction.raw_data.contract[0].Permission_id = permissionId;
-
-        // check if private key insides permission list
-        const address = this.tronWeb.address.toHex(this.tronWeb.address.fromPrivateKey(privateKey)).toLowerCase();
-        const signWeight = await this.getSignWeight(transaction, permissionId);
-
-        if (signWeight.result.code === 'PERMISSION_ERROR') {
-            return callback(signWeight.result.message);
-        }
-
-        let foundKey = false;
-        signWeight.permission.keys.map(key => {
-            if (key.address === address)
-                foundKey = true;
-        });
-
-        if (!foundKey)
-            return callback(privateKey + ' has no permission to sign');
-
-        if (signWeight.approved_list && signWeight.approved_list.indexOf(address) != -1) {
-            return callback(privateKey + ' already sign transaction');
-        }
-
-        // reset transaction
-        if (signWeight.transaction && signWeight.transaction.transaction) {
-            transaction = signWeight.transaction.transaction;
+        // If owner permission or permission id exists in transaction, do sign directly
+        // If no permission id inside transaction or user passes permission id, use old way to reset permission id
+        if (!transaction.raw_data.contract[0].Permission_id && permissionId > 0) {
+            // set permission id
             transaction.raw_data.contract[0].Permission_id = permissionId;
-        } else {
-            return callback('Invalid transaction provided');
+
+            // check if private key insides permission list
+            const address = this.tronWeb.address.toHex(this.tronWeb.address.fromPrivateKey(privateKey)).toLowerCase();
+            const signWeight = await this.getSignWeight(transaction, permissionId);
+
+            if (signWeight.result.code === 'PERMISSION_ERROR') {
+                return callback(signWeight.result.message);
+            }
+
+            let foundKey = false;
+            signWeight.permission.keys.map(key => {
+                if (key.address === address)
+                    foundKey = true;
+            });
+
+            if (!foundKey)
+                return callback(privateKey + ' has no permission to sign');
+
+            if (signWeight.approved_list && signWeight.approved_list.indexOf(address) != -1) {
+                return callback(privateKey + ' already sign transaction');
+            }
+
+            // reset transaction
+            if (signWeight.transaction && signWeight.transaction.transaction) {
+                transaction = signWeight.transaction.transaction;
+                if (permissionId > 0) {
+                    transaction.raw_data.contract[0].Permission_id = permissionId;
+                }
+            } else {
+                return callback('Invalid transaction provided');
+            }
         }
 
         // sign
@@ -802,6 +807,7 @@ export default class Trx {
 
         if (!utils.isObject(transaction) || !transaction.raw_data || !transaction.raw_data.contract)
             return callback('Invalid transaction provided');
+
 
         if (utils.isInteger(permissionId)) {
             transaction.raw_data.contract[0].Permission_id = parseInt(permissionId);
