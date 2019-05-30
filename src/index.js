@@ -79,7 +79,15 @@ export default class TronWeb extends EventEmitter {
         if (privateKey)
             this.setPrivateKey(privateKey);
 
+        this.fullnodeVersion = '3.5.x';
         this.injectPromise = utils.promiseInjector(this);
+
+        this.getFullnodeVersion();
+    }
+
+    async getFullnodeVersion() {
+        const nodeInfo = await this.trx.getNodeInfo()
+        this.fullnodeVersion = nodeInfo.configNodeInfo.codeVersion
     }
 
     setDefaultBlock(blockID = false) {

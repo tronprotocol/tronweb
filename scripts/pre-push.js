@@ -15,7 +15,6 @@ if (!process.env.SKIPPREPUSH) {
 
     let errors = false
 
-
     const build = spawn('yarn', ['build'])
 
     build.stdout.on('data', function (data) {
