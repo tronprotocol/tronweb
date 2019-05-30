@@ -1,6 +1,6 @@
 {
     "name": "tronweb",
-    "version": "2.5.5",
+    "version": "2.5.6",
     "description": "JavaScript SDK that encapsulates the TRON Node HTTP API",
     "main": "dist/TronWeb.node.js",
     "scripts": {
@@ -16,7 +16,7 @@
     },
     "husky": {
         "hooks": {
-            "pre-push": "node ./scripts/pre-push.js"
+            "pre-commit": "node ./scripts/pre-commit.js"
         }
     },
     "dependencies": {

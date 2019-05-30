@@ -1,6 +1,10 @@
-if (!process.env.SKIPPREPUSH) {
+const {execSync, spawn} = require('child_process')
+const path = require('path')
+const fs = require('fs')
+const resultFile = path.resolve(__dirname, '../pre-commit-result')
 
-    const {execSync, spawn} = require('child_process')
+if (!process.env.SKIPPRECOMMIT) {
+
     const chalk = require('chalk')
 
     const branch = execSync('git name-rev --name-only HEAD').toString().split('\n')[0];
@@ -42,8 +46,17 @@ if (!process.env.SKIPPREPUSH) {
                 console.log(chalk.red('Tests have failed. Please verify tests are passing before pushing'));
                 process.exit(1);
             }
+            if (fs.existsSync(resultFile)) {
+                fs.unlinkSync(resultFile)
+            }
+            execSync('git add -A')
+            process.exit(0);
         })
     })
 
+} else {
+    console.log('echo "Test skipped before git commit" >> ' + resultFile)
+    fs.writeFileSync(resultFile, 'Test skipped before git commit.')
+    execSync('git add -A')
+    process.exit(0);
 }
-
