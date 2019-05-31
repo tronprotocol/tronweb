@@ -40,14 +40,22 @@ export default class TransactionBuilder {
         this.validator = new Validator(tronWeb);
     }
 
-    sendTrx(to = false, amount = 0, from = this.tronWeb.defaultAddress.hex, callback = false) {
+    sendTrx(to = false, amount = 0, from = this.tronWeb.defaultAddress.hex, options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (utils.isFunction(from)) {
             callback = from;
             from = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(from)) {
+            options = from;
+            from  = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
-            return this.injectPromise(this.sendTrx, to, amount, from);
+            return this.injectPromise(this.sendTrx, to, amount, from, options);
 
         // accept amounts passed as strings
         amount = parseInt(amount)
@@ -77,21 +85,35 @@ export default class TransactionBuilder {
         ], callback))
             return;
 
-        this.tronWeb.fullNode.request('wallet/createtransaction', {
+        const data = {
             to_address: toHex(to),
             owner_address: toHex(from),
-            amount: amount
-        }, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
+            amount: amount,
+        };
+
+        if (options && options.permissionId) {
+            data.Permission_id = options.permissionId;
+        }
+
+        this.tronWeb.fullNode.request('wallet/createtransaction', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
-    sendToken(to = false, amount = 0, tokenID = false, from = this.tronWeb.defaultAddress.hex, callback = false) {
+    sendToken(to = false, amount = 0, tokenID = false, from = this.tronWeb.defaultAddress.hex, options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (utils.isFunction(from)) {
             callback = from;
             from = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(from)) {
+            options = from;
+            from  = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
-            return this.injectPromise(this.sendToken, to, amount, tokenID, from);
+            return this.injectPromise(this.sendToken, to, amount, tokenID, from, options);
 
         amount = parseInt(amount)
         if (this.validator.notValid([
@@ -124,22 +146,36 @@ export default class TransactionBuilder {
         ], callback))
             return;
 
-        this.tronWeb.fullNode.request('wallet/transferasset', {
+        const data = {
             to_address: toHex(to),
             owner_address: toHex(from),
             asset_name: fromUtf8(tokenID),
             amount: parseInt(amount)
-        }, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
+        };
+
+        if (options && options.permissionId) {
+            data.Permission_id = options.permissionId;
+        }
+
+        this.tronWeb.fullNode.request('wallet/transferasset', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
-    purchaseToken(issuerAddress = false, tokenID = false, amount = 0, buyer = this.tronWeb.defaultAddress.hex, callback = false) {
+    purchaseToken(issuerAddress = false, tokenID = false, amount = 0, buyer = this.tronWeb.defaultAddress.hex, options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (utils.isFunction(buyer)) {
             callback = buyer;
             buyer = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(buyer)) {
+            options = buyer;
+            buyer  = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
-            return this.injectPromise(this.purchaseToken, issuerAddress, tokenID, amount, buyer);
+            return this.injectPromise(this.purchaseToken, issuerAddress, tokenID, amount, buyer, options);
 
         if (this.validator.notValid([
             {
@@ -171,23 +207,40 @@ export default class TransactionBuilder {
         ], callback))
             return;
 
-        this.tronWeb.fullNode.request('wallet/participateassetissue', {
+        const data = {
             to_address: toHex(issuerAddress),
             owner_address: toHex(buyer),
             asset_name: fromUtf8(tokenID),
             amount: parseInt(amount)
-        }, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
+        };
+
+        if (options && options.permissionId) {
+            data.Permission_id = options.permissionId;
+        }
+
+        this.tronWeb.fullNode.request('wallet/participateassetissue', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
-    freezeBalance(amount = 0, duration = 3, resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, receiverAddress = undefined, callback = false) {
+    freezeBalance(amount = 0, duration = 3, resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, receiverAddress = undefined, options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (utils.isFunction(receiverAddress)) {
             callback = receiverAddress;
             receiverAddress = undefined;
+        } else if (utils.isObject(receiverAddress)) {
+            options = receiverAddress;
+            receiverAddress  = undefined;
         }
 
         if (utils.isFunction(address)) {
             callback = address;
             address = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(address)) {
+            options = address;
+            address  = this.tronWeb.defaultAddress.hex;
         }
 
         if (utils.isFunction(duration)) {
@@ -201,7 +254,7 @@ export default class TransactionBuilder {
         }
 
         if (!callback)
-            return this.injectPromise(this.freezeBalance, amount, duration, resource, address, receiverAddress);
+            return this.injectPromise(this.freezeBalance, amount, duration, resource, address, receiverAddress, options);
 
         if (this.validator.notValid([
             {
@@ -247,18 +300,33 @@ export default class TransactionBuilder {
             data.receiver_address = toHex(receiverAddress)
         }
 
+        if (options && options.permissionId) {
+            data.Permission_id = options.permissionId;
+        }
+
         this.tronWeb.fullNode.request('wallet/freezebalance', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
-    unfreezeBalance(resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, receiverAddress = undefined, callback = false) {
+    unfreezeBalance(resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, receiverAddress = undefined, options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (utils.isFunction(receiverAddress)) {
             callback = receiverAddress;
             receiverAddress = undefined;
+        } else if (utils.isObject(receiverAddress)) {
+            options = receiverAddress;
+            receiverAddress  = undefined;
         }
 
         if (utils.isFunction(address)) {
             callback = address;
             address = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(address)) {
+            options = address;
+            address  = this.tronWeb.defaultAddress.hex;
         }
 
         if (utils.isFunction(resource)) {
@@ -267,7 +335,7 @@ export default class TransactionBuilder {
         }
 
         if (!callback)
-            return this.injectPromise(this.unfreezeBalance, resource, address, receiverAddress);
+            return this.injectPromise(this.unfreezeBalance, resource, address, receiverAddress, options);
 
         if (this.validator.notValid([
             {
@@ -299,17 +367,29 @@ export default class TransactionBuilder {
             data.receiver_address = toHex(receiverAddress)
         }
 
+        if (options && options.permissionId) {
+            data.Permission_id = options.permissionId;
+        }
+
         this.tronWeb.fullNode.request('wallet/unfreezebalance', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
-    withdrawBlockRewards(address = this.tronWeb.defaultAddress.hex, callback = false) {
+    withdrawBlockRewards(address = this.tronWeb.defaultAddress.hex, options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (utils.isFunction(address)) {
             callback = address;
             address = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(address)) {
+            options = address;
+            address  = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
-            return this.injectPromise(this.withdrawBlockRewards, address);
+            return this.injectPromise(this.withdrawBlockRewards, address, options);
 
         if (this.validator.notValid([
             {
@@ -320,20 +400,37 @@ export default class TransactionBuilder {
         ], callback))
             return;
 
-        this.tronWeb.fullNode.request('wallet/withdrawbalance', {
+        const data = {
             owner_address: toHex(address)
-        }, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
+        };
+
+        if (options && options.permissionId) {
+            data.Permission_id = options.permissionId;
+        }
+
+        this.tronWeb.fullNode.request('wallet/withdrawbalance', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
-    applyForSR(address = this.tronWeb.defaultAddress.hex, url = false, callback = false) {
+    applyForSR(address = this.tronWeb.defaultAddress.hex, url = false, options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (utils.isValidURL(address)) {
             callback = url || false;
             url = address;
             address = this.tronWeb.defaultAddress.hex;
         }
 
+        if (utils.isObject(url)) {
+            address = this.tronWeb.defaultAddress.hex;
+            url = address;
+            options = url;
+        }
+
         if (!callback)
-            return this.injectPromise(this.applyForSR, address, url);
+            return this.injectPromise(this.applyForSR, address, url, options);
 
         if (this.validator.notValid([
             {
@@ -350,20 +447,34 @@ export default class TransactionBuilder {
         ], callback))
             return;
 
-        this.tronWeb.fullNode.request('wallet/createwitness', {
+        const data = {
             owner_address: toHex(address),
             url: fromUtf8(url)
-        }, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
+        };
+
+        if (options && options.permissionId) {
+            data.Permission_id = options.permissionId;
+        }
+
+        this.tronWeb.fullNode.request('wallet/createwitness', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
-    vote(votes = {}, voterAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+    vote(votes = {}, voterAddress = this.tronWeb.defaultAddress.hex, options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (utils.isFunction(voterAddress)) {
             callback = voterAddress;
             voterAddress = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(voterAddress)) {
+            options = voterAddress;
+            voterAddress  = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
-            return this.injectPromise(this.vote, votes, voterAddress);
+            return this.injectPromise(this.vote, votes, voterAddress, options);
 
         if (this.validator.notValid([
             {
@@ -410,10 +521,16 @@ export default class TransactionBuilder {
         if (invalid)
             return;
 
-        this.tronWeb.fullNode.request('wallet/votewitnessaccount', {
+        const data = {
             owner_address: toHex(voterAddress),
-            votes
-        }, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
+            votes,
+        };
+
+        if (options && options.permissionId) {
+            data.Permission_id = options.permissionId;
+        }
+
+        this.tronWeb.fullNode.request('wallet/votewitnessaccount', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     createSmartContract(options = {}, issuerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
@@ -571,13 +688,15 @@ export default class TransactionBuilder {
             bytecode,
             parameter: parameters,
             name
-        }
+        };
 
         // tokenValue and tokenId can cause errors if provided when the trx10 proposal has not been approved yet. So we set them only if they are passed to the method.
         if (utils.isNotNullOrUndefined(tokenValue))
             args.call_token_value = parseInt(tokenValue)
         if (utils.isNotNullOrUndefined(tokenId))
             args.token_id = parseInt(tokenId)
+        if (options && options.permissionId)
+            args.Permission_id = options.permissionId;
 
         this.tronWeb.fullNode.request('wallet/deploycontract', args, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
@@ -591,6 +710,11 @@ export default class TransactionBuilder {
             params.splice(3, 1)
         }
         return this._triggerSmartContract(...params);
+    }
+
+    triggerConstantContract(...params) {
+        params[2]._isConstant = true
+        return this.triggerSmartContract(...params);
     }
 
     _triggerSmartContract(
@@ -627,7 +751,7 @@ export default class TransactionBuilder {
             tokenValue,
             tokenId,
             callValue,
-            feeLimit
+            feeLimit,
         } = Object.assign({
             callValue: 0,
             feeLimit: 1_000_000_000
@@ -724,19 +848,46 @@ export default class TransactionBuilder {
             contract_address: toHex(contractAddress),
             owner_address: toHex(issuerAddress),
             function_selector: functionSelector,
-            fee_limit: parseInt(feeLimit),
-            call_value: parseInt(callValue),
             parameter: parameters
         };
 
-        if (utils.isNotNullOrUndefined(tokenValue))
-            args.call_token_value = parseInt(tokenValue)
-        if (utils.isNotNullOrUndefined(tokenId))
-            args.token_id = parseInt(tokenId)
+        if (!options._isConstant) {
+            args.call_value = parseInt(callValue)
+            args.fee_limit = parseInt(feeLimit)
+            if (utils.isNotNullOrUndefined(tokenValue))
+                args.call_token_value = parseInt(tokenValue)
+            if (utils.isNotNullOrUndefined(tokenId))
+                args.token_id = parseInt(tokenId)
+        }
 
-        this.tronWeb.fullNode.request('wallet/triggersmartcontract', args, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
+        if (options.permissionId) {
+            args.Permission_id = options.permissionId;
+        }
+
+        this.tronWeb.fullNode.request(`wallet/trigger${options._isConstant ? 'constant' : 'smart'}contract`, args, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
+    clearABI(contractAddress, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+        if (!callback)
+            return this.injectPromise(this.clearABI, contractAddress, ownerAddress);
+
+        if (!this.tronWeb.isAddress(contractAddress))
+            return callback('Invalid contract address provided');
+
+        if (!this.tronWeb.isAddress(ownerAddress))
+            return callback('Invalid owner address provided');
+
+        const data = {
+            contract_address: toHex(contractAddress),
+            owner_address: toHex(ownerAddress)
+        };
+
+        if (this.tronWeb.trx.cache.contracts[contractAddress]) {
+            delete this.tronWeb.trx.cache.contracts[contractAddress]
+        }
+        this.tronWeb.fullNode.request('wallet/clearabi', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
+
+    }
 
     createToken(options = {}, issuerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
         if (utils.isFunction(issuerAddress)) {
@@ -876,18 +1027,29 @@ export default class TransactionBuilder {
         if (voteScore && !isNaN(parseInt(voteScore))) {
             data.vote_score = parseInt(voteScore)
         }
+        if (options && options.permissionId) {
+            data.Permission_id = options.permissionId;
+        }
 
         this.tronWeb.fullNode.request('wallet/createassetissue', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
-    updateAccount(accountName = false, address = this.tronWeb.defaultAddress.hex, callback = false) {
+    updateAccount(accountName = false, address = this.tronWeb.defaultAddress.hex, options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (utils.isFunction(address)) {
             callback = address;
             address = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(address)) {
+            options = address;
+            address  = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback) {
-            return this.injectPromise(this.updateAccount, accountName, address);
+            return this.injectPromise(this.updateAccount, accountName, address, options);
         }
 
         if (this.validator.notValid([
@@ -904,9 +1066,57 @@ export default class TransactionBuilder {
         ], callback))
             return;
 
-
-        this.tronWeb.fullNode.request('wallet/updateaccount', {
+        const data = {
             account_name: fromUtf8(accountName),
+            owner_address: toHex(address),
+        };
+
+        if (options && options.permissionId) {
+            data.Permission_id = options.permissionId;
+        }
+
+        this.tronWeb.fullNode.request('wallet/updateaccount', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
+    }
+
+    setAccountId(accountId, address = this.tronWeb.defaultAddress.hex, callback = false) {
+        if (utils.isFunction(address)) {
+            callback = address;
+            address = this.tronWeb.defaultAddress.hex;
+        }
+
+        if (!callback) {
+            return this.injectPromise(this.setAccountId, accountId, address);
+        }
+
+        if (accountId && utils.isString(accountId) && accountId.startsWith('0x')) {
+            accountId = accountId.slice(2);
+        }
+
+        if (this.validator.notValid([
+            {
+                name: 'accountId',
+                type: 'hex',
+                value: accountId
+            },
+            {
+                name: 'accountId',
+                type: 'string',
+                lte: 32,
+                gte: 8,
+                value: accountId
+            },
+            {
+                name: 'origin',
+                type: 'address',
+                value: address
+            }
+        ], callback))
+            return;
+
+
+
+        this.tronWeb.fullNode.request('wallet/setaccountid', {
+            account_id: accountId,
             owner_address: toHex(address),
         }, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
@@ -915,6 +1125,9 @@ export default class TransactionBuilder {
         if (utils.isFunction(issuerAddress)) {
             callback = issuerAddress;
             issuerAddress = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(issuerAddress)) {
+            options = issuerAddress;
+            issuerAddress  = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
@@ -957,13 +1170,19 @@ export default class TransactionBuilder {
         ], callback))
             return;
 
-        this.tronWeb.fullNode.request('wallet/updateasset', {
+        const data = {
             owner_address: toHex(issuerAddress),
             description: fromUtf8(description),
             url: fromUtf8(url),
             new_limit: parseInt(freeBandwidth),
             new_public_limit: parseInt(freeBandwidthLimit)
-        }, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
+        };
+
+        if (options && options.permissionId) {
+            data.Permission_id = options.permissionId;
+        }
+
+        this.tronWeb.fullNode.request('wallet/updateasset', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     sendAsset(...args) {
@@ -986,14 +1205,22 @@ export default class TransactionBuilder {
      * Creates a proposal to modify the network.
      * Can only be created by a current Super Representative.
      */
-    createProposal(parameters = false, issuerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+    createProposal(parameters = false, issuerAddress = this.tronWeb.defaultAddress.hex, options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (utils.isFunction(issuerAddress)) {
             callback = issuerAddress;
             issuerAddress = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(issuerAddress)) {
+            options = issuerAddress;
+            issuerAddress  = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
-            return this.injectPromise(this.createProposal, parameters, issuerAddress);
+            return this.injectPromise(this.createProposal, parameters, issuerAddress, options);
 
         if (this.validator.notValid([
             {
@@ -1017,24 +1244,38 @@ export default class TransactionBuilder {
                 return callback(invalid);
         }
 
-        this.tronWeb.fullNode.request('wallet/proposalcreate', {
+        const data = {
             owner_address: toHex(issuerAddress),
             parameters: parameters
-        }, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
+        };
+
+        if (options && options.permissionId) {
+            data.Permission_id = options.permissionId;
+        }
+
+        this.tronWeb.fullNode.request('wallet/proposalcreate', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     /**
      * Deletes a network modification proposal that the owner issued.
      * Only current Super Representative can vote on a proposal.
      */
-    deleteProposal(proposalID = false, issuerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+    deleteProposal(proposalID = false, issuerAddress = this.tronWeb.defaultAddress.hex, options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (utils.isFunction(issuerAddress)) {
             callback = issuerAddress;
             issuerAddress = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(issuerAddress)) {
+            options = issuerAddress;
+            issuerAddress  = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
-            return this.injectPromise(this.deleteProposal, proposalID, issuerAddress);
+            return this.injectPromise(this.deleteProposal, proposalID, issuerAddress, options);
 
         if (this.validator.notValid([
             {
@@ -1051,24 +1292,38 @@ export default class TransactionBuilder {
         ], callback))
             return;
 
-        this.tronWeb.fullNode.request('wallet/proposaldelete', {
+        const data = {
             owner_address: toHex(issuerAddress),
             proposal_id: parseInt(proposalID)
-        }, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
+        };
+
+        if (options && options.permissionId) {
+            data.Permission_id = options.permissionId;
+        }
+
+        this.tronWeb.fullNode.request('wallet/proposaldelete', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     /**
      * Adds a vote to an issued network modification proposal.
      * Only current Super Representative can vote on a proposal.
      */
-    voteProposal(proposalID = false, isApproval = false, voterAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+    voteProposal(proposalID = false, isApproval = false, voterAddress = this.tronWeb.defaultAddress.hex, options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (utils.isFunction(voterAddress)) {
             callback = voterAddress;
             voterAddress = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(voterAddress)) {
+            options = voterAddress;
+            voterAddress  = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
-            return this.injectPromise(this.voteProposal, proposalID, isApproval, voterAddress);
+            return this.injectPromise(this.voteProposal, proposalID, isApproval, voterAddress, options);
 
         if (this.validator.notValid([
             {
@@ -1090,11 +1345,17 @@ export default class TransactionBuilder {
         ], callback))
             return;
 
-        this.tronWeb.fullNode.request('wallet/proposalapprove', {
+        const data = {
             owner_address: toHex(voterAddress),
             proposal_id: parseInt(proposalID),
             is_add_approval: isApproval
-        }, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
+        };
+
+        if (options && options.permissionId) {
+            data.Permission_id = options.permissionId;
+        }
+
+        this.tronWeb.fullNode.request('wallet/proposalapprove', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     /**
@@ -1102,14 +1363,22 @@ export default class TransactionBuilder {
      * Token Name should be a CASE SENSITIVE string.
      * PLEASE VERIFY THIS ON TRONSCAN.
      */
-    createTRXExchange(tokenName, tokenBalance, trxBalance, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+    createTRXExchange(tokenName, tokenBalance, trxBalance, ownerAddress = this.tronWeb.defaultAddress.hex, options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (utils.isFunction(ownerAddress)) {
             callback = ownerAddress;
             ownerAddress = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(ownerAddress)) {
+            options = ownerAddress;
+            ownerAddress  = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
-            return this.injectPromise(this.createTRXExchange, tokenName, tokenBalance, trxBalance, ownerAddress);
+            return this.injectPromise(this.createTRXExchange, tokenName, tokenBalance, trxBalance, ownerAddress, options);
 
         if (this.validator.notValid([
             {
@@ -1135,13 +1404,19 @@ export default class TransactionBuilder {
         ], callback))
             return;
 
-        this.tronWeb.fullNode.request('wallet/exchangecreate', {
+        const data = {
             owner_address: toHex(ownerAddress),
             first_token_id: fromUtf8(tokenName),
             first_token_balance: tokenBalance,
             second_token_id: '5f', // Constant for TRX.
             second_token_balance: trxBalance
-        }, 'post').then(resources => {
+        };
+
+        if (options && options.permissionId) {
+            data.Permission_id = options.permissionId;
+        }
+
+        this.tronWeb.fullNode.request('wallet/exchangecreate', data, 'post').then(resources => {
             callback(null, resources);
         }).catch(err => callback(err));
     }
@@ -1152,14 +1427,22 @@ export default class TransactionBuilder {
      * Token Names should be a CASE SENSITIVE string.
      * PLEASE VERIFY THIS ON TRONSCAN.
      */
-    createTokenExchange(firstTokenName, firstTokenBalance, secondTokenName, secondTokenBalance, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+    createTokenExchange(firstTokenName, firstTokenBalance, secondTokenName, secondTokenBalance, ownerAddress = this.tronWeb.defaultAddress.hex, options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (utils.isFunction(ownerAddress)) {
             callback = ownerAddress;
             ownerAddress = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(ownerAddress)) {
+            options = ownerAddress;
+            ownerAddress  = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
-            return this.injectPromise(this.createTokenExchange, firstTokenName, firstTokenBalance, secondTokenName, secondTokenBalance, ownerAddress);
+            return this.injectPromise(this.createTokenExchange, firstTokenName, firstTokenBalance, secondTokenName, secondTokenBalance, ownerAddress, options);
 
         if (this.validator.notValid([
             {
@@ -1190,13 +1473,19 @@ export default class TransactionBuilder {
         ], callback))
             return;
 
-        this.tronWeb.fullNode.request('wallet/exchangecreate', {
+        const data = {
             owner_address: toHex(ownerAddress),
             first_token_id: fromUtf8(firstTokenName),
             first_token_balance: firstTokenBalance,
             second_token_id: fromUtf8(secondTokenName),
             second_token_balance: secondTokenBalance
-        }, 'post').then(resources => {
+        };
+
+        if (options && options.permissionId) {
+            data.Permission_id = options.permissionId;
+        }
+
+        this.tronWeb.fullNode.request('wallet/exchangecreate', data, 'post').then(resources => {
             callback(null, resources);
         }).catch(err => callback(err));
     }
@@ -1206,14 +1495,22 @@ export default class TransactionBuilder {
      * Will add both tokens at market rate.
      * Use "_" for the constant value for TRX.
      */
-    injectExchangeTokens(exchangeID = false, tokenName = false, tokenAmount = 0, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+    injectExchangeTokens(exchangeID = false, tokenName = false, tokenAmount = 0, ownerAddress = this.tronWeb.defaultAddress.hex, options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (utils.isFunction(ownerAddress)) {
             callback = ownerAddress;
             ownerAddress = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(ownerAddress)) {
+            options = ownerAddress;
+            ownerAddress  = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
-            return this.injectPromise(this.injectExchangeTokens, exchangeID, tokenName, tokenAmount, ownerAddress);
+            return this.injectPromise(this.injectExchangeTokens, exchangeID, tokenName, tokenAmount, ownerAddress, options);
 
         if (this.validator.notValid([
             {
@@ -1241,12 +1538,18 @@ export default class TransactionBuilder {
         ], callback))
             return;
 
-        this.tronWeb.fullNode.request('wallet/exchangeinject', {
+        const data = {
             owner_address: toHex(ownerAddress),
             exchange_id: parseInt(exchangeID),
             token_id: fromUtf8(tokenName),
             quant: parseInt(tokenAmount)
-        }, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
+        };
+
+        if (options && options.permissionId) {
+            data.Permission_id = options.permissionId;
+        }
+
+        this.tronWeb.fullNode.request('wallet/exchangeinject', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     /**
@@ -1254,14 +1557,22 @@ export default class TransactionBuilder {
      * Will withdraw at market rate both tokens.
      * Use "_" for the constant value for TRX.
      */
-    withdrawExchangeTokens(exchangeID = false, tokenName = false, tokenAmount = 0, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+    withdrawExchangeTokens(exchangeID = false, tokenName = false, tokenAmount = 0, ownerAddress = this.tronWeb.defaultAddress.hex, options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (utils.isFunction(ownerAddress)) {
             callback = ownerAddress;
             ownerAddress = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(ownerAddress)) {
+            options = ownerAddress;
+            ownerAddress  = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
-            return this.injectPromise(this.withdrawExchangeTokens, exchangeID, tokenName, tokenAmount, ownerAddress);
+            return this.injectPromise(this.withdrawExchangeTokens, exchangeID, tokenName, tokenAmount, ownerAddress, options);
 
         if (this.validator.notValid([
             {
@@ -1289,12 +1600,18 @@ export default class TransactionBuilder {
         ], callback))
             return;
 
-        this.tronWeb.fullNode.request('wallet/exchangewithdraw', {
+        const data = {
             owner_address: toHex(ownerAddress),
             exchange_id: parseInt(exchangeID),
             token_id: fromUtf8(tokenName),
             quant: parseInt(tokenAmount)
-        }, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
+        };
+
+        if (options && options.permissionId) {
+            data.Permission_id = options.permissionId;
+        }
+
+        this.tronWeb.fullNode.request('wallet/exchangewithdraw', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     /**
@@ -1307,14 +1624,23 @@ export default class TransactionBuilder {
                         tokenAmountSold = 0,
                         tokenAmountExpected = 0,
                         ownerAddress = this.tronWeb.defaultAddress.hex,
+                        options,
                         callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (utils.isFunction(ownerAddress)) {
             callback = ownerAddress;
             ownerAddress = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(ownerAddress)) {
+            options = ownerAddress;
+            ownerAddress  = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
-            return this.injectPromise(this.tradeExchangeTokens, exchangeID, tokenName, tokenAmountSold, tokenAmountExpected, ownerAddress);
+            return this.injectPromise(this.tradeExchangeTokens, exchangeID, tokenName, tokenAmountSold, tokenAmountExpected, ownerAddress, options);
 
         if (this.validator.notValid([
             {
@@ -1348,13 +1674,19 @@ export default class TransactionBuilder {
         ], callback))
             return;
 
-        this.tronWeb.fullNode.request('wallet/exchangetransaction', {
+        const data = {
             owner_address: toHex(ownerAddress),
             exchange_id: parseInt(exchangeID),
             token_id: this.tronWeb.fromAscii(tokenName),
             quant: parseInt(tokenAmountSold),
             expected: parseInt(tokenAmountExpected)
-        }, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
+        };
+
+        if (options && options.permissionId) {
+            data.Permission_id = options.permissionId;
+        }
+
+        this.tronWeb.fullNode.request('wallet/exchangetransaction', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     /**
@@ -1363,15 +1695,23 @@ export default class TransactionBuilder {
     updateSetting(contractAddress = false,
                   userFeePercentage = false,
                   ownerAddress = this.tronWeb.defaultAddress.hex,
+                  options,
                   callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
 
         if (utils.isFunction(ownerAddress)) {
             callback = ownerAddress;
             ownerAddress = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(ownerAddress)) {
+            options = ownerAddress;
+            ownerAddress  = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
-            return this.injectPromise(this.updateSetting, contractAddress, userFeePercentage, ownerAddress);
+            return this.injectPromise(this.updateSetting, contractAddress, userFeePercentage, ownerAddress, options);
 
         if (this.validator.notValid([
             {
@@ -1394,11 +1734,17 @@ export default class TransactionBuilder {
         ], callback))
             return;
 
-        this.tronWeb.fullNode.request('wallet/updatesetting', {
+        const data = {
             owner_address: toHex(ownerAddress),
             contract_address: toHex(contractAddress),
             consume_user_resource_percent: userFeePercentage
-        }, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
+        };
+
+        if (options && options.permissionId) {
+            data.Permission_id = options.permissionId;
+        }
+
+        this.tronWeb.fullNode.request('wallet/updatesetting', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     /**
@@ -1407,15 +1753,24 @@ export default class TransactionBuilder {
     updateEnergyLimit(contractAddress = false,
                       originEnergyLimit = false,
                       ownerAddress = this.tronWeb.defaultAddress.hex,
+                      options,
                       callback = false) {
+
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
 
         if (utils.isFunction(ownerAddress)) {
             callback = ownerAddress;
             ownerAddress = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(ownerAddress)) {
+            options = ownerAddress;
+            ownerAddress  = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
-            return this.injectPromise(this.updateEnergyLimit, contractAddress, originEnergyLimit, ownerAddress);
+            return this.injectPromise(this.updateEnergyLimit, contractAddress, originEnergyLimit, ownerAddress, options);
 
         if (this.validator.notValid([
             {
@@ -1438,11 +1793,17 @@ export default class TransactionBuilder {
         ], callback))
             return;
 
-        this.tronWeb.fullNode.request('wallet/updateenergylimit', {
+        const data = {
             owner_address: toHex(ownerAddress),
             contract_address: toHex(contractAddress),
             origin_energy_limit: originEnergyLimit
-        }, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
+        };
+
+        if (options && options.permissionId) {
+            data.Permission_id = options.permissionId;
+        }
+
+        this.tronWeb.fullNode.request('wallet/updateenergylimit', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     checkPermissions(permissions, type) {

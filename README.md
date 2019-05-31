@@ -168,6 +168,11 @@ In order to contribute you can
 
 ## Recent History
 
+__2.6.0__
+* Support trigger constant contract, clear abi and add account by id
+* Add permission id option in functions related to creating transaction
+* Support multi-sign without permission id
+
 __2.5.6__
 * Reverse PR #6
 

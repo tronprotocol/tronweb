@@ -69,6 +69,45 @@ describe('TronWeb.trx', function () {
         });
 
 
+        describe("#getAccountById", async function () {
+
+            const idx = 11;
+            let accountId;
+
+            before(async function(){
+                this.timeout(10000);
+                accountId = TronWeb.toHex(`testtest${Math.ceil(Math.random()*100)}`);
+                const transaction = await tronWeb.transactionBuilder.setAccountId(accountId, accounts.hex[idx]);
+                await broadcaster(null, accounts.pks[idx], transaction);
+            });
+
+            it('should get confirmed account by id', async function () {
+                this.timeout(20000);
+                while (true) {
+                    const account = await tronWeb.trx.getAccountById(accountId);
+                    if (Object.keys(account).length === 0) {
+                        await wait(3);
+                        continue;
+                    } else {
+                        assert.equal(account.account_id, accountId.slice(2));
+                        break;
+                    }
+                }
+            });
+
+            it('should throw accountId is not valid error', async function () {
+                const ids = ['', '12', '616161616262626231313131313131313131313131313131313131313131313131313131313131'];
+                for (let id of ids) {
+                    await assertThrow(
+                        tronWeb.trx.getAccountById(id),
+                        'Invalid accountId provided'
+                    );
+                }
+            });
+
+        });
+
+
         describe("#getAccountResources", async function () {
 
             const idx = 10;
@@ -150,6 +189,39 @@ describe('TronWeb.trx', function () {
                     tronWeb.trx.getUnconfirmedAccount('notAnAddress'),
                     'Invalid address provided'
                 );
+            });
+
+        });
+
+
+        describe("#geUnconfirmedAccountById", async function () {
+
+            const idx = 10;
+
+            let accountId;
+
+            before(async function(){
+                this.timeout(10000);
+                accountId = TronWeb.toHex(`testtest${Math.ceil(Math.random()*100)}`);
+                const transaction = await tronWeb.transactionBuilder.setAccountId(accountId, accounts.hex[idx]);
+                await broadcaster(null, accounts.pks[idx], transaction);
+                await waitChainData('accountById', accountId);
+            });
+
+            it('should get unconfirmed account by id', async function () {
+
+                const account = await tronWeb.trx.getUnconfirmedAccountById(accountId);
+                assert.equal(account.account_id, accountId.slice(2));
+            });
+
+            it('should throw accountId is not valid error', async function () {
+                const ids = ['', '12', '616161616262626231313131313131313131313131313131313131313131313131313131313131'];
+                for (let id of ids) {
+                    await assertThrow(
+                        tronWeb.trx.getUnconfirmedAccountById(id),
+                        'Invalid accountId provided'
+                    );
+                }
             });
 
         });
@@ -357,6 +429,22 @@ describe('TronWeb.trx', function () {
 
             });
 
+            it('should multi-sign a transaction by owner permission (permission id inside tx)', async function () {
+
+                const transaction = await tronWeb.transactionBuilder.freezeBalance(10e5, 3, 'BANDWIDTH', accounts.b58[ownerIdx], {permissionId: 0});
+                let signedTransaction = transaction;
+                for (let i = idxS; i < idxE; i++) {
+                    signedTransaction = await tronWeb.trx.multiSign(signedTransaction, accounts.pks[i]);
+                }
+
+                assert.equal(signedTransaction.signature.length, 3);
+
+                // broadcast multi-sign transaction
+                const result = await tronWeb.trx.broadcast(signedTransaction);
+                assert.isTrue(result.result);
+
+            });
+
             it('should verify weight after multi-sign by owner permission', async function () {
 
                 // create transaction and do multi-sign
@@ -367,6 +455,33 @@ describe('TronWeb.trx', function () {
                 let signWeight;
                 for (let i = idxS; i < idxE; i++) {
                     signedTransaction = await tronWeb.trx.multiSign(signedTransaction, accounts.pks[i], 0);
+                    signWeight = await tronWeb.trx.getSignWeight(signedTransaction);
+                    if (i < idxE - 1) {
+                        assert.equal(signWeight.result.code, 'NOT_ENOUGH_PERMISSION');
+                    }
+                    assert.equal(signWeight.approved_list.length, i - idxS + 1);
+                }
+
+                // get approved list
+                const approvedList = await tronWeb.trx.getApprovedList(signedTransaction);
+                assert.isTrue(approvedList.approved_list.length === threshold);
+
+                // broadcast multi-sign transaction
+                const result = await tronWeb.trx.broadcast(signedTransaction);
+                assert.isTrue(result.result);
+
+            });
+
+            it('should verify weight after multi-sign by owner permission (permission id inside tx)', async function () {
+
+                // create transaction and do multi-sign
+                const transaction = await tronWeb.transactionBuilder.freezeBalance(10e5, 3, 'BANDWIDTH', accounts.b58[ownerIdx], {permissionId: 0});
+
+                // sign and verify sign weight
+                let signedTransaction = transaction;
+                let signWeight;
+                for (let i = idxS; i < idxE; i++) {
+                    signedTransaction = await tronWeb.trx.multiSign(signedTransaction, accounts.pks[i]);
                     signWeight = await tronWeb.trx.getSignWeight(signedTransaction);
                     if (i < idxE - 1) {
                         assert.equal(signWeight.result.code, 'NOT_ENOUGH_PERMISSION');
@@ -423,6 +538,22 @@ describe('TronWeb.trx', function () {
 
             });
 
+            it('should multi-sign a transaction by active permission (permission id inside tx)', async function () {
+
+                const transaction = await tronWeb.transactionBuilder.freezeBalance(10e5, 3, 'BANDWIDTH', accounts.b58[ownerIdx], {permissionId: 2});
+                let signedTransaction = transaction;
+                for (let i = idxS; i < idxE; i++) {
+                    signedTransaction = await tronWeb.trx.multiSign(signedTransaction, accounts.pks[i]);
+                }
+
+                assert.equal(signedTransaction.signature.length, 3);
+
+                // broadcast multi-sign transaction
+                const result = await tronWeb.trx.broadcast(signedTransaction);
+                assert.isTrue(result.result);
+
+            });
+
             it('should verify weight after multi-sign by active permission', async function () {
 
                 // create transaction and do multi-sign
@@ -434,6 +565,33 @@ describe('TronWeb.trx', function () {
                 for (let i = idxS; i < idxE; i++) {
                     signedTransaction = await tronWeb.trx.multiSign(signedTransaction, accounts.pks[i], 2);
                     signWeight = await tronWeb.trx.getSignWeight(signedTransaction, 2);
+                    if (i < idxE - 1) {
+                        assert.equal(signWeight.result.code, 'NOT_ENOUGH_PERMISSION');
+                    }
+                    assert.equal(signWeight.approved_list.length, i - idxS + 1);
+                }
+
+                // get approved list
+                const approvedList = await tronWeb.trx.getApprovedList(signedTransaction);
+                assert.isTrue(approvedList.approved_list.length === threshold);
+
+                // broadcast multi-sign transaction
+                const result = await tronWeb.trx.broadcast(signedTransaction);
+                assert.isTrue(result.result);
+
+            });
+
+            it('should verify weight after multi-sign by active permission (permission id inside tx)', async function () {
+
+                // create transaction and do multi-sign
+                const transaction = await tronWeb.transactionBuilder.freezeBalance(10e5, 3, 'BANDWIDTH', accounts.b58[ownerIdx], {permissionId: 2});
+
+                // sign and verify sign weight
+                let signedTransaction = transaction;
+                let signWeight;
+                for (let i = idxS; i < idxE; i++) {
+                    signedTransaction = await tronWeb.trx.multiSign(signedTransaction, accounts.pks[i]);
+                    signWeight = await tronWeb.trx.getSignWeight(signedTransaction);
                     if (i < idxE - 1) {
                         assert.equal(signWeight.result.code, 'NOT_ENOUGH_PERMISSION');
                     }
