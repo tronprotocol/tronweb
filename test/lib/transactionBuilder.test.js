@@ -12,6 +12,7 @@ const assertEqualHex = require('../helpers/assertEqualHex');
 const testRevertContract = require('../fixtures/contracts').testRevert;
 const testConstantContract = require('../fixtures/contracts').testConstant;
 const waitChainData = require('../helpers/waitChainData');
+const semver = require('semver');
 
 const TronWeb = tronWebBuilder.TronWeb;
 const {
@@ -206,6 +207,26 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(transaction.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
             }
         });
+
+            it(`should create a TestToken without freezing anything in 3.6.0`, async function () {
+                if (semver.satisfies(tronWeb.fullnodeVersion, '^3.6.0')) {
+                    const options = getTokenOptions();
+                    options.totalSupply = '100'
+                    options.frozenAmount = '0'
+                    options.frozenDuration = '0'
+                    options.saleEnd = options.saleEnd.toString()
+                    for (let i = 0; i < 2; i++) {
+                        if (i === 1) options.permissionId = 2;
+                        const transaction = await tronWeb.transactionBuilder.createToken(options);
+                        const parameter = txPars(transaction);
+                        await assertEqualHex(parameter.value.abbr, options.abbreviation);
+                        assert.equal(transaction.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
+                    }
+                } else {
+                    this.skip()
+                }
+            });
+
 
         it('should throw if an invalid name is passed', async function () {
 

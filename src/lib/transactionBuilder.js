@@ -3,7 +3,7 @@ import utils from 'utils';
 import {AbiCoder} from 'utils/ethersUtils';
 import Validator from 'paramValidator';
 import {ADDRESS_PREFIX_REGEX} from 'utils/address';
-
+import semver from 'semver';
 let self;
 
 //helpers
@@ -1015,11 +1015,18 @@ export default class TransactionBuilder {
             start_time: parseInt(saleStart),
             end_time: parseInt(saleEnd),
             free_asset_net_limit: parseInt(freeBandwidth),
-            public_free_asset_net_limit: parseInt(freeBandwidthLimit),
-            frozen_supply: {
-                frozen_amount: parseInt(frozenAmount),
-                frozen_days: parseInt(frozenDuration)
+            public_free_asset_net_limit: parseInt(freeBandwidthLimit)
+        }
+        const frozenSupply = {
+            frozen_amount: parseInt(frozenAmount),
+            frozen_days: parseInt(frozenDuration)
+        }
+        if (semver.satisfies(this.tronWeb.fullnodeVersion, '^3.6.0')) {
+            if (parseInt(frozenAmount) > 0) {
+                data.frozen_supply = frozenSupply
             }
+        } else {
+            data.frozen_supply = frozenSupply
         }
         if (precision && !isNaN(parseInt(precision))) {
             data.precision = parseInt(precision);
