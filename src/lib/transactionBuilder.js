@@ -3,7 +3,7 @@ import utils from 'utils';
 import {AbiCoder} from 'utils/ethersUtils';
 import Validator from 'paramValidator';
 import {ADDRESS_PREFIX_REGEX} from 'utils/address';
-import semver from 'semver';
+
 let self;
 
 //helpers
@@ -1021,7 +1021,7 @@ export default class TransactionBuilder {
             frozen_amount: parseInt(frozenAmount),
             frozen_days: parseInt(frozenDuration)
         }
-        if (semver.satisfies(this.tronWeb.fullnodeVersion, '^3.6.0')) {
+        if (this.tronWeb.fullnodeSatisfies('^3.6.0')) {
             if (parseInt(frozenAmount) > 0) {
                 data.frozen_supply = frozenSupply
             }

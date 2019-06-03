@@ -12,7 +12,6 @@ const assertEqualHex = require('../helpers/assertEqualHex');
 const testRevertContract = require('../fixtures/contracts').testRevert;
 const testConstantContract = require('../fixtures/contracts').testConstant;
 const waitChainData = require('../helpers/waitChainData');
-const semver = require('semver');
 
 const TronWeb = tronWebBuilder.TronWeb;
 const {
@@ -209,7 +208,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
             it(`should create a TestToken without freezing anything in 3.6.0`, async function () {
-                if (semver.satisfies(tronWeb.fullnodeVersion, '^3.6.0')) {
+                if (tronWeb.fullnodeSatisfies('^3.6.0')) {
                     const options = getTokenOptions();
                     options.totalSupply = '100'
                     options.frozenAmount = '0'
