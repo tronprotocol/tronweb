@@ -51,7 +51,7 @@ export default class ApiBuilder {
         this.defValues.reverse();
     }
 
-    set(params, options, handler) {
+    set(params, options, postValidationHandler, postSetHandler) {
         this.keys = Object.keys(this.args).reverse()
         for (let i = 0; i < this.keys.length; i++) {
             if (i > 0 && this.required[i] < 2) {
@@ -81,8 +81,9 @@ export default class ApiBuilder {
                 return this.callback(this.error)
             }
         }
-        if (handler)
-            handler(this);
+
+        if (postValidationHandler)
+            postValidationHandler(this);
 
         if (!this.args.options)
             this.args.options = {};
@@ -98,6 +99,10 @@ export default class ApiBuilder {
                 this.data[ParamNames[options[o]]] = this.fix(o, this.args.options[o])
             }
         }
+
+        if (postSetHandler)
+            postSetHandler(this);
+
         return this
     }
 
@@ -114,10 +119,15 @@ export default class ApiBuilder {
         return val
     }
 
-    call(node, endpoint, method = 'post') {
+    call(node, endpoint, method = 'post', preRequestHandler) {
+
+        this.apiUrl = `wallet${node === 'solidityNode' ? 'solidity' : ''}/${endpoint}`
+
+        if (preRequestHandler)
+            preRequestHandler(this)
 
         return ApiBuilder.tronWeb[node]
-            .request(`wallet${node === 'solidityNode' ? 'solidity' : ''}/${endpoint}`, this.data, method)
+            .request(this.apiUrl, this.data, method)
             .then(transaction => {
 
                 if (transaction.Error)
