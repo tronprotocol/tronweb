@@ -1,6 +1,5 @@
 import utils from 'utils';
 import Validator from 'paramValidator';
-import providers from "./providers";
 
 const Types = {
     a: 'address',
