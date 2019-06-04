@@ -72,65 +72,6 @@ export default class TransactionBuilder {
 
     }
 
-
-    sendTrx0(to = false, amount = 0, from = this.tronWeb.defaultAddress.hex, options, callback = false) {
-        if (utils.isFunction(options)) {
-            callback = options;
-            options = {};
-        }
-
-        if (utils.isFunction(from)) {
-            callback = from;
-            from = this.tronWeb.defaultAddress.hex;
-        } else if (utils.isObject(from)) {
-            options = from;
-            from = this.tronWeb.defaultAddress.hex;
-        }
-
-        if (!callback)
-            return this.injectPromise(this.sendTrx, to, amount, from, options);
-
-        // accept amounts passed as strings
-        amount = parseInt(amount)
-
-        if (this.validator.notValid([
-            {
-                name: 'recipient',
-                type: 'address',
-                value: to
-            },
-            {
-                name: 'origin',
-                type: 'address',
-                value: from
-            },
-            {
-                names: ['recipient', 'origin'],
-                type: 'notEqual',
-                msg: 'Cannot transfer TRX to the same account'
-            },
-            {
-                name: 'amount',
-                type: 'integer',
-                gt: 0,
-                value: amount
-            }
-        ], callback))
-            return;
-
-        const data = {
-            to_address: toHex(to),
-            owner_address: toHex(from),
-            amount: amount,
-        };
-
-        if (options && options.permissionId) {
-            data.Permission_id = options.permissionId;
-        }
-
-        this.tronWeb.fullNode.request('wallet/createtransaction', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
-    }
-
     sendToken(to = false, amount = 0, tokenID = false, from = this.tronWeb.defaultAddress.hex, options, callback = false) {
         if (utils.isFunction(options)) {
             callback = options;
