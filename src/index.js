@@ -4,6 +4,7 @@ import BigNumber from 'bignumber.js';
 import EventEmitter from 'eventemitter3';
 import {version} from '../package.json';
 
+import ApiBuilder from 'lib/apiBuilder';
 import TransactionBuilder from 'lib/transactionBuilder';
 import Trx from 'lib/trx';
 import Contract from 'lib/contract';
@@ -18,6 +19,7 @@ export default class TronWeb extends EventEmitter {
     static providers = providers;
     static BigNumber = BigNumber;
     static TransactionBuilder = TransactionBuilder;
+    static ApiBuilder = ApiBuilder;
     static Trx = Trx;
     static Contract = Contract;
     static Plugin = Plugin;

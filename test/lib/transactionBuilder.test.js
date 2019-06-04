@@ -49,13 +49,15 @@ describe('TronWeb.transactionBuilder', function () {
 
     describe('#sendTrx()', function () {
 
-        it(`should send 10 trx from default address to accounts[1]`, async function () {
+        it.only(`should send 10 trx from default address to accounts[1]`, async function () {
             const params = [
                 [accounts.b58[1], 10, { permissionId: 2 }],
                 [accounts.b58[1], 10]
             ];
             for (let param of params) {
                 const transaction = await tronWeb.transactionBuilder.sendTrx(...param);
+
+                // console.log(transaction)
 
                 const parameter = txPars(transaction);
 
