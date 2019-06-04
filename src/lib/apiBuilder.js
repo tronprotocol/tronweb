@@ -102,14 +102,14 @@ export default class ApiBuilder {
                 })
             }
             if (this.error) {
-                return this.callback(this.error)
+                return this._callback(this.error)
             }
         }
 
         this.handlers.v(this);
 
         if (this.error) {
-            return this.callback(this.error)
+            return this._callback(this.error)
         }
 
         if (!this.args.options)
@@ -118,25 +118,25 @@ export default class ApiBuilder {
         this.data = {}
         for (let o in this.params) {
             if (this.args[o]) {
-                this.data[ParamNames[this.params[o]]] = this.fix(o, this.args[o])
+                this.data[ParamNames[this.params[o]]] = this._fix(o, this.args[o])
             }
         }
         for (let o in this.optionParams) {
             if (this.args.options[o]) {
-                this.data[ParamNames[this.optionParams[o]]] = this.fix(o, this.args.options[o])
+                this.data[ParamNames[this.optionParams[o]]] = this._fix(o, this.args.options[o])
             }
         }
 
         this.handlers.s(this);
 
         if (this.args.callback) {
-            this.call()
+            this._call()
         } else {
-            return this.call()
+            return this._call()
         }
     }
 
-    fix(name, val) {
+    _fix(name, val) {
         for (let i = 0; i < this.keys.length; i++) {
             if (this.keys[i] === name) {
                 switch (this.types[i]) {
@@ -149,7 +149,7 @@ export default class ApiBuilder {
         return val
     }
 
-    call() {
+    _call() {
 
         this.apiUrl = `wallet${this.node === 'solidityNode' ? 'solidity' : ''}/${this.endpoint}`
 
@@ -159,16 +159,16 @@ export default class ApiBuilder {
             .request(this.apiUrl, this.data, this.method)
             .then(transaction => {
                 if (transaction.Error)
-                    return this.callback(transaction.Error);
+                    return this._callback(transaction.Error);
                 if (transaction.result && transaction.result.message) {
-                    return this.callback(ApiBuilder.tronWeb.toUtf8(transaction.result.message));
+                    return this._callback(ApiBuilder.tronWeb.toUtf8(transaction.result.message));
                 }
-                return this.callback(null, transaction);
-            }).catch(err => this.callback(err))
+                return this._callback(null, transaction);
+            }).catch(err => this._callback(err))
 
     }
 
-    async callback(err, res) {
+    async _callback(err, res) {
         if (this.args.callback) {
             this.args.callback(err, res)
         } else if (err) {
