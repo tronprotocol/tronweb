@@ -16,6 +16,13 @@ const ParamNames = {
 
 }
 
+const noop = new Function;
+const defHandlers = {
+    postValidation: noop,
+    preRequest: noop,
+    postSet: noop
+};
+
 function toHex(value) {
     return ApiBuilder.tronWeb.address.toHex(value);
 }
@@ -49,9 +56,14 @@ export default class ApiBuilder {
         this.types.reverse();
         this.required.reverse();
         this.defValues.reverse();
+        this.handlers = defHandlers;
     }
 
-    set(params, options, postValidationHandler, postSetHandler) {
+    setHandler(handlers) {
+        this.handlers = Object.assign(defHandlers, handlers);
+    }
+
+    set(params, options) {
         this.keys = Object.keys(this.args).reverse()
         for (let i = 0; i < this.keys.length; i++) {
             if (i > 0 && this.required[i] < 2) {
@@ -82,8 +94,7 @@ export default class ApiBuilder {
             }
         }
 
-        if (postValidationHandler)
-            postValidationHandler(this);
+        this.handlers.postValidation(this);
 
         if (!this.args.options)
             this.args.options = {};
@@ -100,8 +111,7 @@ export default class ApiBuilder {
             }
         }
 
-        if (postSetHandler)
-            postSetHandler(this);
+        this.handlers.postSet(this);
 
         return this
     }
@@ -119,12 +129,11 @@ export default class ApiBuilder {
         return val
     }
 
-    call(node, endpoint, method = 'post', preRequestHandler) {
+    call(node, endpoint, method = 'post') {
 
         this.apiUrl = `wallet${node === 'solidityNode' ? 'solidity' : ''}/${endpoint}`
 
-        if (preRequestHandler)
-            preRequestHandler(this)
+        this.handlers.preRequest(this);
 
         return ApiBuilder.tronWeb[node]
             .request(this.apiUrl, this.data, method)
