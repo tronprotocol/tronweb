@@ -100,6 +100,22 @@ describe('TronWeb.transactionBuilder', function () {
 
         });
 
+        it('should throw if sender and receiver are same address', async function () {
+
+            await assertThrow(
+                tronWeb.transactionBuilder.sendTrx(accounts.b58[3], 1, accounts.b58[3]),
+                'Cannot transfer TRX to the same account'
+            );
+
+        });
+
+        it('should throw if sender and receiver are same address using callback', async function () {
+            tronWeb.transactionBuilder.sendTrx(accounts.b58[2], 1, accounts.b58[2], err => {
+                assert.equal(err.message, 'Cannot transfer TRX to the same account');
+            })
+
+        });
+
         it('should throw if an invalid address is passed', async function () {
 
             await assertThrow(

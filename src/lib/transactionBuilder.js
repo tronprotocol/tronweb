@@ -43,22 +43,32 @@ export default class TransactionBuilder {
         ApiBuilder.tronWeb = tronWeb;
     }
 
-    sendTrx(to = false, amount = 0, from = this.tronWeb.defaultAddress.hex, options, callback = false) {
+    sendTrx(recipient = false, amount = 0, origin = this.tronWeb.defaultAddress.hex, options, callback = false) {
 
         amount = parseInt(amount)
 
-        return (new ApiBuilder(
-            {to, amount, from, options, callback},
-            {a: 2, i: [2, 0], a2: [1, this.tronWeb.defaultAddress.hex], o: 0, f: 0}
-        ))
-            .set({
-                to: 'ta',
-                from: 'oa',
+        let api = new ApiBuilder(
+            {recipient, amount, origin, options, callback},
+            {a: 2, i: [2, 0, {gt: 0}], a2: [1, this.tronWeb.defaultAddress.hex], o: 0, f: 0},
+            {
+                v: function (a) {
+                    if (a.args.recipient === a.args.origin) {
+                        a.error = 'Cannot transfer TRX to the same account'
+                    }
+                }
+            },
+            {
+                recipient: 'ta',
+                origin: 'oa',
                 amount: 'a'
             }, {
                 permissionId: 'pi'
-            })
-            .end('fullNode', 'createtransaction')
+            },
+            'f',
+            'createtransaction'
+        )
+
+        return api.run()
 
     }
 
