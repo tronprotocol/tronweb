@@ -114,7 +114,8 @@ export default class ApiBuilder {
         return val
     }
 
-    end(node, endpoint, method = 'post') {
+    call(node, endpoint, method = 'post') {
+
         return ApiBuilder.tronWeb[node]
             .request(`wallet${node === 'solidityNode' ? 'solidity' : ''}/${endpoint}`, this.data, method)
             .then(transaction => {
@@ -130,6 +131,14 @@ export default class ApiBuilder {
                 return this.callback(null, transaction);
             }).catch(err => this.callback(err))
 
+    }
+
+    end(...params) {
+        if (this.args.callback) {
+            this.call(...params)
+        } else {
+            return this.call(...params)
+        }
     }
 
     async callback(err, res) {

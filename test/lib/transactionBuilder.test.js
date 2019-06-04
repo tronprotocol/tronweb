@@ -51,14 +51,11 @@ describe('TronWeb.transactionBuilder', function () {
 
         it(`should send 10 trx from default address to accounts[1]`, async function () {
             const params = [
-                [accounts.b58[1], 10, { permissionId: 2 }],
+                [accounts.b58[1], 10, {permissionId: 2}],
                 [accounts.b58[1], 10]
             ];
             for (let param of params) {
                 const transaction = await tronWeb.transactionBuilder.sendTrx(...param);
-
-                // console.log(transaction)
-
                 const parameter = txPars(transaction);
 
                 assert.equal(transaction.txID.length, 64);
@@ -70,9 +67,23 @@ describe('TronWeb.transactionBuilder', function () {
             }
         });
 
+        it(`should send 10 trx from default address to accounts[1] using a callback`, async function () {
+            tronWeb.transactionBuilder.sendTrx(accounts.b58[1], 10, (err, transaction) => {
+                const parameter = txPars(transaction);
+
+                assert.equal(transaction.txID.length, 64);
+                assert.equal(parameter.value.amount, 10);
+                assert.equal(parameter.value.owner_address, ADDRESS_HEX);
+                assert.equal(parameter.value.to_address, accounts.hex[1]);
+                assert.equal(parameter.type_url, 'type.googleapis.com/protocol.TransferContract');
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, 0);
+            })
+
+        });
+
         it(`should send 10 trx from accounts[0] to accounts[1]`, async function () {
             const params = [
-                [accounts.b58[1], 10, accounts.b58[0], { permissionId: 2 }],
+                [accounts.b58[1], 10, accounts.b58[0], {permissionId: 2}],
                 [accounts.b58[1], 10, accounts.b58[0]]
             ];
             for (let param of params) {
@@ -455,7 +466,7 @@ describe('TronWeb.transactionBuilder', function () {
         it(`should update accounts[3]`, async function () {
             const newName = 'New name'
             const params = [
-                [newName, accounts.b58[3], { permissionId: 2}],
+                [newName, accounts.b58[3], {permissionId: 2}],
                 [newName, accounts.b58[3]]
             ];
 
@@ -549,7 +560,7 @@ describe('TronWeb.transactionBuilder', function () {
             while (!tokenList) {
                 tokenList = await tronWeb.trx.getTokensIssuedByAddress(accounts.b58[2])
             }
-            if(isAllowSameTokenNameApproved) {
+            if (isAllowSameTokenNameApproved) {
                 tokenID = tokenList[tokenOptions.name].id
             } else {
                 tokenID = tokenList[tokenOptions.name].name
@@ -695,7 +706,7 @@ describe('TronWeb.transactionBuilder', function () {
             while (!tokenList) {
                 tokenList = await tronWeb.trx.getTokensIssuedByAddress(accounts.b58[5])
             }
-            if(isAllowSameTokenNameApproved) {
+            if (isAllowSameTokenNameApproved) {
                 tokenID = tokenList[tokenOptions.name].id
             } else {
                 tokenID = tokenList[tokenOptions.name].name
@@ -706,7 +717,7 @@ describe('TronWeb.transactionBuilder', function () {
         it('should verify that the asset has been created', async function () {
 
             let token
-            if(isAllowSameTokenNameApproved) {
+            if (isAllowSameTokenNameApproved) {
                 token = await tronWeb.trx.getTokenByID(tokenID)
                 assert.equal(token.id, tokenID)
             } else {
@@ -719,7 +730,7 @@ describe('TronWeb.transactionBuilder', function () {
             this.timeout(20000)
 
             const params = [
-                [accounts.b58[5], tokenID, 20, accounts.b58[2], { permissionId: 2 }],
+                [accounts.b58[5], tokenID, 20, accounts.b58[2], {permissionId: 2}],
                 [accounts.b58[5], tokenID, 20, accounts.b58[2]]
             ];
 
@@ -813,7 +824,7 @@ describe('TronWeb.transactionBuilder', function () {
                 tokenList = await tronWeb.trx.getTokensIssuedByAddress(accounts.b58[6])
             }
 
-            if(isAllowSameTokenNameApproved) {
+            if (isAllowSameTokenNameApproved) {
                 tokenID = tokenList[tokenOptions.name].id
             } else {
                 tokenID = tokenList[tokenOptions.name].name
@@ -824,7 +835,7 @@ describe('TronWeb.transactionBuilder', function () {
         it('should verify that the asset has been created', async function () {
 
             let token
-            if(isAllowSameTokenNameApproved) {
+            if (isAllowSameTokenNameApproved) {
                 token = await tronWeb.trx.getTokenByID(tokenID)
                 assert.equal(token.id, tokenID)
             } else {
@@ -838,7 +849,7 @@ describe('TronWeb.transactionBuilder', function () {
             this.timeout(20000)
 
             const params = [
-                [accounts.b58[1], 5, tokenID, accounts.b58[7], { permissionId: 2 }],
+                [accounts.b58[1], 5, tokenID, accounts.b58[7], {permissionId: 2}],
                 [accounts.b58[1], 5, tokenID, accounts.b58[7]]
             ];
 
@@ -866,7 +877,7 @@ describe('TronWeb.transactionBuilder', function () {
         it("should allow accounts [6]  to send a token to accounts[1]", async function () {
 
             const params = [
-                [accounts.b58[1], 5, tokenID, accounts.b58[6], { permissionId: 2 }],
+                [accounts.b58[1], 5, tokenID, accounts.b58[6], {permissionId: 2}],
                 [accounts.b58[1], 5, tokenID, accounts.b58[6]]
             ];
 
@@ -930,7 +941,7 @@ describe('TronWeb.transactionBuilder', function () {
         it('should allow the SR account to create a new proposal as a single object', async function () {
 
             const inputs = [
-                [parameters[0], ADDRESS_BASE58, { permissionId: 2 }],
+                [parameters[0], ADDRESS_BASE58, {permissionId: 2}],
                 [parameters[0], ADDRESS_BASE58]
             ];
             for (let input of inputs) {
@@ -949,7 +960,7 @@ describe('TronWeb.transactionBuilder', function () {
         it('should allow the SR account to create a new proposal as an array of objects', async function () {
 
             const inputs = [
-                [parameters, ADDRESS_BASE58, { permissionId: 2 }],
+                [parameters, ADDRESS_BASE58, {permissionId: 2}],
                 [parameters, ADDRESS_BASE58]
             ];
 
@@ -1010,8 +1021,8 @@ describe('TronWeb.transactionBuilder', function () {
 
         after(async function () {
             proposals = await tronWeb.trx.listProposals();
-            for(let proposal of proposals) {
-                if(proposal.state !== 'CANCELED')
+            for (let proposal of proposals) {
+                if (proposal.state !== 'CANCELED')
                     await broadcaster(tronWeb.transactionBuilder.deleteProposal(proposal.proposal_id), PRIVATE_KEY)
             }
         })
@@ -1019,7 +1030,7 @@ describe('TronWeb.transactionBuilder', function () {
         it('should allow the SR to delete its own proposal', async function () {
 
             const params = [
-                [proposals[0].proposal_id, { permissionId: 2 }],
+                [proposals[0].proposal_id, {permissionId: 2}],
                 [proposals[0].proposal_id]
             ];
             for (let param of params) {
@@ -1072,7 +1083,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should allows accounts[1] to freeze its balance', async function () {
             const params = [
-                [100e6, 3, 'BANDWIDTH', accounts.b58[1], { permissionId: 2 }],
+                [100e6, 3, 'BANDWIDTH', accounts.b58[1], {permissionId: 2}],
                 [100e6, 3, 'BANDWIDTH', accounts.b58[1]]
             ];
 
@@ -1172,7 +1183,7 @@ describe('TronWeb.transactionBuilder', function () {
     describe("#triggerConstantContract", async function () {
 
         let transaction;
-        before(async function() {
+        before(async function () {
             this.timeout(20000);
 
             transaction = await tronWeb.transactionBuilder.createSmartContract({
@@ -1198,8 +1209,8 @@ describe('TronWeb.transactionBuilder', function () {
             const issuerAddress = accounts.hex[6];
             const functionSelector = 'testPure(uint256,uint256)';
             const parameter = [
-                { type: 'uint256', value: 1 },
-                { type: 'uint256', value: 2 }
+                {type: 'uint256', value: 1},
+                {type: 'uint256', value: 2}
             ]
             const options = {};
 
@@ -1221,7 +1232,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         let transaction;
         let contract;
-        before(async function() {
+        before(async function () {
             this.timeout(20000);
 
             transaction = await tronWeb.transactionBuilder.createSmartContract({
@@ -1277,7 +1288,7 @@ describe('TronWeb.transactionBuilder', function () {
     describe("#triggerSmartContract", async function () {
 
         let transaction;
-        before(async function() {
+        before(async function () {
             this.timeout(20000);
 
             transaction = await tronWeb.transactionBuilder.createSmartContract({
@@ -1303,8 +1314,8 @@ describe('TronWeb.transactionBuilder', function () {
             const issuerAddress = accounts.hex[6];
             const functionSelector = 'testPure(uint256,uint256)';
             const parameter = [
-                { type: 'uint256', value: 1 },
-                { type: 'uint256', value: 2 }
+                {type: 'uint256', value: 1},
+                {type: 'uint256', value: 2}
             ]
             const options = {};
 
@@ -1331,7 +1342,7 @@ describe('TronWeb.transactionBuilder', function () {
         const toIdx2 = 6;
         let tokenNames = [];
 
-        before(async function(){
+        before(async function () {
             this.timeout(20000);
 
             // create token
