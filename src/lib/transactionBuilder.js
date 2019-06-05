@@ -50,6 +50,7 @@ export default class TransactionBuilder {
         let api = new ApiBuilder(
             {recipient, amount, origin, options, callback},
             {a: 2, i: [2, 0, {gt: 0}], a2: [1, this.tronWeb.defaultAddress.hex], o: 0, f: 0},
+            {permissionId: ['i', 0, 0]},
             {
                 v: function (a) {
                     if (a.args.recipient === a.args.origin) {
@@ -60,9 +61,10 @@ export default class TransactionBuilder {
             {
                 recipient: 'ta',
                 origin: 'oa',
-                amount: 'a'
-            }, {
-                permissionId: 'pi'
+                amount: 'a',
+                _: {
+                    permissionId: 'pi'
+                }
             },
             'f',
             'createtransaction'

@@ -37,10 +37,10 @@ export default class ApiBuilder {
 
     constructor(
         args,
-        options,
+        argsTypes,
+        optionsTypes,
         handlers,
         params,
-        optionParams,
         node,
         endpoint,
         method
@@ -52,8 +52,9 @@ export default class ApiBuilder {
         this.required = [];
         this.defValues = [];
         this.extraValidation = [];
-        for (let o in options) {
-            let option = options[o]
+        this.options = [];
+        for (let o in argsTypes) {
+            let option = argsTypes[o]
             if (!Array.isArray(option))
                 option = [option]
             this.types.push(Types[o.substring(0, 1)])
@@ -61,78 +62,109 @@ export default class ApiBuilder {
             this.defValues.push(option[1])
             this.extraValidation.push(option[2] || {})
         }
+        this.keys = Object.keys(this.args).reverse();
         this.types.reverse();
         this.required.reverse();
         this.defValues.reverse();
         this.extraValidation.reverse();
+        this.optionsTypes = optionsTypes;
         this.handlers = Object.assign(defHandlers, handlers);
         this.params = params;
-        this.optionParams = optionParams;
+        this.optionParams = params._ || {};
+        delete this.params._;
         this.node = node === 'f' ? 'fullNode' : 'solidityNode';
         this.endpoint = endpoint;
         this.method = method || 'post';
     }
 
     run() {
-        this.keys = Object.keys(this.args).reverse()
-        for (let i = 0; i < this.keys.length; i++) {
-            if (i > 0 && this.required[i] < 2) {
-                for (let k = i - 1; k >= 0; k--) {
-                    if (typeof this.args[this.keys[i]] === this.types[k]) {
-                        this.args[this.keys[k]] = this.args[this.keys[i]];
-                        this.args[this.keys[i]] = this.defValues[this.keys[i]];
+        try {
+            // check for optional args
+            for (let i = 0; i < this.keys.length; i++) {
+                if (i > 0 && this.required[i] < 2) {
+                    for (let k = i - 1; k >= 0; k--) {
+                        if (typeof this.args[this.keys[i]] === this.types[k]) {
+                            this.args[this.keys[k]] = this.args[this.keys[i]];
+                            this.args[this.keys[i]] = this.defValues[this.keys[i]];
+                        }
                     }
                 }
+                if (!this.args[this.keys[i]] && this.defValues[i]) {
+                    this.args[this.keys[i]] = this.defValues[i]
+                }
             }
-            if (!this.args[this.keys[i]] && this.defValues[i]) {
-                this.args[this.keys[i]] = this.defValues[i]
+            // args validation
+            for (let i = 0; i < this.keys.length; i++) {
+                if (this.required[i]) {
+                    this.validator.notValid([
+                        Object.assign({
+                            name: this.keys[i],
+                            type: this.types[i],
+                            value: this.args[this.keys[i]]
+                        }, this.extraValidation[i])
+                    ], err => {
+                        this.error = err
+                    })
+                }
+                if (this.error) {
+                    return this._callback(this.error)
+                }
             }
-        }
+            // options assign and validation
+            if (!this.args.options) {
+                this.args.options = {};
+            }
+            for (let o in this.optionsTypes) {
+                let option = this.optionsTypes[o];
+                if (typeof this.args.options[o] === 'undefined' && option[2]) {
+                    this.args.options[o] = option[2];
+                }
+                if (option[1] || utils.isNotNullOrUndefined(this.args.options[o])) {
+                    this.validator.notValid([
+                        Object.assign({
+                            name: o,
+                            type: Types[option[0]],
+                            value: this.args.options[o]
+                        }, option[3] || {})
+                    ], err => {
+                        this.error = err
+                    })
+                }
+                if (this.error) {
+                    return this._callback(this.error)
+                }
+            }
 
-        for (let i = 0; i < this.keys.length; i++) {
-            if (this.required[i]) {
-                this.validator.notValid([
-                    Object.assign({
-                        name: this.keys[i],
-                        type: this.types[i],
-                        value: this.args[this.keys[i]]
-                    }, this.extraValidation[i])
-                ], err => {
-                    this.error = err
-                })
-            }
+            this.handlers.v(this);
+
             if (this.error) {
                 return this._callback(this.error)
             }
-        }
 
-        this.handlers.v(this);
+            if (!this.args.options)
+                this.args.options = {};
 
-        if (this.error) {
-            return this._callback(this.error)
-        }
-
-        if (!this.args.options)
-            this.args.options = {};
-
-        this.data = {}
-        for (let o in this.params) {
-            if (this.args[o]) {
-                this.data[ParamNames[this.params[o]]] = this._fix(o, this.args[o])
+            this.data = {}
+            for (let o in this.params) {
+                if (this.args[o]) {
+                    this.data[ParamNames[this.params[o]]] = this._fix(o, this.args[o])
+                }
             }
-        }
-        for (let o in this.optionParams) {
-            if (this.args.options[o]) {
-                this.data[ParamNames[this.optionParams[o]]] = this._fix(o, this.args.options[o])
+            for (let o in this.optionParams) {
+                if (this.args.options[o]) {
+                    this.data[ParamNames[this.optionParams[o]]] = this._fix(o, this.args.options[o])
+                }
             }
-        }
 
-        this.handlers.s(this);
+            this.handlers.s(this);
 
-        if (this.args.callback) {
-            this._call()
-        } else {
-            return this._call()
+            if (this.args.callback) {
+                this._call()
+            } else {
+                return this._call()
+            }
+        } catch(err) {
+            this._callback(err)
         }
     }
 
@@ -150,11 +182,8 @@ export default class ApiBuilder {
     }
 
     _call() {
-
         this.apiUrl = `wallet${this.node === 'solidityNode' ? 'solidity' : ''}/${this.endpoint}`
-
         this.handlers.r(this);
-
         return ApiBuilder.tronWeb[this.node]
             .request(this.apiUrl, this.data, this.method)
             .then(transaction => {

@@ -67,7 +67,7 @@ describe('TronWeb.transactionBuilder', function () {
             }
         });
 
-        it(`should send 10 trx from default address to accounts[1] using a callback`, async function () {
+        it(`should send 10 trx from default address to accounts[1] using a callback`, function (done) {
             tronWeb.transactionBuilder.sendTrx(accounts.b58[1], 10, (err, transaction) => {
                 const parameter = txPars(transaction);
 
@@ -77,6 +77,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.to_address, accounts.hex[1]);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.TransferContract');
                 assert.equal(transaction.raw_data.contract[0].Permission_id || 0, 0);
+                done()
             })
 
         });
@@ -111,9 +112,24 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should throw if sender and receiver are same address using callback', async function () {
             tronWeb.transactionBuilder.sendTrx(accounts.b58[2], 1, accounts.b58[2], err => {
-                assert.equal(err.message, 'Cannot transfer TRX to the same account');
+                 assert.equal(err.message, 'Cannot transfer TRX to the same account');
             })
 
+        });
+
+        it('should throw if permissionId is a string', async function () {
+            await assertThrow(
+                tronWeb.transactionBuilder.sendTrx(accounts.b58[3], 1, {permissionId: 'hello'}),
+                'Invalid permissionId provided'
+            );
+
+        });
+
+        it('should throw if permissionId is a string using a callback', function (done) {
+            tronWeb.transactionBuilder.sendTrx(accounts.b58[3], 1, {permissionId: 'hello'}, err => {
+                assert.equal(err, 'Invalid permissionId provided');
+                done()
+            });
         });
 
         it('should throw if an invalid address is passed', async function () {
