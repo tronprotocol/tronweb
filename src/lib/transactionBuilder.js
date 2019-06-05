@@ -580,7 +580,7 @@ export default class TransactionBuilder {
             {
                 name: 'originEnergyLimit',
                 type: 'integer',
-                value: userFeePercentage,
+                value: originEnergyLimit,
                 gte: 0,
                 lte: 10_000_000
             },
@@ -996,6 +996,9 @@ export default class TransactionBuilder {
                 frozen_amount: parseInt(frozenAmount),
                 frozen_days: parseInt(frozenDuration)
             }
+        }
+        if (this.tronWeb.fullnodeSatisfies('>=3.5.0') && !(parseInt(frozenAmount) > 0)) {
+            delete data.frozen_supply
         }
         if (precision && !isNaN(parseInt(precision))) {
             data.precision = parseInt(precision);
