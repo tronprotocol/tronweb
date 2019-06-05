@@ -51,7 +51,7 @@ export default class TransactionBuilder {
             from = this.tronWeb.defaultAddress.hex;
         } else if (utils.isObject(from)) {
             options = from;
-            from  = this.tronWeb.defaultAddress.hex;
+            from = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
@@ -109,7 +109,7 @@ export default class TransactionBuilder {
             from = this.tronWeb.defaultAddress.hex;
         } else if (utils.isObject(from)) {
             options = from;
-            from  = this.tronWeb.defaultAddress.hex;
+            from = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
@@ -171,7 +171,7 @@ export default class TransactionBuilder {
             buyer = this.tronWeb.defaultAddress.hex;
         } else if (utils.isObject(buyer)) {
             options = buyer;
-            buyer  = this.tronWeb.defaultAddress.hex;
+            buyer = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
@@ -232,7 +232,7 @@ export default class TransactionBuilder {
             receiverAddress = undefined;
         } else if (utils.isObject(receiverAddress)) {
             options = receiverAddress;
-            receiverAddress  = undefined;
+            receiverAddress = undefined;
         }
 
         if (utils.isFunction(address)) {
@@ -240,7 +240,7 @@ export default class TransactionBuilder {
             address = this.tronWeb.defaultAddress.hex;
         } else if (utils.isObject(address)) {
             options = address;
-            address  = this.tronWeb.defaultAddress.hex;
+            address = this.tronWeb.defaultAddress.hex;
         }
 
         if (utils.isFunction(duration)) {
@@ -318,7 +318,7 @@ export default class TransactionBuilder {
             receiverAddress = undefined;
         } else if (utils.isObject(receiverAddress)) {
             options = receiverAddress;
-            receiverAddress  = undefined;
+            receiverAddress = undefined;
         }
 
         if (utils.isFunction(address)) {
@@ -326,7 +326,7 @@ export default class TransactionBuilder {
             address = this.tronWeb.defaultAddress.hex;
         } else if (utils.isObject(address)) {
             options = address;
-            address  = this.tronWeb.defaultAddress.hex;
+            address = this.tronWeb.defaultAddress.hex;
         }
 
         if (utils.isFunction(resource)) {
@@ -385,7 +385,7 @@ export default class TransactionBuilder {
             address = this.tronWeb.defaultAddress.hex;
         } else if (utils.isObject(address)) {
             options = address;
-            address  = this.tronWeb.defaultAddress.hex;
+            address = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
@@ -470,7 +470,7 @@ export default class TransactionBuilder {
             voterAddress = this.tronWeb.defaultAddress.hex;
         } else if (utils.isObject(voterAddress)) {
             options = voterAddress;
-            voterAddress  = this.tronWeb.defaultAddress.hex;
+            voterAddress = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
@@ -1015,18 +1015,14 @@ export default class TransactionBuilder {
             start_time: parseInt(saleStart),
             end_time: parseInt(saleEnd),
             free_asset_net_limit: parseInt(freeBandwidth),
-            public_free_asset_net_limit: parseInt(freeBandwidthLimit)
-        }
-        const frozenSupply = {
-            frozen_amount: parseInt(frozenAmount),
-            frozen_days: parseInt(frozenDuration)
-        }
-        if (this.tronWeb.fullnodeSatisfies('^3.6.0')) {
-            if (parseInt(frozenAmount) > 0) {
-                data.frozen_supply = frozenSupply
+            public_free_asset_net_limit: parseInt(freeBandwidthLimit),
+            frozen_supply: {
+                frozen_amount: parseInt(frozenAmount),
+                frozen_days: parseInt(frozenDuration)
             }
-        } else {
-            data.frozen_supply = frozenSupply
+        }
+        if (this.tronWeb.fullnodeSatisfies('>=3.5.0') && !(parseInt(frozenAmount) > 0)) {
+            delete data.frozen_supply
         }
         if (precision && !isNaN(parseInt(precision))) {
             data.precision = parseInt(precision);
@@ -1052,7 +1048,7 @@ export default class TransactionBuilder {
             address = this.tronWeb.defaultAddress.hex;
         } else if (utils.isObject(address)) {
             options = address;
-            address  = this.tronWeb.defaultAddress.hex;
+            address = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback) {
@@ -1121,7 +1117,6 @@ export default class TransactionBuilder {
             return;
 
 
-
         this.tronWeb.fullNode.request('wallet/setaccountid', {
             account_id: accountId,
             owner_address: toHex(address),
@@ -1134,7 +1129,7 @@ export default class TransactionBuilder {
             issuerAddress = this.tronWeb.defaultAddress.hex;
         } else if (utils.isObject(issuerAddress)) {
             options = issuerAddress;
-            issuerAddress  = this.tronWeb.defaultAddress.hex;
+            issuerAddress = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
@@ -1223,7 +1218,7 @@ export default class TransactionBuilder {
             issuerAddress = this.tronWeb.defaultAddress.hex;
         } else if (utils.isObject(issuerAddress)) {
             options = issuerAddress;
-            issuerAddress  = this.tronWeb.defaultAddress.hex;
+            issuerAddress = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
@@ -1278,7 +1273,7 @@ export default class TransactionBuilder {
             issuerAddress = this.tronWeb.defaultAddress.hex;
         } else if (utils.isObject(issuerAddress)) {
             options = issuerAddress;
-            issuerAddress  = this.tronWeb.defaultAddress.hex;
+            issuerAddress = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
@@ -1326,7 +1321,7 @@ export default class TransactionBuilder {
             voterAddress = this.tronWeb.defaultAddress.hex;
         } else if (utils.isObject(voterAddress)) {
             options = voterAddress;
-            voterAddress  = this.tronWeb.defaultAddress.hex;
+            voterAddress = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
@@ -1381,7 +1376,7 @@ export default class TransactionBuilder {
             ownerAddress = this.tronWeb.defaultAddress.hex;
         } else if (utils.isObject(ownerAddress)) {
             options = ownerAddress;
-            ownerAddress  = this.tronWeb.defaultAddress.hex;
+            ownerAddress = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
@@ -1445,7 +1440,7 @@ export default class TransactionBuilder {
             ownerAddress = this.tronWeb.defaultAddress.hex;
         } else if (utils.isObject(ownerAddress)) {
             options = ownerAddress;
-            ownerAddress  = this.tronWeb.defaultAddress.hex;
+            ownerAddress = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
@@ -1513,7 +1508,7 @@ export default class TransactionBuilder {
             ownerAddress = this.tronWeb.defaultAddress.hex;
         } else if (utils.isObject(ownerAddress)) {
             options = ownerAddress;
-            ownerAddress  = this.tronWeb.defaultAddress.hex;
+            ownerAddress = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
@@ -1575,7 +1570,7 @@ export default class TransactionBuilder {
             ownerAddress = this.tronWeb.defaultAddress.hex;
         } else if (utils.isObject(ownerAddress)) {
             options = ownerAddress;
-            ownerAddress  = this.tronWeb.defaultAddress.hex;
+            ownerAddress = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
@@ -1643,7 +1638,7 @@ export default class TransactionBuilder {
             ownerAddress = this.tronWeb.defaultAddress.hex;
         } else if (utils.isObject(ownerAddress)) {
             options = ownerAddress;
-            ownerAddress  = this.tronWeb.defaultAddress.hex;
+            ownerAddress = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
@@ -1714,7 +1709,7 @@ export default class TransactionBuilder {
             ownerAddress = this.tronWeb.defaultAddress.hex;
         } else if (utils.isObject(ownerAddress)) {
             options = ownerAddress;
-            ownerAddress  = this.tronWeb.defaultAddress.hex;
+            ownerAddress = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
@@ -1773,7 +1768,7 @@ export default class TransactionBuilder {
             ownerAddress = this.tronWeb.defaultAddress.hex;
         } else if (utils.isObject(ownerAddress)) {
             options = ownerAddress;
-            ownerAddress  = this.tronWeb.defaultAddress.hex;
+            ownerAddress = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
