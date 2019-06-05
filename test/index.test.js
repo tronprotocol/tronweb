@@ -114,6 +114,16 @@ describe('TronWeb Instance', function () {
         });
     });
 
+
+    describe('#fullnodeVersion()', function () {
+        it('should verify that the version of the fullNode is available', function () {
+            const tronWeb = tronWebBuilder.createInstance();
+            // setTimeout(() => console.log(tronWeb.fullnodeVersion), 500)
+            assert.equal(typeof tronWeb.fullnodeVersion, 'string');
+
+        });
+    });
+
     describe('#setDefaultBlock()', function () {
         it('should accept a positive integer', function () {
             const tronWeb = tronWebBuilder.createInstance();
