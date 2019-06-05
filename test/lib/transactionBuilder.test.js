@@ -68,16 +68,21 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it(`should send 10 trx from default address to accounts[1] using a callback`, function (done) {
-            tronWeb.transactionBuilder.sendTrx(accounts.b58[1], 10, (err, transaction) => {
-                const parameter = txPars(transaction);
 
-                assert.equal(transaction.txID.length, 64);
-                assert.equal(parameter.value.amount, 10);
-                assert.equal(parameter.value.owner_address, ADDRESS_HEX);
-                assert.equal(parameter.value.to_address, accounts.hex[1]);
-                assert.equal(parameter.type_url, 'type.googleapis.com/protocol.TransferContract');
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, 0);
-                done()
+            tronWeb.transactionBuilder.sendTrx(accounts.b58[1], 10, (err, transaction) => {
+                try {
+                    const parameter = txPars(transaction);
+
+                    assert.equal(transaction.txID.length, 64);
+                    assert.equal(parameter.value.amount, 10);
+                    assert.equal(parameter.value.owner_address, ADDRESS_HEX);
+                    assert.equal(parameter.value.to_address, accounts.hex[1]);
+                    assert.equal(parameter.type_url, 'type.googleapis.com/protocol.TransferContract');
+                    assert.equal(transaction.raw_data.contract[0].Permission_id || 0, 0);
+                    done()
+                } catch (err) {
+                    done('Test failed')
+                }
             })
 
         });
@@ -110,11 +115,15 @@ describe('TronWeb.transactionBuilder', function () {
 
         });
 
-        it('should throw if sender and receiver are same address using callback', async function () {
+        it('should throw if sender and receiver are same address using callback', function (done) {
             tronWeb.transactionBuilder.sendTrx(accounts.b58[2], 1, accounts.b58[2], err => {
-                 assert.equal(err.message, 'Cannot transfer TRX to the same account');
+                try {
+                    assert.equal(err, 'Cannot transfer TRX to the same account');
+                    done()
+                } catch (err) {
+                    done('Should return "Cannot transfer TRX to the same account"')
+                }
             })
-
         });
 
         it('should throw if permissionId is a string', async function () {
@@ -127,8 +136,12 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should throw if permissionId is a string using a callback', function (done) {
             tronWeb.transactionBuilder.sendTrx(accounts.b58[3], 1, {permissionId: 'hello'}, err => {
-                assert.equal(err, 'Invalid permissionId provided');
-                done()
+                try {
+                    assert.equal(err, 'Invalid permissionId provided');
+                    done()
+                } catch (err) {
+                    done('Test failed')
+                }
             });
         });
 
@@ -252,24 +265,24 @@ describe('TronWeb.transactionBuilder', function () {
             }
         });
 
-            it(`should create a TestToken without freezing anything in 3.6.0`, async function () {
-                if (tronWeb.fullnodeSatisfies('^3.6.0')) {
-                    const options = getTokenOptions();
-                    options.totalSupply = '100'
-                    options.frozenAmount = '0'
-                    options.frozenDuration = '0'
-                    options.saleEnd = options.saleEnd.toString()
-                    for (let i = 0; i < 2; i++) {
-                        if (i === 1) options.permissionId = 2;
-                        const transaction = await tronWeb.transactionBuilder.createToken(options);
-                        const parameter = txPars(transaction);
-                        await assertEqualHex(parameter.value.abbr, options.abbreviation);
-                        assert.equal(transaction.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
-                    }
-                } else {
-                    this.skip()
+        it(`should create a TestToken without freezing anything in 3.6.0`, async function () {
+            if (tronWeb.fullnodeSatisfies('^3.6.0')) {
+                const options = getTokenOptions();
+                options.totalSupply = '100'
+                options.frozenAmount = '0'
+                options.frozenDuration = '0'
+                options.saleEnd = options.saleEnd.toString()
+                for (let i = 0; i < 2; i++) {
+                    if (i === 1) options.permissionId = 2;
+                    const transaction = await tronWeb.transactionBuilder.createToken(options);
+                    const parameter = txPars(transaction);
+                    await assertEqualHex(parameter.value.abbr, options.abbreviation);
+                    assert.equal(transaction.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
                 }
-            });
+            } else {
+                this.skip()
+            }
+        });
 
 
         it('should throw if an invalid name is passed', async function () {
