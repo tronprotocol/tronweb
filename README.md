@@ -168,6 +168,9 @@ In order to contribute you can
 
 ## Recent History
 
+__2.6.3__
+* Support get unconfirmed transaction function
+
 __2.6.0__
 * Support trigger constant contract, clear abi and add account by id
 * Add permission id option in functions related to creating transaction
