@@ -1084,7 +1084,7 @@ describe('TronWeb.trx', function () {
         });
 
 
-        describe("#getTransactionInfo", async function () {
+        describe("#getTransactionInfo (Confirmed)", async function () {
 
             const idx = 26;
             let transaction;
@@ -1106,6 +1106,32 @@ describe('TronWeb.trx', function () {
                         break;
                     }
                 }
+            });
+
+        });
+
+
+        describe("#geUnconfirmedTransactionInfo", async function () {
+
+            const idx = 25;
+            let transaction;
+
+            before(async function(){
+                transaction = await tronWeb.trx.freezeBalance(10e5, 3, 'BANDWIDTH', { privateKey: accounts.pks[idx], address: accounts.hex[idx] });
+                transaction = transaction.transaction;
+                await waitChainData('tx', transaction.txID);
+            });
+
+            it('should get unconfirmed transaction by id', async function () {
+                const tx = await tronWeb.trx.getUnconfirmedTransactionInfo(transaction.txID);
+                assert.equal(tx.id, transaction.txID);
+            });
+
+            it('should throw transaction not found error', async function () {
+                await assertThrow(
+                    tronWeb.trx.getUnconfirmedTransactionInfo('a8813981b1737d9caf7d51b200760a16c9cdbc826fa8de102386af898048cbe5'),
+                    'Transaction not found'
+                );
             });
 
         });
