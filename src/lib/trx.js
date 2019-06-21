@@ -170,11 +170,19 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
-    getTransactionInfo(transactionID, callback = false) {
-        if (!callback)
-            return this.injectPromise(this.getTransactionInfo, transactionID);
+    getUnconfirmedTransactionInfo(transactionID, callback = false) {
+        return this._getTransactionInfoById(transactionID, {confirmed: false}, callback)
+    }
 
-        this.tronWeb.solidityNode.request('walletsolidity/gettransactioninfobyid', {
+    getTransactionInfo(transactionID, callback = false) {
+        return this._getTransactionInfoById(transactionID, {confirmed: true}, callback)
+    }
+
+    _getTransactionInfoById(transactionID, options, callback = false) {
+        if (!callback)
+            return this.injectPromise(this._getTransactionInfoById, transactionID, options);
+
+        this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(`wallet${options.confirmed ? 'solidity' : ''}/gettransactioninfobyid`, {
             value: transactionID
         }, 'post').then(transaction => {
             callback(null, transaction);
