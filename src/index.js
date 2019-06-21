@@ -13,7 +13,7 @@ import Event from 'lib/event';
 import {keccak256} from 'utils/ethersUtils';
 import {ADDRESS_PREFIX} from 'utils/address';
 
-const DEFAULT_VERSION = '3.5';
+const DEFAULT_VERSION = '3.5.0';
 
 export default class TronWeb extends EventEmitter {
     static providers = providers;

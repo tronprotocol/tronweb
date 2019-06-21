@@ -1186,8 +1186,8 @@ describe('TronWeb.transactionBuilder', function () {
         });
     });
 
-
-    describe("#triggerConstantContract", async function () {
+    // TODO fix this, Jackie
+    describe.skip("#triggerConstantContract", async function () {
 
         let transaction;
         before(async function() {
@@ -1209,8 +1209,7 @@ describe('TronWeb.transactionBuilder', function () {
             }
         })
 
-        // TODO fix this, Jackie
-        it.skip('should trigger constant contract successfully', async function () {
+        it('should trigger constant contract successfully', async function () {
             this.timeout(20000);
 
             const contractAddress = transaction.contract_address;
@@ -1236,7 +1235,8 @@ describe('TronWeb.transactionBuilder', function () {
         });
     });
 
-    describe("#clearabi", async function () {
+    // TODO fix this, Jackie
+    describe.skip("#clearabi", async function () {
 
         let transaction;
         let contract;
@@ -1259,8 +1259,7 @@ describe('TronWeb.transactionBuilder', function () {
             }
         })
 
-        // TODO fix this, Jackie
-        it.skip('should clear contract abi', async function () {
+        it('should clear contract abi', async function () {
             this.timeout(10000);
 
             const contractAddress = transaction.contract_address;
@@ -1294,7 +1293,8 @@ describe('TronWeb.transactionBuilder', function () {
     describe("#withdrawBlockRewards", async function () {
     });
 
-    describe("#triggerSmartContract", async function () {
+    // TODO fix this, Jackie
+    describe.skip("#triggerSmartContract", async function () {
 
         let transaction;
         before(async function() {
@@ -1316,8 +1316,7 @@ describe('TronWeb.transactionBuilder', function () {
             }
         })
 
-        // TODO fix this, Jackie
-        it.skip('should trigger smart contract successfully', async function () {
+        it('should trigger smart contract successfully', async function () {
             this.timeout(20000);
 
             const contractAddress = transaction.contract_address;
