@@ -90,6 +90,9 @@ export default class TronWeb extends EventEmitter {
         try {
             const nodeInfo = await this.trx.getNodeInfo()
             this.fullnodeVersion = nodeInfo.configNodeInfo.codeVersion
+            if (this.fullnodeVersion.split('.').length === 2) {
+                this.fullnodeVersion += '.0';
+            }
         } catch (err) {
             this.fullnodeVersion = DEFAULT_VERSION;
         }
