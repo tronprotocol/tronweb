@@ -1267,7 +1267,7 @@ describe('TronWeb.transactionBuilder', function () {
             }
         })
 
-        it('should trigger constant contract successfully', async function () {
+        it.only('should trigger constant contract successfully', async function () {
             this.timeout(20000);
 
             const contractAddress = transaction.contract_address;
@@ -1283,10 +1283,12 @@ describe('TronWeb.transactionBuilder', function () {
                 if (i === 1) options.permissionId = 2;
                 transaction = await tronWeb.transactionBuilder.triggerConstantContract(contractAddress, functionSelector, options,
                     parameter, issuerAddress);
+
                 assert.isTrue(transaction.result.result &&
                     transaction.transaction.raw_data.contract[0].parameter.type_url === 'type.googleapis.com/protocol.TriggerSmartContract');
                 assert.equal(transaction.constant_result, '0000000000000000000000000000000000000000000000000000000000000004');
                 transaction = await broadcaster(null, accounts.pks[6], transaction.transaction);
+                console.log(tronWeb.toUtf8(transaction.receipt.message))
                 assert.isTrue(transaction.receipt.result)
                 assert.equal(transaction.transaction.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
             }
