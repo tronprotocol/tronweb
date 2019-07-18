@@ -135,11 +135,11 @@ export default class Trx {
             if (!transactions)
                 callback('Transaction not found in block');
             else if (typeof index == 'number'){
-                if(index >= 0 && index < transactions.length)
+                if (index >= 0 && index < transactions.length)
                     callback(null, transactions[index]);
                 else
                     callback('Invalid transaction index provided');
-            }else
+            } else
                 callback(null, transactions);
         }).catch(err => callback(err));
     }
