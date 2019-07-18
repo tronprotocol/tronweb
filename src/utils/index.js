@@ -150,6 +150,10 @@ const utils = {
 
     isNotNullOrUndefined(val) {
         return val !== null && typeof val !== 'undefined';
+    },
+
+    async sleep(millis = 1000){
+        return new Promise(resolve => setTimeout(resolve, millis));
     }
 }
 
