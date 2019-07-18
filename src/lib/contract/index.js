@@ -180,6 +180,7 @@ export default class Contract {
                     message: this.tronWeb.toUtf8(contract.message)
                 })
 
+            await utils.sleep(3000);
             return this.at(signedTransaction.contract_address, callback);
         } catch (ex) {
             return callback(ex);

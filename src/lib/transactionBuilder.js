@@ -567,6 +567,9 @@ export default class TransactionBuilder {
             }
         }
 
+        if (abi.entrys)
+            abi = abi.entrys;
+
         if (!utils.isArray(abi))
             return callback('Invalid options.abi provided');
 
