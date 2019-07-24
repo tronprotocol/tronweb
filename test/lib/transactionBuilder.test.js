@@ -1416,7 +1416,7 @@ describe('TronWeb.transactionBuilder', function () {
     });
 
     // Contract Test
-    describe.only("#extendExpiration", async function () {
+    describe("#extendExpiration", async function () {
 
         it('should extend the expiration', async function () {
 
@@ -1426,9 +1426,11 @@ describe('TronWeb.transactionBuilder', function () {
             const balance = await tronWeb.trx.getUnconfirmedBalance(sender);
 
             let transaction = await tronWeb.transactionBuilder.sendTrx(receiver, 10, sender);
+            const previousId = transaction.txID;
             transaction = await tronWeb.transactionBuilder.extendExpiration(transaction, 3600);
             await broadcaster(null, privateKey, transaction);
 
+            assert.notEqual(transaction.txID, previousId)
             assert.equal(balance - await tronWeb.trx.getUnconfirmedBalance(sender), 10);
 
         });

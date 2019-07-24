@@ -1901,9 +1901,12 @@ export default class TransactionBuilder {
         if (!callback)
             return this.injectPromise(this.extendExpiration, transaction, extension);
         extension = parseInt(extension * 1000);
-        if (isNaN(extension))
+
+        if (isNaN(extension) || transaction.raw_data.expiration + extension <= Date.now() + 3000)
             return callback('Invalid extension provided');
+
         transaction.raw_data.expiration += extension;
+
         this.tronWeb.fullNode
             .request(
                 'wallet/getsignweight',
