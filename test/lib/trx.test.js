@@ -1117,12 +1117,13 @@ describe('TronWeb.trx', function () {
             let transaction;
 
             before(async function(){
-                transaction = await tronWeb.trx.freezeBalance(10e5, 3, 'BANDWIDTH', { privateKey: accounts.pks[idx], address: accounts.hex[idx] });
-                transaction = transaction.transaction;
+                transaction = (await tronWeb.trx.freezeBalance(10e5, 3, 'BANDWIDTH', { privateKey: accounts.pks[idx], address: accounts.hex[idx] })).transaction;
                 await waitChainData('tx', transaction.txID);
             });
 
             it('should get unconfirmed transaction by id', async function () {
+                this.timeout(10000)
+                await wait(2)
                 const tx = await tronWeb.trx.getUnconfirmedTransactionInfo(transaction.txID);
                 assert.equal(tx.id, transaction.txID);
             });
