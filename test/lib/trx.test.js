@@ -1123,7 +1123,7 @@ describe('TronWeb.trx', function () {
 
             it('should get unconfirmed transaction by id', async function () {
                 this.timeout(10000)
-                await wait(2)
+                await wait(3)
                 const tx = await tronWeb.trx.getUnconfirmedTransactionInfo(transaction.txID);
                 assert.equal(tx.id, transaction.txID);
             });

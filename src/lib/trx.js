@@ -821,11 +821,12 @@ export default class Trx {
         if (utils.isInteger(permissionId)) {
             transaction.raw_data.contract[0].Permission_id = parseInt(permissionId);
         } else if (typeof transaction.raw_data.contract[0].Permission_id !== 'number') {
-           transaction.raw_data.contract[0].Permission_id = 0;
+            transaction.raw_data.contract[0].Permission_id = 0;
         }
 
         if (!utils.isObject(transaction))
             return callback('Invalid transaction provided');
+
 
         this.tronWeb.fullNode.request(
             'wallet/getsignweight',
