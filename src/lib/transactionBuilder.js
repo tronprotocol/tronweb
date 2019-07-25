@@ -1925,6 +1925,5 @@ export default class TransactionBuilder {
             })
             .catch(err => callback('Error generating a new transaction id.'));
     }
-
-
+    
 }
