@@ -1897,5 +1897,33 @@ export default class TransactionBuilder {
         this.tronWeb.fullNode.request('wallet/accountpermissionupdate', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
+    async extendExpiration(transaction, extension, callback = false) {
+        if (!callback)
+            return this.injectPromise(this.extendExpiration, transaction, extension);
+        extension = parseInt(extension * 1000);
 
+        if (transaction.signature)
+            return callback('You can not extend the expiration of a signed transaction.')
+
+        if (isNaN(extension) || transaction.raw_data.expiration + extension <= Date.now() + 3000)
+            return callback('Invalid extension provided');
+
+        transaction.raw_data.expiration += extension;
+
+        this.tronWeb.fullNode
+            .request(
+                'wallet/getsignweight',
+                transaction,
+                'post'
+            )
+            .then(newTransaction => {
+                newTransaction = newTransaction.transaction.transaction
+                if (typeof transaction.visible === 'boolean') {
+                    newTransaction.visible = transaction.visible
+                }
+                callback(null, newTransaction)
+            })
+            .catch(err => callback('Error generating a new transaction id.'));
+    }
+    
 }
