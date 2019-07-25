@@ -1415,7 +1415,7 @@ describe('TronWeb.transactionBuilder', function () {
     describe("#tradeExchangeTokens", async function () {
     });
 
-    // Contract Test
+
     describe("#extendExpiration", async function () {
 
         it('should extend the expiration', async function () {
@@ -1432,6 +1432,33 @@ describe('TronWeb.transactionBuilder', function () {
 
             assert.notEqual(transaction.txID, previousId)
             assert.equal(balance - await tronWeb.trx.getUnconfirmedBalance(sender), 10);
+
+        });
+
+    });
+
+    describe("#alterTransaction", async function () {
+
+        it('should alter the transaction adding a data field', async function () {
+
+            this.timeout(20000)
+
+            const receiver = accounts.b58[1]
+            const sender = accounts.hex[0]
+            const privateKey = accounts.pks[0]
+            const balance = await tronWeb.trx.getUnconfirmedBalance(sender);
+
+            let transaction = await tronWeb.transactionBuilder.sendTrx(receiver, 10, sender);
+            const previousId = transaction.txID;
+            const data = "Sending money to Bill.";
+            transaction = await tronWeb.transactionBuilder.alterTransaction(transaction, {data});
+            const id = transaction.txID;
+            assert.notEqual(id, previousId)
+            await broadcaster(null, privateKey, transaction);
+            await waitChainData('tx', id);
+            assert.equal(balance - await tronWeb.trx.getUnconfirmedBalance(sender), 10);
+            const unconfirmedTx = await tronWeb.trx.getTransaction(id)
+            assert.equal(tronWeb.toUtf8(unconfirmedTx.raw_data.data), data);
 
         });
 
