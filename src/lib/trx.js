@@ -833,7 +833,6 @@ export default class Trx {
             transaction,
             'post'
         ).then(result => {
-            console.log(result)
             callback(null, result);
         }).catch(err => callback(err));
     }

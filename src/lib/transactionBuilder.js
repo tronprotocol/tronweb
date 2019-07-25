@@ -1897,18 +1897,10 @@ export default class TransactionBuilder {
         this.tronWeb.fullNode.request('wallet/accountpermissionupdate', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
-    async extendExpiration(transaction, extension, callback = false) {
+    async newTxID(transaction, callback) {
+
         if (!callback)
-            return this.injectPromise(this.extendExpiration, transaction, extension);
-        extension = parseInt(extension * 1000);
-
-        if (transaction.signature)
-            return callback('You can not extend the expiration of a signed transaction.')
-
-        if (isNaN(extension) || transaction.raw_data.expiration + extension <= Date.now() + 3000)
-            return callback('Invalid extension provided');
-
-        transaction.raw_data.expiration += extension;
+            return this.injectPromise(this.newTxID, transaction);
 
         this.tronWeb.fullNode
             .request(
@@ -1925,5 +1917,52 @@ export default class TransactionBuilder {
             })
             .catch(err => callback('Error generating a new transaction id.'));
     }
-    
+
+    async alterTransaction(transaction, options = {}, callback = false) {
+        if (!callback)
+            return this.injectPromise(this.alterTransaction, transaction, options);
+
+        if (transaction.signature)
+            return callback('You can not extend the expiration of a signed transaction.')
+
+        if (options.data) {
+            if (options.dataFormat !== 'hex')
+                options.data = this.tronWeb.toHex(options.data);
+            options.data = options.data.replace(/^0x/, '')
+            if (options.data.length === 0)
+                return callback('Invalid data provided');
+            transaction.raw_data.data = options.data;
+        }
+
+        if (options.extension) {
+            options.extension = parseInt(options.extension * 1000);
+            if (isNaN(options.extension) || transaction.raw_data.expiration + options.extension <= Date.now() + 3000)
+                return callback('Invalid extension provided');
+            transaction.raw_data.expiration += options.extension;
+        }
+
+        this.newTxID(transaction, callback)
+    }
+
+    async extendExpiration(transaction, extension, callback = false) {
+        if (!callback)
+            return this.injectPromise(this.extendExpiration, transaction, extension);
+
+        this.alterTransaction(transaction, {extension}, callback);
+    }
+
+    async addUpdateData(transaction, data, dataFormat = 'utf8', callback = false) {
+
+        if (utils.isFunction(dataFormat)) {
+            callback = dataFormat;
+            dataFormat = 'utf8';
+        }
+
+        if (!callback)
+            return this.injectPromise(this.addUpdateData, transaction, data, dataFormat);
+
+        this.alterTransaction(transaction, {data, dataFormat}, callback);
+    }
+
+
 }
