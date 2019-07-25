@@ -1902,6 +1902,9 @@ export default class TransactionBuilder {
             return this.injectPromise(this.extendExpiration, transaction, extension);
         extension = parseInt(extension * 1000);
 
+        if (transaction.signature)
+            return callback('You can not extend the expiration of a signed transaction.')
+
         if (isNaN(extension) || transaction.raw_data.expiration + extension <= Date.now() + 3000)
             return callback('Invalid extension provided');
 
