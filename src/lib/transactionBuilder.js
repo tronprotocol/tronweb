@@ -1918,12 +1918,6 @@ export default class TransactionBuilder {
             .catch(err => callback('Error generating a new transaction id.'));
     }
 
-    async extendExpiration(transaction, extension, callback = false) {
-        if (!callback)
-            return this.injectPromise(this.extendExpiration, transaction, extension);
-        this.alterTransaction(transaction, {extension}, callback)
-    }
-
     async alterTransaction(transaction, options = {}, callback = false) {
         if (!callback)
             return this.injectPromise(this.alterTransaction, transaction, options);
@@ -1949,5 +1943,26 @@ export default class TransactionBuilder {
 
         this.newTxID(transaction, callback)
     }
+
+    async extendExpiration(transaction, extension, callback = false) {
+        if (!callback)
+            return this.injectPromise(this.extendExpiration, transaction, extension);
+
+        this.alterTransaction(transaction, {extension}, callback);
+    }
+
+    async addUpdateData(transaction, data, dataFormat = 'utf8', callback = false) {
+
+        if (utils.isFunction(dataFormat)) {
+            callback = dataFormat;
+            dataFormat = 'utf8';
+        }
+
+        if (!callback)
+            return this.injectPromise(this.addUpdateData, transaction, data, dataFormat);
+
+        this.alterTransaction(transaction, {data, dataFormat}, callback);
+    }
+
 
 }
