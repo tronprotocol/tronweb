@@ -1186,7 +1186,6 @@ describe('TronWeb.transactionBuilder', function () {
         });
     });
 
-    // TODO fix this, Jackie
     describe.skip("#triggerConstantContract", async function () {
 
         let transaction;
