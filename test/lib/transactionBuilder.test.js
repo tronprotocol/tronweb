@@ -51,7 +51,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         it(`should send 10 trx from default address to accounts[1]`, async function () {
             const params = [
-                [accounts.b58[1], 10, { permissionId: 2 }],
+                [accounts.b58[1], 10, {permissionId: 2}],
                 [accounts.b58[1], 10]
             ];
             for (let param of params) {
@@ -70,7 +70,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         it(`should send 10 trx from accounts[0] to accounts[1]`, async function () {
             const params = [
-                [accounts.b58[1], 10, accounts.b58[0], { permissionId: 2 }],
+                [accounts.b58[1], 10, accounts.b58[0], {permissionId: 2}],
                 [accounts.b58[1], 10, accounts.b58[0]]
             ];
             for (let param of params) {
@@ -207,24 +207,24 @@ describe('TronWeb.transactionBuilder', function () {
             }
         });
 
-            it(`should create a TestToken without freezing anything in 3.6.0`, async function () {
-                if (tronWeb.fullnodeSatisfies('^3.6.0')) {
-                    const options = getTokenOptions();
-                    options.totalSupply = '100'
-                    options.frozenAmount = '0'
-                    options.frozenDuration = '0'
-                    options.saleEnd = options.saleEnd.toString()
-                    for (let i = 0; i < 2; i++) {
-                        if (i === 1) options.permissionId = 2;
-                        const transaction = await tronWeb.transactionBuilder.createToken(options);
-                        const parameter = txPars(transaction);
-                        await assertEqualHex(parameter.value.abbr, options.abbreviation);
-                        assert.equal(transaction.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
-                    }
-                } else {
-                    this.skip()
+        it(`should create a TestToken without freezing anything in 3.6.0`, async function () {
+            if (tronWeb.fullnodeSatisfies('^3.6.0')) {
+                const options = getTokenOptions();
+                options.totalSupply = '100'
+                options.frozenAmount = '0'
+                options.frozenDuration = '0'
+                options.saleEnd = options.saleEnd.toString()
+                for (let i = 0; i < 2; i++) {
+                    if (i === 1) options.permissionId = 2;
+                    const transaction = await tronWeb.transactionBuilder.createToken(options);
+                    const parameter = txPars(transaction);
+                    await assertEqualHex(parameter.value.abbr, options.abbreviation);
+                    assert.equal(transaction.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
                 }
-            });
+            } else {
+                this.skip()
+            }
+        });
 
 
         it('should throw if an invalid name is passed', async function () {
@@ -473,7 +473,7 @@ describe('TronWeb.transactionBuilder', function () {
         it(`should update accounts[3]`, async function () {
             const newName = 'New name'
             const params = [
-                [newName, accounts.b58[3], { permissionId: 2}],
+                [newName, accounts.b58[3], {permissionId: 2}],
                 [newName, accounts.b58[3]]
             ];
 
@@ -567,7 +567,7 @@ describe('TronWeb.transactionBuilder', function () {
             while (!tokenList) {
                 tokenList = await tronWeb.trx.getTokensIssuedByAddress(accounts.b58[2])
             }
-            if(isAllowSameTokenNameApproved) {
+            if (isAllowSameTokenNameApproved) {
                 tokenID = tokenList[tokenOptions.name].id
             } else {
                 tokenID = tokenList[tokenOptions.name].name
@@ -713,7 +713,7 @@ describe('TronWeb.transactionBuilder', function () {
             while (!tokenList) {
                 tokenList = await tronWeb.trx.getTokensIssuedByAddress(accounts.b58[5])
             }
-            if(isAllowSameTokenNameApproved) {
+            if (isAllowSameTokenNameApproved) {
                 tokenID = tokenList[tokenOptions.name].id
             } else {
                 tokenID = tokenList[tokenOptions.name].name
@@ -724,7 +724,7 @@ describe('TronWeb.transactionBuilder', function () {
         it('should verify that the asset has been created', async function () {
 
             let token
-            if(isAllowSameTokenNameApproved) {
+            if (isAllowSameTokenNameApproved) {
                 token = await tronWeb.trx.getTokenByID(tokenID)
                 assert.equal(token.id, tokenID)
             } else {
@@ -737,7 +737,7 @@ describe('TronWeb.transactionBuilder', function () {
             this.timeout(20000)
 
             const params = [
-                [accounts.b58[5], tokenID, 20, accounts.b58[2], { permissionId: 2 }],
+                [accounts.b58[5], tokenID, 20, accounts.b58[2], {permissionId: 2}],
                 [accounts.b58[5], tokenID, 20, accounts.b58[2]]
             ];
 
@@ -831,7 +831,7 @@ describe('TronWeb.transactionBuilder', function () {
                 tokenList = await tronWeb.trx.getTokensIssuedByAddress(accounts.b58[6])
             }
 
-            if(isAllowSameTokenNameApproved) {
+            if (isAllowSameTokenNameApproved) {
                 tokenID = tokenList[tokenOptions.name].id
             } else {
                 tokenID = tokenList[tokenOptions.name].name
@@ -842,7 +842,7 @@ describe('TronWeb.transactionBuilder', function () {
         it('should verify that the asset has been created', async function () {
 
             let token
-            if(isAllowSameTokenNameApproved) {
+            if (isAllowSameTokenNameApproved) {
                 token = await tronWeb.trx.getTokenByID(tokenID)
                 assert.equal(token.id, tokenID)
             } else {
@@ -856,7 +856,7 @@ describe('TronWeb.transactionBuilder', function () {
             this.timeout(20000)
 
             const params = [
-                [accounts.b58[1], 5, tokenID, accounts.b58[7], { permissionId: 2 }],
+                [accounts.b58[1], 5, tokenID, accounts.b58[7], {permissionId: 2}],
                 [accounts.b58[1], 5, tokenID, accounts.b58[7]]
             ];
 
@@ -884,7 +884,7 @@ describe('TronWeb.transactionBuilder', function () {
         it("should allow accounts [6]  to send a token to accounts[1]", async function () {
 
             const params = [
-                [accounts.b58[1], 5, tokenID, accounts.b58[6], { permissionId: 2 }],
+                [accounts.b58[1], 5, tokenID, accounts.b58[6], {permissionId: 2}],
                 [accounts.b58[1], 5, tokenID, accounts.b58[6]]
             ];
 
@@ -948,7 +948,7 @@ describe('TronWeb.transactionBuilder', function () {
         it('should allow the SR account to create a new proposal as a single object', async function () {
 
             const inputs = [
-                [parameters[0], ADDRESS_BASE58, { permissionId: 2 }],
+                [parameters[0], ADDRESS_BASE58, {permissionId: 2}],
                 [parameters[0], ADDRESS_BASE58]
             ];
             for (let input of inputs) {
@@ -967,7 +967,7 @@ describe('TronWeb.transactionBuilder', function () {
         it('should allow the SR account to create a new proposal as an array of objects', async function () {
 
             const inputs = [
-                [parameters, ADDRESS_BASE58, { permissionId: 2 }],
+                [parameters, ADDRESS_BASE58, {permissionId: 2}],
                 [parameters, ADDRESS_BASE58]
             ];
 
@@ -1028,8 +1028,8 @@ describe('TronWeb.transactionBuilder', function () {
 
         after(async function () {
             proposals = await tronWeb.trx.listProposals();
-            for(let proposal of proposals) {
-                if(proposal.state !== 'CANCELED')
+            for (let proposal of proposals) {
+                if (proposal.state !== 'CANCELED')
                     await broadcaster(tronWeb.transactionBuilder.deleteProposal(proposal.proposal_id), PRIVATE_KEY)
             }
         })
@@ -1037,7 +1037,7 @@ describe('TronWeb.transactionBuilder', function () {
         it('should allow the SR to delete its own proposal', async function () {
 
             const params = [
-                [proposals[0].proposal_id, { permissionId: 2 }],
+                [proposals[0].proposal_id, {permissionId: 2}],
                 [proposals[0].proposal_id]
             ];
             for (let param of params) {
@@ -1089,7 +1089,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should allows accounts[1] to freeze its balance', async function () {
             const params = [
-                [100e6, 3, 'BANDWIDTH', accounts.b58[1], { permissionId: 2 }],
+                [100e6, 3, 'BANDWIDTH', accounts.b58[1], {permissionId: 2}],
                 [100e6, 3, 'BANDWIDTH', accounts.b58[1]]
             ];
 
@@ -1185,11 +1185,10 @@ describe('TronWeb.transactionBuilder', function () {
         });
     });
 
-    // TODO fix this, Jackie
     describe.skip("#triggerConstantContract", async function () {
 
         let transaction;
-        before(async function() {
+        before(async function () {
             this.timeout(20000);
 
             transaction = await tronWeb.transactionBuilder.createSmartContract({
@@ -1215,8 +1214,8 @@ describe('TronWeb.transactionBuilder', function () {
             const issuerAddress = accounts.hex[6];
             const functionSelector = 'testPure(uint256,uint256)';
             const parameter = [
-                { type: 'uint256', value: 1 },
-                { type: 'uint256', value: 2 }
+                {type: 'uint256', value: 1},
+                {type: 'uint256', value: 2}
             ]
             const options = {};
 
@@ -1239,7 +1238,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         let transaction;
         let contract;
-        before(async function() {
+        before(async function () {
             this.timeout(20000);
 
             transaction = await tronWeb.transactionBuilder.createSmartContract({
@@ -1296,7 +1295,7 @@ describe('TronWeb.transactionBuilder', function () {
     describe.skip("#triggerSmartContract", async function () {
 
         let transaction;
-        before(async function() {
+        before(async function () {
             this.timeout(20000);
 
             transaction = await tronWeb.transactionBuilder.createSmartContract({
@@ -1322,8 +1321,8 @@ describe('TronWeb.transactionBuilder', function () {
             const issuerAddress = accounts.hex[6];
             const functionSelector = 'testPure(uint256,uint256)';
             const parameter = [
-                { type: 'uint256', value: 1 },
-                { type: 'uint256', value: 2 }
+                {type: 'uint256', value: 1},
+                {type: 'uint256', value: 2}
             ]
             const options = {};
 
@@ -1350,7 +1349,7 @@ describe('TronWeb.transactionBuilder', function () {
         const toIdx2 = 6;
         let tokenNames = [];
 
-        before(async function(){
+        before(async function () {
             this.timeout(20000);
 
             // create token
@@ -1412,6 +1411,82 @@ describe('TronWeb.transactionBuilder', function () {
     });
 
     describe("#tradeExchangeTokens", async function () {
+    });
+
+    describe("Alter existent transactions", async function () {
+
+        describe("#extendExpiration", async function () {
+
+            it('should extend the expiration', async function () {
+
+                const receiver = accounts.b58[1]
+                const sender = accounts.hex[0]
+                const privateKey = accounts.pks[0]
+                const balance = await tronWeb.trx.getUnconfirmedBalance(sender);
+
+                let transaction = await tronWeb.transactionBuilder.sendTrx(receiver, 10, sender);
+                const previousId = transaction.txID;
+                transaction = await tronWeb.transactionBuilder.extendExpiration(transaction, 3600);
+                await broadcaster(null, privateKey, transaction);
+
+                assert.notEqual(transaction.txID, previousId)
+                assert.equal(balance - await tronWeb.trx.getUnconfirmedBalance(sender), 10);
+
+            });
+
+        });
+
+        describe("#addUpdateData", async function () {
+
+            it('should add a data field', async function () {
+
+                this.timeout(20000)
+
+                const receiver = accounts.b58[1]
+                const sender = accounts.hex[0]
+                const privateKey = accounts.pks[0]
+                const balance = await tronWeb.trx.getUnconfirmedBalance(sender);
+
+                let transaction = await tronWeb.transactionBuilder.sendTrx(receiver, 10, sender);
+                const data = "Sending money to Bill.";
+                transaction = await tronWeb.transactionBuilder.addUpdateData(transaction, data);
+                const id = transaction.txID;
+                await broadcaster(null, privateKey, transaction);
+                await waitChainData('tx', id);
+                assert.equal(balance - await tronWeb.trx.getUnconfirmedBalance(sender), 10);
+                const unconfirmedTx = await tronWeb.trx.getTransaction(id)
+                assert.equal(tronWeb.toUtf8(unconfirmedTx.raw_data.data), data);
+
+            });
+
+        });
+
+        describe("#alterTransaction", async function () {
+
+            it('should alter the transaction adding a data field', async function () {
+
+                this.timeout(20000)
+
+                const receiver = accounts.b58[1]
+                const sender = accounts.hex[0]
+                const privateKey = accounts.pks[0]
+                const balance = await tronWeb.trx.getUnconfirmedBalance(sender);
+
+                let transaction = await tronWeb.transactionBuilder.sendTrx(receiver, 10, sender);
+                const previousId = transaction.txID;
+                const data = "Sending money to Bill.";
+                transaction = await tronWeb.transactionBuilder.alterTransaction(transaction, {data});
+                const id = transaction.txID;
+                assert.notEqual(id, previousId)
+                await broadcaster(null, privateKey, transaction);
+                await waitChainData('tx', id);
+                assert.isTrue(balance > await tronWeb.trx.getUnconfirmedBalance(sender));
+                const unconfirmedTx = await tronWeb.trx.getTransaction(id)
+                assert.equal(tronWeb.toUtf8(unconfirmedTx.raw_data.data), data);
+
+            });
+
+        });
     });
 
 

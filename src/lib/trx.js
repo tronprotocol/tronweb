@@ -117,7 +117,7 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
-    getTransactionFromBlock(block = this.tronWeb.defaultBlock, index = 0, callback = false) {
+    getTransactionFromBlock(block = this.tronWeb.defaultBlock, index, callback = false) {
         if (utils.isFunction(index)) {
             callback = index;
             index = 0;
@@ -131,14 +131,16 @@ export default class Trx {
         if (!callback)
             return this.injectPromise(this.getTransactionFromBlock, block, index);
 
-        if (!utils.isInteger(index) || index < 0)
-            return callback('Invalid transaction index provided');
-
         this.getBlock(block).then(({transactions = false}) => {
-            if (!transactions || transactions.length < index)
-                return callback('Transaction not found in block');
-
-            callback(null, transactions[index]);
+            if (!transactions)
+                callback('Transaction not found in block');
+            else if (typeof index == 'number'){
+                if (index >= 0 && index < transactions.length)
+                    callback(null, transactions[index]);
+                else
+                    callback('Invalid transaction index provided');
+            } else
+                callback(null, transactions);
         }).catch(err => callback(err));
     }
 
@@ -815,7 +817,6 @@ export default class Trx {
 
         if (!utils.isObject(transaction) || !transaction.raw_data || !transaction.raw_data.contract)
             return callback('Invalid transaction provided');
-
 
         if (utils.isInteger(permissionId)) {
             transaction.raw_data.contract[0].Permission_id = parseInt(permissionId);

@@ -6,19 +6,19 @@
   <a href="https://discord.gg/GsRgsTD">
     <img src="https://img.shields.io/badge/chat-on%20discord-brightgreen.svg">
   </a>
-  
+
   <a href="https://github.com/tron-us/tronweb/issues">
     <img src="https://img.shields.io/github/issues/tron-us/tronweb.svg">
   </a>
-  
+
   <a href="https://github.com/tron-us/tronweb/pulls">
     <img src="https://img.shields.io/github/issues-pr/tron-us/tronweb.svg">
   </a>
-  
+
   <a href="https://github.com/tron-us/tronweb/graphs/contributors">
     <img src="https://img.shields.io/github/contributors/tron-us/tronweb.svg">
   </a>
-  
+
   <a href="LICENSE">
     <img src="https://img.shields.io/github/license/tron-us/tronweb.svg">
   </a>
@@ -37,7 +37,7 @@ TronWeb aims to deliver a unified, seamless development experience influenced by
 You can access either version specifically from the [dist](dist) folder.
 
 TronWeb is also compatible with frontend frameworks such as:
-- Angular 
+- Angular
 - React
 - Vue.
 
@@ -167,6 +167,11 @@ In order to contribute you can
 * push your changes and open a pull request
 
 ## Recent History
+
+__2.6.8__
+* Support extension of transaction expiration
+* Allow to add data to the transaction
+* Many minor changes and fixes
 
 __2.6.3__
 * Support get unconfirmed transaction function
