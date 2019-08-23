@@ -411,22 +411,21 @@ export default class TransactionBuilder {
         this.tronWeb.fullNode.request('wallet/withdrawbalance', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
-    applyForSR(address = this.tronWeb.defaultAddress.hex, url = false, options, callback = false) {
+    applyForSR(
+        address = this.tronWeb.defaultAddress.hex,
+        url = false,
+        options,
+        callback = false
+    ) {
+        console.log(toHex(address), utils.isObject(url))
         if (utils.isFunction(options)) {
             callback = options;
             options = {};
         }
-
-        if (utils.isValidURL(address)) {
-            callback = url || false;
-            url = address;
-            address = this.tronWeb.defaultAddress.hex;
-        }
-
-        if (utils.isObject(url)) {
-            address = this.tronWeb.defaultAddress.hex;
-            url = address;
+        if (utils.isObject(url) && utils.isValidURL(address)) {
             options = url;
+            url = address;
+            address = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback)
@@ -446,6 +445,8 @@ export default class TransactionBuilder {
             }
         ], callback))
             return;
+
+        console.log(toHex(address))
 
         const data = {
             owner_address: toHex(address),
