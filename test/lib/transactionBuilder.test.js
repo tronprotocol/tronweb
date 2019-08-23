@@ -1067,23 +1067,22 @@ describe('TronWeb.transactionBuilder', function () {
 
     });
 
-    // describe("#applyForSR", async function () {
-    //
-    //     let url = 'https://xtron.network';
-    //
-    //     it('should allow accounts[0] to apply for SR', async function () {
-    //
-    //
-    //         const transaction = await tronWeb.transactionBuilder.applyForSR(accounts.b58[0], url);
-    //         const parameter = txPars(transaction);
-    //
-    //         assert.equal(parameter.value.owner_address, accounts.hex[0]);
-    //         await assertEqualHex(parameter.value.url, url);
-    //         assert.equal(parameter.type_url, 'type.googleapis.com/protocol.WitnessCreateContract');
-    //     });
-    //
-    //     // TODO add invalid params throws
-    // });
+    describe("#applyForSR", async function () {
+
+        let url = 'https://xtron.network';
+
+        it('should allow accounts[0] to apply for SR', async function () {
+
+            const transaction = await tronWeb.transactionBuilder.applyForSR(accounts.b58[20], url);
+            const parameter = txPars(transaction);
+
+            assert.equal(parameter.value.owner_address, accounts.hex[20]);
+            await assertEqualHex(parameter.value.url, url);
+            assert.equal(parameter.type_url, 'type.googleapis.com/protocol.WitnessCreateContract');
+        });
+
+        // TODO add invalid params throws
+    });
 
 
     describe("#freezeBalance", async function () {
