@@ -246,4 +246,18 @@ describe('TronWeb.utils', function () {
 
     });
 
+    describe("#ethersUtils()", function () {
+
+        it('should import sha256 from ethers and has a string', function () {
+            const tronWeb = tronWebBuilder.createInstance();
+
+            const string = '0x' + Buffer.from('some string').toString('hex');
+            const hash = tronWeb.utils.ethersUtils.sha256(string);
+
+            assert.equal(hash, '0x61d034473102d7dac305902770471fd50f4c5b26f6831a56dd90b5184b3c30fc');
+
+        })
+
+    });
+
 });

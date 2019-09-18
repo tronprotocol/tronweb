@@ -4,6 +4,7 @@ import * as bytes from './bytes';
 import * as crypto from './crypto';
 import * as code from './code';
 import * as abi from './abi';
+import * as ethersUtils from './ethersUtils';
 
 import validator from 'validator';
 import BigNumber from 'bignumber.js';
@@ -164,5 +165,6 @@ export default {
     base58,
     bytes,
     crypto,
-    abi
+    abi,
+    ethersUtils
 };

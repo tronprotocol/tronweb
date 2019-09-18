@@ -1,6 +1,6 @@
 {
     "name": "tronweb",
-    "version": "2.7.0",
+    "version": "2.7.1",
     "description": "JavaScript SDK that encapsulates the TRON HTTP API",
     "main": "dist/TronWeb.node.js",
     "scripts": {
@@ -10,6 +10,7 @@
         "clean": "rimraf dist",
         "newaccount": "node scripts/test-node.js && node test/helpers/newAccounts 50",
         "test": "node scripts/test-node.js && node test/helpers/newAccounts 50 npm run-script newaccount && npx mocha 'test/**/*.test.js'",
+        "test-no-accounts": "node scripts/test-node.js && npx mocha 'test/**/*.test.js'",
         "test:browser": "npm run-script newaccount && node scripts/test-browser.js && npx karma start --single-run --browsers ChromeHeadless",
         "coverage": "npm run-script test:browser && npm run-script test",
         "btest": "npm run build:dev && npm run test"
