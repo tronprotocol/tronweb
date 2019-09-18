@@ -1067,7 +1067,7 @@ describe('TronWeb.transactionBuilder', function () {
 
     });
 
-    describe("#applyForSR", async function () {
+    describe.skip("#applyForSR", async function () {
 
         let url = 'https://xtron.network';
 
