@@ -1292,7 +1292,7 @@ describe('TronWeb.transactionBuilder', function () {
     });
 
     // TODO fix this, Jackie
-    describe.skip("#triggerSmartContract", async function () {
+    describe("#triggerSmartContract", async function () {
 
         let transaction;
         before(async function () {
@@ -1485,6 +1485,24 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(tronWeb.toUtf8(unconfirmedTx.raw_data.data), data);
 
             });
+
+        });
+    });
+
+    describe("#getReward", async function () {
+        it('should get the reward', async function () {
+
+            let transaction = await tronWeb.transactionBuilder.getReward(accounts[0]);
+            assert.equal(transaction.reward, 0)
+
+        });
+    });
+
+    describe("#getBrokerage", async function () {
+        it('should get the brokerage', async function () {
+
+            let transaction = await tronWeb.transactionBuilder.getBrokerage(accounts[0]);
+            assert.equal(transaction.brokerage, 0)
 
         });
     });
