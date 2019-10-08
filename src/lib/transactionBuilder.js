@@ -9,7 +9,7 @@ let self;
 //helpers
 
 function toHex(value) {
-    return self.tronWeb.address.toHex(value);
+    return TronWeb.address.toHex(value);
 }
 
 function fromUtf8(value) {
@@ -1963,74 +1963,6 @@ export default class TransactionBuilder {
             return this.injectPromise(this.addUpdateData, transaction, data, dataFormat);
 
         this.alterTransaction(transaction, {data, dataFormat}, callback);
-    }
-
-
-    async getReward(address = this.tronWeb.defaultAddress.hex, options, callback = false) {
-        if (utils.isFunction(options)) {
-            callback = options;
-            options = {};
-        }
-
-        if (utils.isFunction(address)) {
-            callback = address;
-            address = this.tronWeb.defaultAddress.hex;
-        } else if (utils.isObject(address)) {
-            options = address;
-            address = this.tronWeb.defaultAddress.hex;
-        }
-
-        if (!callback)
-            return this.injectPromise(this.getReward, address, options);
-
-        if (this.validator.notValid([
-            {
-                name: 'origin',
-                type: 'address',
-                value: address
-            }
-        ], callback))
-            return;
-
-        const data = {
-            owner_address: toHex(address)
-        };
-
-        this.tronWeb.solidityNode.request('walletsolidity/getReward', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
-    }
-
-
-    async getBrokerage(address = this.tronWeb.defaultAddress.hex, options, callback = false) {
-        if (utils.isFunction(options)) {
-            callback = options;
-            options = {};
-        }
-
-        if (utils.isFunction(address)) {
-            callback = address;
-            address = this.tronWeb.defaultAddress.hex;
-        } else if (utils.isObject(address)) {
-            options = address;
-            address = this.tronWeb.defaultAddress.hex;
-        }
-
-        if (!callback)
-            return this.injectPromise(this.getBrokerage, address, options);
-
-        if (this.validator.notValid([
-            {
-                name: 'origin',
-                type: 'address',
-                value: address
-            }
-        ], callback))
-            return;
-
-        const data = {
-            owner_address: toHex(address)
-        };
-
-        this.tronWeb.solidityNode.request('walletsolidity/getBrokerage', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
 }

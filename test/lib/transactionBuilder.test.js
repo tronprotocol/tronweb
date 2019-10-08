@@ -1489,23 +1489,4 @@ describe('TronWeb.transactionBuilder', function () {
         });
     });
 
-    describe("#getReward", async function () {
-        it('should get the reward', async function () {
-
-            let transaction = await tronWeb.transactionBuilder.getReward(accounts[0]);
-            assert.equal(transaction.reward, 0)
-
-        });
-    });
-
-    describe("#getBrokerage", async function () {
-        it('should get the brokerage', async function () {
-
-            let transaction = await tronWeb.transactionBuilder.getBrokerage(accounts[0]);
-            assert.equal(transaction.brokerage, 0)
-
-        });
-    });
-
-
 });
