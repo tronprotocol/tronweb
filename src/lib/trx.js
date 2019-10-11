@@ -5,7 +5,12 @@ import {ADDRESS_PREFIX} from 'utils/address';
 import Validator from "../paramValidator";
 
 const TRX_MESSAGE_HEADER = '\x19TRON Signed Message:\n32';
+// it should be: '\x15TRON Signed Message:\n32';
 const ETH_MESSAGE_HEADER = '\x19Ethereum Signed Message:\n32';
+
+function toHex(value) {
+    return TronWeb.address.toHex(value);
+}
 
 export default class Trx {
     constructor(tronWeb = false) {
@@ -134,7 +139,7 @@ export default class Trx {
         this.getBlock(block).then(({transactions = false}) => {
             if (!transactions)
                 callback('Transaction not found in block');
-            else if (typeof index == 'number'){
+            else if (typeof index == 'number') {
                 if (index >= 0 && index < transactions.length)
                     callback(null, transactions[index]);
                 else
@@ -622,8 +627,8 @@ export default class Trx {
     }
 
     static verifySignature(message, address, signature, useTronHeader = true) {
-        message = message.replace(/^0x/,'');
-        signature = signature.replace(/^0x/,'');
+        message = message.replace(/^0x/, '');
+        signature = signature.replace(/^0x/, '');
         const messageBytes = [
             ...toUtf8Bytes(useTronHeader ? TRX_MESSAGE_HEADER : ETH_MESSAGE_HEADER),
             ...utils.code.hexStr2byteArray(message)
@@ -704,7 +709,7 @@ export default class Trx {
     }
 
     static signString(message, privateKey, useTronHeader = true) {
-        message = message.replace(/^0x/,'');
+        message = message.replace(/^0x/, '');
         const signingKey = new SigningKey(privateKey);
         const messageBytes = [
             ...toUtf8Bytes(useTronHeader ? TRX_MESSAGE_HEADER : ETH_MESSAGE_HEADER),
@@ -1304,6 +1309,107 @@ export default class Trx {
 
             callback(null, this._parseToken(token));
         }).catch(err => callback(err));
+    }
+
+    async getReward(address, options = {}, callback = false) {
+        options.confirmed = true;
+        return this._getReward(address, options, callback);
+    }
+
+    async getUnconfirmedReward(address, options = {}, callback = false) {
+        options.confirmed = false;
+        return this._getReward(address, options, callback);
+    }
+
+    async getBrokerage(address, options = {}, callback = false) {
+        options.confirmed = true;
+        return this._getBrokerage(address, options, callback);
+    }
+
+    async getUnconfirmedBrokerage(address, options = {}, callback = false) {
+        options.confirmed = false;
+        return this._getBrokerage(address, options, callback);
+    }
+
+    async _getReward(address = this.tronWeb.defaultAddress.hex, options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
+        if (utils.isFunction(address)) {
+            callback = address;
+            address = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(address)) {
+            options = address;
+            address = this.tronWeb.defaultAddress.hex;
+        }
+
+        if (!callback)
+            return this.injectPromise(this._getReward, address, options);
+
+        if (this.validator.notValid([
+            {
+                name: 'origin',
+                type: 'address',
+                value: address
+            }
+        ], callback))
+            return;
+
+        const data = {
+            owner_address: toHex(address)
+        };
+
+        this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(`wallet${options.confirmed ? 'solidity' : ''}/getReward`, data, 'post')
+            .then((result = {}) => {
+
+                if (typeof result.reward === 'undefined')
+                    return callback('Not found.');
+
+                callback(null, result.reward);
+            }).catch(err => callback(err));
+    }
+
+
+    async _getBrokerage(address = this.tronWeb.defaultAddress.hex, options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
+        if (utils.isFunction(address)) {
+            callback = address;
+            address = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(address)) {
+            options = address;
+            address = this.tronWeb.defaultAddress.hex;
+        }
+
+        if (!callback)
+            return this.injectPromise(this._getBrokerage, address, options);
+
+        if (this.validator.notValid([
+            {
+                name: 'origin',
+                type: 'address',
+                value: address
+            }
+        ], callback))
+            return;
+
+        const data = {
+            owner_address: toHex(address)
+        };
+
+        this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(`wallet${options.confirmed ? 'solidity' : ''}/getBrokerage`, data, 'post')
+            .then((result = {}) => {
+
+                if (typeof result.brokerage === 'undefined')
+                    return callback('Not found.');
+
+                callback(null, result.brokerage);
+            }).catch(err => callback(err));
     }
 
 };

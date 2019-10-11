@@ -9,7 +9,7 @@ let self;
 //helpers
 
 function toHex(value) {
-    return self.tronWeb.address.toHex(value);
+    return TronWeb.address.toHex(value);
 }
 
 function fromUtf8(value) {
@@ -721,6 +721,12 @@ export default class TransactionBuilder {
         return this.triggerSmartContract(...params);
     }
 
+    triggerConfirmedConstantContract(...params) {
+        params[2]._isConstant = true
+        params[2].confirmed = true
+        return this.triggerSmartContract(...params);
+    }
+
     _triggerSmartContract(
         contractAddress,
         functionSelector,
@@ -868,7 +874,7 @@ export default class TransactionBuilder {
             args.Permission_id = options.permissionId;
         }
 
-        this.tronWeb.fullNode.request(`wallet/trigger${options._isConstant ? 'constant' : 'smart'}contract`, args, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
+        this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(`wallet${options.confirmed ? 'solidity' : ''}/trigger${options._isConstant ? 'constant' : 'smart'}contract`, args, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
     }
 
     clearABI(contractAddress, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
@@ -890,6 +896,28 @@ export default class TransactionBuilder {
             delete this.tronWeb.trx.cache.contracts[contractAddress]
         }
         this.tronWeb.fullNode.request('wallet/clearabi', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
+
+    }
+
+    updateBrokerage(brokerage, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+        if (!callback)
+            return this.injectPromise(this.updateBrokerage, brokerage, ownerAddress);
+
+        if (!utils.isNotNullOrUndefined(brokerage))
+            return callback('Invalid brokerage provided');
+
+        if (!utils.isInteger(brokerage) || brokerage < 0 || brokerage > 100)
+            return callback('Brokerage must be an integer between 0 and 100');
+
+        if (!this.tronWeb.isAddress(ownerAddress))
+            return callback('Invalid owner address provided');
+
+        const data = {
+            brokerage: parseInt(brokerage),
+            owner_address: toHex(ownerAddress)
+        };
+
+        this.tronWeb.fullNode.request('wallet/updateBrokerage', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
 
     }
 
@@ -1964,6 +1992,5 @@ export default class TransactionBuilder {
 
         this.alterTransaction(transaction, {data, dataFormat}, callback);
     }
-
 
 }

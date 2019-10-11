@@ -1185,7 +1185,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
     });
 
-    describe.skip("#triggerConstantContract", async function () {
+    describe("#triggerConstantContract", async function () {
 
         let transaction;
         before(async function () {
@@ -1233,8 +1233,55 @@ describe('TronWeb.transactionBuilder', function () {
         });
     });
 
-    // TODO fix this, Jackie
-    describe.skip("#clearabi", async function () {
+    describe("#triggerComfirmedConstantContract", async function () {
+
+        let transaction;
+        before(async function () {
+            this.timeout(20000);
+
+            transaction = await tronWeb.transactionBuilder.createSmartContract({
+                abi: testConstantContract.abi,
+                bytecode: testConstantContract.bytecode
+            }, accounts.hex[6]);
+            await broadcaster(null, accounts.pks[6], transaction);
+            while (true) {
+                const tx = await tronWeb.trx.getTransactionInfo(transaction.txID);
+                if (Object.keys(tx).length === 0) {
+                    await wait(3);
+                    continue;
+                } else {
+                    break;
+                }
+            }
+        })
+
+        it('should trigger confirmed constant contract successfully', async function () {
+            this.timeout(20000);
+
+            const contractAddress = transaction.contract_address;
+            const issuerAddress = accounts.hex[6];
+            const functionSelector = 'testPure(uint256,uint256)';
+            const parameter = [
+                {type: 'uint256', value: 1},
+                {type: 'uint256', value: 2}
+            ]
+            const options = {};
+
+            for (let i = 0; i < 2; i++) {
+                if (i === 1) options.permissionId = 2;
+                transaction = await tronWeb.transactionBuilder.triggerConfirmedConstantContract(contractAddress, functionSelector, options,
+                    parameter, issuerAddress);
+                assert.isTrue(transaction.result.result &&
+                    transaction.transaction.raw_data.contract[0].parameter.type_url === 'type.googleapis.com/protocol.TriggerSmartContract');
+                assert.equal(transaction.constant_result, '0000000000000000000000000000000000000000000000000000000000000004');
+                transaction = await broadcaster(null, accounts.pks[6], transaction.transaction);
+                assert.isTrue(transaction.receipt.result)
+                assert.equal(transaction.transaction.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
+            }
+        });
+    });
+
+    describe("#clearabi", async function () {
 
         let transaction;
         let contract;
@@ -1288,11 +1335,42 @@ describe('TronWeb.transactionBuilder', function () {
         });
     });
 
+    describe("#updateBrokerage", async function () {
+
+        it('should update sr brokerage successfully', async function () {
+            // const transaction = await tronWeb.transactionBuilder.updateBrokerage(10, accounts.hex[1]);
+        });
+
+        it('should throw invalid brokerage provided error', async function () {
+            await assertThrow(
+                tronWeb.transactionBuilder.updateBrokerage(null, accounts.hex[1]),
+                'Invalid brokerage provided'
+            );
+        });
+
+        it('should throw brokerage must be an integer between 0 and 100 error', async function () {
+            let brokerages = [-1, 101]
+            for (let brokerage of brokerages) {
+                await assertThrow(
+                    tronWeb.transactionBuilder.updateBrokerage(brokerage, accounts.hex[1]),
+                    'Brokerage must be an integer between 0 and 100'
+                );
+            }
+        });
+
+        it('should throw invalid owner address provided error', async function () {
+            await assertThrow(
+                tronWeb.transactionBuilder.updateBrokerage(10, 'abcd'),
+                'Invalid owner address provided'
+            );
+        });
+
+    });
+
     describe("#withdrawBlockRewards", async function () {
     });
 
-    // TODO fix this, Jackie
-    describe.skip("#triggerSmartContract", async function () {
+    describe("#triggerSmartContract", async function () {
 
         let transaction;
         before(async function () {
@@ -1488,6 +1566,5 @@ describe('TronWeb.transactionBuilder', function () {
 
         });
     });
-
 
 });
