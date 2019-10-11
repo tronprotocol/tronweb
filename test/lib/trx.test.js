@@ -1760,5 +1760,42 @@ describe('TronWeb.trx', function () {
 
     });
 
+    describe("#getReward", async function () {
+        it('should get the reward', async function () {
+
+            let reward = await tronWeb.trx.getReward(accounts[0]);
+            assert.equal(reward, 0)
+
+        });
+    });
+
+    describe("#getUnconfirmedReward", async function () {
+        it('should get the reward', async function () {
+
+            let reward = await tronWeb.trx.getUnconfirmedReward(accounts[0]);
+            assert.equal(reward, 0)
+
+        });
+    });
+
+    describe("#getBrokerage", async function () {
+        it('should get the brokerage', async function () {
+
+            let brokerage = await tronWeb.trx.getBrokerage(accounts[0]);
+            assert.equal(brokerage, 0)
+
+        });
+    });
+
+    describe("#getUnconfirmedBrokerage", async function () {
+        it('should get the brokerage', async function () {
+
+            let brokerage = await tronWeb.trx.getUnconfirmedBrokerage(accounts[0]);
+            assert.equal(brokerage, 0)
+
+        });
+    });
+
+
 
 });

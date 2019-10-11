@@ -1292,7 +1292,7 @@ describe('TronWeb.transactionBuilder', function () {
     });
 
     // TODO fix this, Jackie
-    describe.skip("#triggerSmartContract", async function () {
+    describe("#triggerSmartContract", async function () {
 
         let transaction;
         before(async function () {
@@ -1488,6 +1488,5 @@ describe('TronWeb.transactionBuilder', function () {
 
         });
     });
-
 
 });

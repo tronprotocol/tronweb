@@ -9,7 +9,7 @@ let self;
 //helpers
 
 function toHex(value) {
-    return self.tronWeb.address.toHex(value);
+    return TronWeb.address.toHex(value);
 }
 
 function fromUtf8(value) {
@@ -1964,6 +1964,5 @@ export default class TransactionBuilder {
 
         this.alterTransaction(transaction, {data, dataFormat}, callback);
     }
-
 
 }
