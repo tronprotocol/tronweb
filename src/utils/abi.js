@@ -19,6 +19,14 @@ export function decodeParams(names, types, output, ignoreMethodHash) {
     if (output.replace(/^0x/, '').length % 64)
         throw new Error('The encoded string is not valid. Its length must be a multiple of 64.');
 
+    // workaround for unsupported trcToken type
+    types = types.map(type => {
+        if (/trcToken/.test(type)) {
+            type = type.replace(/trcToken/, 'uint256')
+        }
+        return type
+    })
+
     return abiCoder.decode(types, output).reduce((obj, arg, index) => {
         if (types[index] == 'address')
             arg = ADDRESS_PREFIX + arg.substr(2).toLowerCase();

@@ -2,6 +2,7 @@ import TronWeb from 'index';
 import utils from 'utils';
 import {keccak256, toUtf8Bytes, recoverAddress, SigningKey} from 'utils/ethersUtils';
 import {ADDRESS_PREFIX} from 'utils/address';
+import Validator from "../paramValidator";
 
 const TRX_MESSAGE_HEADER = '\x19TRON Signed Message:\n32';
 const ETH_MESSAGE_HEADER = '\x19Ethereum Signed Message:\n32';
@@ -16,6 +17,7 @@ export default class Trx {
         this.cache = {
             contracts: {}
         }
+        this.validator = new Validator(tronWeb);
     }
 
     _parseToken(token) {
@@ -115,7 +117,7 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
-    getTransactionFromBlock(block = this.tronWeb.defaultBlock, index = 0, callback = false) {
+    getTransactionFromBlock(block = this.tronWeb.defaultBlock, index, callback = false) {
         if (utils.isFunction(index)) {
             callback = index;
             index = 0;
@@ -129,14 +131,16 @@ export default class Trx {
         if (!callback)
             return this.injectPromise(this.getTransactionFromBlock, block, index);
 
-        if (!utils.isInteger(index) || index < 0)
-            return callback('Invalid transaction index provided');
-
         this.getBlock(block).then(({transactions = false}) => {
-            if (!transactions || transactions.length < index)
-                return callback('Transaction not found in block');
-
-            callback(null, transactions[index]);
+            if (!transactions)
+                callback('Transaction not found in block');
+            else if (typeof index == 'number'){
+                if (index >= 0 && index < transactions.length)
+                    callback(null, transactions[index]);
+                else
+                    callback('Invalid transaction index provided');
+            } else
+                callback(null, transactions);
         }).catch(err => callback(err));
     }
 
@@ -168,11 +172,19 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
-    getTransactionInfo(transactionID, callback = false) {
-        if (!callback)
-            return this.injectPromise(this.getTransactionInfo, transactionID);
+    getUnconfirmedTransactionInfo(transactionID, callback = false) {
+        return this._getTransactionInfoById(transactionID, {confirmed: false}, callback)
+    }
 
-        this.tronWeb.solidityNode.request('walletsolidity/gettransactioninfobyid', {
+    getTransactionInfo(transactionID, callback = false) {
+        return this._getTransactionInfoById(transactionID, {confirmed: true}, callback)
+    }
+
+    _getTransactionInfoById(transactionID, options, callback = false) {
+        if (!callback)
+            return this.injectPromise(this._getTransactionInfoById, transactionID, options);
+
+        this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(`wallet${options.confirmed ? 'solidity' : ''}/gettransactioninfobyid`, {
             value: transactionID
         }, 'post').then(transaction => {
             callback(null, transaction);
@@ -305,6 +317,41 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
+    getAccountById(id = false, callback = false) {
+        if (!callback)
+            return this.injectPromise(this.getAccountById, id);
+
+        this.getAccountInfoById(id, {confirmed: true}, callback);
+    }
+
+    getAccountInfoById(id, options, callback) {
+        if (this.validator.notValid([
+            {
+                name: 'accountId',
+                type: 'hex',
+                value: id
+            },
+            {
+                name: 'accountId',
+                type: 'string',
+                lte: 32,
+                gte: 8,
+                value: id
+            }
+        ], callback))
+            return;
+
+        if (id.startsWith('0x')) {
+            id = id.slice(2);
+        }
+
+        this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(`wallet${options.confirmed ? 'solidity' : ''}/getaccountbyid`, {
+            account_id: id
+        }, 'post').then(account => {
+            callback(null, account);
+        }).catch(err => callback(err));
+    }
+
     getBalance(address = this.tronWeb.defaultAddress.hex, callback = false) {
         if (utils.isFunction(address)) {
             callback = address;
@@ -338,6 +385,13 @@ export default class Trx {
         }, 'post').then(account => {
             callback(null, account);
         }).catch(err => callback(err));
+    }
+
+    getUnconfirmedAccountById(id, callback = false) {
+        if (!callback)
+            return this.injectPromise(this.getUnconfirmedAccountById, id);
+
+        this.getAccountInfoById(id, {confirmed: false}, callback);
     }
 
     getUnconfirmedBalance(address = this.tronWeb.defaultAddress.hex, callback = false) {
@@ -683,43 +737,48 @@ export default class Trx {
             permissionId = 0;
         }
 
-
         if (!callback)
             return this.injectPromise(this.multiSign, transaction, privateKey, permissionId);
 
         if (!utils.isObject(transaction) || !transaction.raw_data || !transaction.raw_data.contract)
             return callback('Invalid transaction provided');
 
-        // set permission id
-        transaction.raw_data.contract[0].Permission_id = permissionId;
-
-        // check if private key insides permission list
-        const address = this.tronWeb.address.toHex(this.tronWeb.address.fromPrivateKey(privateKey)).toLowerCase();
-        const signWeight = await this.getSignWeight(transaction, permissionId);
-
-        if (signWeight.result.code === 'PERMISSION_ERROR') {
-            return callback(signWeight.result.message);
-        }
-
-        let foundKey = false;
-        signWeight.permission.keys.map(key => {
-            if (key.address === address)
-                foundKey = true;
-        });
-
-        if (!foundKey)
-            return callback(privateKey + ' has no permission to sign');
-
-        if (signWeight.approved_list && signWeight.approved_list.indexOf(address) != -1) {
-            return callback(privateKey + ' already sign transaction');
-        }
-
-        // reset transaction
-        if (signWeight.transaction && signWeight.transaction.transaction) {
-            transaction = signWeight.transaction.transaction;
+        // If owner permission or permission id exists in transaction, do sign directly
+        // If no permission id inside transaction or user passes permission id, use old way to reset permission id
+        if (!transaction.raw_data.contract[0].Permission_id && permissionId > 0) {
+            // set permission id
             transaction.raw_data.contract[0].Permission_id = permissionId;
-        } else {
-            return callback('Invalid transaction provided');
+
+            // check if private key insides permission list
+            const address = this.tronWeb.address.toHex(this.tronWeb.address.fromPrivateKey(privateKey)).toLowerCase();
+            const signWeight = await this.getSignWeight(transaction, permissionId);
+
+            if (signWeight.result.code === 'PERMISSION_ERROR') {
+                return callback(signWeight.result.message);
+            }
+
+            let foundKey = false;
+            signWeight.permission.keys.map(key => {
+                if (key.address === address)
+                    foundKey = true;
+            });
+
+            if (!foundKey)
+                return callback(privateKey + ' has no permission to sign');
+
+            if (signWeight.approved_list && signWeight.approved_list.indexOf(address) != -1) {
+                return callback(privateKey + ' already sign transaction');
+            }
+
+            // reset transaction
+            if (signWeight.transaction && signWeight.transaction.transaction) {
+                transaction = signWeight.transaction.transaction;
+                if (permissionId > 0) {
+                    transaction.raw_data.contract[0].Permission_id = permissionId;
+                }
+            } else {
+                return callback('Invalid transaction provided');
+            }
         }
 
         // sign

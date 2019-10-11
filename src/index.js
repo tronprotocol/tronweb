@@ -3,6 +3,7 @@ import utils from 'utils';
 import BigNumber from 'bignumber.js';
 import EventEmitter from 'eventemitter3';
 import {version} from '../package.json';
+import semver from 'semver';
 
 import TransactionBuilder from 'lib/transactionBuilder';
 import Trx from 'lib/trx';
@@ -11,6 +12,8 @@ import Plugin from 'lib/plugin';
 import Event from 'lib/event';
 import {keccak256} from 'utils/ethersUtils';
 import {ADDRESS_PREFIX} from 'utils/address';
+
+const DEFAULT_VERSION = '3.5.0';
 
 export default class TronWeb extends EventEmitter {
     static providers = providers;
@@ -79,7 +82,20 @@ export default class TronWeb extends EventEmitter {
         if (privateKey)
             this.setPrivateKey(privateKey);
 
+        this.fullnodeVersion = DEFAULT_VERSION;
         this.injectPromise = utils.promiseInjector(this);
+    }
+
+    async getFullnodeVersion() {
+        try {
+            const nodeInfo = await this.trx.getNodeInfo()
+            this.fullnodeVersion = nodeInfo.configNodeInfo.codeVersion
+            if (this.fullnodeVersion.split('.').length === 2) {
+                this.fullnodeVersion += '.0';
+            }
+        } catch (err) {
+            this.fullnodeVersion = DEFAULT_VERSION;
+        }
     }
 
     setDefaultBlock(blockID = false) {
@@ -124,6 +140,10 @@ export default class TronWeb extends EventEmitter {
         this.emit('addressChanged', {hex, base58});
     }
 
+    fullnodeSatisfies(version) {
+        return semver.satisfies(this.fullnodeVersion, version);
+    }
+
     isValidProvider(provider) {
         return Object.values(providers).some(knownProvider => provider instanceof knownProvider);
     }
@@ -137,6 +157,8 @@ export default class TronWeb extends EventEmitter {
 
         this.fullNode = fullNode;
         this.fullNode.setStatusPage('wallet/getnowblock');
+
+        this.getFullnodeVersion();
     }
 
     setSolidityNode(solidityNode) {

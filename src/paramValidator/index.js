@@ -38,7 +38,9 @@ export default class Validator {
                 se,
                 optional
             } = param;
-            if (optional && !utils.isNotNullOrUndefined(value))
+            if (optional && (
+                !utils.isNotNullOrUndefined(value)
+                || (type !== 'boolean' && value === false)))
                 continue;
             normalized[param.name] = param.value;
             switch (type) {
@@ -122,7 +124,15 @@ export default class Validator {
                         no = true;
                     }
                     break;
-
+                case 'string':
+                    if (!utils.isString(value) ||
+                        (typeof gt === 'number' && value.length <= param.gt) ||
+                        (typeof lt === 'number' && value.length >= param.lt) ||
+                        (typeof gte === 'number' && value.length < param.gte) ||
+                        (typeof lte === 'number' && value.length > param.lte)) {
+                        no = true;
+                    }
+                    break;
             }
             if (no) {
                 callback(this.invalid(param));
