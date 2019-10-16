@@ -1358,7 +1358,7 @@ export default class Trx {
             return;
 
         const data = {
-            owner_address: toHex(address)
+            address: toHex(address)
         };
 
         this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(`wallet${options.confirmed ? 'solidity' : ''}/getReward`, data, 'post')
@@ -1399,7 +1399,7 @@ export default class Trx {
             return;
 
         const data = {
-            owner_address: toHex(address)
+            address: toHex(address)
         };
 
         this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(`wallet${options.confirmed ? 'solidity' : ''}/getBrokerage`, data, 'post')

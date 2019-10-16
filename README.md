@@ -167,6 +167,9 @@ In order to contribute you can
 * push your changes and open a pull request
 
 ## Recent History
+__2.7.4__
+* Fix bugs of trx.getBrokerage and trx.getReward function
+
 __2.7.3__
 * Support new apis related to Java-Tron 3.6.5
 * Original withdrawBlockRewards method support to withdraw user's reward
