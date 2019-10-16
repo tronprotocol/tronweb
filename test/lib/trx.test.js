@@ -1782,7 +1782,7 @@ describe('TronWeb.trx', function () {
         it('should get the brokerage', async function () {
 
             let brokerage = await tronWeb.trx.getBrokerage(accounts[0]);
-            assert.equal(brokerage, 0)
+            assert.equal(brokerage, 20)
 
         });
     });
@@ -1791,7 +1791,7 @@ describe('TronWeb.trx', function () {
         it('should get the brokerage', async function () {
 
             let brokerage = await tronWeb.trx.getUnconfirmedBrokerage(accounts[0]);
-            assert.equal(brokerage, 0)
+            assert.equal(brokerage, 20)
 
         });
     });
