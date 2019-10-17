@@ -4,11 +4,12 @@ import semver from 'semver';
 
 export default class Plugin {
 
-    constructor(tronWeb = false) {
+    constructor(tronWeb = false, options) {
         if (!tronWeb || !tronWeb instanceof TronWeb)
             throw new Error('Expected instance of TronWeb');
         this.tronWeb = tronWeb;
         this.pluginNoOverride = ['register'];
+        this.disablePlugins = options.disablePlugins;
     }
 
     register(Plugin, options) {
@@ -20,6 +21,10 @@ export default class Plugin {
             libs: [],
             plugged: [],
             skipped: []
+        }
+        if (this.disablePlugins) {
+            console.info('This instance of TronWeb has plugins disabled.')
+            return result;
         }
         const plugin = new Plugin(this.tronWeb)
         if (utils.isFunction(plugin.pluginInterface)) {

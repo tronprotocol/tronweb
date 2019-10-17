@@ -4,11 +4,12 @@ const jlog = require('./jlog')
 
 const {FULL_NODE_API, SOLIDITY_NODE_API, EVENT_API, PRIVATE_KEY} = require('./config')
 
-const createInstance = () => {
-    return new TronWeb({
+const createInstance = (extraOptions = {}) => {
+    let options = Object.assign({
         fullHost: FULL_NODE_API,
         privateKey: PRIVATE_KEY
-    })
+    }, extraOptions)
+    return new TronWeb(options)
 }
 
 let instance

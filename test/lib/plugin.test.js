@@ -41,7 +41,7 @@ describe('TronWeb.lib.plugin', async function () {
 
             result = await tronWeb.trx.getCurrentBlock()
             assert.isTrue(result.fromPlugin)
-            assert.equal(result.blockID.length , 64)
+            assert.equal(result.blockID.length, 64)
             assert.isTrue(/^00000/.test(result.blockID))
 
             result = await tronWeb.trx.getSomeParameter()
@@ -56,10 +56,10 @@ describe('TronWeb.lib.plugin', async function () {
         it('should register the plugin and call a method using a promise', async function () {
 
             let result = tronWeb.plugin.register(BlockLib)
-            assert.equal(result.libs[0] , 'BlockLib')
+            assert.equal(result.libs[0], 'BlockLib')
             result = await tronWeb.blockLib.getCurrent()
             assert.isTrue(result.fromPlugin)
-            assert.equal(result.blockID.length , 64)
+            assert.equal(result.blockID.length, 64)
             assert.isTrue(/^00000/.test(result.blockID))
 
         })
@@ -76,6 +76,24 @@ describe('TronWeb.lib.plugin', async function () {
                 })
             })
         })
+
+        it('should not register if tronWeb is instantiated with the disablePlugins option', async function () {
+
+            let tronWeb2 = tronWebBuilder.createInstance({disablePlugins: true});
+            let result = tronWeb2.plugin.register(BlockLib)
+            assert.equal(result.libs.length, 0)
+
+            const someParameter = 'someValue'
+
+            result = tronWeb2.plugin.register(GetNowBlock, {
+                someParameter
+            })
+            assert.equal(result.plugged.length, 0)
+            assert.equal(result.skipped.length, 0)
+
+        })
+
+
     });
 
 });
