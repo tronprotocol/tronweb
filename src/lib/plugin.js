@@ -4,7 +4,7 @@ import semver from 'semver';
 
 export default class Plugin {
 
-    constructor(tronWeb = false, options) {
+    constructor(tronWeb = false, options = {}) {
         if (!tronWeb || !tronWeb instanceof TronWeb)
             throw new Error('Expected instance of TronWeb');
         this.tronWeb = tronWeb;
