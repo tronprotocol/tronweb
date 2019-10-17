@@ -3,14 +3,12 @@ let someParameter
 
 class GetNowBlock {
 
-    // In a real case, you should have this in order to allow the library to work stand-alone. But for this test, it is more clear this way.
+    constructor(tronWeb = false) {
+        if (!tronWeb)
+            throw new Error('Expected instance of TronWeb');
 
-    // constructor(tronWeb = false) {
-    //     if (!tronWeb)
-    //         throw new Error('Expected instance of TronWeb');
-    //
-    //     this.tronWeb = tronWeb;
-    // }
+        this.tronWeb = tronWeb;
+    }
 
     async someMethod(callback = false) {
 

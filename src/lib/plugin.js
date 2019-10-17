@@ -17,6 +17,7 @@ export default class Plugin {
             components: {}
         }
         let result = {
+            libs: [],
             plugged: [],
             skipped: []
         }
@@ -25,23 +26,34 @@ export default class Plugin {
             pluginInterface = plugin.pluginInterface(options)
         }
         if (semver.satisfies(TronWeb.version, pluginInterface.requires)) {
-            for (let component in pluginInterface.components) {
-                if (!this.tronWeb.hasOwnProperty(component)) {
-                    // TODO implement new sub-classes
-                    continue
+            if (pluginInterface.fullClass) {
+                // plug the entire class at the same level of tronWeb.trx
+                let className = plugin.constructor.name
+                let classInstanceName = className.substring(0, 1).toLowerCase() + className.substring(1)
+                if (className !== classInstanceName) {
+                    TronWeb[className] = Plugin
+                    this.tronWeb[classInstanceName] = plugin
+                    result.libs.push(className)
                 }
-                let methods = pluginInterface.components[component]
-                let pluginNoOverride = this.tronWeb[component].pluginNoOverride || []
-                for (let method in methods) {
-                    if (method === 'constructor' || (this.tronWeb[component][method] &&
-                        (pluginNoOverride.includes(method) // blacklisted methods
-                            || /^_/.test(method)) // private methods
-                    )) {
-                        result.skipped.push(method)
+            } else {
+                // plug methods into a class, like trx
+                for (let component in pluginInterface.components) {
+                    if (!this.tronWeb.hasOwnProperty(component)) {
                         continue
                     }
-                    this.tronWeb[component][method] = methods[method].bind(this.tronWeb[component])
-                    result.plugged.push(method)
+                    let methods = pluginInterface.components[component]
+                    let pluginNoOverride = this.tronWeb[component].pluginNoOverride || []
+                    for (let method in methods) {
+                        if (method === 'constructor' || (this.tronWeb[component][method] &&
+                            (pluginNoOverride.includes(method) // blacklisted methods
+                                || /^_/.test(method)) // private methods
+                        )) {
+                            result.skipped.push(method)
+                            continue
+                        }
+                        this.tronWeb[component][method] = methods[method].bind(this.tronWeb[component])
+                        result.plugged.push(method)
+                    }
                 }
             }
         } else {
