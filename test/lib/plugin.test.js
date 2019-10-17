@@ -56,7 +56,7 @@ describe('TronWeb.lib.plugin', async function () {
         it('should register the plugin and call a method using a promise', async function () {
 
             let result = tronWeb.plugin.register(BlockLib)
-
+            assert.equal(result.libs[0] , 'BlockLib')
             result = await tronWeb.blockLib.getCurrent()
             assert.isTrue(result.fromPlugin)
             assert.equal(result.blockID.length , 64)
