@@ -1,5 +1,6 @@
 import utils from 'utils';
 import {ADDRESS_PREFIX_REGEX} from 'utils/address';
+import injectpromise from 'injectpromise';
 
 const getFunctionSelector = abi => {
     return abi.name + '(' + getParamTypes(abi.inputs || []).join(',') + ')';
@@ -29,7 +30,7 @@ export default class Method {
 
         this.functionSelector = getFunctionSelector(abi);
         this.signature = this.tronWeb.sha3(this.functionSelector, false).slice(0, 8);
-        this.injectPromise = utils.promiseInjector(this);
+        this.injectPromise = injectpromise(this);
 
         this.defaultOptions = {
             feeLimit: 1000000000,

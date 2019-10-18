@@ -4,6 +4,7 @@ import BigNumber from 'bignumber.js';
 import EventEmitter from 'eventemitter3';
 import {version} from '../package.json';
 import semver from 'semver';
+import injectpromise from 'injectpromise';
 
 import TransactionBuilder from 'lib/transactionBuilder';
 import Trx from 'lib/trx';
@@ -83,7 +84,7 @@ export default class TronWeb extends EventEmitter {
             this.setPrivateKey(privateKey);
 
         this.fullnodeVersion = DEFAULT_VERSION;
-        this.injectPromise = utils.promiseInjector(this);
+        this.injectPromise = injectpromise(this);
     }
 
     async getFullnodeVersion() {
