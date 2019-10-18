@@ -23,7 +23,7 @@ export default class Plugin {
             skipped: []
         }
         if (this.disablePlugins) {
-            console.info('This instance of TronWeb has plugins disabled.')
+            result.error = 'This instance of TronWeb has plugins disabled.'
             return result;
         }
         const plugin = new Plugin(this.tronWeb)

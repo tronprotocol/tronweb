@@ -80,16 +80,8 @@ describe('TronWeb.lib.plugin', async function () {
         it('should not register if tronWeb is instantiated with the disablePlugins option', async function () {
 
             let tronWeb2 = tronWebBuilder.createInstance({disablePlugins: true});
-            let result = tronWeb2.plugin.register(BlockLib)
-            assert.equal(result.libs.length, 0)
-
-            const someParameter = 'someValue'
-
-            result = tronWeb2.plugin.register(GetNowBlock, {
-                someParameter
-            })
-            assert.equal(result.plugged.length, 0)
-            assert.equal(result.skipped.length, 0)
+            let result = tronWeb2.plugin.register(BlockLib);
+            assert.isTrue(typeof result.error === 'string');
 
         })
 
