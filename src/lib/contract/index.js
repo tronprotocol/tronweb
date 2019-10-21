@@ -1,6 +1,7 @@
 import TronWeb from 'index';
 import utils from 'utils';
 import Method from './method';
+import injectpromise from 'injectpromise';
 
 export default class Contract {
     constructor(tronWeb = false, abi = [], address = false) {
@@ -8,7 +9,7 @@ export default class Contract {
             throw new Error('Expected instance of TronWeb');
 
         this.tronWeb = tronWeb;
-        this.injectPromise = utils.promiseInjector(this);
+        this.injectPromise = injectpromise(this);
 
         this.address = address;
         this.abi = abi;

@@ -3,6 +3,7 @@ import utils from 'utils';
 import {AbiCoder} from 'utils/ethersUtils';
 import Validator from 'paramValidator';
 import {ADDRESS_PREFIX_REGEX} from 'utils/address';
+import injectpromise from 'injectpromise';
 
 let self;
 
@@ -36,7 +37,7 @@ export default class TransactionBuilder {
             throw new Error('Expected instance of TronWeb');
         self = this;
         this.tronWeb = tronWeb;
-        this.injectPromise = utils.promiseInjector(this);
+        this.injectPromise = injectpromise(this);
         this.validator = new Validator(tronWeb);
     }
 

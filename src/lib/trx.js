@@ -3,6 +3,7 @@ import utils from 'utils';
 import {keccak256, toUtf8Bytes, recoverAddress, SigningKey} from 'utils/ethersUtils';
 import {ADDRESS_PREFIX} from 'utils/address';
 import Validator from "../paramValidator";
+import injectpromise from 'injectpromise';
 
 const TRX_MESSAGE_HEADER = '\x19TRON Signed Message:\n32';
 // it should be: '\x15TRON Signed Message:\n32';
@@ -18,7 +19,7 @@ export default class Trx {
             throw new Error('Expected instance of TronWeb');
 
         this.tronWeb = tronWeb;
-        this.injectPromise = utils.promiseInjector(this);
+        this.injectPromise = injectpromise(this);
         this.cache = {
             contracts: {}
         }

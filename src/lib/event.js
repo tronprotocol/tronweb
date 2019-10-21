@@ -2,6 +2,7 @@ import TronWeb from 'index';
 import utils from 'utils';
 import providers from "./providers";
 import querystring from "querystring";
+import injectpromise from 'injectpromise';
 
 export default class Event {
 
@@ -9,7 +10,7 @@ export default class Event {
         if (!tronWeb || !(tronWeb instanceof TronWeb))
             throw new Error('Expected instance of TronWeb');
         this.tronWeb = tronWeb;
-        this.injectPromise = utils.promiseInjector(this);
+        this.injectPromise = injectpromise(this);
     }
 
     setServer(eventServer = false, healthcheck = 'healthcheck') {
@@ -98,7 +99,7 @@ export default class Event {
             size,
             page
         }
-        
+
         if (typeof filters === 'object' && Object.keys(filters).length > 0) {
             qs.filters = JSON.stringify(filters);
         }
