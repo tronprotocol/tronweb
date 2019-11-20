@@ -142,7 +142,7 @@ If you are using different servers for anything, you can do
 ```js
 const tronWeb = new TronWeb({
     fullNode: 'https://some-node.tld',
-    solidityNode: 'https://some-other-node.tld'
+    solidityNode: 'https://some-other-node.tld',
     eventServer: 'https://some-event-server.tld',
     privateKey: 'your private key'
   }
