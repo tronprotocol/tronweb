@@ -1497,9 +1497,9 @@ describe('TronWeb.transactionBuilder', function () {
 
             it('should extend the expiration', async function () {
 
-                const receiver = accounts.b58[1]
-                const sender = accounts.hex[0]
-                const privateKey = accounts.pks[0]
+                const receiver = accounts.b58[42]
+                const sender = accounts.hex[43]
+                const privateKey = accounts.pks[43]
                 const balance = await tronWeb.trx.getUnconfirmedBalance(sender);
 
                 let transaction = await tronWeb.transactionBuilder.sendTrx(receiver, 10, sender);
@@ -1520,9 +1520,9 @@ describe('TronWeb.transactionBuilder', function () {
 
                 this.timeout(20000)
 
-                const receiver = accounts.b58[1]
-                const sender = accounts.hex[0]
-                const privateKey = accounts.pks[0]
+                const receiver = accounts.b58[44]
+                const sender = accounts.hex[45]
+                const privateKey = accounts.pks[45]
                 const balance = await tronWeb.trx.getUnconfirmedBalance(sender);
 
                 let transaction = await tronWeb.transactionBuilder.sendTrx(receiver, 10, sender);
@@ -1541,14 +1541,16 @@ describe('TronWeb.transactionBuilder', function () {
 
         describe("#alterTransaction", async function () {
 
+            // before(async function() {
+            //     await wait(4);
+            // })
+
             it('should alter the transaction adding a data field', async function () {
 
-                this.timeout(20000)
-
-                const receiver = accounts.b58[1]
-                const sender = accounts.hex[0]
-                const privateKey = accounts.pks[0]
-                const balance = await tronWeb.trx.getUnconfirmedBalance(sender);
+                const receiver = accounts.b58[40]
+                const sender = accounts.hex[41]
+                const privateKey = accounts.pks[41]
+                // const balance = await tronWeb.trx.getUnconfirmedBalance(sender);
 
                 let transaction = await tronWeb.transactionBuilder.sendTrx(receiver, 10, sender);
                 const previousId = transaction.txID;
@@ -1558,7 +1560,6 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.notEqual(id, previousId)
                 await broadcaster(null, privateKey, transaction);
                 await waitChainData('tx', id);
-                assert.isTrue(balance > await tronWeb.trx.getUnconfirmedBalance(sender));
                 const unconfirmedTx = await tronWeb.trx.getTransaction(id)
                 assert.equal(tronWeb.toUtf8(unconfirmedTx.raw_data.data), data);
 

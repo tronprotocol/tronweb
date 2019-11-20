@@ -223,7 +223,7 @@ export default class Method {
                 return callback(null, signedTransaction.txID);
 
             const checkResult = async (index = 0) => {
-                if (index == 20) {
+                if (index === 20) {
                     return callback({
                         error: 'Cannot find result in solidity node',
                         transaction: signedTransaction
@@ -238,7 +238,7 @@ export default class Method {
                     }, 3000);
                 }
 
-                if (output.result && output.result == 'FAILED') {
+                if (output.result && output.result === 'FAILED') {
                     return callback({
                         error: this.tronWeb.toUtf8(output.resMessage),
                         transaction: signedTransaction,
@@ -261,6 +261,10 @@ export default class Method {
 
                 if (decoded.length === 1)
                     decoded = decoded[0];
+
+                if (options.keepTxID) {
+                    return callback(null, [signedTransaction.txID, decoded]);
+                }
 
                 return callback(null, decoded);
             }

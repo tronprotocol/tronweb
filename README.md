@@ -167,6 +167,13 @@ In order to contribute you can
 * push your changes and open a pull request
 
 ## Recent History
+
+__2.8.1__
+* Add options `keepTxID` to show also the txID when triggering a contract with `shouldPollResponse`
+
+__2.8.0__
+* Improve in the plugin architecture allows someone to implement a full lib at the same level of Trx and TransactionBuilder
+
 __2.7.4__
 * Fix bugs of trx.getBrokerage and trx.getReward function
 
