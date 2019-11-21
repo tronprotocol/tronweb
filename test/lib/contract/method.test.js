@@ -8,6 +8,7 @@ const tronWebBuilder = require('../../helpers/tronWebBuilder');
 const TronWeb = tronWebBuilder.TronWeb;
 
 const testRevertContract = require('../../fixtures/contracts').testRevert;
+const testSetValContract = require('../../fixtures/contracts').testSetVal;
 
 describe('#contract.method', function () {
 
@@ -25,6 +26,7 @@ describe('#contract.method', function () {
     describe('#send()', function () {
 
         let testRevert
+        let testSetVal
 
         before(async function () {
             const tx = await broadcaster(tronWeb.transactionBuilder.createSmartContract({
@@ -32,6 +34,12 @@ describe('#contract.method', function () {
                 bytecode: testRevertContract.bytecode
             }, accounts.b58[0]), accounts.pks[0])
             testRevert = await tronWeb.contract().at(tx.transaction.contract_address)
+
+            const tx2 = await broadcaster(tronWeb.transactionBuilder.createSmartContract({
+                abi: testSetValContract.abi,
+                bytecode: testSetValContract.bytecode
+            }, accounts.b58[0]), accounts.pks[0])
+            testSetVal = await tronWeb.contract().at(tx2.transaction.contract_address)
         })
 
         it("should set accounts[2] as the owner and check it with getOwner(1)", async function () {
@@ -45,6 +53,16 @@ describe('#contract.method', function () {
                 null,
                 'REVERT'
             )
+        });
+
+        it("should set the val to 123", async function () {
+            this.timeout(30000)
+            let result = await testSetVal.set(123).send({
+                shouldPollResponse: true,
+                keepTxID: true
+            })
+            assert.equal(result[0].length, 64)
+            assert.equal(result[1].toNumber(), 123)
         });
 
     });
