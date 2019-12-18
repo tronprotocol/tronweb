@@ -59,7 +59,6 @@ export function isArrayish(value) {
 
 export function hexlify(value) {
     if (isHexable(value)) {
-        console.log(value)
         return toHexString(value);
     }
     if (typeof value === 'number') {
