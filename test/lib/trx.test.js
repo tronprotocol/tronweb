@@ -337,7 +337,7 @@ describe('TronWeb.trx', function () {
         });
 
 
-        describe("#verifyMessage", async function () {
+        describe.only("#verifyMessage", async function () {
 
             const idx = 14;
             let hexMsg;

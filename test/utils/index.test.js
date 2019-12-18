@@ -252,7 +252,7 @@ describe('TronWeb.utils', function () {
             const tronWeb = tronWebBuilder.createInstance();
 
             const string = '0x' + Buffer.from('some string').toString('hex');
-            const hash = tronWeb.utils.ethersUtils.sha256(string);
+            const hash = tronWeb.utils.ethersUtils.sha256(string, 'hex');
 
             assert.equal(hash, '0x61d034473102d7dac305902770471fd50f4c5b26f6831a56dd90b5184b3c30fc');
 

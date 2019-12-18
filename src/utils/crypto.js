@@ -213,7 +213,6 @@ export function getPubKeyFromPriKey(priKeyBytes) {
 
     const pubkeyHex = `04${xHex}${yHex}`;
     const pubkeyBytes = hexStr2byteArray(pubkeyHex);
-
     return pubkeyBytes;
 }
 
@@ -243,13 +242,6 @@ export function ECKeySign(hashBytes, priKeyBytes) {
     return signHex;
 }
 
-// export function SHA256(msgBytes) {
-//     return shab(msgBytes)
-//     // const msgHex = byteArray2hexStr(msgBytes);
-//     // const hashHex = sha256('0x' + msgHex).replace(/^0x/, '')
-//     // return hexStr2byteArray(hashHex);
-// }
-
 export function passwordToAddress(password) {
     const com_priKeyBytes = base64DecodeFromString(password);
     const com_addressBytes = getAddressFromPriKey(com_priKeyBytes);
@@ -260,6 +252,5 @@ export function passwordToAddress(password) {
 export function pkToAddress(privateKey) {
     const com_priKeyBytes = hexStr2byteArray(privateKey);
     const com_addressBytes = getAddressFromPriKey(com_priKeyBytes);
-
     return getBase58CheckAddress(com_addressBytes);
 }
