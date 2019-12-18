@@ -23,7 +23,6 @@ const getInstance = () => {
 
 const newTestAccounts = async (amount) => {
     const tronWeb = createInstance();
-
     console.log(chalk.blue(`Generating ${amount} new accounts...`))
     await tronWeb.fullNode.request('/admin/temporary-accounts-generation?accounts=' + amount);
     const lastCreated = await getTestAccounts(-1)
@@ -38,10 +37,11 @@ const getTestAccounts = async (block) => {
     }
     const tronWeb = createInstance();
     const accountsJson = await tronWeb.fullNode.request('/admin/accounts-json');
-    const index = typeof block === 'number'
+    let index = typeof block === 'number'
         ? (block > -1 && block < accountsJson.more.length ? block : accountsJson.more.length - 1)
         : undefined
-    accounts.pks = typeof block === 'number'
+
+    accounts.pks = typeof block === 'number' && index !== -1
         ? accountsJson.more[index].privateKeys
         : accountsJson.privateKeys;
     for (let i = 0; i < accounts.pks.length; i++) {

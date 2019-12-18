@@ -7,7 +7,6 @@ const BigNumber = require('bignumber.js');
 const broadcaster = require('./helpers/broadcaster');
 const wait = require('./helpers/wait')
 
-
 const assert = chai.assert;
 const HttpProvider = TronWeb.providers.HttpProvider;
 

@@ -6,6 +6,7 @@ import elliptic from "elliptic";
 const HexCharacters = '0123456789abcdef';
 
 let _curve = null;
+
 export function getCurve() {
     if (!_curve) {
         _curve = new elliptic.ec('secp256k1');
@@ -17,8 +18,50 @@ export function isSignature(value) {
     return (value && value.r != null && value.s != null);
 }
 
-export function isHexString(str) {
-    return /^0x[0-9a-f]+$/ig.test(str)
+export function isHexString(value, length) {
+    if (typeof value !== 'string' || !value.match(/^0x[0-9A-Fa-f]*$/)) {
+        return false
+    }
+    if (length && value.length !== 2 + 2 * length) {
+        return false;
+    }
+    return true;
+}
+
+export function isHexable(value) {
+    if (typeof(value) === 'string') {
+        if (isHexString(value)) {
+            if (value == '0x') { value = '0x0'; }
+            return true
+
+        } else if (value[0] === '-' && isHexString(value.substring(1))) {
+            return true
+
+        } else if (value.match(/^-?[0-9]*$/)) {
+            return true
+
+        } else {
+            return false
+        }
+
+    } else if (typeof(value) === 'number') {
+        if (parseInt(String(value)) !== value) {
+            return false
+        }
+        try {
+            return true
+        } catch (error) {
+            return false
+        }
+
+    } else if (value instanceof BigNumber) {
+        return true
+
+    } else if (Array.isArray(value)) {
+        return true
+    } else {
+        return false
+    }
 }
 
 export function hexZeroPad(value, length) {
@@ -31,9 +74,9 @@ export function hexZeroPad(value, length) {
     return value;
 }
 
-export function isHexable(val) {
-    return !isHexString(val);
-}
+// export function isHexable(val) {
+//     return !!isHexString(val);
+// }
 
 export function toHexString(arr) {
     var str = ''
@@ -68,20 +111,24 @@ export function hexlify(value) {
         if (value >= 9007199254740991) {
             throw new Error('Out-of-range');
         }
+        //console.log(1, 'Entered')
         var hex = '';
         while (value) {
             hex = HexCharacters[value & 0x0f] + hex;
             value = Math.floor(value / 16);
         }
+        //console.log(1, hex)
         if (hex.length) {
             if (hex.length % 2) {
                 hex = '0' + hex;
             }
+            //console.log(1, hex)
             return '0x' + hex;
         }
         return '0x00';
     }
     if (typeof value === 'string') {
+        //console.log(1, 'string')
         var match = value.match(/^(0x)?[0-9a-fA-F]*$/);
         if (!match) {
             throw new Error('Invalid hexadecimal string');
@@ -92,14 +139,17 @@ export function hexlify(value) {
         if (value.length % 2) {
             value = '0x0' + value.substring(2);
         }
+        //console.log(1, value)
         return value;
     }
     if (isArrayish(value)) {
+        //console.log(1, 'array')
         var result = [];
         for (var i = 0; i < value.length; i++) {
             var v = value[i];
             result.push(HexCharacters[(v & 0xf0) >> 4] + HexCharacters[v & 0x0f]);
         }
+        //console.log(1, result)
         return '0x' + result.join('');
     }
     throw new Error('Invalid hexlify value');
@@ -123,8 +173,7 @@ export function splitSignature(signature) {
             recoveryParam = 1 - (v % 2);
         }
         v = 27 + recoveryParam;
-    }
-    else {
+    } else {
         var bytes = arrayify(signature);
         if (bytes.length !== 65) {
             throw new Error('invalid signature');
@@ -144,34 +193,52 @@ export function splitSignature(signature) {
     };
 }
 
+
+export function defineReadOnly(object, name, value) {
+    Object.defineProperty(object, name, {
+        enumerable: true,
+        value: value,
+        writable: false,
+    });
+}
+
+export function setType(object, type) {
+    Object.defineProperty(object, '_ethersType', {configurable: false, value: type, writable: false});
+}
+
+export function isType(object, type) {
+    return (object && object._ethersType === type);
+}
+
 export function recoverPublicKey(digest, signature) {
     var sig = splitSignature(signature);
-    var rs = { r: arrayify(sig.r), s: arrayify(sig.s) };
+    var rs = {r: arrayify(sig.r), s: arrayify(sig.s)};
     return '0x' + getCurve().recoverPubKey(arrayify(digest), rs, sig.recoveryParam).encode('hex', false);
 }
 
 var KeyPair = (function () {
     function KeyPair(privateKey) {
         var keyPair = getCurve().keyFromPrivate(arrayify(privateKey));
-        properties_1.defineReadOnly(this, 'privateKey', bytes_1.hexlify(keyPair.priv.toArray('be', 32)));
-        properties_1.defineReadOnly(this, 'publicKey', '0x' + keyPair.getPublic(false, 'hex'));
-        properties_1.defineReadOnly(this, 'compressedPublicKey', '0x' + keyPair.getPublic(true, 'hex'));
-        properties_1.defineReadOnly(this, 'publicKeyBytes', keyPair.getPublic().encode(null, true));
+        defineReadOnly(this, 'privateKey', hexlify(keyPair.priv.toArray('be', 32)));
+        defineReadOnly(this, 'publicKey', '0x' + keyPair.getPublic(false, 'hex'));
+        defineReadOnly(this, 'compressedPublicKey', '0x' + keyPair.getPublic(true, 'hex'));
+        defineReadOnly(this, 'publicKeyBytes', keyPair.getPublic().encode(null, true));
     }
+
     KeyPair.prototype.sign = function (digest) {
         var keyPair = getCurve().keyFromPrivate(arrayify(this.privateKey));
-        var signature = keyPair.sign(arrayify(digest), { canonical: true });
+        var signature = keyPair.sign(arrayify(digest), {canonical: true});
         return {
             recoveryParam: signature.recoveryParam,
-            r: bytes_1.hexZeroPad('0x' + signature.r.toString(16), 32),
-            s: bytes_1.hexZeroPad('0x' + signature.s.toString(16), 32),
+            r: hexZeroPad('0x' + signature.r.toString(16), 32),
+            s: hexZeroPad('0x' + signature.s.toString(16), 32),
             v: 27 + signature.recoveryParam
         };
     };
     KeyPair.prototype.computeSharedSecret = function (otherKey) {
         var keyPair = getCurve().keyFromPrivate(arrayify(this.privateKey));
         var otherKeyPair = getCurve().keyFromPublic(arrayify(computePublicKey(otherKey)));
-        return bytes_1.hexZeroPad('0x' + keyPair.derive(otherKeyPair.getPublic()).toString(16), 32);
+        return hexZeroPad('0x' + keyPair.derive(otherKeyPair.getPublic()).toString(16), 32);
     };
     KeyPair.prototype._addPoint = function (other) {
         var p0 = getCurve().keyFromPublic(arrayify(this.publicKey));
@@ -189,14 +256,12 @@ export function computePublicKey(key, compressed) {
             return keyPair.compressedPublicKey;
         }
         return keyPair.publicKey;
-    }
-    else if (bytes.length === 33) {
+    } else if (bytes.length === 33) {
         if (compressed) {
-            return bytes_1.hexlify(bytes);
+            return hexlify(bytes);
         }
         return '0x' + getCurve().keyFromPublic(bytes).getPublic(false, 'hex');
-    }
-    else if (bytes.length === 65) {
+    } else if (bytes.length === 65) {
         if (!compressed) {
             return hexlify(bytes);
         }
@@ -221,7 +286,9 @@ export function getChecksumAddress(address) {
     for (var i_1 = 0; i_1 < 40; i_1++) {
         hashed[i_1] = chars[i_1].charCodeAt(0);
     }
+    //console.log(1, 'hashed', hashed)
     hashed = arrayify(keccak256(hashed));
+    //console.log(1, 'hashed', keccak256(hashed), hashed)
     for (var i = 0; i < 40; i += 2) {
         if ((hashed[i >> 1] >> 4) >= 8) {
             chars[i] = chars[i].toUpperCase();
@@ -249,8 +316,7 @@ export function getAddress(address) {
             throw new Error('bad address checksum');
         }
         // Maybe ICAP? (we only support direct mode)
-    }
-    else if (address.match(/^XE[0-9]{2}[0-9A-Za-z]{30,31}$/)) {
+    } else if (address.match(/^XE[0-9]{2}[0-9A-Za-z]{30,31}$/)) {
         // It is an ICAP address with a bad checksum
         if (address.substring(2, 4) !== ibanChecksum(address)) {
             throw new Error('bad icap checksum');
@@ -260,24 +326,72 @@ export function getAddress(address) {
             result = '0' + result;
         }
         result = getChecksumAddress('0x' + result);
-    }
-    else {
+    } else {
         throw new Error('invalid address');
     }
     return result;
 }
 
+export function addSlice(array) {
+    if (array.slice) {
+        return array;
+    }
+    array.slice = function () {
+        var args = Array.prototype.slice.call(arguments);
+        return addSlice(new Uint8Array(Array.prototype.slice.apply(array, args)));
+    };
+    return array;
+}
+
+export function concat(objects) {
+    var arrays = [];
+    var length = 0;
+    for (var i = 0; i < objects.length; i++) {
+        var object = arrayify(objects[i]);
+        arrays.push(object);
+        length += object.length;
+    }
+    var result = new Uint8Array(length);
+    var offset = 0;
+    for (var i = 0; i < arrays.length; i++) {
+        result.set(arrays[i], offset);
+        offset += arrays[i].length;
+    }
+    return addSlice(result);
+}
+
+export function hashMessage(message) {
+
+    // console.log(1, 'hashMessage', message, concat([
+    //     toUtf8Bytes('\x19Ethereum Signed Message:\n'),
+    //     toUtf8Bytes(String(message.length)),
+    //     ((typeof (message) === 'string') ? toUtf8Bytes(message) : message)
+    // ]))
+    //
+    return keccak256(concat([
+        toUtf8Bytes('\x19Ethereum Signed Message:\n'),
+        toUtf8Bytes(String(message.length)),
+        ((typeof (message) === 'string') ? toUtf8Bytes(message) : message)
+    ]));
+}
+
 export function recoverAddress(digest, signature) {
+    // TODO remove
+    utils.recoverAddress(digest, signature)
+    //
     return computeAddress(recoverPublicKey(arrayify(digest), signature));
 }
 
 export function verifyMessage(message, signature) {
-    return recoverAddress(hash_1.hashMessage(message), signature);
+    return recoverAddress(hashMessage(message), signature);
 }
 
 export function arrayify(hexStr, noUint8Array) {
-    if (typeof hexStr === 'string' && hexStr.length % 2) {
-        hexStr = '0' + hexStr;
+    if (typeof hexStr === 'string') {
+        if (/0x/.test(hexStr))
+            hexStr = hexStr.substring(2);
+        if (hexStr.length % 2)
+            hexStr = '0' + hexStr;
     } else if (Buffer.isBuffer(hexStr)) {
         let arr = [];
         for (let i = 0; i < hexStr.length; i++) {
@@ -295,6 +409,8 @@ export function arrayify(hexStr, noUint8Array) {
 }
 
 export function keccak256(data) {
+    //console.log(1, 'data', data)
+    //console.log(1, 'data', arrayify(data))
     return '0x' + keccak_256(arrayify(data));
 }
 
@@ -349,11 +465,76 @@ export function toUtf8Bytes(str) {
     return arrayify(result);
 }
 
+export function checkNew(self, kind) {
+    if (!(self instanceof kind)) {
+        throw new Error('missing new');
+    }
+}
+
+export function hexDataSlice(data, offset, endOffset) {
+    if (!isHexString(data)) {
+        throw new Error('invalid hex data');
+    }
+    if ((data.length % 2) !== 0) {
+        throw new Error('hex data length must be even');
+    }
+    offset = 2 + 2 * offset;
+    if (endOffset != null) {
+        return '0x' + data.substring(offset, 2 + 2 * endOffset);
+    }
+    return '0x' + data.substring(offset);
+}
+
+var SigningKey = /** @class */ (function () {
+    function SigningKey(privateKey) {
+        checkNew(this, SigningKey);
+        var privateKeyBytes = null;
+        if (typeof (privateKey) === 'string' && privateKey.match(/^[0-9a-f]*$/i) && privateKey.length === 64) {
+            privateKey = '0x' + privateKey;
+        }
+        privateKeyBytes = arrayify(privateKey);
+        try {
+            if (privateKeyBytes.length !== 32) {
+                throw new Error('exactly 32 bytes required', errors.INVALID_ARGUMENT, {
+                    arg: 'privateKey',
+                    value: '[REDACTED]'
+                });
+            }
+        } catch (error) {
+            var params = {arg: 'privateKey', reason: error.reason, value: '[REDACTED]'};
+            if (error.value) {
+                if (typeof (error.value.length) === 'number') {
+                    params.length = error.value.length;
+                }
+                params.type = typeof (error.value);
+            }
+            throw new Error('invalid private key', error.code, params);
+        }
+        defineReadOnly(this, 'privateKey', hexlify(privateKeyBytes));
+        defineReadOnly(this, 'keyPair', new KeyPair(privateKeyBytes));
+        defineReadOnly(this, 'publicKey', this.keyPair.publicKey);
+        defineReadOnly(this, 'address', computeAddress(this.keyPair.publicKey));
+        setType(this, 'SigningKey');
+    }
+
+    SigningKey.prototype.signDigest = function (digest) {
+        return this.keyPair.sign(digest);
+    };
+    SigningKey.prototype.computeSharedSecret = function (key) {
+        return this.keyPair.computeSharedSecret(arrayify(key));
+    };
+    SigningKey.isSigningKey = function (value) {
+        return isType(value, 'SigningKey');
+    };
+    return SigningKey;
+}());
+
 // const recoverAddress = recoverAddress;
-const SigningKey = utils.SigningKey;
+// const SigningKey = utils.SigningKey;
 const AbiCoder = utils.AbiCoder;
 
 export {
     SigningKey,
     AbiCoder
 }
+
