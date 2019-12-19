@@ -1,4 +1,4 @@
-import {AbiCoder} from './abi-coder';
+import {AbiCoder} from './AbiCoder';
 import TronWeb from 'index';
 import {ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX} from 'utils/address';
 

@@ -829,6 +829,7 @@ describe('TronWeb.transactionBuilder', function () {
             let tokenList
             while (!tokenList) {
                 tokenList = await tronWeb.trx.getTokensIssuedByAddress(accounts.b58[6])
+                if (!tokenList) await wait(1)
             }
 
             if (isAllowSameTokenNameApproved) {

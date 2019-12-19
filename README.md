@@ -15,7 +15,7 @@
     <img src="https://img.shields.io/github/issues-pr/tron-us/tronweb.svg">
   </a>
 
-  <a href="https://github.com/tron-us/tronweb/graphs/contributors">
+  <a href="https://github.com/tron-us/tronweb/graphs/contributors
     <img src="https://img.shields.io/github/contributors/tron-us/tronweb.svg">
   </a>
 
