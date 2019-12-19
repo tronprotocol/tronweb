@@ -6,7 +6,7 @@
 //  *
 //  */
 // import bn_js  from 'bn.js';
-// var BN = new bn_js.default.BN(-1);
+// var BN = new bn_js(-1);
 //
 // import {
 //     checkNew,
@@ -40,9 +40,9 @@
 // function _bnify(value) {
 //     var hex = value._hex;
 //     if (hex[0] === '-') {
-//         return (new bn_js.default.BN(hex.substring(3), 16)).mul(BN);
+//         return (new bn_js(hex.substring(3), 16)).mul(BN);
 //     }
-//     return new bn_js.default.BN(hex.substring(2), 16);
+//     return new bn_js(hex.substring(2), 16);
 // }
 // var BigNumber = /** @class */ (function () {
 //     function BigNumber(value) {
@@ -62,7 +62,7 @@
 //                 if (value == '') {
 //                     value = '0';
 //                 }
-//                 properties_1.defineReadOnly(this, '_hex', toHex(new bn_js.default.BN(value)));
+//                 properties_1.defineReadOnly(this, '_hex', toHex(new bn_js(value)));
 //             }
 //             else {
 //                 throw new Error('invalid BigNumber string value');
@@ -73,7 +73,7 @@
 //                 throw new Error('underflow');
 //             }
 //             try {
-//                 properties_1.defineReadOnly(this, '_hex', toHex(new bn_js.default.BN(value)));
+//                 properties_1.defineReadOnly(this, '_hex', toHex(new bn_js(value)));
 //             }
 //             catch (error) {
 //                 throw new Error('overflow');
@@ -89,7 +89,7 @@
 //             properties_1.defineReadOnly(this, '_hex', value._hex);
 //         }
 //         else if (isArrayish(value)) {
-//             properties_1.defineReadOnly(this, '_hex', toHex(new bn_js.default.BN(hexlify(value).substring(2), 16)));
+//             properties_1.defineReadOnly(this, '_hex', toHex(new bn_js(hexlify(value).substring(2), 16)));
 //         }
 //         else {
 //             throw new Error('invalid BigNumber value');
