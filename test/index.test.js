@@ -749,7 +749,7 @@ describe('TronWeb Instance', function () {
         });
     });
 
-    describe.only("#getEventsByTransactionID", async function () {
+    describe("#getEventsByTransactionID", async function () {
 
         let accounts
         let tronWeb

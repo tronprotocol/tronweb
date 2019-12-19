@@ -5,6 +5,7 @@
 import jsSha256 from 'js-sha256';
 import {keccak_256} from 'js-sha3';
 import elliptic from "elliptic";
+import BN from 'bn.js';
 
 const HexCharacters = '0123456789abcdef';
 
@@ -376,7 +377,9 @@ export function padZeros(value, length) {
 }
 
 export function arrayify(hexStr, noUint8Array) {
-    if (typeof hexStr === 'string') {
+    if (BN.isBN(hexStr)) {
+        hexStr = hexStr.toJSON()
+    } else  if (typeof hexStr === 'string') {
         if (/0x/.test(hexStr))
             hexStr = hexStr.substring(2);
         if (hexStr.length % 2)
@@ -388,6 +391,7 @@ export function arrayify(hexStr, noUint8Array) {
         }
         hexStr = arr;
     }
+
     let arr = Array.isArray(hexStr) || /Uint8Array/.test(hexStr.constructor)
         ? hexStr
         : hexStr.match(/.{1,2}/g).map(byte => parseInt(byte, 16));
