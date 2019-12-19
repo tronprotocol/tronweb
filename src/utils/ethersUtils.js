@@ -1,4 +1,3 @@
-import {utils} from 'ethers';
 import jsSha256 from 'js-sha256';
 import {keccak_256} from 'js-sha3';
 import elliptic from "elliptic";
@@ -24,6 +23,19 @@ export function isHexString(value, length) {
     }
     if (length && value.length !== 2 + 2 * length) {
         return false;
+    }
+    return true;
+}
+
+export function isArrayish(value) {
+    if (!value || parseInt(String(value.length)) !== value.length || typeof (value) === 'string') {
+        return false;
+    }
+    for (var i = 0; i < value.length; i++) {
+        var v = value[i];
+        if (v < 0 || v >= 256 || parseInt(String(v)) !== v) {
+            return false;
+        }
     }
     return true;
 }
@@ -54,8 +66,8 @@ export function isHexable(value) {
             return false
         }
 
-    } else if (value instanceof BigNumber) {
-        return true
+    // } else if (value instanceof BigNumber) {
+    //     return true
 
     } else if (Array.isArray(value)) {
         return true
@@ -87,19 +99,6 @@ export function toHexString(arr) {
     return str
 }
 
-export function isArrayish(value) {
-    if (!value || parseInt(String(value.length)) !== value.length || typeof value === 'string') {
-        return false;
-    }
-    for (var i = 0; i < value.length; i++) {
-        var v = value[i];
-        if (v < 0 || v >= 256 || parseInt(String(v)) !== v) {
-            return false;
-        }
-    }
-    return true;
-}
-
 export function hexlify(value) {
     if (isHexable(value)) {
         return toHexString(value);
@@ -111,24 +110,20 @@ export function hexlify(value) {
         if (value >= 9007199254740991) {
             throw new Error('Out-of-range');
         }
-        //console.log(1, 'Entered')
         var hex = '';
         while (value) {
             hex = HexCharacters[value & 0x0f] + hex;
             value = Math.floor(value / 16);
         }
-        //console.log(1, hex)
         if (hex.length) {
             if (hex.length % 2) {
                 hex = '0' + hex;
             }
-            //console.log(1, hex)
             return '0x' + hex;
         }
         return '0x00';
     }
     if (typeof value === 'string') {
-        //console.log(1, 'string')
         var match = value.match(/^(0x)?[0-9a-fA-F]*$/);
         if (!match) {
             throw new Error('Invalid hexadecimal string');
@@ -139,17 +134,14 @@ export function hexlify(value) {
         if (value.length % 2) {
             value = '0x0' + value.substring(2);
         }
-        //console.log(1, value)
         return value;
     }
     if (isArrayish(value)) {
-        //console.log(1, 'array')
         var result = [];
         for (var i = 0; i < value.length; i++) {
             var v = value[i];
             result.push(HexCharacters[(v & 0xf0) >> 4] + HexCharacters[v & 0x0f]);
         }
-        //console.log(1, result)
         return '0x' + result.join('');
     }
     throw new Error('Invalid hexlify value');
@@ -193,7 +185,6 @@ export function splitSignature(signature) {
     };
 }
 
-
 export function defineReadOnly(object, name, value) {
     Object.defineProperty(object, name, {
         enumerable: true,
@@ -204,10 +195,6 @@ export function defineReadOnly(object, name, value) {
 
 export function setType(object, type) {
     Object.defineProperty(object, '_ethersType', {configurable: false, value: type, writable: false});
-}
-
-export function isType(object, type) {
-    return (object && object._ethersType === type);
 }
 
 export function recoverPublicKey(digest, signature) {
@@ -286,9 +273,7 @@ export function getChecksumAddress(address) {
     for (var i_1 = 0; i_1 < 40; i_1++) {
         hashed[i_1] = chars[i_1].charCodeAt(0);
     }
-    //console.log(1, 'hashed', hashed)
     hashed = arrayify(keccak256(hashed));
-    //console.log(1, 'hashed', keccak256(hashed), hashed)
     for (var i = 0; i < 40; i += 2) {
         if ((hashed[i >> 1] >> 4) >= 8) {
             chars[i] = chars[i].toUpperCase();
@@ -361,13 +346,6 @@ export function concat(objects) {
 }
 
 export function hashMessage(message) {
-
-    // console.log(1, 'hashMessage', message, concat([
-    //     toUtf8Bytes('\x19Ethereum Signed Message:\n'),
-    //     toUtf8Bytes(String(message.length)),
-    //     ((typeof (message) === 'string') ? toUtf8Bytes(message) : message)
-    // ]))
-    //
     return keccak256(concat([
         toUtf8Bytes('\x19Ethereum Signed Message:\n'),
         toUtf8Bytes(String(message.length)),
@@ -376,14 +354,21 @@ export function hashMessage(message) {
 }
 
 export function recoverAddress(digest, signature) {
-    // TODO remove
-    utils.recoverAddress(digest, signature)
-    //
     return computeAddress(recoverPublicKey(arrayify(digest), signature));
 }
 
 export function verifyMessage(message, signature) {
     return recoverAddress(hashMessage(message), signature);
+}
+
+export function padZeros(value, length) {
+    value = arrayify(value);
+    if (length < value.length) {
+        throw new Error('cannot pad');
+    }
+    var result = new Uint8Array(length);
+    result.set(value, length - value.length);
+    return addSlice(result);
 }
 
 export function arrayify(hexStr, noUint8Array) {
@@ -409,9 +394,66 @@ export function arrayify(hexStr, noUint8Array) {
 }
 
 export function keccak256(data) {
-    //console.log(1, 'data', data)
-    //console.log(1, 'data', arrayify(data))
     return '0x' + keccak_256(arrayify(data));
+}
+
+export function shallowCopy(object) {
+    var result = {};
+    for (var key in object) {
+        result[key] = object[key];
+    }
+    return result;
+}
+
+export function isType(object, type) {
+    return (object && object._ethersType === type);
+}
+
+
+var opaque = { boolean: true, number: true, string: true };
+
+export function deepCopy(object, frozen) {
+    // Opaque objects are not mutable, so safe to copy by assignment
+    if (object === undefined || object === null || opaque[typeof (object)]) {
+        return object;
+    }
+    // Arrays are mutable, so we need to create a copy
+    if (Array.isArray(object)) {
+        var result = object.map(function (item) { return deepCopy(item, frozen); });
+        if (frozen) {
+            Object.freeze(result);
+        }
+        return result;
+    }
+    if (typeof (object) === 'object') {
+        // Some internal objects, which are already immutable
+        if (isType(object, 'BigNumber')) {
+            return object;
+        }
+        if (isType(object, 'Description')) {
+            return object;
+        }
+        if (isType(object, 'Indexed')) {
+            return object;
+        }
+        var result = {};
+        for (var key in object) {
+            var value = object[key];
+            if (value === undefined) {
+                continue;
+            }
+            defineReadOnly(result, key, deepCopy(value, frozen));
+        }
+        if (frozen) {
+            Object.freeze(result);
+        }
+        return result;
+    }
+    // The function type is also immutable, so safe to copy by assignment
+    if (typeof (object) === 'function') {
+        return object;
+    }
+    throw new Error('Cannot deepCopy ' + typeof (object));
 }
 
 export function sha256(val, format = 'array') {
@@ -465,10 +507,119 @@ export function toUtf8Bytes(str) {
     return arrayify(result);
 }
 
+export function toUtf8String(bytes, ignoreErrors) {
+    bytes = arrayify(bytes);
+    var result = '';
+    var i = 0;
+    // Invalid bytes are ignored
+    while (i < bytes.length) {
+        var c = bytes[i++];
+        // 0xxx xxxx
+        if (c >> 7 === 0) {
+            result += String.fromCharCode(c);
+            continue;
+        }
+        // Multibyte; how many bytes left for this character?
+        var extraLength = null;
+        var overlongMask = null;
+        // 110x xxxx 10xx xxxx
+        if ((c & 0xe0) === 0xc0) {
+            extraLength = 1;
+            overlongMask = 0x7f;
+            // 1110 xxxx 10xx xxxx 10xx xxxx
+        }
+        else if ((c & 0xf0) === 0xe0) {
+            extraLength = 2;
+            overlongMask = 0x7ff;
+            // 1111 0xxx 10xx xxxx 10xx xxxx 10xx xxxx
+        }
+        else if ((c & 0xf8) === 0xf0) {
+            extraLength = 3;
+            overlongMask = 0xffff;
+        }
+        else {
+            if (!ignoreErrors) {
+                if ((c & 0xc0) === 0x80) {
+                    throw new Error('invalid utf8 byte sequence; unexpected continuation byte');
+                }
+                throw new Error('invalid utf8 byte sequence; invalid prefix');
+            }
+            continue;
+        }
+        // Do we have enough bytes in our data?
+        if (i + extraLength > bytes.length) {
+            if (!ignoreErrors) {
+                throw new Error('invalid utf8 byte sequence; too short');
+            }
+            // If there is an invalid unprocessed byte, skip continuation bytes
+            for (; i < bytes.length; i++) {
+                if (bytes[i] >> 6 !== 0x02) {
+                    break;
+                }
+            }
+            continue;
+        }
+        // Remove the length prefix from the char
+        var res = c & ((1 << (8 - extraLength - 1)) - 1);
+        for (var j = 0; j < extraLength; j++) {
+            var nextChar = bytes[i];
+            // Invalid continuation byte
+            if ((nextChar & 0xc0) != 0x80) {
+                res = null;
+                break;
+            }
+            res = (res << 6) | (nextChar & 0x3f);
+            i++;
+        }
+        if (res === null) {
+            if (!ignoreErrors) {
+                throw new Error('invalid utf8 byte sequence; invalid continuation byte');
+            }
+            continue;
+        }
+        // Check for overlong seuences (more bytes than needed)
+        if (res <= overlongMask) {
+            if (!ignoreErrors) {
+                throw new Error('invalid utf8 byte sequence; overlong');
+            }
+            continue;
+        }
+        // Maximum code point
+        if (res > 0x10ffff) {
+            if (!ignoreErrors) {
+                throw new Error('invalid utf8 byte sequence; out-of-range');
+            }
+            continue;
+        }
+        // Reserved for UTF-16 surrogate halves
+        if (res >= 0xd800 && res <= 0xdfff) {
+            if (!ignoreErrors) {
+                throw new Error('invalid utf8 byte sequence; utf-16 surrogate');
+            }
+            continue;
+        }
+        if (res <= 0xffff) {
+            result += String.fromCharCode(res);
+            continue;
+        }
+        res -= 0x10000;
+        result += String.fromCharCode(((res >> 10) & 0x3ff) + 0xd800, (res & 0x3ff) + 0xdc00);
+    }
+    return result;
+}
+
 export function checkNew(self, kind) {
     if (!(self instanceof kind)) {
         throw new Error('missing new');
     }
+}
+
+export function errorInfo() {
+    var args = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        args[_i] = arguments[_i];
+    }
+    console.info("info", args);
 }
 
 export function hexDataSlice(data, offset, endOffset) {
@@ -483,6 +634,18 @@ export function hexDataSlice(data, offset, endOffset) {
         return '0x' + data.substring(offset, 2 + 2 * endOffset);
     }
     return '0x' + data.substring(offset);
+}
+
+export function checkArgumentCount(count, expectedCount, suffix) {
+    if (!suffix) {
+        suffix = '';
+    }
+    if (count < expectedCount) {
+        throw new Error('missing argument' + suffix);
+    }
+    if (count > expectedCount) {
+        throw new Error('too many arguments' + suffix);
+    }
 }
 
 var SigningKey = /** @class */ (function () {
@@ -529,12 +692,7 @@ var SigningKey = /** @class */ (function () {
     return SigningKey;
 }());
 
-// const recoverAddress = recoverAddress;
-// const SigningKey = utils.SigningKey;
-const AbiCoder = utils.AbiCoder;
-
 export {
-    SigningKey,
-    AbiCoder
+    SigningKey
 }
 

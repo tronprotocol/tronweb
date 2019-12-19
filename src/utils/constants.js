@@ -1,11 +1,15 @@
-// var bignumber_1 = require("./utils/bignumber");
-//
-// exports.AddressZero = '0x0000000000000000000000000000000000000000';
-// exports.HashZero = '0x0000000000000000000000000000000000000000000000000000000000000000';
-// exports.EtherSymbol = '\u039e';
-// exports.NegativeOne = bignumber_1.bigNumberify(-1);
-// exports.Zero = bignumber_1.bigNumberify(0);
-// exports.One = bignumber_1.bigNumberify(1);
-// exports.Two = bignumber_1.bigNumberify(2);
-// exports.WeiPerEther = bignumber_1.bigNumberify('1000000000000000000');
-// exports.MaxUint256 = bignumber_1.bigNumberify('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
+import BigNumber from 'bignumber.js';
+
+const constants = {
+    AddressZero: '0x0000000000000000000000000000000000000000',
+    HashZero: '0x0000000000000000000000000000000000000000000000000000000000000000',
+    EtherSymbol: '\u039e',
+    NegativeOne: new BigNumber(-1),
+    Zero: new BigNumber(0),
+    One: new BigNumber(1),
+    Two: new BigNumber(2),
+    WeiPerEther: new BigNumber('1000000000000000000'),
+    MaxUint256: new BigNumber('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
+}
+
+export default constants
