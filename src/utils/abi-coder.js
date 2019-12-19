@@ -1,3 +1,7 @@
+// this code is extracted from ethers.js
+// Copyright (c) 2017 Richard Moore
+// https://github.com/ethers-io/ethers.js
+
 // See: https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI
 import constants from './constants';
 import BigNumber from 'bignumber.js';

@@ -1,3 +1,7 @@
+// this code is extracted from ethers.js
+// Copyright (c) 2017 Richard Moore
+// https://github.com/ethers-io/ethers.js
+
 import jsSha256 from 'js-sha256';
 import {keccak_256} from 'js-sha3';
 import elliptic from "elliptic";
