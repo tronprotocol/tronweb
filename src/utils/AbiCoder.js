@@ -17,7 +17,9 @@ import {
     toUtf8Bytes,
     toUtf8String,
     errorInfo,
-    checkArgumentCount
+    checkArgumentCount,
+    deepCopy,
+    shallowCopy
 } from './ethersUtils';
 
 var __extends = (this && this.__extends) || (function () {
@@ -911,6 +913,8 @@ var AbiCoder = /** @class */ (function () {
     };
     AbiCoder.prototype.decode = function (types, data) {
         var coders = [];
+        console.log(JSON.stringify(types))
+        console.log(JSON.stringify(data))
         types.forEach(function (type) {
             // See encode for details
             var typeObject = null;
@@ -921,6 +925,8 @@ var AbiCoder = /** @class */ (function () {
             }
             coders.push(getParamCoder(this.coerceFunc, typeObject));
         }, this);
+        console.log(JSON.stringify(coders))
+        console.log(arrayify(data))
         return new CoderTuple(this.coerceFunc, coders, '_').decode(arrayify(data), 0).value;
     };
     return AbiCoder;
