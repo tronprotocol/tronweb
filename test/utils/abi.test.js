@@ -50,7 +50,7 @@ describe('TronWeb.utils.abi', function () {
             }
         });
 
-        it('should throw if the string does not start with 0x', function () {
+        it.skip('should throw if the string does not start with 0x', function () {
 
             const tronWeb = tronWebBuilder.createInstance();
             const types = ['string', 'string', 'uint8', 'bytes32', 'uint256'];

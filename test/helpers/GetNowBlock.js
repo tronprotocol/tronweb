@@ -30,7 +30,7 @@ class GetNowBlock {
             someParameter = options.someParameter
         }
         return {
-            requires: '^2.2.4',
+            requires: '>=2.2.4',
             components: {
                 trx: {
                     // will be overridden

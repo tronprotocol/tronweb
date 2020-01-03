@@ -1,6 +1,6 @@
 import TronWeb from 'index';
 import utils from 'utils';
-import {AbiCoder} from 'utils/ethersUtils';
+import {AbiCoder} from 'utils/AbiCoder';
 import Validator from 'paramValidator';
 import {ADDRESS_PREFIX_REGEX} from 'utils/address';
 import injectpromise from 'injectpromise';

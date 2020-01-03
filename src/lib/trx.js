@@ -637,7 +637,7 @@ export default class Trx {
 
         const messageDigest = keccak256(messageBytes);
         const recovered = recoverAddress(messageDigest, {
-            recoveryParam: signature.substring(128, 130) == '1c' ? 1 : 0,
+            recoveryParam: signature.substring(128, 130) === '1c' ? 1 : 0,
             r: '0x' + signature.substring(0, 64),
             s: '0x' + signature.substring(64, 128)
         });
@@ -645,7 +645,7 @@ export default class Trx {
         const tronAddress = ADDRESS_PREFIX + recovered.substr(2);
         const base58Address = TronWeb.address.fromHex(tronAddress);
 
-        return base58Address == TronWeb.address.fromHex(address);
+        return base58Address === TronWeb.address.fromHex(address);
     }
 
     async sign(transaction = false, privateKey = this.tronWeb.defaultPrivateKey, useTronHeader = true, multisig = false, callback = false) {

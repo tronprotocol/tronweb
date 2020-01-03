@@ -76,7 +76,7 @@ describe('TronWeb.trx', function () {
 
             before(async function(){
                 this.timeout(10000);
-                accountId = TronWeb.toHex(`testtest${Math.ceil(Math.random()*100)}`);
+                accountId = TronWeb.toHex(`testtest${Math.ceil(Math.random()*10000)}`);
                 const transaction = await tronWeb.transactionBuilder.setAccountId(accountId, accounts.hex[idx]);
                 await broadcaster(null, accounts.pks[idx], transaction);
             });
@@ -202,7 +202,7 @@ describe('TronWeb.trx', function () {
 
             before(async function(){
                 this.timeout(10000);
-                accountId = TronWeb.toHex(`testtest${Math.ceil(Math.random()*100)}`);
+                accountId = TronWeb.toHex(`testtest${Math.ceil(Math.random()*10000)}`);
                 const transaction = await tronWeb.transactionBuilder.setAccountId(accountId, accounts.hex[idx]);
                 await broadcaster(null, accounts.pks[idx], transaction);
                 await waitChainData('accountById', accountId);

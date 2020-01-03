@@ -51,6 +51,10 @@ export default class TronWeb extends EventEmitter {
         if (utils.isString(eventServer))
             eventServer = new providers.HttpProvider(eventServer);
 
+        if (fullNode === solidityNode && fullNode === eventServer && /api.*\.trongrid.io/.test(fullNode)) {
+            this.usingTronGrid = true
+        }
+
         this.event = new Event(this);
         this.transactionBuilder = new TransactionBuilder(this);
         this.trx = new Trx(this);
