@@ -9,8 +9,7 @@ const pollAccountFor = require('../helpers/pollAccountFor');
 const _ = require('lodash');
 const tronWebBuilder = require('../helpers/tronWebBuilder');
 const assertEqualHex = require('../helpers/assertEqualHex');
-const testRevertContract = require('../fixtures/contracts').testRevert;
-const testConstantContract = require('../fixtures/contracts').testConstant;
+const {testRevert, testConstant, arrayParam} = require('../fixtures/contracts');
 const waitChainData = require('../helpers/waitChainData');
 
 const TronWeb = tronWebBuilder.TronWeb;
@@ -1152,8 +1151,8 @@ describe('TronWeb.transactionBuilder', function () {
         it('should create a smart contract with default parameters', async function () {
 
             const options = {
-                abi: testRevertContract.abi,
-                bytecode: testRevertContract.bytecode
+                abi: testRevert.abi,
+                bytecode: testRevert.bytecode
             };
             for (let i = 0; i < 2; i++) {
                 if (i === 1) options.permissionId = 2;
@@ -1165,11 +1164,42 @@ describe('TronWeb.transactionBuilder', function () {
             }
         });
 
+        it('should create a smart contract with array parameters', async function () {
+            this.timeout(20000);
+            const bals = [1000, 2000, 3000, 4000];
+            const options = {
+                abi: arrayParam.abi,
+                bytecode: arrayParam.bytecode,
+                permissionId: 2,
+                parameters: [
+                    [accounts.hex[25], accounts.hex[26], accounts.hex[27], accounts.hex[28]],
+                    [bals[0], bals[1], bals[2], bals[3]]
+                ]
+            };
+            const transaction = await tronWeb.transactionBuilder.createSmartContract(options, accounts.hex[0]);
+            await broadcaster(null, accounts.pks[0], transaction);
+            while (true) {
+                const tx = await tronWeb.trx.getTransactionInfo(transaction.txID);
+                if (Object.keys(tx).length === 0) {
+                    await wait(3);
+                    continue;
+                } else {
+                    break;
+                }
+            }
+            const deployed = await tronWeb.contract().at(transaction.contract_address);
+            for (let j = 25; j <= 28; j++) {
+                let bal = await deployed.balances(accounts.hex[j]).call();
+                bal = bal.toNumber();
+                assert.equal(bal, bals[j - 25]);
+            }
+        });
+
         it('should create a smart contract and verify the parameters', async function () {
 
             const options = {
-                abi: testRevertContract.abi,
-                bytecode: testRevertContract.bytecode,
+                abi: testRevert.abi,
+                bytecode: testRevert.bytecode,
                 userFeePercentage: 30,
                 originEnergyLimit: 9e6,
                 feeLimit: 9e8
@@ -1192,8 +1222,8 @@ describe('TronWeb.transactionBuilder', function () {
             this.timeout(20000);
 
             transaction = await tronWeb.transactionBuilder.createSmartContract({
-                abi: testConstantContract.abi,
-                bytecode: testConstantContract.bytecode
+                abi: testConstant.abi,
+                bytecode: testConstant.bytecode
             }, accounts.hex[6]);
             await broadcaster(null, accounts.pks[6], transaction);
             while (true) {
@@ -1240,8 +1270,8 @@ describe('TronWeb.transactionBuilder', function () {
             this.timeout(20000);
 
             transaction = await tronWeb.transactionBuilder.createSmartContract({
-                abi: testConstantContract.abi,
-                bytecode: testConstantContract.bytecode
+                abi: testConstant.abi,
+                bytecode: testConstant.bytecode
             }, accounts.hex[6]);
             await broadcaster(null, accounts.pks[6], transaction);
             while (true) {
@@ -1289,8 +1319,8 @@ describe('TronWeb.transactionBuilder', function () {
             this.timeout(20000);
 
             transaction = await tronWeb.transactionBuilder.createSmartContract({
-                abi: testConstantContract.abi,
-                bytecode: testConstantContract.bytecode
+                abi: testConstant.abi,
+                bytecode: testConstant.bytecode
             }, accounts.hex[7]);
             await broadcaster(null, accounts.pks[7], transaction);
             while (true) {
@@ -1377,8 +1407,8 @@ describe('TronWeb.transactionBuilder', function () {
             this.timeout(20000);
 
             transaction = await tronWeb.transactionBuilder.createSmartContract({
-                abi: testConstantContract.abi,
-                bytecode: testConstantContract.bytecode
+                abi: testConstant.abi,
+                bytecode: testConstant.bytecode
             }, accounts.hex[6]);
             await broadcaster(null, accounts.pks[6], transaction);
             while (true) {
