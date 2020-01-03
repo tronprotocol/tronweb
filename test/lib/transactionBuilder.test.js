@@ -39,7 +39,7 @@ describe('TronWeb.transactionBuilder', function () {
 
     describe('#constructor()', function () {
 
-        it.only('should have been set a full instance in tronWeb', function () {
+        it('should have been set a full instance in tronWeb', function () {
 
             assert.instanceOf(tronWeb.transactionBuilder, TronWeb.TransactionBuilder);
         });
