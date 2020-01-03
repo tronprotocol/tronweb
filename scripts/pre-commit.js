@@ -3,7 +3,28 @@ const path = require('path')
 const fs = require('fs')
 const resultFile = path.resolve(__dirname, '../pre-commit-result')
 
-if (!process.env.SKIPPRECOMMIT) {
+
+const statusHash = execSync(
+    path.resolve(__dirname, 'git-hash.sh')
+).toString().split('\n')[0];
+
+const prevStatusHash = fs.readFileSync(
+    path.resolve(__dirname, '../test-git-hash'),
+    'utf8'
+).split('\n')[0]
+
+if (statusHash === prevStatusHash) {
+    process.exit(0)
+}
+
+if (process.env.SKIPPRECOMMIT) {
+
+    console.log('echo "Test skipped before git commit" >> ' + resultFile)
+    fs.writeFileSync(resultFile, 'Test skipped before git commit.')
+    execSync('git add -A')
+    process.exit(0);
+
+} else {
 
     const chalk = require('chalk')
 
@@ -54,9 +75,5 @@ if (!process.env.SKIPPRECOMMIT) {
         })
     })
 
-} else {
-    console.log('echo "Test skipped before git commit" >> ' + resultFile)
-    fs.writeFileSync(resultFile, 'Test skipped before git commit.')
-    execSync('git add -A')
-    process.exit(0);
+
 }

@@ -5,7 +5,6 @@
 import jsSha256 from 'js-sha256';
 import {keccak_256} from 'js-sha3';
 import elliptic from "elliptic";
-// import BN from 'bn.js';
 import BigNumber from './BNWrapper.js';
 import {bigNumberify} from './BNWrapper.js';
 
@@ -92,10 +91,6 @@ export function hexZeroPad(value, length) {
     }
     return value;
 }
-
-// export function isHexable(val) {
-//     return !!isHexString(val);
-// }
 
 export function toHexString(arr) {
     var str = ''

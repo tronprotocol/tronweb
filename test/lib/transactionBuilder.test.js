@@ -831,6 +831,8 @@ describe('TronWeb.transactionBuilder', function () {
                 if (!tokenList) await wait(1)
             }
 
+            await wait(3)
+
             if (isAllowSameTokenNameApproved) {
                 tokenID = tokenList[tokenOptions.name].id
             } else {
@@ -1528,6 +1530,7 @@ describe('TronWeb.transactionBuilder', function () {
 
             it('should extend the expiration', async function () {
 
+                this.timeout(10000);
                 const receiver = accounts.b58[42]
                 const sender = accounts.hex[43]
                 const privateKey = accounts.pks[43]
@@ -1540,7 +1543,6 @@ describe('TronWeb.transactionBuilder', function () {
                 await wait(3);
                 assert.notEqual(transaction.txID, previousId)
                 assert.equal(balance - await tronWeb.trx.getUnconfirmedBalance(sender), 10);
-
             });
 
         });
