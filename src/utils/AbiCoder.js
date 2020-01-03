@@ -4,7 +4,9 @@
 
 // See: https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI
 import constants from './constants';
-import BN from 'bn.js';
+// import BN from 'bn.js';
+// import BigNumber from './BNWrapper.js';
+import {bigNumberify} from './BNWrapper.js';
 
 import {
     arrayify,
@@ -21,6 +23,15 @@ import {
     deepCopy,
     shallowCopy
 } from './ethersUtils';
+
+
+// const bigNumberify = function (value) {
+//     if (BigNumber.isBigNumber(value)) {
+//         return value;
+//     }
+//     return new BigNumber(value);
+// }
+
 
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -240,7 +251,7 @@ function parseSignatureFunction(fragment) {
         if (!comps[1].match(/^[0-9]+$/)) {
             throw new Error('invalid signature gas');
         }
-        abi.gas = new BN(comps[1]);
+        abi.gas = bigNumberify(comps[1]);
         fragment = comps[0];
     }
     comps = fragment.split(' returns ');
@@ -406,7 +417,7 @@ var CoderNumber = /** @class */ (function (_super) {
 
     CoderNumber.prototype.encode = function (value) {
         try {
-            var v = new BN(value);
+            var v = bigNumberify(value);
             if (this.signed) {
                 var bounds = constants.MaxUint256.maskn(this.size * 8 - 1);
                 if (v.gt(bounds)) {
@@ -435,7 +446,7 @@ var CoderNumber = /** @class */ (function (_super) {
             throw new Error('insufficient data for ' + this.name + ' type');
         }
         var junkLength = 32 - this.size;
-        var value = new BN(data.slice(offset + junkLength, offset + 32));
+        var value = bigNumberify(data.slice(offset + junkLength, offset + 32));
         if (this.signed) {
             value = value.fromTwos(this.size * 8);
         } else {
@@ -913,8 +924,6 @@ var AbiCoder = /** @class */ (function () {
     };
     AbiCoder.prototype.decode = function (types, data) {
         var coders = [];
-        console.log(JSON.stringify(types))
-        console.log(JSON.stringify(data))
         types.forEach(function (type) {
             // See encode for details
             var typeObject = null;
@@ -925,8 +934,6 @@ var AbiCoder = /** @class */ (function () {
             }
             coders.push(getParamCoder(this.coerceFunc, typeObject));
         }, this);
-        console.log(JSON.stringify(coders))
-        console.log(arrayify(data))
         return new CoderTuple(this.coerceFunc, coders, '_').decode(arrayify(data), 0).value;
     };
     return AbiCoder;

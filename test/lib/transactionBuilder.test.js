@@ -1165,9 +1165,9 @@ describe('TronWeb.transactionBuilder', function () {
             }
         });
 
-        it.only('should create a smart contract with array parameters', async function () {
+        it('should create a smart contract with array parameters', async function () {
             this.timeout(20000);
-            const bals = [10, 20, 30, 40];
+            const bals = [1000, 2000, 3000, 4000];
             const options = {
                 abi: arrayParam.abi,
                 bytecode: arrayParam.bytecode,
@@ -1191,10 +1191,8 @@ describe('TronWeb.transactionBuilder', function () {
             const deployed = await tronWeb.contract().at(transaction.contract_address);
             for (let j = 25; j <= 28; j++) {
                 let bal = await deployed.balances(accounts.hex[j]).call();
-                console.log(bal);
                 bal = bal.toNumber();
-                console.log(bal);
-                // assert.equal(bal, bals[j - 25]);
+                assert.equal(bal, bals[j - 25]);
             }
         });
 
@@ -1539,7 +1537,7 @@ describe('TronWeb.transactionBuilder', function () {
                 const previousId = transaction.txID;
                 transaction = await tronWeb.transactionBuilder.extendExpiration(transaction, 3600);
                 await broadcaster(null, privateKey, transaction);
-
+                await wait(3);
                 assert.notEqual(transaction.txID, previousId)
                 assert.equal(balance - await tronWeb.trx.getUnconfirmedBalance(sender), 10);
 

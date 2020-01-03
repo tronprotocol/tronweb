@@ -55,7 +55,7 @@ describe('#contract.method', function () {
             )
         });
 
-        it.only("should set the val to 400", async function () {
+        it("should set the val to 400", async function () {
             this.timeout(30000)
             let result = await testSetVal.set(400).send({
                 shouldPollResponse: true,
