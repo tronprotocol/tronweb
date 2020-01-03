@@ -10,3 +10,5 @@ yarn-error.log
 .vscode/
 .idea/
 example/
+/test-report
+/test-git-hash

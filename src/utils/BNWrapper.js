@@ -1,6 +1,3 @@
-// var __importDefault = (this && this.__importDefault) || function (mod) {
-//     return (mod && mod.__esModule) ? mod : { "default": mod };
-// };
 /**
  *  BigNumber
  *
@@ -19,7 +16,6 @@ import {
     setType,
     checkNew
 } from "./ethersUtils";
-// var BN = new bn_js.default.BN(-1);
 var BN = new bn_js(-1);
 function toHex(bn) {
     var value = bn.toString(16);
@@ -181,4 +177,3 @@ export function bigNumberify(value) {
     }
     return new BigNumber(value);
 }
-// exports.bigNumberify = bigNumberify;
