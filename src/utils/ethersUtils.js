@@ -5,7 +5,8 @@
 import jsSha256 from 'js-sha256';
 import {keccak_256} from 'js-sha3';
 import elliptic from "elliptic";
-import BN from 'bn.js';
+import BigNumber from './BNWrapper.js';
+import {bigNumberify} from './BNWrapper.js';
 
 const HexCharacters = '0123456789abcdef';
 
@@ -46,9 +47,11 @@ export function isArrayish(value) {
 }
 
 export function isHexable(value) {
-    if (typeof(value) === 'string') {
+    if (typeof (value) === 'string') {
         if (isHexString(value)) {
-            if (value == '0x') { value = '0x0'; }
+            if (value == '0x') {
+                value = '0x0';
+            }
             return true
 
         } else if (value[0] === '-' && isHexString(value.substring(1))) {
@@ -61,7 +64,7 @@ export function isHexable(value) {
             return false
         }
 
-    } else if (typeof(value) === 'number') {
+    } else if (typeof (value) === 'number') {
         if (parseInt(String(value)) !== value) {
             return false
         }
@@ -70,10 +73,8 @@ export function isHexable(value) {
         } catch (error) {
             return false
         }
-
-    // } else if (value instanceof BigNumber) {
-    //     return true
-
+    } else if (BigNumber.isBigNumber(value)) {
+        return true
     } else if (Array.isArray(value)) {
         return true
     } else {
@@ -90,10 +91,6 @@ export function hexZeroPad(value, length) {
     }
     return value;
 }
-
-// export function isHexable(val) {
-//     return !!isHexString(val);
-// }
 
 export function toHexString(arr) {
     var str = ''
@@ -311,7 +308,7 @@ export function getAddress(address) {
         if (address.substring(2, 4) !== ibanChecksum(address)) {
             throw new Error('bad icap checksum');
         }
-        result = (new bn_js_1.default.BN(address.substring(4), 36)).toString(16);
+        result = (bigNumberify(address.substring(4), 36)).toString(16);
         while (result.length < 40) {
             result = '0' + result;
         }
@@ -377,9 +374,9 @@ export function padZeros(value, length) {
 }
 
 export function arrayify(hexStr, noUint8Array) {
-    if (BN.isBN(hexStr)) {
-        hexStr = hexStr.toJSON()
-    } else  if (typeof hexStr === 'string') {
+    if (BigNumber.isBigNumber(hexStr)) {
+        hexStr = hexStr._hex;
+    } else if (typeof hexStr === 'string') {
         if (/0x/.test(hexStr))
             hexStr = hexStr.substring(2);
         if (hexStr.length % 2)
@@ -391,7 +388,6 @@ export function arrayify(hexStr, noUint8Array) {
         }
         hexStr = arr;
     }
-
     let arr = Array.isArray(hexStr) || /Uint8Array/.test(hexStr.constructor)
         ? hexStr
         : hexStr.match(/.{1,2}/g).map(byte => parseInt(byte, 16));
@@ -418,7 +414,7 @@ export function isType(object, type) {
 }
 
 
-var opaque = { boolean: true, number: true, string: true };
+var opaque = {boolean: true, number: true, string: true};
 
 export function deepCopy(object, frozen) {
     // Opaque objects are not mutable, so safe to copy by assignment
@@ -427,7 +423,9 @@ export function deepCopy(object, frozen) {
     }
     // Arrays are mutable, so we need to create a copy
     if (Array.isArray(object)) {
-        var result = object.map(function (item) { return deepCopy(item, frozen); });
+        var result = object.map(function (item) {
+            return deepCopy(item, frozen);
+        });
         if (frozen) {
             Object.freeze(result);
         }
@@ -535,17 +533,14 @@ export function toUtf8String(bytes, ignoreErrors) {
             extraLength = 1;
             overlongMask = 0x7f;
             // 1110 xxxx 10xx xxxx 10xx xxxx
-        }
-        else if ((c & 0xf0) === 0xe0) {
+        } else if ((c & 0xf0) === 0xe0) {
             extraLength = 2;
             overlongMask = 0x7ff;
             // 1111 0xxx 10xx xxxx 10xx xxxx 10xx xxxx
-        }
-        else if ((c & 0xf8) === 0xf0) {
+        } else if ((c & 0xf8) === 0xf0) {
             extraLength = 3;
             overlongMask = 0xffff;
-        }
-        else {
+        } else {
             if (!ignoreErrors) {
                 if ((c & 0xc0) === 0x80) {
                     throw new Error('invalid utf8 byte sequence; unexpected continuation byte');

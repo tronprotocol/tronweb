@@ -190,7 +190,6 @@ describe('TronWeb.trx', function () {
                     'Invalid address provided'
                 );
             });
-
         });
 
 

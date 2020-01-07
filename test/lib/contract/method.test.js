@@ -55,14 +55,14 @@ describe('#contract.method', function () {
             )
         });
 
-        it("should set the val to 123", async function () {
+        it("should set the val to 400", async function () {
             this.timeout(30000)
-            let result = await testSetVal.set(123).send({
+            let result = await testSetVal.set(400).send({
                 shouldPollResponse: true,
                 keepTxID: true
             })
             assert.equal(result[0].length, 64)
-            assert.equal(result[1].toNumber(), 123)
+            assert.equal(result[1].toNumber(), 400)
         });
 
     });
