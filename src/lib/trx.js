@@ -1285,7 +1285,9 @@ export default class Trx {
         this.tronWeb.fullNode.request('wallet/getassetissuelistbyname', {
             value: this.tronWeb.fromUtf8(tokenID)
         }, 'post').then(token => {
-            if (!token.name)
+            if (Array.isArray(token.assetIssue)) {
+                callback(null, token.assetIssue.map(t => this._parseToken(t)));
+            } else if (!token.name)
                 return callback('Token does not exist');
 
             callback(null, this._parseToken(token));
