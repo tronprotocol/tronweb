@@ -43,9 +43,6 @@ module.exports = async function (type, ...params) {
                 }
                 case 'sendToken': {
                     data = await tronWeb.trx.getUnconfirmedAccount(params[0]);
-
-                    jlog(data)
-
                     isFound = data && data.assetV2 && data.assetV2.length && data.assetV2[0].value !== params[1];
                     break;
                 }
