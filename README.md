@@ -168,6 +168,9 @@ In order to contribute you can
 
 ## Recent History
 
+__2.11.0__
+* Remove `ethers.js` as a dependency reducing the size of the library of ~37%
+
 __2.10.0__
 * Fix `trx.getTokenListByName`
 

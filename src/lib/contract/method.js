@@ -314,7 +314,10 @@ export default class Method {
                         params.onlyConfirmed = true
                 }
 
-                const events = await this.tronWeb.event.getEventsByContractAddress(this.contract.address, params);
+                let events = await this.tronWeb.event.getEventsByContractAddress(this.contract.address, params);
+                if (events.data) {
+                    events = events.data;
+                }
                 const [latestEvent] = events.sort((a, b) => b.block - a.block);
                 const newEvents = events.filter((event, index) => {
 

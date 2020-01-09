@@ -5,6 +5,7 @@ import EventEmitter from 'eventemitter3';
 import {version} from '../package.json';
 import semver from 'semver';
 import injectpromise from 'injectpromise';
+import TronGrid from 'trongrid';
 
 import TransactionBuilder from 'lib/transactionBuilder';
 import Trx from 'lib/trx';
@@ -26,6 +27,7 @@ export default class TronWeb extends EventEmitter {
     static Event = Event;
     static version = version;
     static utils = utils;
+    static TronGrid = TronGrid;
 
     constructor(options = false,
                 // for retro-compatibility:
@@ -89,6 +91,15 @@ export default class TronWeb extends EventEmitter {
 
         this.fullnodeVersion = DEFAULT_VERSION;
         this.injectPromise = injectpromise(this);
+
+        this.tronGrid = new TronGrid(this);
+        this.useTronGridAPI = options.useTronGridAPI || false;
+    }
+
+    useTrongrid(options = {}) {
+        if (typeof options.useTronGridAPI === 'boolean')
+            return options.useTronGridAPI;
+        return this.useTronGridAPI;
     }
 
     async getFullnodeVersion() {

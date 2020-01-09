@@ -3,15 +3,18 @@ const path = require('path')
 const fs = require('fs')
 const resultFile = path.resolve(__dirname, '../pre-commit-result')
 
-
 const statusHash = execSync(
     path.resolve(__dirname, 'git-hash.sh')
 ).toString().split('\n')[0];
 
-const prevStatusHash = fs.readFileSync(
-    path.resolve(__dirname, '../test-git-hash'),
-    'utf8'
-).split('\n')[0]
+const testGitHashPath = path.resolve(__dirname, '../test-git-hash')
+
+const prevStatusHash = fs.existsSync(testGitHashPath)
+    ? fs.readFileSync(
+        testGitHashPath,
+        'utf8'
+    ).split('\n')[0]
+    : ''
 
 if (statusHash === prevStatusHash) {
     process.exit(0)
