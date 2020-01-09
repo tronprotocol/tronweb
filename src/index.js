@@ -5,6 +5,7 @@ import EventEmitter from 'eventemitter3';
 import {version} from '../package.json';
 import semver from 'semver';
 import injectpromise from 'injectpromise';
+import TronGrid from 'trongrid';
 
 import TransactionBuilder from 'lib/transactionBuilder';
 import Trx from 'lib/trx';
@@ -26,6 +27,7 @@ export default class TronWeb extends EventEmitter {
     static Event = Event;
     static version = version;
     static utils = utils;
+    static TronGrid = TronGrid;
 
     constructor(options = false,
                 // for retro-compatibility:
@@ -54,6 +56,8 @@ export default class TronWeb extends EventEmitter {
         if (fullNode === solidityNode && fullNode === eventServer && /api.*\.trongrid.io/.test(fullNode)) {
             this.usingTronGrid = true
         }
+
+        this.tronGrid = new TronGrid(this);
 
         this.event = new Event(this);
         this.transactionBuilder = new TransactionBuilder(this);
