@@ -244,8 +244,6 @@ describe('TronWeb.lib.event', async function () {
                     }
                     await wait(0.5)
                 }
-                assert.isTrue(Math.abs(events.meta.at - Date.now()) < 15);
-
                 events = events.data
 
                 assert.equal(events[0].result._receiver.substring(2), accounts.hex[8].substring(2))
