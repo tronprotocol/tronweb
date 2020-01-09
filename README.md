@@ -168,7 +168,7 @@ In order to contribute you can
 
 ## Recent History
 
-__2.9.1__
+__2.10.0__
 * Fix `trx.getTokenListByName`
 
 __2.9.0__
