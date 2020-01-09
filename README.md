@@ -168,9 +168,8 @@ In order to contribute you can
 
 ## Recent History
 
-__3.0.0__
+__2.11.0__
 * Remove `ethers.js` as a dependency reducing the size of the library of ~37%
-* Uses TronGrid as an internal dependency allowing to use TG API from TronWeb, setting `useTronGridAPI: true`
 
 __2.10.0__
 * Fix `trx.getTokenListByName`
