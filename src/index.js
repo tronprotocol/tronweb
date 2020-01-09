@@ -93,9 +93,7 @@ export default class TronWeb extends EventEmitter {
         this.injectPromise = injectpromise(this);
 
         this.tronGrid = new TronGrid(this);
-        if (options.useTronGridAPI) {
-            this.useTronGridAPI = true
-        }
+        this.useTronGridAPI = options.useTronGridAPI || false;
     }
 
     useTrongrid(options = {}) {
