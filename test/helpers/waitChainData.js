@@ -2,6 +2,7 @@ const tronWebBuilder = require('./tronWebBuilder');
 const tronWeb = tronWebBuilder.createInstance();
 const wait = require('./wait');
 const chalk = require('chalk');
+const jlog = require('./jlog');
 
 function log(x) {
     process.stdout.write(chalk.yellow(x))

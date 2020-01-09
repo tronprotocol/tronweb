@@ -168,6 +168,12 @@ In order to contribute you can
 
 ## Recent History
 
+__2.9.1__
+* Fix `trx.getTokenListByName`
+
+__2.9.0__
+* Support smart contracts with function that requires an array of addresses as a parameter, included the constructor during the deployment
+
 __2.8.1__
 * Add options `keepTxID` to show also the txID when triggering a contract with `shouldPollResponse`
 
