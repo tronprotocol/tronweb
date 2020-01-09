@@ -10,13 +10,13 @@ const assert = chai.assert;
 
 describe('TronWeb.lib.event', async function () {
 
-    let accounts
-    let tronWeb
-    let contractAddress
-    let contract
-    let eventLength = 0
-
     describe('Legacy version', async function () {
+
+        let accounts
+        let tronWeb
+        let contractAddress
+        let contract
+        let eventLength = 0
 
         before(async function () {
             tronWeb = tronWebBuilder.createInstance();
@@ -169,11 +169,17 @@ describe('TronWeb.lib.event', async function () {
         })
     });
 
-    describe.only('Trongrid-compatible version', async function () {
+    describe('Trongrid-compatible version', async function () {
 
-        before(async function () {
+        let accounts
+        let tronWeb
+        let contractAddress
+        let contract
+        let eventLength = 0
+
+        beforeEach(async function () {
             tronWeb = tronWebBuilder.createInstance({
-                trongridCompatible: true
+                useTronGridAPI: true
             });
             accounts = await tronWebBuilder.getTestAccounts(-1);
 
@@ -227,8 +233,6 @@ describe('TronWeb.lib.event', async function () {
                     rawResponse: true
                 })
 
-                jlog(output)
-
                 eventLength++
 
                 let txId = output.id
@@ -240,6 +244,7 @@ describe('TronWeb.lib.event', async function () {
                     }
                     await wait(0.5)
                 }
+                assert.isTrue(Math.abs(events.meta.at - Date.now()) < 15);
 
                 events = events.data
 
@@ -275,9 +280,9 @@ describe('TronWeb.lib.event', async function () {
                     await wait(0.5)
                 }
 
-                events = events.data //[events.data.length -1]
+                assert.equal(events.meta.page_size, 1);
 
-                jlog(events)
+                events = events.data
 
                 const event = events[events.length - 1]
 
@@ -296,43 +301,22 @@ describe('TronWeb.lib.event', async function () {
                 this.timeout(20000)
                 tronWeb.setPrivateKey(accounts.pks[3])
 
-
                 let watchTest = await contract.SomeEvent().watch((err, res) => {
                     if (res) {
-                        res = res.data
                         assert.equal(res.result._sender, accounts.hex[3])
                         assert.equal(res.result._receiver, accounts.hex[4])
-                        assert.equal(res.result._amount, 4000)
+                        assert.equal(res.result._amount, 5000)
 
                         watchTest.stop() // Calls stop on itself when successful
                     }
                 })
 
-                contract.emitNow(accounts.hex[4], 4000).send({
+                contract.emitNow(accounts.hex[4], 5000).send({
                     from: accounts.hex[3]
                 })
 
             })
 
-            it('should only watch for an event with given filters', async function () {
-
-                this.timeout(20000)
-                tronWeb.setPrivateKey(accounts.pks[3])
-
-                let watchTest = await contract.SomeEvent().watch({filters: {"_amount": "4000"}}, (err, res) => {
-                    if (res) {
-                        assert.equal(res.result._sender, accounts.hex[3])
-                        assert.equal(res.result._receiver, accounts.hex[4])
-                        assert.equal(res.result._amount, 4000)
-
-                        watchTest.stop() // Calls stop on itself when successful
-                    }
-                })
-
-                contract.emitNow(accounts.hex[4], 4000).send({
-                    from: accounts.hex[3]
-                })
-            })
         })
     });
 });

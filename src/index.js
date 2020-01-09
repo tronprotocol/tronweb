@@ -61,8 +61,6 @@ export default class TronWeb extends EventEmitter {
             this.useTronGridAPI = true
         }
 
-        this.tronGrid = new TronGrid(this);
-
         this.event = new Event(this);
         this.transactionBuilder = new TransactionBuilder(this);
         this.trx = new Trx(this);
@@ -97,6 +95,8 @@ export default class TronWeb extends EventEmitter {
 
         this.fullnodeVersion = DEFAULT_VERSION;
         this.injectPromise = injectpromise(this);
+
+        this.tronGrid = new TronGrid(this);
     }
 
     async getFullnodeVersion() {
