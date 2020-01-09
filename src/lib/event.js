@@ -29,6 +29,10 @@ export default class Event {
 
     getEventsByContractAddress(contractAddress = false, options = {}, callback = false) {
 
+        if (this.tronWeb.useTronGridAPI) {
+            return this.tronWeb.tronGrid.contract.getEvents(contractAddress, options, callback);
+        }
+
         let {
             sinceTimestamp,
             since,
@@ -136,6 +140,10 @@ export default class Event {
 
 
     getEventsByTransactionID(transactionID = false, options = {}, callback = false) {
+
+        if (this.tronWeb.useTronGridAPI) {
+            return this.tronWeb.tronGrid.transaction.getEvents(transactionID, options, callback);
+        }
 
         if (utils.isFunction(options)) {
             callback = options;
