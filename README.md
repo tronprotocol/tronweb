@@ -168,6 +168,9 @@ In order to contribute you can
 
 ## Recent History
 
+__2.10.1__
+* Fix `trx.listExchangesPaginated`
+
 __2.10.0__
 * Fix `trx.getTokenListByName`
 
