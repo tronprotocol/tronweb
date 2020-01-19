@@ -1246,12 +1246,12 @@ export default class Trx {
         }
         if (utils.isFunction(limit)) {
             callback = limit;
-            limit = 30;
+            limit = 10;
         }
         if (!callback)
-            return this.injectPromise(this.listExchanges);
+            return this.injectPromise(this.listExchangesPaginated, limit, offset);
 
-        this.tronWeb.fullNode.request('wallet/listexchangespaginated', {
+        this.tronWeb.fullNode.request('wallet/getpaginatedexchangelist', {
             limit,
             offset
         }, 'post').then(({exchanges = []}) => {
