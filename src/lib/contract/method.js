@@ -2,6 +2,22 @@ import utils from 'utils';
 import {ADDRESS_PREFIX_REGEX} from 'utils/address';
 import injectpromise from 'injectpromise';
 
+export class MethodError extends Error {
+    constructor(message, extra = {}) {
+        // wrap existing error
+        super(message)
+        Object.assign(this, extra)
+    }
+}
+
+export class WrappedMethodError extends MethodError {
+    constructor(wrappedError, extra = {}) {
+        super(wrappedError.message)
+        this.wrappedError = wrappedError
+        Object.assign(this, extra)
+    }
+}
+
 const getFunctionSelector = abi => {
     return abi.name + '(' + getParamTypes(abi.inputs || []).join(',') + ')';
 }
@@ -75,18 +91,18 @@ export default class Method {
             return this.injectPromise(this._call, types, args, options);
 
         if (types.length !== args.length)
-            return callback('Invalid argument count provided');
+            return callback(new MethodError('Invalid argument count provided'));
 
         if (!this.contract.address)
-            return callback('Smart contract is missing address');
+            return callback(new MethodError('Smart contract is missing address'));
 
         if (!this.contract.deployed)
-            return callback('Calling smart contracts requires you to load the contract first');
+            return callback(new MethodError('Calling smart contracts requires you to load the contract first'));
 
         const {stateMutability} = this.abi;
 
         if (!['pure', 'view'].includes(stateMutability.toLowerCase()))
-            return callback(`Methods with state mutability "${stateMutability}" must use send()`);
+            return callback(new MethodError(`Methods with state mutability "${stateMutability}" must use send()`));
 
         options = {
             ...this.defaultOptions,
@@ -107,10 +123,10 @@ export default class Method {
             options.from ? this.tronWeb.address.toHex(options.from) : false,
             (err, transaction) => {
                 if (err)
-                    return callback(err);
+                    return callback(new WrappedMethodError(err, { transaction }));
 
                 if (!utils.hasProperty(transaction, 'constant_result'))
-                    return callback('Failed to execute');
+                    return callback(new MethodError('Failed to execute', { transaction }));
 
                 try {
 
@@ -126,7 +142,7 @@ export default class Method {
                             }
                             msg += msg2.replace(/(\u0000|\u000b|\f)+/g, ' ').replace(/ +/g, ' ').replace(/\s+$/g, '');
                         }
-                        return callback(msg)
+                        return callback(new MethodError(msg))
                     }
 
                     let output = decodeOutput(this.outputs, '0x' + transaction.constant_result[0]);
@@ -136,7 +152,7 @@ export default class Method {
 
                     return callback(null, output);
                 } catch (ex) {
-                    return callback(ex);
+                    return callback(WrappedMethodError(ex, { transaction }));
                 }
             });
     }
@@ -156,18 +172,18 @@ export default class Method {
             return this.injectPromise(this._send, types, args, options, privateKey);
 
         if (types.length !== args.length)
-            throw new Error('Invalid argument count provided');
+            throw new MethodError('Invalid argument count provided');
 
         if (!this.contract.address)
-            return callback('Smart contract is missing address');
+            return callback(new MethodError('Smart contract is missing address'));
 
         if (!this.contract.deployed)
-            return callback('Calling smart contracts requires you to load the contract first');
+            return callback(new MethodError('Calling smart contracts requires you to load the contract first'));
 
         const {stateMutability} = this.abi;
 
         if (['pure', 'view'].includes(stateMutability.toLowerCase()))
-            return callback(`Methods with state mutability "${stateMutability}" must use call()`);
+            return callback(new MethodError(`Methods with state mutability "${stateMutability}" must use call()`));
 
         // If a function isn't payable, dont provide a callValue.
         if (!['payable'].includes(stateMutability.toLowerCase()))
@@ -195,14 +211,16 @@ export default class Method {
             );
 
             if (!transaction.result || !transaction.result.result)
-                return callback('Unknown error: ' + JSON.stringify(transaction, null, 2));
+                return callback(
+                    new MethodError('Unknown error: ' + JSON.stringify(transaction, null, 2), { transaction })
+                );
 
             // If privateKey is false, this won't be signed here. We assume sign functionality will be replaced.
             const signedTransaction = await this.tronWeb.trx.sign(transaction.transaction, privateKey);
 
             if (!signedTransaction.signature) {
                 if (!privateKey)
-                    return callback('Transaction was not signed properly');
+                    return callback(new MethodError('Transaction was not signed properly', { transaction, signedTransaction }));
 
                 return callback('Invalid private key provided');
             }
@@ -210,13 +228,8 @@ export default class Method {
             const broadcast = await this.tronWeb.trx.sendRawTransaction(signedTransaction);
 
             if (broadcast.code) {
-                const err = {
-                    error: broadcast.code,
-                    message: broadcast.code
-                };
-                if (broadcast.message)
-                    err.message = this.tronWeb.toUtf8(broadcast.message);
-                return callback(err)
+                const message = broadcast.message ? this.tronWeb.toUtf8(broadcast.message) : broadcast.code
+                return callback(new MethodError(message, { code: broadcast.code, broadcast, signedTransaction, transaction }))
             }
 
             if (!options.shouldPollResponse)
@@ -224,10 +237,10 @@ export default class Method {
 
             const checkResult = async (index = 0) => {
                 if (index === 20) {
-                    return callback({
-                        error: 'Cannot find result in solidity node',
-                        transaction: signedTransaction
-                    });
+                    return callback(new MethodError('Cannot find result in solidity node', {
+                        signedTransaction,
+                        transaction
+                    }));
                 }
 
                 const output = await this.tronWeb.trx.getTransactionInfo(signedTransaction.txID);
@@ -239,19 +252,19 @@ export default class Method {
                 }
 
                 if (output.result && output.result === 'FAILED') {
-                    return callback({
-                        error: this.tronWeb.toUtf8(output.resMessage),
-                        transaction: signedTransaction,
+                    return callback(new MethodError(this.tronWeb.toUtf8(output.resMessage), {
+                        transaction,
+                        signedTransaction,
                         output
-                    });
+                    }));
                 }
 
                 if (!utils.hasProperty(output, 'contractResult')) {
-                    return callback({
-                        error: 'Failed to execute: ' + JSON.stringify(output, null, 2),
-                        transaction: signedTransaction,
+                    return callback(new MethodError('Failed to execute: ' + JSON.stringify(output, null, 2), {
+                        transaction,
+                        signedTransaction,
                         output
-                    });
+                    }));
                 }
 
                 if (options.rawResponse)
@@ -271,7 +284,7 @@ export default class Method {
 
             checkResult();
         } catch (ex) {
-            return callback(ex);
+            return callback(new WrappedMethodError(ex));
         }
     }
 
@@ -282,16 +295,16 @@ export default class Method {
         }
 
         if (!utils.isFunction(callback))
-            throw new Error('Expected callback to be provided');
+            throw new MethodError('Expected callback to be provided');
 
         if (!this.contract.address)
-            return callback('Smart contract is missing address');
+            return callback(new MethodError('Smart contract is missing address'));
 
         if (!this.abi.type || !/event/i.test(this.abi.type))
-            return callback('Invalid method type for event watching');
+            return callback(new MethodError('Invalid method type for event watching'));
 
         if (!this.tronWeb.eventServer)
-            return callback('No event server configured');
+            return callback(new MethodError('No event server configured'));
 
         let listener = false;
         let lastBlock = false;
