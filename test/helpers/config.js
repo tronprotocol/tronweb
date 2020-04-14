@@ -2,7 +2,7 @@ const fullHost = "http://127.0.0.1:" + (process.env.HOST_PORT || 9090)
 
 module.exports = {
 
-    PRIVATE_KEY: 'da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0',
+    PRIVATE_KEY: '',
     CONSUME_USER_RESOURCE_PERCENT: 30,
     FEE_LIMIT: 100000000,
     FULL_NODE_API: fullHost,
