@@ -466,6 +466,12 @@ describe('TronWeb Instance', function () {
             let input = 'salamon';
             let expected = '0x73616c616d6f6e';
             assert.equal(TronWeb.toHex(input), expected);
+            input = '';
+            expected = '0x';
+            assert.equal(TronWeb.toHex(input), expected);
+            input = ' ';
+            expected = '0x20';
+            assert.equal(TronWeb.toHex(input), expected);
         });
 
         it('should leave an hex string as is', function () {
