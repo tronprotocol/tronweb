@@ -168,6 +168,12 @@ In order to contribute you can
 
 ## Recent History
 
+__2.10.2__
+- Support toHex function with a space and empty character as parameter
+- The sign function supports visible as true.
+- Fix delete the private key in test files
+- Fix start method returned from watch is undefined #45
+
 __2.10.1__
 * Fix `trx.listExchangesPaginated`
 

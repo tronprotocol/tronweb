@@ -361,7 +361,7 @@ export default class Method {
         bindListener();
 
         return {
-            start: bindListener(),
+            start: bindListener,
             stop: () => {
                 if (!listener)
                     return;

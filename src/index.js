@@ -273,7 +273,7 @@ export default class TronWeb extends EventEmitter {
             if (/^(-|)0x/.test(val))
                 return val;
 
-            if (!isFinite(val))
+            if ((!isFinite(val)) ||  /^\s*$/.test(val))
                 return TronWeb.fromUtf8(val);
         }
 
