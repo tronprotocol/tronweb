@@ -2,7 +2,7 @@ import providers from 'lib/providers';
 import utils from 'utils';
 import BigNumber from 'bignumber.js';
 import EventEmitter from 'eventemitter3';
-import {version} from '../package.json';
+import { version } from '../package.json';
 import semver from 'semver';
 import injectpromise from 'injectpromise';
 
@@ -11,8 +11,9 @@ import Trx from 'lib/trx';
 import Contract from 'lib/contract';
 import Plugin from 'lib/plugin';
 import Event from 'lib/event';
-import {keccak256} from 'utils/ethersUtils';
-import {ADDRESS_PREFIX} from 'utils/address';
+import SideChain from 'lib/sidechain';
+import { keccak256 } from 'utils/ethersUtils';
+import { ADDRESS_PREFIX } from 'utils/address';
 
 const DEFAULT_VERSION = '3.5.0';
 
@@ -28,8 +29,8 @@ export default class TronWeb extends EventEmitter {
     static utils = utils;
 
     constructor(options = false,
-                // for retro-compatibility:
-                solidityNode = false, eventServer = false, privateKey = false) {
+        // for retro-compatibility:
+        solidityNode = false, eventServer = false, sideOptions = false, privateKey = false) {
         super();
 
         let fullNode;
@@ -79,6 +80,12 @@ export default class TronWeb extends EventEmitter {
         ].forEach(key => {
             this[key] = TronWeb[key];
         });
+        // for sidechain
+        if (typeof sideOptions === 'object' && (sideOptions.fullNode || sideOptions.fullHost)) {
+            this.sidechain = new SideChain(sideOptions, TronWeb, this);
+        } else {
+            privateKey = privateKey || sideOptions;
+        }
 
         if (privateKey)
             this.setPrivateKey(privateKey);
@@ -138,7 +145,7 @@ export default class TronWeb extends EventEmitter {
             base58
         };
 
-        this.emit('addressChanged', {hex, base58});
+        this.emit('addressChanged', { hex, base58 });
     }
 
     fullnodeSatisfies(version) {
@@ -273,7 +280,7 @@ export default class TronWeb extends EventEmitter {
             if (/^(-|)0x/.test(val))
                 return val;
 
-            if ((!isFinite(val)) ||  /^\s*$/.test(val))
+            if ((!isFinite(val)) || /^\s*$/.test(val))
                 return TronWeb.fromUtf8(val);
         }
 
