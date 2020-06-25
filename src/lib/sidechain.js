@@ -1,20 +1,18 @@
 import injectpromise from 'injectpromise';
+import Validator from 'paramValidator';
 
 export default class SideChain {
-    constructor(sideOptions, TronWeb = false, mainchain = false) {
+    constructor(sideOptions, TronWeb = false, mainchain = false, privateKey = false) {
         this.mainchain = mainchain;
-        const {fullNode, solidityNode, eventServer, mainGatewayAddress, sideGatewayAddress, sideChainId} = sideOptions;
-        // console.log(TronWeb, sideOptions, TronWeb, mainchain, 'yyyyy')
-        this.sidechain = new TronWeb(fullNode, solidityNode, eventServer);
-        console.log(this.sidechain, '1234888888')
+        const {fullHost, fullNode, solidityNode, eventServer, mainGatewayAddress, sideGatewayAddress, sideChainId} = sideOptions;
+        this.sidechain = new TronWeb(fullHost || fullNode, fullHost || solidityNode, fullHost || eventServer, privateKey);
         this.isAddress = this.mainchain.isAddress;
         this.utils = this.mainchain.utils;
-
         this.setMainGatewayAddress(mainGatewayAddress);
         this.setSideGatewayAddress(sideGatewayAddress);
         this.setChainId(sideChainId);
         this.injectPromise = injectpromise(this);
-        this.validator = this.mainchain.trx.validator;
+        this.validator = new Validator(this.sidechain);
 
         const self = this;
         this.sidechain.trx.sign = (...args) => {
@@ -23,19 +21,6 @@ export default class SideChain {
         this.sidechain.trx.multiSign = (...args) => {
             return self.multiSign(...args);
         };
-
-        [
-            'depositTrx'
-        ].forEach(key => {
-            this.sidechain[key] = this[key];
-        });
-        // Object.keys(this).forEach(key => {
-        //     if (key != 'sidechain') {
-        //         console.log(key)
-        //         this.sidechain[key] = this[key];
-        //     }
-        // });
-        // Object.assign(this.sidechain, this);
     }
     setMainGatewayAddress(mainGatewayAddress) {
         if (!this.isAddress(mainGatewayAddress))
@@ -225,7 +210,7 @@ export default class SideChain {
                 name: 'feeLimit',
                 type: 'integer',
                 value: feeLimit,
-                gt: 0,
+                gte: 0,
                 lte: 1_000_000_000
             }
         ], callback)) {
@@ -281,7 +266,7 @@ export default class SideChain {
                 name: 'feeLimit',
                 type: 'integer',
                 value: feeLimit,
-                gt: 0,
+                gte: 0,
                 lte: 1_000_000_000
             },
             {
@@ -352,7 +337,7 @@ export default class SideChain {
                 name: 'feeLimit',
                 type: 'integer',
                 value: feeLimit,
-                gt: 0,
+                gte: 0,
                 lte: 1_000_000_000
             },
             {
@@ -525,7 +510,7 @@ export default class SideChain {
                 name: 'feeLimit',
                 type: 'integer',
                 value: feeLimit,
-                gt: 0,
+                gte: 0,
                 lte: 1_000_000_000
             }
         ], callback)) {
@@ -630,7 +615,7 @@ export default class SideChain {
                 name: 'feeLimit',
                 type: 'integer',
                 value: feeLimit,
-                gt: 0,
+                gte: 0,
                 lte: 1_000_000_000
             }
         ], callback)) {
@@ -693,7 +678,7 @@ export default class SideChain {
                 name: 'feeLimit',
                 type: 'integer',
                 value: feeLimit,
-                gt: 0,
+                gte: 0,
                 lte: 1_000_000_000
             }
         ], callback)) {
@@ -758,7 +743,7 @@ export default class SideChain {
                 name: 'feeLimit',
                 type: 'integer',
                 value: feeLimit,
-                gt: 0,
+                gte: 0,
                 lte: 1_000_000_000
             },
             {
@@ -841,7 +826,7 @@ export default class SideChain {
                     });
                 }
 
-                if (!utils.hasProperty(output, 'contractResult')) {
+                if (!this.utils.hasProperty(output, 'contractResult')) {
                     return callback({
                         error: 'Failed to execute: ' + JSON.stringify(output, null, 2),
                         transaction: signedTransaction,
@@ -939,7 +924,7 @@ export default class SideChain {
                 name: 'feeLimit',
                 type: 'integer',
                 value: feeLimit,
-                gt: 0,
+                gte: 0,
                 lte: 1_000_000_000
             }
         ], callback)) {

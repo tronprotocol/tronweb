@@ -34,15 +34,16 @@ export default class TronWeb extends EventEmitter {
         super();
 
         let fullNode;
+
         if (typeof options === 'object' && (options.fullNode || options.fullHost)) {
             fullNode = options.fullNode || options.fullHost;
+            sideOptions = solidityNode;
             solidityNode = options.solidityNode || options.fullHost;
             eventServer = options.eventServer || options.fullHost;
             privateKey = options.privateKey;
         } else {
             fullNode = options;
         }
-
         if (utils.isString(fullNode))
             fullNode = new providers.HttpProvider(fullNode);
 
@@ -82,14 +83,13 @@ export default class TronWeb extends EventEmitter {
         });
         // for sidechain
         if (typeof sideOptions === 'object' && (sideOptions.fullNode || sideOptions.fullHost)) {
-            this.sidechain = new SideChain(sideOptions, TronWeb, this);
+            this.sidechain = new SideChain(sideOptions, TronWeb, this, privateKey);
         } else {
             privateKey = privateKey || sideOptions;
         }
 
         if (privateKey)
             this.setPrivateKey(privateKey);
-
         this.fullnodeVersion = DEFAULT_VERSION;
         this.injectPromise = injectpromise(this);
     }
