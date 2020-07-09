@@ -418,7 +418,6 @@ export default class TransactionBuilder {
         options,
         callback = false
     ) {
-        console.log(toHex(address), utils.isObject(url))
         if (utils.isFunction(options)) {
             callback = options;
             options = {};
@@ -447,7 +446,6 @@ export default class TransactionBuilder {
         ], callback))
             return;
 
-        console.log(toHex(address))
 
         const data = {
             owner_address: toHex(address),
@@ -544,7 +542,7 @@ export default class TransactionBuilder {
         if (!callback)
             return this.injectPromise(this.createSmartContract, options, issuerAddress);
 
-        const feeLimit = options.feeLimit || 1_000_000_000;
+        const feeLimit = options.feeLimit || this.tronWeb.feeLimit;
         let userFeePercentage = options.userFeePercentage;
         if (typeof userFeePercentage !== 'number' && !userFeePercentage) {
             userFeePercentage = 100;
@@ -767,7 +765,7 @@ export default class TransactionBuilder {
             feeLimit,
         } = Object.assign({
             callValue: 0,
-            feeLimit: 1_000_000_000
+            feeLimit: this.tronWeb.feeLimit
         }, options)
 
         if (this.validator.notValid([

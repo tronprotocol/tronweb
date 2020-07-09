@@ -927,9 +927,7 @@ describe('TronWeb Instance', function () {
             this.timeout(10000)
 
             const tronWeb = tronWebBuilder.createInstance();
-            console.log(tronWeb.fullNode, tronWeb.solidityNode, await tronWeb.isConnected());
             const isConnected = await tronWeb.isConnected();
-            console.log(isConnected)
             assert.isTrue(isConnected.fullNode);
             assert.isTrue(isConnected.solidityNode);
             if (!SUN_NETWORK) {  // As https://testhttpapi.tronex.io/healthcheck is 404
