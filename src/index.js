@@ -17,6 +17,8 @@ import { ADDRESS_PREFIX } from 'utils/address';
 
 const DEFAULT_VERSION = '3.5.0';
 
+const FEE_LIMIT = 20000000;
+
 export default class TronWeb extends EventEmitter {
     static providers = providers;
     static BigNumber = BigNumber;
@@ -91,6 +93,7 @@ export default class TronWeb extends EventEmitter {
         if (privateKey)
             this.setPrivateKey(privateKey);
         this.fullnodeVersion = DEFAULT_VERSION;
+        this.feeLimit = FEE_LIMIT;
         this.injectPromise = injectpromise(this);
     }
 
