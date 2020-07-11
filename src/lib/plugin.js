@@ -30,6 +30,7 @@ export default class Plugin {
         if (utils.isFunction(plugin.pluginInterface)) {
             pluginInterface = plugin.pluginInterface(options)
         }
+        console.log(TronWeb.version, pluginInterface.requires, 'kkk');
         if (semver.satisfies(TronWeb.version, pluginInterface.requires)) {
             if (pluginInterface.fullClass) {
                 // plug the entire class at the same level of tronWeb.trx
