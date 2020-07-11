@@ -33,7 +33,7 @@ export default class Method {
         this.injectPromise = injectpromise(this);
 
         this.defaultOptions = {
-            feeLimit: tronWeb.feeLimit,
+            feeLimit: this.tronWeb.feeLimit,
             callValue: 0,
             userFeePercentage: 100,
             shouldPollResponse: false // Only used for sign()
