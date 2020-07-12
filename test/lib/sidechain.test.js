@@ -86,7 +86,7 @@ describe("TronWeb.sidechain", function () {
             const tronWeb = tronWebBuilder.createInstanceSide();
             it('deposit trc10 from main chain to side chain', async function () {
                 const tokenValue = 10;
-                const txID = await tronWeb.sidechain.depositTrc10(TOKEN_ID, tokenValue, DEPOSIT_FEE, 0);
+                const txID = await tronWeb.sidechain.depositTrc10(TOKEN_ID, tokenValue, DEPOSIT_FEE, FEE_LIMIT);
                 assert.equal(txID.length, 64);
             });
 
@@ -233,7 +233,7 @@ describe("TronWeb.sidechain", function () {
                 assert.equal(txID.length, 64);
             });
 
-            it('should check the trc20 balance after depositTrc20', async function () {
+            it('should check the trc20 balance after depositTrc721', async function () {
                 const num = 100;
                 const options = {};
                 // only mapping once
@@ -248,7 +248,7 @@ describe("TronWeb.sidechain", function () {
                 // approve trc20
                 // const approveResult = await tronWeb.sidechain.approveTrc20(100000, FEE_LIMIT, CONTRACT_ADDRESS20);
 
-                const txID = await tronWeb.sidechain.depositTrc721(id, DEPOSIT_FEE, FEE_LIMIT, CONTRACT_ADDRESS721);
+                const txID = await tronWeb.sidechain.depositTrc721(TRC721_ID, DEPOSIT_FEE, FEE_LIMIT, CONTRACT_ADDRESS721);
                 await wait(80);
                 const dataAfter = await contractInstance.balanceOf(address).call();
                 const balanceAfter = parseInt(dataAfter._hex, 16);
@@ -541,7 +541,7 @@ describe("TronWeb.sidechain", function () {
     describe('#injectFund', function() {
         it('excute injectFund', async function() {
             const tronWeb = tronWebBuilder.createInstanceSide();
-            const txID = tronWeb.sidechain.injectFund(1000000, FEE_LIMIT);
+            const txID = await tronWeb.sidechain.injectFund(1000000, FEE_LIMIT);
             assert.equal(txID.length, 64);
         });
     });
