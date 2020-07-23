@@ -4,7 +4,7 @@ import Validator from 'paramValidator';
 export default class SideChain {
     constructor(sideOptions, TronWeb = false, mainchain = false, privateKey = false) {
         this.mainchain = mainchain;
-        const {fullHost, fullNode, solidityNode, eventServer, mainGatewayAddress, sideGatewayAddress, sideChainId} = sideOptions;
+        const { fullHost, fullNode, solidityNode, eventServer, mainGatewayAddress, sideGatewayAddress, sideChainId } = sideOptions;
         this.sidechain = new TronWeb(fullHost || fullNode, fullHost || solidityNode, fullHost || eventServer, privateKey);
         this.isAddress = this.mainchain.isAddress;
         this.utils = this.mainchain.utils;
@@ -75,41 +75,42 @@ export default class SideChain {
 
         if (!this.utils.isObject(transaction) || !transaction.raw_data || !transaction.raw_data.contract) return callback('Invalid transaction provided');
 
-        // set permission id
-        transaction.raw_data.contract[0].Permission_id = permissionId;
-
-        // check if private key insides permission list
-        const address = this.sidechain.address.toHex(this.sidechain.address.fromPrivateKey(privateKey)).toLowerCase();
-        const signWeight = await this.sidechain.trx.getSignWeight(transaction, permissionId);
-
-        if (signWeight.result.code === 'PERMISSION_ERROR') {
-           return callback(signWeight.result.message);
-        }
-
-        let foundKey = false;
-        signWeight.permission.keys.map(key => {
-           if (key.address === address) foundKey = true;
-        });
-
-        if (!foundKey) return callback(privateKey + ' has no permission to sign');
-
-        if (signWeight.approved_list && signWeight.approved_list.indexOf(address) != -1) {
-           return callback(privateKey + ' already sign transaction');
-        }
-
-        // reset transaction
-        if (signWeight.transaction && signWeight.transaction.transaction) {
-            transaction = signWeight.transaction.transaction;
+        if (!transaction.raw_data.contract[0].Permission_id && permissionId > 0) {
+            // set permission id
             transaction.raw_data.contract[0].Permission_id = permissionId;
-        } else {
-             return callback('Invalid transaction provided');
-        }
 
+            // check if private key insides permission list
+            const address = this.sidechain.address.toHex(this.sidechain.address.fromPrivateKey(privateKey)).toLowerCase();
+            const signWeight = await this.sidechain.trx.getSignWeight(transaction, permissionId);
+
+            if (signWeight.result.code === 'PERMISSION_ERROR') {
+                return callback(signWeight.result.message);
+            }
+
+            let foundKey = false;
+            signWeight.permission.keys.map(key => {
+                if (key.address === address) foundKey = true;
+            });
+
+            if (!foundKey) return callback(privateKey + ' has no permission to sign');
+
+            if (signWeight.approved_list && signWeight.approved_list.indexOf(address) != -1) {
+                return callback(privateKey + ' already sign transaction');
+            }
+
+            // reset transaction
+            if (signWeight.transaction && signWeight.transaction.transaction) {
+                transaction = signWeight.transaction.transaction;
+                transaction.raw_data.contract[0].Permission_id = permissionId;
+            } else {
+                return callback('Invalid transaction provided');
+            }
+        }
         // sign
         try {
-           return callback(null, this.signTransaction(privateKey, transaction));
+            return callback(null, this.signTransaction(privateKey, transaction));
         } catch (ex) {
-           callback(ex);
+            callback(ex);
         }
     }
 
@@ -171,9 +172,9 @@ export default class SideChain {
         }
     }
 
-     /**
-     * deposit asset to sidechain
-     */
+    /**
+    * deposit asset to sidechain
+    */
     async depositTrx(
         callValue,
         depositFee,
@@ -362,7 +363,7 @@ export default class SideChain {
                 result = await approveInstance.approve(this.mainGatewayAddress, num).send(options, privateKey);
             } else {
                 const contractInstance = await this.mainchain.contract().at(this.mainGatewayAddress);
-                switch(functionSelector) {
+                switch (functionSelector) {
                     case 'depositTRC20':
                         result = await contractInstance.depositTRC20(contractAddress, num).send(options, privateKey);
                         break;
