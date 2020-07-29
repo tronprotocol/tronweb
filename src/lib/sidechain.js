@@ -161,7 +161,7 @@ export default class SideChain {
                 const address = this.sidechain.address.toHex(
                     this.sidechain.address.fromPrivateKey(privateKey)
                 ).toLowerCase();
-                if (address !== transaction.raw_data.contract[0].parameter.value.owner_address.toLowerCase())
+                if (address !== this.tronWeb.address.toHex(transaction.raw_data.contract[0].parameter.value.owner_address))
                     return callback('Private key does not match address in transaction');
             }
             return callback(null,
