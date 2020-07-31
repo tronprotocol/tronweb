@@ -23,7 +23,7 @@ class BlockLib {
 
     pluginInterface() {
         return {
-            requires: '^2.8.0',
+            requires: '^3.0.0',
             fullClass: true
         }
     }

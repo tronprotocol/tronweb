@@ -39,7 +39,6 @@ export default class Trx {
     getCurrentBlock(callback = false) {
         if (!callback)
             return this.injectPromise(this.getCurrentBlock);
-
         this.tronWeb.fullNode.request('wallet/getnowblock').then(block => {
             callback(null, block);
         }).catch(err => callback(err));

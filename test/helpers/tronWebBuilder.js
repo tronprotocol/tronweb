@@ -2,14 +2,29 @@ const chalk = require('chalk')
 const TronWeb = require('../setup/TronWeb');
 const jlog = require('./jlog')
 
-const {FULL_NODE_API, SOLIDITY_NODE_API, EVENT_API, PRIVATE_KEY} = require('./config')
+const {FULL_NODE_API, SOLIDITY_NODE_API, EVENT_API, PRIVATE_KEY, SUN_NETWORK, SIDE_CHAIN} = require('./config')
 
-const createInstance = (extraOptions = {}) => {
+
+const createInstanceSide = (extraOptions = {}, sideExtraOptions = {}) => {
+    let options = Object.assign({
+        fullHost: SIDE_CHAIN.fullNode,
+        privateKey: PRIVATE_KEY,
+    }, extraOptions)
+    let sideOptions = Object.assign({
+        fullHost: SIDE_CHAIN.sideOptions.fullNode,
+        mainGatewayAddress: SIDE_CHAIN.sideOptions.mainGatewayAddress,
+        sideGatewayAddress: SIDE_CHAIN.sideOptions.sideGatewayAddress,
+        sideChainId: SIDE_CHAIN.sideOptions.sideChainId
+    }, sideExtraOptions);
+    return new TronWeb(options, sideOptions);
+}
+
+const createInstance = (extraOptions = {}, sideExtraOptions = {}) => {
     let options = Object.assign({
         fullHost: FULL_NODE_API,
-        privateKey: PRIVATE_KEY
+        privateKey: PRIVATE_KEY,
     }, extraOptions)
-    return new TronWeb(options)
+    return new TronWeb(options);
 }
 
 let instance
@@ -55,6 +70,7 @@ const getTestAccounts = async (block) => {
 module.exports = {
     createInstance,
     getInstance,
+    createInstanceSide,
     newTestAccounts,
     getTestAccounts,
     TronWeb

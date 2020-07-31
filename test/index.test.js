@@ -1,5 +1,5 @@
 const chai = require('chai');
-const {ADDRESS_HEX, ADDRESS_BASE58, FULL_NODE_API, SOLIDITY_NODE_API, EVENT_API, PRIVATE_KEY} = require('./helpers/config');
+const {ADDRESS_HEX, ADDRESS_BASE58, FULL_NODE_API, SOLIDITY_NODE_API, EVENT_API, PRIVATE_KEY, SIDE_CHAIN, SUN_NETWORK} = require('./helpers/config');
 const tronWebBuilder = require('./helpers/tronWebBuilder');
 const TronWeb = tronWebBuilder.TronWeb;
 const log = require('./helpers/log')
@@ -103,6 +103,172 @@ describe('TronWeb Instance', function () {
                 '$' + EVENT_API
             ), 'Invalid URL provided to HttpProvider');
         });
+
+        it('should create an instance using an options and sideOptions object without private key', function () {
+            const fullNode = new HttpProvider(SIDE_CHAIN.fullNode);
+            const solidityNode = new HttpProvider(SIDE_CHAIN.solidityNode);
+            const eventServer = SIDE_CHAIN.eventServer;
+
+            const tronWeb = new TronWeb({
+                fullNode,
+                solidityNode,
+                eventServer
+            }, SIDE_CHAIN.sideOptions);
+
+            assert.equal(tronWeb.defaultPrivateKey, false);
+        });
+
+        it('should create an instance using a full options and a full sideOptions object', function () {
+
+            const {fullNode, solidityNode, eventServer, sideOptions} = SIDE_CHAIN;
+            const privateKey = PRIVATE_KEY;
+            const tronWeb = new TronWeb({
+                fullNode,
+                solidityNode,
+                eventServer,
+                privateKey
+            }, sideOptions);
+            assert.equal(tronWeb.defaultPrivateKey, privateKey);
+        });
+
+        it('should create an instance with a full sideOptions without a private key', function () {
+            const fullNode = new HttpProvider(SIDE_CHAIN.fullNode);
+            const solidityNode = new HttpProvider(SIDE_CHAIN.solidityNode);
+            const eventServer = SIDE_CHAIN.eventServer;
+
+            const tronWeb = new TronWeb(
+                fullNode,
+                solidityNode,
+                eventServer,
+                {
+                    fullNode: SIDE_CHAIN.sideOptions.fullNode,
+                    solidityNode: SIDE_CHAIN.sideOptions.solidityNode,
+                    eventServer: SIDE_CHAIN.sideOptions.eventServer,
+                    mainGatewayAddress: SIDE_CHAIN.sideOptions.mainGatewayAddress,
+                    sideGatewayAddress: SIDE_CHAIN.sideOptions.sideGatewayAddress,
+                    sideChainId: SIDE_CHAIN.sideOptions.sideChainId
+                }
+            );
+
+            assert.equal(tronWeb.defaultPrivateKey, false);
+        });
+
+        it('should create an instance with a fullhost in sideOptions without a private key', function () {
+            const fullNode = new HttpProvider(SIDE_CHAIN.fullNode);
+            const solidityNode = new HttpProvider(SIDE_CHAIN.solidityNode);
+            const eventServer = SIDE_CHAIN.eventServer;
+
+            const tronWeb = new TronWeb(
+                fullNode,
+                solidityNode,
+                eventServer,
+                {
+                    fullHost: SIDE_CHAIN.sideOptions.fullNode,
+                    mainGatewayAddress: SIDE_CHAIN.sideOptions.mainGatewayAddress,
+                    sideGatewayAddress: SIDE_CHAIN.sideOptions.sideGatewayAddress,
+                    sideChainId: SIDE_CHAIN.sideOptions.sideChainId
+                }
+            );
+
+            assert.equal(tronWeb.defaultPrivateKey, false);
+        });
+
+        it('should create an instance with a full sideOptions without an event server', function () {
+            const fullNode = new HttpProvider(SIDE_CHAIN.fullNode);
+            const solidityNode = new HttpProvider(SIDE_CHAIN.solidityNode);
+
+            const tronWeb = new TronWeb(
+                fullNode,
+                solidityNode,
+                false,
+                {
+                    fullNode: SIDE_CHAIN.sideOptions.fullNode,
+                    solidityNode: SIDE_CHAIN.sideOptions.solidityNode,
+                    eventServer: SIDE_CHAIN.sideOptions.eventServer,
+                    mainGatewayAddress: SIDE_CHAIN.sideOptions.mainGatewayAddress,
+                    sideGatewayAddress: SIDE_CHAIN.sideOptions.sideGatewayAddress,
+                    sideChainId: SIDE_CHAIN.sideOptions.sideChainId
+                }
+            );
+
+            assert.equal(tronWeb.eventServer, false);
+        });
+
+
+        it('should create an instance with a full sideOptions without an event server in sideOptions', function () {
+            const fullNode = new HttpProvider(SIDE_CHAIN.fullNode);
+            const solidityNode = new HttpProvider(SIDE_CHAIN.solidityNode);
+
+            const tronWeb = new TronWeb(
+                fullNode,
+                solidityNode,
+                false,
+                {
+                    fullNode: SIDE_CHAIN.sideOptions.fullNode,
+                    solidityNode: SIDE_CHAIN.sideOptions.solidityNode,
+                    mainGatewayAddress: SIDE_CHAIN.sideOptions.mainGatewayAddress,
+                    sideGatewayAddress: SIDE_CHAIN.sideOptions.sideGatewayAddress,
+                    sideChainId: SIDE_CHAIN.sideOptions.sideChainId
+                }
+            );
+
+            assert.equal(tronWeb.eventServer, false);
+        });
+
+        it('should reject an invalid full node URL in sideOptions', function () {
+            const fullNode = new HttpProvider(SIDE_CHAIN.fullNode);
+            const solidityNode = new HttpProvider(SIDE_CHAIN.solidityNode);
+            assert.throws(() => new TronWeb(
+                fullNode,
+                solidityNode,
+                false,
+                {
+                    fullNode: '$' + SIDE_CHAIN.sideOptions.fullNode,
+                    mainGatewayAddress: SIDE_CHAIN.sideOptions.mainGatewayAddress,
+                    sideGatewayAddress: SIDE_CHAIN.sideOptions.sideGatewayAddress,
+                    sideChainId: SIDE_CHAIN.sideOptions.sideChainId
+                }
+            ), 'Invalid URL provided to HttpProvider');
+        });
+
+        it('should reject an invalid solidity node URL in sideOptions', function () {
+            const fullNode = new HttpProvider(SIDE_CHAIN.fullNode);
+            const solidityNode = new HttpProvider(SIDE_CHAIN.solidityNode);
+            const eventServer = SIDE_CHAIN.eventServer;
+            assert.throws(() => new TronWeb(
+                fullNode,
+                solidityNode,
+                eventServer,
+                {
+                    fullNode: SIDE_CHAIN.sideOptions.fullNode,
+                    solidityNode: '$' + SIDE_CHAIN.sideOptions.solidityNode,
+                    mainGatewayAddress: SIDE_CHAIN.sideOptions.mainGatewayAddress,
+                    sideGatewayAddress: SIDE_CHAIN.sideOptions.sideGatewayAddress,
+                    sideChainId: SIDE_CHAIN.sideOptions.sideChainId
+                }
+            ), 'Invalid URL provided to HttpProvider');
+        });
+
+        it('should reject an invalid event server URL in sideOptions ', function () {
+
+            const fullNode = new HttpProvider(SIDE_CHAIN.fullNode);
+            const solidityNode = new HttpProvider(SIDE_CHAIN.solidityNode);
+            const eventServer = SIDE_CHAIN.eventServer;
+            assert.throws(() => new TronWeb(
+                fullNode,
+                solidityNode,
+                eventServer,
+                {
+                    fullNode: SIDE_CHAIN.sideOptions.fullNode,
+                    solidityNode: SIDE_CHAIN.sideOptions.solidityNode,
+                    eventServer: '$' + SIDE_CHAIN.sideOptions.eventServer,
+                    mainGatewayAddress: SIDE_CHAIN.sideOptions.mainGatewayAddress,
+                    sideGatewayAddress: SIDE_CHAIN.sideOptions.sideGatewayAddress,
+                    sideChainId: SIDE_CHAIN.sideOptions.sideChainId
+                }
+            ), 'Invalid URL provided to HttpProvider');
+        });
+
     });
 
     describe('#version()', function () {
@@ -401,9 +567,16 @@ describe('TronWeb Instance', function () {
             const tronWeb = tronWebBuilder.createInstance();
             const providers = tronWeb.currentProviders();
 
+            const tronWebSide = tronWebBuilder.createInstanceSide();
+            const providersSide = tronWebSide.currentProviders();
+
             assert.equal(providers.fullNode.host, FULL_NODE_API);
             assert.equal(providers.solidityNode.host, SOLIDITY_NODE_API);
             assert.equal(providers.eventServer.host, EVENT_API);
+
+            assert.equal(providersSide.fullNode.host, SIDE_CHAIN.fullNode);
+            assert.equal(providersSide.solidityNode.host, SIDE_CHAIN.solidityNode);
+            assert.equal(providersSide.eventServer.host, SIDE_CHAIN.eventServer);
         });
     });
 
@@ -412,9 +585,16 @@ describe('TronWeb Instance', function () {
             const tronWeb = tronWebBuilder.createInstance();
             const providers = tronWeb.currentProvider();
 
+            const tronWebSide = tronWebBuilder.createInstanceSide();
+            const providersSide = tronWebSide.currentProviders();
+
             assert.equal(providers.fullNode.host, FULL_NODE_API);
             assert.equal(providers.solidityNode.host, SOLIDITY_NODE_API);
             assert.equal(providers.eventServer.host, EVENT_API);
+
+            assert.equal(providersSide.fullNode.host, SIDE_CHAIN.fullNode);
+            assert.equal(providersSide.solidityNode.host, SIDE_CHAIN.solidityNode);
+            assert.equal(providersSide.eventServer.host, SIDE_CHAIN.eventServer);
         });
     });
 
@@ -748,10 +928,11 @@ describe('TronWeb Instance', function () {
 
             const tronWeb = tronWebBuilder.createInstance();
             const isConnected = await tronWeb.isConnected();
-
             assert.isTrue(isConnected.fullNode);
             assert.isTrue(isConnected.solidityNode);
-            assert.isTrue(isConnected.eventServer);
+            if (!SUN_NETWORK) {  // As https://testhttpapi.tronex.io/healthcheck is 404
+                assert.isTrue(isConnected.eventServer);
+            }
 
         });
     });
