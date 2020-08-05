@@ -168,6 +168,10 @@ In order to contribute you can
 
 ## Recent History
 
+__3.0.0__
+- Support sidechain for SunNetwork
+- Set feeLimit default value as 20 TRX
+
 __2.10.2__
 - Support toHex function with a space and empty character as parameter
 - The sign function supports visible as true.
