@@ -56,10 +56,9 @@ describe('TronWeb.utils.abi', function () {
             const types = ['string', 'string', 'uint8', 'bytes32', 'uint256'];
             const output =
                 '00000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000e00000000000000000000000000000000000000000000000000000000000000012dc03b7993bad736ad595eb9e3ba51877ac17ecc31d2355f8f270125b9427ece700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011506920446179204e30306220546f6b656e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000035049450000000000000000000000000000000000000000000000000000000000';
-
             assert.throws(() => {
                 tronWeb.utils.abi.decodeParams(types, output)
-            }, 'hex string must have 0x prefix');
+            }, 'invalid arrayify value');
         });
 
         it('should throw if the output format is wrong', function () {
@@ -70,7 +69,7 @@ describe('TronWeb.utils.abi', function () {
 
             assert.throws(() => {
                 tronWeb.utils.abi.decodeParams(types, output)
-            }, 'dynamic bytes count too large');
+            }, 'overflow');
         });
 
         it('should throw if the output is invalid', function () {

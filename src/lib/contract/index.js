@@ -202,7 +202,7 @@ export default class Contract {
             this.bytecode = contract.bytecode;
             this.deployed = true;
 
-            this.loadAbi(contract.abi ? contract.abi.entrys : []);
+            this.loadAbi(contract.abi ? contract.abi.entrys ? contract.abi.entrys : [] : []);
 
             return callback(null, this);
         } catch (ex) {
