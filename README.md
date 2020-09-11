@@ -168,6 +168,11 @@ In order to contribute you can
 
 ## Recent History
 
+__3.1.0__
+- Update `elliptic` to the latest version 6.5.3
+- Update `ethers` to the latest version 5.0.8
+- Fix `loadAbi()`
+
 __3.0.0__
 - Support sidechain for SunNetwork
 - Set feeLimit default value as 20 TRX

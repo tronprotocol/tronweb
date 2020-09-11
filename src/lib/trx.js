@@ -710,22 +710,25 @@ export default class Trx {
 
     static signString(message, privateKey, useTronHeader = true) {
         message = message.replace(/^0x/, '');
-        const signingKey = new SigningKey(privateKey);
+        const value ={
+            toHexString: function() {
+                return '0x' + privateKey
+            },
+            value: privateKey
+        }
+        const signingKey = new SigningKey(value);
         const messageBytes = [
             ...toUtf8Bytes(useTronHeader ? TRX_MESSAGE_HEADER : ETH_MESSAGE_HEADER),
             ...utils.code.hexStr2byteArray(message)
         ];
-
         const messageDigest = keccak256(messageBytes);
         const signature = signingKey.signDigest(messageDigest);
-
         const signatureHex = [
             '0x',
             signature.r.substring(2),
             signature.s.substring(2),
             Number(signature.v).toString(16)
         ].join('');
-
         return signatureHex
     }
 
