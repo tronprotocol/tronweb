@@ -63,7 +63,12 @@ cp node_modules/tronweb/dist/TronWeb.js ./js/tronweb.js
 ```
 so that you can call it in your HTML page as
 ```
-<script src="./js/tronweb.js"><script>
+<script src="./js/tronweb.js"></script>
+```
+
+Or you can use it as 
+```
+<script src="https://unpkg.com/tronweb@3.0.0/dist/TronWeb.js"></script>
 ```
 
 ## Testnet
