@@ -1159,7 +1159,7 @@ describe('TronWeb.transactionBuilder', function () {
                 const tx = await tronWeb.transactionBuilder.createSmartContract(options)
                 assert.equal(tx.raw_data.contract[0].parameter.value.new_contract.consume_user_resource_percent, 100);
                 assert.equal(tx.raw_data.contract[0].parameter.value.new_contract.origin_energy_limit, 1e7);
-                assert.equal(tx.raw_data.fee_limit, 1e9);
+                assert.equal(tx.raw_data.fee_limit, 2e7);
                 assert.equal(tx.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
             }
         });
