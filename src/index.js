@@ -12,6 +12,7 @@ import Contract from 'lib/contract';
 import Plugin from 'lib/plugin';
 import Event from 'lib/event';
 import SideChain from 'lib/sidechain';
+import ZTron from 'lib/ztron';
 import { keccak256 } from 'utils/ethersUtils';
 import { ADDRESS_PREFIX } from 'utils/address';
 
@@ -27,6 +28,7 @@ export default class TronWeb extends EventEmitter {
     static Contract = Contract;
     static Plugin = Plugin;
     static Event = Event;
+    static ZTron = ZTron;
     static version = version;
     static utils = utils;
 
@@ -92,9 +94,14 @@ export default class TronWeb extends EventEmitter {
 
         if (privateKey)
             this.setPrivateKey(privateKey);
+
+        // for ztron
+        this.ztron = new ZTron(this);
+
         this.fullnodeVersion = DEFAULT_VERSION;
         this.feeLimit = FEE_LIMIT;
         this.injectPromise = injectpromise(this);
+
     }
 
     async getFullnodeVersion() {
