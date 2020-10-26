@@ -67,7 +67,7 @@ export default class ZTron {
 
         if (this.validator.notValid([
             {
-                name: 'ask',
+                name: 'nsk',
                 type: 'not-empty-string',
                 value: nsk
             }
