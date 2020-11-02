@@ -228,17 +228,23 @@ export default class ZTron {
             .catch(err => callback(err));
     }
 
-    async createMintParams(ovk, fromAmount, shieldedReceives = {}, shieldedTRC20ContractAddress, callback = false) {
+    async createMintParams(ovk, fromAmount, shieldedReceives, shieldedTRC20ContractAddress, options = {}, callback = false) {
         if (utils.isObject(ovk)) {
-            callback = fromAmount;
+            options = fromAmount;
+            callback = shieldedReceives;
             fromAmount = ovk.from_amount;
             shieldedReceives = ovk.shielded_receives;
             shieldedTRC20ContractAddress = ovk.shielded_TRC20_contract_address;
             ovk = ovk.ovk;
         }
 
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (!callback) {
-            return this.injectPromise(this.createMintParams, ovk, fromAmount, shieldedReceives, shieldedTRC20ContractAddress);
+            return this.injectPromise(this.createMintParams, ovk, fromAmount, shieldedReceives, shieldedTRC20ContractAddress, options);
         }
         if (this.validator.notValid([
             {
@@ -268,7 +274,8 @@ export default class ZTron {
             ovk,
             from_amount: fromAmount,
             shielded_receives: shieldedReceives,
-            shielded_TRC20_contract_address: this.tronWeb.address.toHex(shieldedTRC20ContractAddress)
+            shielded_TRC20_contract_address: options && options.visible ? shieldedTRC20ContractAddress : this.tronWeb.address.toHex(shieldedTRC20ContractAddress),
+            ...options
         }
 
         this.tronWeb.fullNode.request('wallet/createshieldedcontractparameters', params, 'post')
@@ -276,17 +283,23 @@ export default class ZTron {
             .catch(err => callback(err));
     }
 
-    async createMintParamsWithoutAsk(ovk, fromAmount, shieldedReceives = {}, shieldedTRC20ContractAddress, callback = false) {
+    async createMintParamsWithoutAsk(ovk, fromAmount, shieldedReceives, shieldedTRC20ContractAddress, options = {}, callback = false) {
         if (utils.isObject(ovk)) {
-            callback = fromAmount;
+            options = fromAmount;
+            callback = shieldedReceives;
             fromAmount = ovk.from_amount;
             shieldedReceives = ovk.shielded_receives;
             shieldedTRC20ContractAddress = ovk.shielded_TRC20_contract_address;
             ovk = ovk.ovk;
         }
 
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (!callback) {
-            return this.injectPromise(this.createMintParamsWithoutAsk, ovk, fromAmount, shieldedReceives, shieldedTRC20ContractAddress);
+            return this.injectPromise(this.createMintParamsWithoutAsk, ovk, fromAmount, shieldedReceives, shieldedTRC20ContractAddress, options);
         }
 
         if (this.validator.notValid([
@@ -317,7 +330,8 @@ export default class ZTron {
             ovk,
             from_amount: fromAmount,
             shielded_receives: shieldedReceives,
-            shielded_TRC20_contract_address: this.tronWeb.address.toHex(shieldedTRC20ContractAddress)
+            shielded_TRC20_contract_address: options && options.visible ? shieldedTRC20ContractAddress : this.tronWeb.address.toHex(shieldedTRC20ContractAddress),
+            ...options
         }
 
         this.tronWeb.fullNode.request('wallet/createshieldedcontractparameterswithoutask', params, 'post')
@@ -325,9 +339,10 @@ export default class ZTron {
             .catch(err => callback(err));
     }
 
-    async createTransferParams(ask, nsk, ovk, shieldedSpends, shieldedReceives, shieldedTRC20ContractAddress, callback = false) {
+    async createTransferParams(ask, nsk, ovk, shieldedSpends, shieldedReceives, shieldedTRC20ContractAddress, options = {}, callback = false) {
         if (utils.isObject(ask)) {
-            callback = nsk;
+            options = nsk;
+            callback = ovk;
             nsk = ask.nsk;
             ovk = ask.ovk;
             shieldedSpends = ask.shielded_spends;
@@ -336,8 +351,13 @@ export default class ZTron {
             ask = ask.ask;
         }
 
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (!callback) {
-            return this.injectPromise(this.createTransferParams, ask, nsk, ovk, shieldedSpends, shieldedReceives, shieldedTRC20ContractAddress);
+            return this.injectPromise(this.createTransferParams, ask, nsk, ovk, shieldedSpends, shieldedReceives, shieldedTRC20ContractAddress, options);
         }
 
         if (this.validator.notValid([
@@ -380,7 +400,8 @@ export default class ZTron {
             ovk,
             shielded_spends: shieldedSpends,
             shielded_receives: shieldedReceives,
-            shielded_TRC20_contract_address: this.tronWeb.address.toHex(shieldedTRC20ContractAddress)
+            shielded_TRC20_contract_address: options && options.visible ? shieldedTRC20ContractAddress : this.tronWeb.address.toHex(shieldedTRC20ContractAddress),
+            ...options
         }
 
         this.tronWeb.fullNode.request('wallet/createshieldedcontractparameters', params, 'post')
@@ -389,9 +410,10 @@ export default class ZTron {
 
     }
 
-    async createTransferParamsWithoutAsk(ak, nsk, ovk, shieldedSpends, shieldedReceives, shieldedTRC20ContractAddress, callback = false) {
+    async createTransferParamsWithoutAsk(ak, nsk, ovk, shieldedSpends, shieldedReceives, shieldedTRC20ContractAddress, options = {}, callback = false) {
         if (utils.isObject(ak)) {
-            callback = nsk;
+            options = nsk;
+            callback = ovk;
             nsk = ak.nsk;
             ovk = ak.ovk;
             shieldedSpends = ak.shielded_spends;
@@ -400,8 +422,13 @@ export default class ZTron {
             ak = ak.ak;
         }
 
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (!callback) {
-            return this.injectPromise(this.createTransferParamsWithoutAsk, ak, nsk, ovk, shieldedSpends, shieldedReceives, shieldedTRC20ContractAddress);
+            return this.injectPromise(this.createTransferParamsWithoutAsk, ak, nsk, ovk, shieldedSpends, shieldedReceives, shieldedTRC20ContractAddress, options);
         }
 
         if (this.validator.notValid([
@@ -444,7 +471,8 @@ export default class ZTron {
             ovk,
             shielded_spends: shieldedSpends,
             shielded_receives: shieldedReceives,
-            shielded_TRC20_contract_address: this.tronWeb.address.toHex(shieldedTRC20ContractAddress)
+            shielded_TRC20_contract_address:  options && options.visible ? shieldedTRC20ContractAddress : this.tronWeb.address.toHex(shieldedTRC20ContractAddress),
+            ...options
         }
 
         this.tronWeb.fullNode.request('wallet/createshieldedcontractparameterswithoutask', params, 'post')
@@ -453,9 +481,10 @@ export default class ZTron {
 
     }
 
-    async createBurnParams(ask, nsk, ovk, shieldedSpends, shieldedReceives, transparentToAddress, toAmount, shieldedTRC20ContractAddress, callback = false) {
+    async createBurnParams(ask, nsk, ovk, shieldedSpends, shieldedReceives, transparentToAddress, toAmount, shieldedTRC20ContractAddress, options = {}, callback = false) {
         if (utils.isObject(ask)) {
-            callback = nsk;
+            options = nsk;
+            callback = ovk;
             nsk = ask.nsk;
             ovk = ask.ovk;
             shieldedSpends = ask.shielded_spends;
@@ -466,8 +495,13 @@ export default class ZTron {
             ask = ask.ask;
         }
 
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (!callback) {
-            return this.injectPromise(this.createBurnParams, ask, nsk, ovk, shieldedSpends, shieldedReceives, transparentToAddress, toAmount, shieldedTRC20ContractAddress);
+            return this.injectPromise(this.createBurnParams, ask, nsk, ovk, shieldedSpends, shieldedReceives, transparentToAddress, toAmount, shieldedTRC20ContractAddress, options);
         }
 
         if (this.validator.notValid([
@@ -522,16 +556,18 @@ export default class ZTron {
             shielded_receives: shieldedReceives,
             transparent_to_address: transparentToAddress,
             to_amount: toAmount,
-            shielded_TRC20_contract_address: this.tronWeb.address.toHex(shieldedTRC20ContractAddress)
+            shielded_TRC20_contract_address: options && options.visible ? shieldedTRC20ContractAddress : this.tronWeb.address.toHex(shieldedTRC20ContractAddress),
+            ...options
         }
         this.tronWeb.fullNode.request('wallet/createshieldedcontractparameters', params, 'post')
             .then(data => callback(null, data))
             .catch(err => callback(err));
     }
 
-    async createBurnParamsWithoutAsk(ak, nsk, ovk, shieldedSpends, shieldedReceives, transparentToAddress, toAmount, shieldedTRC20ContractAddress, visible = false, callback = false) {
+    async createBurnParamsWithoutAsk(ak, nsk, ovk, shieldedSpends, shieldedReceives, transparentToAddress, toAmount, shieldedTRC20ContractAddress, options = {}, callback = false) {
         if (utils.isObject(ak)) {
-            callback = nsk;
+            options = nsk;
+            callback = ovk;
             nsk = ak.nsk;
             ovk = ak.ovk;
             shieldedSpends = ak.shielded_spends;
@@ -543,8 +579,13 @@ export default class ZTron {
             ak = ak.ak;
         }
 
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (!callback) {
-            return this.injectPromise(this.createBurnParamsWithoutAsk, ak, nsk, ovk, shieldedSpends, shieldedReceives, transparentToAddress, toAmount, shieldedTRC20ContractAddress, visible);
+            return this.injectPromise(this.createBurnParamsWithoutAsk, ak, nsk, ovk, shieldedSpends, shieldedReceives, transparentToAddress, toAmount, shieldedTRC20ContractAddress, options);
         }
 
         if (this.validator.notValid([
@@ -599,8 +640,8 @@ export default class ZTron {
             shielded_receives: shieldedReceives,
             transparent_to_address: this.tronWeb.address.toHex(transparentToAddress),
             to_amount: toAmount,
-            shielded_TRC20_contract_address: this.tronWeb.address.toHex(shieldedTRC20ContractAddress),
-            visible
+            shielded_TRC20_contract_address: options && options.visible ? shieldedTRC20ContractAddress : this.tronWeb.address.toHex(shieldedTRC20ContractAddress),
+            ...options
         }
 
         this.tronWeb.fullNode.request('wallet/createshieldedcontractparameterswithoutask', params, 'post')
