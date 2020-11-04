@@ -5,6 +5,7 @@ import TronWeb from 'index';
 import injectpromise from 'injectpromise';
 import Validator from 'paramValidator';
 import utils from 'utils';
+import * as m from 'redjubjub-js';
 
 export default class ZTron {
     constructor(tronWeb = false) {
@@ -13,6 +14,14 @@ export default class ZTron {
         this.tronWeb = tronWeb;
         this.injectPromise = injectpromise(this);
         this.validator = new Validator(tronWeb);
+
+        [
+            'generate_keys', 'generate_keys_by_sk', 'generate_keys_by_sk_d', 'generate_rk_by_ask',
+            'generate_spend_auth_sig', 'verify_spend_auth_sig', 'generate_pk_by_sk', 'generate_binding_sig',
+            'verify_binding_sig'
+        ].forEach(key => {
+            this[key] = m[key];
+        });
     }
 
     async getExpandedSpendingKey(spendingKey, callback = false) {
@@ -649,4 +658,69 @@ export default class ZTron {
             .catch(err => callback(err));
     }
 
+    async mint(ovk, fromAmount, shieldedReceives, shieldedTRC20ContractAddress, options = {}, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
+        if (utils.isObject(ovk)) {
+            options = fromAmount;
+            callback = shieldedReceives;
+            fromAmount = ovk.from_amount;
+            shieldedReceives = ovk.shielded_receives;
+            shieldedTRC20ContractAddress = ovk.shielded_TRC20_contract_address;
+            privateKey = ovk.private_key || this.tronWeb.defaultPrivateKey;
+            ovk = ovk.ovk;
+        }
+
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
+        if (utils.isFunction(privateKey)) {
+            callback = privateKey;
+            privateKey = this.tronWeb.defaultPrivateKey;
+        }
+
+        if (!callback) {
+            return this.injectPromise(this.mint, ovk, fromAmount, shieldedReceives, shieldedTRC20ContractAddress, options);
+        }
+
+        const params = {
+            ovk,
+            from_amount: fromAmount,
+            shielded_receives: shieldedReceives,
+            shielded_TRC20_contract_address: options && options.visible ? shieldedTRC20ContractAddress : this.tronWeb.address.toHex(shieldedTRC20ContractAddress),
+            ...options
+        }
+        try {
+            const mintParameters = await this.createMintParams(params)
+            if (!mintParameters || !mintParameters.trigger_contract_input) {
+                return callback('Failed to generate mint parameters')
+            }
+
+            options.shieldedParameter = mintParameters.trigger_contract_input;
+            const address = privateKey ? this.tronWeb.address.fromPrivateKey(privateKey) : this.tronWeb.defaultAddress.base58;
+            const transaction = await this.tronWeb.transactionBuilder.triggerSmartContract(
+                this.tronWeb.address.toHex(shieldedTRC20ContractAddress),
+                'mint(uint256, bytes32[9], bytes32[2], bytes32[21])',
+                options,
+                [],
+                this.tronWeb.address.toHex(address)
+            );
+            if (!transaction.result || !transaction.result.result)
+                return callback('Unknown error: ' + JSON.stringify(transaction, null, 2));
+
+            const signedTransaction = await this.tronWeb.trx.sign(transaction.transaction, privateKey);
+            const result = await this.tronWeb.trx.sendRawTransaction(signedTransaction);
+            return callback(null, result);
+        } catch (e) {
+            return callback(e)
+        }
+    }
+
+    async transfer(){
+
+    }
+
+    async burn(){
+
+    }
 }

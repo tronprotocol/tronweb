@@ -857,6 +857,10 @@ export default class TransactionBuilder {
             }
         } else parameters = '';
 
+        if(options.shieldedParameter){
+            parameters = options.shieldedParameter.replace(/^(0x)/, '');
+        }
+
         const args = {
             contract_address: toHex(contractAddress),
             owner_address: toHex(issuerAddress),

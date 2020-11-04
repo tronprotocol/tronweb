@@ -263,4 +263,37 @@ describe("Tronweb.ztron", function (){
     describe("#createSpendAuthSig", function (){
 
     })
+
+    describe("redjubjub tool", function (){
+        it('should all passed.', function (){
+            const keys = tronWeb.ztron.generate_keys();
+            assert.ok(keys.sk && keys.ask && keys.nsk && keys.ovk && keys.ak && keys.nk && keys.ivk && keys.d && keys.pk_d && keys.payment_address)
+
+            const keysBySk = tronWeb.ztron.generate_keys_by_sk(keys.sk)
+            assert.ok(keysBySk.sk && keysBySk.ask && keysBySk.nsk && keysBySk.ovk && keysBySk.ak && keysBySk.nk
+                && keysBySk.ivk && keysBySk.d && keysBySk.pk_d && keysBySk.payment_address)
+
+            const keysByskd = tronWeb.ztron.generate_keys_by_sk_d(keys.sk, keysBySk.d)
+            assert.ok(keysByskd.sk && keysByskd.ask && keysByskd.nsk && keysByskd.ovk && keysByskd.ak && keysByskd.nk
+                && keysByskd.ivk && keysByskd.d && keysByskd.pk_d && keysByskd.payment_address)
+
+            const rk_by_ask = tronWeb.ztron.generate_rk_by_ask(keys.ask, '2608999c3a97d005a879ecdaa16fd29ae434fb67b177c5e875b0c829e6a1db05')
+            assert.ok(rk_by_ask)
+
+            const spend_auth_sign = tronWeb.ztron.generate_spend_auth_sig(keys.ask, '2608999c3a97d005a879ecdaa16fd29ae434fb67b177c5e875b0c829e6a1db05', '3b78fee6e956f915ffe082284c5f18640edca9c57a5f227e5f7d7eb65ad61502')
+            assert.ok(spend_auth_sign)
+
+            const  verifySpendAuthSig = tronWeb.ztron.verify_spend_auth_sig(rk_by_ask, '3b78fee6e956f915ffe082284c5f18640edca9c57a5f227e5f7d7eb65ad61502', spend_auth_sign)
+            assert.ok(verifySpendAuthSig === true)
+
+            const generate_pk_by_sk = tronWeb.ztron.generate_pk_by_sk(keys.ask);
+            assert.ok(generate_pk_by_sk)
+
+            const generate_binding_sig = tronWeb.ztron.generate_binding_sig(keys.ask, '3b78fee6e956f915ffe082284c5f18640edca9c57a5f227e5f7d7eb65ad61502');
+            assert.ok(generate_binding_sig)
+
+            const verify_binding_sig = tronWeb.ztron.verify_binding_sig(generate_pk_by_sk, '3b78fee6e956f915ffe082284c5f18640edca9c57a5f227e5f7d7eb65ad61502', generate_binding_sig)
+            assert.ok(verify_binding_sig === true)
+        })
+    })
 })
