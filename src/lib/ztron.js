@@ -584,7 +584,6 @@ export default class ZTron {
             transparentToAddress = ak.transparent_to_address;
             toAmount = ak.to_amount;
             shieldedTRC20ContractAddress = ak.shielded_TRC20_contract_address;
-            visible = ak.visible;
             ak = ak.ak;
         }
 
@@ -658,15 +657,17 @@ export default class ZTron {
             .catch(err => callback(err));
     }
 
-    async mint(ovk, fromAmount, shieldedReceives, shieldedTRC20ContractAddress, options = {}, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
-        if (utils.isObject(ovk)) {
-            options = fromAmount;
-            callback = shieldedReceives;
-            fromAmount = ovk.from_amount;
-            shieldedReceives = ovk.shielded_receives;
-            shieldedTRC20ContractAddress = ovk.shielded_TRC20_contract_address;
-            privateKey = ovk.private_key || this.tronWeb.defaultPrivateKey;
-            ovk = ovk.ovk;
+    async scanShieldedTRC20NotesByIvk(startBlockIndex, endBlockIndex, ivk, ak, nk, visible, shieldedTRC20ContractAddress, options, callback){
+        if (utils.isObject(startBlockIndex)) {
+            options = endBlockIndex;
+            callback = ivk;
+            endBlockIndex = startBlockIndex.end_block_index;
+            ivk = startBlockIndex.ivk;
+            ak = startBlockIndex.ak;
+            nk = startBlockIndex.nk;
+            visible = startBlockIndex.visible;
+            shieldedTRC20ContractAddress = startBlockIndex.shielded_TRC20_contract_address;
+            startBlockIndex = startBlockIndex.start_block_index;
         }
 
         if (utils.isFunction(options)) {
@@ -674,53 +675,57 @@ export default class ZTron {
             options = {};
         }
 
-        if (utils.isFunction(privateKey)) {
-            callback = privateKey;
-            privateKey = this.tronWeb.defaultPrivateKey;
+        if (!callback) {
+            return this.injectPromise(this.scanShieldedTRC20NotesByIvk, startBlockIndex, endBlockIndex, ivk, ak, nk, visible, shieldedTRC20ContractAddress, options);
         }
 
-        if (!callback) {
-            return this.injectPromise(this.mint, ovk, fromAmount, shieldedReceives, shieldedTRC20ContractAddress, options);
-        }
+        if (this.validator.notValid([
+            {
+                name: 'startBlockIndex',
+                type: 'positive-integer',
+                value: startBlockIndex
+            },
+            {
+                name: 'endBlockIndex',
+                type: 'positive-integer',
+                value: endBlockIndex
+            },
+            {
+                name: 'ivk',
+                type: 'string',
+                value: ivk
+            },
+            {
+                name: 'ak',
+                type: 'string',
+                value: ak
+            },
+            {
+                name: 'nk',
+                type: 'string',
+                value: nk
+            },
+            {
+                name: 'shieldedTRC20ContractAddress',
+                type: 'address',
+                value: shieldedTRC20ContractAddress
+            }
+        ], callback))
+            return;
 
         const params = {
-            ovk,
-            from_amount: fromAmount,
-            shielded_receives: shieldedReceives,
+            ivk,
+            nk,
+            ak,
+            visible: !!visible,
+            start_block_index: startBlockIndex,
+            end_block_index: endBlockIndex,
             shielded_TRC20_contract_address: options && options.visible ? shieldedTRC20ContractAddress : this.tronWeb.address.toHex(shieldedTRC20ContractAddress),
             ...options
         }
-        try {
-            const mintParameters = await this.createMintParams(params)
-            if (!mintParameters || !mintParameters.trigger_contract_input) {
-                return callback('Failed to generate mint parameters')
-            }
-
-            options.shieldedParameter = mintParameters.trigger_contract_input;
-            const address = privateKey ? this.tronWeb.address.fromPrivateKey(privateKey) : this.tronWeb.defaultAddress.base58;
-            const transaction = await this.tronWeb.transactionBuilder.triggerSmartContract(
-                this.tronWeb.address.toHex(shieldedTRC20ContractAddress),
-                'mint(uint256, bytes32[9], bytes32[2], bytes32[21])',
-                options,
-                [],
-                this.tronWeb.address.toHex(address)
-            );
-            if (!transaction.result || !transaction.result.result)
-                return callback('Unknown error: ' + JSON.stringify(transaction, null, 2));
-
-            const signedTransaction = await this.tronWeb.trx.sign(transaction.transaction, privateKey);
-            const result = await this.tronWeb.trx.sendRawTransaction(signedTransaction);
-            return callback(null, result);
-        } catch (e) {
-            return callback(e)
-        }
+        this.tronWeb.fullNode.request('wallet/scanshieldedtrc20notesbyivk', params, 'post')
+            .then(data => callback(null, data))
+            .catch(err => callback(err));
     }
 
-    async transfer(){
-
-    }
-
-    async burn(){
-
-    }
 }
