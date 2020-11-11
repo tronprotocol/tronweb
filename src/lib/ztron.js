@@ -212,7 +212,7 @@ export default class ZTron {
                 value: ask
             },
             {
-                name: 'tx_hash',
+                name: 'txHash',
                 type: 'not-empty-string',
                 value: txHash
             },
@@ -228,8 +228,8 @@ export default class ZTron {
 
         const data = {
             ask,
-            txHash,
-            alpha
+            alpha,
+            tx_hash: txHash
         }
 
         this.tronWeb.fullNode.request('wallet/createspendauthsig', data, 'post')
@@ -480,7 +480,7 @@ export default class ZTron {
             ovk,
             shielded_spends: shieldedSpends,
             shielded_receives: shieldedReceives,
-            shielded_TRC20_contract_address:  options && options.visible ? shieldedTRC20ContractAddress : this.tronWeb.address.toHex(shieldedTRC20ContractAddress),
+            shielded_TRC20_contract_address: options && options.visible ? shieldedTRC20ContractAddress : this.tronWeb.address.toHex(shieldedTRC20ContractAddress),
             ...options
         }
 
@@ -563,7 +563,7 @@ export default class ZTron {
             ovk,
             shielded_spends: shieldedSpends,
             shielded_receives: shieldedReceives,
-            transparent_to_address: transparentToAddress,
+            transparent_to_address: options && options.visible ? transparentToAddress : this.tronWeb.address.toHex(transparentToAddress),
             to_amount: toAmount,
             shielded_TRC20_contract_address: options && options.visible ? shieldedTRC20ContractAddress : this.tronWeb.address.toHex(shieldedTRC20ContractAddress),
             ...options
@@ -657,73 +657,62 @@ export default class ZTron {
             .catch(err => callback(err));
     }
 
-    async scanShieldedTRC20NotesByIvk(startBlockIndex, endBlockIndex, ivk, ak, nk, visible, shieldedTRC20ContractAddress, options, callback){
-        if (utils.isObject(startBlockIndex)) {
-            options = endBlockIndex;
-            callback = ivk;
-            endBlockIndex = startBlockIndex.end_block_index;
-            ivk = startBlockIndex.ivk;
-            ak = startBlockIndex.ak;
-            nk = startBlockIndex.nk;
-            visible = startBlockIndex.visible;
-            shieldedTRC20ContractAddress = startBlockIndex.shielded_TRC20_contract_address;
-            startBlockIndex = startBlockIndex.start_block_index;
-        }
-
+    async getTriggerInputForShieldedTRC20Contract(shieldedTRC20Parameters, spendAuthoritySignature, options = {}, callback = false) {
         if (utils.isFunction(options)) {
             callback = options;
             options = {};
         }
 
         if (!callback) {
-            return this.injectPromise(this.scanShieldedTRC20NotesByIvk, startBlockIndex, endBlockIndex, ivk, ak, nk, visible, shieldedTRC20ContractAddress, options);
+            return this.injectPromise(this.getTriggerInputForShieldedTRC20Contract, shieldedTRC20Parameters, spendAuthoritySignature, options);
         }
 
         if (this.validator.notValid([
             {
-                name: 'startBlockIndex',
-                type: 'positive-integer',
-                value: startBlockIndex
+                name: 'shieldedTRC20Parameters',
+                type: 'notEmptyObject',
+                value: shieldedTRC20Parameters
             },
             {
-                name: 'endBlockIndex',
-                type: 'positive-integer',
-                value: endBlockIndex
+                name: 'spendAuthoritySignature',
+                type: 'array',
+                value: spendAuthoritySignature
             },
             {
-                name: 'ivk',
-                type: 'string',
-                value: ivk
+                name: 'shieldedTRC20Parameters.spend_description',
+                type: 'array',
+                value: shieldedTRC20Parameters.spend_description
             },
             {
-                name: 'ak',
-                type: 'string',
-                value: ak
+                name: 'shieldedTRC20Parameters.receive_description',
+                type: 'array',
+                value: shieldedTRC20Parameters.receive_description
             },
             {
-                name: 'nk',
-                type: 'string',
-                value: nk
+                name: 'shieldedTRC20Parameters.binding_signature',
+                type: 'not-empty-string',
+                value: shieldedTRC20Parameters.binding_signature
             },
             {
-                name: 'shieldedTRC20ContractAddress',
-                type: 'address',
-                value: shieldedTRC20ContractAddress
-            }
+                name: 'shieldedTRC20Parameters.message_hash',
+                type: 'not-empty-string',
+                value: shieldedTRC20Parameters.message_hash
+            },
+            {
+                name: 'shieldedTRC20Parameters.parameter_type',
+                type: 'not-empty-string',
+                value: shieldedTRC20Parameters.parameter_type
+            },
+
         ], callback))
             return;
 
         const params = {
-            ivk,
-            nk,
-            ak,
-            visible: !!visible,
-            start_block_index: startBlockIndex,
-            end_block_index: endBlockIndex,
-            shielded_TRC20_contract_address: options && options.visible ? shieldedTRC20ContractAddress : this.tronWeb.address.toHex(shieldedTRC20ContractAddress),
+            shielded_TRC20_Parameters: shieldedTRC20Parameters,
+            spend_authority_signature: spendAuthoritySignature,
             ...options
         }
-        this.tronWeb.fullNode.request('wallet/scanshieldedtrc20notesbyivk', params, 'post')
+        this.tronWeb.fullNode.request('wallet/gettriggerinputforshieldedtrc20contract', params, 'post')
             .then(data => callback(null, data))
             .catch(err => callback(err));
     }
