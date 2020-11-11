@@ -1,5 +1,5 @@
 
-async function makeAndSendTransaction(tronWeb, contractAddress, functionSelector, options = {}, parameters = [], issuerAddress){
+async function makeAndSendTransaction(tronWeb, contractAddress, functionSelector, options = {}, parameters = [], issuerAddress) {
     const transaction = await tronWeb.transactionBuilder.triggerSmartContract(
         contractAddress,
         functionSelector,
@@ -12,7 +12,7 @@ async function makeAndSendTransaction(tronWeb, contractAddress, functionSelector
 }
 
 function makeShieldedMethodInstance(tronWeb, contractAddress) {
-    const abiConfig =  [{
+    const abiConfig = [{
         "inputs": [{"name": "trc20ContractAddress", "type": "address"}, {
             "name": "scalingFactorExponent",
             "type": "uint256"
@@ -141,7 +141,37 @@ function makeShieldedMethodInstance(tronWeb, contractAddress) {
 
     return tronWeb.contract(abiConfig, contractAddress)
 }
+
+async function scanShieldedTRC20NotesByIvk(tronWeb, startBlockIndex, endBlockIndex, ivk, ak, nk, visible, shieldedTRC20ContractAddress, options = {}) {
+    try{
+        if (Object.prototype.toString.call(startBlockIndex).slice(8, -1) === 'Object') {
+            options = endBlockIndex;
+            endBlockIndex = startBlockIndex.end_block_index;
+            ivk = startBlockIndex.ivk;
+            ak = startBlockIndex.ak;
+            nk = startBlockIndex.nk;
+            visible = startBlockIndex.visible;
+            shieldedTRC20ContractAddress = startBlockIndex.shielded_TRC20_contract_address;
+            startBlockIndex = startBlockIndex.start_block_index;
+        }
+        const params = {
+            ivk,
+            nk,
+            ak,
+            visible: !!visible,
+            start_block_index: startBlockIndex,
+            end_block_index: endBlockIndex,
+            shielded_TRC20_contract_address: options && options.visible ? shieldedTRC20ContractAddress : this.tronWeb.address.toHex(shieldedTRC20ContractAddress),
+            ...options
+        }
+        return tronWeb.fullNode.request('wallet/scanshieldedtrc20notesbyivk', params, 'post')
+    }catch (e){
+        return e
+    }
+}
+
 module.exports = {
     makeShieldedMethodInstance,
-    makeAndSendTransaction
+    makeAndSendTransaction,
+    scanShieldedTRC20NotesByIvk
 }
