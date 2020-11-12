@@ -717,4 +717,67 @@ export default class ZTron {
             .catch(err => callback(err));
     }
 
+    async isShieldedTRC20ContractNoteSpent(ak, nk, note, position, shieldedTRC20ContractAddress, options = {}, callback = false){
+        if (utils.isObject(ak)) {
+            options = nk;
+            callback = note;
+            nk = ak.nk;
+            note = ak.note;
+            position = ak.position;
+            shieldedTRC20ContractAddress = ak.shielded_TRC20_contract_address;
+            ak = ak.ak;
+        }
+
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
+        if (!callback) {
+            return this.injectPromise(this.isShieldedTRC20ContractNoteSpent, ak, nk, note, position, shieldedTRC20ContractAddress, options);
+        }
+
+        if (this.validator.notValid([
+            {
+                name: 'ak',
+                type: 'string',
+                value: ak
+            },
+            {
+                name: 'nk',
+                type: 'string',
+                value: nk
+            },
+            {
+                name: 'note',
+                type: 'notEmptyObject',
+                value: note
+            },
+            {
+                name: 'position',
+                type: 'integer',
+                value: position
+            },
+            {
+                name: 'shieldedTRC20ContractAddress',
+                type: 'address',
+                value: shieldedTRC20ContractAddress
+            }
+        ], callback))
+            return;
+
+        const params = {
+            ak,
+            nk,
+            note,
+            position,
+            shielded_TRC20_contract_address: options && options.visible ? shieldedTRC20ContractAddress : this.tronWeb.address.toHex(shieldedTRC20ContractAddress),
+            ...options
+        }
+
+        this.tronWeb.fullNode.request('wallet/isshieldedtrc20contractNoteSpent', params, 'post')
+            .then(data => callback(null, data))
+            .catch(err => callback(err));
+    }
+
 }
