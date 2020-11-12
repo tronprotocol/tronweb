@@ -33,19 +33,6 @@ describe("Tronweb.ztron", function (){
         payment_address: 'ztron18dhq7m0wf528k0c07fv23cwjn78swn7hshnz7dalleyc7zqt5qg55rapkwys20ke4rrqxramfxn'
     }
 
-    const shieldedReceiveInfo = {
-        sk: '0884fc28d0103e7fa235b250c7f88b8c25d52031064728b95baf54660766b3ec',
-        ask: 'baf3b3b2fdbb0a9f7d4878510b1832e57f06bbcb2a23beb3bdbf79c450210c0b',
-        nsk: '3bd0fe3499cbe058560297eb2f56224f8ee5c9b377a88913e8612858fff44e06',
-        ovk: '2e3d6f9aad8550b5242f1ea1aa6935e72b2a9a31b61c83a7bb990405897c88dd',
-        ak: '658dbf82f2186d0754d2a5ca482c7685eab99b98ef7f584c14040e9c4a764f4c',
-        nk: '1b31c257fb0c42b6b727c2b17710cbe51d2f7435febe84f4a93eb946093e43dc',
-        ivk: '59a54bb76b3768dfe3074e19a0755c443dfb2b5258dcf0b190b4d1d4c1932f05',
-        d: '327f14a7e5c22adf05a552',
-        pkD: 'f3d0169efa84e543144f9f2014c0926cc5d5fb84e77118f28d3aa8c2cc335115',
-        payment_address: 'ztron1xfl3ffl9cg4d7pd92teaq957l2zw2sc5f70jq9xqjfkvt40msnnhzx8j35a23skvxdg3263yyge'
-    }
-
     let methodInstance;
 
     const narrowValue = 1;
@@ -309,37 +296,40 @@ describe("Tronweb.ztron", function (){
     describe("#createMintParams", function (){
 
         it('should get mintParams with ovk is object', async function (){
-            const rcmInfo = await tronWeb.ztron.getRcm();
-            const params = {
-                from_amount: realCost,
-                shielded_receives: {
-                    note: {
-                        value: narrowValue,
-                        payment_address: shieldedInfo.payment_address,
-                        rcm: rcmInfo.value
-                    }
-                },
-                shielded_TRC20_contract_address: shieldedAddress,
-                ovk: shieldedInfo.ovk
-            }
-
-            const result = await tronWeb.ztron.createMintParams(params);
-            assert.ok(result && result.trigger_contract_input);
-
             const startBlockInfo = await tronWeb.trx.getCurrentBlock()
-            const address = tronWeb.defaultAddress.base58;
-            //approve
-            await shieldedUtils.makeAndSendTransaction(tronWeb, trc20Address, 'approve(address,uint256)', {},
-                [{type: 'address', value: shieldedAddress},{type: 'uint256', value: 10}], address)
 
-            const options = {
-                shieldedParameter: result.trigger_contract_input
+            for(let i = 0; i < 4; i++){
+                const rcmInfo = await tronWeb.ztron.getRcm();
+                const params = {
+                    from_amount: realCost,
+                    shielded_receives: {
+                        note: {
+                            value: narrowValue,
+                            payment_address: shieldedInfo.payment_address,
+                            rcm: rcmInfo.value
+                        }
+                    },
+                    shielded_TRC20_contract_address: shieldedAddress,
+                    ovk: shieldedInfo.ovk
+                }
+
+                const result = await tronWeb.ztron.createMintParams(params);
+                assert.ok(result && result.trigger_contract_input);
+
+                const address = tronWeb.defaultAddress.base58;
+                //approve
+                await shieldedUtils.makeAndSendTransaction(tronWeb, trc20Address, 'approve(address,uint256)', {},
+                    [{type: 'address', value: shieldedAddress},{type: 'uint256', value: narrowValue * scalingFactor}], address)
+
+                const options = {
+                    shieldedParameter: result.trigger_contract_input
+                }
+                await shieldedUtils.makeAndSendTransaction(tronWeb, shieldedAddress, 'mint(uint256,bytes32[9],bytes32[2],bytes32[21])', options, [], address);
+
             }
-            await shieldedUtils.makeAndSendTransaction(tronWeb, shieldedAddress, 'mint(uint256,bytes32[9],bytes32[2],bytes32[21])', options, [], address);
-
-            const endBlockInfo = await tronWeb.trx.getCurrentBlock();
+            // const endBlockInfo = await tronWeb.trx.getCurrentBlock();
             startBlockIndex = startBlockInfo.block_header.raw_data.number;
-            endBlockIndex = endBlockInfo.block_header.raw_data.number + 10;
+            endBlockIndex = startBlockIndex + 999;
         })
 
         it('should get mintParams with Expanded parameters', async function(){
@@ -636,7 +626,7 @@ describe("Tronweb.ztron", function (){
 
     })
 
-    describe.only("#scanShieldedTRC20NotesByIvk No publicity", function (){
+    describe("#scanShieldedTRC20NotesByIvk No publicity", function (){
         it('should get shielded_spends with startBlockIndex is object', async function (){
             await wait(2)
             const params = {
@@ -767,7 +757,7 @@ describe("Tronweb.ztron", function (){
         })
     })
 
-    describe.only("#createTransferParamsWithoutAsk chain", function (){
+    describe("#createTransferParamsWithoutAsk chain", function (){
         let transferParamsResult;
         let spendAuthoritySignature;
         let transferTriggerContractInput;
@@ -1096,7 +1086,7 @@ describe("Tronweb.ztron", function (){
 
     })
 
-    describe.only("#createBurnParamsWithoutAsk chain", function (){
+    describe("#createBurnParamsWithoutAsk chain", function (){
         let burnParamsResult;
         let spendAuthoritySignature;
         let burnTriggerContractInput;
@@ -1234,6 +1224,83 @@ describe("Tronweb.ztron", function (){
             })
         })
 
+    })
+
+    describe("#isShieldedTRC20ContractNoteSpent", function (){
+        let spendNote, pendingNote;
+
+        before(async () => {
+            spendNote = shieldedSpends[0].note;
+            pendingNote = noteTxs[noteTxs.length - 1]
+        })
+
+        it('should return is_spent is true, The ak is an object', async function (){
+            const params = {
+                note: spendNote,
+                ak: shieldedInfo.ak,
+                nk: shieldedInfo.nk,
+                position: shieldedSpends[0].pos,
+                shielded_TRC20_contract_address: shieldedAddress
+            }
+            const result = await tronWeb.ztron.isShieldedTRC20ContractNoteSpent(params);
+            assert.ok(result && result.is_spent);
+        });
+
+        it('should return is_spent is true, The parameters are expanded', async function (){
+            const result = await tronWeb.ztron.isShieldedTRC20ContractNoteSpent(shieldedInfo.ak, shieldedInfo.nk, spendNote, shieldedSpends[0].pos, shieldedAddress);
+            assert.ok(result && result.is_spent);
+        });
+
+        it('should return is_spent is false', async function (){
+            const params = {
+                note: pendingNote.note,
+                ak: shieldedInfo.ak,
+                nk: shieldedInfo.nk,
+                position: pendingNote.position,
+                shielded_TRC20_contract_address: shieldedAddress
+            }
+            const result = await tronWeb.ztron.isShieldedTRC20ContractNoteSpent(params);
+            console.log("true:", result);
+            assert.ok(result && !result.is_spent);
+        })
+
+        it('should throw if ak|nk is not a string', async function (){
+            const invalidAk = 1111;
+            const invalidNk = 1111;
+            await assertThrow(
+                tronWeb.ztron.isShieldedTRC20ContractNoteSpent(invalidAk, shieldedInfo.nk, spendNote, shieldedSpends[0].pos, shieldedAddress),
+                'Invalid ak provided'
+            )
+
+            await assertThrow(
+                tronWeb.ztron.isShieldedTRC20ContractNoteSpent(shieldedInfo.ak, invalidNk, spendNote, shieldedSpends[0].pos, shieldedAddress),
+                'Invalid nk provided'
+            )
+        })
+
+        it('should throw if note is not an object', async function (){
+            const invalidNote = []
+            await assertThrow(
+                tronWeb.ztron.isShieldedTRC20ContractNoteSpent(shieldedInfo.ak, shieldedInfo.nk, invalidNote, shieldedSpends[0].pos, shieldedAddress),
+                'Invalid note provided'
+            )
+        })
+
+        it('should throw if position is not an integer', async function (){
+            const invalidPosition = "1"
+            await assertThrow(
+                tronWeb.ztron.isShieldedTRC20ContractNoteSpent(shieldedInfo.ak, shieldedInfo.nk, spendNote, invalidPosition, shieldedAddress),
+                'Invalid position provided'
+            )
+        })
+
+        it('should throw if shieldedTRC20ContractAddress is not an address', async  function (){
+            const invalidShieldedTRC20ContractAddress = shieldedAddress.slice(0, 10);
+            await assertThrow(
+                tronWeb.ztron.isShieldedTRC20ContractNoteSpent(shieldedInfo.ak, shieldedInfo.nk, spendNote, shieldedSpends[0].pos, invalidShieldedTRC20ContractAddress),
+                'Invalid shieldedTRC20ContractAddress address provided'
+            )
+        })
     })
 
     describe("redjubjub tool", function (){
