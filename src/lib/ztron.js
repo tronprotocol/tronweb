@@ -775,7 +775,7 @@ export default class ZTron {
             ...options
         }
 
-        this.tronWeb.fullNode.request('wallet/isshieldedtrc20contractNoteSpent', params, 'post')
+        this.tronWeb.fullNode.request('wallet/isshieldedtrc20contractnotespent', params, 'post')
             .then(data => callback(null, data))
             .catch(err => callback(err));
     }
