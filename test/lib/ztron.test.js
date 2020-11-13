@@ -20,18 +20,7 @@ describe("Tronweb.ztron", function (){
     let scalingFactor;
     let shieldedSpends;
     let shieldedReceives;
-    const shieldedInfo = {
-        sk: '0d768b4ab179d297da9c6bdbce61a476d2a74f6c03dc85e102762ad3b4997f84',
-        ask: '971cc71faf72c38a38a0e211f335f18d450ec8ba3d1d8fabdfdda018acc50d04',
-        nsk: 'a6f38ec76321287f5b1109e76fcb7077d1e0de3ccbc243acff648b2b470d2403',
-        ovk: 'c0ed60956c272149c06944dd1c36813f04b1fac9828b5232b957c6fd4403ac55',
-        ak: 'dc51a25220495e50637089cd6a98d9a36452a3d56f239fe38b826f8c878888d1',
-        nk: '1893f19b3df3ef082a60582b4cacd30722eaa7d56e32331f7be0740d286f2bae',
-        ivk: '940274c782928f3ae55f74eb1df96c5fad0e629e320ad68f49b0db76b0cedc03',
-        d: '3b6e0f6dee4d147b3f0ff2',
-        pkD: '58a8e1d29f8f074fd785e62f37bffe498f080ba0114a0fa1b389053ed9a8c603',
-        payment_address: 'ztron18dhq7m0wf528k0c07fv23cwjn78swn7hshnz7dalleyc7zqt5qg55rapkwys20ke4rrqxramfxn'
-    }
+    let shieldedInfo;
 
     let methodInstance;
 
@@ -47,8 +36,8 @@ describe("Tronweb.ztron", function (){
         methodInstance = shieldedUtils.makeShieldedMethodInstance(tronWeb, shieldedAddress);
         scalingFactor = (await methodInstance.scalingFactor().call()).toNumber();
         realCost = tronWeb.BigNumber(narrowValue).multipliedBy(scalingFactor).toFixed();
-        console.log(realCost, narrowValue)
-        // shieldedInfo = await tronWeb.ztron.getNewShieldedAddress();
+        // console.log(realCost, narrowValue)
+        shieldedInfo = await tronWeb.ztron.getNewShieldedAddress();
         // console.log(await tronWeb.ztron.getNewShieldedAddress())
     });
 
@@ -87,7 +76,6 @@ describe("Tronweb.ztron", function (){
 
         it('should throw if The length of spendingKey is not equal to 64', async function (){
             const result = await tronWeb.ztron.getExpandedSpendingKey('0d1fd0aa0cca9f74eac4b542b62ec36ab84263534dae8814c69210180d3d49');
-            console.log(result)
             assert.ok(result.Error.indexOf('should be 64') !== -1)
             // await assertThrow(
             //     tronWeb.ztron.getExpandedSpendingKey('0d1fd0aa0cca9f74eac4b542b62ec36ab84263534dae8814c69210180d3d49'),
@@ -628,10 +616,10 @@ describe("Tronweb.ztron", function (){
 
     describe("#scanShieldedTRC20NotesByIvk No publicity", function (){
         it('should get shielded_spends with startBlockIndex is object', async function (){
-            await wait(2)
+            await wait(10)
             const params = {
-                "start_block_index": 10732343 || startBlockIndex,
-                "end_block_index": 10733342 || endBlockIndex,
+                "start_block_index": startBlockIndex,
+                "end_block_index": endBlockIndex,
                 "shielded_TRC20_contract_address": shieldedAddress,
                 "ivk": shieldedInfo.ivk,
                 "ak": shieldedInfo.ak,
