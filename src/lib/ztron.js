@@ -61,12 +61,12 @@ export default class ZTron {
         ], callback))
             return;
 
-        const data = {
+        const params = {
             value: ask
         }
 
-        this.tronWeb.fullNode.request('wallet/getakfromask', data, 'post')
-            .then(result => callback(null, result))
+        this.tronWeb.fullNode.request('wallet/getakfromask', params, 'post')
+            .then(data => callback(null, data))
             .catch(err => callback(err));
     }
 
@@ -84,12 +84,12 @@ export default class ZTron {
         ], callback))
             return;
 
-        const data = {
+        const params = {
             value: nsk
         }
 
-        this.tronWeb.fullNode.request('wallet/getnkfromnsk', data, 'post')
-            .then(result => callback(null, result))
+        this.tronWeb.fullNode.request('wallet/getnkfromnsk', params, 'post')
+            .then(data => callback(null, data))
             .catch(err => callback(err));
     }
 
@@ -99,7 +99,7 @@ export default class ZTron {
         }
 
         this.tronWeb.fullNode.request('wallet/getspendingkey', null, 'get')
-            .then(result => callback(null, result))
+            .then(data => callback(null, data))
             .catch(err => callback(err));
     }
 
@@ -109,7 +109,7 @@ export default class ZTron {
         }
 
         this.tronWeb.fullNode.request('wallet/getdiversifier', null, 'get')
-            .then(result => callback(null, result))
+            .then(data => callback(null, data))
             .catch(err => callback(err));
     }
 
@@ -132,13 +132,13 @@ export default class ZTron {
         ], callback))
             return;
 
-        const data = {
+        const params = {
             ak,
             nk
         }
 
-        this.tronWeb.fullNode.request('wallet/getincomingviewingkey', data, 'post')
-            .then(result => callback(null, result))
+        this.tronWeb.fullNode.request('wallet/getincomingviewingkey', params, 'post')
+            .then(data => callback(null, data))
             .catch(err => callback(err));
     }
 
@@ -161,13 +161,13 @@ export default class ZTron {
         ], callback))
             return;
 
-        const data = {
+        const params = {
             ivk,
             d
         }
 
-        this.tronWeb.fullNode.request('wallet/getzenpaymentaddress', data, 'post')
-            .then(result => callback(null, result))
+        this.tronWeb.fullNode.request('wallet/getzenpaymentaddress', params, 'post')
+            .then(data => callback(null, data))
             .catch(err => callback(err));
     }
 
@@ -177,7 +177,7 @@ export default class ZTron {
         }
 
         this.tronWeb.fullNode.request('wallet/getrcm', null, 'get')
-            .then(result => callback(null, result))
+            .then(data => callback(null, data))
             .catch(err => callback(err));
     }
 
@@ -187,7 +187,7 @@ export default class ZTron {
         }
 
         this.tronWeb.fullNode.request('wallet/getnewshieldedaddress', null, 'get')
-            .then(result => callback(null, result))
+            .then(data => callback(null, data))
             .catch(err => callback(err));
     }
 
@@ -219,21 +219,19 @@ export default class ZTron {
             {
                 name: 'alpha',
                 type: 'string',
-                lte: 64,
-                gte: 64,
                 value: alpha
             }
         ], callback))
             return;
 
-        const data = {
+        const params = {
             ask,
             alpha,
             tx_hash: txHash
         }
 
-        this.tronWeb.fullNode.request('wallet/createspendauthsig', data, 'post')
-            .then(result => callback(null, result))
+        this.tronWeb.fullNode.request('wallet/createspendauthsig', params, 'post')
+            .then(data => callback(null, data))
             .catch(err => callback(err));
     }
 
