@@ -80,5 +80,13 @@ module.exports = {
 
     ADDRESS721_MAPPING: 'TWU8w6qrqb42x9gt5NRGdzXD6xjgzEvnK1',
     ADDRESS721_MAPPING_HEX: '41e0db2ebd7619fc7d4af7d4cd04515c4f77840d45',
-    TRC721_ID: 1
+    TRC721_ID: 1,
+
+    Z_TRON: {
+        fullNode: 'https://api.nileex.io/',
+        solidityNode: 'https://api.nileex.io/',
+        shieldedAddress: 'TPcKtz5TRfP4xUZSos81RmXB9K2DBqj2iu',
+        trc20Address: 'TFUD8x3iAZ9dF7NDCGBtSjznemEomE5rP9',
+        transParentToAddress: 'TRM11TZjzC8Gksria7tpYZvHEWpGW2T68r'
+    }
 }

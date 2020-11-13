@@ -5,6 +5,7 @@ const assertThrow = require('../helpers/assertThrow');
 const tronWebBuilder = require('../helpers/tronWebBuilder');
 const wait = require('../helpers/wait');
 const shieldedUtils = require('../helpers/shieldedUtils');
+const {Z_TRON: zTronConfig} = require('../helpers/config');
 
 
 const TronWeb = tronWebBuilder.TronWeb;
@@ -14,8 +15,7 @@ describe("Tronweb.ztron", function (){
     let tronWeb;
     let noteTxs; //notes
     const keysInfo = {};
-    const shieldedAddress = 'TPcKtz5TRfP4xUZSos81RmXB9K2DBqj2iu';
-    const trc20Address = 'TFUD8x3iAZ9dF7NDCGBtSjznemEomE5rP9';
+    const {shieldedAddress, trc20Address} = zTronConfig;
     let startBlockIndex = 0, endBlockIndex = 0;
     let scalingFactor;
     let shieldedSpends;
@@ -30,21 +30,18 @@ describe("Tronweb.ztron", function (){
 
     before(async function () {
         tronWeb = tronWebBuilder.createInstance({
-            fullNode: 'https://api.nileex.io/',
-            solidityNode: 'https://api.nileex.io/'
+            fullNode: zTronConfig.fullNode,
+            solidityNode: zTronConfig.solidityNode
         });
         methodInstance = shieldedUtils.makeShieldedMethodInstance(tronWeb, shieldedAddress);
         scalingFactor = (await methodInstance.scalingFactor().call()).toNumber();
         realCost = tronWeb.BigNumber(narrowValue).multipliedBy(scalingFactor).toFixed();
-        // console.log(realCost, narrowValue)
         shieldedInfo = await tronWeb.ztron.getNewShieldedAddress();
-        // console.log(await tronWeb.ztron.getNewShieldedAddress())
     });
 
     describe('#constructor()', function () {
 
         it('should have been set a full instance in tronWeb', function () {
-
             assert.instanceOf(tronWeb.ztron, TronWeb.ZTron);
         });
 
@@ -61,7 +58,6 @@ describe("Tronweb.ztron", function (){
 
     describe("#getExpandedSpendingKey", function (){
         it('should get spending keys with the spendingKey', async function (){
-            // const spendingKeyInfo = await tronWeb.ztron.getSpendingKey();
             const result  = await tronWeb.ztron.getExpandedSpendingKey(keysInfo.spendingKey);
             assert.ok(result.ask);
             assert.ok(result.nsk);
@@ -75,13 +71,9 @@ describe("Tronweb.ztron", function (){
         })
 
         it('should throw if The length of spendingKey is not equal to 64', async function (){
-            const result = await tronWeb.ztron.getExpandedSpendingKey('0d1fd0aa0cca9f74eac4b542b62ec36ab84263534dae8814c69210180d3d49');
+            const invalidSpendingKey = keysInfo.spendingKey.slice(0, 54);
+            const result = await tronWeb.ztron.getExpandedSpendingKey(invalidSpendingKey);
             assert.ok(result.Error.indexOf('should be 64') !== -1)
-            // await assertThrow(
-            //     tronWeb.ztron.getExpandedSpendingKey('0d1fd0aa0cca9f74eac4b542b62ec36ab84263534dae8814c69210180d3d49'),
-            //     null,
-            //     'the length of spendingKey\'s hex string should be 64'
-            // )
         })
 
         it('should throw if spendingKey is null.', async function (){
@@ -117,13 +109,9 @@ describe("Tronweb.ztron", function (){
         })
 
         it('should throw if The length of ask is not equal to 64', async function (){
-            const result = await tronWeb.ztron.getAkFromAsk('f1549d4a039140b07d0400cd0442be994bd16b9269b225eb75d1b6d334');
+            const invalidAsk = keysInfo.ask.slice(0, 54)
+            const result = await tronWeb.ztron.getAkFromAsk(invalidAsk);
             assert.ok(result.Error.indexOf('should be 64') !== -1)
-            // await assertThrow(
-            //     tronWeb.ztron.getAkFromAsk('f1549d4a039140b07d0400cd0442be994bd16b9269b225eb75d1b6d334'),
-            //     null,
-            //     'the length of ask\'s hex string should be 64'
-            // )
         })
 
         it('should throw if ask is null.', async function (){
@@ -158,13 +146,9 @@ describe("Tronweb.ztron", function (){
         })
 
         it('should throw if The length of nsk is not equal to 64', async function (){
-            const result = await tronWeb.ztron.getNkFromNsk('ebaff02009978d74731bc81e08012927da1aaa6564f18d7');
+            const invalidNsk = keysInfo.nsk.slice(0, 54);
+            const result = await tronWeb.ztron.getNkFromNsk(invalidNsk);
             assert.ok(result.Error.indexOf('should be 64') !== -1)
-            // await assertThrow(
-            //     tronWeb.ztron.getNkFromNsk('ebaff02009978d74731bc81e08012927da1aaa6564f18d7'),
-            //     null,
-            //     'the length of nsk\'s hex string should be 64'
-            // )
         })
 
         it('should throw if nsk is null.', async function (){
@@ -618,8 +602,8 @@ describe("Tronweb.ztron", function (){
         it('should get shielded_spends with startBlockIndex is object', async function (){
             await wait(10)
             const params = {
-                "start_block_index": startBlockIndex,
-                "end_block_index": endBlockIndex,
+                "start_block_index": 10786036 || startBlockIndex,
+                "end_block_index": 10787035 || endBlockIndex,
                 "shielded_TRC20_contract_address": shieldedAddress,
                 "ivk": shieldedInfo.ivk,
                 "ak": shieldedInfo.ak,
@@ -862,16 +846,10 @@ describe("Tronweb.ztron", function (){
                 )
             })
 
-            it('should throw if alpha is not a string or is less than 64', async function (){
+            it('should throw if alpha is not a string', async function (){
                 const alphaNotString = 1111;
-                const alphaLengthNotEnough = alpha.slice(0, 54);
                 await assertThrow(
                     tronWeb.ztron.createSpendAuthSig(shieldedInfo.ask, txHash, alphaNotString),
-                    'Invalid alpha provided'
-                )
-
-                await assertThrow(
-                    tronWeb.ztron.createSpendAuthSig(shieldedInfo.ask, txHash, alphaLengthNotEnough),
                     'Invalid alpha provided'
                 )
             })
@@ -966,17 +944,27 @@ describe("Tronweb.ztron", function (){
     describe("#createBurnParams", function (){
         let burnShieldedReceives = [];
         let toAmount;
-        const transParentToAddress = 'TRM11TZjzC8Gksria7tpYZvHEWpGW2T68r'
+        let burnShieldedSpends;
+        const transParentToAddress = zTronConfig.transParentToAddress;
 
         before(async () => {
+            const pathInfo = await methodInstance.getPath([noteTxs[1].position]).call();
+            burnShieldedSpends = [{
+                "note": noteTxs[1].note,
+                "alpha": (await tronWeb.ztron.getRcm()).value,
+                "root":  pathInfo[0].replace('0x', ''),
+                "path":  pathInfo[1].map(v => v.replace('0x', '')).join(''),
+                "pos": noteTxs[1].position
+            }];
+
             Object.assign(burnShieldedReceives, shieldedReceives);
             burnShieldedReceives[0].note.value = 0;
-            toAmount = tronWeb.BigNumber(shieldedSpends[0].note.value).minus(burnShieldedReceives[0].note.value).multipliedBy(scalingFactor).toFixed()
+            toAmount = tronWeb.BigNumber(burnShieldedSpends[0].note.value).minus(burnShieldedReceives[0].note.value).multipliedBy(scalingFactor).toFixed()
         })
 
         it('should get burnParams with ask is object', async function (){
             let params = {
-                shielded_spends: shieldedSpends,
+                shielded_spends: burnShieldedSpends,
                 shielded_receives: burnShieldedReceives,
                 shielded_TRC20_contract_address: shieldedAddress,
                 ovk: shieldedInfo.ovk,
@@ -999,7 +987,7 @@ describe("Tronweb.ztron", function (){
 
         it('should get burnParams with Expanded parameters', async function(){
             const result = await tronWeb.ztron.createBurnParams(shieldedInfo.ask, shieldedInfo.nsk, shieldedInfo.ovk,
-                shieldedSpends, burnShieldedReceives, transParentToAddress, toAmount, shieldedAddress);
+                burnShieldedSpends, burnShieldedReceives, transParentToAddress, toAmount, shieldedAddress);
             assert.ok(result && result.trigger_contract_input);
         })
 
@@ -1010,19 +998,19 @@ describe("Tronweb.ztron", function (){
 
             await assertThrow(
                 tronWeb.ztron.createBurnParams(invalidAsk, shieldedInfo.nsk, shieldedInfo.ovk,
-                    shieldedSpends, burnShieldedReceives, transParentToAddress, toAmount, shieldedAddress),
+                    burnShieldedSpends, burnShieldedReceives, transParentToAddress, toAmount, shieldedAddress),
                 'Invalid ask provided'
             )
 
             await assertThrow(
                 tronWeb.ztron.createBurnParams(shieldedInfo.ask, invalidNsk, shieldedInfo.ovk,
-                    shieldedSpends, burnShieldedReceives, transParentToAddress, toAmount, shieldedAddress),
+                    burnShieldedSpends, burnShieldedReceives, transParentToAddress, toAmount, shieldedAddress),
                 'Invalid nsk provided'
             )
 
             await assertThrow(
                 tronWeb.ztron.createBurnParams(shieldedInfo.ask, shieldedInfo.nsk, invalidOvk,
-                    shieldedSpends, burnShieldedReceives, transParentToAddress, toAmount, shieldedAddress),
+                    burnShieldedSpends, burnShieldedReceives, transParentToAddress, toAmount, shieldedAddress),
                 'Invalid ovk provided'
             )
         })
@@ -1038,7 +1026,7 @@ describe("Tronweb.ztron", function (){
 
             await assertThrow(
                 tronWeb.ztron.createBurnParams(shieldedInfo.ask, shieldedInfo.nsk, shieldedInfo.ovk,
-                    shieldedSpends, invalidShieldedReceives, transParentToAddress, toAmount, shieldedAddress),
+                    burnShieldedSpends, invalidShieldedReceives, transParentToAddress, toAmount, shieldedAddress),
                 'Invalid shieldedReceives provided'
             )
         })
@@ -1047,7 +1035,7 @@ describe("Tronweb.ztron", function (){
             const invalidToAmount = 10;
             await assertThrow(
                 tronWeb.ztron.createBurnParams(shieldedInfo.ask, shieldedInfo.nsk, shieldedInfo.ovk,
-                    shieldedSpends, burnShieldedReceives, transParentToAddress, invalidToAmount, shieldedAddress),
+                    burnShieldedSpends, burnShieldedReceives, transParentToAddress, invalidToAmount, shieldedAddress),
                 'Invalid toAmount provided'
             )
         })
@@ -1056,7 +1044,7 @@ describe("Tronweb.ztron", function (){
             const invalidTransparentToAddress = transParentToAddress.slice(0, 10);
             await assertThrow(
                 tronWeb.ztron.createBurnParams(shieldedInfo.ask, shieldedInfo.nsk, shieldedInfo.ovk,
-                    shieldedSpends, burnShieldedReceives, invalidTransparentToAddress, toAmount, shieldedAddress),
+                    burnShieldedSpends, burnShieldedReceives, invalidTransparentToAddress, toAmount, shieldedAddress),
                 'Invalid transparentToAddress address provided'
             )
         })
@@ -1065,7 +1053,7 @@ describe("Tronweb.ztron", function (){
             const invalidShieldedTRC20ContractAddress = shieldedAddress.slice(0, 10);
             await assertThrow(
                 tronWeb.ztron.createBurnParams(shieldedInfo.ask, shieldedInfo.nsk, shieldedInfo.ovk,
-                    shieldedSpends, burnShieldedReceives, transParentToAddress, toAmount, invalidShieldedTRC20ContractAddress),
+                    burnShieldedSpends, burnShieldedReceives, transParentToAddress, toAmount, invalidShieldedTRC20ContractAddress),
                 'Invalid shieldedTRC20ContractAddress address provided'
             )
         })
@@ -1081,7 +1069,7 @@ describe("Tronweb.ztron", function (){
 
         let burnShieldedReceives = [];
         let toAmount;
-        const transParentToAddress = 'TRM11TZjzC8Gksria7tpYZvHEWpGW2T68r'
+        const transParentToAddress = zTronConfig.transParentToAddress;
 
         before(async () => {
             Object.assign(burnShieldedReceives, shieldedReceives);
@@ -1248,7 +1236,6 @@ describe("Tronweb.ztron", function (){
                 shielded_TRC20_contract_address: shieldedAddress
             }
             const result = await tronWeb.ztron.isShieldedTRC20ContractNoteSpent(params);
-            console.log("true:", result);
             assert.ok(result && !result.is_spent);
         })
 
