@@ -168,6 +168,9 @@ In order to contribute you can
 
 ## Recent History
 
+__3.2.0__
+- Support shielded transactions
+
 __3.1.0__
 - Update `elliptic` to the latest version 6.5.3
 - Update `ethers` to the latest version 5.0.8
