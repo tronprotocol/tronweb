@@ -602,8 +602,8 @@ describe("Tronweb.ztron", function (){
         it('should get shielded_spends with startBlockIndex is object', async function (){
             await wait(10)
             const params = {
-                "start_block_index": 10786036 || startBlockIndex,
-                "end_block_index": 10787035 || endBlockIndex,
+                "start_block_index": startBlockIndex,
+                "end_block_index": endBlockIndex,
                 "shielded_TRC20_contract_address": shieldedAddress,
                 "ivk": shieldedInfo.ivk,
                 "ak": shieldedInfo.ak,
