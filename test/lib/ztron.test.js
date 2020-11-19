@@ -598,8 +598,11 @@ describe("Tronweb.ztron", function (){
 
     })
 
-    describe("#scanShieldedTRC20NotesByIvk No publicity", function (){
-        it('should get shielded_spends with startBlockIndex is object', async function (){
+    describe("#scanShieldedTRC20NotesByIvk", function (){
+        const options = {
+            visible: true
+        }
+        it('should get noteTxs with startBlockIndex is object', async function (){
             await wait(10)
             const params = {
                 "start_block_index": startBlockIndex,
@@ -608,15 +611,78 @@ describe("Tronweb.ztron", function (){
                 "ivk": shieldedInfo.ivk,
                 "ak": shieldedInfo.ak,
                 "nk": shieldedInfo.nk,
-                "visible": true
             }
-            const options = {
-                visible: true
-            }
-            const result = await shieldedUtils.scanShieldedTRC20NotesByIvk(tronWeb, params, options);
+            const result = await tronWeb.ztron.scanShieldedTRC20NotesByIvk(params, options);
             assert.ok(result && result.noteTxs && result.noteTxs.length > 0);
-            noteTxs = result.noteTxs;
-            // noteTxs = result.noteTxs.filter(item => !item.is_spent)
+            noteTxs = result.noteTxs
+        })
+
+        it('should get noteTxs with The parameters are expanded', async function (){
+            const result = await tronWeb.ztron.scanShieldedTRC20NotesByIvk(startBlockIndex, endBlockIndex, shieldedInfo.ivk,
+                shieldedInfo.ak, shieldedInfo.nk, shieldedAddress, options);
+            assert.ok(result && result.noteTxs && result.noteTxs.length > 0);
+        })
+
+        it('should throw if startBlockIndex not a positive-integer', async function (){
+            const invalidStartBlockIndex = -10;
+            await assertThrow(
+                tronWeb.ztron.scanShieldedTRC20NotesByIvk(invalidStartBlockIndex, endBlockIndex, shieldedInfo.ivk,
+                    shieldedInfo.ak, shieldedInfo.nk, shieldedAddress, options),
+                'startBlockIndex must be a positive integer'
+            )
+            const stringStartBlockIndex = '1001';
+            await assertThrow(
+                tronWeb.ztron.scanShieldedTRC20NotesByIvk(stringStartBlockIndex, endBlockIndex, shieldedInfo.ivk,
+                    shieldedInfo.ak, shieldedInfo.nk, shieldedAddress, options),
+                'startBlockIndex must be a positive integer'
+            )
+        })
+
+        it('should throw if endBlockIndex not a positive-integer', async function (){
+            const invalidEndBlockIndex = -10;
+            await assertThrow(
+                tronWeb.ztron.scanShieldedTRC20NotesByIvk(startBlockIndex, invalidEndBlockIndex, shieldedInfo.ivk,
+                    shieldedInfo.ak, shieldedInfo.nk, shieldedAddress, options),
+                'endBlockIndex must be a positive integer'
+            )
+            const stringEndBlockIndex = '1001';
+            await assertThrow(
+                tronWeb.ztron.scanShieldedTRC20NotesByIvk(startBlockIndex, stringEndBlockIndex, shieldedInfo.ivk,
+                    shieldedInfo.ak, shieldedInfo.nk, shieldedAddress, options),
+                'endBlockIndex must be a positive integer'
+            )
+        })
+
+        it('should throw if ivk|ak|nk is not a string', async function (){
+            const invalidIvk = 1111;
+            const invalidAk = 1111;
+            const invalidNk = 1111;
+            await assertThrow(
+                tronWeb.ztron.scanShieldedTRC20NotesByIvk(startBlockIndex, endBlockIndex, invalidIvk,
+                    shieldedInfo.ak, shieldedInfo.nk, shieldedAddress, options),
+                'Invalid ivk provided'
+            )
+
+            await assertThrow(
+                tronWeb.ztron.scanShieldedTRC20NotesByIvk(startBlockIndex, endBlockIndex, shieldedInfo.ivk,
+                    invalidAk, shieldedInfo.nk, shieldedAddress, options),
+                'Invalid ak provided'
+            )
+
+            await assertThrow(
+                tronWeb.ztron.scanShieldedTRC20NotesByIvk(startBlockIndex, endBlockIndex, shieldedInfo.ivk,
+                    shieldedInfo.ak, invalidNk, shieldedAddress, options),
+                'Invalid nk provided'
+            )
+        })
+
+        it('should throw if shieldedTRC20ContractAddress is not an address', async  function (){
+            const invalidShieldedTRC20ContractAddress = shieldedAddress.slice(0, 10);
+            await assertThrow(
+                tronWeb.ztron.scanShieldedTRC20NotesByIvk(startBlockIndex, endBlockIndex, shieldedInfo.ivk,
+                    shieldedInfo.ak, shieldedInfo.nk, invalidShieldedTRC20ContractAddress, options),
+                'Invalid shieldedTRC20ContractAddress address provided'
+            )
         })
 
         after(async () => {
@@ -1273,6 +1339,70 @@ describe("Tronweb.ztron", function (){
             const invalidShieldedTRC20ContractAddress = shieldedAddress.slice(0, 10);
             await assertThrow(
                 tronWeb.ztron.isShieldedTRC20ContractNoteSpent(shieldedInfo.ak, shieldedInfo.nk, spendNote, shieldedSpends[0].pos, invalidShieldedTRC20ContractAddress),
+                'Invalid shieldedTRC20ContractAddress address provided'
+            )
+        })
+    })
+
+    describe("#scanShieldedTRC20NotesByOvk", function (){
+        const options = {
+            visible: true
+        }
+        it('should get noteTxs with startBlockIndex is object', async function (){
+            await wait(10)
+            const params = {
+                "start_block_index": startBlockIndex,
+                "end_block_index": endBlockIndex,
+                "shielded_TRC20_contract_address": shieldedAddress,
+                "ovk": shieldedInfo.ovk,
+            }
+            const result = await tronWeb.ztron.scanShieldedTRC20NotesByOvk(params, options);
+            assert.ok(result && result.noteTxs && result.noteTxs.length > 0);
+        })
+
+        it('should get noteTxs with The parameters are expanded', async function (){
+            const result = await tronWeb.ztron.scanShieldedTRC20NotesByOvk(startBlockIndex, endBlockIndex, shieldedInfo.ovk, shieldedAddress, options);
+            assert.ok(result && result.noteTxs && result.noteTxs.length > 0);
+        })
+
+        it('should throw if startBlockIndex not a positive-integer', async function (){
+            const invalidStartBlockIndex = -10;
+            await assertThrow(
+                tronWeb.ztron.scanShieldedTRC20NotesByOvk(invalidStartBlockIndex, endBlockIndex, shieldedInfo.ovk, shieldedAddress, options),
+                'startBlockIndex must be a positive integer'
+            )
+            const stringStartBlockIndex = '1001';
+            await assertThrow(
+                tronWeb.ztron.scanShieldedTRC20NotesByOvk(stringStartBlockIndex, endBlockIndex, shieldedInfo.ovk, shieldedAddress, options),
+                'startBlockIndex must be a positive integer'
+            )
+        })
+
+        it('should throw if endBlockIndex not a positive-integer', async function (){
+            const invalidEndBlockIndex = -10;
+            await assertThrow(
+                tronWeb.ztron.scanShieldedTRC20NotesByOvk(startBlockIndex, invalidEndBlockIndex, shieldedInfo.ovk, shieldedAddress, options),
+                'endBlockIndex must be a positive integer'
+            )
+            const stringEndBlockIndex = '1001';
+            await assertThrow(
+                tronWeb.ztron.scanShieldedTRC20NotesByOvk(startBlockIndex, stringEndBlockIndex, shieldedInfo.ovk, shieldedAddress, options),
+                'endBlockIndex must be a positive integer'
+            )
+        })
+
+        it('should throw if ovk is not a string', async function (){
+            const invalidOvk = 1111;
+            await assertThrow(
+                tronWeb.ztron.scanShieldedTRC20NotesByOvk(startBlockIndex, endBlockIndex, invalidOvk, shieldedAddress, options),
+                'Invalid ovk provided'
+            )
+        })
+
+        it('should throw if shieldedTRC20ContractAddress is not an address', async  function (){
+            const invalidShieldedTRC20ContractAddress = shieldedAddress.slice(0, 10);
+            await assertThrow(
+                tronWeb.ztron.scanShieldedTRC20NotesByOvk(startBlockIndex, endBlockIndex, shieldedInfo.ovk, invalidShieldedTRC20ContractAddress, options),
                 'Invalid shieldedTRC20ContractAddress address provided'
             )
         })
