@@ -778,4 +778,130 @@ export default class ZTron {
             .catch(err => callback(err));
     }
 
+    async scanShieldedTRC20NotesByIvk(startBlockIndex, endBlockIndex, ivk, ak, nk, shieldedTRC20ContractAddress, options, callback){
+        if (utils.isObject(startBlockIndex)) {
+            options = endBlockIndex;
+            callback = ivk;
+            endBlockIndex = startBlockIndex.end_block_index;
+            ivk = startBlockIndex.ivk;
+            ak = startBlockIndex.ak;
+            nk = startBlockIndex.nk;
+            shieldedTRC20ContractAddress = startBlockIndex.shielded_TRC20_contract_address;
+            startBlockIndex = startBlockIndex.start_block_index;
+        }
+
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
+        if (!callback) {
+            return this.injectPromise(this.scanShieldedTRC20NotesByIvk, startBlockIndex, endBlockIndex, ivk, ak, nk, shieldedTRC20ContractAddress, options);
+        }
+
+        if (this.validator.notValid([
+            {
+                name: 'startBlockIndex',
+                type: 'positive-integer',
+                value: startBlockIndex
+            },
+            {
+                name: 'endBlockIndex',
+                type: 'positive-integer',
+                value: endBlockIndex
+            },
+            {
+                name: 'ivk',
+                type: 'string',
+                value: ivk
+            },
+            {
+                name: 'ak',
+                type: 'string',
+                value: ak
+            },
+            {
+                name: 'nk',
+                type: 'string',
+                value: nk
+            },
+            {
+                name: 'shieldedTRC20ContractAddress',
+                type: 'address',
+                value: shieldedTRC20ContractAddress
+            }
+        ], callback))
+            return;
+
+        const params = {
+            ivk,
+            nk,
+            ak,
+            visible: !!options.visible,
+            start_block_index: startBlockIndex,
+            end_block_index: endBlockIndex,
+            shielded_TRC20_contract_address: options && options.visible ? shieldedTRC20ContractAddress : this.tronWeb.address.toHex(shieldedTRC20ContractAddress),
+            ...options
+        }
+        this.tronWeb.fullNode.request('wallet/scanshieldedtrc20notesbyivk', params, 'post')
+            .then(data => callback(null, data))
+            .catch(err => callback(err));
+    }
+
+    async scanShieldedTRC20NotesByOvk(startBlockIndex, endBlockIndex, ovk, shieldedTRC20ContractAddress, options = {}, callback = false) {
+        if (utils.isObject(startBlockIndex)) {
+            options = endBlockIndex;
+            callback = ovk;
+            endBlockIndex = startBlockIndex.end_block_index;
+            ovk = startBlockIndex.ovk;
+            shieldedTRC20ContractAddress = startBlockIndex.shielded_TRC20_contract_address;
+            startBlockIndex = startBlockIndex.start_block_index;
+        }
+
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
+        if (!callback) {
+            return this.injectPromise(this.scanShieldedTRC20NotesByOvk, startBlockIndex, endBlockIndex, ovk, shieldedTRC20ContractAddress, options);
+        }
+
+        if (this.validator.notValid([
+            {
+                name: 'startBlockIndex',
+                type: 'positive-integer',
+                value: startBlockIndex
+            },
+            {
+                name: 'endBlockIndex',
+                type: 'positive-integer',
+                value: endBlockIndex
+            },
+            {
+                name: 'ovk',
+                type: 'string',
+                value: ovk
+            },
+            {
+                name: 'shieldedTRC20ContractAddress',
+                type: 'address',
+                value: shieldedTRC20ContractAddress
+            }
+        ], callback))
+            return;
+
+        const params = {
+            ovk,
+            visible: !!options.visible,
+            start_block_index: startBlockIndex,
+            end_block_index: endBlockIndex,
+            shielded_TRC20_contract_address: options && options.visible ? shieldedTRC20ContractAddress : this.tronWeb.address.toHex(shieldedTRC20ContractAddress),
+            ...options
+        }
+        this.tronWeb.fullNode.request('wallet/scanshieldedtrc20notesbyovk', params, 'post')
+            .then(data => callback(null, data))
+            .catch(err => callback(err));
+    }
+
 }
