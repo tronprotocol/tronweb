@@ -18,7 +18,7 @@ import { ADDRESS_PREFIX } from 'utils/address';
 
 const DEFAULT_VERSION = '3.5.0';
 
-const FEE_LIMIT = 20000000;
+const FEE_LIMIT = 100000000;
 
 export default class TronWeb extends EventEmitter {
     static providers = providers;
