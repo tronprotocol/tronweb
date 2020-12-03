@@ -686,7 +686,7 @@ describe("Tronweb.ztron", function (){
         })
 
         after(async () => {
-            const pathInfo = await methodInstance.getPath([noteTxs[0].position]).call();
+            const pathInfo = await methodInstance.getPath(noteTxs[0].position).call();
             shieldedSpends = [{
                 "note": noteTxs[0].note,
                 "alpha": (await tronWeb.ztron.getRcm()).value,
@@ -1014,7 +1014,7 @@ describe("Tronweb.ztron", function (){
         const transParentToAddress = zTronConfig.transParentToAddress;
 
         before(async () => {
-            const pathInfo = await methodInstance.getPath([noteTxs[1].position]).call();
+            const pathInfo = await methodInstance.getPath(noteTxs[1].position).call();
             burnShieldedSpends = [{
                 "note": noteTxs[1].note,
                 "alpha": (await tronWeb.ztron.getRcm()).value,
