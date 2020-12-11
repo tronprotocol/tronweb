@@ -1,4 +1,4 @@
-import TronWeb from 'index';
+import AccWeb from 'index';
 import utils from 'utils';
 import providers from "./providers";
 import querystring from "querystring";
@@ -6,25 +6,25 @@ import injectpromise from 'injectpromise';
 
 export default class Event {
 
-    constructor(tronWeb = false) {
-        if (!tronWeb || !(tronWeb instanceof TronWeb))
-            throw new Error('Expected instance of TronWeb');
-        this.tronWeb = tronWeb;
+    constructor(accWeb = false) {
+        if (!accWeb || !(accWeb instanceof AccWeb))
+            throw new Error('Expected instance of AccWeb');
+        this.accWeb = accWeb;
         this.injectPromise = injectpromise(this);
     }
 
     setServer(eventServer = false, healthcheck = 'healthcheck') {
         if (!eventServer)
-            return this.tronWeb.eventServer = false;
+            return this.accWeb.eventServer = false;
 
         if (utils.isString(eventServer))
             eventServer = new providers.HttpProvider(eventServer);
 
-        if (!this.tronWeb.isValidProvider(eventServer))
+        if (!this.accWeb.isValidProvider(eventServer))
             throw new Error('Invalid event server provided');
 
-        this.tronWeb.eventServer = eventServer;
-        this.tronWeb.eventServer.isConnected = () => this.tronWeb.eventServer.request(healthcheck).then(() => true).catch(() => false);
+        this.accWeb.eventServer = eventServer;
+        this.accWeb.eventServer.isConnected = () => this.accWeb.eventServer.request(healthcheck).then(() => true).catch(() => false);
     }
 
     getEventsByContractAddress(contractAddress = false, options = {}, callback = false) {
@@ -58,12 +58,12 @@ export default class Event {
 
         fromTimestamp = fromTimestamp || sinceTimestamp || since;
 
-        if (!this.tronWeb.eventServer)
+        if (!this.accWeb.eventServer)
             return callback('No event server configured');
 
         const routeParams = [];
 
-        if (!this.tronWeb.isAddress(contractAddress))
+        if (!this.accWeb.isAddress(contractAddress))
             return callback('Invalid contract address provided');
 
         if (eventName && !contractAddress)
@@ -87,7 +87,7 @@ export default class Event {
             return callback('Usage of block number filtering requires an event name');
 
         if (contractAddress)
-            routeParams.push(this.tronWeb.address.fromHex(contractAddress));
+            routeParams.push(this.accWeb.address.fromHex(contractAddress));
 
         if (eventName)
             routeParams.push(eventName);
@@ -121,7 +121,7 @@ export default class Event {
         if (fingerprint)
             qs.fingerprint = fingerprint
 
-        return this.tronWeb.eventServer.request(`event/contract/${routeParams.join('/')}?${querystring.stringify(qs)}`).then((data = false) => {
+        return this.accWeb.eventServer.request(`event/contract/${routeParams.join('/')}?${querystring.stringify(qs)}`).then((data = false) => {
             if (!data)
                 return callback('Unknown error occurred');
 
@@ -145,10 +145,10 @@ export default class Event {
         if (!callback)
             return this.injectPromise(this.getEventsByTransactionID, transactionID, options);
 
-        if (!this.tronWeb.eventServer)
+        if (!this.accWeb.eventServer)
             return callback('No event server configured');
 
-        return this.tronWeb.eventServer.request(`event/transaction/${transactionID}`).then((data = false) => {
+        return this.accWeb.eventServer.request(`event/transaction/${transactionID}`).then((data = false) => {
             if (!data)
                 return callback('Unknown error occurred');
 

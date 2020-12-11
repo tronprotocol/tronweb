@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const target = path.resolve(__dirname, '..', 'test', 'setup', 'TronWeb.js');
+const target = path.resolve(__dirname, '..', 'test', 'setup', 'AccWeb.js');
 
 try {
     fs.unlinkSync(target);

@@ -1,16 +1,16 @@
 const _ = require('lodash');
 const wait = require('./wait');
-const tronWebBuilder = require('./tronWebBuilder')
+const accWebBuilder = require('./accWebBuilder')
 
 module.exports = async function pollAccountFor(address, property, value = false, interval = 3, timeout = 10000) {
-    const tronWeb = tronWebBuilder.createInstance()
+    const accWeb = accWebBuilder.createInstance()
     let now = Date.now()
     while (true) {
         if(Date.now() > now + timeout) {
             throw new Error('Timeout...');
         }
         wait(interval);
-        let result = await tronWeb.trx.getAccount(address);
+        let result = await accWeb.trx.getAccount(address);
         if(typeof property === 'string') {
             let data = _.get(result, property)
             if(data) {

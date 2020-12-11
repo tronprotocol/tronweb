@@ -4,8 +4,8 @@ const wait = require('../../helpers/wait');
 const assertThrow = require('../../helpers/assertThrow');
 const broadcaster = require('../../helpers/broadcaster');
 const _ = require('lodash');
-const tronWebBuilder = require('../../helpers/tronWebBuilder');
-const TronWeb = tronWebBuilder.TronWeb;
+const accWebBuilder = require('../../helpers/accWebBuilder');
+const AccWeb = accWebBuilder.AccWeb;
 
 const testRevertContract = require('../../fixtures/contracts').testRevert;
 const testSetValContract = require('../../fixtures/contracts').testSetVal;
@@ -13,14 +13,14 @@ const testSetValContract = require('../../fixtures/contracts').testSetVal;
 describe('#contract.method', function () {
 
     let accounts;
-    let tronWeb;
+    let accWeb;
     let emptyAccount;
 
     before(async function () {
-        tronWeb = tronWebBuilder.createInstance();
+        accWeb = accWebBuilder.createInstance();
         // ALERT this works only with Tron Quickstart:
-        accounts = await tronWebBuilder.getTestAccounts(-1);
-        emptyAccount = await TronWeb.createAccount();
+        accounts = await accWebBuilder.getTestAccounts(-1);
+        emptyAccount = await AccWeb.createAccount();
     });
 
     describe('#send()', function () {
@@ -29,17 +29,17 @@ describe('#contract.method', function () {
         let testSetVal
 
         before(async function () {
-            const tx = await broadcaster(tronWeb.transactionBuilder.createSmartContract({
+            const tx = await broadcaster(accWeb.transactionBuilder.createSmartContract({
                 abi: testRevertContract.abi,
                 bytecode: testRevertContract.bytecode
             }, accounts.b58[0]), accounts.pks[0])
-            testRevert = await tronWeb.contract().at(tx.transaction.contract_address)
+            testRevert = await accWeb.contract().at(tx.transaction.contract_address)
 
-            const tx2 = await broadcaster(tronWeb.transactionBuilder.createSmartContract({
+            const tx2 = await broadcaster(accWeb.transactionBuilder.createSmartContract({
                 abi: testSetValContract.abi,
                 bytecode: testSetValContract.bytecode
             }, accounts.b58[0]), accounts.pks[0])
-            testSetVal = await tronWeb.contract().at(tx2.transaction.contract_address)
+            testSetVal = await accWeb.contract().at(tx2.transaction.contract_address)
         })
 
         it("should set accounts[2] as the owner and check it with getOwner(1)", async function () {
@@ -72,11 +72,11 @@ describe('#contract.method', function () {
         let testRevert
 
         before(async function () {
-            const tx = await broadcaster(tronWeb.transactionBuilder.createSmartContract({
+            const tx = await broadcaster(accWeb.transactionBuilder.createSmartContract({
                 abi: testRevertContract.abi,
                 bytecode: testRevertContract.bytecode
             }, accounts.b58[0]), accounts.pks[0])
-            testRevert = await tronWeb.contract().at(tx.transaction.contract_address)
+            testRevert = await accWeb.contract().at(tx.transaction.contract_address)
             await testRevert.setOwner(accounts.b58[2]).send()
         })
 

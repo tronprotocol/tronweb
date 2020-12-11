@@ -1,27 +1,27 @@
 const chai = require('chai');
 const {FULL_NODE_API} = require('../helpers/config');
 const assertThrow = require('../helpers/assertThrow');
-const tronWebBuilder = require('../helpers/tronWebBuilder');
-const TronWeb = tronWebBuilder.TronWeb;
+const accWebBuilder = require('../helpers/accWebBuilder');
+const AccWeb = accWebBuilder.AccWeb;
 const jlog = require('../helpers/jlog')
 const broadcaster = require('../helpers/broadcaster');
 const wait = require('../helpers/wait')
 
 const assert = chai.assert;
 
-describe('TronWeb.lib.event', async function () {
+describe('AccWeb.lib.event', async function () {
 
     let accounts
-    let tronWeb
+    let accWeb
     let contractAddress
     let contract
     let eventLength = 0
 
     before(async function () {
-        tronWeb = tronWebBuilder.createInstance();
-        accounts = await tronWebBuilder.getTestAccounts(-1);
+        accWeb = accWebBuilder.createInstance();
+        accounts = await accWebBuilder.getTestAccounts(-1);
 
-        const result = await broadcaster(tronWeb.transactionBuilder.createSmartContract({
+        const result = await broadcaster(accWeb.transactionBuilder.createSmartContract({
             abi: [
                 {
                     "anonymous": false,
@@ -68,15 +68,15 @@ describe('TronWeb.lib.event', async function () {
         }, accounts.hex[0]), accounts.pks[0])
 
         contractAddress = result.receipt.transaction.contract_address
-        contract = await tronWeb.contract().at(contractAddress)
+        contract = await accWeb.contract().at(contractAddress)
 
     });
 
     describe('#constructor()', function () {
 
-        it('should have been set a full instance in tronWeb', function () {
+        it('should have been set a full instance in accWeb', function () {
 
-            assert.instanceOf(tronWeb.event, TronWeb.Event);
+            assert.instanceOf(accWeb.event, AccWeb.Event);
         });
 
     });
@@ -87,14 +87,14 @@ describe('TronWeb.lib.event', async function () {
         it('should emit an unconfirmed event and get it', async function () {
 
             this.timeout(60000)
-            tronWeb.setPrivateKey(accounts.pks[1])
+            accWeb.setPrivateKey(accounts.pks[1])
             let txId = await contract.emitNow(accounts.hex[2], 2000).send({
                 from: accounts.hex[1]
             })
             eventLength++
             let events
             while(true) {
-                events = await tronWeb.event.getEventsByTransactionID(txId)
+                events = await accWeb.event.getEventsByTransactionID(txId)
                 if (events.length) {
                     break
                 }
@@ -110,7 +110,7 @@ describe('TronWeb.lib.event', async function () {
         it('should emit an event, wait for confirmation and get it', async function () {
 
             this.timeout(60000)
-            tronWeb.setPrivateKey(accounts.pks[1])
+            accWeb.setPrivateKey(accounts.pks[1])
             let output = await contract.emitNow(accounts.hex[2], 2000).send({
                 from: accounts.hex[1],
                 shouldPollResponse: true,
@@ -121,7 +121,7 @@ describe('TronWeb.lib.event', async function () {
             let txId = output.id
             let events
             while(true) {
-                events = await tronWeb.event.getEventsByTransactionID(txId)
+                events = await accWeb.event.getEventsByTransactionID(txId)
                 if (events.length) {
                     break
                 }
@@ -141,14 +141,14 @@ describe('TronWeb.lib.event', async function () {
         it('should emit an event and wait for it', async function () {
 
             this.timeout(60000)
-            tronWeb.setPrivateKey(accounts.pks[3])
+            accWeb.setPrivateKey(accounts.pks[3])
             await contract.emitNow(accounts.hex[4], 4000).send({
                 from: accounts.hex[3]
             })
             eventLength++
             let events
             while(true) {
-                events = await tronWeb.event.getEventsByContractAddress(contractAddress, {
+                events = await accWeb.event.getEventsByContractAddress(contractAddress, {
                     eventName: 'SomeEvent',
                     sort: 'block_timestamp'
                 })
@@ -173,7 +173,7 @@ describe('TronWeb.lib.event', async function () {
         it('should watch for an event', async function () {
             
             this.timeout(20000)
-            tronWeb.setPrivateKey(accounts.pks[3])
+            accWeb.setPrivateKey(accounts.pks[3])
 
             let watchTest = await contract.SomeEvent().watch((err, res) => {
                 if(res) {
@@ -194,7 +194,7 @@ describe('TronWeb.lib.event', async function () {
         it('should only watch for an event with given filters',  async function () {
 
             this.timeout(20000)
-            tronWeb.setPrivateKey(accounts.pks[3])
+            accWeb.setPrivateKey(accounts.pks[3])
             
             let watchTest = await contract.SomeEvent().watch({filters: {"_amount": "4000"}}, (err, res) => {
                 if(res) { 

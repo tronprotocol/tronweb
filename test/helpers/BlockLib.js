@@ -3,10 +3,10 @@ const injectPromise = require('injectpromise')
 
 class BlockLib {
 
-    constructor(tronWeb = false) {
-        if (!tronWeb)
-            throw new Error('Expected instances of TronWeb and utils');
-        this.tronWeb = tronWeb;
+    constructor(accWeb = false) {
+        if (!accWeb)
+            throw new Error('Expected instances of AccWeb and utils');
+        this.accWeb = accWeb;
         this.injectPromise = injectPromise(this);
     }
 
@@ -15,7 +15,7 @@ class BlockLib {
         if (!callback)
             return this.injectPromise(this.getCurrent);
 
-        this.tronWeb.fullNode.request('wallet/getnowblock').then(block => {
+        this.accWeb.fullNode.request('wallet/getnowblock').then(block => {
             block.fromPlugin = true
             callback(null, block);
         }).catch(err => callback(err));

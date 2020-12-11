@@ -1,12 +1,12 @@
-import TronWeb from 'index';
+import AccWeb from 'index';
 import utils from 'utils';
 
 export default class Validator {
 
-    constructor(tronWeb = false) {
-        if (!tronWeb || !tronWeb instanceof TronWeb)
-            throw new Error('Expected instance of TronWeb');
-        this.tronWeb = tronWeb;
+    constructor(accWeb = false) {
+        if (!accWeb || !accWeb instanceof AccWeb)
+            throw new Error('Expected instance of AccWeb');
+        this.accWeb = accWeb;
     }
 
     invalid(param) {
@@ -46,10 +46,10 @@ export default class Validator {
             switch (type) {
 
                 case 'address':
-                    if (!this.tronWeb.isAddress(value)) {
+                    if (!this.accWeb.isAddress(value)) {
                         no = true;
                     } else {
-                        normalized[name] = this.tronWeb.address.toHex(value);
+                        normalized[name] = this.accWeb.address.toHex(value);
                     }
                     break;
 

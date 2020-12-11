@@ -11,7 +11,7 @@ import Trx from 'lib/trx';
 import Contract from 'lib/contract';
 import Plugin from 'lib/plugin';
 import Event from 'lib/event';
-import SideChain from 'lib/sidechain';
+// import SideChain from 'lib/sidechain';
 import { keccak256 } from 'utils/ethersUtils';
 import { ADDRESS_PREFIX } from 'utils/address';
 
@@ -19,7 +19,7 @@ const DEFAULT_VERSION = '3.5.0';
 
 const FEE_LIMIT = 20000000;
 
-export default class TronWeb extends EventEmitter {
+export default class AccWeb extends EventEmitter {
     static providers = providers;
     static BigNumber = BigNumber;
     static TransactionBuilder = TransactionBuilder;
@@ -81,14 +81,14 @@ export default class TronWeb extends EventEmitter {
             'toSun', 'fromSun', 'toBigNumber', 'isAddress',
             'createAccount', 'address', 'version'
         ].forEach(key => {
-            this[key] = TronWeb[key];
+            this[key] = AccWeb[key];
         });
         // for sidechain
-        if (typeof sideOptions === 'object' && (sideOptions.fullNode || sideOptions.fullHost)) {
-            this.sidechain = new SideChain(sideOptions, TronWeb, this, privateKey);
-        } else {
-            privateKey = privateKey || sideOptions;
-        }
+        // if (typeof sideOptions === 'object' && (sideOptions.fullNode || sideOptions.fullHost)) {
+        //     this.sidechain = new SideChain(sideOptions, AccWeb, this, privateKey);
+        // } else {
+        //     privateKey = privateKey || sideOptions;
+        // }
 
         if (privateKey)
             this.setPrivateKey(privateKey);
@@ -271,23 +271,23 @@ export default class TronWeb extends EventEmitter {
 
     static toHex(val) {
         if (utils.isBoolean(val))
-            return TronWeb.fromDecimal(+val);
+            return AccWeb.fromDecimal(+val);
 
         if (utils.isBigNumber(val))
-            return TronWeb.fromDecimal(val);
+            return AccWeb.fromDecimal(val);
 
         if (typeof val === 'object')
-            return TronWeb.fromUtf8(JSON.stringify(val));
+            return AccWeb.fromUtf8(JSON.stringify(val));
 
         if (utils.isString(val)) {
             if (/^(-|)0x/.test(val))
                 return val;
 
             if ((!isFinite(val)) || /^\s*$/.test(val))
-                return TronWeb.fromUtf8(val);
+                return AccWeb.fromUtf8(val);
         }
 
-        let result = TronWeb.fromDecimal(val);
+        let result = AccWeb.fromDecimal(val);
         if (result === '0xNaN') {
             throw new Error('The passed value is not convertible to a hex string');
         } else {
@@ -337,23 +337,23 @@ export default class TronWeb extends EventEmitter {
 
 
     static toDecimal(value) {
-        return TronWeb.toBigNumber(value).toNumber();
+        return AccWeb.toBigNumber(value).toNumber();
     }
 
     static fromDecimal(value) {
-        const number = TronWeb.toBigNumber(value);
+        const number = AccWeb.toBigNumber(value);
         const result = number.toString(16);
 
         return number.isLessThan(0) ? '-0x' + result.substr(1) : '0x' + result;
     }
 
     static fromSun(sun) {
-        const trx = TronWeb.toBigNumber(sun).div(1_000_000);
+        const trx = AccWeb.toBigNumber(sun).div(1_000_000);
         return utils.isBigNumber(sun) ? trx : trx.toString(10);
     }
 
     static toSun(trx) {
-        const sun = TronWeb.toBigNumber(trx).times(1_000_000);
+        const sun = AccWeb.toBigNumber(trx).times(1_000_000);
         return utils.isBigNumber(trx) ? sun : sun.toString(10);
     }
 
@@ -374,7 +374,7 @@ export default class TronWeb extends EventEmitter {
         // Convert HEX to Base58
         if (address.length === 42) {
             try {
-                return TronWeb.isAddress(
+                return AccWeb.isAddress(
                     utils.crypto.getBase58CheckAddress(
                         utils.code.hexStr2byteArray(address) // it throws an error if the address starts with 0x
                     )

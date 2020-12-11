@@ -2,7 +2,7 @@ const fullHost = "http://127.0.0.1:" + (process.env.HOST_PORT || 9090)
 
 module.exports = {
 
-    PRIVATE_KEY: process.env.PRIVATE_KEY,
+    PRIVATE_KEY: 'da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0',
     CONSUME_USER_RESOURCE_PERCENT: 30,
     FEE_LIMIT: 100000000,
     FULL_NODE_API: fullHost,
@@ -35,8 +35,8 @@ module.exports = {
             freeBandwidthLimit: 1000
         }
     },
-    isProposalApproved: async (tronWeb, proposal) => {
-        let chainParameters = await tronWeb.trx.getChainParameters()
+    isProposalApproved: async (accWeb, proposal) => {
+        let chainParameters = await accWeb.trx.getChainParameters()
         for(let param of chainParameters) {
             if(param.key === proposal) {
                 return param.value
@@ -44,20 +44,20 @@ module.exports = {
         }
         return false
     },
-    SUN_NETWORK: process.env.SUN_NETWORK,
-    SIDE_CHAIN: {
-        fullNode: 'https://testhttpapi.tronex.io',
-        solidityNode: 'https://testhttpapi.tronex.io',
-        eventServer: 'https://testhttpapi.tronex.io',
-        sideOptions: {
-            fullNode: 'https://suntest.tronex.io',
-            solidityNode: 'https://suntest.tronex.io',
-            eventServer: 'https://suntest.tronex.io',
-            mainGatewayAddress: 'TFLtPoEtVJBMcj6kZPrQrwEdM3W3shxsBU',
-            sideGatewayAddress: 'TRDepx5KoQ8oNbFVZ5sogwUxtdYmATDRgX',
-            sideChainId: '413AF23F37DA0D48234FDD43D89931E98E1144481B'
-        }
-    },
+    // SUN_NETWORK: process.env.SUN_NETWORK,
+    // SIDE_CHAIN: {
+    //     fullNode: 'https://testhttpapi.tronex.io',
+    //     solidityNode: 'https://testhttpapi.tronex.io',
+    //     eventServer: 'https://testhttpapi.tronex.io',
+    //     sideOptions: {
+    //         fullNode: 'https://suntest.tronex.io',
+    //         solidityNode: 'https://suntest.tronex.io',
+    //         eventServer: 'https://suntest.tronex.io',
+    //         mainGatewayAddress: 'TFLtPoEtVJBMcj6kZPrQrwEdM3W3shxsBU',
+    //         sideGatewayAddress: 'TRDepx5KoQ8oNbFVZ5sogwUxtdYmATDRgX',
+    //         sideChainId: '413AF23F37DA0D48234FDD43D89931E98E1144481B'
+    //     }
+    // },
     TOKEN_ID: 1000003,
     DEPOSIT_FEE: 0,
     MAPPING_FEE: 1000000000,

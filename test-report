@@ -1,6 +1,6 @@
 
 [0m[0m
-[0m  TronWeb.lib.event[0m
+[0m  AccWeb.lib.event[0m
 [0m    Trongrid-compatible version[0m
 [0m      #getEventsByTransactionID[0m
 [33mSleeping for 0.5 seconds...[39m[33m Slept.[39m
@@ -18,7 +18,7 @@
 [92m [0m[32m 2 passing[0m[90m (11s)[0m
 [31m  3 failing[0m
 
-[0m  1) TronWeb.lib.event
+[0m  1) AccWeb.lib.event
        Trongrid-compatible version
          #getEventsByContractAddress
            should emit an event and wait for it:
@@ -30,7 +30,7 @@
 } was thrown, throw an Error :)[0m[90m
       at processTicksAndRejections (internal/process/task_queues.js:93:5)
 [0m
-[0m  2) TronWeb.lib.event
+[0m  2) AccWeb.lib.event
        Trongrid-compatible version
          #contract.method.watch
            should watch for an event:
@@ -42,7 +42,7 @@
 } was thrown, throw an Error :)[0m[90m
       at processTicksAndRejections (internal/process/task_queues.js:93:5)
 [0m
-[0m  3) TronWeb.lib.event
+[0m  3) AccWeb.lib.event
        Trongrid-compatible version
          #contract.method.watch
            should only watch for an event with given filters:

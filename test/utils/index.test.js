@@ -1,24 +1,24 @@
 const chai = require('chai');
-const tronWebBuilder = require('../helpers/tronWebBuilder');
-const TronWeb = tronWebBuilder.TronWeb;
+const accWebBuilder = require('../helpers/accWebBuilder');
+const AccWeb = accWebBuilder.AccWeb;
 const BigNumber = require('bignumber.js');
 
 const assert = chai.assert;
 
-describe('TronWeb.utils', function () {
+describe('AccWeb.utils', function () {
 
     describe("#isValidURL()", function () {
 
         it('should verify good urls', function () {
 
-            const tronWeb = tronWebBuilder.createInstance();
+            const accWeb = accWebBuilder.createInstance();
 
-            assert.isTrue(tronWeb.utils.isValidURL('https://some.example.com:9090/casa?qe=3'))
-            assert.isTrue(tronWeb.utils.isValidURL('www.example.com/welcome'))
+            assert.isTrue(accWeb.utils.isValidURL('https://some.example.com:9090/casa?qe=3'))
+            assert.isTrue(accWeb.utils.isValidURL('www.example.com/welcome'))
 
-            assert.isFalse(tronWeb.utils.isValidURL('http:/some.example.com'))
+            assert.isFalse(accWeb.utils.isValidURL('http:/some.example.com'))
 
-            assert.isFalse(tronWeb.utils.isValidURL(['http://example.com']))
+            assert.isFalse(accWeb.utils.isValidURL(['http://example.com']))
 
         })
 
@@ -27,13 +27,13 @@ describe('TronWeb.utils', function () {
     describe("#isArray()", function () {
 
         it('should verify that a value is an array', function () {
-            const tronWeb = tronWebBuilder.createInstance();
+            const accWeb = accWebBuilder.createInstance();
 
-            assert.isTrue(tronWeb.utils.isArray([]));
-            assert.isTrue(tronWeb.utils.isArray([[2], {a: 3}]));
+            assert.isTrue(accWeb.utils.isArray([]));
+            assert.isTrue(accWeb.utils.isArray([[2], {a: 3}]));
 
-            assert.isFalse(tronWeb.utils.isArray({}));
-            assert.isFalse(tronWeb.utils.isArray("Array"));
+            assert.isFalse(accWeb.utils.isArray({}));
+            assert.isFalse(accWeb.utils.isArray("Array"));
 
         })
 
@@ -43,14 +43,14 @@ describe('TronWeb.utils', function () {
     describe("#isJson()", function () {
 
         it('should verify that a value is a JSON string', function () {
-            const tronWeb = tronWebBuilder.createInstance();
+            const accWeb = accWebBuilder.createInstance();
 
-            assert.isTrue(tronWeb.utils.isJson('[]'));
-            assert.isTrue(tronWeb.utils.isJson('{"key":"value"}'));
-            assert.isTrue(tronWeb.utils.isJson('"json"'));
+            assert.isTrue(accWeb.utils.isJson('[]'));
+            assert.isTrue(accWeb.utils.isJson('{"key":"value"}'));
+            assert.isTrue(accWeb.utils.isJson('"json"'));
 
-            assert.isFalse(tronWeb.utils.isJson({}));
-            assert.isFalse(tronWeb.utils.isJson("json"));
+            assert.isFalse(accWeb.utils.isJson({}));
+            assert.isFalse(accWeb.utils.isJson("json"));
 
         })
 
@@ -59,13 +59,13 @@ describe('TronWeb.utils', function () {
     describe("#isBoolean()", function () {
 
         it('should verify that a value is a JSON string', function () {
-            const tronWeb = tronWebBuilder.createInstance();
+            const accWeb = accWebBuilder.createInstance();
 
-            assert.isTrue(tronWeb.utils.isBoolean(true));
-            assert.isTrue(tronWeb.utils.isBoolean('a' == []));
+            assert.isTrue(accWeb.utils.isBoolean(true));
+            assert.isTrue(accWeb.utils.isBoolean('a' == []));
 
-            assert.isFalse(tronWeb.utils.isBoolean({}));
-            assert.isFalse(tronWeb.utils.isBoolean("json"));
+            assert.isFalse(accWeb.utils.isBoolean({}));
+            assert.isFalse(accWeb.utils.isBoolean("json"));
 
         })
 
@@ -74,15 +74,15 @@ describe('TronWeb.utils', function () {
     describe("#isBigNumber()", function () {
 
         it('should verify that a value is a JSON string', function () {
-            const tronWeb = tronWebBuilder.createInstance();
+            const accWeb = accWebBuilder.createInstance();
 
             const bigNumber = BigNumber('1234565432123456778765434456777')
 
-            assert.isTrue(tronWeb.utils.isBigNumber(bigNumber));
+            assert.isTrue(accWeb.utils.isBigNumber(bigNumber));
 
-            assert.isFalse(tronWeb.utils.isBigNumber('0x09e80f665949b63b39f3850127eb29b55267306b69e2104c41c882e076524a1c'));
-            assert.isFalse(tronWeb.utils.isBigNumber({}));
-            assert.isFalse(tronWeb.utils.isBigNumber("json"));
+            assert.isFalse(accWeb.utils.isBigNumber('0x09e80f665949b63b39f3850127eb29b55267306b69e2104c41c882e076524a1c'));
+            assert.isFalse(accWeb.utils.isBigNumber({}));
+            assert.isFalse(accWeb.utils.isBigNumber("json"));
 
         })
 
@@ -92,12 +92,12 @@ describe('TronWeb.utils', function () {
     describe("#isString()", function () {
 
         it('should verify that a valyue is a string', function () {
-            const tronWeb = tronWebBuilder.createInstance();
+            const accWeb = accWebBuilder.createInstance();
 
-            assert.isTrue(tronWeb.utils.isString('str'));
-            assert.isTrue(tronWeb.utils.isString(13..toString()));
+            assert.isTrue(accWeb.utils.isString('str'));
+            assert.isTrue(accWeb.utils.isString(13..toString()));
 
-            assert.isFalse(tronWeb.utils.isString(2));
+            assert.isFalse(accWeb.utils.isString(2));
 
         })
 
@@ -106,14 +106,14 @@ describe('TronWeb.utils', function () {
     describe("#isFunction()", function () {
 
         it('should verify that a value is a function', function () {
-            const tronWeb = tronWebBuilder.createInstance();
+            const accWeb = accWebBuilder.createInstance();
 
-            assert.isTrue(tronWeb.utils.isFunction(new Function()));
-            assert.isTrue(tronWeb.utils.isFunction(() => {
+            assert.isTrue(accWeb.utils.isFunction(new Function()));
+            assert.isTrue(accWeb.utils.isFunction(() => {
             }));
-            assert.isTrue(tronWeb.utils.isFunction(tronWeb.utils.isFunction));
+            assert.isTrue(accWeb.utils.isFunction(accWeb.utils.isFunction));
 
-            assert.isFalse(tronWeb.utils.isFunction({function: new Function}));
+            assert.isFalse(accWeb.utils.isFunction({function: new Function}));
 
         })
 
@@ -122,31 +122,31 @@ describe('TronWeb.utils', function () {
     describe('#isHex()', function () {
         it('should verify that a string is an hex string', function () {
 
-            const tronWeb = tronWebBuilder.createInstance();
+            const accWeb = accWebBuilder.createInstance();
 
             let input = '0x1';
             let expected = true;
-            assert.equal(tronWeb.utils.isHex(input), expected);
+            assert.equal(accWeb.utils.isHex(input), expected);
 
             input = '0x0';
             expected = true;
-            assert.equal(tronWeb.utils.isHex(input), expected);
+            assert.equal(accWeb.utils.isHex(input), expected);
 
             input = '0x73616c616d6f6e';
             expected = true;
-            assert.equal(tronWeb.utils.isHex(input), expected);
+            assert.equal(accWeb.utils.isHex(input), expected);
 
             input = '73616c616d6f';
             expected = true;
-            assert.equal(tronWeb.utils.isHex(input), expected);
+            assert.equal(accWeb.utils.isHex(input), expected);
 
             input = '0x73616c616d6fsz';
             expected = false;
-            assert.equal(tronWeb.utils.isHex(input), expected);
+            assert.equal(accWeb.utils.isHex(input), expected);
 
             input = 'x898989';
             expected = false;
-            assert.equal(tronWeb.utils.isHex(input), expected);
+            assert.equal(accWeb.utils.isHex(input), expected);
 
         });
 
@@ -155,13 +155,13 @@ describe('TronWeb.utils', function () {
     describe("#isInteger()", function () {
 
         it('should verify that a value is an integer', function () {
-            const tronWeb = tronWebBuilder.createInstance();
+            const accWeb = accWebBuilder.createInstance();
 
-            assert.isTrue(tronWeb.utils.isInteger(2345434));
-            assert.isTrue(tronWeb.utils.isInteger(-234e4));
+            assert.isTrue(accWeb.utils.isInteger(2345434));
+            assert.isTrue(accWeb.utils.isInteger(-234e4));
 
-            assert.isFalse(tronWeb.utils.isInteger(3.4));
-            assert.isFalse(tronWeb.utils.isInteger('integer'));
+            assert.isFalse(accWeb.utils.isInteger(3.4));
+            assert.isFalse(accWeb.utils.isInteger('integer'));
 
         })
 
@@ -170,12 +170,12 @@ describe('TronWeb.utils', function () {
     describe("#hasProperty()", function () {
 
         it('should verify that an object has a specific property', function () {
-            const tronWeb = tronWebBuilder.createInstance();
+            const accWeb = accWebBuilder.createInstance();
 
-            assert.isTrue(tronWeb.utils.hasProperty({p: 2}, 'p'));
-            assert.isFalse(tronWeb.utils.hasProperty([{p: 2}], 'p'));
+            assert.isTrue(accWeb.utils.hasProperty({p: 2}, 'p'));
+            assert.isFalse(accWeb.utils.hasProperty([{p: 2}], 'p'));
 
-            assert.isFalse(tronWeb.utils.hasProperty({a: 2}, 'p'));
+            assert.isFalse(accWeb.utils.hasProperty({a: 2}, 'p'));
 
         })
 
@@ -184,11 +184,11 @@ describe('TronWeb.utils', function () {
     describe("#hasProperties()", function () {
 
         it('should verify that an object has some specific properties', function () {
-            const tronWeb = tronWebBuilder.createInstance();
+            const accWeb = accWebBuilder.createInstance();
 
-            assert.isTrue(tronWeb.utils.hasProperties({p: 2, s: 2}, 'p', 's'));
+            assert.isTrue(accWeb.utils.hasProperties({p: 2, s: 2}, 'p', 's'));
 
-            assert.isFalse(tronWeb.utils.hasProperties({p: 2, s: 2}, 'p', 'q'));
+            assert.isFalse(accWeb.utils.hasProperties({p: 2, s: 2}, 'p', 'q'));
 
         })
 
@@ -198,7 +198,7 @@ describe('TronWeb.utils', function () {
     describe("#mapEvent()", function () {
 
         it('should map an event result', function () {
-            const tronWeb = tronWebBuilder.createInstance();
+            const accWeb = accWebBuilder.createInstance();
 
             const event = {
                 block_number: 'blockNumber',
@@ -220,7 +220,7 @@ describe('TronWeb.utils', function () {
                 resourceNode: 'resourceNode'
             }
 
-            const mapped = tronWeb.utils.mapEvent(event)
+            const mapped = accWeb.utils.mapEvent(event)
             for(let key in mapped) {
                 assert.equal(mapped[key], expected[key])
             }
@@ -236,11 +236,11 @@ describe('TronWeb.utils', function () {
     describe("#padLeft()", function () {
 
         it('should return the pad left of a string', function () {
-            const tronWeb = tronWebBuilder.createInstance();
+            const accWeb = accWebBuilder.createInstance();
 
-            assert.equal(tronWeb.utils.padLeft('09e80f', '0', 12), '00000009e80f');
-            // assert.equal(tronWeb.utils.padLeft(new Function, '0', 32), '0000000function anonymous() {\n\n}');
-            assert.equal(tronWeb.utils.padLeft(3.4e3, '0', 12), '000000003400');
+            assert.equal(accWeb.utils.padLeft('09e80f', '0', 12), '00000009e80f');
+            // assert.equal(accWeb.utils.padLeft(new Function, '0', 32), '0000000function anonymous() {\n\n}');
+            assert.equal(accWeb.utils.padLeft(3.4e3, '0', 12), '000000003400');
 
         })
 
@@ -249,10 +249,10 @@ describe('TronWeb.utils', function () {
     describe("#ethersUtils()", function () {
 
         it('should import sha256 from ethers and has a string', function () {
-            const tronWeb = tronWebBuilder.createInstance();
+            const accWeb = accWebBuilder.createInstance();
 
             const string = '0x' + Buffer.from('some string').toString('hex');
-            const hash = tronWeb.utils.ethersUtils.sha256(string);
+            const hash = accWeb.utils.ethersUtils.sha256(string);
 
             assert.equal(hash, '0x61d034473102d7dac305902770471fd50f4c5b26f6831a56dd90b5184b3c30fc');
 

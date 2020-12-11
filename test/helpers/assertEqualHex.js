@@ -1,10 +1,10 @@
 const assert = require('chai').assert;
-const tronWebBuilder = require('./tronWebBuilder');
+const accWebBuilder = require('./accWebBuilder');
 
 module.exports = async function (result, string) {
 
     assert.equal(
         result,
-        tronWebBuilder.getInstance().toHex(string).substring(2)
+        accWebBuilder.getInstance().toHex(string).substring(2)
     )
 }

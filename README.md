@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img align="center" src="https://raw.githubusercontent.com/tron-us/tronweb/master/assets/TronWeb-logo.png" width="400"/>
+  <img align="center" src="https://raw.githubusercontent.com/tron-us/tronweb/master/assets/AccWeb-logo.png" width="400"/>
 </h1>
 
 <p align="center">
@@ -24,11 +24,11 @@
   </a>
 </p>
 
-## What is TronWeb?
+## What is AccWeb?
 
 __[Tron Web - Developer Document](https://developers.tron.network/docs/tron-web-intro)__
 
-TronWeb aims to deliver a unified, seamless development experience influenced by Ethereum's [Web3](https://github.com/ethereum/web3.js/) implementation. We have taken the core ideas and expanded upon it to unlock the functionality of TRON's unique feature set along with offering new tools for integrating DApps in the browser, Node.js and IoT devices.
+AccWeb aims to deliver a unified, seamless development experience influenced by Ethereum's [Web3](https://github.com/ethereum/web3.js/) implementation. We have taken the core ideas and expanded upon it to unlock the functionality of TRON's unique feature set along with offering new tools for integrating DApps in the browser, Node.js and IoT devices.
 
 ## Compatibility
 - Version built for Node.js v6 and above
@@ -36,12 +36,12 @@ TronWeb aims to deliver a unified, seamless development experience influenced by
 
 You can access either version specifically from the [dist](dist) folder.
 
-TronWeb is also compatible with frontend frameworks such as:
+AccWeb is also compatible with frontend frameworks such as:
 - Angular
 - React
 - Vue.
 
-You can also ship TronWeb in a Chrome extension.
+You can also ship AccWeb in a Chrome extension.
 
 ## Installation
 
@@ -57,9 +57,9 @@ yarn add tronweb
 ### Browser
 First, don't use the release section of this repo, it has not updated in a long time.
 
-Then easiest way to use TronWeb in a browser is to install it as above and copy the dist file to your working folder. For example:
+Then easiest way to use AccWeb in a browser is to install it as above and copy the dist file to your working folder. For example:
 ```
-cp node_modules/tronweb/dist/TronWeb.js ./js/tronweb.js
+cp node_modules/tronweb/dist/AccWeb.js ./js/tronweb.js
 ```
 so that you can call it in your HTML page as
 ```
@@ -94,13 +94,13 @@ docker run -it --rm \
 
 ## Creating an Instance
 
-First off, in your javascript file, define TronWeb:
+First off, in your javascript file, define AccWeb:
 
 ```js
-const TronWeb = require('tronweb')
+const AccWeb = require('tronweb')
 ```
 
-When you instantiate TronWeb you can define
+When you instantiate AccWeb you can define
 
 * fullNode
 * solidityNode
@@ -112,10 +112,10 @@ you can also set a
 * fullHost
 
 which works as a jolly. If you do so, though, the more precise specification has priority.
-Supposing you are using a server which provides everything, like TronGrid, you can instantiate TronWeb as:
+Supposing you are using a server which provides everything, like TronGrid, you can instantiate AccWeb as:
 
 ```js
-const tronWeb = new TronWeb({
+const accWeb = new AccWeb({
     fullHost: 'https://api.trongrid.io',
     privateKey: 'your private key'
 })
@@ -123,14 +123,14 @@ const tronWeb = new TronWeb({
 
 For retro-compatibility, though, you can continue to use the old approach, where any parameter is passed separately:
 ```js
-const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, privateKey)
+const accWeb = new AccWeb(fullNode, solidityNode, eventServer, privateKey)
 
 ```
 
 If you are, for example, using a server as full and solidity node, and another server for the events, you can set it as:
 
 ```js
-const tronWeb = new TronWeb({
+const accWeb = new AccWeb({
     fullHost: 'https://api.trongrid.io',
     eventServer: 'https://api.someotherevent.io',
     privateKey: 'your private key'
@@ -140,7 +140,7 @@ const tronWeb = new TronWeb({
 
 If you are using different servers for anything, you can do
 ```js
-const tronWeb = new TronWeb({
+const accWeb = new AccWeb({
     fullNode: 'https://some-node.tld',
     solidityNode: 'https://some-other-node.tld',
     eventServer: 'https://some-event-server.tld',
@@ -161,7 +161,7 @@ In order to contribute you can
 * fork this repo and clone it locally
 * install the dependencies — `npm i`
 * do your changes to the code
-* build the TronWeb dist files — `npm run build`
+* build the AccWeb dist files — `npm run build`
 * run a local private network using Tron Quickstart
 * run the tests — `npm test:node`
 * push your changes and open a pull request
@@ -250,19 +250,19 @@ __2.3.3__
 * Adds filters during event watching.
 
 __2.3.2__
-* Removes mixed approach instantiating tronWeb. Before you could pass the servers as an object, and the privateKey as a separate parameter. Now, you pass them either in the options object or in the params.
+* Removes mixed approach instantiating accWeb. Before you could pass the servers as an object, and the privateKey as a separate parameter. Now, you pass them either in the options object or in the params.
 
 __2.3.1__
 * Adds support for not-tld domain, like http://localhost
 * Improve the new format, allow passing the privateKey as a property in the option object
 
 __2.3.0__
-* Introduces new format to instantiate tronWeb, passing an options object instead that `fullNode`, `solidityNode` and `eventServer` as separate params
+* Introduces new format to instantiate accWeb, passing an options object instead that `fullNode`, `solidityNode` and `eventServer` as separate params
 * Fixes bug in `_watch` which causes a continuous update of the `since` parameter
 
 ## Licence
 
-TronWeb is distributed under a MIT licence.
+AccWeb is distributed under a MIT licence.
 
 
 -----

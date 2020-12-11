@@ -3,11 +3,11 @@ let someParameter
 
 class GetNowBlock {
 
-    constructor(tronWeb = false) {
-        if (!tronWeb)
-            throw new Error('Expected instance of TronWeb');
+    constructor(accWeb = false) {
+        if (!accWeb)
+            throw new Error('Expected instance of AccWeb');
 
-        this.tronWeb = tronWeb;
+        this.accWeb = accWeb;
     }
 
     async someMethod(callback = false) {
@@ -15,7 +15,7 @@ class GetNowBlock {
         if(!callback)
             return this.injectPromise(this.getCurrentBlock);
 
-        this.tronWeb.fullNode.request('wallet/getnowblock').then(block => {
+        this.accWeb.fullNode.request('wallet/getnowblock').then(block => {
             block.fromPlugin = true
             callback(null, block);
         }).catch(err => callback(err));
