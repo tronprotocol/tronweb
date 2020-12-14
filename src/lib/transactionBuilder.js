@@ -1039,8 +1039,8 @@ export default class TransactionBuilder {
         if (utils.isNotNullOrUndefined(voteScore) && (!utils.isInteger(voteScore) || voteScore <= 0))
             return callback('voteScore must be a positive integer greater than 0');
 
-        if (utils.isNotNullOrUndefined(precision) && (!utils.isInteger(precision) || precision <= 0 || precision > 6))
-            return callback('precision must be a positive integer > 0 and <= 6');
+        if (utils.isNotNullOrUndefined(precision) && (!utils.isInteger(precision) || precision < 0 || precision > 6))
+            return callback('precision must be a positive integer >= 0 and <= 6');
 
         const data = {
             owner_address: toHex(issuerAddress),
