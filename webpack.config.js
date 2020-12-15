@@ -42,6 +42,9 @@ const baseConfig = {
             path.resolve(__dirname, 'src')
         ],
     },
+    node: {
+       fs: 'empty'
+    },
     devtool: 'source-map',
     mode
 };
