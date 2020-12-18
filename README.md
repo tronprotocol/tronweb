@@ -168,11 +168,6 @@ In order to contribute you can
 
 ## Recent History
 
-__3.2.0__
-- Support shielded transactions
-- Set feeLimit default value as 40 TRX
-- The precision in the createToken method supports passing in 0
-
 __3.1.0__
 - Update `elliptic` to the latest version 6.5.3
 - Update `ethers` to the latest version 5.0.8
