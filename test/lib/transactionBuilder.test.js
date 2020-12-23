@@ -206,6 +206,18 @@ describe('TronWeb.transactionBuilder', function () {
             }
         });
 
+        it(`should create a TestToken passing with precision is zero`, async function () {
+            const options = getTokenOptions();
+            options.precision = 0
+            for (let i = 0; i < 2; i++) {
+                if (i === 1) options.permissionId = 2;
+                const transaction = await tronWeb.transactionBuilder.createToken(options);
+                const parameter = txPars(transaction);
+                await assertEqualHex(parameter.value.abbr, options.abbreviation);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
+            }
+        });
+
         it(`should create a TestToken without freezing anything in 3.6.0`, async function () {
             if (tronWeb.fullnodeSatisfies('^3.6.0')) {
                 const options = getTokenOptions();
@@ -1159,7 +1171,7 @@ describe('TronWeb.transactionBuilder', function () {
                 const tx = await tronWeb.transactionBuilder.createSmartContract(options)
                 assert.equal(tx.raw_data.contract[0].parameter.value.new_contract.consume_user_resource_percent, 100);
                 assert.equal(tx.raw_data.contract[0].parameter.value.new_contract.origin_energy_limit, 1e7);
-                assert.equal(tx.raw_data.fee_limit, 2e7);
+                assert.equal(tx.raw_data.fee_limit, 4e7);
                 assert.equal(tx.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
             }
         });
