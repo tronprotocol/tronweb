@@ -168,6 +168,10 @@ In order to contribute you can
 
 ## Recent History
 
+__3.2.3__
+- Support triggerSmartContract function with empty character functionSelector and empty array parameters
+- The triggerSmartContract function Support for anonymous contract parameter incoming
+
 __3.2.2__
 - Set feeLimit default value as 40 TRX
 - The `createToken` method supports 0 in its precision
