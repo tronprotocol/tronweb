@@ -304,7 +304,6 @@ export default class Method {
                     since,
                     eventName: this.name,
                     sort: 'block_timestamp',
-                    // blockNumber: 'latest',
                     filters: options.filters
                 }
                 if (options.resourceNode) {
