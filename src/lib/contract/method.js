@@ -304,6 +304,7 @@ export default class Method {
                     since,
                     eventName: this.name,
                     sort: 'block_timestamp',
+                    blockNumber: 'latest',
                     filters: options.filters
                 }
                 if (options.resourceNode) {
@@ -335,10 +336,8 @@ export default class Method {
                     return event.block > lastBlock;
                 });
 
-                if (latestEvent){
+                if (latestEvent)
                     lastBlock = latestEvent.block;
-                    since = latestEvent.timestamp;
-                }
 
                 return newEvents;
             } catch (ex) {
@@ -362,10 +361,7 @@ export default class Method {
         bindListener();
 
         return {
-            start: () => {
-                since = Date.now() - 1000;
-                bindListener()
-            },
+            start: bindListener,
             stop: () => {
                 if (!listener)
                     return;
