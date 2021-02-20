@@ -1,6 +1,7 @@
 import injectpromise from 'injectpromise';
 import Validator from 'paramValidator';
 
+const MAX_FEE_LIMIT = 5_000_000_000;
 export default class SideChain {
     constructor(sideOptions, TronWeb = false, mainchain = false, privateKey = false) {
         this.mainchain = mainchain;
@@ -212,7 +213,7 @@ export default class SideChain {
                 type: 'integer',
                 value: feeLimit,
                 gte: 0,
-                lte: 1_000_000_000
+                lte: MAX_FEE_LIMIT
             }
         ], callback)) {
             return;
@@ -268,7 +269,7 @@ export default class SideChain {
                 type: 'integer',
                 value: feeLimit,
                 gte: 0,
-                lte: 1_000_000_000
+                lte: MAX_FEE_LIMIT
             },
             {
                 name: 'tokenId',
@@ -339,7 +340,7 @@ export default class SideChain {
                 type: 'integer',
                 value: feeLimit,
                 gte: 0,
-                lte: 1_000_000_000
+                lte: MAX_FEE_LIMIT
             },
             {
                 name: 'contractAddress',
@@ -512,7 +513,7 @@ export default class SideChain {
                 type: 'integer',
                 value: feeLimit,
                 gte: 0,
-                lte: 1_000_000_000
+                lte: MAX_FEE_LIMIT
             }
         ], callback)) {
             return;
