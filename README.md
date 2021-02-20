@@ -168,6 +168,9 @@ In order to contribute you can
 
 ## Recent History
 
+__3.2.5__
+- Set feeLimit max value as 5000 TRX
+
 __3.2.4__
 - Set feeLimit default value as 150 TRX
 
