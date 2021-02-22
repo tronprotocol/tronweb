@@ -1153,7 +1153,7 @@ describe("#testTronGrid", function () {
             const tronWeb = tronWebBuilder.createInstance({
                 fullHost: TEST_TRON_GRID_API,
             });
-            tronWeb.setHeader({ "TRON-PRO-API-KEY": TEST_TRON_HEADER_API_KEY })
+            tronWeb.setHeader({ "TRON-PRO-API-KEY": TEST_TRON_HEADER_API_KEY });
 
             const account = await tronWeb.trx.getAccount();
             assert.equal(typeof account, "object");

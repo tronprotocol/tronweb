@@ -36,7 +36,7 @@ export default class TronWeb extends EventEmitter {
         super();
 
         let fullNode;
-        let headers = false
+        let headers = false;
 
         if (typeof options === 'object' && (options.fullNode || options.fullHost)) {
             fullNode = options.fullNode || options.fullHost;
@@ -99,7 +99,7 @@ export default class TronWeb extends EventEmitter {
         this.injectPromise = injectpromise(this);
 
         if (headers) {
-            this.setHeader(headers)
+            this.setHeader(headers);
         }
     }
 
