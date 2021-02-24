@@ -1144,9 +1144,34 @@ describe("#testTronGrid", function () {
                 headers: { "TRON-PRO-API-KEY": TEST_TRON_HEADER_API_KEY },
             });
 
+            assert.equal(tronWeb.fullNode.headers['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
+            assert.equal(tronWeb.eventServer.headers['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
+
             const account = await tronWeb.trx.getAccount();
             assert.equal(typeof account, "object");
+
+            const tx = await tronWeb.event.getEventsByContractAddress(tronWeb.defaultAddress.base58);
+            assert.equal(typeof tx, "object");
         });
+
+        it("should add the parameter TRON-PRO-API-KEY=Key to the header of the event request", async function () {
+
+            const tronWeb = tronWebBuilder.createInstance({
+                fullHost: TEST_TRON_GRID_API,
+                headers: { "TRON-PRO-API-KEY": TEST_TRON_HEADER_API_KEY },
+                eventHeaders: { "TRON-PRO-API-KEY": TEST_TRON_HEADER_API_KEY },
+            });
+
+            assert.equal(tronWeb.fullNode.headers['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
+            assert.equal(tronWeb.eventServer.headers['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
+
+            const account = await tronWeb.trx.getAccount();
+            assert.equal(typeof account, "object");
+
+            const tx = await tronWeb.event.getEventsByContractAddress(tronWeb.defaultAddress.base58);
+            assert.equal(typeof tx, "object");
+        });
+
 
         it("should set the parameter TRON-PRO-API-KEY=Key to the header of the request", async function () {
 
@@ -1155,22 +1180,128 @@ describe("#testTronGrid", function () {
             });
             tronWeb.setHeader({ "TRON-PRO-API-KEY": TEST_TRON_HEADER_API_KEY });
 
+            assert.equal(tronWeb.fullNode.headers['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
+            assert.equal(tronWeb.eventServer.headers['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
+
             const account = await tronWeb.trx.getAccount();
             assert.equal(typeof account, "object");
+
+            const tx = await tronWeb.event.getEventsByContractAddress(tronWeb.defaultAddress.base58);
+            assert.equal(typeof tx, "object");
         });
 
-        it("should set the valid key to the header of the request", async function () {
+
+        it("should set the parameter TRON-PRO-API-KEY=Key to the header of the fullNode request", async function () {
 
             const tronWeb = tronWebBuilder.createInstance({
                 fullHost: TEST_TRON_GRID_API,
-                headers: { "TRON-PRO-API-KEY": "abcdef" },
             });
+            tronWeb.setFullNodeHeader({ "TRON-PRO-API-KEY": TEST_TRON_HEADER_API_KEY });
+
+            assert.equal(tronWeb.fullNode.headers['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
+            assert.equal(tronWeb.eventServer.headers['TRON-PRO-API-KEY'], undefined);
+
+            const account = await tronWeb.trx.getAccount();
+            assert.equal(typeof account, "object");
+
+            try {
+                await tronWeb.event.getEventsByContractAddress(tronWeb.defaultAddress.base58);
+            } catch (error) {
+                assert.equal(error.statusCode, 401);
+            }
+        });
+
+
+        it("should set the parameter TRON-PRO-API-KEY=Key to the header of the event request", async function () {
+
+            const tronWeb = tronWebBuilder.createInstance({
+                fullHost: TEST_TRON_GRID_API,
+            });
+            tronWeb.setEventHeader({ "TRON-PRO-API-KEY": TEST_TRON_HEADER_API_KEY });
+
+            assert.equal(tronWeb.fullNode.headers['TRON-PRO-API-KEY'], undefined);
+            assert.equal(tronWeb.eventServer.headers['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
+
             try {
                 await tronWeb.trx.getAccount();
             } catch (error) {
                 assert.equal(error.response.status, 401);
             }
+
+            const tx = await tronWeb.event.getEventsByContractAddress(tronWeb.defaultAddress.base58);
+            assert.equal(typeof tx, "object");
         });
+
+        it("should set the valid key to the header of the request", async function () {
+
+            const FAKE_KEY = "ABCEDF"
+            const tronWeb = tronWebBuilder.createInstance({
+                fullHost: TEST_TRON_GRID_API,
+                headers: { "TRON-PRO-API-KEY": FAKE_KEY },
+            });
+
+            assert.equal(tronWeb.fullNode.headers['TRON-PRO-API-KEY'], FAKE_KEY);
+            assert.equal(tronWeb.eventServer.headers['TRON-PRO-API-KEY'], FAKE_KEY);
+
+            try {
+                await tronWeb.trx.getAccount();
+            } catch (error) {
+                assert.equal(error.response.status, 401);
+            }
+
+            try {
+                await tronWeb.event.getEventsByContractAddress(tronWeb.defaultAddress.base58);
+            } catch (error) {
+                assert.equal(error.statusCode, 401);
+            }
+        });
+
+        it("should set the valid key to the header of the fullnode request", async function () {
+
+            const FAKE_KEY = "ABCEDF"
+            const tronWeb = tronWebBuilder.createInstance({
+                fullHost: TEST_TRON_GRID_API,
+                headers: { "TRON-PRO-API-KEY": FAKE_KEY },
+                eventHeaders: { "TRON-PRO-API-KEY": TEST_TRON_HEADER_API_KEY },
+            });
+
+            assert.equal(tronWeb.fullNode.headers['TRON-PRO-API-KEY'], FAKE_KEY);
+            assert.equal(tronWeb.eventServer.headers['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
+
+            try {
+                await tronWeb.trx.getAccount();
+            } catch (error) {
+                assert.equal(error.response.status, 401);
+            }
+
+            const tx = await tronWeb.event.getEventsByContractAddress(tronWeb.defaultAddress.base58);
+            assert.equal(typeof tx, "object");
+        });
+
+        it("should set the valid key to the header of the event request", async function () {
+
+            const FAKE_KEY = "ABCEDF"
+            const tronWeb = tronWebBuilder.createInstance({
+                fullHost: TEST_TRON_GRID_API,
+                headers: { "TRON-PRO-API-KEY": TEST_TRON_HEADER_API_KEY },
+                eventHeaders: { "TRON-PRO-API-KEY": FAKE_KEY },
+            });
+
+            assert.equal(tronWeb.fullNode.headers['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
+            assert.equal(tronWeb.eventServer.headers['TRON-PRO-API-KEY'], FAKE_KEY);
+
+            const account = await tronWeb.trx.getAccount();
+            assert.equal(typeof account, "object");
+
+            try {
+                await tronWeb.event.getEventsByContractAddress(tronWeb.defaultAddress.base58);
+            } catch (error) {
+                assert.equal(error.statusCode, 401);
+            }
+        });
+    });
+
+    describe("#testTronGridJwtKey", function () {
 
         it("should add the parameter Authorization=Key to the header of the request", async function () {
 
