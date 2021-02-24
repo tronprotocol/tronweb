@@ -37,6 +37,7 @@ export default class TronWeb extends EventEmitter {
 
         let fullNode;
         let headers = false;
+        let eventHeaders = false;
 
         if (typeof options === 'object' && (options.fullNode || options.fullHost)) {
             fullNode = options.fullNode || options.fullHost;
@@ -44,6 +45,7 @@ export default class TronWeb extends EventEmitter {
             solidityNode = options.solidityNode || options.fullHost;
             eventServer = options.eventServer || options.fullHost;
             headers = options.headers || false;
+            eventHeaders = options.eventHeaders || headers;
             privateKey = options.privateKey;
         } else {
             fullNode = options;
@@ -99,7 +101,11 @@ export default class TronWeb extends EventEmitter {
         this.injectPromise = injectpromise(this);
 
         if (headers) {
-            this.setHeader(headers);
+            this.setFullNodeHeader(headers);
+        }
+
+        if (eventHeaders) {
+            this.setEventHeader(eventHeaders);
         }
     }
 
@@ -200,6 +206,19 @@ export default class TronWeb extends EventEmitter {
 
         this.setFullNode(fullNode);
         this.setSolidityNode(solidityNode);
+        this.setEventServer(eventServer);
+    }
+
+    setFullNodeHeader (headers = {}) {
+        const fullNode = new providers.HttpProvider(this.fullNode.host, 30000, false, false, headers);
+        const solidityNode = new providers.HttpProvider(this.solidityNode.host, 30000, false, false, headers);
+
+        this.setFullNode(fullNode);
+        this.setSolidityNode(solidityNode);
+    }
+
+    setEventHeader (headers = {}) {
+        const eventServer = new providers.HttpProvider(this.eventServer.host, 30000, false, false, headers);
         this.setEventServer(eventServer);
     }
 
