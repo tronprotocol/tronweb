@@ -1164,7 +1164,8 @@ describe('TronWeb.transactionBuilder', function () {
 
             const options = {
                 abi: testRevert.abi,
-                bytecode: testRevert.bytecode
+                bytecode: testRevert.bytecode,
+                feeLimit: 4e7
             };
             for (let i = 0; i < 2; i++) {
                 if (i === 1) options.permissionId = 2;

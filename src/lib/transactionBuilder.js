@@ -667,9 +667,9 @@ export default class TransactionBuilder {
                 if (!type || !utils.isString(type) || !type.length)
                     return callback('Invalid parameter type provided: ' + type);
 
-                if (type == 'address')
+                if (type === 'address')
                     value = toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
-                else if (type == 'address[]')
+                else if (type.match(/^([^\x5b]*)(\x5b|$)/)[0] === 'address[')
                     value = value.map(v => toHex(v).replace(ADDRESS_PREFIX_REGEX, '0x'));
 
                 types.push(type);
@@ -682,6 +682,10 @@ export default class TransactionBuilder {
                 return callback(ex);
             }
         } else parameters = '';
+
+        if (options.rawParameter && utils.isString(options.rawParameter)) {
+            parameters = options.rawParameter.replace(/^(0x)/, '');
+        }
 
         const args = {
             owner_address: toHex(issuerAddress),
@@ -833,9 +837,9 @@ export default class TransactionBuilder {
                     if (!type || !utils.isString(type) || !type.length)
                         return callback('Invalid parameter type provided: ' + type);
 
-                    if (type == 'address')
+                    if (type === 'address')
                         value = toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
-                    else if (type == 'address[]')
+                    else if (type.match(/^([^\x5b]*)(\x5b|$)/)[0] === 'address[')
                         value = value.map(v => toHex(v).replace(ADDRESS_PREFIX_REGEX, '0x'));
 
                     types.push(type);
@@ -857,8 +861,12 @@ export default class TransactionBuilder {
                 }
             } else parameters = '';
 
-            if(options.shieldedParameter){
+            if (options.shieldedParameter && utils.isString(options.shieldedParameter)) {
                 parameters = options.shieldedParameter.replace(/^(0x)/, '');
+            }
+
+            if (options.rawParameter && utils.isString(options.rawParameter)) {
+                parameters = options.rawParameter.replace(/^(0x)/, '');
             }
 
             args.function_selector = functionSelector;

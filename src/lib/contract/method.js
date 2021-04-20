@@ -48,10 +48,10 @@ export default class Method {
         const types = getParamTypes(this.inputs);
 
         args.forEach((arg, index) => {
-            if (types[index] == 'address')
+            if (types[index] === 'address')
                 args[index] = this.tronWeb.address.toHex(arg).replace(ADDRESS_PREFIX_REGEX, '0x')
 
-            if (types[index] == 'address[]') {
+            if (types[index].match(/^([^\x5b]*)(\x5b|$)/)[0] === 'address[') {
                 args[index] = args[index].map(address => {
                     return this.tronWeb.address.toHex(address).replace(ADDRESS_PREFIX_REGEX, '0x')
                 })
