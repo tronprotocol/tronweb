@@ -645,46 +645,46 @@ export default class TransactionBuilder {
             return callback('When contract is not payable, options.callValue and options.tokenValue must be 0');
 
 
-        var constructorParams = abi.find(
-            (it) => {
-                return it.type === 'constructor';
-            }
-        );
-
-        if (typeof constructorParams !== 'undefined' && constructorParams) {
-            const abiCoder = new AbiCoder();
-            const types = [];
-            const values = [];
-            constructorParams = constructorParams.inputs;
-
-            if (parameters.length != constructorParams.length)
-                return callback(`constructor needs ${constructorParams.length} but ${parameters.length} provided`);
-
-            for (let i = 0; i < parameters.length; i++) {
-                let type = constructorParams[i].type;
-                let value = parameters[i];
-
-                if (!type || !utils.isString(type) || !type.length)
-                    return callback('Invalid parameter type provided: ' + type);
-
-                if (type === 'address')
-                    value = toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
-                else if (type.match(/^([^\x5b]*)(\x5b|$)/)[0] === 'address[')
-                    value = value.map(v => toHex(v).replace(ADDRESS_PREFIX_REGEX, '0x'));
-
-                types.push(type);
-                values.push(value);
-            }
-
-            try {
-                parameters = abiCoder.encode(types, values).replace(/^(0x)/, '');
-            } catch (ex) {
-                return callback(ex);
-            }
-        } else parameters = '';
-
         if (options.rawParameter && utils.isString(options.rawParameter)) {
             parameters = options.rawParameter.replace(/^(0x)/, '');
+        } else {
+            var constructorParams = abi.find(
+                (it) => {
+                    return it.type === 'constructor';
+                }
+            );
+
+            if (typeof constructorParams !== 'undefined' && constructorParams) {
+                const abiCoder = new AbiCoder();
+                const types = [];
+                const values = [];
+                constructorParams = constructorParams.inputs;
+
+                if (parameters.length != constructorParams.length)
+                    return callback(`constructor needs ${constructorParams.length} but ${parameters.length} provided`);
+
+                for (let i = 0; i < parameters.length; i++) {
+                    let type = constructorParams[i].type;
+                    let value = parameters[i];
+
+                    if (!type || !utils.isString(type) || !type.length)
+                        return callback('Invalid parameter type provided: ' + type);
+
+                    if (type === 'address')
+                        value = toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
+                    else if (type.match(/^([^\x5b]*)(\x5b|$)/)[0] === 'address[')
+                        value = value.map(v => toHex(v).replace(ADDRESS_PREFIX_REGEX, '0x'));
+
+                    types.push(type);
+                    values.push(value);
+                }
+
+                try {
+                    parameters = abiCoder.encode(types, values).replace(/^(0x)/, '');
+                } catch (ex) {
+                    return callback(ex);
+                }
+            } else parameters = '';
         }
 
         const args = {
