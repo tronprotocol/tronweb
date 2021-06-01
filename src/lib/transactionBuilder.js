@@ -1054,7 +1054,7 @@ export default class TransactionBuilder {
             abbr: fromUtf8(abbreviation),
             description: fromUtf8(description),
             url: fromUtf8(url),
-            total_supply: parseInt(totalSupply),
+            total_supply: totalSupply,
             trx_num: parseInt(trxRatio),
             num: parseInt(tokenRatio),
             start_time: parseInt(saleStart),
