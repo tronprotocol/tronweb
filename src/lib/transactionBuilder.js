@@ -575,7 +575,7 @@ export default class TransactionBuilder {
 
 
         const payable = abi.some(func => {
-            return func.type == 'constructor' && func.payable;
+            return func.type === 'constructor' && 'payable' === func.stateMutability.toLowerCase();
         });
 
         if (this.validator.notValid([
@@ -674,6 +674,9 @@ export default class TransactionBuilder {
                         value = toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
                     else if (type.match(/^([^\x5b]*)(\x5b|$)/)[0] === 'address[')
                         value = value.map(v => toHex(v).replace(ADDRESS_PREFIX_REGEX, '0x'));
+                    else if (/trcToken/.test(type)) {
+                        type = type.replace(/trcToken/, 'uint256')
+                    }
 
                     types.push(type);
                     values.push(value);
