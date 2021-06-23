@@ -9,7 +9,7 @@ const pollAccountFor = require('../helpers/pollAccountFor');
 const _ = require('lodash');
 const tronWebBuilder = require('../helpers/tronWebBuilder');
 const assertEqualHex = require('../helpers/assertEqualHex');
-const {testRevert, testConstant, arrayParam} = require('../fixtures/contracts');
+const { testRevert, testConstant, arrayParam, rawParam } = require('../fixtures/contracts');
 const waitChainData = require('../helpers/waitChainData');
 
 const TronWeb = tronWebBuilder.TronWeb;
@@ -1164,7 +1164,8 @@ describe('TronWeb.transactionBuilder', function () {
 
             const options = {
                 abi: testRevert.abi,
-                bytecode: testRevert.bytecode
+                bytecode: testRevert.bytecode,
+                feeLimit: 4e7
             };
             for (let i = 0; i < 2; i++) {
                 if (i === 1) options.permissionId = 2;
@@ -1610,4 +1611,54 @@ describe('TronWeb.transactionBuilder', function () {
         });
     });
 
+    describe("#triggerSmartContractWithRawParam", async function () {
+
+        it('should create or trigger a smart contract with rawParameter', async function () {
+            const issuerAddress = accounts.hex[0];
+            const issuerPk = accounts.pks[0];
+
+            const transaction = await tronWeb.transactionBuilder.createSmartContract(
+                {
+                    abi: rawParam.abi,
+                    bytecode: rawParam.bytecode,
+                    rawParameter:
+                        "0x0000000000000000000000000000000000000000000000000000000000000001",
+                },
+                issuerAddress
+            );
+            await broadcaster(null, issuerPk, transaction);
+            while (true) {
+                const tx = await tronWeb.trx.getTransactionInfo(
+                    transaction.txID
+                );
+                if (Object.keys(tx).length === 0) {
+                    await wait(3);
+                    continue;
+                } else {
+                    break;
+                }
+            }
+
+            const deployed = await tronWeb
+                .contract()
+                .at(transaction.contract_address);
+            let check = await deployed.check().call();
+            assert.equal(check, 1);
+
+            const setTransaction = await tronWeb.transactionBuilder.triggerSmartContract(
+                transaction.contract_address,
+                "setCheck(uint256)",
+                {
+                    rawParameter:
+                        "0x0000000000000000000000000000000000000000000000000000000000000002",
+                },
+                [],
+                issuerAddress
+            );
+            await broadcaster(null, issuerPk, setTransaction.transaction);
+
+            check = await deployed.check().call();
+            assert.equal(check, 2);
+        });
+    });
 });

@@ -575,7 +575,7 @@ export default class TransactionBuilder {
 
 
         const payable = abi.some(func => {
-            return func.type == 'constructor' && func.payable;
+            return func.type === 'constructor' && 'payable' === func.stateMutability.toLowerCase();
         });
 
         if (this.validator.notValid([
@@ -645,43 +645,50 @@ export default class TransactionBuilder {
             return callback('When contract is not payable, options.callValue and options.tokenValue must be 0');
 
 
-        var constructorParams = abi.find(
-            (it) => {
-                return it.type === 'constructor';
-            }
-        );
+        if (options.rawParameter && utils.isString(options.rawParameter)) {
+            parameters = options.rawParameter.replace(/^(0x)/, '');
+        } else {
+            var constructorParams = abi.find(
+                (it) => {
+                    return it.type === 'constructor';
+                }
+            );
 
-        if (typeof constructorParams !== 'undefined' && constructorParams) {
-            const abiCoder = new AbiCoder();
-            const types = [];
-            const values = [];
-            constructorParams = constructorParams.inputs;
+            if (typeof constructorParams !== 'undefined' && constructorParams) {
+                const abiCoder = new AbiCoder();
+                const types = [];
+                const values = [];
+                constructorParams = constructorParams.inputs;
 
-            if (parameters.length != constructorParams.length)
-                return callback(`constructor needs ${constructorParams.length} but ${parameters.length} provided`);
+                if (parameters.length != constructorParams.length)
+                    return callback(`constructor needs ${constructorParams.length} but ${parameters.length} provided`);
 
-            for (let i = 0; i < parameters.length; i++) {
-                let type = constructorParams[i].type;
-                let value = parameters[i];
+                for (let i = 0; i < parameters.length; i++) {
+                    let type = constructorParams[i].type;
+                    let value = parameters[i];
 
-                if (!type || !utils.isString(type) || !type.length)
-                    return callback('Invalid parameter type provided: ' + type);
+                    if (!type || !utils.isString(type) || !type.length)
+                        return callback('Invalid parameter type provided: ' + type);
 
-                if (type == 'address')
-                    value = toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
-                else if (type == 'address[]')
-                    value = value.map(v => toHex(v).replace(ADDRESS_PREFIX_REGEX, '0x'));
+                    if (type === 'address')
+                        value = toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
+                    else if (type.match(/^([^\x5b]*)(\x5b|$)/)[0] === 'address[')
+                        value = value.map(v => toHex(v).replace(ADDRESS_PREFIX_REGEX, '0x'));
+                    else if (/trcToken/.test(type)) {
+                        type = type.replace(/trcToken/, 'uint256')
+                    }
 
-                types.push(type);
-                values.push(value);
-            }
+                    types.push(type);
+                    values.push(value);
+                }
 
-            try {
-                parameters = abiCoder.encode(types, values).replace(/^(0x)/, '');
-            } catch (ex) {
-                return callback(ex);
-            }
-        } else parameters = '';
+                try {
+                    parameters = abiCoder.encode(types, values).replace(/^(0x)/, '');
+                } catch (ex) {
+                    return callback(ex);
+                }
+            } else parameters = '';
+        }
 
         const args = {
             owner_address: toHex(issuerAddress),
@@ -833,9 +840,9 @@ export default class TransactionBuilder {
                     if (!type || !utils.isString(type) || !type.length)
                         return callback('Invalid parameter type provided: ' + type);
 
-                    if (type == 'address')
+                    if (type === 'address')
                         value = toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
-                    else if (type == 'address[]')
+                    else if (type.match(/^([^\x5b]*)(\x5b|$)/)[0] === 'address[')
                         value = value.map(v => toHex(v).replace(ADDRESS_PREFIX_REGEX, '0x'));
 
                     types.push(type);
@@ -857,8 +864,12 @@ export default class TransactionBuilder {
                 }
             } else parameters = '';
 
-            if(options.shieldedParameter){
+            if (options.shieldedParameter && utils.isString(options.shieldedParameter)) {
                 parameters = options.shieldedParameter.replace(/^(0x)/, '');
+            }
+
+            if (options.rawParameter && utils.isString(options.rawParameter)) {
+                parameters = options.rawParameter.replace(/^(0x)/, '');
             }
 
             args.function_selector = functionSelector;

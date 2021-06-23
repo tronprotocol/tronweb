@@ -169,6 +169,11 @@ In order to contribute you can
 
 ## Recent History
 
+__3.2.7__
+- Add options `rawParameter` that format of the parameters method and args when creating or triggering a contract
+- Update `elliptic` to the latest version 6.5.4
+- Update `validator` to the latest version 13.6.0
+
 __3.2.6__
 - Add setHeader function
 
