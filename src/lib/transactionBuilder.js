@@ -1069,7 +1069,7 @@ export default class TransactionBuilder {
                 frozen_days: parseInt(frozenDuration)
             }
         }
-        if (this.tronWeb.fullnodeSatisfies('>=3.5.0') && !(parseInt(frozenAmount) > 0)) {
+        if (!(parseInt(frozenAmount) > 0)) {
             delete data.frozen_supply
         }
         if (precision && !isNaN(parseInt(precision))) {
