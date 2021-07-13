@@ -290,9 +290,9 @@ export default class TronWeb extends EventEmitter {
                     utils.crypto.decodeBase58Address(address)
                 ).toLowerCase();
             },
-            fromPrivateKey(privateKey) {
+            fromPrivateKey(privateKey, strict = false) {
                 try {
-                    return utils.crypto.pkToAddress(privateKey);
+                    return utils.crypto.pkToAddress(privateKey, strict);
                 } catch {
                     return false;
                 }

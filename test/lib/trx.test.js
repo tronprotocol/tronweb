@@ -16,6 +16,7 @@ const {
     ADDRESS_BASE58,
     PRIVATE_KEY,
     getTokenOptions,
+    SIGNED_HEX_TRANSACTION
 } = require('../helpers/config');
 const testRevertContract = require('../fixtures/contracts').testRevert;
 
@@ -993,6 +994,27 @@ describe('TronWeb.trx', function () {
             });
         });
 
+        describe("#broadcastHex", async function () {
+
+            it('should broadcast a hex transaction', async function () {
+                const result = await tronWeb.trx.broadcastHex(SIGNED_HEX_TRANSACTION);
+                assert.isTrue(result.result);
+            });
+
+            it('should throw invalid hex transaction provided error', async function () {
+                await assertThrow(
+                    tronWeb.trx.broadcastHex(false),
+                    'Invalid hex transaction provided'
+                );
+            });
+
+            it('should throw invalid options provided error', async function () {
+                await assertThrow(
+                    tronWeb.trx.broadcastHex(SIGNED_HEX_TRANSACTION, false),
+                    'Invalid options provided'
+                );
+            });
+        });
 
         describe("#getTransaction", async function () {
 
