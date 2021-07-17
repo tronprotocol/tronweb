@@ -1,0 +1,192 @@
+html,
+body,
+* {
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-bottom: 0;
+}
+
+body {
+  overscroll-behavior: none;
+}
+
+ul,
+li {
+  list-style: none;
+}
+
+button,
+.modal-btn {
+  border: none;
+  cursor: pointer;
+}
+
+#root .main-content {
+  min-height: 100vh;
+}
+
+.flexB {
+  display: flex;
+  justify-content: space-between;
+}
+
+.flexC {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  span {
+    display: block;
+    line-height: 33px;
+  }
+}
+
+.flex {
+  display: flex;
+
+  &.between {
+    justify-content: space-between;
+  }
+
+  &.ai-center {
+    align-items: center;
+  }
+}
+
+.ques {
+  color: #999;
+  display: inline-block;
+  background: #fff;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+  text-align: center;
+  border-radius: 100%;
+  // margin-left: 10px;
+  margin-right: 10px;
+  border: 1px solid #999;
+  font-family: AvenirNext-Medium;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.center {
+  text-align: center;
+}
+
+.collateralSymbol {
+  align-items: center;
+
+  img {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.ant-progress {
+  &.deposit-stroke {
+    .ant-progress-success-bg,
+    .ant-progress-bg,
+    .ant-progress-status-success .ant-progress-bg {
+      background-color: #3d56d6;
+    }
+  }
+
+  &.lend-stroke {
+    .ant-progress-success-bg,
+    .ant-progress-bg,
+    .ant-progress-status-success .ant-progress-bg {
+      background-color: #1ed0ac;
+    }
+  }
+}
+
+.ant-notification .ant-notification-notice {
+  border-radius: 10px !important;
+}
+
+.trans-notify {
+  font-family: AvenirNext-Medium;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 10px;
+
+  .typo-text-link {
+    font-size: 14px;
+    color: #4850e5;
+  }
+
+  .trans-btn-tip {
+    display: inline-block;
+    font-size: 12px;
+    border-radius: 10px;
+    padding: 10px;
+  }
+
+  .trans-pending {
+    background: rgb(22, 195, 120, 0.2);
+    color: rgb(22, 195, 120);
+  }
+
+  .trans-confirmed {
+    background: rgb(72, 80, 229, 0.2);
+    color: rgb(72, 80, 229);
+  }
+
+  .trans-failed {
+    background: rgb(255, 142, 24, 0.2);
+    color: rgb(255, 142, 24);
+  }
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('../font/Roboto/Roboto-Black.ttf');
+  src: url('../font/Roboto/Roboto-Black.ttf') format('truetype');
+}
+
+body {
+  font-family: 'PingFang SC', 'Roboto', 'sans-serif' !important;
+}
+
+.copied-style-sp {
+  position: absolute;
+  font-family: PingFang SC;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 17px;
+  text-align: center;
+  color: #ffffff;
+  background: #0f134f;
+  border-radius: 34px;
+  z-index: 9000;
+  padding: 7px 22px;
+  white-space: nowrap;
+  cursor: pointer;
+  bottom: 30px;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: 85px;
+}
+.main-content {
+  margin-left: 220px;
+  padding: 30px;
+  width: calc(100% - 220px);
+}
