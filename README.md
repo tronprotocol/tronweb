@@ -152,9 +152,9 @@ const tronWeb = new TronWeb({
 
 ## A full example
 
-The better way to understand how to work with Tron is to clone the [demo branch](https://github.com/tronprotocol/tronweb/tree/demo) in this repository.
+The better way to understand how to work with Tron is go to the demo directory in this repository.
 
-If you'd like to connect with tronlink app and chrome extention and  develop a dapp on tron, you could run the demo in path demo/tron-dapp-react-demo.
+If you'd like to connect with tronlink app and chrome extention and develop a dapp on tron, you could run the demo in path demo/tron-dapp-react-demo.
 
 If you'd like to develop only with tronweb dependency, you could run the demo in path demo/tronweb-demo.
 
