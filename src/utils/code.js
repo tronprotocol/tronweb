@@ -94,11 +94,12 @@ export function hexStr2byteArray(str, strict = false) {
     if (typeof str !== 'string')
         throw new Error('The passed string is not a string')
 
-    const len = str.length;
+    let len = str.length;
 
     if (strict) {
         if (len % 2) {
             str = `0${str}`;
+            len++;
         }
     }
     const byteArray = Array();
