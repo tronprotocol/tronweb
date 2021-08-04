@@ -430,7 +430,7 @@ export default class Trx {
         this.tronWeb.fullNode.request('wallet/getaccountnet', {
             address
         }, 'post').then(({freeNetUsed = 0, freeNetLimit = 0, NetUsed = 0, NetLimit = 0}) => {
-            callback(null, (freeNetLimit - freeNetUsed) + (NetLimit - NetUsed));
+            callback(null, Math.max(freeNetLimit - freeNetUsed, 0) + Math.max(NetLimit - NetUsed, 0));
         }).catch(err => callback(err));
     }
 
