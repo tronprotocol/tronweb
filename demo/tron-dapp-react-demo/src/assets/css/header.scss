@@ -1,0 +1,46 @@
+.header-container {
+  width: 220px;
+  float: left;
+  position: absolute;
+  top: 0;
+  left: 0;
+  // padding: 20px;
+  .menu-content {
+    padding-top: 20px;
+  }
+  .connect-wallet {
+    margin-bottom: 15px;
+  }
+  .address-text {
+    width: 90%;
+    height: 46px;
+    line-height: 46px;
+    color: #fff;
+    background: #1a8796;
+    margin: 0 auto;
+    transition: all ease-in-out 0.2s;
+    border-radius: 5px;
+    text-align: center;
+
+    img {
+      width: 17px;
+      display: inline-block;
+      margin-right: 10px;
+    }
+
+    > span {
+      font-size: 12px;
+    }
+  }
+  .links {
+    padding-left: 20px;
+    padding-top: 10px;
+  }
+  .language-logo {
+    display: block;
+    cursor: pointer;
+  }
+  .lg-active {
+    color: #3d56d6;
+  }
+}

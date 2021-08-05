@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="40px" height="41px" viewBox="0 0 40 41" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 53.2 (72643) - https://sketchapp.com -->
+    <title>Tronlink</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <rect id="path-1" x="0" y="2.10739561" width="40" height="40.6111111" rx="20"></rect>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Justyam_Connect-to-a-wallet" transform="translate(-898.000000, -614.000000)">
+            <g id="Group-23" transform="translate(833.000000, 374.000000)">
+                <g id="Group-17" transform="translate(45.000000, 218.000000)">
+                    <g id="Tronlink" transform="translate(20.000000, 20.000000)">
+                        <mask id="mask-2" fill="white">
+                            <use xlink:href="#path-1"></use>
+                        </mask>
+                        <use id="Mask" fill="#3365F9" xlink:href="#path-1"></use>
+                        <path d="M30.1657306,29.2681636 L43.2941176,26.8232076 L28.2352941,45.6893044 L30.1657306,29.2681636 Z M28.4705882,28.5215159 L26.4474088,45.6893044 L15.5294118,17.5126663 L28.4705882,28.5215159 Z M29.32247,26.0881648 L16.9411765,15.7975666 L37.1764706,19.5292732 L29.32247,26.0881648 Z M39.2284352,20.4528372 L43.5294118,24.6410199 L31.7647059,26.8232076 L39.2284352,20.4528372 Z M39.7852062,18.1688304 L11.7647059,12.8573956 L26.5120326,51.0796178 L47.0588235,25.2923741 L39.7852062,18.1688304 Z" id="Fill-4" fill="#FFFFFF" mask="url(#mask-2)"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
