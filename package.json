@@ -1,6 +1,6 @@
 {
     "name": "tronweb",
-    "version": "3.2.8",
+    "version": "4.0.0",
     "description": "JavaScript SDK that encapsulates the TRON HTTP API",
     "main": "dist/TronWeb.node.js",
     "scripts": {
@@ -23,9 +23,9 @@
     "dependencies": {
         "@babel/runtime": "^7.0.0",
         "axios": "^0.21.1",
-        "bignumber.js": "^7.2.1",
+        "bignumber.js": "^9.0.1",
         "elliptic": "^6.5.4",
-        "ethers": "^5.0.8",
+        "ethers": "^5.4.4",
         "eventemitter3": "^3.1.0",
         "injectpromise": "^1.0.0",
         "lodash": "^4.17.21",
@@ -44,7 +44,7 @@
         "chai": "^4.1.2",
         "chalk": "^2.4.1",
         "globby": "^8.0.1",
-        "husky": "^6.0.0",
+        "husky": "^7.0.0",
         "istanbul": "^0.4.5",
         "istanbul-instrumenter-loader": "^3.0.1",
         "jsonwebtoken": "^8.5.1",

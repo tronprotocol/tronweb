@@ -152,8 +152,11 @@ const tronWeb = new TronWeb({
 
 ## A full example
 
-The better way to understand how to work with Tron is to clone the [MetaCoin example](https://github.com/Tronbox-boxes/metacoin-box) and follow the instructions at
-https://github.com/Tronbox-boxes/metacoin-box
+The better way to understand how to work with TronWeb is go to the demo directory in this repository.
+
+If you'd like to connect with tronlink app and chrome extention and develop a dapp on tron, you could run the demo in path demo/tron-dapp-react-demo.
+
+If you'd like to develop only with tronweb dependency, you could run the demo in path demo/tronweb-demo.
 
 ## Contributions
 
@@ -168,6 +171,12 @@ In order to contribute you can
 * push your changes and open a pull request
 
 ## Recent History
+
+__4.0.0__
+- support `broadcastHex` method
+- ignore fullnode version check when calling `createToken` method
+- update dependencies version
+- add strict mode for `pkToAddress` method
 
 __3.2.7__
 - Add options `rawParameter` that format of the parameters method and args when creating or triggering a contract
