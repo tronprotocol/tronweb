@@ -930,7 +930,8 @@ describe('TronWeb Instance', function () {
             assert.equal(newAccount.publicKey.length, 130);
             let address = tronWeb.address.fromPrivateKey(newAccount.privateKey);
             assert.equal(address, newAccount.address.base58);
-
+            address = tronWeb.address.fromPrivateKey(newAccount.privateKey, true);
+            assert.equal(address, newAccount.address.base58);
             // TODO The new accounts returns an uppercase address, while everywhere else we handle lowercase addresses. Maybe we should make it consistent and let createAccount returning a lowercase address
             assert.equal(tronWeb.address.toHex(address), newAccount.address.hex.toLowerCase());
         });

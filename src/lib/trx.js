@@ -874,6 +874,38 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
+    sendHexTransaction(signedHexTransaction = false, options = {}, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
+        if (!callback)
+            return this.injectPromise(this.sendHexTransaction, signedHexTransaction, options);
+
+        if (!utils.isHex(signedHexTransaction))
+            return callback('Invalid hex transaction provided');
+
+        if (!utils.isObject(options))
+            return callback('Invalid options provided');
+
+        const params = {
+            transaction: signedHexTransaction
+        }
+
+        this.tronWeb.fullNode.request(
+            'wallet/broadcasthex',
+             params,
+            'post'
+        ).then(result => {
+            if (result.result) {
+                result.transaction = JSON.parse(result.transaction)
+                result.hexTransaction = signedHexTransaction;
+            }
+            callback(null, result);
+        }).catch(err => callback(err));
+    }
+
     async sendTransaction(to = false, amount = false, options = {}, callback = false) {
         if (utils.isFunction(options)) {
             callback = options;
@@ -1145,6 +1177,10 @@ export default class Trx {
 
     broadcast(...args) {
         return this.sendRawTransaction(...args);
+    }
+
+    broadcastHex(...args) {
+        return this.sendHexTransaction(...args);
     }
 
     signTransaction(...args) {

@@ -89,16 +89,25 @@ export function isHexChar(c) {
     return 0;
 }
 
-export function hexStr2byteArray(str) {
+// set strict as true: if the length of str is odd, add 0 before the str to make its length as even
+export function hexStr2byteArray(str, strict = false) {
     if (typeof str !== 'string')
         throw new Error('The passed string is not a string')
 
+    let len = str.length;
+
+    if (strict) {
+        if (len % 2) {
+            str = `0${str}`;
+            len++;
+        }
+    }
     const byteArray = Array();
     let d = 0;
     let j = 0;
     let k = 0;
 
-    for (let i = 0; i < str.length; i++) {
+    for (let i = 0; i < len; i++) {
         const c = str.charAt(i);
 
         if (isHexChar(c)) {

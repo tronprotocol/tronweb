@@ -172,6 +172,12 @@ In order to contribute you can
 
 ## Recent History
 
+__4.0.0__
+- support `broadcastHex` method
+- ignore fullnode version check when calling `createToken` method
+- update dependencies version
+- add strict mode for `pkToAddress` method
+
 __3.2.7__
 - Add options `rawParameter` that format of the parameters method and args when creating or triggering a contract
 - Update `elliptic` to the latest version 6.5.4
