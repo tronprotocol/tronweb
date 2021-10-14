@@ -48,7 +48,7 @@ export default class Trx {
         if (!callback)
             return this.injectPromise(this.getConfirmedCurrentBlock);
 
-        this.tronWeb.solidityNode.request('walletsolidity/getnowblock').then(block => {
+        this.tronWeb.solidityNode.request('wallet/getnowblock').then(block => {
             callback(null, block);
         }).catch(err => callback(err));
     }
@@ -167,7 +167,7 @@ export default class Trx {
         if (!callback)
             return this.injectPromise(this.getConfirmedTransaction, transactionID);
 
-        this.tronWeb.solidityNode.request('walletsolidity/gettransactionbyid', {
+        this.tronWeb.solidityNode.request('wallet/gettransactionbyid', {
             value: transactionID
         }, 'post').then(transaction => {
             if (!Object.keys(transaction).length)
@@ -315,7 +315,7 @@ export default class Trx {
 
         address = this.tronWeb.address.toHex(address);
 
-        this.tronWeb.solidityNode.request('walletsolidity/getaccount', {
+        this.tronWeb.solidityNode.request('wallet/getaccount', {
             address
         }, 'post').then(account => {
             callback(null, account);
