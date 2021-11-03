@@ -99,7 +99,7 @@ export default class Method {
             value
         }));
 
-        this.tronWeb.transactionBuilder.triggerSmartContract(
+        this.tronWeb.transactionBuilder.triggerConstantContract(
             this.contract.address,
             this.functionSelector,
             options,
@@ -110,7 +110,7 @@ export default class Method {
                     return callback(err);
 
                 if (!utils.hasProperty(transaction, 'constant_result'))
-                    return callback('Failed to execute');
+                    return callback('Failed to execute' + JSON.stringify(transaction));
 
                 try {
 
