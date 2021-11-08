@@ -1,20 +1,15 @@
 import utils from 'utils';
 import {ADDRESS_PREFIX_REGEX} from 'utils/address';
+import {encodeParamsV2ByABI, decodeParamsV2ByABI} from 'utils/abi';
 import injectpromise from 'injectpromise';
 
 const getFunctionSelector = abi => {
-    return abi.name + '(' + getParamTypes(abi.inputs || []).join(',') + ')';
-}
-
-const getParamTypes = params => {
-    return params.map(({type}) => type);
+    let iface = new utils.ethersUtils.Interface([abi]);
+    return iface.getFunction(abi.name).format(utils.ethersUtils.FormatTypes.sighash)
 }
 
 const decodeOutput = (abi, output) => {
-    const names = abi.map(({name}) => name).filter(name => !!name);
-    const types = abi.map(({type}) => type);
-
-    return utils.abi.decodeParams(names, types, output);
+    return decodeParamsV2ByABI(abi, output)
 };
 
 export default class Method {
@@ -45,24 +40,12 @@ export default class Method {
     }
 
     onMethod(...args) {
-        const types = getParamTypes(this.inputs);
-
-        args.forEach((arg, index) => {
-            if (types[index] === 'address')
-                args[index] = this.tronWeb.address.toHex(arg).replace(ADDRESS_PREFIX_REGEX, '0x')
-
-            if (types[index].match(/^([^\x5b]*)(\x5b|$)/)[0] === 'address[') {
-                args[index] = args[index].map(address => {
-                    return this.tronWeb.address.toHex(address).replace(ADDRESS_PREFIX_REGEX, '0x')
-                })
-            }
-        });
-
-        return {
-            call: (...methodArgs) => this._call(types, args, ...methodArgs),
-            send: (...methodArgs) => this._send(types, args, ...methodArgs),
-            watch: (...methodArgs) => this._watch(...methodArgs)
-        }
+      const rawParameter = encodeParamsV2ByABI(this.abi, args);
+      return {
+          call: (...methodArgs) => this._call([], [], {...methodArgs, rawParameter, _isConstant: true} ),
+          send: (...methodArgs) => this._send([], [], {...methodArgs, rawParameter}),
+          watch: (...methodArgs) => this._watch(...methodArgs)
+      }
     }
 
     async _call(types, args, options = {}, callback = false) {
@@ -129,7 +112,7 @@ export default class Method {
                         return callback(msg)
                     }
 
-                    let output = decodeOutput(this.outputs, '0x' + transaction.constant_result[0]);
+                    let output = decodeOutput(this.abi, '0x' + transaction.constant_result[0]);
 
                     if (output.length === 1)
                         output = output[0];

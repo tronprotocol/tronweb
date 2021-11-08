@@ -1,8 +1,11 @@
+
 const chai = require('chai');
 const {ADDRESS_HEX, ADDRESS_BASE58} = require('../helpers/config');
 const tronWebBuilder = require('../helpers/tronWebBuilder');
+const { loadTests, saveTests } = require('../testcases/src/disk-utils');
 
 const assert = chai.assert;
+
 
 describe('TronWeb.utils.abi', function () {
 
@@ -136,4 +139,47 @@ describe('TronWeb.utils.abi', function () {
             }
         });
     });
+
+
+    describe('#encodeParamsV2()-(v1 input)', function() {
+        const tronWeb = tronWebBuilder.createInstance();
+        let coder = tronWeb.utils.abi;
+
+        let tests = loadTests('contract-interface');
+
+        tests.forEach((test) => {
+            let { values, result } = test;
+            const parameters = JSON.parse(values);
+
+            let title = test.name + ' => (' + test.types + ') = (' + test.normalizedValues + ')';
+
+            it(('encodes parameters - ' + test.name + ' - ' + test.types), function() {
+                this.timeout(120000);
+                let encoded = coder.encodeParamsV2(parameters);
+                assert.equal(encoded, result.substr(2), 'encoded data - ' + title);
+
+            });
+        });
+    });
+
+
+    describe('#encodeParamsV2()-(v2 input)', function() {
+      const tronWeb = tronWebBuilder.createInstance();
+      let coder = tronWeb.utils.abi;
+
+      let tests = loadTests('contract-interface-abi2');
+      tests.forEach((test) => {
+          let { values, result } = test;
+          const parameters = JSON.parse(values);
+          let title = test.name + ' => (' + test.types + ') = (' + test.normalizedValues + ')';
+
+          it(('encodes parameters - ' + test.name + ' - ' + test.types), function() {
+              this.timeout(120000);
+              let encoded = coder.encodeParamsV2(parameters);
+              assert.equal(encoded, result.substr(2), 'encoded data - ' + title);
+
+          });
+      });
+    });
 });
+

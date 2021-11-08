@@ -1,7 +1,6 @@
 import injectpromise from 'injectpromise';
 import Validator from 'paramValidator';
 
-const MAX_FEE_LIMIT = 5_000_000_000;
 export default class SideChain {
     constructor(sideOptions, TronWeb = false, mainchain = false, privateKey = false) {
         this.mainchain = mainchain;
@@ -212,8 +211,7 @@ export default class SideChain {
                 name: 'feeLimit',
                 type: 'integer',
                 value: feeLimit,
-                gte: 0,
-                lte: MAX_FEE_LIMIT
+                gte: 0
             }
         ], callback)) {
             return;
@@ -268,8 +266,7 @@ export default class SideChain {
                 name: 'feeLimit',
                 type: 'integer',
                 value: feeLimit,
-                gte: 0,
-                lte: MAX_FEE_LIMIT
+                gte: 0
             },
             {
                 name: 'tokenId',
@@ -339,8 +336,7 @@ export default class SideChain {
                 name: 'feeLimit',
                 type: 'integer',
                 value: feeLimit,
-                gte: 0,
-                lte: MAX_FEE_LIMIT
+                gte: 0
             },
             {
                 name: 'contractAddress',
@@ -512,8 +508,7 @@ export default class SideChain {
                 name: 'feeLimit',
                 type: 'integer',
                 value: feeLimit,
-                gte: 0,
-                lte: MAX_FEE_LIMIT
+                gte: 0
             }
         ], callback)) {
             return;
@@ -617,8 +612,7 @@ export default class SideChain {
                 name: 'feeLimit',
                 type: 'integer',
                 value: feeLimit,
-                gte: 0,
-                lte: 1_000_000_000
+                gte: 0
             }
         ], callback)) {
             return;
@@ -680,8 +674,7 @@ export default class SideChain {
                 name: 'feeLimit',
                 type: 'integer',
                 value: feeLimit,
-                gte: 0,
-                lte: 1_000_000_000
+                gte: 0
             }
         ], callback)) {
             return;
@@ -745,8 +738,7 @@ export default class SideChain {
                 name: 'feeLimit',
                 type: 'integer',
                 value: feeLimit,
-                gte: 0,
-                lte: 1_000_000_000
+                gte: 0
             },
             {
                 name: 'contractAddress',
@@ -926,8 +918,7 @@ export default class SideChain {
                 name: 'feeLimit',
                 type: 'integer',
                 value: feeLimit,
-                gte: 0,
-                lte: 1_000_000_000
+                gte: 0
             }
         ], callback)) {
             return;

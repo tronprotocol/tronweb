@@ -7,6 +7,8 @@ const toUtf8String = utils.toUtf8String;
 const recoverAddress = utils.recoverAddress;
 const SigningKey = utils.SigningKey;
 const AbiCoder = utils.AbiCoder;
+const Interface = utils.Interface;
+const FormatTypes = utils.FormatTypes;
 
 export {
     keccak256,
@@ -16,4 +18,6 @@ export {
     recoverAddress,
     SigningKey,
     AbiCoder,
+    Interface,
+    FormatTypes
 };

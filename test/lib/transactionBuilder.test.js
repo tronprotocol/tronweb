@@ -1165,14 +1165,14 @@ describe('TronWeb.transactionBuilder', function () {
             const options = {
                 abi: testRevert.abi,
                 bytecode: testRevert.bytecode,
-                feeLimit: 4e7
+                feeLimit: 1e11
             };
             for (let i = 0; i < 2; i++) {
                 if (i === 1) options.permissionId = 2;
                 const tx = await tronWeb.transactionBuilder.createSmartContract(options)
                 assert.equal(tx.raw_data.contract[0].parameter.value.new_contract.consume_user_resource_percent, 100);
                 assert.equal(tx.raw_data.contract[0].parameter.value.new_contract.origin_energy_limit, 1e7);
-                assert.equal(tx.raw_data.fee_limit, 4e7);
+                assert.equal(tx.raw_data.fee_limit, 1e11);
                 assert.equal(tx.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
             }
         });
@@ -1215,14 +1215,14 @@ describe('TronWeb.transactionBuilder', function () {
                 bytecode: testRevert.bytecode,
                 userFeePercentage: 30,
                 originEnergyLimit: 9e6,
-                feeLimit: 9e8
+                feeLimit: 1e11
             };
             for (let i = 0; i < 2; i++) {
                 if (i === 1) options.permissionId = 2;
                 const tx = await tronWeb.transactionBuilder.createSmartContract(options)
                 assert.equal(tx.raw_data.contract[0].parameter.value.new_contract.consume_user_resource_percent, 30);
                 assert.equal(tx.raw_data.contract[0].parameter.value.new_contract.origin_energy_limit, 9e6);
-                assert.equal(tx.raw_data.fee_limit, 9e8);
+                assert.equal(tx.raw_data.fee_limit, 1e11);
                 assert.equal(tx.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
             }
         });
