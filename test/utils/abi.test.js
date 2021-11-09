@@ -2,9 +2,101 @@
 const chai = require('chai');
 const {ADDRESS_HEX, ADDRESS_BASE58} = require('../helpers/config');
 const tronWebBuilder = require('../helpers/tronWebBuilder');
+const TronWeb = require('../setup/TronWeb');
 const { loadTests, saveTests } = require('../testcases/src/disk-utils');
-
+const ethers = require('ethers');
 const assert = chai.assert;
+
+const bnify = ethers.BigNumber.from;
+
+function equals(actual, expected) {
+  // Array (treat recursively)
+  if (Array.isArray(actual)) {
+      if (!Array.isArray(expected) || actual.length !== expected.length) { return false; }
+      for (let i = 0; i < actual.length; i++) {
+          if (!equals(actual[i], expected[i])) { return false; }
+      }
+      return true;
+  }
+
+  if (typeof(actual) === 'number') { actual = bnify(actual); }
+  if (typeof(expected) === 'number') { expected = bnify(expected); }
+
+  // BigNumber
+  if (actual.eq) {
+      if (typeof(expected) === 'string' && expected.match(/^-?0x[0-9A-Fa-f]*$/)) {
+          let neg = (expected.substring(0, 1) === '-');
+          if (neg) { expected = expected.substring(1); }
+          expected = bnify(expected);
+          if (neg) { expected = expected.mul(-1); }
+      }
+      if (!actual.eq(expected)) { return false; }
+      return true;
+  }
+
+  // Uint8Array
+  if (expected.buffer) {
+      if (!ethers.utils.isHexString(actual)) { return false; }
+      actual = ethers.utils.arrayify(actual);
+
+      if (!actual.buffer || actual.length !== expected.length) { return false; }
+      for (let i = 0; i < actual.length; i++) {
+          if (actual[i] !== expected[i]) { return false; }
+      }
+
+      return true;
+  }
+
+  // Maybe address?
+  try {
+      if (TronWeb.isAddress(actual)) {
+        let actualAddress = actual;
+        let expectedAddress = TronWeb.address.toHex(expected);
+
+        return (actualAddress === expectedAddress);
+      }
+  } catch (error) { }
+
+  // Something else
+  return (actual === expected);
+}
+
+
+function getValues(object, named) {
+  if (Array.isArray(object)) {
+      let result = [];
+      object.forEach(function(object) {
+          result.push(getValues(object, named));
+      });
+      return result;
+  }
+
+  switch (object.type) {
+      case 'number':
+          return bnify(object.value);
+
+      case 'boolean':
+      case 'string':
+          return object.value;
+
+      case 'buffer':
+          return ethers.utils.arrayify(object.value);
+
+      case 'tuple':
+          let result = getValues(object.value, named);
+          if (named) {
+              let namedResult = {};
+              result.forEach((value, index) => {
+                  namedResult['r' + String(index)] = value;
+              });
+              return namedResult;
+          }
+          return result;
+
+      default:
+          throw new Error('invalid type - ' + object.type);
+  }
+}
 
 
 describe('TronWeb.utils.abi', function () {
@@ -97,7 +189,6 @@ describe('TronWeb.utils.abi', function () {
         });
     });
 
-
     describe('#encodeParams()', function () {
         it('should encode abi coded params passing types and values', function () {
 
@@ -140,44 +231,78 @@ describe('TronWeb.utils.abi', function () {
         });
     });
 
+    describe('#encodeParamsV2ByABI()-(v1 input)', function() {
+      const tronWeb = tronWebBuilder.createInstance();
+      let coder = tronWeb.utils.abi;
 
-    describe('#encodeParamsV2()-(v1 input)', function() {
-        const tronWeb = tronWebBuilder.createInstance();
-        let coder = tronWeb.utils.abi;
+      let tests = loadTests('contract-interface');
+      tests.forEach((test) => {
+          let { normalizedValues, result, interface } = test;
+          const funcABI = JSON.parse(interface);
+          const inputValues = getValues(JSON.parse(normalizedValues))
+          funcABI[0].inputs = funcABI[0].outputs;
+          let title = test.name + ' => (' + test.types + ') = (' + test.normalizedValues + ')';
+          it(('encodes parameters - ' + test.name + ' - ' + test.types), function() {
+              this.timeout(120000);
+              const encoded = coder.encodeParamsV2ByABI(funcABI[0], inputValues);
+              assert.equal(encoded, result, 'encoded data - ' + title);
 
-        let tests = loadTests('contract-interface');
-
-        tests.forEach((test) => {
-            let { values, result } = test;
-            const parameters = JSON.parse(values);
-
-            let title = test.name + ' => (' + test.types + ') = (' + test.normalizedValues + ')';
-
-            it(('encodes parameters - ' + test.name + ' - ' + test.types), function() {
-                this.timeout(120000);
-                let encoded = coder.encodeParamsV2(parameters);
-                assert.equal(encoded, result.substr(2), 'encoded data - ' + title);
-
-            });
-        });
+          });
+      });
     });
 
-
-    describe('#encodeParamsV2()-(v2 input)', function() {
+    describe('#encodeParamsV2ByABI()-(v2 input)', function() {
       const tronWeb = tronWebBuilder.createInstance();
       let coder = tronWeb.utils.abi;
 
       let tests = loadTests('contract-interface-abi2');
       tests.forEach((test) => {
-          let { values, result } = test;
-          const parameters = JSON.parse(values);
+          let { values, result, interface } = test;
+          const funcABI = JSON.parse(interface);
+          const inputValues = getValues(JSON.parse(values))
+          funcABI[0].inputs = funcABI[0].outputs;
           let title = test.name + ' => (' + test.types + ') = (' + test.normalizedValues + ')';
-
           it(('encodes parameters - ' + test.name + ' - ' + test.types), function() {
               this.timeout(120000);
-              let encoded = coder.encodeParamsV2(parameters);
-              assert.equal(encoded, result.substr(2), 'encoded data - ' + title);
+              const encoded = coder.encodeParamsV2ByABI(funcABI[0], inputValues);
+              assert.equal(encoded, result, 'encoded data - ' + title);
 
+          });
+      });
+    });
+
+    describe('#decodeParamsV2ByABI()-(v1 output)', function() {
+      const tronWeb = tronWebBuilder.createInstance();
+      let coder = tronWeb.utils.abi;
+
+      let tests = loadTests('contract-interface');
+      tests.forEach((test) => {
+          let { normalizedValues, result, interface } = test;
+          const funcABI = JSON.parse(interface);
+          const outputValues = getValues(JSON.parse(normalizedValues))
+          let title = test.name + ' => (' + test.types + ') = (' + test.normalizedValues + ')';
+          it(('decodes parameters - ' + test.name + ' - ' + test.types), function() {
+              this.timeout(120000);
+              const encoded = coder.decodeParamsV2ByABI(funcABI[0], result);
+              assert.ok(equals(encoded, outputValues), 'encoded data - ' + title);
+          });
+      });
+    });
+
+    describe('#decodeParamsV2ByABI()-(v1 output)', function() {
+      const tronWeb = tronWebBuilder.createInstance();
+      let coder = tronWeb.utils.abi;
+
+      let tests = loadTests('contract-interface-abi2');
+      tests.forEach((test) => {
+          let { values, result, interface } = test;
+          const funcABI = JSON.parse(interface);
+          const outputValues = getValues(JSON.parse(values))
+          let title = test.name + ' => (' + test.types + ') = (' + test.normalizedValues + ')';
+          it(('decodes parameters - ' + test.name + ' - ' + test.types), function() {
+              this.timeout(120000);
+              const encoded = coder.decodeParamsV2ByABI(funcABI[0], result);
+              assert.ok(equals(encoded, outputValues), 'encoded data - ' + title);
           });
       });
     });

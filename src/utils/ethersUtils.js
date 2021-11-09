@@ -9,6 +9,7 @@ const SigningKey = utils.SigningKey;
 const AbiCoder = utils.AbiCoder;
 const Interface = utils.Interface;
 const FormatTypes = utils.FormatTypes;
+const arrayify = utils.arrayify;
 
 export {
     keccak256,
@@ -19,5 +20,6 @@ export {
     SigningKey,
     AbiCoder,
     Interface,
-    FormatTypes
+    FormatTypes,
+    arrayify
 };

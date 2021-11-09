@@ -32,7 +32,7 @@ function deepCopy(target) {
     const newTarget = _isArray(target) ? [] : {};
 
     Object.keys(target).forEach(key =>
-        newTarget[key] = target[key] instanceof Object ? deepCopy(target[key]) : target[key]
+        newTarget[key] = target[key] instanceof Object && !target[key]._isBigNumber ? deepCopy(target[key]) : target[key]
     );
 
     return newTarget;
@@ -83,108 +83,14 @@ export function encodeParams(types, values) {
     return abiCoder.encode(types, values);
 }
 
-export function encodeParamsV2(parameters) {
-    const formatParams = (_params) => {
-        const types = [];
-        const values = [];
-        const getBaseType = (type) => {
-            if (!type || !_isString(type) || !type.length)
-                throw new Error("Invalid parameter type provided: " + type);
-
-            return type.match(/^([^\x5b]*)(\x5b|$)/)[0];
-        }
-
-        const getTypes = (_obj) => {
-            if (_isArray(_obj)) {
-                return _obj.map(function (_) {
-                  return getTypes(_);
-                });
-            }
-
-            let { type, value } = _obj;
-            const baseType = getBaseType(type);
-            switch (baseType) {
-                case "trcToken":
-                case "trcToken[":
-                    type = type.replace(/trcToken/, "uint256");
-                    break;
-                case "tuple":
-                    type = `tuple(${getTypes(value).join(",")})`;
-                    break;
-                case "tuple[":
-                    type = `tuple(${getTypes(value[0]).join(
-                        ","
-                    )})${type.replace(/tuple/, "")}`;
-                    break;
-                default:
-                    break;
-            }
-
-            return type;
-        }
-
-        const getValues = (_obj) => {
-            if (_isArray(_obj)) {
-                return _obj.map(function (_) {
-                    return getValues(_);
-                });
-            }
-
-            const getHexAddress = (_addr) => {
-                if (_isArray(_addr)) {
-                    return _addr.map((_) => {
-                        return getHexAddress(_);
-                    });
-                }
-
-                return TronWeb.address.toHex(_addr).replace(ADDRESS_PREFIX_REGEX, "0x");
-            }
-
-            const getTupleValue = (_value) => {
-                if (_isArray(_value)) {
-                    return _value.map((_) => {
-                        return getTupleValue(_);
-                    });
-                }
-
-                return getValues(_value);
-            }
-
-            let { type, value } = _obj;
-
-            const baseType = getBaseType(type);
-            switch (baseType) {
-                case "address":
-                case "address[":
-                    value = getHexAddress(value);
-                    break;
-                case "tuple":
-                case "tuple[":
-                    value = getTupleValue(value);
-                    break;
-                default:
-                    break;
-            }
-
-            return value;
-        }
-
-        _params.forEach((_) => {
-            types.push(getTypes(_));
-            values.push(getValues(_));
-        });
-
-        return { types, values };
-    }
-
-    const { types, values } = formatParams(parameters);
-    console.log(JSON.stringify(types), JSON.stringify(values), abiCoder.encode(types, values).replace(/^(0x)/, ""),'result')
-    return abiCoder.encode(types, values).replace(/^(0x)/, "");
-}
-
 function extractSize (type) {
   const size = type.match(/([a-zA-Z0-9])(\[.*\])/);
   return size ? size[2] : '';
+}
+
+function extractSizeDimensions (type) {
+  const size = extractSize(type)
+  return (size.match(/\]\[/g) || []).length + 1;
 }
 
 export function encodeParamsV2ByABI(funABI, args) {
@@ -210,6 +116,33 @@ export function encodeParamsV2ByABI(funABI, args) {
       }
     }
 
+    const convertAddresses = addrArr => {
+      if (Array.isArray(addrArr)) {
+        addrArr.forEach((addrs, i) => {
+          addrArr[i] = convertAddresses(addrs);
+        });
+        return addrArr;
+      } else {
+        return _addressToHex(addrArr)
+      }
+    };
+
+    const mapTuple = (components, args, dimension) => {
+      if (dimension > 1) {
+        if (args.length) {
+          args.forEach(arg => {
+            mapTuple(components, arg, dimension - 1);
+          });
+        }
+      } else {
+        if (args.length && dimension) {
+          args.forEach(arg => {
+            encodeArgs(components, arg);
+          });
+        }
+      }
+    };
+
     const encodeArgs = (inputs = [], args) => {
       if (inputs.length)
         inputs.forEach((input, i) => {
@@ -218,13 +151,11 @@ export function encodeParamsV2ByABI(funABI, args) {
           if (args[i])
             if (type === 'address') args[i] = _addressToHex(args[i]);
             else if (type.match(/^([^\x5b]*)(\x5b|$)/)[0] === 'address[')
-              args[i] = args[i].map(v => _addressToHex(v));
+              convertAddresses(args[i])
             else if (type.indexOf('tuple') === 0)
               if (extractSize(type)) {
-                if (args[i].length)
-                  args[i].forEach(arg => {
-                    encodeArgs(input.components, arg);
-                  });
+                const dimension = extractSizeDimensions(type);
+                mapTuple(input.components, args[i], dimension);
               } else encodeArgs(input.components, args[i]);
         });
     };
@@ -250,7 +181,6 @@ export function encodeParamsV2ByABI(funABI, args) {
     return abiCoder.encode(types, args);
 }
 
-
 export function decodeParamsV2ByABI(funABI, data) {
   const convertTypeNames = (types) => {
     for (let i = 0; i < types.length; i++) {
@@ -259,6 +189,33 @@ export function decodeParamsV2ByABI(funABI, data) {
         types[i] = type.replace(/^trcToken/, 'uint256')
     }
   }
+
+  const convertAddresses = addrArr => {
+    if (Array.isArray(addrArr)) {
+      addrArr.forEach((addrs, i) => {
+        addrArr[i] = convertAddresses(addrs);
+      });
+      return addrArr;
+    } else {
+      return TronWeb.address.toHex(addrArr)
+    }
+  };
+
+  const mapTuple = (components, args, dimension) => {
+    if (dimension > 1) {
+      if (args.length) {
+        args.forEach(arg => {
+          mapTuple(components, arg, dimension - 1);
+        });
+      }
+    } else {
+      if (args.length && dimension) {
+        args.forEach(arg => {
+          decodeResult(components, arg);
+        });
+      }
+    }
+  };
 
   const buildFullTypeNameDefinition = (typeDef) => {
     if (typeDef && typeDef.type.indexOf('tuple') === 0 && typeDef.components) {
@@ -283,15 +240,13 @@ export function decodeParamsV2ByABI(funABI, data) {
             if(name) result[name] = TronWeb.address.toHex(result[name]);
           }
           else if (type.match(/^([^\x5b]*)(\x5b|$)/)[0] === 'address[') {
-            result[i] = result[i].map(v => TronWeb.address.toHex(v));
-            if(name) result[name] = result[name].map(v => TronWeb.address.toHex(v));
+            convertAddresses(result[i])
+            if(name) convertAddresses(result[name])
           }
           else if (type.indexOf('tuple') === 0)
             if (extractSize(type)) {
-              if (result[i].length)
-                result[i].forEach(res => {
-                  decodeResult(output.components, res);
-                });
+              const dimension = extractSizeDimensions(type);
+              mapTuple(output.components, result[i], dimension);
             } else decodeResult(output.components, result[i]);
       });
   };

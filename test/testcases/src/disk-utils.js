@@ -15,6 +15,13 @@ function loadTests(tag) {
    return JSON.parse(zlib.gunzipSync(fs.readFileSync(filename)).toString());
 }
 
+function loadTestsJSON(tag) {
+  let filename = path.resolve(__dirname, '../', tag + '.json');
+  return JSON.parse(fs.readFileSync(filename).toString());
+  // let filename = path.resolve(__dirname, '../', tag + '.json');
+  // return JSON.parse(fs.readFileSync(filename)).toString();
+}
+
 function loadData(filename) {
    return fs.readFileSync(path.resolve(__dirname, filename));
 }
@@ -31,5 +38,6 @@ module.exports = {
   saveTests,
   loadTests,
   loadData,
-  saveJson
+  saveJson,
+  loadTestsJSON
 }

@@ -1,10 +1,10 @@
 import TronWeb from 'index';
 import utils from 'utils';
 import {AbiCoder} from 'utils/ethersUtils';
-import { encodeParamsV2 } from 'utils/abi';
 import Validator from 'paramValidator';
 import {ADDRESS_PREFIX_REGEX} from 'utils/address';
 import injectpromise from 'injectpromise';
+import { encodeParamsV2ByABI } from 'utils/abi';
 
 let self;
 
@@ -826,15 +826,49 @@ export default class TransactionBuilder {
             owner_address: toHex(issuerAddress)
         };
 
+
         if (functionSelector && utils.isString(functionSelector)) {
             functionSelector = functionSelector.replace('/\s*/g', '');
             if (parameters.length) {
+                const abiCoder = new AbiCoder();
+                let types = [];
+                const values = [];
+
+                for (let i = 0; i < parameters.length; i++) {
+                    let {type, value} = parameters[i];
+
+                    if (!type || !utils.isString(type) || !type.length)
+                        return callback('Invalid parameter type provided: ' + type);
+
+                    if (type === 'address')
+                        value = toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
+                    else if (type.match(/^([^\x5b]*)(\x5b|$)/)[0] === 'address[')
+                        value = value.map(v => toHex(v).replace(ADDRESS_PREFIX_REGEX, '0x'));
+
+                    types.push(type);
+                    values.push(value);
+                }
+
                 try {
-                  parameters = encodeParamsV2([...parameters])
-                } catch(ex) {
-                  return callback(ex);
+                    // workaround for unsupported trcToken type
+                    types = types.map(type => {
+                        if (/trcToken/.test(type)) {
+                            type = type.replace(/trcToken/, 'uint256')
+                        }
+                        return type
+                    })
+
+                    parameters = abiCoder.encode(types, values).replace(/^(0x)/, '');
+
+                } catch (ex) {
+                    return callback(ex);
                 }
             } else parameters = '';
+
+            // work for abiv2 if passed the function abi in options
+            if(options.funcABIV2) {
+                parameters = encodeParamsV2ByABI(options.funcABIV2, options.parametersV2)
+            }
 
             if (options.shieldedParameter && utils.isString(options.shieldedParameter)) {
                 parameters = options.shieldedParameter.replace(/^(0x)/, '');
