@@ -182,7 +182,7 @@ export function encodeParamsV2(parameters) {
     return abiCoder.encode(types, values).replace(/^(0x)/, "");
 }
 
-export function extractSize (type) {
+function extractSize (type) {
   const size = type.match(/([a-zA-Z0-9])(\[.*\])/);
   return size ? size[2] : '';
 }
