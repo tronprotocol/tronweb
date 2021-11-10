@@ -7,6 +7,9 @@ const getFunctionSelector = abi => {
     abi.stateMutability = abi.stateMutability ? abi.stateMutability.toLowerCase() : 'nonpayable';
     abi.type = abi.type ? abi.type.toLowerCase() : '';
     let iface = new utils.ethersUtils.Interface([abi]);
+    if(abi.type === 'event') {
+      return iface.getEvents(abi.name).format(utils.ethersUtils.FormatTypes.sighash);
+    }
     return iface.getFunction(abi.name).format(utils.ethersUtils.FormatTypes.sighash)
 }
 
@@ -77,6 +80,7 @@ export default class Method {
             ...this.defaultOptions,
             from: this.tronWeb.defaultAddress.hex,
             ...options,
+            _isConstant: true
         };
 
         const parameters = args.map((value, index) => ({

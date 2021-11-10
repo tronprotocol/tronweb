@@ -292,7 +292,7 @@ describe("TronWeb.sidechain", function () {
         });
 
         it('should throw if an invalid fee limit is passed', async function () {
-            const feeLimit = 0.5;
+            const feeLimit = -1;
             await assertThrow(
                 tronWeb.sidechain.mappingTrc20(HASH20, MAPPING_FEE, feeLimit),
                 'Invalid feeLimit provided'
@@ -438,7 +438,7 @@ describe("TronWeb.sidechain", function () {
             });
 
             it('should throw if an invalid fee limit is passed', async function () {
-                const feeLimit = 0.5;
+                const feeLimit = -1;
                 await assertThrow(
                     tronWeb.sidechain.withdrawTrc10(TOKEN_ID, 100, WITHDRAW_FEE, feeLimit),
                     'Invalid feeLimit provided'
@@ -497,11 +497,15 @@ describe("TronWeb.sidechain", function () {
                 });
 
                 it('should throw if an invalid fee limit is passed', async function () {
-                    const feeLimit = -1;
-                    await assertThrow(
-                        tronWeb.sidechain.withdrawTrc20(100, WITHDRAW_FEE, feeLimit, ADDRESS20_MAPPING),
-                        'Invalid feeLimit provided'
-                    );
+                    const feeLimit = 100000000000;
+                    const num = 10;
+                    const options = { permissionId: 0 };
+                    const txID = await tronWeb.sidechain.withdrawTrc20(num, WITHDRAW_FEE, FEE_LIMIT, ADDRESS20_MAPPING, options, PRIVATE_KEY);
+                    assert.equal(txID.length, 64);
+                    // await assertThrow(
+                    //     tronWeb.sidechain.withdrawTrc20(100, WITHDRAW_FEE, feeLimit, ADDRESS20_MAPPING),
+                    //     'Invalid feeLimit provided'
+                    // );
                 });
 
                 it('should throw if an invalid contract address is passed', async function () {
