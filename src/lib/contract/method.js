@@ -4,6 +4,8 @@ import {encodeParamsV2ByABI, decodeParamsV2ByABI} from 'utils/abi';
 import injectpromise from 'injectpromise';
 
 const getFunctionSelector = abi => {
+    abi.stateMutability = abi.stateMutability ? abi.stateMutability.toLowerCase() : 'nonpayable';
+    abi.type = abi.type ? abi.type.toLowerCase() : '';
     let iface = new utils.ethersUtils.Interface([abi]);
     return iface.getFunction(abi.name).format(utils.ethersUtils.FormatTypes.sighash)
 }
@@ -42,9 +44,9 @@ export default class Method {
     onMethod(...args) {
       const rawParameter = encodeParamsV2ByABI(this.abi, args);
       return {
-          call: (...methodArgs) => this._call([], [], {...methodArgs, rawParameter, _isConstant: true} ),
-          send: (...methodArgs) => this._send([], [], {...methodArgs, rawParameter}),
-          watch: (...methodArgs) => this._watch(...methodArgs)
+          call: (options = {}, cb = false) => this._call([], [], Object.assign(options, { rawParameter, _isConstant: true }), cb),
+          send: (options = {}, pk = this.tronWeb.defaultPrivateKey, cb = false) => this._send([], [], Object.assign(options, { rawParameter }), pk, cb),
+          watch: (options = {}) => this._watch(options)
       }
     }
 
@@ -240,7 +242,7 @@ export default class Method {
                 if (options.rawResponse)
                     return callback(null, output);
 
-                let decoded = decodeOutput(this.outputs, '0x' + output.contractResult[0]);
+                let decoded = decodeOutput(this.abi, '0x' + output.contractResult[0]);
 
                 if (decoded.length === 1)
                     decoded = decoded[0];

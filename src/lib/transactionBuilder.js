@@ -866,7 +866,7 @@ export default class TransactionBuilder {
             } else parameters = '';
 
             // work for abiv2 if passed the function abi in options
-            if(options.funcABIV2) {
+            if (options.funcABIV2) {
                 parameters = encodeParamsV2ByABI(options.funcABIV2, options.parametersV2)
             }
 
