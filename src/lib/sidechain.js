@@ -265,8 +265,7 @@ export default class SideChain {
                 name: 'feeLimit',
                 type: 'integer',
                 value: feeLimit,
-                gte: 0,
-                lte: MAX_FEE_LIMIT
+                gte: 0
             },
             {
                 name: 'tokenId',
