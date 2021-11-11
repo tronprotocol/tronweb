@@ -175,7 +175,6 @@ In order to contribute you can
 __4.0.1__
 - set _isConstant as true for call method
 - ignore max feeLimit check
-- update axios to the latest version 0.24.0
 - change git repository url
 
 __4.0.0__
