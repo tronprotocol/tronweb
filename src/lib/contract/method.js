@@ -92,6 +92,7 @@ export default class Method {
             ...this.defaultOptions,
             from: this.tronWeb.defaultAddress.hex,
             ...options,
+            _isConstant: true
         };
 
         const parameters = args.map((value, index) => ({

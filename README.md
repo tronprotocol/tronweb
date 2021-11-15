@@ -172,6 +172,11 @@ In order to contribute you can
 
 ## Recent History
 
+__4.0.1__
+- set _isConstant as true for call method
+- ignore max feeLimit check
+- change git repository url
+
 __4.0.0__
 - support `broadcastHex` method
 - ignore fullnode version check when calling `createToken` method
