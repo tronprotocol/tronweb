@@ -6,9 +6,10 @@ import injectpromise from 'injectpromise';
 const getFunctionSelector = abi => {
     abi.stateMutability = abi.stateMutability ? abi.stateMutability.toLowerCase() : 'nonpayable';
     abi.type = abi.type ? abi.type.toLowerCase() : '';
+    if(abi.type === 'fallback' || abi.type === 'receive') return '0x';
     let iface = new utils.ethersUtils.Interface([abi]);
     if(abi.type === 'event') {
-      return iface.getEvents(abi.name).format(utils.ethersUtils.FormatTypes.sighash);
+      return iface.getEvent(abi.name).format(utils.ethersUtils.FormatTypes.sighash);
     }
     return iface.getFunction(abi.name).format(utils.ethersUtils.FormatTypes.sighash)
 }
@@ -45,11 +46,14 @@ export default class Method {
     }
 
     onMethod(...args) {
-      const rawParameter = encodeParamsV2ByABI(this.abi, args);
+      let rawParameter = '';
+      if(this.abi && !/event/i.test(this.abi.type)) {
+          rawParameter = encodeParamsV2ByABI(this.abi, args);
+      }
       return {
           call: (options = {}, cb = false) => this._call([], [], Object.assign(options, { rawParameter, _isConstant: true }), cb),
           send: (options = {}, pk = this.tronWeb.defaultPrivateKey, cb = false) => this._send([], [], Object.assign(options, { rawParameter }), pk, cb),
-          watch: (options = {}) => this._watch(options)
+          watch: (options = {}, cb = false) => this._watch(options, cb)
       }
     }
 

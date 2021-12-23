@@ -4,7 +4,7 @@ import {AbiCoder} from 'utils/ethersUtils';
 import Validator from 'paramValidator';
 import {ADDRESS_PREFIX_REGEX} from 'utils/address';
 import injectpromise from 'injectpromise';
-import { encodeParamsV2ByABI } from 'utils/abi';
+import {encodeParamsV2ByABI} from 'utils/abi';
 
 let self;
 
@@ -647,6 +647,8 @@ export default class TransactionBuilder {
 
         if (options.rawParameter && utils.isString(options.rawParameter)) {
             parameters = options.rawParameter.replace(/^(0x)/, '');
+        } else if (options.funcABIV2) {
+            parameters = encodeParamsV2ByABI(options.funcABIV2, options.parametersV2).replace(/^(0x)/, '');
         } else {
             var constructorParams = abi.find(
                 (it) => {
@@ -867,7 +869,7 @@ export default class TransactionBuilder {
 
             // work for abiv2 if passed the function abi in options
             if (options.funcABIV2) {
-                parameters = encodeParamsV2ByABI(options.funcABIV2, options.parametersV2)
+                parameters = encodeParamsV2ByABI(options.funcABIV2, options.parametersV2).replace(/^(0x)/, '');
             }
 
             if (options.shieldedParameter && utils.isString(options.shieldedParameter)) {

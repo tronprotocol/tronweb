@@ -8,19 +8,9 @@ function _isArray(_array) {
     return Array.isArray(_array);
 }
 
-function _isString(_string) {
-    return (
-        typeof _string === "string" ||
-        (_string &&
-            _string.constructor &&
-            _string.constructor.name === "String")
-    );
-}
-
 function _addressToHex(value) {
     return TronWeb.address.toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
 }
-
 
 function deepCopy(target) {
     if (

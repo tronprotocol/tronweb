@@ -18,8 +18,6 @@ function loadTests(tag) {
 function loadTestsJSON(tag) {
   let filename = path.resolve(__dirname, '../', tag + '.json');
   return JSON.parse(fs.readFileSync(filename).toString());
-  // let filename = path.resolve(__dirname, '../', tag + '.json');
-  // return JSON.parse(fs.readFileSync(filename)).toString();
 }
 
 function loadData(filename) {
