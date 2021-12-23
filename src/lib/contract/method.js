@@ -1,20 +1,21 @@
 import utils from 'utils';
 import {ADDRESS_PREFIX_REGEX} from 'utils/address';
+import {encodeParamsV2ByABI, decodeParamsV2ByABI} from 'utils/abi';
 import injectpromise from 'injectpromise';
 
 const getFunctionSelector = abi => {
-    return abi.name + '(' + getParamTypes(abi.inputs || []).join(',') + ')';
-}
-
-const getParamTypes = params => {
-    return params.map(({type}) => type);
+    abi.stateMutability = abi.stateMutability ? abi.stateMutability.toLowerCase() : 'nonpayable';
+    abi.type = abi.type ? abi.type.toLowerCase() : '';
+    if(abi.type === 'fallback' || abi.type === 'receive') return '0x';
+    let iface = new utils.ethersUtils.Interface([abi]);
+    if(abi.type === 'event') {
+      return iface.getEvent(abi.name).format(utils.ethersUtils.FormatTypes.sighash);
+    }
+    return iface.getFunction(abi.name).format(utils.ethersUtils.FormatTypes.sighash)
 }
 
 const decodeOutput = (abi, output) => {
-    const names = abi.map(({name}) => name).filter(name => !!name);
-    const types = abi.map(({type}) => type);
-
-    return utils.abi.decodeParams(names, types, output);
+    return decodeParamsV2ByABI(abi, output)
 };
 
 export default class Method {
@@ -45,24 +46,15 @@ export default class Method {
     }
 
     onMethod(...args) {
-        const types = getParamTypes(this.inputs);
-
-        args.forEach((arg, index) => {
-            if (types[index] === 'address')
-                args[index] = this.tronWeb.address.toHex(arg).replace(ADDRESS_PREFIX_REGEX, '0x')
-
-            if (types[index].match(/^([^\x5b]*)(\x5b|$)/)[0] === 'address[') {
-                args[index] = args[index].map(address => {
-                    return this.tronWeb.address.toHex(address).replace(ADDRESS_PREFIX_REGEX, '0x')
-                })
-            }
-        });
-
-        return {
-            call: (...methodArgs) => this._call(types, args, ...methodArgs),
-            send: (...methodArgs) => this._send(types, args, ...methodArgs),
-            watch: (...methodArgs) => this._watch(...methodArgs)
-        }
+      let rawParameter = '';
+      if(this.abi && !/event/i.test(this.abi.type)) {
+          rawParameter = encodeParamsV2ByABI(this.abi, args);
+      }
+      return {
+          call: (options = {}, cb = false) => this._call([], [], Object.assign(options, { rawParameter, _isConstant: true }), cb),
+          send: (options = {}, pk = this.tronWeb.defaultPrivateKey, cb = false) => this._send([], [], Object.assign(options, { rawParameter }), pk, cb),
+          watch: (options = {}, cb = false) => this._watch(options, cb)
+      }
     }
 
     async _call(types, args, options = {}, callback = false) {
@@ -130,7 +122,7 @@ export default class Method {
                         return callback(msg)
                     }
 
-                    let output = decodeOutput(this.outputs, '0x' + transaction.constant_result[0]);
+                    let output = decodeOutput(this.abi, '0x' + transaction.constant_result[0]);
 
                     if (output.length === 1)
                         output = output[0];
@@ -258,7 +250,7 @@ export default class Method {
                 if (options.rawResponse)
                     return callback(null, output);
 
-                let decoded = decodeOutput(this.outputs, '0x' + output.contractResult[0]);
+                let decoded = decodeOutput(this.abi, '0x' + output.contractResult[0]);
 
                 if (decoded.length === 1)
                     decoded = decoded[0];
