@@ -172,10 +172,14 @@ In order to contribute you can
 
 ## Recent History
 
+__4.1.0__
+- add `encodeParamsV2ByABI` and `decodeParamsV2ByABI` functions in `tronWeb.utils.abi` lib
+- support abi v2 for `triggerSmartContract`, `createSmartContract`, `call` and `send` method
+- update discord group link
+
 __4.0.1__
 - set _isConstant as true for call method
 - ignore max feeLimit check
-- update axios to the latest version 0.24.0
 - change git repository url
 
 __4.0.0__

@@ -78,7 +78,7 @@ function extractSize (type) {
   return size ? size[2] : '';
 }
 
-function extractSizeDimensions (type) {
+function extractArrayDim (type) {
   const size = extractSize(type)
   return (size.match(/\]\[/g) || []).length + 1;
 }
@@ -144,7 +144,7 @@ export function encodeParamsV2ByABI(funABI, args) {
               convertAddresses(args[i])
             else if (type.indexOf('tuple') === 0)
               if (extractSize(type)) {
-                const dimension = extractSizeDimensions(type);
+                const dimension = extractArrayDim(type);
                 mapTuple(input.components, args[i], dimension);
               } else encodeArgs(input.components, args[i]);
         });
@@ -235,7 +235,7 @@ export function decodeParamsV2ByABI(funABI, data) {
           }
           else if (type.indexOf('tuple') === 0)
             if (extractSize(type)) {
-              const dimension = extractSizeDimensions(type);
+              const dimension = extractArrayDim(type);
               mapTuple(output.components, result[i], dimension);
             } else decodeResult(output.components, result[i]);
       });
