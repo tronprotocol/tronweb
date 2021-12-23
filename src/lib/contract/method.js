@@ -51,7 +51,7 @@ export default class Method {
           rawParameter = encodeParamsV2ByABI(this.abi, args);
       }
       return {
-          call: (options = {}, cb = false) => this._call([], [], Object.assign(options, { rawParameter, _isConstant: true }), cb),
+          call: (options = {}, cb = false) => this._call([], [], Object.assign(options, { rawParameter }), cb),
           send: (options = {}, pk = this.tronWeb.defaultPrivateKey, cb = false) => this._send([], [], Object.assign(options, { rawParameter }), pk, cb),
           watch: (options = {}, cb = false) => this._watch(options, cb)
       }
