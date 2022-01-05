@@ -51,9 +51,35 @@ export default class Method {
           rawParameter = encodeParamsV2ByABI(this.abi, args);
       }
       return {
-          call: (options = {}, cb = false) => this._call([], [], Object.assign(options, { rawParameter }), cb),
-          send: (options = {}, pk = this.tronWeb.defaultPrivateKey, cb = false) => this._send([], [], Object.assign(options, { rawParameter }), pk, cb),
-          watch: (options = {}, cb = false) => this._watch(options, cb)
+          call: (options = {}, callback = false) => {
+              if (utils.isFunction(options)) {
+                  callback = options;
+                  options = {};
+              }
+              options = {
+                ...options,
+                rawParameter
+              };
+
+              return this._call([], [], options, callback);
+          },
+          send: (options = {}, privateKey = this.tronWeb.defaultPrivateKey, callback = false) => {
+              if (utils.isFunction(privateKey)) {
+                  callback = privateKey;
+                  privateKey = this.tronWeb.defaultPrivateKey;
+              }
+              if (utils.isFunction(options)) {
+                callback = options;
+                options = {};
+              }
+              options = {
+                ...options,
+                rawParameter
+              };
+
+              return this._send([], [], options, privateKey, callback);
+          },
+          watch: (...methodArgs) => this._watch(...methodArgs)
       }
     }
 
