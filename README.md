@@ -175,6 +175,8 @@ In order to contribute you can
 __4.1.0__
 - add `encodeParamsV2ByABI` and `decodeParamsV2ByABI` functions in `tronWeb.utils.abi` lib
 - support abi v2 for `triggerSmartContract`, `createSmartContract`, `call` and `send` method
+- update `validator` to version 13.7.0
+- update `axios` t0 version 0.24.0
 - update discord group link
 
 __4.0.1__
