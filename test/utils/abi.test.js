@@ -1,8 +1,13 @@
+
 const chai = require('chai');
 const {ADDRESS_HEX, ADDRESS_BASE58} = require('../helpers/config');
 const tronWebBuilder = require('../helpers/tronWebBuilder');
-
+const testUtils = require('../helpers/testUtils');
+const { loadTests } = require('../testcases/src/disk-utils');
+const ethers = require('ethers');
 const assert = chai.assert;
+
+const { equals, getValues } = testUtils;
 
 describe('TronWeb.utils.abi', function () {
 
@@ -94,7 +99,6 @@ describe('TronWeb.utils.abi', function () {
         });
     });
 
-
     describe('#encodeParams()', function () {
         it('should encode abi coded params passing types and values', function () {
 
@@ -136,4 +140,81 @@ describe('TronWeb.utils.abi', function () {
             }
         });
     });
+
+    describe('#encodeParamsV2ByABI()-(v1 input)', function() {
+      const tronWeb = tronWebBuilder.createInstance();
+      let coder = tronWeb.utils.abi;
+
+      let tests = loadTests('contract-interface');
+      tests.forEach((test) => {
+          let { normalizedValues, result, interface } = test;
+          const funcABI = JSON.parse(interface);
+          const inputValues = getValues(JSON.parse(normalizedValues))
+          funcABI[0].inputs = funcABI[0].outputs;
+          let title = test.name + ' => (' + test.types + ') = (' + test.normalizedValues + ')';
+          it(('encodes parameters - ' + test.name + ' - ' + test.types), function() {
+              this.timeout(120000);
+              const encoded = coder.encodeParamsV2ByABI(funcABI[0], inputValues);
+              assert.equal(encoded, result, 'encoded data - ' + title);
+
+          });
+      });
+    });
+
+    describe('#encodeParamsV2ByABI()-(v2 input)', function() {
+      const tronWeb = tronWebBuilder.createInstance();
+      let coder = tronWeb.utils.abi;
+
+      let tests = loadTests('contract-interface-abi2');
+      tests.forEach((test) => {
+          let { values, result, interface } = test;
+          const funcABI = JSON.parse(interface);
+          const inputValues = getValues(JSON.parse(values));
+          funcABI[0].inputs = funcABI[0].outputs;
+          let title = test.name + ' => (' + test.types + ') = (' + test.normalizedValues + ')';
+          it(('encodes parameters - ' + test.name + ' - ' + test.types), function() {
+              this.timeout(120000);
+              const encoded = coder.encodeParamsV2ByABI(funcABI[0], inputValues);
+              assert.equal(encoded, result, 'encoded data - ' + title);
+
+          });
+      });
+    });
+
+    describe('#decodeParamsV2ByABI()-(v1 output)', function() {
+      const tronWeb = tronWebBuilder.createInstance();
+      let coder = tronWeb.utils.abi;
+
+      let tests = loadTests('contract-interface');
+      tests.forEach((test) => {
+          let { normalizedValues, result, interface } = test;
+          const funcABI = JSON.parse(interface);
+          const outputValues = getValues(JSON.parse(normalizedValues))
+          let title = test.name + ' => (' + test.types + ') = (' + test.normalizedValues + ')';
+          it(('decodes parameters - ' + test.name + ' - ' + test.types), function() {
+              this.timeout(120000);
+              const decoded = coder.decodeParamsV2ByABI(funcABI[0], result);
+              assert.ok(equals(decoded, outputValues), 'decoded data - ' + title);
+          });
+      });
+    });
+
+    describe('#decodeParamsV2ByABI()-(v2 output)', function() {
+      const tronWeb = tronWebBuilder.createInstance();
+      let coder = tronWeb.utils.abi;
+
+      let tests = loadTests('contract-interface-abi2');
+      tests.forEach((test) => {
+          let { values, result, interface } = test;
+          const funcABI = JSON.parse(interface);
+          const outputValues = getValues(JSON.parse(values))
+          let title = test.name + ' => (' + test.types + ') = (' + test.normalizedValues + ')';
+          it(('decodes parameters - ' + test.name + ' - ' + test.types), function() {
+              this.timeout(120000);
+              const decoded = coder.decodeParamsV2ByABI(funcABI[0], result);
+              assert.ok(equals(decoded, outputValues), 'decoded data - ' + title);
+          });
+      });
+    });
 });
+

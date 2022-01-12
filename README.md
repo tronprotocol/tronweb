@@ -3,19 +3,19 @@
 </h1>
 
 <p align="center">
-  <a href="https://discord.gg/GsRgsTD">
+  <a href="https://discord.gg/FgvVFQgdCW">
     <img src="https://img.shields.io/badge/chat-on%20discord-brightgreen.svg">
   </a>
 
-  <a href="https://github.com/tron-us/tronweb/issues">
+  <a href="https://github.com/tronprotocol/tronweb/issues">
     <img src="https://img.shields.io/github/issues/tron-us/tronweb.svg">
   </a>
 
-  <a href="https://github.com/tron-us/tronweb/pulls">
+  <a href="https://github.com/tronprotocol/tronweb/pulls">
     <img src="https://img.shields.io/github/issues-pr/tron-us/tronweb.svg">
   </a>
 
-  <a href="https://github.com/tron-us/tronweb/graphs/contributors">
+  <a href="https://github.com/tronprotocol/tronweb/graphs/contributors">
     <img src="https://img.shields.io/github/contributors/tron-us/tronweb.svg">
   </a>
 
@@ -171,6 +171,13 @@ In order to contribute you can
 * push your changes and open a pull request
 
 ## Recent History
+
+__4.1.0__
+- add `encodeParamsV2ByABI` and `decodeParamsV2ByABI` functions in `tronWeb.utils.abi` lib
+- support abi v2 for `triggerSmartContract`, `createSmartContract`, `call` and `send` method
+- update `validator` to version 13.7.0
+- update `axios` t0 version 0.24.0
+- update discord group link
 
 __4.0.1__
 - set _isConstant as true for call method

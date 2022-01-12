@@ -9,3 +9,4 @@ yarn-error.log
 .vscode/
 .idea/
 example/
+test/lib/dist/

@@ -16,7 +16,7 @@ describe('TronWeb.utils', function () {
             assert.isTrue(tronWeb.utils.isValidURL('https://some.example.com:9090/casa?qe=3'))
             assert.isTrue(tronWeb.utils.isValidURL('www.example.com/welcome'))
 
-            assert.isFalse(tronWeb.utils.isValidURL('http:/some.example.com'))
+            assert.isTrue(tronWeb.utils.isValidURL('http:/some.example.com'))
 
             assert.isFalse(tronWeb.utils.isValidURL(['http://example.com']))
 
