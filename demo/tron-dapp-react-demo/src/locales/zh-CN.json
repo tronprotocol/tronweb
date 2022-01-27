@@ -1,38 +1,9 @@
 {
-  "navi": {
-    "wallet_linkbtn": "连接钱包",
-    "index_btn": "首页",
-    "index_btn1": "首页1",
-    "index_btn2": "首页2",
-    "white_paper": "白皮书",
-    "report": "审计报告",
-    "twitter": "推特",
-    "telegram": "电报",
-    "help": "帮助"
-  },
-  "login_modal": {
-    "tronlink": "TronLink 钱包",
-    "no_tronlink_tip": {
-      "tip1": "还没安装 TronLink？",
-      "tip2": "请点击此处>>"
-    },
-    "initializing": "正在初始化...",
-    "login_tips": "请使用  <a href='https://chrome.google.com/webstore/detail/tronlink%EF%BC%88%E6%B3%A2%E5%AE%9D%E9%92%B1%E5%8C%85%EF%BC%89/ibnejdfjmmkpcnlpebklmnkoeoihofec'>TronLink 钱包 </a>进行连接"
-  },
   "account_modal": {
     "account": "账户",
     "connect_with_tronlink": "已连接 TronLink",
     "copy": "复制",
     "copied": "已复制"
-  },
-  "wallet": {
-    "accept_tips": "连接则代表您已接受",
-    "service": "服务条款",
-    "privacy": "隐私协议",
-    "no_wallet": "还没有TronLink钱包？",
-    "click_to_get": "点击获取",
-    "authorize_justlend": "您需要在钱包中确认以连接JustLend",
-    "use_justlend": "请连接钱包以开始使用JustLend"
   },
   "deposit": {
     "deposit": "存款",
@@ -69,9 +40,5 @@
     "to": "接受地址",
     "confirm": "确认"
   },
-  "no_data": "无数据",
-  "footer": {
-    "audit": "审计报告",
-    "develop": "API文档"
-  }
+  "no_data": "无数据"
 }
