@@ -1,38 +1,9 @@
 {
-  "navi": {
-    "wallet_linkbtn": "Connect Wallet",
-    "index_btn": "Home",
-    "index_btn1": "Home1",
-    "index_btn2": "Home2",
-    "white_paper": "Whitepaper",
-    "report": "Audit Report",
-    "twitter": "Twitter",
-    "telegram": "Telegram",
-    "help": "Help"
-  },
-  "login_modal": {
-    "tronlink": "TronLink Wallet",
-    "no_tronlink_tip": {
-      "tip1": "Haven't installed TronLink yet?",
-      "tip2": "Click here>>"
-    },
-    "initializing": "Initializing...",
-    "login_tips": "Go to <a href='https://chrome.google.com/webstore/detail/tronlink%EF%BC%88%E6%B3%A2%E5%AE%9D%E9%92%B1%E5%8C%85%EF%BC%89/ibnejdfjmmkpcnlpebklmnkoeoihofec'>TronLink Wallet</a> for connection."
-  },
   "account_modal": {
     "account": "Account",
     "connect_with_tronlink": "Connected with TronLink",
     "copy": "Copy",
     "copied": "Copied"
-  },
-  "wallet": {
-    "accept_tips": "Choosing to connect indicates that you have accepted",
-    "service": "Terms of Use",
-    "privacy": "Privacy Policy",
-    "no_wallet": "No TronLink Wallet?",
-    "click_to_get": "Click to download TronLink",
-    "authorize_justlend": "You need to confirm in your wallet for connection to JustLend",
-    "use_justlend": "Please connect to TronLink wallet to use JustLend"
   },
   "deposit": {
     "deposit": "Supply",
@@ -69,9 +40,5 @@
     "to": "Recieve Address",
     "confirm": "Transfer"
   },
-  "no_data": "No Data",
-  "footer": {
-    "audit": "Audit Report",
-    "develop": "API Doc"
-  }
+  "no_data": "No Data"
 }
