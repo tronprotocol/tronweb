@@ -101,7 +101,7 @@ class UserList extends React.Component {
         title: intl.get('table.balance'),
         dataIndex: 'balance',
         key: '3',
-        render: (text, item) => <span> {formatNumber({ text })}</span>
+        render: (text, item) => <span> {isNaN(text) ? '--' : formatNumber({ text })}</span>
       },
       {
         title: intl.get('table.transfer'),
