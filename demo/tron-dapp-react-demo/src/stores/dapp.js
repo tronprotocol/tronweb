@@ -20,7 +20,7 @@ export default class NetworkStore {
   };
 
   getUserList = async () => {
-    const account = this.rootStore.network.defaultAccount;
+    const account = window.defaultAccount;
     if (!account) return;
     const res = await getUserList(account);
     if (!res.success) return;

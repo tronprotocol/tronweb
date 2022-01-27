@@ -184,15 +184,21 @@ export default class NetworkStore {
           clearInterval(tmpTimer1);
         }
         if (window.tronWeb && window.tronWeb.ready) {
-          if (process.env.REACT_APP_ENV === 'test') {
-            window.tronWeb.setFullNode('https://api.nileex.io');
+          if (process.env.REACT_APP_ENV === 'test' || process.env.REACT_APP_ENV === 'qaTest') {
+            window.tronWeb.setFullNode(Config.chain.fullHost);
+            window.tronWeb.setSolidityNode(Config.chain.fullHost);
+          }
+          const { trongrid } = Config;
+
+          if (trongrid && window.tronWeb.setHeader && window.tronWeb.fullNode.host === trongrid.host) {
+            window.tronWeb.setHeader({ 'TRON-PRO-API-KEY': trongrid.key });
           }
           self.tronWeb = window.tronWeb;
           self.defaultAccount = self.tronWeb.defaultAddress.base58;
           window.defaultAccount = self.defaultAccount;
           self.isConnected = true;
           cb && cb();
-          // this.setVariablesInterval(); // 全局定时任务
+          this.setVariablesInterval(); // 全局定时任务
           clearInterval(tmpTimer1);
         }
       }, 1000);

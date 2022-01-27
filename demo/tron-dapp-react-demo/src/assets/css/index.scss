@@ -155,9 +155,9 @@ button,
 }
 
 @font-face {
-  font-family: 'Roboto';
-  src: url('../font/Roboto/Roboto-Black.ttf');
-  src: url('../font/Roboto/Roboto-Black.ttf') format('truetype');
+  // font-family: 'Roboto';
+  // src: url('../font/Roboto/Roboto-Black.ttf');
+  // src: url('../font/Roboto/Roboto-Black.ttf') format('truetype');
 }
 
 body {
@@ -185,6 +185,7 @@ body {
   margin: auto;
   width: 85px;
 }
+
 .main-content {
   margin-left: 220px;
   padding: 30px;
