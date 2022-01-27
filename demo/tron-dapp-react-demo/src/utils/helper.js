@@ -152,7 +152,7 @@ export const setTransactionsData = (tx, intlObj) => {
   let data = window.localStorage.getItem(window.defaultAccount) || '[]';
   let dataArr = JSON.parse(data);
   let item = {
-    title: '', // 兼容
+    title: '', // compatible
     intlObj,
     tx,
     status: 1, // 1: pending, 2: confirmed, 3: failed
@@ -173,19 +173,19 @@ export const getParameterByName = (name, url) => {
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
 };
 
-//获取当前时间对应零时区的整天 即零点 毫秒级别
+// Get the whole day that the current time corresponds to the zero time zone, that is, zero o'clock millisecond level
 export function getUTCDay(unixDateParams) {
   let unix = moment(moment.unix(unixDateParams).utc().format('YYYY-MM-DD 00:00:00Z')).unix();
   return unix;
 }
 
-//获取当前时间的上一分钟取整数 UTC
+// Get the last minute of the current time as an integer UTC
 export function getLastUTCMinutes() {
   let unix = moment(moment().subtract(1, 'minutes').format('YYYY-MM-DD HH:mm:00')).utc().unix();
   return unix;
 }
 
-//获取当前时间的当前分钟 一分钟取整数 UTC
+// Get the current minute of the current time One minute rounded up as an integer UTC
 export function getCurrentMinutes() {
   let unix = moment(moment().format('YYYY-MM-DD HH:mm:00')).utc().unix();
   return unix;
