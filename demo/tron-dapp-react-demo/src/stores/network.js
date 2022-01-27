@@ -5,7 +5,7 @@ import intl from 'react-intl-universal';
 import Config from '../config';
 import { tronscanTX } from '../utils/helper';
 import Tip from '../components/Tip';
-import { getTransactionInfo } from '../utils/blockchain';
+import { getTrxBalance, getTransactionInfo } from '../utils/blockchain';
 export default class NetworkStore {
   @observable tronWeb = false;
   @observable defaultAccount = null; // current login tron account address
@@ -23,6 +23,7 @@ export default class NetworkStore {
   }
 
   getDescription = (type, item, text) => {
+    // console.log('description type: ', type);
     const { tx, title, status } = item;
     let className = '';
     switch (type) {
@@ -72,7 +73,7 @@ export default class NetworkStore {
                 if (item.checkCnt != undefined && item.checkCnt < 30) {
                   setTimeout(this.checkPendingTransactions, 3000);
                 } else {
-                  this.logTransactionFailed(item, true); // Failed transactions after 90s are directly deleted locally
+                  this.logTransactionFailed(item, true); // 90s后的失败的交易直接本地删除
                 }
               }
             }
@@ -107,7 +108,7 @@ export default class NetworkStore {
     });
     this.saveTransactions(item);
 
-    // After 5s destroy the notification corresponding to the key...
+    // todo 5s后 destroy 这个 key 对应的 notification
   };
 
   logTransactionFailed = (item, needDelete = false) => {
@@ -120,8 +121,8 @@ export default class NetworkStore {
       duration: 30
     });
     this.saveTransactions(item, needDelete);
-    // Update transaction status of localstorage
-    // After 5s destroy the notification corresponding to the key...
+    // 更新localstorage的交易状态
+    // todo 5s后 destroy 这个 key 对应的 notification
   };
 
   saveTransactions = (record, needDelete) => {
@@ -160,7 +161,7 @@ export default class NetworkStore {
     });
   };
 
-  // Determine if there is a wallet and login
+  //判断是否有钱包和登录
   checkLogin = () => {
     if (!this.tronWeb || !this.tronWeb.defaultAddress.base58) {
       return false;
@@ -183,21 +184,15 @@ export default class NetworkStore {
           clearInterval(tmpTimer1);
         }
         if (window.tronWeb && window.tronWeb.ready) {
-          if (process.env.REACT_APP_ENV === 'test' || process.env.REACT_APP_ENV === 'qaTest') {
-            window.tronWeb.setFullNode(Config.chain.fullHost);
-            window.tronWeb.setSolidityNode(Config.chain.fullHost);
-          }
-          const { trongrid } = Config;
-
-          if (trongrid && window.tronWeb.setHeader && window.tronWeb.fullNode.host === trongrid.host) {
-            window.tronWeb.setHeader({ 'TRON-PRO-API-KEY': trongrid.key });
+          if (process.env.REACT_APP_ENV === 'test') {
+            window.tronWeb.setFullNode('https://api.nileex.io');
           }
           self.tronWeb = window.tronWeb;
           self.defaultAccount = self.tronWeb.defaultAddress.base58;
           window.defaultAccount = self.defaultAccount;
           self.isConnected = true;
           cb && cb();
-          this.setVariablesInterval(); // Global scheduled tasks
+          // this.setVariablesInterval(); // 全局定时任务
           clearInterval(tmpTimer1);
         }
       }, 1000);
