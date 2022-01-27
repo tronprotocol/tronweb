@@ -1,6 +1,10 @@
+import { observable } from 'mobx';
+
 import NetworkStore from './network';
 import System from './system';
 import Dapp from './dapp';
+
+import Config from '../config';
 
 class RootStore {
   constructor() {

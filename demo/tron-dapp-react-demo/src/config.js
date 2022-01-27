@@ -6,10 +6,6 @@ const Config = {
     privateKey: '01',
     fullHost: 'https://api.trongrid.io'
   },
-  trongrid: {
-    host: 'https://api.trongrid.io',
-    key: 'xxxxxx'
-  },
   service: {},
   contract: {
     usdt: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'
