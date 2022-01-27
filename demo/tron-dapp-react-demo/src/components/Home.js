@@ -8,7 +8,6 @@ import UserList from './UserList';
 class Home extends React.Component {
   constructor(props) {
     super(props);
-    this.migrateRef = React.createRef();
     this.state = {};
   }
 
@@ -22,9 +21,7 @@ class Home extends React.Component {
     return (
       <div>
         <HeaderPage mountedActions={this.mountedActions} />
-        {/* <MarketList /> */}
         <UserList />
-        {/* <FooterPage /> */}
       </div>
     );
   }
