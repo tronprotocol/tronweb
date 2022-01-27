@@ -1,10 +1,4 @@
-import React from 'react';
 import { observable } from 'mobx';
-import { notification } from 'antd';
-import intl from 'react-intl-universal';
-import Config from '../config';
-import { tronscanTX } from '../utils/helper';
-import Tip from '../components/Tip';
 import { getUserList } from '../utils/backend';
 export default class NetworkStore {
   @observable userList = [];

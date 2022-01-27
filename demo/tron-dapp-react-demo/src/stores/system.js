@@ -12,7 +12,7 @@ export default class SystemStore {
     title: '',
     obj: {},
     txId: '',
-    callbacks: false // 关闭交易窗口后的回调
+    callbacks: false // Callback after closing the trading window
   };
 
   constructor(rootStore) {
