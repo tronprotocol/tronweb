@@ -172,11 +172,16 @@ In order to contribute you can
 
 ## Recent History
 
+__4.2.0__
+- update `axios` to version 0.26.0
+- update `karma` to version 6.3.17
+- update `puppeteer` to version 13.5.1
+
 __4.1.0__
 - add `encodeParamsV2ByABI` and `decodeParamsV2ByABI` functions in `tronWeb.utils.abi` lib
 - support abi v2 for `triggerSmartContract`, `createSmartContract`, `call` and `send` method
 - update `validator` to version 13.7.0
-- update `axios` t0 version 0.24.0
+- update `axios` to version 0.24.0
 - update discord group link
 
 __4.0.1__
