@@ -173,6 +173,7 @@ In order to contribute you can
 ## Recent History
 
 __4.2.0__
+- add the name key when the contract call method has only one return value
 - update `axios` to version 0.26.0
 - update `karma` to version 6.3.17
 - update `puppeteer` to version 13.5.1

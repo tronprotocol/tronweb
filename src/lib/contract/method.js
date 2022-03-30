@@ -150,7 +150,7 @@ export default class Method {
 
                     let output = decodeOutput(this.abi, '0x' + transaction.constant_result[0]);
 
-                    if (output.length === 1 && Object.keys(output).length === 0) {
+                    if (output.length === 1 && Object.keys(output).length === 1) {
                         output = output[0];
                     }
 
