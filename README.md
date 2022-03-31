@@ -173,28 +173,29 @@ In order to contribute you can
 ## Recent History
 
 __4.2.0__
-- add the name key when the contract call method has only one return value
-- update `axios` to version 0.26.0
-- update `karma` to version 6.3.17
-- update `puppeteer` to version 13.5.1
+- Add the name key when the contract call method has only one return value
+- Optimize the `TriggerConstantContract` method
+- Update `axios` to version 0.26.0
+- Update `karma` to version 6.3.17
+- Update `puppeteer` to version 13.5.1
 
 __4.1.0__
-- add `encodeParamsV2ByABI` and `decodeParamsV2ByABI` functions in `tronWeb.utils.abi` lib
-- support abi v2 for `triggerSmartContract`, `createSmartContract`, `call` and `send` method
-- update `validator` to version 13.7.0
-- update `axios` to version 0.24.0
-- update discord group link
+- Add `encodeParamsV2ByABI` and `decodeParamsV2ByABI` functions in `tronWeb.utils.abi` lib
+- Support abi v2 for `triggerSmartContract`, `createSmartContract`, `call` and `send` method
+- Update `validator` to version 13.7.0
+- Update `axios` to version 0.24.0
+- Update discord group link
 
 __4.0.1__
-- set _isConstant as true for call method
-- ignore max feeLimit check
-- change git repository url
+- Set _isConstant as true for call method
+- Ignore max feeLimit check
+- Change git repository url
 
 __4.0.0__
-- support `broadcastHex` method
-- ignore fullnode version check when calling `createToken` method
-- update dependencies version
-- add strict mode for `pkToAddress` method
+- Support `broadcastHex` method
+- Ignore fullnode version check when calling `createToken` method
+- Update dependencies version
+- Add strict mode for `pkToAddress` method
 
 __3.2.7__
 - Add options `rawParameter` that format of the parameters method and args when creating or triggering a contract
