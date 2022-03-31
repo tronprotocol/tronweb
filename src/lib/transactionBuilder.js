@@ -885,13 +885,13 @@ export default class TransactionBuilder {
         }
 
         args.call_value = parseInt(callValue)
+        if (utils.isNotNullOrUndefined(tokenValue))
+        args.call_token_value = parseInt(tokenValue)
+        if (utils.isNotNullOrUndefined(tokenId))
+            args.token_id = parseInt(tokenId)
 
         if (!options._isConstant) {
             args.fee_limit = parseInt(feeLimit)
-            if (utils.isNotNullOrUndefined(tokenValue))
-                args.call_token_value = parseInt(tokenValue)
-            if (utils.isNotNullOrUndefined(tokenId))
-                args.token_id = parseInt(tokenId)
         }
 
         if (options.permissionId) {
