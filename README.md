@@ -173,15 +173,15 @@ In order to contribute you can
 ## Recent History
 
 __4.2.0__
-- Add the name key when the contract call method has only one return value
-- Optimize the `TriggerConstantContract` method
+- Add the name key when the `call()` and `send()` methods has only one return value
+- Optimize the `TriggerConstantContract()` method
 - Update `axios` to version 0.26.1
 - Update `karma` to version 6.3.17
 - Update `puppeteer` to version 13.5.1
 
 __4.1.0__
 - Add `encodeParamsV2ByABI` and `decodeParamsV2ByABI` functions in `tronWeb.utils.abi` lib
-- Support abi v2 for `triggerSmartContract`, `createSmartContract`, `call` and `send` method
+- Support abi v2 for `triggerSmartContract`, `createSmartContract`, `call` and `send` methods
 - Update `validator` to version 13.7.0
 - Update `axios` to version 0.24.0
 - Update discord group link

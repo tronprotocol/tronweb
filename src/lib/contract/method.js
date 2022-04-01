@@ -279,8 +279,9 @@ export default class Method {
 
                 let decoded = decodeOutput(this.abi, '0x' + output.contractResult[0]);
 
-                if (decoded.length === 1)
+                if (decoded.length === 1 && Object.keys(decoded).length === 1) {
                     decoded = decoded[0];
+                }
 
                 if (options.keepTxID) {
                     return callback(null, [signedTransaction.txID, decoded]);
