@@ -886,7 +886,7 @@ export default class TransactionBuilder {
 
         args.call_value = parseInt(callValue)
         if (utils.isNotNullOrUndefined(tokenValue))
-        args.call_token_value = parseInt(tokenValue)
+            args.call_token_value = parseInt(tokenValue)
         if (utils.isNotNullOrUndefined(tokenId))
             args.token_id = parseInt(tokenId)
 
