@@ -175,7 +175,7 @@ In order to contribute you can
 __4.2.0__
 - Add the name key when the contract call method has only one return value
 - Optimize the `TriggerConstantContract` method
-- Update `axios` to version 0.26.0
+- Update `axios` to version 0.26.1
 - Update `karma` to version 6.3.17
 - Update `puppeteer` to version 13.5.1
 
