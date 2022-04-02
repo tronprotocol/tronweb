@@ -208,11 +208,11 @@ export function decodeParamsV2ByABI(funABI, data) {
   };
 
   const buildFullTypeNameDefinition = (typeDef) => {
+    const name = typeDef.name ? ` ${typeDef.name}` : '';
     if (typeDef && typeDef.type.indexOf('tuple') === 0 && typeDef.components) {
       const innerTypes = typeDef.components.map((innerType) => { return buildFullTypeNameDefinition(innerType) });
-      return `tuple(${innerTypes.join(',')})${extractSize(typeDef.type)}`;
+      return `tuple(${innerTypes.join(',')})${extractSize(typeDef.type)}${name}`;
     }
-    const name = typeDef.name ? ` ${typeDef.name}` : '';
     if (/trcToken/.test(typeDef.type))
       return typeDef.type.replace(/trcToken/, 'uint256') + name;
 
