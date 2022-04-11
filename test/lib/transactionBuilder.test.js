@@ -1765,7 +1765,7 @@ describe('TronWeb.transactionBuilder', function () {
             .contract(abi, transaction.contract_address)
         let check = await deployed.test().call();
 
-        assert.ok(equals(check, outputValues[0]));
+        assert.ok(equals(check[0], outputValues[0]));
     });
 
     it('should create or trigger a smart contract with funcABIV2 (V2 input test send )', async function () {
