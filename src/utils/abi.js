@@ -233,11 +233,14 @@ export function decodeParamsV2ByABI(funABI, data) {
             convertAddresses(result[i])
             if(name) convertAddresses(result[name])
           }
-          else if (type.indexOf('tuple') === 0)
+          else if (type.indexOf('tuple') === 0) {
             if (extractSize(type)) {
               const dimension = extractArrayDim(type);
               mapTuple(output.components, result[i], dimension);
             } else decodeResult(output.components, result[i]);
+
+            if(name) result[name] = result[i];
+          }
       });
   };
 
@@ -248,7 +251,7 @@ export function decodeParamsV2ByABI(funABI, data) {
       for (let i = 0; i < funABI.outputs.length; i++) {
         const type = funABI.outputs[i].type;
         const name = funABI.outputs[i].name ? ` ${funABI.outputs[i].name}` : '';
-        outputTypes.push(type.indexOf('tuple') === 0 ? buildFullTypeNameDefinition(funABI.outputs[i]) : type+name);
+        outputTypes.push(type.indexOf('tuple') === 0 ? buildFullTypeNameDefinition(funABI.outputs[i]) : type + name);
       }
       convertTypeNames(outputTypes);
 
