@@ -1966,6 +1966,7 @@ export default class TransactionBuilder {
                 if (typeof transaction.visible === 'boolean') {
                     newTransaction.visible = transaction.visible
                 }
+                transaction.txID = newTransaction.txID;
                 callback(null, newTransaction)
             })
             .catch(err => callback('Error generating a new transaction id.'));
