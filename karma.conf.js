@@ -11,7 +11,7 @@ const basePlugins = [
     'source-map-support'
 ];
 
-const files = globby.sync([ 'test/**/*.test.js' ]);
+const files = globby.sync([ 'test/**/*.test.js', '!test/**/abi.test.js' ]);
 
 module.exports = function (config) {
     config.set({
