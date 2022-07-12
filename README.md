@@ -172,6 +172,9 @@ In order to contribute you can
 
 ## Recent History
 
+__4.3.0__
+- Support `signTypedData`
+
 __4.2.0__
 - Add the name key when the `call()` and `send()` methods has only one return value
 - Optimize the `TriggerConstantContract()` method
@@ -279,7 +282,7 @@ __2.5.4__
 * Adds cache in Trx to cache Contracts locally and make the process more efficient
 
 __2.5.2__
-* Adds static methods `Trx.signString` and `Trx.verifySignature
+* Adds static methods `Trx.signString` and `Trx.verifySignature`
 
 __2.5.0__
 * Allows freeBandwidth, freeBandwidthLimit, frozenAmount and frozenDuration to be zero

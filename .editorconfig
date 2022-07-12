@@ -14,6 +14,7 @@ indent_size = 4
 
 [*.js]
 indent_size = 4
+quote_type = single
 
 [*.html]
 indent_size = 4
