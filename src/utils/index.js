@@ -5,7 +5,7 @@ import * as crypto from './crypto';
 import * as code from './code';
 import * as abi from './abi';
 import * as ethersUtils from './ethersUtils';
-import {TypedDataEncoder} from './typedData'
+import {TypedDataEncoder as _TypedDataEncoder} from './typedData'
 
 import validator from 'validator';
 import BigNumber from 'bignumber.js';
@@ -151,6 +151,6 @@ export default {
     bytes,
     crypto,
     abi,
-    TypedDataEncoder,
+    _TypedDataEncoder,
     ethersUtils
 };

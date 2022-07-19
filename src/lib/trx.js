@@ -665,7 +665,7 @@ export default class Trx {
     static verifyTypedData(domain, types, value, signature, address) {
         signature = signature.replace(/^0x/, '');
 
-        const messageDigest = utils.TypedDataEncoder.hash(domain, types, value);
+        const messageDigest = utils._TypedDataEncoder.hash(domain, types, value);
         const recovered = recoverAddress(messageDigest, {
             recoveryParam: signature.substring(128, 130) == '1c' ? 1 : 0,
             r: '0x' + signature.substring(0, 64),
@@ -763,25 +763,25 @@ export default class Trx {
         return signatureHex
     }
 
-    signTypedData(domain, types, value, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
+    _signTypedData(domain, types, value, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
         if (utils.isFunction(privateKey)) {
             callback = privateKey;
             privateKey = this.tronWeb.defaultPrivateKey;
         }
 
         if (!callback)
-            return this.injectPromise(this.signTypedData, domain, types, value, privateKey);
+            return this.injectPromise(this._signTypedData, domain, types, value, privateKey);
 
         try {
-            const signatureHex = Trx.signTypedData(domain, types, value, privateKey);
+            const signatureHex = Trx._signTypedData(domain, types, value, privateKey);
             return callback(null, signatureHex);
         } catch (ex) {
             callback(ex);
         }
     }
 
-    static signTypedData(domain, types, value, privateKey) {
-        return utils.crypto.signTypedData(domain, types, value, privateKey);
+    static _signTypedData(domain, types, value, privateKey) {
+        return utils.crypto._signTypedData(domain, types, value, privateKey);
     }
 
     async multiSign(transaction = false, privateKey = this.tronWeb.defaultPrivateKey, permissionId = false, callback = false) {

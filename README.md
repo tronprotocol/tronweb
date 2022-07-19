@@ -173,7 +173,7 @@ In order to contribute you can
 ## Recent History
 
 __4.3.0__
-- Support `signTypedData`
+- Support `_signTypedData`
 
 __4.2.0__
 - Add the name key when the `call()` and `send()` methods has only one return value

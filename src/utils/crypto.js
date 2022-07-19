@@ -77,7 +77,7 @@ export function signBytes(privateKey, contents) {
     return signBytes;
 }
 
-export function signTypedData(domain, types, value, privateKey) {
+export function _signTypedData(domain, types, value, privateKey) {
     const key = {
         toHexString: function () {
             return '0x' + privateKey;
