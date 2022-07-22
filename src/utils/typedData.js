@@ -11,6 +11,9 @@ const logger = new Logger(version);
 function getAddress(address) {
     return TronWeb.address.toHex(address).replace(ADDRESS_PREFIX_REGEX, '0x');
 };
+function getTronAddress(address) {
+    return TronWeb.address.toHex(address);
+};
 function id(text) {
     return keccak256(toUtf8Bytes(text));
 }
@@ -60,7 +63,7 @@ const domainChecks = {
     },
     verifyingContract: function (value) {
         try {
-            return getAddress(value).toLowerCase();
+            return getTronAddress(value).toLowerCase();
         }
         catch (error) { }
         return logger.throwArgumentError(`invalid domain value "verifyingContract"`, "domain.verifyingContract", value);
@@ -387,7 +390,7 @@ export class TypedDataEncoder {
                     case "trcToken":
                         return BigNumber.from(value).toString();
                     case "address":
-                        return getAddress(value).toLowerCase();
+                        return getTronAddress(value).toLowerCase();
                     case "bool":
                         return !!value;
                     case "string":
