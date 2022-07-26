@@ -4,7 +4,8 @@ import {base64DecodeFromString, hexStr2byteArray} from './code';
 import {encode58, decode58} from './base58';
 import {byte2hexStr, byteArray2hexStr} from './bytes';
 import {ec as EC} from 'elliptic';
-import {keccak256, sha256} from './ethersUtils';
+import {keccak256, sha256, SigningKey} from './ethersUtils';
+import {TypedDataEncoder} from './typedData';
 
 export function getBase58CheckAddress(addressBytes) {
     const hash0 = SHA256(addressBytes);
@@ -74,6 +75,26 @@ export function signBytes(privateKey, contents) {
     const signBytes = ECKeySign(hashBytes, privateKey);
 
     return signBytes;
+}
+
+export function _signTypedData(domain, types, value, privateKey) {
+    const key = {
+        toHexString: function () {
+            return '0x' + privateKey;
+        },
+        value: privateKey,
+    };
+    const signingKey = new SigningKey(key);
+
+    const messageDigest = TypedDataEncoder.hash(domain, types, value);
+    const signature = signingKey.signDigest(messageDigest);
+    const signatureHex = [
+        '0x',
+        signature.r.substring(2),
+        signature.s.substring(2),
+        Number(signature.v).toString(16),
+    ].join('');
+    return signatureHex;
 }
 
 export function getRowBytesFromTransactionBase64(base64Data) {
