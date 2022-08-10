@@ -647,6 +647,37 @@ export default class Trx {
         return base58Address == TronWeb.address.fromHex(address);
     }
 
+    verifyTypedData(domain, types, value, signature, address = this.tronWeb.defaultAddress.base58, callback = false) {
+        if (utils.isFunction(address)) {
+            callback = address;
+            address = this.tronWeb.defaultAddress.base58;
+        }
+
+        if (!callback)
+            return this.injectPromise(this.verifyTypedData, domain, types, value, signature, address);
+
+        if (Trx.verifyTypedData(domain, types, value, signature, address))
+            return callback(null, true);
+
+        callback('Signature does not match');
+    }
+
+    static verifyTypedData(domain, types, value, signature, address) {
+        signature = signature.replace(/^0x/, '');
+
+        const messageDigest = utils._TypedDataEncoder.hash(domain, types, value);
+        const recovered = recoverAddress(messageDigest, {
+            recoveryParam: signature.substring(128, 130) == '1c' ? 1 : 0,
+            r: '0x' + signature.substring(0, 64),
+            s: '0x' + signature.substring(64, 128),
+        });
+
+        const tronAddress = ADDRESS_PREFIX + recovered.substr(2);
+        const base58Address = TronWeb.address.fromHex(tronAddress);
+
+        return base58Address == TronWeb.address.fromHex(address);
+    }
+
     async sign(transaction = false, privateKey = this.tronWeb.defaultPrivateKey, useTronHeader = true, multisig = false, callback = false) {
 
         if (utils.isFunction(multisig)) {
@@ -730,6 +761,27 @@ export default class Trx {
             Number(signature.v).toString(16)
         ].join('');
         return signatureHex
+    }
+
+    _signTypedData(domain, types, value, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
+        if (utils.isFunction(privateKey)) {
+            callback = privateKey;
+            privateKey = this.tronWeb.defaultPrivateKey;
+        }
+
+        if (!callback)
+            return this.injectPromise(this._signTypedData, domain, types, value, privateKey);
+
+        try {
+            const signatureHex = Trx._signTypedData(domain, types, value, privateKey);
+            return callback(null, signatureHex);
+        } catch (ex) {
+            callback(ex);
+        }
+    }
+
+    static _signTypedData(domain, types, value, privateKey) {
+        return utils.crypto._signTypedData(domain, types, value, privateKey);
     }
 
     async multiSign(transaction = false, privateKey = this.tronWeb.defaultPrivateKey, permissionId = false, callback = false) {

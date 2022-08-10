@@ -10,6 +10,8 @@ const AbiCoder = utils.AbiCoder;
 const Interface = utils.Interface;
 const FormatTypes = utils.FormatTypes;
 const arrayify = utils.arrayify;
+const splitSignature = utils.splitSignature;
+const joinSignature = utils.joinSignature;
 
 export {
     keccak256,
@@ -21,5 +23,7 @@ export {
     AbiCoder,
     Interface,
     FormatTypes,
+    splitSignature,
+    joinSignature,
     arrayify
 };
