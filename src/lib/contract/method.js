@@ -323,6 +323,7 @@ export default class Method {
 
                 const params = {
                     since,
+                    size: options.size,
                     eventName: this.name,
                     sort: 'block_timestamp',
                     blockNumber: 'latest',
