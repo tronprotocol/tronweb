@@ -323,11 +323,13 @@ export default class Method {
 
                 const params = {
                     since,
-                    size: options.size,
                     eventName: this.name,
                     sort: 'block_timestamp',
                     blockNumber: 'latest',
                     filters: options.filters
+                }
+                if(options.size){
+                    params.size = options.size;
                 }
                 if (options.resourceNode) {
                     if (/full/i.test(options.resourceNode))
