@@ -1,4 +1,4 @@
-import { utils } from "ethers";
+import { utils, Wallet as ethersWallet } from "ethers";
 
 const keccak256 = utils.keccak256;
 const sha256 = utils.sha256;
@@ -12,6 +12,7 @@ const FormatTypes = utils.FormatTypes;
 const arrayify = utils.arrayify;
 const splitSignature = utils.splitSignature;
 const joinSignature = utils.joinSignature;
+const concat = utils.concat;
 
 export {
     keccak256,
@@ -25,5 +26,7 @@ export {
     FormatTypes,
     splitSignature,
     joinSignature,
-    arrayify
+    arrayify,
+    ethersWallet,
+    concat
 };

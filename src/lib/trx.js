@@ -1,7 +1,7 @@
 import TronWeb from 'index';
 import utils from 'utils';
-import {keccak256, toUtf8Bytes, recoverAddress, SigningKey} from 'utils/ethersUtils';
-import {ADDRESS_PREFIX} from 'utils/address';
+import { keccak256, toUtf8Bytes, recoverAddress, SigningKey } from 'utils/ethersUtils';
+import { ADDRESS_PREFIX } from 'utils/address';
 import Validator from "../paramValidator";
 import injectpromise from 'injectpromise';
 
@@ -647,6 +647,22 @@ export default class Trx {
         return base58Address == TronWeb.address.fromHex(address);
     }
 
+    verifyMessage2(message = false, signature = false, callback = false) {
+        if (!callback)
+        return this.injectPromise(this.verifyMessage2, message, signature);
+
+        try {
+            const base58Address = utils.message.verifyMessage(message, signature);
+            callback(null, base58Address);
+        } catch(ex) {
+            callback(ex);
+        }
+    }
+
+    static verifyMessage2(message, signature) {
+        return Trx.verifyMessage2(message, signature);
+    }
+    
     verifyTypedData(domain, types, value, signature, address = this.tronWeb.defaultAddress.base58, callback = false) {
         if (utils.isFunction(address)) {
             callback = address;
@@ -762,6 +778,33 @@ export default class Trx {
         ].join('');
         return signatureHex
     }
+
+    /**
+     * sign message v2 for verified header length
+     * 
+     * @param {message to be signed, should be Bytes or string} message 
+     * @param {privateKey for signature} privateKey 
+     */
+    signMessage2(message, privateKey = this.tronWeb.defaultPrivateKey, callback = false ) {
+        if (utils.isFunction(privateKey)) {
+            callback = privateKey;
+            privateKey = this.tronWeb.defaultPrivateKey;
+        }
+
+        if (!callback)
+            return this.injectPromise(this.signMessage2, message, privateKey);
+
+        try {
+            const signatureHex = Trx.signMessage2(message, privateKey);
+            return callback(null, signatureHex);
+        } catch (ex) {
+            callback(ex);
+        }
+    }
+
+    static signMessage2(message, privateKey) {
+        return utils.message.signMessage(message, privateKey);
+     }
 
     _signTypedData(domain, types, value, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
         if (utils.isFunction(privateKey)) {
