@@ -2,11 +2,6 @@ import { keccak256, toUtf8Bytes, concat, recoverAddress, SigningKey, joinSignatu
 import { ADDRESS_PREFIX } from 'utils/address';
 
 export const TRON_MESSAGE_PREFIX = "\x19TRON Signed Message:\n";
-/**
- * 
- * @param {message should be Bytes or string} message 
- * @returns string
- */
 
 export function hashMessage(message) {
     if (typeof(message) === "string") { 
