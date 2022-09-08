@@ -13,6 +13,7 @@ const arrayify = utils.arrayify;
 const splitSignature = utils.splitSignature;
 const joinSignature = utils.joinSignature;
 const concat = utils.concat;
+const id = utils.id;
 
 export {
     keccak256,
@@ -28,5 +29,6 @@ export {
     joinSignature,
     arrayify,
     ethersWallet,
-    concat
+    concat,
+    id
 };
