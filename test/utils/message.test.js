@@ -13,7 +13,6 @@ describe('TronWeb.utils.message', function () {
 
         tests.forEach(function(test) {
             it(('hashes a message "' + test.name + '"'), function() {
-                this.timeout(120000);
                 let hash = TronWeb.utils.message.hashMessage(test.message);
                 assert.equal(hash, test.messageHash, 'calculates message hash');
             });
@@ -24,7 +23,6 @@ describe('TronWeb.utils.message', function () {
 
         tests.forEach(function(test) {
             it('signs a message "' + test.name + '"', function () {
-                this.timeout(120000);
                 const signature = TronWeb.utils.message.signMessage(test.message, test.privateKey);
                 assert.equal(signature, test.signature, 'computes message signature');
             });
@@ -35,11 +33,9 @@ describe('TronWeb.utils.message', function () {
 
         tests.forEach(function(test) {
             it('verify a message "' + test.name + '"', function () {
-                this.timeout(120000);
                 const address = TronWeb.utils.message.verifyMessage(test.message, test.signature);
                 assert.equal(address, test.address, 'verifies message signature');
             });
         });
-    })
-
+    });
 });
