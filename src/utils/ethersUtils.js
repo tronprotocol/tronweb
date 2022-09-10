@@ -14,6 +14,7 @@ const splitSignature = utils.splitSignature;
 const joinSignature = utils.joinSignature;
 const concat = utils.concat;
 const id = utils.id;
+const isValidMnemonic = utils.isValidMnemonic;
 
 export {
     keccak256,
@@ -30,5 +31,6 @@ export {
     arrayify,
     ethersWallet,
     concat,
-    id
+    id,
+    isValidMnemonic
 };

@@ -7,7 +7,10 @@ import {
     pkToAddress,
 } from './crypto';
 import {ethersWallet} from './ethersUtils'
-import {ADDRESS_PREFIX, TRON_BIP39_PATH_INDEX_0} from './address'
+import {TRON_BIP39_PATH_INDEX_0, TRON_BIP39_PATH_PREFIX} from './address'
+import utils from './index';
+
+const INVALID_TRON_PATH_ERROR_MSG = 'Invalid tron path provided';
 
 export function generateAccount() {
     const priKeyBytes = genPriKey();
@@ -27,36 +30,33 @@ export function generateAccount() {
     }
 }
 
-export function generateRandom(options = {}) {
+export function generateRandom(options) {
+    if(!utils.isObject(options)) { options = {}; }
     if(!options.path) {
         options.path = TRON_BIP39_PATH_INDEX_0;
     }
-    console.log(options, 'options')
-    const account = ethersWallet.createRandom(options);
+    if(!String(options.path).match(/^m\/44\'\/195\'/)) {
+        throw new Error(INVALID_TRON_PATH_ERROR_MSG);
+    }
 
-    console.log(account, 'account')
+    const account = ethersWallet.createRandom(options);
 
     const result = {
         mnemonic: account.mnemonic,
         privateKey: account.privateKey,
         publicKey: account.publicKey,
-        address: {
-            hex: account.address,
-            base58: false
-        }
+        address: pkToAddress(account.privateKey.replace(/^0x/, ''))
     }
     
-    if(options.path.match('^m\/44\'\/195\'')) {
-        result.address.hex = account.address.replace(/^0x/, ADDRESS_PREFIX);
-        result.address.base58 = pkToAddress(account.privateKey.replace(/^0x/, ''));
-    }
-
     return result;
 }
 
-export function generateAccountWithMnemonic(mnemonic, path = TRON_BIP39_PATH_INDEX_0, wordlist = 'en') {
+export function generateAccountWithMnemonic(mnemonic, path, wordlist = 'en') {
     if(!path) {
         path = TRON_BIP39_PATH_INDEX_0;
+    }
+    if(!String(path).match(/^m\/44\'\/195\'/)) {
+        throw new Error(INVALID_TRON_PATH_ERROR_MSG);
     }
     const account =  ethersWallet.fromMnemonic(mnemonic, path, wordlist);
 
@@ -64,15 +64,7 @@ export function generateAccountWithMnemonic(mnemonic, path = TRON_BIP39_PATH_IND
         mnemonic: account.mnemonic,
         privateKey: account.privateKey,
         publicKey: account.publicKey,
-        address: {
-            hex: account.address,
-            base58: false
-        }
-    }
-
-    if(options.path.match('^m\/44\'\/195\'')) {
-        result.address.hex = account.address.replace(/^0x/, ADDRESS_PREFIX);
-        result.address.base58 = pkToAddress(account.privateKey.replace(/^0x/, ''));
+        address: pkToAddress(account.privateKey.replace(/^0x/, ''))
     }
 
     return result;
