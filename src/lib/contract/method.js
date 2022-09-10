@@ -328,6 +328,11 @@ export default class Method {
                     blockNumber: 'latest',
                     filters: options.filters
                 }
+
+                if(options.size) {
+                    params.size = options.size;
+                }
+                
                 if (options.resourceNode) {
                     if (/full/i.test(options.resourceNode))
                         params.onlyUnconfirmed = true
