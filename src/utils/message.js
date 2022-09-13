@@ -30,6 +30,9 @@ export function signMessage(message, privateKey) {
 }
 
 export function verifyMessage(message, signature) {
+    if(!signature.match(/^0x/)) {
+      signature =  '0x' + signature;
+    }
     const recovered = recoverAddress(hashMessage(message), signature);
     const base58Address = getBase58CheckAddress(hexStr2byteArray(recovered.replace(/^0x/, ADDRESS_PREFIX)));
     

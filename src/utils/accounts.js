@@ -7,7 +7,7 @@ import {
     pkToAddress,
 } from './crypto';
 import {ethersWallet} from './ethersUtils'
-import {TRON_BIP39_PATH_INDEX_0, TRON_BIP39_PATH_PREFIX} from './address'
+import {TRON_BIP39_PATH_INDEX_0} from './address'
 import utils from './index';
 
 const INVALID_TRON_PATH_ERROR_MSG = 'Invalid tron path provided';
