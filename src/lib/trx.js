@@ -647,14 +647,14 @@ export default class Trx {
         return base58Address == TronWeb.address.fromHex(address);
     }
 
-    verifyMessageV2(message = false, signature = false, options, callback = false) {
+    verifyMessageV2(message = false, signature = false, options = {}, callback = false) {
         if (utils.isFunction(options)) {
             callback = options;
             options = {};
         }
 
         if (!callback)
-        return this.injectPromise(this.verifyMessageV2, message, signature, options);
+            return this.injectPromise(this.verifyMessageV2, message, signature, options);
 
         try {
             const base58Address = Trx.verifyMessageV2(message, signature);
