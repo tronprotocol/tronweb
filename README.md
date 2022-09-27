@@ -176,7 +176,6 @@ __4.4.0__
 - Support `createRandom` and `fromMnemonic` function
 - Add `tronWeb.utils.message` lib, which includes `hashMessage`, `signMessage` and `verifyMessage`
 - Add `signMessageV2` and `verifyMessageV2` in `tronWeb.trx` lib which can support plain text signature and verification
-- Support contract callStatic
 - Add `size` filter for event watch 
 
 __4.3.0__
