@@ -28,26 +28,14 @@ class LeftMenu extends React.Component {
 
   componentDidMount() {
     this.props.instantActions && this.props.instantActions(); // should excute when componentDidMount, we need not check if a user logined or not
-    if (!this.props.network.isConnected) {
-      this.props.network.initTronLinkWallet(
-        () => {
-          this.props.mountedActions && this.props.mountedActions();
-        },
-        () => {
-          // if a user do not login TronLink wallet, we should do something
-          this.props.unmountedActions && this.props.unmountedActions();
-        }
-      );
-    } else {
-      this.props.mountedActions && this.props.mountedActions();
-    }
     // when a user change a node or change a account or change a chain type,
     // we shoule listen TronLink to reload the webpage to get new account info
-    this.props.network.listenTronLink();
+    // this.props.network.listenTronLink();
   }
 
   render() {
-    return <></>;
+    if (this.props.network.isConnected) return null;
+    return <div style={{ textAlign: 'center' }}>connecting your wallet...</div>;
   }
 }
 

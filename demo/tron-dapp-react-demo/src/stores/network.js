@@ -171,39 +171,69 @@ export default class NetworkStore {
     return true;
   };
 
-  initTronLinkWallet = async (cb, cbn) => {
+  initTronLinkWallet = (cb = false, cbn = false, pop = true) => {
     try {
-      let timeCount = 0;
       const self = this;
-      const tmpTimer1 = setInterval(() => {
-        timeCount++;
-        if (timeCount > Config.tronLinkTime) {
-          self.isConnected = false;
-          cbn && cbn();
-          clearInterval(tmpTimer1);
-        }
-        if (window.tronWeb && window.tronWeb.ready) {
-          if (process.env.REACT_APP_ENV === 'test' || process.env.REACT_APP_ENV === 'qaTest') {
-            window.tronWeb.setFullNode(Config.chain.fullHost);
-            window.tronWeb.setSolidityNode(Config.chain.fullHost);
-          }
-          const { trongrid } = Config;
 
-          if (trongrid && window.tronWeb.setHeader && window.tronWeb.fullNode.host === trongrid.host) {
-            window.tronWeb.setHeader({ 'TRON-PRO-API-KEY': trongrid.key });
+      const tronlinkPromise = new Promise(reslove => {
+        window.addEventListener(
+          'tronLink#initialized',
+          async () => {
+            return reslove(window.tronLink);
+          },
+          {
+            once: true
           }
-          self.tronWeb = window.tronWeb;
-          self.defaultAccount = self.tronWeb.defaultAddress.base58;
-          window.defaultAccount = self.defaultAccount;
-          self.isConnected = true;
-          cb && cb();
-          this.setVariablesInterval(); // Global scheduled tasks
-          clearInterval(tmpTimer1);
-        }
-      }, 1000);
+        );
+
+        setTimeout(() => {
+          if (window.tronLink) {
+            return reslove(window.tronLink);
+          }
+        }, 3000);
+      });
+
+      const appPromise = new Promise(resolve => {
+        let timeCount = 0;
+        const tmpTimer1 = setInterval(() => {
+          timeCount++;
+          if (timeCount > 8) {
+            cbn && cbn();
+            clearInterval(tmpTimer1);
+            return resolve(false);
+          }
+          if (window.tronLink && window.tronLink.defaultAddress && window.tronLink.defaultAddress.base58) {
+            clearInterval(tmpTimer1);
+            return resolve(window.tronLink);
+          }
+        }, 1000);
+      });
+
+      Promise.race([tronlinkPromise, appPromise]).then(tron => {
+        self.handleTronWallet(tron, cb, pop, cbn);
+      });
     } catch (e) {
       console.log(e);
     }
+  };
+
+  handleTronWallet = (tron, cb, cbn) => {
+    if (!tron) return;
+    var self = this;
+    if (process.env?.REACT_APP_ENV === 'test' || process?.env?.REACT_APP_ENV === 'qaTest') {
+      window.tronWeb.setFullNode(Config.chain.fullHost);
+      window.tronWeb.setSolidityNode(Config.chain.fullHost);
+    }
+    const { trongrid } = Config;
+    if (trongrid && window.tronWeb.setHeader && window.tronWeb.fullNode.host === trongrid.host) {
+      window.tronWeb.setHeader({ 'TRON-PRO-API-KEY': trongrid.key });
+    }
+    self.tronWeb = window.tronWeb;
+    self.defaultAccount = self.tronWeb.defaultAddress.base58;
+    window.defaultAccount = self.defaultAccount;
+    self.isConnected = true; // 没有钱包是否连上的事件，这里直接默认选择了连接
+    cb && cb();
+    this.setVariablesInterval(); // Global scheduled tasks
   };
 
   connectWallet = async () => {

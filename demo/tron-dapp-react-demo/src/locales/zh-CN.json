@@ -1,4 +1,10 @@
 {
+  "login_modal": {
+    "wallet_linkbtn": "连接钱包",
+    "connect_to_tronlink": "连接 TronLink",
+    "tronlink": "TronLink 钱包",
+    "logining": "连接中"
+  },
   "account_modal": {
     "account": "账户",
     "connect_with_tronlink": "已连接 TronLink",
