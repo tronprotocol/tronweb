@@ -29,7 +29,7 @@ if (env === 'test') {
     },
     service: {},
     contract: {
-      usdt: 'TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf'
+      usdt: 'TXLAQ63Xg1NAzckPwKHvzw7CSEmLMEqcdj'
     },
     justSwap: 'https://justswap.org/',
     tronscanUrl: 'https://nile.tronscan.io/#'

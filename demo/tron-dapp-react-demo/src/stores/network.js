@@ -57,10 +57,10 @@ export default class NetworkStore {
     transactions.map(item => {
       const { tx, status, showPending } = item;
       if (Number(status) === 1) {
+        item.checkCnt++;
         if (showPending) {
           this.logTransactionPending(item);
         }
-        item.checkCnt++;
         getTransactionInfo(tx)
           .then(r => {
             if (r) {
@@ -91,8 +91,8 @@ export default class NetworkStore {
     const { tx, intlObj } = item;
     notification.open({
       key: tx,
-      message: intl.get(intlObj.title, intlObj.obj),
-      description: this.getDescription(1, item, intl.get('trans_status.pending'))
+      message: 'Confirming',
+      duration: 0
     });
     this.saveTransactions(item);
   };
@@ -102,8 +102,7 @@ export default class NetworkStore {
     const { tx, intlObj } = item;
     notification.open({
       key: tx,
-      message: intl.get(intlObj && intlObj.title4 ? intlObj.title4 : intlObj.title, intlObj.obj),
-      description: this.getDescription(2, item, intl.get('trans_status.confirmed'))
+      message: 'Success'
     });
     this.saveTransactions(item);
 
@@ -115,8 +114,7 @@ export default class NetworkStore {
     const { tx, intlObj } = item;
     notification.open({
       key: tx,
-      message: intl.get(intlObj && intlObj.title3 ? intlObj.title3 : intlObj.title, intlObj.obj),
-      description: this.getDescription(3, item, intl.get('trans_status.failed')),
+      message: 'Fail',
       duration: 30
     });
     this.saveTransactions(item, needDelete);
@@ -225,9 +223,9 @@ export default class NetworkStore {
       window.tronWeb.setSolidityNode(Config.chain.fullHost);
     }
     const { trongrid } = Config;
-    if (trongrid && window.tronWeb.setHeader && window.tronWeb.fullNode.host === trongrid.host) {
-      window.tronWeb.setHeader({ 'TRON-PRO-API-KEY': trongrid.key });
-    }
+    // if (trongrid && window.tronWeb.setHeader && window.tronWeb.fullNode.host === trongrid.host) {
+    //   window.tronWeb.setHeader({ 'TRON-PRO-API-KEY': trongrid.key });
+    // }
     self.tronWeb = window.tronWeb;
     self.defaultAccount = self.tronWeb.defaultAddress.base58;
     window.defaultAccount = self.defaultAccount;

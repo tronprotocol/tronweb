@@ -38,6 +38,7 @@ class UserList extends React.Component {
     const { to, amount } = this.state;
     const amountToken = BigNumber(amount).times(BigNumber(10).pow(Config.defaultDecimal))._toHex(); // for a large amount, we can pass value with hex string
     await this.props.system.transferToken(to, amountToken);
+    this.closeTransferModal();
   };
 
   changeTo = e => {

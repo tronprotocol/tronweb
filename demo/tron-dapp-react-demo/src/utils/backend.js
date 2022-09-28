@@ -15,7 +15,7 @@ export const getUserList = async params => {
         env === 'test'
           ? [
               {
-                tokenAddress: 'TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf',
+                tokenAddress: 'TXLAQ63Xg1NAzckPwKHvzw7CSEmLMEqcdj',
                 tokenDecimal: 6,
                 tokenLogoUrl: 'https://coin.top/production/logo/usdtlogo.png',
                 tokenName: 'Tether USD',
