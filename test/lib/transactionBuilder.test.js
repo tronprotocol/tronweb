@@ -480,6 +480,44 @@ describe('TronWeb.transactionBuilder', function () {
 
     });
 
+    describe('#createAccount()', function () {
+        it('should create account[2] by account[3]', async function () {
+            const params = [
+                [accounts.b58[2], accounts.b58[3], {permissionId: 2}],
+                [accounts.b58[2], accounts.b58[3]],
+            ];
+
+            for (let param of params) {
+                const transaction = await tronWeb.transactionBuilder.createAccount(...param);
+                const parameter = txPars(transaction);
+
+                assert.equal(transaction.txID.length, 64);
+                assert.equal(parameter.value.owner_address, accounts.hex[3]);
+                assert.equal(parameter.value.account_address, accounts.hex[2]);
+                assert.equal(parameter.type_url, 'type.googleapis.com/protocol.AccountUpdateContract');
+                assert.equal(transaction.raw_data.contract[0].permission_id || 0, param[2] ? param[2]['permissionId'] : 0);
+            }
+        });
+
+        it('should throw if an invalid accountAddress is passed', async function () {
+
+            await assertThrow(
+                tronWeb.transactionBuilder.createAccount(123, accounts.b58[4]),
+                'Invalid account address provided'
+            );
+
+        });
+
+        it('should throw if the issuer address is invalid', async function () {
+
+            await assertThrow(
+                tronWeb.transactionBuilder.createAccount(accounts.b58[4], '0xzzzww'),
+                'Invalid origin address provided'
+            );
+
+        });
+    });
+
     describe('#updateAccount()', function () {
 
         it(`should update accounts[3]`, async function () {
