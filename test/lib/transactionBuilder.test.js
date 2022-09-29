@@ -494,7 +494,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(transaction.txID.length, 64);
                 assert.equal(parameter.value.owner_address, accounts.hex[3]);
                 assert.equal(parameter.value.account_address, accounts.hex[2]);
-                assert.equal(parameter.type_url, 'type.googleapis.com/protocol.AccountUpdateContract');
+                assert.equal(parameter.type_url, 'type.googleapis.com/protocol.AccountCreateContract');
                 assert.equal(transaction.raw_data.contract[0].permission_id || 0, param[2] ? param[2]['permissionId'] : 0);
             }
         });
