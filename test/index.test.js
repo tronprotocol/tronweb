@@ -937,6 +937,41 @@ describe('TronWeb Instance', function () {
         });
     });
 
+
+    describe("#createRandom", function () {
+        it("should create a random mnemonic and the zero index account", async function () {
+            const tronWeb = tronWebBuilder.createInstance();
+
+            const newAccount = await tronWeb.createRandom();
+            assert.equal(newAccount.privateKey.substring(2).length, 64);
+            assert.equal(newAccount.publicKey.substring(2).length, 130);
+            let address = tronWeb.address.fromPrivateKey(newAccount.privateKey.substring(2));
+            assert.equal(address, newAccount.address);
+            address = tronWeb.address.fromPrivateKey(newAccount.privateKey.substring(2), true);
+            assert.equal(address, newAccount.address);
+            assert.equal(tronWeb.address.toHex(address), tronWeb.address.toHex(newAccount.address));
+        });
+    });
+
+    describe("#fromMnemonic", function () {
+        it("should generate the zero index account of the passed mnemonic phrase", async function () {
+            const tronWeb = tronWebBuilder.createInstance();
+
+            const accountCreated = await tronWeb.createRandom()
+    
+            const newAccount = await tronWeb.fromMnemonic(accountCreated.mnemonic.phrase);
+      
+            assert.equal(newAccount.privateKey.substring(2).length, 64);
+            assert.equal(newAccount.publicKey.substring(2).length, 130);
+            let address = tronWeb.address.fromPrivateKey(newAccount.privateKey.substring(2));
+            assert.equal(address, newAccount.address);
+            address = tronWeb.address.fromPrivateKey(newAccount.privateKey.substring(2), true);
+            assert.equal(address, newAccount.address);
+            assert.equal(tronWeb.address.toHex(address), tronWeb.address.toHex(newAccount.address));
+        });
+    });
+
+
     describe("#isConnected", function () {
         it("should verify that tronWeb is connected to nodes and event server", async function () {
 

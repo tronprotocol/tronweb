@@ -13,7 +13,7 @@ import Plugin from 'lib/plugin';
 import Event from 'lib/event';
 import SideChain from 'lib/sidechain';
 import { keccak256 } from 'utils/ethersUtils';
-import { ADDRESS_PREFIX } from 'utils/address';
+import { ADDRESS_PREFIX, TRON_BIP39_PATH_INDEX_0 } from 'utils/address';
 
 const DEFAULT_VERSION = '3.5.0';
 
@@ -83,7 +83,7 @@ export default class TronWeb extends EventEmitter {
             'sha3', 'toHex', 'toUtf8', 'fromUtf8',
             'toAscii', 'fromAscii', 'toDecimal', 'fromDecimal',
             'toSun', 'fromSun', 'toBigNumber', 'isAddress',
-            'createAccount', 'address', 'version'
+            'createAccount', 'address', 'version', 'createRandom', 'fromMnemonic'
         ].forEach(key => {
             this[key] = TronWeb[key];
         });
@@ -429,6 +429,18 @@ export default class TronWeb extends EventEmitter {
         const account = utils.accounts.generateAccount();
 
         return account;
+    }
+
+    static createRandom(options) {
+        const account = utils.accounts.generateRandom(options);
+
+        return account
+    }
+
+    static fromMnemonic(mnemonic, path = TRON_BIP39_PATH_INDEX_0, wordlist = 'en') {
+        const account = utils.accounts.generateAccountWithMnemonic(mnemonic, path, wordlist);
+
+        return account
     }
 
     async isConnected(callback = false) {
