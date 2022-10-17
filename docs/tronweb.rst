@@ -1,3 +1,4 @@
+
 =================
 tronweb object
 =================
@@ -93,7 +94,7 @@ Example
 ------------------------------------------------------------------------------
 
 tronWeb.address.fromHex
---------------------------
+===========================
 
 Convert Hexstring format address to Base58 format address
 
@@ -131,7 +132,7 @@ Example
 ------------------------------------------------------------------------------
 
 tronWeb.address.fromPrivateKey
----------------------------------
+==================================
 
 Derive its corresponding address based on the private key
 
