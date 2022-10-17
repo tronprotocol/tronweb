@@ -13,3 +13,4 @@ Welcome to the TRON developer hub. You'll find comprehensive guides and document
    tronweb-transactionBuilder
    tronweb-contract
    tronweb-method
+   tronweb-utils
