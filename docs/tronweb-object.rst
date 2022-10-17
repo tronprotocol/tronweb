@@ -7,6 +7,9 @@ Create an instance of the tronWeb javascript library. In addition to the utility
 
 ------------------------------------------------------------------------------
 
+tronweb object
+=================
+
 -------
 Returns
 -------
