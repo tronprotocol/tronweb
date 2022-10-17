@@ -1365,7 +1365,7 @@ Example
   
 ------------------------------------------------------------------------------
 
-toBigNumber
+BigNumber
 ==============================
 
 Convert a given number or hexadecimal string to a BigNumber
@@ -1377,7 +1377,7 @@ Usage
 
 .. code-block:: javascript
 
-  tronWeb.toBigNumber(amount)
+  tronWeb.BigNumber(amount)
 
 --------------
 Parameters
@@ -1398,7 +1398,7 @@ Parameters
 Returns
 -------
 
-BigNumber
+BigNumber-BigNumber instance
 
 -------
 Example
