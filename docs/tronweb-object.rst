@@ -291,6 +291,7 @@ Usage
 --------------
 Parameters
 --------------
+
 .. list-table::
    :widths: 25 25 25
    :header-rows: 1
@@ -366,6 +367,7 @@ Usage
 --------------
 Parameters
 --------------
+
 .. list-table::
    :widths: 25 25 25
    :header-rows: 1
@@ -391,3 +393,393 @@ Example
 
   tronWeb.fromUtf8("test")
   >"74657374"
+
+------------------------------------------------------------------------------
+
+fromDecimal
+===============
+
+Converts a number, or a string of numbers, into a hexadecimal string.
+
+-------
+Usage
+-------
+
+.. code-block:: javascript
+
+  tronWeb.fromDecimal(value)
+
+--------------
+Parameters
+--------------
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+     - Data Type
+   * - value
+     - value to convert to hexadecimal string
+     - Number | String - number
+
+-------
+Returns
+-------
+
+string
+
+-------
+Example
+-------
+
+.. code-block:: javascript
+  
+  tronWeb.fromDecimal("21")
+  > "0x15"
+
+------------------------------------------------------------------------------
+
+fromMnemonic
+===============
+
+Obtain the address and private key according to the provided mnemonic.
+
+-------
+Usage
+-------
+
+.. code-block:: javascript
+
+  // Call directly
+  TronWeb.fromMnemonic()
+
+  // Called via the instantiated tronWeb object
+  tronWeb.fromMnemonic()
+
+--------------
+Parameters
+--------------
+
+.. list-table::
+   :widths: 25 25 25
+   :header-rows: 1
+
+   * - Parameter
+     - Description
+     - Data Type
+   * - mnemonic	
+     - mnemonic. Separate each mnemonic with a space.	
+     - String
+   * - path
+     -	BIP44 path, optional parameter. If you want to get an account other than index 0, you need to fill in this parameter, and the complete path is required.	
+     - String
+   * - wordlist	
+     - Language type, optional parameter. If the incoming mnemonic is not english(en), you need to fill in the corresponding language type through this parameter, such as zh, ja, it, ...	
+     - String
+
+-------
+Returns
+-------
+
+Object - Returns the obtained account information, including mnemonic, public key, and private key. If the entered BIP44 path does not start with m/44'/195', throw an exception - Error: Invalid tron path provided.
+
+-------
+Example
+-------
+
+Example 1
+
+.. code-block:: javascript
+  
+  >tronWeb.fromMnemonic( 'patch left empty genuine rain normal syrup yellow consider moon stock denial')
+  {
+    mnemonic: {
+      phrase: 'patch left empty genuine rain normal syrup yellow consider moon stock denial',
+      path: "m/44'/195'/0'/0/0",
+      locale: 'en'
+    },
+    privateKey: '0x0f9148e9be0c5b0213607a6491603891241ec7aa204918018dba691e4269ffe7',
+    publicKey: '0x04642b796ba0acf06233e65695b977d28d2cae90fabd70dc0a300a831866b8f46ce5ee0ffa832492ce1b55a6c90463b2a31a03729b212281f6531558145b634ee0',
+    address: 'TPiD26cc1vptLxwYmw4waHTPCNgqtZ5SCX'
+  }
+
+Example 2
+
+.. code-block:: javascript
+
+  >tronWeb.fromMnemonic( 'patch left empty genuine rain normal syrup yellow consider moon stock denial',"m/44'/195'/0'/0/1")
+  {
+    mnemonic: {
+      phrase: 'patch left empty genuine rain normal syrup yellow consider moon stock denial',
+      path: "m/44'/195'/0'/0/1",
+      locale: 'en'
+    },
+    privateKey: '0x5f3ecfca6e51dc70d58bca89d9b8fcb60cf193e0d8943af62311136c3e6504a0',
+    publicKey: '0x04df45411faa27c933e10c83305da6f15138a018d2b539d8d4155a7e15f2552f9de3c6a7993e3814b4022a673faa70ad137bcc65857fc40cc0d59218ce28002361',
+    address: 'TXzMaz1QU4jKLctDu2QibrWvPtogtYHdW7'
+  }
+
+------------------------------------------------------------------------------
+
+fromSun
+===============
+
+Helper function that will convert a value in SUN to TRX. (1 SUN = 0.000001 TRX)
+
+-------
+Usage
+-------
+
+.. code-block:: javascript
+
+  tronWeb.fromSun()
+
+--------------
+Parameters
+--------------
+
+String or Number
+
+-------
+Returns
+-------
+
+String
+
+-------
+Example
+-------
+
+.. code-block:: javascript
+  
+  > tronWeb.fromSun("1000000")
+  '1'
+
+------------------------------------------------------------------------------
+
+fromUtf8
+===============
+
+Helper function that will convert UTF8 to HEX
+
+-------
+Usage
+-------
+
+.. code-block:: javascript
+
+  tronWeb.fromUtf8()
+
+--------------
+Parameters
+--------------
+
+String
+
+-------
+Returns
+-------
+
+String
+
+-------
+Example
+-------
+
+.. code-block:: javascript
+  
+  tronWeb.fromUtf8("test")
+  >"0x74657374"
+  
+------------------------------------------------------------------------------
+
+getEventByTransactionID
+==============================
+
+Will return all events within a transactionID.
+
+-------
+Usage
+-------
+
+.. code-block:: javascript
+
+  tronWeb.getEventByTransactionID()
+
+--------------
+Parameters
+--------------
+
+String
+
+-------
+Returns
+-------
+
+Promise Object(Array)
+
+-------
+Example
+-------
+
+.. code-block:: javascript
+  
+  >tronWeb.getEventByTransactionID("78938dc73353a9a2cc45f7e20e4f9344f99e31bfcd5d54337a0bd9f2c8626604").then(result => {console.log(result)})
+  Promise { <pending> }
+  > [
+    {
+      block: 693938,
+      timestamp: 1577676408000,
+      contract: 'TUPz3wD356e3iV337s4cnjQS2weUdhX5ci',
+      name: 'RNGUpdated',
+      transaction: '78938dc73353a9a2cc45f7e20e4f9344f99e31bfcd5d54337a0bd9f2c8626604',
+      result: {
+        r: 'fc76c7a74f2154548b78cf4800c62140c0b4c132fe5603ae0529f8e072196d8b',
+        afterSeed: '38045f6efcdac2da2389639bf61fd06eb0c3814dcaa99adabf2ca56817ee69ce',
+        s: '7db37b185701cb63150bad3604dbc268561ef3dba9115fb991ef27fa7aac5155',
+        index: '53866',
+        previousSeed: 'a3a67ca0db89f0676c0f9e9e50338d4b5254385299f81f5aa11c25e926461108',
+        updater: '0xc2ee6be7f9ea0be9084047e60119204d81b3e658',
+        timestamp: '1577676408'
+      },
+      resourceNode: 'solidityNode'
+    }
+  ]
+  
+------------------------------------------------------------------------------
+
+getEventResult
+==============================
+
+Returns all events matching the filters.
+
+.. note:: 
+  API Change
+
+  Applies Starting From TronWeb 2.1.31
+
+  This new API function differs from the previous function in that it takes in an additional 3 parameters in the optional object input. These additional 3 parameters are onlyConfirmed, onlyUnconfirmed, and fingerprint.
+
+-------
+Usage
+-------
+
+.. code-block:: javascript
+
+  tronWeb.getEventResult(contractAddress, {}, callback);
+
+--------------
+Parameters
+--------------
+
+String
+Object
+
+The { } input parameter refers to an object that contains 7 parameters whose values can be customized. If the values are not customized, then default values are set in place. The 7 parameters and their descriptions are below:
+
+.. list-table::
+   :widths: 25 50
+   :header-rows: 1
+
+   * - Options Parameter
+     - Description
+   * - sinceTimestamp
+     - Filter for events since certain timestamp. The sequence of the result is according to the 'sort' field.
+   * - eventName
+     - Name of the event to filter by.
+   * - blockNumber
+     - Specific block number to query
+   * - size
+     - maximum number returned
+   * - onlyConfirmed
+     - If set to true, only returns confirmed transactions.
+   * - onlyUnconfirmed
+     - If set to true, only returns unconfirmed transactions.
+   * - fingerprint
+     - The fingerprint field appears in the last data of the previous query. After specifying the corresponding field content this time, subsequent data will be returned. If there is no this field in the last data of the query, it means that there is no more data
+   * - sort
+     - Can be 'block_timestamp' for time sequence or '-block_timestamp' for the reverse. Default is '-block_timestamp'.
+
+-------
+Returns
+-------
+
+Promise Object(Array)
+
+-------
+Example
+-------
+
+.. code-block:: javascript
+  
+  > tronWeb.getEventResult("TUPz3wD356e3iV337s4cnjQS2weUdhX5ci",{eventName:"RNGIterated",size:2}).then(result => {console.log(result)})
+  Promise { <pending> }
+  > [
+    {
+      block: 615212,
+      timestamp: 1577440164000,
+      contract: 'TUPz3wD356e3iV337s4cnjQS2weUdhX5ci',
+      name: 'RNGIterated',
+      transaction: 'a8929bcfb8a7337d6c8c5850b5ed63cdd09ff17bbde46dad07b2c1f20c427e89',
+      result: {
+        index: '41796',
+        rng: '3f7bf1c50a01cbcb980360effa904e0e11880af8daeeb2f8da686b7b3e5d9a50',
+        timestamp: '1577440164'
+      },
+      resourceNode: 'solidityNode'
+    },
+    {
+      block: 615205,
+      timestamp: 1577440143000,
+      contract: 'TUPz3wD356e3iV337s4cnjQS2weUdhX5ci',
+      name: 'RNGIterated',
+      transaction: 'fa9e91282de9eb462efabea838c2d0465602312a87ded06524c87d8afafd743d',
+      result: {
+        index: '41795',
+        rng: 'bf190910aa5293ab12f644eb723b5460340e3ec11ac073124147e5fc92ca44d2',
+        timestamp: '1577440143'
+      },
+      resourceNode: 'solidityNode',
+      fingerprint: '2TBTeOqO3x2kJDyxT'
+    }
+  ]
+  
+------------------------------------------------------------------------------
+
+isAddress
+==============================
+
+Helper function that will check if a given address is valid.
+
+-------
+Usage
+-------
+
+.. code-block:: javascript
+
+  tronWeb.isAddress()
+
+--------------
+Parameters
+--------------
+
+String
+
+-------
+Returns
+-------
+
+Boolean
+
+-------
+Example
+-------
+
+.. code-block:: javascript
+  
+  tronWeb.isAddress("414fa1f834a47f621957ec2ae7d445da9b3be0bee4")
+  >true
+  tronWeb.isAddress("THEGR4Aor5pCDVktbbbwgHAE6PQWRfejBf")
+  >true
