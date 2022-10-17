@@ -8,7 +8,7 @@ Welcome to the TRON developer hub. You'll find comprehensive guides and document
    :maxdepth: 2
    :caption: API Reference
 
-   tronweb
+   tronweb-object
    tronweb-transactionBuilder
    tronweb-contract
    tronweb-method
