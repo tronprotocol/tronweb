@@ -58,7 +58,7 @@ Object that allows you to convert between hex / base58 and privatekey representa
 ------------------------------------------------------------------------------
 
 tronWeb.address.toHex
-----------------------
+=======================
 
 Convert Base58 format addresses to Hex
 
@@ -98,7 +98,6 @@ tronWeb.address.fromHex
 
 Convert Hexstring format address to Base58 format address
 
-
 -------
 Usage
 -------
@@ -112,7 +111,6 @@ Parameters
 --------------
 
 address-hexstring format
-
 
 -------
 Returns
@@ -135,7 +133,6 @@ tronWeb.address.fromPrivateKey
 ==================================
 
 Derive its corresponding address based on the private key
-
 
 -------
 Usage
