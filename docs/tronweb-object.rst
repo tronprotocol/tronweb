@@ -65,7 +65,7 @@ Object that allows you to convert between hex / base58 and privatekey representa
 tronWeb.address.toHex
 ==========================================
 
-Convert Base58 format addresses to Hex
+Convert Base58 format addresses to Hex.
 
 -------
 Usage
@@ -101,7 +101,7 @@ Example
 tronWeb.address.fromHex
 ==========================================
 
-Convert Hexstring format address to Base58 format address
+Convert Hexstring format address to Base58 format address.
 
 -------
 Usage
@@ -137,7 +137,7 @@ Example
 tronWeb.address.fromPrivateKey
 ==========================================
 
-Derive its corresponding address based on the private key
+Derive its corresponding address based on the private key.
 
 
 -------
@@ -1032,7 +1032,7 @@ Example
 sha3
 ==============================
 
-Helper function that will sha3 any value using keccak256
+Helper function that will sha3 any value using keccak256.
 
 
 -------
@@ -1084,7 +1084,7 @@ Example
 toAscii
 ==============================
 
-Convert HEX string to ASCII3 string
+Convert HEX string to ASCII3 string.
 
 
 -------
@@ -1130,7 +1130,7 @@ Example
 toBigNumber
 ==============================
 
-Convert a given number or hexadecimal string to a BigNumber
+Convert a given number or hexadecimal string to a BigNumber.
 
 
 -------
@@ -1179,7 +1179,7 @@ Example
 toDecimal
 ==============================
 
-Convert a hexadecimal to a decimal number
+Convert a hexadecimal to a decimal number.
 
 
 -------
@@ -1225,7 +1225,7 @@ Example
 toHex
 ==============================
 
-Convert any value to HEX
+Convert any value to HEX.
 
 .. note:: 
   This function does not convert TRX addresses to Hex. If you wish to specifically convert TRX addresses to HEX, please use tronWeb.address.toHex instead.
@@ -1277,7 +1277,7 @@ Example
 toSun
 ==============================
 
-Helper function that will convert a value in TRX to SUN. (1 SUN = 0.000001 TRX)
+Helper function that will convert a value in TRX to SUN. (1 SUN = 0.000001 TRX).
 
 -------
 Usage
@@ -1322,7 +1322,7 @@ Example
 toUtf8
 ==============================
 
-Helper function that will convert HEX to UTF8
+Helper function that will convert HEX to UTF8.
 
 
 -------
@@ -1368,7 +1368,7 @@ Example
 BigNumber
 ==============================
 
-Convert a given number or hexadecimal string to a BigNumber
+Convert a given number or hexadecimal string to a BigNumber.
 
 
 -------
