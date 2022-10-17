@@ -5,6 +5,8 @@ tronweb object
 
 Create an instance of the tronWeb javascript library. In addition to the utility functions, it includes all related modules.
 
+------------------------------------------------------------------------------
+
 -------
 Returns
 -------
