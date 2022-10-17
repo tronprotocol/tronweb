@@ -9,6 +9,7 @@ Welcome to the TRON developer hub. You'll find comprehensive guides and document
    :caption: API Reference
 
    tronweb-object
+   tronweb-trx
    tronweb-transactionBuilder
    tronweb-contract
    tronweb-method
