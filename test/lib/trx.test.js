@@ -10,13 +10,13 @@ const _ = require('lodash');
 const tronWebBuilder = require('../helpers/tronWebBuilder');
 const assertEqualHex = require('../helpers/assertEqualHex');
 const TronWeb = tronWebBuilder.TronWeb;
-const config = require('../helpers/config');
 const waitChainData = require('../helpers/waitChainData');
 const {
     ADDRESS_BASE58,
     PRIVATE_KEY,
     getTokenOptions,
-    SIGNED_HEX_TRANSACTION
+    SIGNED_HEX_TRANSACTION,
+    FULL_NODE_API
 } = require('../helpers/config');
 const testRevertContract = require('../fixtures/contracts').testRevert;
 
@@ -1936,7 +1936,24 @@ describe('TronWeb.trx', function () {
 
         });
     });
+   
+    describe("#signMessageV2", async function() {
+        tests.forEach(function(test) {
+            it('signs a message "' + test.name + '"', async function () {
+                const tronWeb = new TronWeb({ fullHost: FULL_NODE_API }, test.privateKey)
+                const signature = await tronWeb.trx.signMessageV2(test.message);
+                assert.equal(signature, test.signature, 'computes message signature');
+            });
+        });
+    });
 
-
-
+    describe("#verifyMessageV2", async function() {
+        tests.forEach(function(test) {
+            it('signs a message "' + test.name + '"', async function () {
+                const tronWeb = new TronWeb({ fullHost: FULL_NODE_API }, test.privateKey)
+                const address = await tronWeb.trx.verifyMessageV2(test.message, test.signature);
+                assert.equal(address, test.address, 'verifies message signature');
+            });
+        });
+    });
 });

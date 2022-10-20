@@ -164,4 +164,6 @@ Example
       let res = await tronWeb.contract().at("TBBp5VF2q73hfMUoyxr138Kx3kbsi6HQRS");
       console.log(res);
   }
+
   getContract();// Execute the function
+
