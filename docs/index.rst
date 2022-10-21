@@ -1,16 +1,15 @@
 =================================
-TRON developer hub
+TronWeb - TRON JavaScript API
 =================================
 
-Welcome to the TRON developer hub. You'll find comprehensive guides and documentation to help you start working with TRON as quickly as possible, as well as support if you get stuck. Let's jump right in!
+TronWeb aims to deliver a unified, seamless development experience influenced by Ethereum's Web3 implementation. We have taken the core ideas and expanded upon it to unlock the functionality of TRON's unique feature set along with offering new tools for integrating DApps in the browser, Node.js and IoT devices.
 
 .. toctree::
    :maxdepth: 2
    :caption: API Reference
 
-   tronweb-object
+   tronweb
    tronweb-trx
    tronweb-transactionBuilder
    tronweb-contract
-   tronweb-method
    tronweb-utils

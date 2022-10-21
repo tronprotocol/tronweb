@@ -1,5 +1,5 @@
 ===========================
-tronweb.transactionBuilder
+tronWeb.transactionBuilder
 ===========================
 
 tronweb.transactionBuilder intro
