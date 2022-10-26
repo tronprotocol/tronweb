@@ -1,4 +1,4 @@
-.. _tronWeb:
+.. _tronweb:
 
 =================
 tronWeb
