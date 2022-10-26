@@ -1,4 +1,4 @@
-.. _tronweb.contract:
+.. _tronweb-contract:
 
 ================
 tronWeb.contract

@@ -1,4 +1,4 @@
-.. _tronweb.utils:
+.. _tronweb-utils:
 
 =======================
 tronWeb.utils

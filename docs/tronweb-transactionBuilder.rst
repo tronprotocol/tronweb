@@ -1,4 +1,4 @@
-.. _tronweb.transactionBuilder:
+.. _tronweb-transactionBuilder:
 
 ===========================
 tronWeb.transactionBuilder
