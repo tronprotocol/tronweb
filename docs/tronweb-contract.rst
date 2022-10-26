@@ -1,9 +1,34 @@
+.. _tronWeb.contract:
 
 ================
 tronWeb.contract
 ================
 
-tronweb.contract intro
+**Smart Contract Deployment**
+
+For deploying a smart contract, you can not only use the `tronWeb.transactionBuilder.createSmartContract <createSmartContract>` interface, but also the `tronWeb.contract().new() <tronweb.contract().new>` interface.
+
+**Smart Contract Invocation**
+
+Get smart contract instance
+
+Before calling a smart contract, you need to obtain the smart contract instance first. You can create a contract instance in the following two ways:
+
+.. code-block:: javascript
+
+  //Example 1
+  let abi = [...];       
+  let instance = await tronWeb.contract(abi,'contractAddress'); 
+
+  //Example 2
+  let instance = await tronWeb.contract.at('contractAddress');
+
+Calling smart contract methods
+
+Different types of contract methods need to be invoked by different tronweb apis:
+
+Use ``call`` to execute ``pure`` or ``view`` smart contract methods, please refer to `method.call() <contract.call()>`
+Use ``send`` to execute ``non-pure`` or ``modify`` smart contract methods, please refer to `method.send() <contract.send()>` for specific usage instructions.
 
 ------------------------------------------------------------------------------
 
@@ -60,7 +85,7 @@ If the contract ABI does not exist on the chain, Please invoke loadAbi function 
   let res = await instance.totalSupply().call({_isConstant:true})
 
 ------------------------------------------------------------------------------
-
+.. _tronweb.contract().new:
 
 tronweb.contract().new
 =========================
@@ -76,7 +101,7 @@ Usage
   let abi = 'some abi for contract';
   let code = 'bytecode';
   async function deploy_contract(){
-        let contract_instance = await tronWeb.contract().new({
+    let contract_instance = await tronWeb.contract().new({
       abi:JSON.parse(abi),
       bytecode:code,
       feeLimit:1000000000,
@@ -147,7 +172,7 @@ Example
   let abi = 'some abi for contract';
   let code = 'bytecode';
   async function deploy_contract(){
-      let contract_instance = await tronWeb.contract().new({
+    let contract_instance = await tronWeb.contract().new({
       abi:JSON.parse(abi),
       bytecode:code,
       feeLimit:1_00_000_000,
@@ -186,6 +211,8 @@ There are two ways to create a contract instance:
   let instance = await tronWeb.contract.at('contractAddress');
 
 ------------------------------------------------------------------------------
+
+.. _contract.call():
 
 call()
 ======
@@ -241,6 +268,8 @@ Example
   triggercontract();
 
 ------------------------------------------------------------------------------
+
+.. _contract.send():
 
 send()
 ======
