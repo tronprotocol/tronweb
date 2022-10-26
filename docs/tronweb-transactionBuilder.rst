@@ -1,3 +1,5 @@
+.. _tronWeb.transactionBuilder:
+
 ===========================
 tronWeb.transactionBuilder
 ===========================
@@ -299,6 +301,8 @@ Example
   }
 
 ------------------------------------------------------------------------------
+
+.. _createSmartContract:
 
 createSmartContract
 =====================
