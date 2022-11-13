@@ -5,6 +5,7 @@ import EventEmitter from 'eventemitter3';
 import { version } from '../package.json';
 import semver from 'semver';
 import injectpromise from 'injectpromise';
+import { Buffer } from 'buffer';
 
 import TransactionBuilder from 'lib/transactionBuilder';
 import Trx from 'lib/trx';
