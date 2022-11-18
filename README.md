@@ -55,7 +55,6 @@ yarn add tronweb
 ```
 
 ### Browser
-First, don't use the release section of this repo, it has not updated in a long time.
 
 Then easiest way to use TronWeb in a browser is to install it as above and copy the dist file to your working folder. For example:
 ```
@@ -65,6 +64,8 @@ so that you can call it in your HTML page as
 ```
 <script src="./js/tronweb.js"><script>
 ```
+
+This project is also published on NPM and you can access CDN mirrors of this release (please use sub-resource integrity for any `<script>` includes).
 
 ## Testnet
 
