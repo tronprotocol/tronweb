@@ -170,6 +170,8 @@ In order to contribute you can
 * run the tests — `npm test:node`
 * push your changes and open a pull request
 
+Contact the team at https://cn.developers.tron.network/docs/online-technical-support
+
 ## Recent History
 
 __4.4.0__
