@@ -30,6 +30,10 @@ __[Tron Web - Developer Document](https://developers.tron.network/docs/tronweb-1
 
 TronWeb aims to deliver a unified, seamless development experience influenced by Ethereum's [Web3](https://github.com/ethereum/web3.js/) implementation. We have taken the core ideas and expanded upon it to unlock the functionality of TRON's unique feature set along with offering new tools for integrating DApps in the browser, Node.js and IoT devices.
 
+**Project scope**
+
+Any new TRON feature will be incorporated into TronWeb. Changes to the API to improve quality-of-life are in-scope for the project. We will not necessarilly maintain feature parity with Web3.js going forward as this is a separate project, not a synchronized fork.
+
 ## Compatibility
 - Version built for Node.js v6 and above
 - Version built for browsers with more than 0.25% market share
