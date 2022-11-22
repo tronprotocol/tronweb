@@ -3,6 +3,7 @@
     "version": "4.4.0",
     "description": "JavaScript SDK that encapsulates the TRON HTTP API",
     "main": "dist/TronWeb.node.js",
+    "browser": "dist/TronWeb.js",
     "scripts": {
         "prepare": "npm run build",
         "build": "npm run clean && webpack --config webpack.config.js --progress --color",
