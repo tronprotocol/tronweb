@@ -107,7 +107,8 @@ export default class Contract {
 
         abi.forEach(func => {
             // Don't build a method for constructor function. That's handled through contract create.
-            if (!func.type || /constructor/i.test(func.type))
+            // Don't build a method for error function.
+            if (!func.type || /constructor|error/i.test(func.type))
                 return;
 
             const method = new Method(this, func);
