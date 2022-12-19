@@ -55,7 +55,6 @@ yarn add tronweb
 ```
 
 ### Browser
-First, don't use the release section of this repo, it has not updated in a long time.
 
 Then easiest way to use TronWeb in a browser is to install it as above and copy the dist file to your working folder. For example:
 ```
@@ -65,6 +64,8 @@ so that you can call it in your HTML page as
 ```
 <script src="./js/tronweb.js"><script>
 ```
+
+This project is also published on NPM and you can access CDN mirrors of this release (please use sub-resource integrity for any `<script>` includes).
 
 ## Testnet
 
@@ -170,7 +171,15 @@ In order to contribute you can
 * run the tests — `npm test:node`
 * push your changes and open a pull request
 
+Contact the team at https://cn.developers.tron.network/docs/online-technical-support
+
 ## Recent History
+
+__5.0.0__
+- Add `tronWeb.utils.transaction` lib to serialize and deserialize transaction 
+- Add `tronWeb.utils.transaction.txJsonToPb` function to convert transaction json to protobuf
+- Add `tronWeb.utils.transaction.txPbToTxID` function to get txID from transaction protobuf
+- Support new transaction builder `createAccount` 
 
 __4.4.0__
 - Support `createRandom` and `fromMnemonic` function
