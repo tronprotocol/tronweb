@@ -200,7 +200,7 @@ describe('TronWeb.transactionBuilder', function () {
             options.saleEnd = options.saleEnd.toString()
             for (let i = 0; i < 2; i++) {
                 if (i === 1) options.permissionId = 2;
-                const transaction = await tronWeb.transactionBuilder.createToken(options);
+                const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.b58[46]);
                 const parameter = txPars(transaction);
                 await assertEqualHex(parameter.value.abbr, options.abbreviation);
                 assert.equal(transaction.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
@@ -212,7 +212,7 @@ describe('TronWeb.transactionBuilder', function () {
             options.precision = 0
             for (let i = 0; i < 2; i++) {
                 if (i === 1) options.permissionId = 2;
-                const transaction = await tronWeb.transactionBuilder.createToken(options);
+                const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.b58[47]);
                 const parameter = txPars(transaction);
                 await assertEqualHex(parameter.value.abbr, options.abbreviation);
                 assert.equal(transaction.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
@@ -408,7 +408,7 @@ describe('TronWeb.transactionBuilder', function () {
             delete options.freeBandwidthLimit;
 
             await assertThrow(
-                tronWeb.transactionBuilder.createToken(options),
+                tronWeb.transactionBuilder.createToken(options, accounts.b58[48]),
                 'Invalid Free bandwidth limit provided'
             );
 
@@ -478,6 +478,45 @@ describe('TronWeb.transactionBuilder', function () {
             });
         });
 
+    });
+
+    describe('#createAccount()', function () {
+        it('should create an account by account[3]', async function () {
+            const inactiveAccount = await tronWeb.createAccount();
+            const inactiveAccountAddress = inactiveAccount.address.base58;
+            const params = [
+                [inactiveAccountAddress, accounts.b58[3], {permissionId: 2}],
+                [inactiveAccountAddress, accounts.b58[3]],
+            ];
+
+            for (let param of params) {
+                const transaction = await tronWeb.transactionBuilder.createAccount(...param);
+                const parameter = txPars(transaction);
+                assert.equal(transaction.txID.length, 64);
+                assert.equal(parameter.value.owner_address, accounts.hex[3]);
+                assert.equal(parameter.value.account_address, tronWeb.address.toHex(inactiveAccountAddress).toLowerCase());
+                assert.equal(parameter.type_url, 'type.googleapis.com/protocol.AccountCreateContract');
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[2] ? param[2]['permissionId'] : 0);
+            }
+        });
+
+        it('should throw if an invalid accountAddress is passed', async function () {
+
+            await assertThrow(
+                tronWeb.transactionBuilder.createAccount(123, accounts.b58[4]),
+                'Invalid account address provided'
+            );
+
+        });
+
+        it('should throw if the issuer address is invalid', async function () {
+
+            await assertThrow(
+                tronWeb.transactionBuilder.createAccount(accounts.b58[4], '0xzzzww'),
+                'Invalid origin address provided'
+            );
+
+        });
     });
 
     describe('#updateAccount()', function () {
@@ -1038,14 +1077,6 @@ describe('TronWeb.transactionBuilder', function () {
 
         })
 
-        after(async function () {
-            proposals = await tronWeb.trx.listProposals();
-            for (let proposal of proposals) {
-                if (proposal.state !== 'CANCELED')
-                    await broadcaster(tronWeb.transactionBuilder.deleteProposal(proposal.proposal_id), PRIVATE_KEY)
-            }
-        })
-
         it('should allow the SR to delete its own proposal', async function () {
 
             const params = [
@@ -1077,6 +1108,43 @@ describe('TronWeb.transactionBuilder', function () {
 
         // TODO add invalid params throws
 
+    });
+
+    describe("#voteProposal", function () {
+        let proposals;
+
+        before(async function () {
+
+            this.timeout(20000)
+
+            const sendTrxTransaction = await tronWeb.transactionBuilder.sendTrx(accounts.b58[5], 10000e6);
+            await broadcaster(sendTrxTransaction, PRIVATE_KEY);
+            waitChainData('tx', sendTrxTransaction.txID);
+            const applyForSrTransaction = await tronWeb.transactionBuilder.applyForSR(accounts.b58[5], 'url.tron.network');
+            await broadcaster(applyForSrTransaction, accounts.pks[5]);
+            waitChainData('tx', applyForSrTransaction.txID);
+            let parameters = [{ "key": 0, "value": 100000 }, { "key": 1, "value": 2 }]
+
+            await broadcaster(tronWeb.transactionBuilder.createProposal(parameters, ADDRESS_BASE58), PRIVATE_KEY)
+
+            proposals = await tronWeb.trx.listProposals();
+
+        })
+
+        it('should allow vote proposal', async function () {
+
+            const params = [
+                [proposals[0].proposal_id, true, accounts.b58[5], { permissionId: 2 }],
+                [proposals[0].proposal_id, true, accounts.b58[5]]
+            ];
+            for (let param of params) {
+                const transaction = await tronWeb.transactionBuilder.voteProposal(...param)
+                const authResult =
+                    TronWeb.utils.transaction.txCheck(transaction);
+                assert.equal(authResult, true);
+            }
+
+        })
     });
 
     describe.skip("#applyForSR", async function () {
@@ -1122,10 +1190,60 @@ describe('TronWeb.transactionBuilder', function () {
 
     });
 
-    describe("#unfreezeBalance", async function () {
+    describe.skip("#unfreezeBalance", async function () {
 
         // TODO this is not fully testable because the minimum time before unfreezing is 3 days
+        async function freezeBandWith() {
+            const transaction = await tronWeb.transactionBuilder.freezeBalance(100e6, 3, 'BANDWIDTH', accounts.b58[1]);
+            await broadcaster(transaction, accounts.pks[1]);
+            while (true) {
+                const tx = await tronWeb.trx.getTransactionInfo(transaction.txID);
+                if (Object.keys(tx).length === 0) {
+                    await wait(3);
+                    continue;
+                } else {
+                    break;
+                }
+            }
+        };
 
+        it('should unfreeze balance', async function () {
+            const params = [
+                ['BANDWIDTH', accounts.b58[1], { permissionId: 2 }],
+                ['BANDWIDTH', accounts.b58[1]]
+            ];
+
+            for (let param of params) {
+                await freezeBandWith();
+                const transaction = await tronWeb.transactionBuilder.unfreezeBalance(...param)
+                const authResult =
+                    TronWeb.utils.transaction.txCheck(transaction);
+                assert.equal(authResult, true);
+            }
+        })
+
+    });
+
+    describe.skip('#withdrawBalance', function () {
+
+        // this is not fully testable because the minimum time before withdrawBlockRewards is 1 days
+        // witnessAccount does not have any reward
+
+        it(`should withdraw balance`, async function () {
+            const params = [
+                [accounts.b58[1], { permissionId: 2 }],
+                [accounts.b58[1]]
+            ];
+            for (let param of params) {
+                const transaction = await tronWeb.transactionBuilder.withdrawBlockRewards(
+                    ...param
+                );
+                const authResult =
+                    TronWeb.utils.transaction.txCheck(transaction);
+                assert.equal(authResult, true);
+
+            }
+        });
     });
 
 
@@ -1527,12 +1645,313 @@ describe('TronWeb.transactionBuilder', function () {
     });
 
     describe("#injectExchangeTokens", async function () {
+        const idxS = 14;
+        const idxE = 16;
+        let tokenNames = [];
+        let exchangeId = '';
+
+        before(async function () {
+            this.timeout(20000);
+
+            // create token
+            for (let i = idxS; i < idxE; i++) {
+                const options = getTokenOptions();
+                const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.hex[i]);
+                await broadcaster(null, accounts.pks[i], transaction);
+                await waitChainData('token', accounts.hex[i]);
+                const token = await tronWeb.trx.getTokensIssuedByAddress(accounts.hex[i]);
+                await waitChainData('tokenById', token[Object.keys(token)[0]]['id']);
+                await broadcaster(null, accounts.pks[i], await tronWeb.transactionBuilder.sendToken(
+                    tronWeb.defaultAddress.hex,
+                    10e4,
+                    token[Object.keys(token)[0]]['id'],
+                    token[Object.keys(token)[0]]['owner_address']
+                ));
+                tokenNames.push(token[Object.keys(token)[0]]['id']);
+            }
+            const transaction = await tronWeb.transactionBuilder.createTokenExchange(tokenNames[1], 10, tokenNames[0], 10);
+            await broadcaster(null, PRIVATE_KEY, transaction);
+            let receipt = await tronWeb.trx.getTransactionInfo(transaction.txID);
+            while (!Object.keys(receipt).length) {
+                await wait(5);
+                receipt = await tronWeb.trx.getTransactionInfo(transaction.txID);
+            }
+            exchangeId = receipt.exchange_id;
+        });
+        it(`should inject exchange tokens`, async function () {
+            const params = [
+                [exchangeId, tokenNames[0], 10, { permissionId: 2 }],
+                [exchangeId, tokenNames[0], 10]
+            ];
+            for (let param of params) {
+                const transaction = await tronWeb.transactionBuilder.injectExchangeTokens(
+                    ...param
+                );
+                const authResult =
+                    TronWeb.utils.transaction.txCheck(transaction);
+                assert.equal(authResult, true);
+            }
+        });
     });
 
     describe("#withdrawExchangeTokens", async function () {
+        const idxS = 0;
+        const idxE = 2;
+        let tokenNames = [];
+        let exchangeId = '';
+
+        before(async function () {
+            this.timeout(20000);
+
+            // create token
+            for (let i = idxS; i < idxE; i++) {
+                const options = getTokenOptions();
+                const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.hex[i]);
+                await broadcaster(null, accounts.pks[i], transaction);
+                await waitChainData('token', accounts.hex[i]);
+                const token = await tronWeb.trx.getTokensIssuedByAddress(accounts.hex[i]);
+                await waitChainData('tokenById', token[Object.keys(token)[0]]['id']);
+                await broadcaster(null, accounts.pks[i], await tronWeb.transactionBuilder.sendToken(
+                    tronWeb.defaultAddress.hex,
+                    10e4,
+                    token[Object.keys(token)[0]]['id'],
+                    token[Object.keys(token)[0]]['owner_address']
+                ));
+                tokenNames.push(token[Object.keys(token)[0]]['id']);
+            }
+            const transaction = await tronWeb.transactionBuilder.createTokenExchange(tokenNames[1], 10, tokenNames[0], 10);
+            await broadcaster(transaction);
+            let receipt = await tronWeb.trx.getTransactionInfo(transaction.txID);
+            while (!Object.keys(receipt).length) {
+                await wait(5);
+                receipt = await tronWeb.trx.getTransactionInfo(transaction.txID);
+            }
+            exchangeId = receipt.exchange_id;
+
+            transaction.raw_data_hex = transaction.raw_data_hex + '00';
+            const authResult2 =
+                TronWeb.utils.transaction.txCheck(transaction);
+            assert.equal(authResult2, false);
+
+        });
+        it(`should withdraw exchange tokens`, async function () {
+            const params = [
+                [exchangeId, tokenNames[0], 10, { permissionId: 2 }],
+                [exchangeId, tokenNames[0], 10]
+            ];
+            for (let param of params) {
+                const transaction = await tronWeb.transactionBuilder.withdrawExchangeTokens(
+                    ...param
+                );
+                const authResult =
+                    TronWeb.utils.transaction.txCheck(transaction);
+                assert.equal(authResult, true);
+            }
+        });
     });
 
     describe("#tradeExchangeTokens", async function () {
+        const idxS = 31;
+        const idxE = 33;
+        let tokenNames = [];
+        let exchangeId = '';
+
+        before(async function () {
+            this.timeout(20000);
+
+            // create token
+            for (let i = idxS; i < idxE; i++) {
+                const options = getTokenOptions();
+                const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.hex[i]);
+                await broadcaster(null, accounts.pks[i], transaction);
+                await waitChainData('token', accounts.hex[i]);
+                const token = await tronWeb.trx.getTokensIssuedByAddress(accounts.hex[i]);
+                await waitChainData('tokenById', token[Object.keys(token)[0]]['id']);
+                await broadcaster(null, accounts.pks[i], await tronWeb.transactionBuilder.sendToken(
+                    tronWeb.defaultAddress.hex,
+                    10e4,
+                    token[Object.keys(token)[0]]['id'],
+                    token[Object.keys(token)[0]]['owner_address']
+                ));
+                tokenNames.push(token[Object.keys(token)[0]]['id']);
+            }
+            // console.log(tokenNames, 99999999);
+            const transaction = await tronWeb.transactionBuilder.createTokenExchange(tokenNames[1], 10, tokenNames[0], 10);
+            await broadcaster(transaction);
+            let receipt = await tronWeb.trx.getTransactionInfo(transaction.txID);
+            while (!Object.keys(receipt).length) {
+                await wait(5);
+                receipt = await tronWeb.trx.getTransactionInfo(transaction.txID);
+            }
+            exchangeId = receipt.exchange_id;
+        });
+        it(`should trade exchange tokens`, async function () {
+            const params = [
+                [exchangeId, tokenNames[0], 10, 5, { permissionId: 2 }],
+                [exchangeId, tokenNames[0], 10, 5]
+            ];
+            for (let param of params) {
+                const transaction = await tronWeb.transactionBuilder.tradeExchangeTokens(
+                    ...param
+                );
+                const authResult =
+                    TronWeb.utils.transaction.txCheck(transaction);
+                assert.equal(authResult, true);
+
+                transaction.raw_data_hex = transaction.raw_data_hex + '00';
+                const authResult2 =
+                    TronWeb.utils.transaction.txCheck(transaction);
+                assert.equal(authResult2, false);
+
+                transaction.txID = transaction.txID + '00'
+                const authResult3 =
+                    TronWeb.utils.transaction.txCheck(transaction);
+                assert.equal(authResult3, false);
+            }
+        });
+    });
+
+    describe("#updateSetting", function () {
+        let transaction;
+        before(async function () {
+            this.timeout(20000);
+
+            transaction = await tronWeb.transactionBuilder.createSmartContract({
+                abi: testConstant.abi,
+                bytecode: testConstant.bytecode
+            }, accounts.hex[3]);
+            await broadcaster(null, accounts.pks[3], transaction);
+            while (true) {
+                const tx = await tronWeb.trx.getTransactionInfo(transaction.txID);
+                if (Object.keys(tx).length === 0) {
+                    await wait(3);
+                    continue;
+                } else {
+                    break;
+                }
+            }
+        })
+        it(`should update setting`, async function () {
+            const params = [
+                [transaction.contract_address, 10, accounts.b58[3], { permissionId: 2 }],
+                [transaction.contract_address, 20, accounts.b58[3]]
+            ];
+            for (let param of params) {
+                const transaction = await tronWeb.transactionBuilder.updateSetting(
+                    ...param
+                );
+                const authResult =
+                    TronWeb.utils.transaction.txCheck(transaction);
+                assert.equal(authResult, true);
+            }
+        });
+    });
+
+    describe("#updateEnergyLimit", function () {
+        let transaction;
+        before(async function () {
+            this.timeout(20000);
+
+            transaction = await tronWeb.transactionBuilder.createSmartContract({
+                abi: testConstant.abi,
+                bytecode: testConstant.bytecode
+            }, accounts.hex[3]);
+            await broadcaster(null, accounts.pks[3], transaction);
+            while (true) {
+                const tx = await tronWeb.trx.getTransactionInfo(transaction.txID);
+                if (Object.keys(tx).length === 0) {
+                    await wait(3);
+                    continue;
+                } else {
+                    break;
+                }
+            }
+        })
+        it(`should update energy limit`, async function () {
+            const params = [
+                [transaction.contract_address, 10e6, accounts.b58[3], { permissionId: 2 }],
+                [transaction.contract_address, 10e6, accounts.b58[3]]
+            ];
+            for (let param of params) {
+                const transaction = await tronWeb.transactionBuilder.updateEnergyLimit(
+                    ...param
+                );
+                const authResult =
+                    TronWeb.utils.transaction.txCheck(transaction);
+                assert.equal(authResult, true);
+            }
+        });
+    });
+
+    describe("#accountPermissionUpdate", function () {
+        before(async () => {
+            await broadcaster(tronWeb.transactionBuilder.sendTrx(accounts.b58[6], 10000e6), PRIVATE_KEY);
+            const transaction = await tronWeb.transactionBuilder.applyForSR(accounts.b58[6], 'url.tron.network');
+            await broadcaster(transaction, accounts.pks[6]);
+            while (true) {
+                const tx = await tronWeb.trx.getTransactionInfo(transaction.txID);
+                if (Object.keys(tx).length === 0) {
+                    await wait(3);
+                    continue;
+                } else {
+                    break;
+                }
+            }
+        });
+        it(`should update account permissions`, async function () {
+            const permissionData = {
+                "owner": {
+                    "type": 0,
+                    "keys": [
+                    {
+                        "address": accounts.hex[6],
+                        "weight": 1
+                    }
+                    ],
+                    "threshold": 1,
+                    "permission_name": "owner"
+                },
+                "witness": {
+                    "keys": [
+                    {
+                        "address": accounts.hex[6],
+                        "weight": 1
+                    }
+                    ],
+                    "threshold": 1,
+                    "id": 1,
+                    "type": 1,
+                    "permission_name": "witness"
+                },
+                "owner_address": accounts.hex[6],
+                "actives": [
+                    {
+                    "operations": "7fff1fc0033e0000000000000000000000000000000000000000000000000000",
+                    "keys": [
+                        {
+                        "address": accounts.hex[6],
+                        "weight": 1
+                        }
+                    ],
+                    "threshold": 1,
+                    "id": 2,
+                    "type": 2,
+                    "permission_name": "active"
+                    }
+                ]
+            };
+            const params = [
+                [accounts.hex[6], permissionData.owner, permissionData.witness, permissionData.actives] // No suppored for multiSign
+            ];
+            for (let param of params) {
+                const transaction = await tronWeb.transactionBuilder.updateAccountPermissions(
+                    ...param
+                );
+                const authResult =
+                    TronWeb.utils.transaction.txCheck(transaction);
+                assert.equal(authResult, true);
+            }
+        });
     });
 
     describe("Alter existent transactions", async function () {

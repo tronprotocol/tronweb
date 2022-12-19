@@ -1,0 +1,971 @@
+const google_protobuf_any_pb = require('@tronweb3/google-protobuf/google/protobuf/any_pb');
+
+const { Transaction, Permission, Key } = require('../protocol/core/Tron_pb');
+
+const {
+    TransferContract,
+    FreezeBalanceContract,
+    UnfreezeBalanceContract,
+    WithdrawBalanceContract,
+} = require('../protocol/core/contract/balance_contract_pb');
+const {
+    TransferAssetContract,
+    ParticipateAssetIssueContract,
+    AssetIssueContract,
+    UpdateAssetContract
+} = require('../protocol/core/contract/asset_issue_contract_pb');
+
+const {
+    TriggerSmartContract,
+    ClearABIContract,
+    UpdateEnergyLimitContract,
+    UpdateSettingContract,
+    CreateSmartContract,
+    SmartContract,
+} = require('../protocol/core/contract/smart_contract_pb');
+
+const { ResourceCode } = require('../protocol/core/contract/common_pb');
+
+const {
+    WitnessCreateContract,
+    VoteWitnessContract,
+} = require('../protocol/core/contract/witness_contract_pb');
+
+const {
+    UpdateBrokerageContract,
+} = require('../protocol/core/contract/storage_contract_pb');
+
+const {
+    AccountCreateContract,
+    AccountUpdateContract,
+    SetAccountIdContract,
+    AccountPermissionUpdateContract,
+} = require('../protocol/core/contract/account_contract_pb');
+
+const {
+    ProposalCreateContract,
+    ProposalDeleteContract,
+    ProposalApproveContract,
+} = require('../protocol/core/contract/proposal_contract_pb');
+
+const {
+    ExchangeCreateContract,
+    ExchangeInjectContract,
+    ExchangeWithdrawContract,
+    ExchangeTransactionContract,
+} = require('../protocol/core/contract/exchange_contract_pb');
+
+import { byteArray2hexStr } from './bytes';
+import { sha256, keccak256 } from './ethersUtils';
+import TronWeb from '../index';
+
+const fromHexString = (hexString) => {
+    if (!hexString || hexString.length === 0) return new Uint8Array([]);
+    return new Uint8Array(
+        TronWeb.address.toHex(hexString).match(/.{1,2}/g).map((byte) => parseInt(byte, 16))
+    );
+};
+    
+
+const sha3 = (string, prefix = true) => {
+    return (
+        (prefix ? '0x' : '') +
+        keccak256(Buffer.from(string, 'utf-8')).toString().substring(2)
+    );
+};
+
+const buildCommonTransaction = (
+    message,
+    contractType,
+    typeName,
+    permissionId
+) => {
+    let anyValue = new google_protobuf_any_pb.Any();
+    anyValue.pack(message.serializeBinary(), 'protocol.' + typeName);
+    let contract = new Transaction.Contract();
+    contract.setType(contractType);
+    contract.setParameter(anyValue);
+    if (permissionId) {
+        contract.setPermissionId(permissionId);
+    }
+    let raw = new Transaction.raw();
+    raw.addContract(contract);
+    let transaction = new Transaction();
+    transaction.setRawData(raw);
+    return transaction;
+};
+
+// wallet/createtransaction for sendTrx
+const buildTransferContract = (value, options) => {
+    const { to_address, owner_address, amount } = value;
+    let transferContract = new TransferContract();
+    transferContract.setToAddress(fromHexString(to_address));
+    transferContract.setOwnerAddress(fromHexString(owner_address));
+    transferContract.setAmount(amount);
+    return buildCommonTransaction(
+        transferContract,
+        Transaction.Contract.ContractType.TRANSFERCONTRACT,
+        'TransferContract',
+        options.Permission_id
+    );
+};
+
+// wallet/transferasset for sendToken
+const buildTransferAssetContract = (value, options) => {
+    const { to_address, owner_address, amount, asset_name } = value;
+    let transferContract = new TransferAssetContract();
+    transferContract.setToAddress(fromHexString(to_address));
+    transferContract.setOwnerAddress(fromHexString(owner_address));
+    transferContract.setAssetName(fromHexString(asset_name.replace(/^0x/, '')));
+    transferContract.setAmount(amount);
+    return buildCommonTransaction(
+        transferContract,
+        Transaction.Contract.ContractType.TRANSFERASSETCONTRACT,
+        'TransferAssetContract',
+        options.Permission_id
+    );
+};
+
+// wallet/participateassetissue for purchaseToken
+const buildParticipateAssetIssueContract = (value, options) => {
+    let pbObj = new ParticipateAssetIssueContract();
+    pbObj.setToAddress(fromHexString(value.to_address));
+    pbObj.setOwnerAddress(fromHexString(value.owner_address));
+    pbObj.setAssetName(fromHexString(value.asset_name.replace(/^0x/, '')));
+    pbObj.setAmount(value.amount);
+
+    return buildCommonTransaction(
+        pbObj,
+        Transaction.Contract.ContractType.PARTICIPATEASSETISSUECONTRACT,
+        'ParticipateAssetIssueContract',
+        options.Permission_id
+    );
+};
+
+const buildTriggerSmartContract = (value, options) => {
+    let triggerSmartContract = new TriggerSmartContract();
+    const {
+        owner_address,
+        contract_address,
+        parameter = '',
+        function_selector,
+        call_value,
+        call_token_value,
+        token_id,
+        data,
+    } = value;
+    triggerSmartContract.setOwnerAddress(fromHexString(owner_address));
+    triggerSmartContract.setContractAddress(fromHexString(contract_address));
+    triggerSmartContract.setCallValue(call_value);
+    if (data) {
+        triggerSmartContract.setData(fromHexString(data));
+    } else if (function_selector) {
+        const contractData = sha3(function_selector).substring(2, 10) + parameter;
+        triggerSmartContract.setData(fromHexString(contractData));
+    }
+    
+    if (token_id) {
+        triggerSmartContract.setTokenId(token_id);
+    }
+    if (call_token_value) {
+        triggerSmartContract.setCallTokenValue(call_token_value);
+    }
+
+    return buildCommonTransaction(
+        triggerSmartContract,
+        Transaction.Contract.ContractType.TRIGGERSMARTCONTRACT,
+        'TriggerSmartContract',
+        options.Permission_id
+    );
+};
+
+const buildFreezeBalanceContract = (value, options) => {
+    let freezeBalanceContract = new FreezeBalanceContract();
+    const {
+        owner_address,
+        frozen_balance,
+        frozen_duration,
+        resource,
+        receiver_address,
+    } = value;
+    freezeBalanceContract.setOwnerAddress(fromHexString(owner_address));
+    freezeBalanceContract.setFrozenBalance(frozen_balance);
+    freezeBalanceContract.setFrozenDuration(frozen_duration);
+    if (resource) {
+        freezeBalanceContract.setResource(ResourceCode[resource]);
+    }
+    if (receiver_address) {
+        freezeBalanceContract.setReceiverAddress(
+            fromHexString(receiver_address)
+        );
+    }
+
+    return buildCommonTransaction(
+        freezeBalanceContract,
+        Transaction.Contract.ContractType.FREEZEBALANCECONTRACT,
+        'FreezeBalanceContract',
+        options.Permission_id
+    );
+};
+
+const buildUnfreezeBalanceContract = (value, options) => {
+    let unfreezeBalanceContract = new UnfreezeBalanceContract();
+    const { owner_address, resource, receiver_address } = value;
+    unfreezeBalanceContract.setOwnerAddress(fromHexString(owner_address));
+    if (resource) {
+        unfreezeBalanceContract.setResource(ResourceCode[resource]);
+    }
+    if (receiver_address) {
+        unfreezeBalanceContract.setReceiverAddress(
+            fromHexString(receiver_address)
+        );
+    }
+
+    return buildCommonTransaction(
+        unfreezeBalanceContract,
+        Transaction.Contract.ContractType.UNFREEZEBALANCECONTRACT,
+        'UnfreezeBalanceContract',
+        options.Permission_id
+    );
+};
+
+const buildWithdrawBalanceContract = (value, options) => {
+    let withdrawbalanceContract = new WithdrawBalanceContract();
+    const { owner_address } = value;
+    withdrawbalanceContract.setOwnerAddress(fromHexString(owner_address));
+
+    return buildCommonTransaction(
+        withdrawbalanceContract,
+        Transaction.Contract.ContractType.WITHDRAWBALANCECONTRACT,
+        'WithdrawBalanceContract',
+        options.Permission_id
+    );
+};
+
+// applyForSR
+const buildCreateWitness = (value, options) => {
+    const createWitnessContract = new WitnessCreateContract();
+    const { owner_address, url } = value;
+    createWitnessContract.setOwnerAddress(fromHexString(owner_address));
+    createWitnessContract.setUrl(fromHexString(url.replace(/^0x/, '')));
+    return buildCommonTransaction(
+        createWitnessContract,
+        Transaction.Contract.ContractType.WITNESSCREATECONTRACT,
+        'WitnessCreateContract',
+        options.Permission_id
+    );
+};
+
+// vote
+const buildVoteWitnessAccount = (value, options) => {
+    let voteWitnessContract = new VoteWitnessContract();
+    const { owner_address, votes } = value;
+    voteWitnessContract.setOwnerAddress(fromHexString(owner_address));
+
+    votes.forEach((voteItem) => {
+        let vote = new VoteWitnessContract.Vote();
+        const { vote_address, vote_count } = voteItem;
+        vote.setVoteAddress(fromHexString(vote_address));
+        let numberOfVotes = parseInt(vote_count);
+        vote.setVoteCount(numberOfVotes);
+        voteWitnessContract.addVotes(vote);
+    });
+
+    return buildCommonTransaction(
+        voteWitnessContract,
+        Transaction.Contract.ContractType.VOTEWITNESSCONTRACT,
+        'VoteWitnessContract',
+        options.Permission_id
+    );
+};
+
+const buildCreateSmartContract = (value, options) => {
+    let params = value?.new_contract ?
+        {
+            ...{
+                owner_address: value.owner_address,
+                call_token_value: value.call_token_value,
+                token_id: value.token_id,
+            },
+            ...value.new_contract,
+        }
+        : value;
+    let {
+        owner_address,
+        consume_user_resource_percent,
+        origin_energy_limit,
+        abi,
+        bytecode = '',
+        name: contracName,
+        parameter = '',
+        call_value,
+        call_token_value,
+        token_id,
+        origin_address,
+    } = params;
+
+    let createSmartContract = new CreateSmartContract();
+    createSmartContract.setOwnerAddress(fromHexString(owner_address));
+    if (token_id) {
+        createSmartContract.setTokenId(token_id);
+    }
+    if (call_token_value) {
+        createSmartContract.setCallTokenValue(call_token_value);
+    }
+    const smartContractBuilder = new SmartContract();
+
+    if (abi) {
+        let abiJson;
+        if (typeof abi === 'string') {
+            abiJson = JSON.parse(abi);
+        } else {
+            abiJson = abi?.entrys || []; // abi could be an empty object if origin abi is `[]`;
+        }
+        const abiBuilder = new SmartContract.ABI();
+
+        const buildEntryParam = (data) => {
+            const param = new SmartContract.ABI.Entry.Param();
+            const { indexed, name, type } = data;
+            if (indexed === true) {
+                param.setIndexed(true);
+            }
+            param.setName(name);
+            param.setType(type);
+            return param;
+        };
+        const entryBuilders = abiJson.map((entry) => {
+            const {
+                anonymous,
+                constant,
+                name,
+                inputs,
+                outputs,
+                type,
+                payable,
+                stateMutability,
+            } = entry;
+            const entryBuilder = new SmartContract.ABI.Entry();
+            entryBuilder.setAnonymous(anonymous);
+            entryBuilder.setConstant(constant);
+            entryBuilder.setName(name);
+            if (inputs) {
+                entryBuilder.setInputsList(
+                    inputs.map((input) => buildEntryParam(input))
+                );
+            }
+            if (outputs) {
+                entryBuilder.setOutputsList(
+                    outputs.map((output) => buildEntryParam(output))
+                );
+            }
+            if (type) {
+                entryBuilder.setType(
+                    SmartContract.ABI.Entry.EntryType[type.toUpperCase()]
+                );
+            }
+            
+            entryBuilder.setPayable(payable);
+            if(stateMutability) {
+                entryBuilder.setStatemutability(
+                    SmartContract.ABI.Entry.StateMutabilityType[
+                        stateMutability.toUpperCase()
+                    ]
+                );
+            }
+            
+            return entryBuilder;
+        });
+        abiBuilder.setEntrysList(entryBuilders);
+        smartContractBuilder.setAbi(abiBuilder);
+    }
+    
+
+    if (call_value) {
+        smartContractBuilder.setCallValue(call_value);
+    }
+
+    smartContractBuilder.setConsumeUserResourcePercent(
+        consume_user_resource_percent
+    );
+    smartContractBuilder.setOriginEnergyLimit(origin_energy_limit);
+
+    if (!origin_address) {
+        origin_address = owner_address;
+    }
+    smartContractBuilder.setOriginAddress(fromHexString(origin_address));
+
+    if (bytecode) {
+        const bytecodeParameter = bytecode.replace(/^0x/, '') + parameter.replace(/^0x/, '');
+        smartContractBuilder.setBytecode(fromHexString(bytecodeParameter));
+    }
+
+    smartContractBuilder.setName(contracName);
+
+    createSmartContract.setNewContract(smartContractBuilder);
+
+    return buildCommonTransaction(
+        createSmartContract,
+        Transaction.Contract.ContractType.CREATESMARTCONTRACT,
+        'CreateSmartContract',
+        options.Permission_id
+    );
+};
+
+const buildClearABIContract = (value, options) => {
+    const { contract_address, owner_address } = value;
+    const clearABIContract = new ClearABIContract();
+    clearABIContract.setOwnerAddress(fromHexString(owner_address));
+    clearABIContract.setContractAddress(fromHexString(contract_address));
+
+    return buildCommonTransaction(
+        clearABIContract,
+        Transaction.Contract.ContractType.CLEARABICONTRACT,
+        'ClearABIContract'
+    );
+};
+
+// updateBrokerage
+const buildUpdateBrokerageContract = (value, options) => {
+    const { brokerage, owner_address } = value;
+    const updateBrokerageContract = new UpdateBrokerageContract();
+    updateBrokerageContract.setOwnerAddress(fromHexString(owner_address));
+    updateBrokerageContract.setBrokerage(brokerage);
+
+    return buildCommonTransaction(
+        updateBrokerageContract,
+        Transaction.Contract.ContractType.UPDATEBROKERAGECONTRACT,
+        'UpdateBrokerageContract'
+    );
+};
+
+// createToken
+const buildAssetIssueContract = (value, options) => {
+    const {
+        owner_address,
+        name,
+        abbr,
+        description,
+        url,
+        total_supply,
+        trx_num,
+        num,
+        start_time,
+        end_time,
+        precision,
+        free_asset_net_limit,
+        public_free_asset_net_limit,
+        public_free_asset_net_usage = 0,
+        public_latest_free_net_time = 0,
+        vote_score = 0,
+        frozen_supply,
+    } = value;
+    let assetIssueContract = new AssetIssueContract();
+    assetIssueContract.setOwnerAddress(fromHexString(owner_address));
+    if (name) {
+        assetIssueContract.setName(fromHexString(name.replace(/^0x/, '')));
+    }
+    if (abbr) {
+        assetIssueContract.setAbbr(fromHexString(abbr.replace(/^0x/, '')));
+    }
+    assetIssueContract.setTotalSupply(total_supply);
+    assetIssueContract.setNum(num);
+    assetIssueContract.setEndTime(end_time);
+    assetIssueContract.setStartTime(start_time);
+    assetIssueContract.setTrxNum(trx_num);
+    assetIssueContract.setVoteScore(vote_score);
+    if (precision) {
+        assetIssueContract.setPrecision(precision);
+    }
+    if (public_latest_free_net_time) {
+        assetIssueContract.setPublicLatestFreeNetTime(
+            public_latest_free_net_time
+        );
+    }
+    if (description) {
+        assetIssueContract.setDescription(
+            fromHexString(description.replace(/^0x/, ''))
+        );
+    }
+    if (url) {
+        assetIssueContract.setUrl(fromHexString(url.replace(/^0x/, '')));
+    }
+    
+    assetIssueContract.setPublicFreeAssetNetUsage(public_free_asset_net_usage);
+    assetIssueContract.setFreeAssetNetLimit(free_asset_net_limit);
+    assetIssueContract.setPublicFreeAssetNetLimit(public_free_asset_net_limit);
+    if (frozen_supply) {
+        let frozenSupplyContract = new AssetIssueContract.FrozenSupply();
+        frozenSupplyContract.setFrozenAmount(frozen_supply.length ? frozen_supply[0].frozen_amount : frozen_supply.frozen_amount);
+        frozenSupplyContract.setFrozenDays(frozen_supply.length ? frozen_supply[0].frozen_days : frozen_supply.frozen_days);
+        assetIssueContract.addFrozenSupply(frozenSupplyContract);
+    }
+    return buildCommonTransaction(
+        assetIssueContract,
+        Transaction.Contract.ContractType.ASSETISSUECONTRACT,
+        'AssetIssueContract',
+        options.Permission_id
+    );
+};
+
+//createAccount
+const buildAccountCreateContract = (value, options) => {
+    let accountCreateContract = new AccountCreateContract();
+    const { account_address, owner_address } = value;
+    accountCreateContract.setOwnerAddress(fromHexString(owner_address));
+    accountCreateContract.setAccountAddress(
+        fromHexString(account_address.replace(/^0x/, ''))
+    );
+    return buildCommonTransaction(
+        accountCreateContract,
+        Transaction.Contract.ContractType.ACCOUNTCREATECONTRACT,
+        'AccountCreateContract',
+        options.Permission_id
+    );
+}
+
+// updateAccount
+const buildAccountUpdateContract = (value, options) => {
+    let accountUpdateContract = new AccountUpdateContract();
+    const { account_name, owner_address } = value;
+    accountUpdateContract.setOwnerAddress(fromHexString(owner_address));
+    accountUpdateContract.setAccountName(
+        fromHexString(account_name.replace(/^0x/, ''))
+    );
+    return buildCommonTransaction(
+        accountUpdateContract,
+        Transaction.Contract.ContractType.ACCOUNTUPDATECONTRACT,
+        'AccountUpdateContract',
+        options.Permission_id
+    );
+};
+
+// setAccountId
+const buildSetAccountIdContract = (value, options) => {
+    let setAccountIdContract = new SetAccountIdContract();
+    const { account_id, owner_address } = value;
+    setAccountIdContract.setOwnerAddress(fromHexString(owner_address));
+    setAccountIdContract.setAccountId(
+        fromHexString(account_id.replace(/^0x/, ''))
+    );
+    return buildCommonTransaction(
+        setAccountIdContract,
+        Transaction.Contract.ContractType.SETACCOUNTIDCONTRACT,
+        'SetAccountIdContract',
+        options.Permission_id
+    );
+};
+
+const buildProposalCreateContract = (value, options) => {
+    let proposalCreateContract = new ProposalCreateContract();
+    const { owner_address, parameters } = value;
+    proposalCreateContract.setOwnerAddress(fromHexString(owner_address));
+    parameters.forEach((parameter) => {
+        proposalCreateContract
+            .getParametersMap()
+            .set(parameter.key, parameter.value);
+    });
+    return buildCommonTransaction(
+        proposalCreateContract,
+        Transaction.Contract.ContractType.PROPOSALCREATECONTRACT,
+        'ProposalCreateContract',
+        options.Permission_id
+    );
+};
+
+const buildProposalDeleteContract = (value, options) => {
+    let proposalDeleteContract = new ProposalDeleteContract();
+    const { owner_address, proposal_id } = value;
+    proposalDeleteContract.setOwnerAddress(fromHexString(owner_address));
+    proposalDeleteContract.setProposalId(proposal_id);
+    return buildCommonTransaction(
+        proposalDeleteContract,
+        Transaction.Contract.ContractType.PROPOSALDELETECONTRACT,
+        'ProposalDeleteContract',
+        options.Permission_id
+    );
+};
+
+const buildVoteProposalContract = (value, options) => {
+    let proposalVoteContract = new ProposalApproveContract();
+    const { owner_address, proposal_id, is_add_approval } = value;
+    proposalVoteContract.setOwnerAddress(fromHexString(owner_address));
+    proposalVoteContract.setProposalId(proposal_id);
+    proposalVoteContract.setIsAddApproval(is_add_approval);
+    return buildCommonTransaction(
+        proposalVoteContract,
+        Transaction.Contract.ContractType.PROPOSALAPPROVECONTRACT,
+        'ProposalApproveContract',
+        options.Permission_id
+    );
+};
+
+const buildExchangeCreateContract = (value, options) => {
+    const exchangeCreateContract = new ExchangeCreateContract();
+    const {
+        owner_address,
+        first_token_id,
+        first_token_balance,
+        second_token_id,
+        second_token_balance,
+    } = value;
+    exchangeCreateContract.setOwnerAddress(fromHexString(owner_address));
+    exchangeCreateContract.setFirstTokenId(
+        fromHexString(first_token_id.replace(/^0x/, ''))
+    );
+    exchangeCreateContract.setFirstTokenBalance(first_token_balance);
+    exchangeCreateContract.setSecondTokenId(
+        fromHexString(second_token_id.replace(/^0x/, ''))
+    );
+    exchangeCreateContract.setSecondTokenBalance(second_token_balance);
+    return buildCommonTransaction(
+        exchangeCreateContract,
+        Transaction.Contract.ContractType.EXCHANGECREATECONTRACT,
+        'ExchangeCreateContract',
+        options.Permission_id
+    );
+};
+
+const buildExchangeInjectContract = (value, options) => {
+    const exchangeInjectContract = new ExchangeInjectContract();
+    const { owner_address, exchange_id, token_id, quant } = value;
+    exchangeInjectContract.setOwnerAddress(fromHexString(owner_address));
+    exchangeInjectContract.setExchangeId(exchange_id);
+    exchangeInjectContract.setTokenId(
+        fromHexString(token_id.replace(/^0x/, ''))
+    );
+    exchangeInjectContract.setQuant(quant);
+    return buildCommonTransaction(
+        exchangeInjectContract,
+        Transaction.Contract.ContractType.EXCHANGEINJECTCONTRACT,
+        'ExchangeInjectContract',
+        options.Permission_id
+    );
+};
+
+const buildExchangeWithdrawContract = (value, options) => {
+    const exchangeWithdrawContract = new ExchangeWithdrawContract();
+    const { owner_address, exchange_id, token_id, quant } = value;
+    exchangeWithdrawContract.setOwnerAddress(fromHexString(owner_address));
+    exchangeWithdrawContract.setExchangeId(exchange_id);
+    exchangeWithdrawContract.setTokenId(
+        fromHexString(token_id.replace(/^0x/, ''))
+    );
+    exchangeWithdrawContract.setQuant(quant);
+    return buildCommonTransaction(
+        exchangeWithdrawContract,
+        Transaction.Contract.ContractType.EXCHANGEWITHDRAWCONTRACT,
+        'ExchangeWithdrawContract',
+        options.Permission_id
+    );
+};
+
+const buildExchangeTransactionContract = (value, options) => {
+    const exchangeTransactionContract = new ExchangeTransactionContract();
+    const { owner_address, exchange_id, token_id, quant, expected } = value;
+    exchangeTransactionContract.setOwnerAddress(fromHexString(owner_address));
+    exchangeTransactionContract.setExchangeId(exchange_id);
+    exchangeTransactionContract.setTokenId(
+        fromHexString(token_id.replace(/^0x/, ''))
+    );
+    exchangeTransactionContract.setQuant(quant);
+    exchangeTransactionContract.setExpected(expected);
+    return buildCommonTransaction(
+        exchangeTransactionContract,
+        Transaction.Contract.ContractType.EXCHANGETRANSACTIONCONTRACT,
+        'ExchangeTransactionContract',
+        options.Permission_id
+    );
+};
+
+const buildUpdateSettingContract = (value, options) => {
+    const updateSettingContract = new UpdateSettingContract();
+    const { owner_address, contract_address, consume_user_resource_percent } =
+        value;
+    updateSettingContract.setOwnerAddress(fromHexString(owner_address));
+    updateSettingContract.setContractAddress(fromHexString(contract_address));
+    updateSettingContract.setConsumeUserResourcePercent(
+        consume_user_resource_percent
+    );
+    return buildCommonTransaction(
+        updateSettingContract,
+        Transaction.Contract.ContractType.UPDATESETTINGCONTRACT,
+        'UpdateSettingContract',
+        options.Permission_id
+    );
+};
+
+const buildUpdateEnergyLimitContract = (value, options) => {
+    const updateEnergyLimitContract = new UpdateEnergyLimitContract();
+    const { owner_address, contract_address, origin_energy_limit } = value;
+    updateEnergyLimitContract.setOwnerAddress(fromHexString(owner_address));
+    updateEnergyLimitContract.setContractAddress(
+        fromHexString(contract_address)
+    );
+    updateEnergyLimitContract.setOriginEnergyLimit(origin_energy_limit);
+    return buildCommonTransaction(
+        updateEnergyLimitContract,
+        Transaction.Contract.ContractType.UPDATEENERGYLIMITCONTRACT,
+        'UpdateEnergyLimitContract',
+        options.Permission_id
+    );
+};
+
+const buildAccountPermissionUpdateContract = (value, options) => {
+    const accountPermissionUpdateContract =
+        new AccountPermissionUpdateContract();
+    const { owner_address, owner, witness, actives } = value;
+    accountPermissionUpdateContract.setOwnerAddress(
+        fromHexString(owner_address)
+    );
+    const getType = type => {
+        // no type when permission_name is owner
+        if (isNaN(type)) return type === 'Active' ? 2 : type === 'Witness' ? 1 : 0;
+        return type;
+    }
+    const buildPermission = (data) => {
+        // no type when permission_name is owner
+        const permission = new Permission();
+        const {
+            type,
+            id,
+            permission_name,
+            threshold,
+            parentId,
+            operations,
+            keys,
+        } = data;
+        permission.setType(getType(type));
+        permission.setId(id);
+        permission.setPermissionName(permission_name);
+        permission.setThreshold(threshold);
+        if (parentId) {
+            permission.setParentId(parentId);
+        }
+        if (operations) {
+            permission.setOperations(fromHexString(operations));
+        }
+        if (keys) {
+            permission.setKeysList(
+                keys.map((key) => {
+                    const keyBuilder = new Key();
+                    keyBuilder.setAddress(fromHexString(key.address));
+                    keyBuilder.setWeight(key.weight);
+                    return keyBuilder;
+                })
+            );
+        }
+        return permission;
+    };
+    if (owner) {
+        accountPermissionUpdateContract.setOwner(buildPermission(owner));
+    }
+    if (witness) {
+        accountPermissionUpdateContract.setWitness(buildPermission(witness));
+    }
+    if (actives) {
+        if (Array.isArray(actives)) {
+            accountPermissionUpdateContract.setActivesList(
+                actives.map(active => buildPermission(active))
+            );
+        } else {
+            accountPermissionUpdateContract.setActivesList([
+                buildPermission(actives),
+            ]);
+        }
+    }
+    return buildCommonTransaction(
+        accountPermissionUpdateContract,
+        Transaction.Contract.ContractType.ACCOUNTPERMISSIONUPDATECONTRACT,
+        'AccountPermissionUpdateContract',
+        options.Permission_id
+    );
+};
+
+const buildUpdateAssetContract = (value, options) => {
+    const updateAssetContract = new UpdateAssetContract();
+    const { owner_address, description, url, new_limit, new_public_limit } = value;
+    updateAssetContract.setOwnerAddress(fromHexString(owner_address));
+    if (description) {
+        updateAssetContract.setDescription(fromHexString(description.replace(/^0x/, '')));
+    }
+    if (url) {
+        updateAssetContract.setUrl(fromHexString(url.replace(/^0x/, '')));
+    }
+    if(new_limit) {
+        updateAssetContract.setNewLimit(new_limit);
+    }
+    if(new_public_limit) {
+        updateAssetContract.setNewPublicLimit(new_public_limit);
+    }
+    return buildCommonTransaction(
+        updateAssetContract,
+        Transaction.Contract.ContractType.UPDATEASSETCONTRACT,
+        'UpdateAssetContract',
+        options.Permission_id
+    );
+}
+ 
+const contractJsonToProtobuf = (contract, value, options) => {
+    switch (contract.type) {
+        case 'TransferContract':
+            return buildTransferContract(value, options);
+        case 'TransferAssetContract':
+            return buildTransferAssetContract(value, options);
+        case 'ParticipateAssetIssueContract':
+            return buildParticipateAssetIssueContract(value, options);
+        case 'TriggerSmartContract':
+            return buildTriggerSmartContract(value, options);
+        case 'FreezeBalanceContract':
+            return buildFreezeBalanceContract(value, options);
+        case 'UnfreezeBalanceContract':
+            return buildUnfreezeBalanceContract(value, options);
+        case 'WithdrawBalanceContract':
+            return buildWithdrawBalanceContract(value, options);
+        case 'WitnessCreateContract':
+            return buildCreateWitness(value, options);
+        case 'VoteWitnessContract':
+            return buildVoteWitnessAccount(value, options);
+        case 'CreateSmartContract':
+            return buildCreateSmartContract(value, options);
+        case 'ClearABIContract':
+            return buildClearABIContract(value, options);
+        case 'UpdateBrokerageContract':
+            return buildUpdateBrokerageContract(value, options);
+        case 'AssetIssueContract':
+            return buildAssetIssueContract(value, options);
+        case 'AccountCreateContract':
+            return buildAccountCreateContract(value, options);
+        case 'AccountUpdateContract':
+            return buildAccountUpdateContract(value, options);
+        case 'SetAccountIdContract':
+            return buildSetAccountIdContract(value, options);
+        case 'ProposalCreateContract':
+            return buildProposalCreateContract(value, options);
+        case 'ProposalDeleteContract':
+            return buildProposalDeleteContract(value, options);
+        case 'ProposalApproveContract':
+            return buildVoteProposalContract(value, options);
+        case 'ExchangeCreateContract':
+            return buildExchangeCreateContract(value, options);
+        case 'ExchangeInjectContract':
+            return buildExchangeInjectContract(value, options);
+        case 'ExchangeWithdrawContract':
+            return buildExchangeWithdrawContract(value, options);
+        case 'ExchangeTransactionContract':
+            return buildExchangeTransactionContract(value, options);
+        case 'UpdateSettingContract':
+            return buildUpdateSettingContract(value, options);
+        case 'UpdateEnergyLimitContract':
+            return buildUpdateEnergyLimitContract(value, options);
+        case 'AccountPermissionUpdateContract':
+            return buildAccountPermissionUpdateContract(value, options);
+        case 'UpdateAssetContract': 
+            return buildUpdateAssetContract(value, options);
+    }
+};
+
+const txJsonToPb = (transaction) => {
+    const rawData = transaction['raw_data'];
+    const contractJson = rawData.contract[0];
+    const data = contractJson.parameter.value;
+    const options = { Permission_id: contractJson.Permission_id };
+    const transactionObj = contractJsonToProtobuf(contractJson, data, options);
+
+    const rawDataObj = transactionObj.getRawData();
+    rawDataObj.setRefBlockBytes(fromHexString(rawData.ref_block_bytes));
+    rawDataObj.setRefBlockHash(fromHexString(rawData.ref_block_hash));
+    if (rawData.data) {
+        rawDataObj.setData(fromHexString(rawData.data));
+    }
+
+    if (rawData.fee_limit) {
+        rawDataObj.setFeeLimit(rawData.fee_limit);
+    }
+
+    if (rawData.expiration) {
+        rawDataObj.setExpiration(rawData.expiration);
+    }
+
+    if (rawData.timestamp) {
+        rawDataObj.setTimestamp(rawData.timestamp);
+    }
+
+    transactionObj.setRawData(rawDataObj);
+
+    return transactionObj;
+};
+
+const txJsonToPbWithArgs = (
+    transaction,
+    args = {},
+    options = {}
+) => {
+    const rawData = transaction['raw_data'];
+    const contractJson = rawData.contract[0];
+
+    const transactionObj = contractJsonToProtobuf(contractJson, args, { Permission_id: args?.Permission_id });
+
+    const rawDataObj = transactionObj.getRawData();
+    rawDataObj.setRefBlockBytes(fromHexString(rawData.ref_block_bytes));
+    rawDataObj.setRefBlockHash(fromHexString(rawData.ref_block_hash));
+    // for memo
+    if (options.data) {
+        rawDataObj.setData(fromHexString(options.data.replace(/^0x/, '')));
+    }
+
+    if (options.fee_limit || args.fee_limit) {
+        rawDataObj.setFeeLimit(options.fee_limit || args.fee_limit);
+    }
+
+    if (rawData.expiration) {
+        rawDataObj.setExpiration(rawData.expiration);
+    }
+
+    if (rawData.timestamp) {
+        rawDataObj.setTimestamp(rawData.timestamp);
+    }
+
+    transactionObj.setRawData(rawDataObj);
+
+    return transactionObj;
+};
+
+const compareTransaction = (transaction, transactionPb) => {
+    const rawDataBytes = transactionPb.getRawData().serializeBinary();
+    const rawDataHex = byteArray2hexStr(rawDataBytes);
+    const txID = sha256(rawDataBytes);
+    return (
+        rawDataHex.toLowerCase() === transaction.raw_data_hex.toLowerCase() &&
+        txID.replace(/^0x/, '').toLowerCase() ===
+            transaction.txID.replace(/^0x/, '').toLowerCase()
+    );
+    
+};
+
+const txCheck = (transaction) => {
+    const transactionPb = txJsonToPb(transaction);
+    return compareTransaction(transaction, transactionPb);
+};
+
+const txCheckWithArgs = (transaction, args, options) => {
+    const transactionPb = txJsonToPbWithArgs(
+        transaction,
+        args,
+        options
+    );
+    return compareTransaction(transaction, transactionPb);
+};
+
+const txPbToTxID = (transactionPb) => {
+    const rawDataBytes = transactionPb.getRawData().serializeBinary();
+    const txID = sha256(rawDataBytes);
+    return txID;
+}
+
+export {
+    txJsonToPb,
+    txPbToTxID,
+    txJsonToPbWithArgs,
+    txCheckWithArgs,
+    txCheck,
+};
