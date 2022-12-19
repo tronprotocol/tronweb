@@ -11,6 +11,7 @@ const tronWebBuilder = require('../helpers/tronWebBuilder');
 const assertEqualHex = require('../helpers/assertEqualHex');
 const TronWeb = tronWebBuilder.TronWeb;
 const waitChainData = require('../helpers/waitChainData');
+const tests = require('../testcases/src/sign-message').tests;
 const {
     ADDRESS_BASE58,
     PRIVATE_KEY,
@@ -314,6 +315,13 @@ describe('TronWeb.trx', function () {
                 );
             });
 
+            it('should throw Invalid transaction', async function () {
+                transaction.raw_data_hex += '00';
+                await assertThrow(
+                    tronWeb.trx.sign(transaction, accounts.pks[idx]),
+                    'Invalid transaction'
+                );
+            });
         });
 
 
@@ -769,7 +777,7 @@ describe('TronWeb.trx', function () {
                     const transaction = await tronWeb.transactionBuilder.freezeBalance(10e5, 3, 'BANDWIDTH', accounts.b58[ownerIdx]);
                     await tronWeb.trx.multiSign(transaction, accounts.pks[ownerIdx], 1);
                 } catch (e) {
-                    assert.isTrue(e.indexOf('permission isn\'t exit') != -1);
+                    assert.isTrue(e.indexOf('permission isn\'t exit') != -1 || e.indexOf('Permission for this, does not exist!') != -1);
                 }
 
             });
@@ -1485,7 +1493,7 @@ describe('TronWeb.trx', function () {
 
         describe("#getTokenFromID", async function () {
 
-            const idx = 31;
+            const idx = 26;
 
             before(async function(){
                 this.timeout(10000);
@@ -1523,7 +1531,7 @@ describe('TronWeb.trx', function () {
 
         describe("#getTokensIssuedByAddress", async function () {
 
-            const idx = 32;
+            const idx = 49;
 
             before(async function(){
                 this.timeout(10000);
@@ -1882,6 +1890,7 @@ describe('TronWeb.trx', function () {
         it('should list super representatives', async function () {
             const srs = await tronWeb.trx.listSuperRepresentatives();
             assert.isArray(srs);
+
             for (let sr of srs) {
                 assert.isDefined(sr.address);
                 assert.isDefined(sr.voteCount);
@@ -1903,8 +1912,7 @@ describe('TronWeb.trx', function () {
 
     describe("#getReward", async function () {
         it('should get the reward', async function () {
-
-            let reward = await tronWeb.trx.getReward(accounts[0]);
+            let reward = await tronWeb.trx.getReward(accounts.b58[0]);
             assert.equal(reward, 0)
 
         });
@@ -1912,8 +1920,7 @@ describe('TronWeb.trx', function () {
 
     describe("#getUnconfirmedReward", async function () {
         it('should get the reward', async function () {
-
-            let reward = await tronWeb.trx.getUnconfirmedReward(accounts[0]);
+            let reward = await tronWeb.trx.getUnconfirmedReward(accounts.b58[0]);
             assert.equal(reward, 0)
 
         });
