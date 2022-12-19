@@ -179,6 +179,12 @@ Contact the team at https://cn.developers.tron.network/docs/online-technical-sup
 
 ## Recent History
 
+__5.0.0__
+- Add `tronWeb.utils.transaction` lib to serialize and deserialize transaction 
+- Add `tronWeb.utils.transaction.txJsonToPb` function to convert transaction json to protobuf
+- Add `tronWeb.utils.transaction.txPbToTxID` function to get txID from transaction protobuf
+- Support new transaction builder `createAccount` 
+
 __4.4.0__
 - Support `createRandom` and `fromMnemonic` function
 - Add `tronWeb.utils.message` lib, which includes `hashMessage`, `signMessage` and `verifyMessage`
