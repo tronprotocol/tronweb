@@ -4,6 +4,7 @@ import { keccak256, toUtf8Bytes, recoverAddress, SigningKey } from 'utils/ethers
 import { ADDRESS_PREFIX } from 'utils/address';
 import Validator from "../paramValidator";
 import injectpromise from 'injectpromise';
+import { txCheck } from '../utils/transaction';
 
 const TRX_MESSAGE_HEADER = '\x19TRON Signed Message:\n32';
 // it should be: '\x15TRON Signed Message:\n32';
@@ -751,6 +752,10 @@ export default class Trx {
 
                 if (address !== this.tronWeb.address.toHex(transaction.raw_data.contract[0].parameter.value.owner_address))
                     return callback('Private key does not match address in transaction');
+
+                if (!txCheck(transaction)) {
+                    return callback('Invalid transaction');
+                }
             }
             return callback(null,
                 utils.crypto.signTransaction(privateKey, transaction)
@@ -898,6 +903,9 @@ export default class Trx {
 
         // sign
         try {
+            if (!txCheck(transaction)) {
+                return callback('Invalid transaction');
+            }
             return callback(null, utils.crypto.signTransaction(privateKey, transaction));
         } catch (ex) {
             callback(ex);

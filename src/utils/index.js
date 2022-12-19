@@ -6,7 +6,8 @@ import * as code from './code';
 import * as abi from './abi';
 import * as message from './message'
 import * as ethersUtils from './ethersUtils';
-import {TypedDataEncoder as _TypedDataEncoder} from './typedData'
+import {TypedDataEncoder as _TypedDataEncoder} from './typedData';
+import * as transaction from './transaction';
 
 import validator from 'validator';
 import BigNumber from 'bignumber.js';
@@ -154,5 +155,6 @@ export default {
     abi,
     message,
     _TypedDataEncoder,
+    transaction,
     ethersUtils
 };
