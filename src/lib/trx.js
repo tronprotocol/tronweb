@@ -1361,6 +1361,48 @@ export default class Trx {
     }
 
     /**
+     * Query the resource delegation information
+     */
+    getDelegatedResourceV2(fromAddress = this.tronWeb.defaultAddress.hex, toAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+        if (!callback)
+            return this.injectPromise(this.getDelegatedResourceV2, fromAddress, toAddress);
+
+        if (!this.tronWeb.isAddress(fromAddress))
+            return callback('Invalid address provided');
+
+        if (!this.tronWeb.isAddress(toAddress))
+            return callback('Invalid address provided');
+
+        this.tronWeb.fullNode.request('wallet/getdelegatedresourcev2', {
+            fromAddress: this.tronWeb.address.toHex(fromAddress),
+            toAddress: this.tronWeb.address.toHex(toAddress),
+        }, 'post').then(resources => {
+            callback(null, resources);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Query the resource delegation index by an account
+     */
+    getDelegatedResourceAccountIndexV2(fromAddress = this.tronWeb.defaultAddress.hex, toAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+        if (!callback)
+            return this.injectPromise(this.getDelegatedResourceAccountIndexV2, fromAddress, toAddress);
+
+        if (!this.tronWeb.isAddress(fromAddress))
+            return callback('Invalid address provided');
+
+        if (!this.tronWeb.isAddress(toAddress))
+            return callback('Invalid address provided');
+
+        this.tronWeb.fullNode.request('wallet/getdelegatedresourceaccountindexv2', {
+            fromAddress: this.tronWeb.address.toHex(fromAddress),
+            toAddress: this.tronWeb.address.toHex(toAddress),
+        }, 'post').then(resources => {
+            callback(null, resources);
+        }).catch(err => callback(err));
+    }
+
+    /**
      * Get the exchange ID.
      */
     getExchangeByID(exchangeID = false, callback = false) {

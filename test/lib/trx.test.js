@@ -133,6 +133,49 @@ describe('TronWeb.trx', function () {
 
         });
 
+        describe("#getDelegatedResourceV2", async function () {
+
+            const idx = 10;
+
+            it.only('should get the resource delegation information', async function () {
+                const addressType = ['hex', 'b58'];
+                let delegationInfo;
+                for (let type of addressType) {
+                    delegationInfo = await tronWeb.trx.getDelegatedResourceV2(accounts[type][idx], accounts[type][idx + 1]);
+                    assert.isTrue(delegationInfo);
+                }
+            });
+
+            it.only('should throw address is not valid error', async function () {
+                await assertThrow(
+                    tronWeb.trx.getDelegatedResourceV2('notAnAddress'),
+                    'Invalid address provided'
+                );
+            });
+
+        });
+
+        describe("#getDelegatedResourceAccountIndexV2", async function () {
+
+            const idx = 10;
+
+            it.only('should get the resource delegation information', async function () {
+                const addressType = ['hex', 'b58'];
+                let delegationInfo;
+                for (let type of addressType) {
+                    delegationInfo = await tronWeb.trx.getDelegatedResourceAccountIndexV2(accounts[type][idx], accounts[type][idx + 1]);
+                    assert.isTrue(delegationInfo);
+                }
+            });
+
+            it.only('should throw address is not valid error', async function () {
+                await assertThrow(
+                    tronWeb.trx.getDelegatedResourceAccountIndexV2('notAnAddress'),
+                    'Invalid address provided'
+                );
+            });
+
+        });
 
         describe("#getBalance", async function () {
 

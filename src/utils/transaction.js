@@ -7,6 +7,11 @@ const {
     FreezeBalanceContract,
     UnfreezeBalanceContract,
     WithdrawBalanceContract,
+    FreezeBalanceV2Contract,
+    UnfreezeBalanceV2Contract,
+    WithdrawExpireUnfreezeContract,
+    DelegateResourceContract,
+    UnDelegateResourceContract,
 } = require('../protocol/core/contract/balance_contract_pb');
 const {
     TransferAssetContract,
@@ -239,6 +244,105 @@ const buildWithdrawBalanceContract = (value, options) => {
         Transaction.Contract.ContractType.WITHDRAWBALANCECONTRACT,
         'WithdrawBalanceContract',
         options.Permission_id
+    );
+};
+
+const buildFreezeBalanceV2Contract = (value, options) => {
+    const freezeBalanceV2Contract = new FreezeBalanceV2Contract();
+    const {
+        owner_address,
+        frozen_balance,
+        resource,
+    } = value;
+    freezeBalanceV2Contract.setOwnerAddress(fromHexString(owner_address));
+    freezeBalanceV2Contract.setFrozenBalance(frozen_balance);
+    freezeBalanceV2Contract.setResource(ResourceCode[resource]);
+
+    return buildCommonTransaction(
+        freezeBalanceV2Contract,
+        Transaction.Contract.ContractType.FREEZEBALANCEV2CONTRACT,
+        'FreezeBalanceV2Contract',
+        options.Permission_id,
+    );
+};
+
+const buildUnfreezeBalanceV2Contract = (value, options) => {
+    const unfreezeBalanceV2Contract = new UnfreezeBalanceV2Contract();
+    const {
+        owner_address,
+        unfreeze_balance,
+        resource,
+    } = value;
+    unfreezeBalanceV2Contract.setOwnerAddress(fromHexString(owner_address));
+    unfreezeBalanceV2Contract.setUnfreezeBalance(unfreeze_balance);
+    unfreezeBalanceV2Contract.setResource(ResourceCode[resource]);
+
+    return buildCommonTransaction(
+        unfreezeBalanceV2Contract,
+        Transaction.Contract.ContractType.UNFREEZEBALANCEV2CONTRACT,
+        'UnfreezeBalanceV2Contract',
+        options.Permission_id,
+    );
+};
+
+const buildDelegateResourceContract = (value, options) => {
+    const delegateResourceContract = new DelegateResourceContract();
+    const {
+        owner_address,
+        receiver_address,
+        balance,
+        resource,
+        lock,
+    } = value;
+    delegateResourceContract.setOwnerAddress(fromHexString(owner_address));
+    delegateResourceContract.setBalance(balance);
+    delegateResourceContract.setResource(ResourceCode[resource]);
+    delegateResourceContract.setLock(lock);
+    if (receiver_address) {
+        delegateResourceContract.setReceiverAddress(fromHexString(receiver_address));
+    }
+
+    return buildCommonTransaction(
+        delegateResourceContract,
+        Transaction.Contract.ContractType.DELEGATERESOURCECONTRACT,
+        'DelegateResourceContract',
+        options.Permission_id,
+    );
+};
+
+const buildUnDelegateResourceContract = (value, options) => {
+    const unDelegateResourceContract = new UnDelegateResourceContract();
+    const {
+        owner_address,
+        receiver_address,
+        balance,
+        resource,
+    } = value;
+    unDelegateResourceContract.setOwnerAddress(fromHexString(owner_address));
+    unDelegateResourceContract.setBalance(balance);
+    unDelegateResourceContract.setResource(ResourceCode[resource]);
+    if (receiver_address) {
+        unDelegateResourceContract.setReceiverAddress(fromHexString(receiver_address));
+    }
+
+    return buildCommonTransaction(
+        unDelegateResourceContract,
+        Transaction.Contract.ContractType.UNDELEGATERESOURCECONTRACT,
+        'UnDelegateResourceContract',
+        options.Permission_id,
+    );
+};
+
+const buildWithdrawExpireUnfreezeContract = (value, options) => {
+    const withdrawExpireUnfreeze = new WithdrawExpireUnfreezeContract();
+    const { owner_address } = value;
+    withdrawExpireUnfreeze.setOwnerAddress(fromHexString(owner_address));
+
+    return buildCommonTransaction(
+        withdrawExpireUnfreeze,
+        Transaction.Contract.ContractType.WITHDRAWEXPIREUNFREEZECONTRACT,
+        'WithdrawExpireUnfreezeContract',
+        options.Permission_id,
     );
 };
 
@@ -821,6 +925,16 @@ const contractJsonToProtobuf = (contract, value, options) => {
             return buildUnfreezeBalanceContract(value, options);
         case 'WithdrawBalanceContract':
             return buildWithdrawBalanceContract(value, options);
+        case 'FreezeBalanceV2Contract':
+            return buildFreezeBalanceV2Contract(value, options);
+        case 'UnfreezeBalanceV2Contract':
+            return buildUnfreezeBalanceV2Contract(value, options);
+        case 'DelegateResourceContract':
+            return buildDelegateResourceContract(value, options);
+        case 'UnDelegateResourceContract':
+            return buildUnDelegateResourceContract(value, options);
+        case 'WithdrawExpireUnfreezeContract':
+            return buildWithdrawExpireUnfreezeContract(value, options);
         case 'WitnessCreateContract':
             return buildCreateWitness(value, options);
         case 'VoteWitnessContract':
