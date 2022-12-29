@@ -204,7 +204,7 @@ describe('TronWeb.trx', function () {
                 for (let type of addressType) {
                     delegationInfo = await tronWeb.trx.getDelegatedResourceAccountIndexV2(accounts[type][idx]);
                     assert.isDefined(delegationInfo.account);
-                    assert.isDefined(delegationInfo.toAccounts);
+                    assert.isArray(delegationInfo.toAccounts);
                 }
             });
 
@@ -212,7 +212,7 @@ describe('TronWeb.trx', function () {
                 tronWeb.trx.getDelegatedResourceAccountIndexV2(accounts.hex[idx], (err, delegationInfo) => {
                     if (err) return done(err);
                     assert.isDefined(delegationInfo.account);
-                    assert.isDefined(delegationInfo.toAccounts);
+                    assert.isArray(delegationInfo.toAccounts);
                     done();
                 });
             });
@@ -221,13 +221,13 @@ describe('TronWeb.trx', function () {
                 await wait(10); // wait for solidity
                 const delegationInfo = await tronWeb.trx.getDelegatedResourceAccountIndexV2(accounts['hex'][idx], { confirmed: true });
                 assert.isDefined(delegationInfo.account);
-                assert.isDefined(delegationInfo.toAccounts);
+                assert.isArray(delegationInfo.toAccounts);
             });
 
             it('should get the resource delegation account information when origin address is omitted', async function () {
                 const delegationInfo = await tronWeb.trx.getDelegatedResourceAccountIndexV2();
                 assert.isDefined(delegationInfo.account);
-                assert.isDefined(delegationInfo.toAccounts);
+                assert.isArray(delegationInfo.toAccounts);
             });
 
             it('should throw address is not valid error', async function () {
@@ -336,17 +336,17 @@ describe('TronWeb.trx', function () {
 
         describe("#getCanWithdrawUnfreezeAmount", async function () {
 
-            const idx = 10;
+            const idx = 11;
 
             before(async function(){
-                const transaction2 = await tronWeb.transactionBuilder.freezeBalanceV2(100e6, 'BANDWIDTH', accounts.hex[idx]);
+                const transaction2 = await tronWeb.transactionBuilder.freezeBalanceV2(100e6, 'ENERGY', accounts.hex[idx]);
                 await broadcaster(null, accounts.pks[idx], transaction2);
-                const transaction = await tronWeb.transactionBuilder.unfreezeBalanceV2(10e6, 'BANDWIDTH', accounts.hex[idx], accounts.hex[idx + 1]);
+                const transaction = await tronWeb.transactionBuilder.unfreezeBalanceV2(10e6, 'ENERGY', accounts.hex[idx], accounts.hex[idx + 1]);
                 await broadcaster(null, accounts.pks[idx], transaction);
 
-                const transaction3 = await tronWeb.transactionBuilder.freezeBalanceV2(100e6, 'BANDWIDTH');
+                const transaction3 = await tronWeb.transactionBuilder.freezeBalanceV2(100e6, 'ENERGY');
                 await broadcaster(null, PRIVATE_KEY, transaction3);
-                const transaction4 = await tronWeb.transactionBuilder.unfreezeBalanceV2(10e6, 'BANDWIDTH', tronWeb.defaultAddress.hex, accounts.hex[idx + 1]);
+                const transaction4 = await tronWeb.transactionBuilder.unfreezeBalanceV2(10e6, 'ENERGY', tronWeb.defaultAddress.hex, accounts.hex[idx + 1]);
                 await broadcaster(null, PRIVATE_KEY, transaction4);
                 await wait(65);
             });
