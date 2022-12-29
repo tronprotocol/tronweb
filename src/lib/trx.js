@@ -1446,7 +1446,7 @@ export default class Trx {
         if (!callback)
             return this.injectPromise(this.getCanDelegatedMaxSize, address, resourceType, options);
 
-        if (!this.tronWeb.isAddress(value))
+        if (!this.tronWeb.isAddress(address))
             return callback('Invalid address provided');
         
         if (![0, 1].includes(resourceType))
@@ -1477,7 +1477,7 @@ export default class Trx {
         if (!callback)
             return this.injectPromise(this.getAvailableUnfreezeCount, address, options);
         
-        if (!this.tronWeb.isAddress(value))
+        if (!this.tronWeb.isAddress(address))
             return callback('Invalid address provided');
         
         this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(`wallet${options.confirmed ? 'solidity' : ''}/getavailableunfreezecount`, {
@@ -1509,7 +1509,7 @@ export default class Trx {
         if (!callback)
             return this.injectPromise(this.getCanWithdrawUnfreezeAmount, address, timestamp, options);
 
-        if (!this.tronWeb.isAddress(value))
+        if (!this.tronWeb.isAddress(address))
             return callback('Invalid address provided');
 
         if (!utils.isInteger(timestamp) || timestamp < 0)
