@@ -1259,7 +1259,7 @@ describe('TronWeb.transactionBuilder', function () {
 
                 const parameter = txPars(transaction);
                 // jlog(parameter)
-                assert.equal(parameter.value.owner_address, accounts.b58[1]);
+                assert.equal(parameter.value.owner_address, accounts.hex[1]);
                 assert.equal(parameter.value.frozen_balance, 500e6);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.FreezeBalanceV2Contract');
                 assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[3] ? param[3]['permissionId'] : 0);
@@ -1313,7 +1313,7 @@ describe('TronWeb.transactionBuilder', function () {
 
                 const parameter = txPars(transaction);
                 // jlog(parameter)
-                assert.equal(parameter.value.owner_address, accounts.b58[1]);
+                assert.equal(parameter.value.owner_address, accounts.hex[1]);
                 assert.equal(parameter.value.unfreeze_balance, 100e6);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.UnfreezeBalanceV2Contract');
                 assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[3] ? param[3]['permissionId'] : 0);
@@ -1367,8 +1367,8 @@ describe('TronWeb.transactionBuilder', function () {
 
                 const parameter = txPars(transaction);
                 // jlog(parameter)
-                assert.equal(parameter.value.owner_address, accounts.b58[1]);
-                assert.equal(parameter.value.receiver_address, accounts.b58[7]);
+                assert.equal(parameter.value.owner_address, accounts.hex[1]);
+                assert.equal(parameter.value.receiver_address, accounts.hex[7]);
                 assert.equal(parameter.value.balance, 100e6);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.DelegateResourceContract');
                 assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[4] ? param[4]['permissionId'] : 0);
@@ -1433,8 +1433,8 @@ describe('TronWeb.transactionBuilder', function () {
 
                 const parameter = txPars(transaction);
                 // jlog(parameter)
-                assert.equal(parameter.value.owner_address, accounts.b58[1]);
-                assert.equal(parameter.value.receiver_address, accounts.b58[7]);
+                assert.equal(parameter.value.owner_address, accounts.hex[1]);
+                assert.equal(parameter.value.receiver_address, accounts.hex[7]);
                 assert.equal(parameter.value.balance, 100e6);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.UnDelegateResourceContract');
                 assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[4] ? param[4]['permissionId'] : 0);
@@ -1487,24 +1487,30 @@ describe('TronWeb.transactionBuilder', function () {
     });
 
     describe("#withdrawExpireUnfreeze", async function () {
-        it('should allows accounts[1] to undelegate its resource', async function () {
+        const idx = 1;
+
+        before(async () => {
+            const transaction2 = await tronWeb.transactionBuilder.freezeBalanceV2(100e6, 'BANDWIDTH', accounts.hex[idx]);
+            await broadcaster(null, accounts.pks[idx], transaction2);
+            const transaction = await tronWeb.transactionBuilder.unfreezeBalanceV2(10e6, 'BANDWIDTH', accounts.hex[idx], accounts.hex[idx + 1]);
+            await broadcaster(null, accounts.pks[idx], transaction);
+            await wait(65);
+        })
+        it('should allows accounts[1] to withdraw its undelegated resource', async function () {
             const params = [
                 [accounts.b58[1], {permissionId: 2}],
                 [accounts.b58[1]]
             ];
+            for (let param of params) {
+                const transaction = await tronWeb.transactionBuilder.withdrawExpireUnfreeze(...param)
+                await broadcaster(null, accounts.pks[1], transaction);
 
-            setTimeout(async () => {
-                for (let param of params) {
-                    const transaction = await tronWeb.transactionBuilder.withdrawExpireUnfreeze(...param)
-                    await broadcaster(null, accounts.pks[1], transaction);
-
-                    const parameter = txPars(transaction);
-                    // jlog(parameter)
-                    assert.equal(parameter.value.owner_address, accounts.b58[1]);
-                    assert.equal(parameter.type_url, 'type.googleapis.com/protocol.WithdrawExpireUnfreeze');
-                    assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[1] ? param[1]['permissionId'] : 0);
-                }
-            }, 300000);
+                const parameter = txPars(transaction);
+                // jlog(parameter)
+                assert.equal(parameter.value.owner_address, accounts.hex[1]);
+                assert.equal(parameter.type_url, 'type.googleapis.com/protocol.WithdrawExpireUnfreezeContract');
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[1] ? param[1]['permissionId'] : 0);
+            }
         })
 
         it('should throw if owner address is invalid', async function () {
