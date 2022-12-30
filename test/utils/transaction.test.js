@@ -1338,7 +1338,6 @@ describe('TronWeb.utils.transaction', function () {
                     ));
                     tokenNames.push(token[Object.keys(token)[0]]['id']);
                 }
-                // console.log(tokenNames, 99999999);
                 const transaction = await tronWeb.transactionBuilder.createTokenExchange(tokenNames[1], 10, tokenNames[0], 10);
                 await broadcaster(transaction);
                 let receipt = await tronWeb.trx.getTransactionInfo(transaction.txID);

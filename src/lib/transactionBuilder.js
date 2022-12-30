@@ -1536,10 +1536,10 @@ export default class TransactionBuilder {
         };
 
         if (options && options.permissionId) {
-            data.permission_id = options.permissionId;
+            data.Permission_id = options.permissionId;
         }
 
-        this.tronWeb.fullNode.request('wallet/createaccount', data, 'post').then(transaction => resultManager(transaction, callback)).catch(err => callback(err));
+        this.tronWeb.fullNode.request('wallet/createaccount', data, 'post').then(transaction => resultManager(transaction, data, options, callback)).catch(err => callback(err));
     }
 
     updateAccount(accountName = false, address = this.tronWeb.defaultAddress.hex, options, callback = false) {
