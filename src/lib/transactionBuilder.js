@@ -54,7 +54,7 @@ function resultManagerTriggerSmartContract(transaction, data, options, callback)
         );
     }
 
-    if(!options._isConstant) {
+    if(!(options._isConstant || options.estimateEnergy)) {
         const authResult = txCheckWithArgs(transaction.transaction, data, options);
         if(authResult) {
             return callback(null, transaction);
@@ -1083,6 +1083,11 @@ export default class TransactionBuilder {
         return this.triggerSmartContract(...params);
     }
 
+    estimateEnergy(...params) {
+        params[2].estimateEnergy = true;
+        return this.triggerSmartContract(...params);
+    }
+
     _triggerSmartContract(
         contractAddress,
         functionSelector,
@@ -1236,7 +1241,7 @@ export default class TransactionBuilder {
         if (utils.isNotNullOrUndefined(tokenId))
             args.token_id = parseInt(tokenId)
 
-        if (!options._isConstant) {
+        if (!(options._isConstant || options.estimateEnergy)) {
             args.fee_limit = parseInt(feeLimit)
         }
 
@@ -1244,7 +1249,15 @@ export default class TransactionBuilder {
             args.Permission_id = options.permissionId;
         }
 
-        this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(`wallet${options.confirmed ? 'solidity' : ''}/trigger${options._isConstant ? 'constant' : 'smart'}contract`, args, 'post').then(transaction => resultManagerTriggerSmartContract(transaction, args, options, callback)).catch(err => callback(err));
+        let pathInfo = 'triggesmartcontract';
+        if(options._isConstant) {
+            pathInfo = 'triggerconstantcontract';
+        } else if (options.estimateEnergy) {
+            pathInfo = 'estimateenergy';
+        }
+        pathInfo = `wallet${options.confirmed ? 'solidity' : ''}/${pathInfo}`;
+
+        this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(pathInfo, args, 'post').then(transaction => resultManagerTriggerSmartContract(transaction, args, options, callback)).catch(err => callback(err));
     }
 
     clearABI(contractAddress, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {        
