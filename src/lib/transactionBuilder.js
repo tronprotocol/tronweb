@@ -1249,7 +1249,7 @@ export default class TransactionBuilder {
             args.Permission_id = options.permissionId;
         }
 
-        let pathInfo = 'triggesmartcontract';
+        let pathInfo = 'triggersmartcontract';
         if(options._isConstant) {
             pathInfo = 'triggerconstantcontract';
         } else if (options.estimateEnergy) {
