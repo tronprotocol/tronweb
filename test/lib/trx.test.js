@@ -159,6 +159,11 @@ describe('TronWeb.trx', function () {
                 assert.isDefined(delegationInfo.delegatedResource);
             });
 
+            it('should get the resource delegation information when confirmed is false', async function () {
+                const delegationInfo = await tronWeb.trx.getDelegatedResourceV2(accounts['hex'][idx], accounts['hex'][idx + 1], { confirmed: false });
+                assert.isDefined(delegationInfo.delegatedResource);
+            });
+
             it('should not throw error when fromAddress and toAddress are omitted', async function () {
                 const delegationInfo = await tronWeb.trx.getDelegatedResourceV2();
             });
@@ -224,6 +229,12 @@ describe('TronWeb.trx', function () {
                 assert.isArray(delegationInfo.toAccounts);
             });
 
+            it('should get the resource delegation account information when confirmed is false', async function () {
+                const delegationInfo = await tronWeb.trx.getDelegatedResourceAccountIndexV2(accounts['hex'][idx], { confirmed: false });
+                assert.isDefined(delegationInfo.account);
+                assert.isArray(delegationInfo.toAccounts);
+            });
+
             it('should get the resource delegation account information when origin address is omitted', async function () {
                 const delegationInfo = await tronWeb.trx.getDelegatedResourceAccountIndexV2();
                 assert.isDefined(delegationInfo.account);
@@ -267,6 +278,11 @@ describe('TronWeb.trx', function () {
             it('should get the max resource can delegate when confirmed is true', async function () {
                 await wait(10); // wait for solidity
                 const { max_size } = await tronWeb.trx.getCanDelegatedMaxSize(accounts['hex'][idx], 0, { confirmed: true });
+                assert.isNumber(max_size);
+            });
+
+            it('should get the max resource can delegate when confirmed is false', async function () {
+                const { max_size } = await tronWeb.trx.getCanDelegatedMaxSize(accounts['hex'][idx], 0, { confirmed: false });
                 assert.isNumber(max_size);
             });
 
@@ -320,6 +336,11 @@ describe('TronWeb.trx', function () {
                 assert.isNumber(count);
             });
 
+            it('should get the times user can do UnFreezeBalanceV2 when confirmed is false', async function () {
+                const { count } = await tronWeb.trx.getAvailableUnfreezeCount(accounts['hex'][idx], { confirmed: false });
+                assert.isNumber(count);
+            });
+
             it('should get the times user can do UnFreezeBalanceV2 when address is omitted', async function () {
                 const { count } = await tronWeb.trx.getAvailableUnfreezeCount();
                 assert.isNumber(count);
@@ -369,6 +390,11 @@ describe('TronWeb.trx', function () {
 
             it('should get the amount of a widrawUnfreeze operation when confirmed is true', async function () {
                 const { amount } = await tronWeb.trx.getCanWithdrawUnfreezeAmount(accounts['hex'][idx], Date.now(), { confirmed: true });
+                assert.isNumber(amount);
+            });
+
+            it('should get the amount of a widrawUnfreeze operation when confirmed is false', async function () {
+                const { amount } = await tronWeb.trx.getCanWithdrawUnfreezeAmount(accounts['hex'][idx], Date.now(), { confirmed: false });
                 assert.isNumber(amount);
             });
 

@@ -1363,10 +1363,10 @@ export default class Trx {
     /**
      * Query the amount of resources of a specific resourceType delegated by fromAddress to toAddress
      */
-    getDelegatedResourceV2(fromAddress = this.tronWeb.defaultAddress.hex, toAddress = this.tronWeb.defaultAddress.hex, options = {}, callback = false) {
+    getDelegatedResourceV2(fromAddress = this.tronWeb.defaultAddress.hex, toAddress = this.tronWeb.defaultAddress.hex, options = { confirmed: true }, callback = false) {
         if(utils.isFunction(options)) {
             callback = options;
-            options = {};
+            options = { confirmed: true };
         }
 
         if(utils.isFunction(toAddress)) {
@@ -1400,10 +1400,10 @@ export default class Trx {
     /**
      * Query the resource delegation index by an account
      */
-    getDelegatedResourceAccountIndexV2(address = this.tronWeb.defaultAddress.hex, options = {}, callback = false) {
+    getDelegatedResourceAccountIndexV2(address = this.tronWeb.defaultAddress.hex, options = { confirmed: true }, callback = false) {
         if(utils.isFunction(options)) {
             callback = options;
-            options = {};
+            options = { confirmed: true };
         }
         
         if(utils.isFunction(address)) {
@@ -1427,10 +1427,10 @@ export default class Trx {
     /**
      * Query the amount of delegatable resources of the specified resource Type for target address, unit is sun.
      */
-    getCanDelegatedMaxSize(address = this.tronWeb.defaultAddress.hex, resourceType = 0, options= {}, callback = false) {
+    getCanDelegatedMaxSize(address = this.tronWeb.defaultAddress.hex, resourceType = 0, options = { confirmed: true }, callback = false) {
         if(utils.isFunction(options)) {
             callback = options;
-            options = {};
+            options = { confirmed: true };
         }
         
         if(utils.isFunction(resourceType)) {
@@ -1463,10 +1463,10 @@ export default class Trx {
     /**
      * Remaining times of available unstaking API
      */
-    getAvailableUnfreezeCount(address = this.tronWeb.defaultAddress.hex, options = {}, callback = false) {
+    getAvailableUnfreezeCount(address = this.tronWeb.defaultAddress.hex, options = { confirmed: true }, callback = false) {
         if(utils.isFunction(options)) {
             callback = options;
-            options = {};
+            options = { confirmed: true };
         }
 
         if(utils.isFunction(address)) {
@@ -1490,10 +1490,10 @@ export default class Trx {
     /**
      * Query the withdrawable balance at the specified timestamp
      */
-    getCanWithdrawUnfreezeAmount(address = this.tronWeb.defaultAddress.hex, timestamp = Date.now(), options = {}, callback = false) {
+    getCanWithdrawUnfreezeAmount(address = this.tronWeb.defaultAddress.hex, timestamp = Date.now(), options = { confirmed: true }, callback = false) {
         if(utils.isFunction(options)) {
             callback = options;
-            options = {};
+            options = { confirmed: true };
         }
 
         if(utils.isFunction(timestamp)) {

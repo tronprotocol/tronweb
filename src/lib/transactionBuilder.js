@@ -1085,6 +1085,7 @@ export default class TransactionBuilder {
 
     estimateEnergy(...params) {
         params[2].estimateEnergy = true;
+        params[2].confirmed = true;
         return this.triggerSmartContract(...params);
     }
 
