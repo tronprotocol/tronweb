@@ -37,7 +37,7 @@
         "validator": "^13.7.0"
     },
     "devDependencies": {
-        "@babel/core": "^7.0.0",
+        "@babel/core": "^7.20.12",
         "@babel/plugin-proposal-class-properties": "^7.0.0",
         "@babel/plugin-proposal-numeric-separator": "^7.0.0",
         "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
@@ -52,7 +52,7 @@
         "husky": "^7.0.0",
         "istanbul": "^0.4.5",
         "istanbul-instrumenter-loader": "^3.0.1",
-        "jsonwebtoken": "^8.5.1",
+        "jsonwebtoken": "^9.0.0",
         "karma": "^6.3.17",
         "karma-chrome-launcher": "^2.2.0",
         "karma-coverage": "^2.0.3",

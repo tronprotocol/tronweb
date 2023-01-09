@@ -1363,10 +1363,10 @@ export default class Trx {
     /**
      * Query the amount of resources of a specific resourceType delegated by fromAddress to toAddress
      */
-    getDelegatedResourceV2(fromAddress = this.tronWeb.defaultAddress.hex, toAddress = this.tronWeb.defaultAddress.hex, options = {}, callback = false) {
+    getDelegatedResourceV2(fromAddress = this.tronWeb.defaultAddress.hex, toAddress = this.tronWeb.defaultAddress.hex, options = { confirmed: true }, callback = false) {
         if(utils.isFunction(options)) {
             callback = options;
-            options = {};
+            options = { confirmed: true };
         }
 
         if(utils.isFunction(toAddress)) {
@@ -1400,10 +1400,10 @@ export default class Trx {
     /**
      * Query the resource delegation index by an account
      */
-    getDelegatedResourceAccountIndexV2(address = this.tronWeb.defaultAddress.hex, options = {}, callback = false) {
+    getDelegatedResourceAccountIndexV2(address = this.tronWeb.defaultAddress.hex, options = { confirmed: true }, callback = false) {
         if(utils.isFunction(options)) {
             callback = options;
-            options = {};
+            options = { confirmed: true };
         }
         
         if(utils.isFunction(address)) {
@@ -1427,15 +1427,15 @@ export default class Trx {
     /**
      * Query the amount of delegatable resources of the specified resource Type for target address, unit is sun.
      */
-    getCanDelegatedMaxSize(address = this.tronWeb.defaultAddress.hex, resourceType = 0, options= {}, callback = false) {
+    getCanDelegatedMaxSize(address = this.tronWeb.defaultAddress.hex, resource = 'BANDWIDTH', options = { confirmed: true }, callback = false) {
         if(utils.isFunction(options)) {
             callback = options;
-            options = {};
+            options = { confirmed: true };
         }
         
-        if(utils.isFunction(resourceType)) {
-            callback = resourceType;
-            resourceType = 0;
+        if(utils.isFunction(resource)) {
+            callback = resource;
+            resource = 'BANDWIDTH';
         }
 
         if(utils.isFunction(address)) {
@@ -1444,17 +1444,24 @@ export default class Trx {
         }
         
         if (!callback)
-            return this.injectPromise(this.getCanDelegatedMaxSize, address, resourceType, options);
+            return this.injectPromise(this.getCanDelegatedMaxSize, address, resource, options);
 
         if (!this.tronWeb.isAddress(address))
             return callback('Invalid address provided');
         
-        if (![0, 1].includes(resourceType))
-        return callback('Invalid resource type provided: Expected 0 or 1');
+        if (this.validator.notValid([
+            {
+                name: 'resource',
+                type: 'resource',
+                value: resource,
+                msg: 'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"'
+            }
+        ], callback))
+            return;
 
         this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(`wallet${options.confirmed ? 'solidity' : ''}/getcandelegatedmaxsize`, {
             owner_address: toHex(address),
-            type: resourceType
+            type: resource === "ENERGY" ? 1 : 0
         }, 'post').then(resources => {
             callback(null, resources);
         }).catch(err => callback(err));
@@ -1463,10 +1470,10 @@ export default class Trx {
     /**
      * Remaining times of available unstaking API
      */
-    getAvailableUnfreezeCount(address = this.tronWeb.defaultAddress.hex, options = {}, callback = false) {
+    getAvailableUnfreezeCount(address = this.tronWeb.defaultAddress.hex, options = { confirmed: true }, callback = false) {
         if(utils.isFunction(options)) {
             callback = options;
-            options = {};
+            options = { confirmed: true };
         }
 
         if(utils.isFunction(address)) {
@@ -1490,10 +1497,10 @@ export default class Trx {
     /**
      * Query the withdrawable balance at the specified timestamp
      */
-    getCanWithdrawUnfreezeAmount(address = this.tronWeb.defaultAddress.hex, timestamp = Date.now(), options = {}, callback = false) {
+    getCanWithdrawUnfreezeAmount(address = this.tronWeb.defaultAddress.hex, timestamp = Date.now(), options = { confirmed: true }, callback = false) {
         if(utils.isFunction(options)) {
             callback = options;
-            options = {};
+            options = { confirmed: true };
         }
 
         if(utils.isFunction(timestamp)) {

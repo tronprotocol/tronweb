@@ -2766,5 +2766,5 @@ describe('TronWeb.transactionBuilder', function () {
             assert.isNumber(result.energy_required);
         }
     });
-});
+  });
 });
