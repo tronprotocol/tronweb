@@ -320,7 +320,7 @@ export default class TransactionBuilder {
                 name: 'resource',
                 type: 'resource',
                 value: resource,
-                msg: 'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY'
+                msg: 'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"'
             }
         ], callback))
             return;
@@ -389,7 +389,7 @@ export default class TransactionBuilder {
                 name: 'resource',
                 type: 'resource',
                 value: resource,
-                msg: 'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY'
+                msg: 'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"'
             }
         ], callback))
             return;
@@ -448,7 +448,7 @@ export default class TransactionBuilder {
                 name: 'resource',
                 type: 'resource',
                 value: resource,
-                msg: 'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY'
+                msg: 'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"'
             }
         ], callback))
             return;
@@ -504,7 +504,7 @@ export default class TransactionBuilder {
                 name: 'resource',
                 type: 'resource',
                 value: resource,
-                msg: 'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY'
+                msg: 'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"'
             }
         ], callback))
             return;
@@ -582,7 +582,7 @@ export default class TransactionBuilder {
                 name: 'resource',
                 type: 'resource',
                 value: resource,
-                msg: 'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY'
+                msg: 'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"'
             },
             {
                 name: 'lock',
@@ -663,7 +663,7 @@ export default class TransactionBuilder {
                 name: 'resource',
                 type: 'resource',
                 value: resource,
-                msg: 'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY'
+                msg: 'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"'
             }
         ], callback))
             return;
@@ -1085,7 +1085,6 @@ export default class TransactionBuilder {
 
     estimateEnergy(...params) {
         params[2].estimateEnergy = true;
-        params[2].confirmed = true;
         return this.triggerSmartContract(...params);
     }
 
