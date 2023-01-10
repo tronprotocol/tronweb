@@ -319,9 +319,7 @@ const buildUnDelegateResourceContract = (value, options) => {
     unDelegateResourceContract.setOwnerAddress(fromHexString(owner_address));
     unDelegateResourceContract.setBalance(balance);
     unDelegateResourceContract.setResource(ResourceCode[resource]);
-    if (receiver_address) {
-        unDelegateResourceContract.setReceiverAddress(fromHexString(receiver_address));
-    }
+    unDelegateResourceContract.setReceiverAddress(fromHexString(receiver_address));
 
     return buildCommonTransaction(
         unDelegateResourceContract,
