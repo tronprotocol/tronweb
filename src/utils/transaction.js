@@ -292,15 +292,13 @@ const buildDelegateResourceContract = (value, options) => {
         receiver_address,
         balance,
         resource,
-        lock,
+        lock = false,
     } = value;
     delegateResourceContract.setOwnerAddress(fromHexString(owner_address));
     delegateResourceContract.setBalance(balance);
     delegateResourceContract.setResource(ResourceCode[resource]);
     delegateResourceContract.setLock(lock);
-    if (receiver_address) {
-        delegateResourceContract.setReceiverAddress(fromHexString(receiver_address));
-    }
+    delegateResourceContract.setReceiverAddress(fromHexString(receiver_address));
 
     return buildCommonTransaction(
         delegateResourceContract,

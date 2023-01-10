@@ -427,6 +427,9 @@ export default class TransactionBuilder {
         if (utils.isFunction(resource)) {
             callback = resource;
             resource = "BANDWIDTH";
+        } else if (utils.isObject(resource)) {
+            options = resource;
+            resource = "BANDWIDTH";
         }
 
         if (!callback)
@@ -483,6 +486,9 @@ export default class TransactionBuilder {
         if (utils.isFunction(resource)) {
             callback = resource;
             resource = "BANDWIDTH";
+        } else if (utils.isObject(resource)) {
+            options = resource;
+            resource = "BANDWIDTH";
         }
 
         if (!callback)
@@ -522,7 +528,7 @@ export default class TransactionBuilder {
         this.tronWeb.fullNode.request('wallet/unfreezebalancev2', data, 'post').then(transaction => resultManager(transaction, data, options, callback)).catch(err => callback(err));
     }
 
-    delegateResource(amount = 0, resource = "BANDWIDTH", receiverAddress, address = this.tronWeb.defaultAddress.hex, lock = false, options, callback = false) {
+    delegateResource(amount = 0, receiverAddress, resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, lock = false, options, callback = false) {
         if (utils.isFunction(options)) {
             callback = options;
             options = {};
@@ -547,10 +553,13 @@ export default class TransactionBuilder {
         if (utils.isFunction(resource)) {
             callback = resource;
             resource = "BANDWIDTH";
+        } else if (utils.isObject(resource)) {
+            options = resource;
+            resource = "BANDWIDTH";
         }
 
         if (!callback)
-            return this.injectPromise(this.delegateResource, amount, resource, receiverAddress, address, lock, options);
+            return this.injectPromise(this.delegateResource, amount, receiverAddress, resource, address, lock, options);
 
         if (this.validator.notValid([
             {
@@ -578,8 +587,7 @@ export default class TransactionBuilder {
             {
                 name: 'lock',
                 type: 'boolean',
-                value: lock,
-                optional: true
+                value: lock
             }
         ], callback))
             return;
@@ -603,7 +611,7 @@ export default class TransactionBuilder {
         this.tronWeb.fullNode.request('wallet/delegateresource', data, 'post').then(transaction => resultManager(transaction, data, options, callback)).catch(err => callback(err));
     }
 
-    undelegateResource(amount = 0, resource = "BANDWIDTH", receiverAddress, address = this.tronWeb.defaultAddress.hex, options, callback = false) {
+    undelegateResource(amount = 0, receiverAddress, resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, options, callback = false) {
         if (utils.isFunction(options)) {
             callback = options;
             options = {};
@@ -620,10 +628,13 @@ export default class TransactionBuilder {
         if (utils.isFunction(resource)) {
             callback = resource;
             resource = "BANDWIDTH";
+        } else if (utils.isObject(resource)) {
+            options = resource;
+            resource = "BANDWIDTH";
         }
 
         if (!callback)
-            return this.injectPromise(this.undelegateResource, amount, resource, receiverAddress, address, options);
+            return this.injectPromise(this.undelegateResource, amount, receiverAddress, resource, address, options);
 
         if (this.validator.notValid([
             {
