@@ -179,6 +179,11 @@ Contact the team at https://cn.developers.tron.network/docs/online-technical-sup
 
 ## Recent History
 
+__5.1.0__
+- Add `freezeBalanceV2`, `unfreezeBalanceV2`, `delegateResource`, `undelegateResource` and `withdrawExpireUnfreeze` function in transactiobBuiler lib to support stakeV2 
+- Support `tronWeb.transactionBuilder.estimateEnergy` to estimate energy for triggersmartcontract transaction
+- Add `getDelegatedResourceV2`, `getDelegatedResourceAccountIndexV2`, `getCanDelegatedMaxSize`, `getAvailableUnfreezeCount` and `getCanWithdrawUnfreezeAmount` function to query account resource info
+
 __5.0.0__
 - Add `tronWeb.utils.transaction` lib to serialize and deserialize transaction 
 - Add `tronWeb.utils.transaction.txJsonToPb` function to convert transaction json to protobuf
@@ -338,7 +343,3 @@ __2.3.0__
 TronWeb is distributed under a MIT licence.
 
 
------
-
-For more historic data, check the original repo at
-[https://github.com/tronprotocol/tron-web](https://github.com/tronprotocol/tron-web)
