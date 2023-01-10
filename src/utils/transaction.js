@@ -292,15 +292,13 @@ const buildDelegateResourceContract = (value, options) => {
         receiver_address,
         balance,
         resource,
-        lock,
+        lock = false,
     } = value;
     delegateResourceContract.setOwnerAddress(fromHexString(owner_address));
     delegateResourceContract.setBalance(balance);
     delegateResourceContract.setResource(ResourceCode[resource]);
     delegateResourceContract.setLock(lock);
-    if (receiver_address) {
-        delegateResourceContract.setReceiverAddress(fromHexString(receiver_address));
-    }
+    delegateResourceContract.setReceiverAddress(fromHexString(receiver_address));
 
     return buildCommonTransaction(
         delegateResourceContract,
@@ -321,9 +319,7 @@ const buildUnDelegateResourceContract = (value, options) => {
     unDelegateResourceContract.setOwnerAddress(fromHexString(owner_address));
     unDelegateResourceContract.setBalance(balance);
     unDelegateResourceContract.setResource(ResourceCode[resource]);
-    if (receiver_address) {
-        unDelegateResourceContract.setReceiverAddress(fromHexString(receiver_address));
-    }
+    unDelegateResourceContract.setReceiverAddress(fromHexString(receiver_address));
 
     return buildCommonTransaction(
         unDelegateResourceContract,

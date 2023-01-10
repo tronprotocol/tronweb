@@ -427,6 +427,9 @@ export default class TransactionBuilder {
         if (utils.isFunction(resource)) {
             callback = resource;
             resource = "BANDWIDTH";
+        } else if (utils.isObject(resource)) {
+            options = resource;
+            resource = "BANDWIDTH";
         }
 
         if (!callback)
@@ -483,6 +486,9 @@ export default class TransactionBuilder {
         if (utils.isFunction(resource)) {
             callback = resource;
             resource = "BANDWIDTH";
+        } else if (utils.isObject(resource)) {
+            options = resource;
+            resource = "BANDWIDTH";
         }
 
         if (!callback)
@@ -522,7 +528,7 @@ export default class TransactionBuilder {
         this.tronWeb.fullNode.request('wallet/unfreezebalancev2', data, 'post').then(transaction => resultManager(transaction, data, options, callback)).catch(err => callback(err));
     }
 
-    delegateResource(amount = 0, resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, receiverAddress = undefined, lock = false, options, callback = false) {
+    delegateResource(amount = 0, receiverAddress, resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, lock = false, options, callback = false) {
         if (utils.isFunction(options)) {
             callback = options;
             options = {};
@@ -536,14 +542,6 @@ export default class TransactionBuilder {
             lock = false;
         }
 
-        if (utils.isFunction(receiverAddress)) {
-            callback = receiverAddress;
-            receiverAddress = undefined;
-        } else if (utils.isObject(receiverAddress)) {
-            options = receiverAddress;
-            receiverAddress = undefined;
-        }
-
         if (utils.isFunction(address)) {
             callback = address;
             address = this.tronWeb.defaultAddress.hex;
@@ -555,23 +553,15 @@ export default class TransactionBuilder {
         if (utils.isFunction(resource)) {
             callback = resource;
             resource = "BANDWIDTH";
+        } else if (utils.isObject(resource)) {
+            options = resource;
+            resource = "BANDWIDTH";
         }
 
         if (!callback)
-            return this.injectPromise(this.delegateResource, amount, resource, address, receiverAddress, lock, options);
+            return this.injectPromise(this.delegateResource, amount, receiverAddress, resource, address, lock, options);
 
         if (this.validator.notValid([
-            {
-                name: 'origin',
-                type: 'address',
-                value: address
-            },
-            {
-                name: 'receiver',
-                type: 'address',
-                value: receiverAddress,
-                optional: true
-            },
             {
                 name: 'amount',
                 type: 'integer',
@@ -585,23 +575,33 @@ export default class TransactionBuilder {
                 msg: 'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"'
             },
             {
+                name: 'receiver',
+                type: 'address',
+                value: receiverAddress
+            },
+            {
+                name: 'origin',
+                type: 'address',
+                value: address
+            },
+            {
                 name: 'lock',
                 type: 'boolean',
-                value: lock,
-                optional: true
+                value: lock
             }
         ], callback))
             return;
 
+        if(toHex(receiverAddress) === toHex(address)) {
+            return callback('Receiver address must not be the same as owner address');
+        }
+
         const data = {
             owner_address: toHex(address),
+            receiver_address: toHex(receiverAddress),
             balance: parseInt(amount),
             resource: resource,
             lock
-        }
-
-        if (utils.isNotNullOrUndefined(receiverAddress) && toHex(receiverAddress) !== toHex(address)) {
-            data.receiver_address = toHex(receiverAddress)
         }
 
         if (options && options.permissionId) {
@@ -611,18 +611,10 @@ export default class TransactionBuilder {
         this.tronWeb.fullNode.request('wallet/delegateresource', data, 'post').then(transaction => resultManager(transaction, data, options, callback)).catch(err => callback(err));
     }
 
-    undelegateResource(amount = 0, resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, receiverAddress = undefined, options, callback = false) {
+    undelegateResource(amount = 0, receiverAddress, resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, options, callback = false) {
         if (utils.isFunction(options)) {
             callback = options;
             options = {};
-        }
-
-        if (utils.isFunction(receiverAddress)) {
-            callback = receiverAddress;
-            receiverAddress = undefined;
-        } else if (utils.isObject(receiverAddress)) {
-            options = receiverAddress;
-            receiverAddress = undefined;
         }
 
         if (utils.isFunction(address)) {
@@ -636,10 +628,13 @@ export default class TransactionBuilder {
         if (utils.isFunction(resource)) {
             callback = resource;
             resource = "BANDWIDTH";
+        } else if (utils.isObject(resource)) {
+            options = resource;
+            resource = "BANDWIDTH";
         }
 
         if (!callback)
-            return this.injectPromise(this.undelegateResource, amount, resource, address, receiverAddress, options);
+            return this.injectPromise(this.undelegateResource, amount, receiverAddress, resource, address, options);
 
         if (this.validator.notValid([
             {
@@ -650,8 +645,7 @@ export default class TransactionBuilder {
             {
                 name: 'receiver',
                 type: 'address',
-                value: receiverAddress,
-                optional: true
+                value: receiverAddress
             },
             {
                 name: 'amount',
@@ -668,14 +662,15 @@ export default class TransactionBuilder {
         ], callback))
             return;
 
+        if(toHex(receiverAddress) === toHex(address)) {
+            return callback('Receiver address must not be the same as owner address');
+        }
+    
         const data = {
             owner_address: toHex(address),
+            receiver_address: toHex(receiverAddress),
             balance: parseInt(amount),
             resource: resource
-        }
-
-        if (utils.isNotNullOrUndefined(receiverAddress) && toHex(receiverAddress) !== toHex(address)) {
-            data.receiver_address = toHex(receiverAddress)
         }
 
         if (options && options.permissionId) {
@@ -1452,50 +1447,6 @@ export default class TransactionBuilder {
         }
 
         this.tronWeb.fullNode.request('wallet/createassetissue', data, 'post').then(transaction => resultManager(transaction, data, callback)).catch(err => callback(err));
-    }
-
-    createAccount(accountAddress, address = this.tronWeb.defaultAddress.hex, options, callback = false) {
-        if (utils.isFunction(options)) {
-            callback = options;
-            options = {};
-        }
-
-        if (utils.isFunction(address)) {
-            callback = address;
-            address = this.tronWeb.defaultAddress.hex;
-        } else if (utils.isObject(address)) {
-            options = address;
-            address = this.tronWeb.defaultAddress.hex;
-        }
-
-        if (!callback) {
-            return this.injectPromise(this.createAccount, accountAddress, address, options);
-        }
-
-        if (this.validator.notValid([
-            {
-                name: 'account',
-                type: 'address',
-                value: accountAddress
-            },
-            {
-                name: 'origin',
-                type: 'address',
-                value: address
-            }
-        ], callback))
-            return;
-
-        const data = {
-            owner_address: toHex(address),
-            account_address: toHex(accountAddress),
-        };
-
-        if (options && options.permissionId) {
-            data.Permission_id = options.permissionId;
-        }
-
-        this.tronWeb.fullNode.request('wallet/createaccount', data, 'post').then(transaction => resultManager(transaction, data, options, callback)).catch(err => callback(err));
     }
 
     createAccount(accountAddress, address = this.tronWeb.defaultAddress.hex, options, callback = false) {

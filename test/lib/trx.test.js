@@ -140,7 +140,7 @@ describe('TronWeb.trx', function () {
             before(async function(){
                 const transaction2 = await tronWeb.transactionBuilder.freezeBalanceV2(100e6, 'BANDWIDTH', accounts.hex[idx]);
                 await broadcaster(null, accounts.pks[idx], transaction2);
-                const transaction = await tronWeb.transactionBuilder.delegateResource(10e6, 'BANDWIDTH', accounts.hex[idx], accounts.hex[idx + 1]);
+                const transaction = await tronWeb.transactionBuilder.delegateResource(10e6, accounts.hex[idx + 1], 'BANDWIDTH', accounts.hex[idx]);
                 await broadcaster(null, accounts.pks[idx], transaction);
                 await wait(10);
             });
@@ -199,7 +199,7 @@ describe('TronWeb.trx', function () {
             before(async function(){
                 const transaction2 = await tronWeb.transactionBuilder.freezeBalanceV2(100e6, 'BANDWIDTH');
                 await broadcaster(null, PRIVATE_KEY, transaction2);
-                const transaction = await tronWeb.transactionBuilder.delegateResource(10e6, 'BANDWIDTH', tronWeb.defaultAddress.hex, accounts.hex[idx]);
+                const transaction = await tronWeb.transactionBuilder.delegateResource(10e6, accounts.hex[idx], 'BANDWIDTH', tronWeb.defaultAddress.hex);
                 await broadcaster(null, PRIVATE_KEY, transaction);
                 await wait(10); // wait for solidity
             });

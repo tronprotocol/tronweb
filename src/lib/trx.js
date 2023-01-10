@@ -1391,7 +1391,7 @@ export default class Trx {
 
         this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(`wallet${options.confirmed ? 'solidity' : ''}/getdelegatedresourcev2`, {
             fromAddress: toHex(fromAddress),
-            toAddress: toHex(toAddress),
+            toAddress: toHex(toAddress)
         }, 'post').then(resources => {
             callback(null, resources);
         }).catch(err => callback(err));

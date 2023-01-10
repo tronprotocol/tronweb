@@ -451,8 +451,8 @@ describe('TronWeb.utils.transaction', function () {
 
             before(async () => {
                 params = [
-                    [10e6, 'BANDWIDTH', accounts.b58[1], accounts.b58[2], false, { permissionId: 2 }],
-                    [10e6, 'BANDWIDTH', accounts.b58[1], accounts.b58[2], false]
+                    [10e6, accounts.b58[2], 'BANDWIDTH', accounts.b58[1], false, { permissionId: 2 }],
+                    [10e6, accounts.b58[2], 'BANDWIDTH', accounts.b58[1], false]
                 ];
                 const freezeTx = await tronWeb.transactionBuilder.freezeBalanceV2(10e8, 'BANDWIDTH', accounts.b58[1]);
                 await broadcaster(null, accounts.pks[1], freezeTx);
@@ -485,8 +485,8 @@ describe('TronWeb.utils.transaction', function () {
 
             before(async () => {
                 params = [
-                    [10e6, 'BANDWIDTH', accounts.b58[1], accounts.b58[2], { permissionId: 2 }],
-                    [10e6, 'BANDWIDTH', accounts.b58[1], accounts.b58[2]]
+                    [10e6, accounts.b58[2], 'BANDWIDTH', accounts.b58[1], { permissionId: 2 }],
+                    [10e6, accounts.b58[2], 'BANDWIDTH', accounts.b58[1]]
                 ];
             });
 
@@ -2013,9 +2013,9 @@ describe('TronWeb.utils.transaction', function () {
             const generateData = (param) => {
                 return {
                     balance: parseInt(param[0]),
-                    resource: param[1],
-                    owner_address: tronWeb.address.toHex(param[2]),
-                    receiver_address: tronWeb.address.toHex(param[3]),
+                    resource: param[2],
+                    owner_address: tronWeb.address.toHex(param[3]),
+                    receiver_address: tronWeb.address.toHex(param[1]),
                     lock: param[4],
                     Permission_id: param[5]?.permissionId,
                 };
@@ -2023,8 +2023,8 @@ describe('TronWeb.utils.transaction', function () {
 
             before(async () => {
                 params.push(...[
-                    [10e6, 'BANDWIDTH', accounts.b58[1], accounts.b58[2], false, { permissionId: 2 }],
-                    [10e6, 'BANDWIDTH', accounts.b58[1], accounts.b58[2], false]
+                    [10e6, accounts.b58[2], 'BANDWIDTH', accounts.b58[1], false, { permissionId: 2 }],
+                    [10e6, accounts.b58[2], 'BANDWIDTH', accounts.b58[1], false]
                 ]);
                 const freezeTx = await tronWeb.transactionBuilder.freezeBalanceV2(10e8, 'BANDWIDTH', accounts.b58[1]);
                 await broadcaster(null, accounts.pks[1], freezeTx);
@@ -2050,17 +2050,17 @@ describe('TronWeb.utils.transaction', function () {
             const generateData = (param) => {
                 return {
                     balance: parseInt(param[0]),
-                    resource: param[1],
-                    owner_address: tronWeb.address.toHex(param[2]),
-                    receiver_address: tronWeb.address.toHex(param[3]),
+                    resource: param[2],
+                    owner_address: tronWeb.address.toHex(param[3]),
+                    receiver_address: tronWeb.address.toHex(param[1]),
                     Permission_id: param[4]?.permissionId,
                 };
             };
 
             before(async () => {
                 params.push(...[
-                    [10e6, 'BANDWIDTH', accounts.b58[1], accounts.b58[2], { permissionId: 2 }],
-                    [10e6, 'BANDWIDTH', accounts.b58[1], accounts.b58[2]]
+                    [10e6, accounts.b58[2], 'BANDWIDTH', accounts.b58[1], { permissionId: 2 }],
+                    [10e6, accounts.b58[2], 'BANDWIDTH', accounts.b58[1]]
                 ]);
             });
 
