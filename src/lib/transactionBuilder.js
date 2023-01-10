@@ -1498,50 +1498,6 @@ export default class TransactionBuilder {
         this.tronWeb.fullNode.request('wallet/createaccount', data, 'post').then(transaction => resultManager(transaction, data, options, callback)).catch(err => callback(err));
     }
 
-    createAccount(accountAddress, address = this.tronWeb.defaultAddress.hex, options, callback = false) {
-        if (utils.isFunction(options)) {
-            callback = options;
-            options = {};
-        }
-
-        if (utils.isFunction(address)) {
-            callback = address;
-            address = this.tronWeb.defaultAddress.hex;
-        } else if (utils.isObject(address)) {
-            options = address;
-            address = this.tronWeb.defaultAddress.hex;
-        }
-
-        if (!callback) {
-            return this.injectPromise(this.createAccount, accountAddress, address, options);
-        }
-
-        if (this.validator.notValid([
-            {
-                name: 'account',
-                type: 'address',
-                value: accountAddress
-            },
-            {
-                name: 'origin',
-                type: 'address',
-                value: address
-            }
-        ], callback))
-            return;
-
-        const data = {
-            owner_address: toHex(address),
-            account_address: toHex(accountAddress),
-        };
-
-        if (options && options.permissionId) {
-            data.Permission_id = options.permissionId;
-        }
-
-        this.tronWeb.fullNode.request('wallet/createaccount', data, 'post').then(transaction => resultManager(transaction, data, options, callback)).catch(err => callback(err));
-    }
-
     updateAccount(accountName = false, address = this.tronWeb.defaultAddress.hex, options, callback = false) {
         if (utils.isFunction(options)) {
             callback = options;
