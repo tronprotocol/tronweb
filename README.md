@@ -1,5 +1,7 @@
 <h1 align="center">
-  <img align="center" src="https://raw.githubusercontent.com/tron-us/tronweb/master/assets/TronWeb-logo.png" width="400"/>
+  <a href="https://tronweb.network">
+  <img align="center" src="https://raw.githubusercontent.com/tron-us/tronweb/feature/v5.1.0/assets/TronWeb-logo.png" width="400"/>
+  </a>
 </h1>
 
 <p align="center">
