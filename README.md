@@ -1,6 +1,6 @@
 <h1 align="center">
   <a href="https://tronweb.network">
-    <img align="center" src="https://raw.githubusercontent.com/tronprotocol/tronweb/feature/v5.1.0/assets/TronWeb-logo.png" width="200"/>
+    <img align="center" src="https://raw.githubusercontent.com/tronprotocol/tronweb/master/assets/TronWeb-logo.png" width="200"/>
   </a>
 </h1>
 
