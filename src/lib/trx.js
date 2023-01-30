@@ -1361,6 +1361,177 @@ export default class Trx {
     }
 
     /**
+     * Query the amount of resources of a specific resourceType delegated by fromAddress to toAddress
+     */
+    getDelegatedResourceV2(fromAddress = this.tronWeb.defaultAddress.hex, toAddress = this.tronWeb.defaultAddress.hex, options = { confirmed: true }, callback = false) {
+        if(utils.isFunction(options)) {
+            callback = options;
+            options = { confirmed: true };
+        }
+
+        if(utils.isFunction(toAddress)) {
+            callback = toAddress;
+            toAddress = this.tronWeb.defaultAddress.hex;
+        }
+
+        if(utils.isFunction(fromAddress)) {
+            callback = fromAddress;
+            fromAddress = this.tronWeb.defaultAddress.hex;
+            toAddress = this.tronWeb.defaultAddress.hex;
+        }
+
+        if (!callback)
+            return this.injectPromise(this.getDelegatedResourceV2, fromAddress, toAddress, options);
+
+        if (!this.tronWeb.isAddress(fromAddress))
+            return callback('Invalid address provided');
+
+        if (!this.tronWeb.isAddress(toAddress))
+            return callback('Invalid address provided');
+
+        this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(`wallet${options.confirmed ? 'solidity' : ''}/getdelegatedresourcev2`, {
+            fromAddress: toHex(fromAddress),
+            toAddress: toHex(toAddress)
+        }, 'post').then(resources => {
+            callback(null, resources);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Query the resource delegation index by an account
+     */
+    getDelegatedResourceAccountIndexV2(address = this.tronWeb.defaultAddress.hex, options = { confirmed: true }, callback = false) {
+        if(utils.isFunction(options)) {
+            callback = options;
+            options = { confirmed: true };
+        }
+        
+        if(utils.isFunction(address)) {
+            callback = address;
+            address = this.tronWeb.defaultAddress.hex
+        }
+
+        if (!callback)
+            return this.injectPromise(this.getDelegatedResourceAccountIndexV2, address, options);
+
+        if (!this.tronWeb.isAddress(address))
+            return callback('Invalid address provided');
+
+        this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(`wallet${options.confirmed ? 'solidity' : ''}/getdelegatedresourceaccountindexv2`, {
+            value: toHex(address)
+        }, 'post').then(resources => {
+            callback(null, resources);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Query the amount of delegatable resources of the specified resource Type for target address, unit is sun.
+     */
+    getCanDelegatedMaxSize(address = this.tronWeb.defaultAddress.hex, resource = 'BANDWIDTH', options = { confirmed: true }, callback = false) {
+        if(utils.isFunction(options)) {
+            callback = options;
+            options = { confirmed: true };
+        }
+        
+        if(utils.isFunction(resource)) {
+            callback = resource;
+            resource = 'BANDWIDTH';
+        }
+
+        if(utils.isFunction(address)) {
+            callback = address;
+            address = this.tronWeb.defaultAddress.hex;
+        }
+        
+        if (!callback)
+            return this.injectPromise(this.getCanDelegatedMaxSize, address, resource, options);
+
+        if (!this.tronWeb.isAddress(address))
+            return callback('Invalid address provided');
+        
+        if (this.validator.notValid([
+            {
+                name: 'resource',
+                type: 'resource',
+                value: resource,
+                msg: 'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"'
+            }
+        ], callback))
+            return;
+
+        this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(`wallet${options.confirmed ? 'solidity' : ''}/getcandelegatedmaxsize`, {
+            owner_address: toHex(address),
+            type: resource === "ENERGY" ? 1 : 0
+        }, 'post').then(resources => {
+            callback(null, resources);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Remaining times of available unstaking API
+     */
+    getAvailableUnfreezeCount(address = this.tronWeb.defaultAddress.hex, options = { confirmed: true }, callback = false) {
+        if(utils.isFunction(options)) {
+            callback = options;
+            options = { confirmed: true };
+        }
+
+        if(utils.isFunction(address)) {
+            callback = address;
+            address = this.tronWeb.defaultAddress.hex;
+        }
+
+        if (!callback)
+            return this.injectPromise(this.getAvailableUnfreezeCount, address, options);
+        
+        if (!this.tronWeb.isAddress(address))
+            return callback('Invalid address provided');
+        
+        this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(`wallet${options.confirmed ? 'solidity' : ''}/getavailableunfreezecount`, {
+            owner_address: toHex(address),
+        }, 'post').then(data => {
+            callback(null, data);
+        }).catch(err => callback(err));
+    }
+
+    /**
+     * Query the withdrawable balance at the specified timestamp
+     */
+    getCanWithdrawUnfreezeAmount(address = this.tronWeb.defaultAddress.hex, timestamp = Date.now(), options = { confirmed: true }, callback = false) {
+        if(utils.isFunction(options)) {
+            callback = options;
+            options = { confirmed: true };
+        }
+
+        if(utils.isFunction(timestamp)) {
+            callback = timestamp;
+            timestamp = Date.now();
+        }
+
+        if(utils.isFunction(address)) {
+            callback = address;
+            address = this.tronWeb.defaultAddress.hex;
+        }
+
+        if (!callback)
+            return this.injectPromise(this.getCanWithdrawUnfreezeAmount, address, timestamp, options);
+
+        if (!this.tronWeb.isAddress(address))
+            return callback('Invalid address provided');
+
+        if (!utils.isInteger(timestamp) || timestamp < 0)
+            return callback('Invalid timestamp provided');
+
+        this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(`wallet${options.confirmed ? 'solidity' : ''}/getcanwithdrawunfreezeamount`, {
+            owner_address: toHex(address),
+            timestamp: timestamp
+        }, 'post').then(data => {
+            callback(null, data);
+        }).catch(err => callback(err));
+
+    }
+
+    /**
      * Get the exchange ID.
      */
     getExchangeByID(exchangeID = false, callback = false) {

@@ -1,5 +1,7 @@
 <h1 align="center">
-  <img align="center" src="https://raw.githubusercontent.com/tron-us/tronweb/master/assets/TronWeb-logo.png" width="400"/>
+  <a href="https://tronweb.network">
+    <img align="center" src="https://raw.githubusercontent.com/tronprotocol/tronweb/master/assets/logo.png"/>
+  </a>
 </h1>
 
 <p align="center">
@@ -26,9 +28,15 @@
 
 ## What is TronWeb?
 
+__[Tron Web - Official Site](https://tronweb.network)__
+
 __[Tron Web - Developer Document](https://developers.tron.network/docs/tronweb-1)__
 
 TronWeb aims to deliver a unified, seamless development experience influenced by Ethereum's [Web3](https://github.com/ethereum/web3.js/) implementation. We have taken the core ideas and expanded upon it to unlock the functionality of TRON's unique feature set along with offering new tools for integrating DApps in the browser, Node.js and IoT devices.
+
+**Project scope**
+
+Any new TRON feature will be incorporated into TronWeb. Changes to the API to improve quality-of-life are in-scope for the project. We will not necessarilly maintain feature parity with Web3.js going forward as this is a separate project, not a synchronized fork.
 
 ## Compatibility
 - Version built for Node.js v6 and above
@@ -174,6 +182,11 @@ In order to contribute you can
 Contact the team at https://cn.developers.tron.network/docs/online-technical-support
 
 ## Recent History
+
+__5.1.0__
+- Add `freezeBalanceV2`, `unfreezeBalanceV2`, `delegateResource`, `undelegateResource` and `withdrawExpireUnfreeze` function in transactiobBuiler lib to support stakeV2 
+- Support `tronWeb.transactionBuilder.estimateEnergy` to estimate energy for triggersmartcontract transaction
+- Add `getDelegatedResourceV2`, `getDelegatedResourceAccountIndexV2`, `getCanDelegatedMaxSize`, `getAvailableUnfreezeCount` and `getCanWithdrawUnfreezeAmount` function to query account resource info
 
 __5.0.0__
 - Add `tronWeb.utils.transaction` lib to serialize and deserialize transaction 
@@ -334,7 +347,3 @@ __2.3.0__
 TronWeb is distributed under a MIT licence.
 
 
------
-
-For more historic data, check the original repo at
-[https://github.com/tronprotocol/tron-web](https://github.com/tronprotocol/tron-web)
