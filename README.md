@@ -1,5 +1,7 @@
 <h1 align="center">
-  <img align="center" src="https://raw.githubusercontent.com/tron-us/tronweb/master/assets/TronWeb-logo.png" width="400"/>
+  <a href="https://tronweb.network">
+    <img align="center" src="https://raw.githubusercontent.com/tronprotocol/tronweb/master/assets/logo.png"/>
+  </a>
 </h1>
 
 <p align="center">
@@ -25,6 +27,8 @@
 </p>
 
 ## What is TronWeb?
+
+__[Tron Web - Official Site](https://tronweb.network)__
 
 __[Tron Web - Developer Document](https://developers.tron.network/docs/tronweb-1)__
 
@@ -178,6 +182,11 @@ In order to contribute you can
 Contact the team at https://cn.developers.tron.network/docs/online-technical-support
 
 ## Recent History
+
+__5.1.0__
+- Add `freezeBalanceV2`, `unfreezeBalanceV2`, `delegateResource`, `undelegateResource` and `withdrawExpireUnfreeze` function in transactiobBuiler lib to support stakeV2 
+- Support `tronWeb.transactionBuilder.estimateEnergy` to estimate energy for triggersmartcontract transaction
+- Add `getDelegatedResourceV2`, `getDelegatedResourceAccountIndexV2`, `getCanDelegatedMaxSize`, `getAvailableUnfreezeCount` and `getCanWithdrawUnfreezeAmount` function to query account resource info
 
 __5.0.0__
 - Add `tronWeb.utils.transaction` lib to serialize and deserialize transaction 
@@ -338,7 +347,3 @@ __2.3.0__
 TronWeb is distributed under a MIT licence.
 
 
------
-
-For more historic data, check the original repo at
-[https://github.com/tronprotocol/tron-web](https://github.com/tronprotocol/tron-web)

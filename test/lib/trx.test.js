@@ -133,6 +133,291 @@ describe('TronWeb.trx', function () {
 
         });
 
+        describe("#getDelegatedResourceV2", async function () {
+
+            const idx = 10;
+
+            before(async function(){
+                const transaction2 = await tronWeb.transactionBuilder.freezeBalanceV2(100e6, 'BANDWIDTH', accounts.hex[idx]);
+                await broadcaster(null, accounts.pks[idx], transaction2);
+                const transaction = await tronWeb.transactionBuilder.delegateResource(10e6, accounts.hex[idx + 1], 'BANDWIDTH', accounts.hex[idx]);
+                await broadcaster(null, accounts.pks[idx], transaction);
+                await wait(10);
+            });
+
+            it('should get the resource delegation information', async function () {
+                const addressType = ['hex', 'b58'];
+                let delegationInfo;
+                for (let type of addressType) {
+                    delegationInfo = await tronWeb.trx.getDelegatedResourceV2(accounts[type][idx], accounts[type][idx + 1]);
+                    assert.isDefined(delegationInfo.delegatedResource);
+                }
+            });
+
+            it('should get the resource delegation information when confirmed is true', async function () {
+                const delegationInfo = await tronWeb.trx.getDelegatedResourceV2(accounts['hex'][idx], accounts['hex'][idx + 1], { confirmed: true });
+                assert.isDefined(delegationInfo.delegatedResource);
+            });
+
+            it('should get the resource delegation information when confirmed is false', async function () {
+                const delegationInfo = await tronWeb.trx.getDelegatedResourceV2(accounts['hex'][idx], accounts['hex'][idx + 1], { confirmed: false });
+                assert.isDefined(delegationInfo.delegatedResource);
+            });
+
+            it('should not throw error when fromAddress and toAddress are omitted', async function () {
+                const delegationInfo = await tronWeb.trx.getDelegatedResourceV2();
+            });
+
+            it('should not throw error when toAddress is omitted', async function () {
+                const delegationInfo = await tronWeb.trx.getDelegatedResourceV2(accounts['hex'][idx]);
+            });
+
+            it('should not throw error when options is omitted', function (done) {
+                tronWeb.trx.getDelegatedResourceV2(accounts['hex'][idx], accounts['hex'][idx + 1], done);
+            });
+
+            it('should throw origin address is not valid error', async function () {
+                await assertThrow(
+                    tronWeb.trx.getDelegatedResourceV2('notAnAddress'),
+                    'Invalid address provided'
+                );
+            });
+
+            it('should throw receiver address is not valid error', async function () {
+                await assertThrow(
+                    tronWeb.trx.getDelegatedResourceV2(accounts.hex[idx], 'notAnAddress'),
+                    'Invalid address provided'
+                );
+            });
+
+        });
+
+        describe("#getDelegatedResourceAccountIndexV2", async function () {
+
+            const idx = 10;
+
+            before(async function(){
+                const transaction2 = await tronWeb.transactionBuilder.freezeBalanceV2(100e6, 'BANDWIDTH');
+                await broadcaster(null, PRIVATE_KEY, transaction2);
+                const transaction = await tronWeb.transactionBuilder.delegateResource(10e6, accounts.hex[idx], 'BANDWIDTH', tronWeb.defaultAddress.hex);
+                await broadcaster(null, PRIVATE_KEY, transaction);
+                await wait(10); // wait for solidity
+            });
+
+            it('should get the resource delegation account information', async function () {
+                const addressType = ['hex', 'b58'];
+                let delegationInfo;
+                for (let type of addressType) {
+                    delegationInfo = await tronWeb.trx.getDelegatedResourceAccountIndexV2(accounts[type][idx]);
+                    assert.isDefined(delegationInfo.account);
+                    assert.isArray(delegationInfo.toAccounts);
+                }
+            });
+
+            it('should get the resource delegation account information when options is omitted', function (done) {
+                tronWeb.trx.getDelegatedResourceAccountIndexV2(accounts.hex[idx], (err, delegationInfo) => {
+                    if (err) return done(err);
+                    assert.isDefined(delegationInfo.account);
+                    assert.isArray(delegationInfo.toAccounts);
+                    done();
+                });
+            });
+
+            it('should get the resource delegation account information when confirmed is true', async function () {
+                const delegationInfo = await tronWeb.trx.getDelegatedResourceAccountIndexV2(accounts['hex'][idx], { confirmed: true });
+                assert.isDefined(delegationInfo.account);
+                assert.isArray(delegationInfo.toAccounts);
+            });
+
+            it('should get the resource delegation account information when confirmed is false', async function () {
+                const delegationInfo = await tronWeb.trx.getDelegatedResourceAccountIndexV2(accounts['hex'][idx], { confirmed: false });
+                assert.isDefined(delegationInfo.account);
+                assert.isArray(delegationInfo.toAccounts);
+            });
+
+            it('should get the resource delegation account information when origin address is omitted', async function () {
+                const delegationInfo = await tronWeb.trx.getDelegatedResourceAccountIndexV2();
+                assert.isDefined(delegationInfo.account);
+                assert.isArray(delegationInfo.toAccounts);
+            });
+
+            it('should throw address is not valid error', async function () {
+                await assertThrow(
+                    tronWeb.trx.getDelegatedResourceAccountIndexV2('notAnAddress'),
+                    'Invalid address provided'
+                );
+            });
+
+        });
+
+        describe("#getCanDelegatedMaxSize", async function () {
+
+            const idx = 10;
+
+            before(async function(){
+                const transaction2 = await tronWeb.transactionBuilder.freezeBalanceV2(10e6, 'ENERGY', accounts.hex[idx]);
+                await broadcaster(null, accounts.pks[idx], transaction2);
+                await wait(60); // wait for solidity
+            });
+
+            it('should get the max resource can delegate', async function () {
+                const addressType = ['hex', 'b58'];
+                for (let type of addressType) {
+                    const { max_size } = await tronWeb.trx.getCanDelegatedMaxSize(accounts[type][idx],  'ENERGY');
+                    assert.isNumber(max_size);
+                }
+            });
+
+            it('should get the max resource can delegate when options is omitted', function (done) {
+                tronWeb.trx.getCanDelegatedMaxSize(accounts.hex[idx], 'ENERGY', (err, { max_size }) => {
+                    if (err) return done(err);
+                    assert.isNumber(max_size);
+                    done();
+                });
+            });
+
+            it('should get the max resource can delegate when confirmed is true', async function () {
+                const { max_size } = await tronWeb.trx.getCanDelegatedMaxSize(accounts['hex'][idx], 'ENERGY', { confirmed: true });
+                assert.isNumber(max_size);
+            });
+
+            it('should get the max resource can delegate when confirmed is false', async function () {
+                const { max_size } = await tronWeb.trx.getCanDelegatedMaxSize(accounts['hex'][idx], 'ENERGY', { confirmed: false });
+                assert.isNumber(max_size);
+            });
+
+            it('should get the max resource can delegate when resource type is omitted', async function () {
+                const { max_size } = await tronWeb.trx.getCanDelegatedMaxSize(accounts['hex'][idx]);
+                assert.isNumber(max_size);
+            });
+
+            it('should get the max resource can delegate when address and resource type are omitted', async function () {
+                const { max_size } = await tronWeb.trx.getCanDelegatedMaxSize();
+                assert.isNumber(max_size);
+            });
+
+            it('should throw address is not valid error', async function () {
+                await assertThrow(
+                    tronWeb.trx.getCanDelegatedMaxSize('notAnAddress'),
+                    'Invalid address provided'
+                );
+            });
+
+            it('should throw resource type is not valid error', async function () {
+                await assertThrow(
+                    tronWeb.trx.getCanDelegatedMaxSize(accounts.hex[idx], 2),
+                    'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"'
+                );
+            });
+        });
+
+        describe("#getAvailableUnfreezeCount", async function () {
+
+            const idx = 10;
+
+            it('should get the times user can do UnFreezeBalanceV2', async function () {
+                const addressType = ['hex', 'b58'];
+                for (let type of addressType) {
+                    const { count } = await tronWeb.trx.getAvailableUnfreezeCount(accounts[type][idx]);
+                    assert.isNumber(count);
+                }
+            });
+
+            it('should get the times user can do UnFreezeBalanceV2 when options is omitted', function (done) {
+                tronWeb.trx.getAvailableUnfreezeCount(accounts.hex[idx], (err, { count }) => {
+                    if (err) return done(err);
+                    assert.isNumber(count);
+                    done();
+                });
+            });
+
+            it('should get the times user can do UnFreezeBalanceV2 when confirmed is true', async function () {
+                const { count } = await tronWeb.trx.getAvailableUnfreezeCount(accounts['hex'][idx], { confirmed: true });
+                assert.isNumber(count);
+            });
+
+            it('should get the times user can do UnFreezeBalanceV2 when confirmed is false', async function () {
+                const { count } = await tronWeb.trx.getAvailableUnfreezeCount(accounts['hex'][idx], { confirmed: false });
+                assert.isNumber(count);
+            });
+
+            it('should get the times user can do UnFreezeBalanceV2 when address is omitted', async function () {
+                const { count } = await tronWeb.trx.getAvailableUnfreezeCount();
+                assert.isNumber(count);
+            });
+
+            it('should throw address is not valid error', async function () {
+                await assertThrow(
+                    tronWeb.trx.getAvailableUnfreezeCount('notAnAddress'),
+                    'Invalid address provided'
+                );
+            });
+
+        });
+
+        describe("#getCanWithdrawUnfreezeAmount", async function () {
+
+            const idx = 11;
+
+            before(async function(){
+                const transaction2 = await tronWeb.transactionBuilder.freezeBalanceV2(100e6, 'ENERGY', accounts.hex[idx]);
+                await broadcaster(null, accounts.pks[idx], transaction2);
+                const transaction = await tronWeb.transactionBuilder.unfreezeBalanceV2(10e6, 'ENERGY', accounts.hex[idx], accounts.hex[idx + 1]);
+                await broadcaster(null, accounts.pks[idx], transaction);
+
+                const transaction3 = await tronWeb.transactionBuilder.freezeBalanceV2(100e6, 'ENERGY');
+                await broadcaster(null, PRIVATE_KEY, transaction3);
+                const transaction4 = await tronWeb.transactionBuilder.unfreezeBalanceV2(10e6, 'ENERGY', tronWeb.defaultAddress.hex, accounts.hex[idx + 1]);
+                await broadcaster(null, PRIVATE_KEY, transaction4);
+                await wait(65);
+            });
+
+            it('should get the amount of a widrawUnfreeze operation', async function () {
+                const addressType = ['hex', 'b58'];
+                for (let type of addressType) {
+                    const { amount } = await tronWeb.trx.getCanWithdrawUnfreezeAmount(accounts[type][idx], Date.now());
+                    assert.isNumber(amount);
+                }
+            });
+
+            it('should get the amount of a widrawUnfreeze operation when options is omitted', function (done) {
+                tronWeb.trx.getCanWithdrawUnfreezeAmount(accounts.hex[idx], Date.now(), (err, { amount }) => {
+                    if (err) return done(err);
+                    assert.isNumber(amount);
+                    done();
+                });
+            });
+
+            it('should get the amount of a widrawUnfreeze operation when confirmed is true', async function () {
+                const { amount } = await tronWeb.trx.getCanWithdrawUnfreezeAmount(accounts['hex'][idx], Date.now(), { confirmed: true });
+                assert.isNumber(amount);
+            });
+
+            it('should get the amount of a widrawUnfreeze operation when confirmed is false', async function () {
+                const { amount } = await tronWeb.trx.getCanWithdrawUnfreezeAmount(accounts['hex'][idx], Date.now(), { confirmed: false });
+                assert.isNumber(amount);
+            });
+
+            it('should get the amount of a widrawUnfreeze operation when address and timestamp are omitted', async function () {
+                const { amount } = await tronWeb.trx.getCanWithdrawUnfreezeAmount();
+                assert.isNumber(amount);
+            });
+
+            it('should throw address is not valid error', async function () {
+                await assertThrow(
+                    tronWeb.trx.getCanWithdrawUnfreezeAmount('notAnAddress', Date.now()),
+                    'Invalid address provided'
+                );
+            });
+
+            it('should throw timestamp is not valid error', async function () {
+                await assertThrow(
+                    tronWeb.trx.getCanWithdrawUnfreezeAmount(accounts.hex[idx], -1),
+                    'Invalid timestamp provided'
+                );
+            });
+
+        });
 
         describe("#getBalance", async function () {
 
