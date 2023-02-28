@@ -2265,7 +2265,9 @@ describe('TronWeb.transactionBuilder', function () {
                 {type: 'uint256', value: 1},
                 {type: 'uint256', value: 2}
             ]
-            const options = {};
+            const options = {
+                _isConstant: true,
+            };
 
             for (let i = 0; i < 2; i++) {
                 if (i === 1) options.permissionId = 2;
@@ -2694,7 +2696,7 @@ describe('TronWeb.transactionBuilder', function () {
                 const id = transaction.txID;
                 await broadcaster(null, privateKey, transaction);
                 await waitChainData('tx', id);
-                assert.equal(balance - await tronWeb.trx.getUnconfirmedBalance(sender), 10);
+                assert.equal(balance - await tronWeb.trx.getUnconfirmedBalance(sender), 10 + 1e6); // change chain data at a cost of 1e6
                 const unconfirmedTx = await tronWeb.trx.getTransaction(id)
                 assert.equal(tronWeb.toUtf8(unconfirmedTx.raw_data.data), data);
 
