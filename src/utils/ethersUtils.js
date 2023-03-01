@@ -15,6 +15,7 @@ const joinSignature = utils.joinSignature;
 const concat = utils.concat;
 const id = utils.id;
 const isValidMnemonic = utils.isValidMnemonic;
+const computeHmac = utils.computeHmac;
 
 export {
     keccak256,
@@ -32,5 +33,6 @@ export {
     ethersWallet,
     concat,
     id,
-    isValidMnemonic
+    isValidMnemonic,
+    computeHmac,
 };
