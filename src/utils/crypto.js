@@ -7,10 +7,13 @@ import * as secp from '@noble/secp256k1';
 import {keccak256, sha256, SigningKey, computeHmac, concat} from './ethersUtils';
 import {TypedDataEncoder} from './typedData';
 
-
 // Enable sync API for noble-secp256k1
 secp.utils.hmacSha256Sync = function(key, ...messages) {
     return new Uint8Array(hexStr2byteArray(computeHmac("sha256", key, concat(messages)).replace(/^0x/, '')));
+}
+
+function normalizePrivateKeyBytes(priKeyBytes) {
+    return hexStr2byteArray(byteArray2hexStr(priKeyBytes).padStart(64, '0'));
 }
 
 export function getBase58CheckAddress(addressBytes) {
@@ -215,7 +218,7 @@ export function getAddressFromPriKeyBase64String(priKeyBase64String) {
 }
 
 export function getPubKeyFromPriKey(priKeyBytes) {
-    const pubkey = secp.Point.fromPrivateKey(new Uint8Array(priKeyBytes));
+    const pubkey = secp.Point.fromPrivateKey(new Uint8Array(normalizePrivateKeyBytes(priKeyBytes)));
     const x = pubkey.x;
     const y = pubkey.y;
 
