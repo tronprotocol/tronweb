@@ -1,21 +1,31 @@
-import { utils, Wallet as ethersWallet } from "ethers";
+import {
+    keccak256,
+    sha256,
+    toUtf8Bytes,
+    toUtf8String,
+    recoverAddress,
+    SigningKey,
+    AbiCoder,
+    Interface,
+    Signature,
+    concat,
+    id,
+    Mnemonic,
+    computeHmac,
+    Wallet as ethersWallet,
+    getBytes,
+} from 'ethers';
 
-const keccak256 = utils.keccak256;
-const sha256 = utils.sha256;
-const toUtf8Bytes = utils.toUtf8Bytes;
-const toUtf8String = utils.toUtf8String;
-const recoverAddress = utils.recoverAddress;
-const SigningKey = utils.SigningKey;
-const AbiCoder = utils.AbiCoder;
-const Interface = utils.Interface;
-const FormatTypes = utils.FormatTypes;
-const arrayify = utils.arrayify;
-const splitSignature = utils.splitSignature;
-const joinSignature = utils.joinSignature;
-const concat = utils.concat;
-const id = utils.id;
-const isValidMnemonic = utils.isValidMnemonic;
-const computeHmac = utils.computeHmac;
+const splitSignature = (sigBytes) => Signature.from(sigBytes);
+const joinSignature = (splitSig) => Signature.from(splitSig).serialized;
+const arrayify = (value) => getBytes(value);
+const FormatTypes = {
+    sighash: 'sighash',
+    minimal: 'minimal',
+    full: 'full',
+    json: 'json',
+};
+const isValidMnemonic = Mnemonic.isValidMnemonic;
 
 export {
     keccak256,

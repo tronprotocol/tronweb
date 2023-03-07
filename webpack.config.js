@@ -41,6 +41,9 @@ const baseConfig = {
             'node_modules',
             path.resolve(__dirname, 'src')
         ],
+        fallback: {
+            'querystring': require.resolve("querystring-es3"),
+        },
     },
     devtool: 'source-map',
     mode
