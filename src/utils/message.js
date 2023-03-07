@@ -24,7 +24,7 @@ export function signMessage(message, privateKey) {
     
     const signingKey = new SigningKey(privateKey);
     const messageDigest = hashMessage(message);
-    const signature = signingKey.signDigest(messageDigest);
+    const signature = signingKey.sign(messageDigest);
     
     return joinSignature(signature)
 }
