@@ -15,7 +15,8 @@ const getValues = (object, named) => {
 
   switch (object.type) {
       case 'number':
-          return bnify(object.value);
+      case 'bigint':
+          return ethers.getBigInt(object.value);
 
       case 'boolean':
       case 'string':
@@ -50,8 +51,8 @@ const equals = (actual, expected) => {
       return true;
   }
 
-  if (typeof(actual) === 'number') { actual = bnify(actual); }
-  if (typeof(expected) === 'number') { expected = bnify(expected); }
+  if (['bigint', 'number'].includes(typeof(actual))) { actual = bnify(actual); }
+  if (['bigint', 'number'].includes(typeof(expected))) { expected = bnify(expected); }
 
   // BigNumber
   if (actual.eq) {
@@ -67,9 +68,6 @@ const equals = (actual, expected) => {
 
   // Uint8Array
   if (expected.buffer) {
-      if (!ethers.isHexString(actual)) { return false; }
-      actual = ethers.getBytes(actual);
-
       if (!actual.buffer || actual.length !== expected.length) { return false; }
       for (let i = 0; i < actual.length; i++) {
           if (actual[i] !== expected[i]) { return false; }

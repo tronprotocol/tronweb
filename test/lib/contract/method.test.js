@@ -62,7 +62,7 @@ describe('#contract.method', function () {
                 keepTxID: true
             })
             assert.equal(result[0].length, 64)
-            assert.equal(result[1].toNumber(), 123)
+            assert.equal(Number(result[1]), 123)
         });
 
     });

@@ -1,4 +1,4 @@
-import {AbiCoder} from './ethersUtils';
+import {AbiCoder, arrayify} from './ethersUtils';
 import TronWeb from 'index';
 import {ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX} from 'utils/address';
 
@@ -217,7 +217,18 @@ export function decodeParamsV2ByABI(funABI, data) {
       return typeDef.type.replace(/trcToken/, 'uint256') + name;
 
     return typeDef.type + name;
-  }
+  };
+
+  const convertBytes = bytesArr => {
+    if (Array.isArray(bytesArr)) {
+      bytesArr.forEach((bytes, idx) => {
+        bytesArr[idx] = convertBytes(bytes);
+      });
+      return bytesArr;
+    } else {
+      return arrayify(bytesArr);
+    }
+  };
 
   const decodeResult = (outputs = [], result) => {
     if (outputs.length)
@@ -240,6 +251,14 @@ export function decodeParamsV2ByABI(funABI, data) {
             } else decodeResult(output.components, result[i]);
 
             if(name) result[name] = result[i];
+          }
+          else if (/^bytes\d*\[/.test(type)) {
+            convertBytes(result[i]);
+            if (name) result[name] = result[i];
+          }
+          else if (/^bytes\d*/.test(type)) {
+            result[i] = arrayify(result[i]);
+            if (name) result[name] = result[i];
           }
       });
   };

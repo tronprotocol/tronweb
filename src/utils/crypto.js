@@ -87,16 +87,11 @@ export function signBytes(privateKey, contents) {
 }
 
 export function _signTypedData(domain, types, value, privateKey) {
-    const key = {
-        toHexString: function () {
-            return '0x' + privateKey;
-        },
-        value: privateKey,
-    };
+    const key = `0x${privateKey.replace(/^0x/, '')}`;
     const signingKey = new SigningKey(key);
 
     const messageDigest = TypedDataEncoder.hash(domain, types, value);
-    const signature = signingKey.signDigest(messageDigest);
+    const signature = signingKey.sign(messageDigest);
     const signatureHex = [
         '0x',
         signature.r.substring(2),
