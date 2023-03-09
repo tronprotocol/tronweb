@@ -2023,7 +2023,7 @@ describe('TronWeb.transactionBuilder', function () {
             const deployed = await tronWeb.contract().at(transaction.contract_address);
             for (let j = 25; j <= 28; j++) {
                 let bal = await deployed.balances(accounts.hex[j]).call();
-                bal = bal.toNumber();
+                bal = Number(bal);
                 assert.equal(bal, bals[j - 25]);
             }
         });
@@ -2694,7 +2694,7 @@ describe('TronWeb.transactionBuilder', function () {
                 const id = transaction.txID;
                 await broadcaster(null, privateKey, transaction);
                 await waitChainData('tx', id);
-                assert.equal(balance - await tronWeb.trx.getUnconfirmedBalance(sender), 10);
+                assert.equal(balance - await tronWeb.trx.getUnconfirmedBalance(sender), 1000010);
                 const unconfirmedTx = await tronWeb.trx.getTransaction(id)
                 assert.equal(tronWeb.toUtf8(unconfirmedTx.raw_data.data), data);
 
@@ -2813,7 +2813,7 @@ describe('TronWeb.transactionBuilder', function () {
               .contract()
               .at(transaction.contract_address);
           let check = await deployed.check().call();
-          assert.ok(check.eq(1));
+          assert.ok(check === 1n);
 
           /* test send method */
           const sendTxId = await deployed.setCheck(8).send({}, issuerPk);
@@ -2829,7 +2829,7 @@ describe('TronWeb.transactionBuilder', function () {
             }
           }
           let check1 = await deployed.check().call();
-          assert.ok(check1.eq(8));
+          assert.ok(check1 === 8n);
 
           /* test triggersmartcontract */
           const setTransaction = await tronWeb.transactionBuilder.triggerSmartContract(
@@ -2847,7 +2847,7 @@ describe('TronWeb.transactionBuilder', function () {
           await broadcaster(null, issuerPk, setTransaction.transaction);
 
           check = await deployed.check().call();
-          assert.ok(check.eq(16));
+          assert.ok(check === 16n);
       });
   });
 

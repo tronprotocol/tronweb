@@ -6,15 +6,18 @@ import {
     recoverAddress,
     SigningKey,
     AbiCoder,
-    Interface,
     Signature,
     concat,
     id,
     Mnemonic,
+    Wordlist,
     computeHmac,
     Wallet as ethersWallet,
+    HDNodeWallet as ethersHDNodeWallet,
     getBytes,
 } from 'ethers';
+
+import { Interface } from './interface.js';
 
 const splitSignature = (sigBytes) => Signature.from(sigBytes);
 const joinSignature = (splitSig) => Signature.from(splitSig).serialized;
@@ -41,8 +44,11 @@ export {
     joinSignature,
     arrayify,
     ethersWallet,
+    ethersHDNodeWallet,
     concat,
     id,
+    Mnemonic,
+    Wordlist,
     isValidMnemonic,
     computeHmac,
 };
