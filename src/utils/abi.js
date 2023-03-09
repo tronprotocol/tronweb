@@ -1,6 +1,7 @@
 import {AbiCoder, arrayify} from './ethersUtils';
 import TronWeb from 'index';
 import {ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX} from 'utils/address';
+import BigNumber from 'bignumber.js';
 
 const abiCoder = new AbiCoder();
 
@@ -17,13 +18,14 @@ function deepCopy(target) {
         Object.prototype.toString.call(target) !== '[object Object]' &&
         Object.prototype.toString.call(target) !== '[object Array]'
     ) {
+        if (typeof target === 'bigint') return BigNumber(target);
         return target;
     }
     const newTarget = _isArray(target) ? [] : {};
 
-    Object.keys(target).forEach(key =>
-        newTarget[key] = target[key] instanceof Object && !target[key]._isBigNumber ? deepCopy(target[key]) : target[key]
-    );
+    Object.keys(target).forEach(key => {
+      newTarget[key] = deepCopy(target[key])
+    });
 
     return newTarget;
 }
