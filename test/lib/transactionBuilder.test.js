@@ -2023,7 +2023,7 @@ describe('TronWeb.transactionBuilder', function () {
             const deployed = await tronWeb.contract().at(transaction.contract_address);
             for (let j = 25; j <= 28; j++) {
                 let bal = await deployed.balances(accounts.hex[j]).call();
-                bal = Number(bal);
+                bal = bal.toNumber();
                 assert.equal(bal, bals[j - 25]);
             }
         });
@@ -2813,7 +2813,7 @@ describe('TronWeb.transactionBuilder', function () {
               .contract()
               .at(transaction.contract_address);
           let check = await deployed.check().call();
-          assert.ok(check === 1n);
+          assert.ok(check.eq(1));
 
           /* test send method */
           const sendTxId = await deployed.setCheck(8).send({}, issuerPk);
@@ -2829,7 +2829,7 @@ describe('TronWeb.transactionBuilder', function () {
             }
           }
           let check1 = await deployed.check().call();
-          assert.ok(check1 === 8n);
+          assert.ok(check1.eq(8));
 
           /* test triggersmartcontract */
           const setTransaction = await tronWeb.transactionBuilder.triggerSmartContract(
@@ -2847,7 +2847,7 @@ describe('TronWeb.transactionBuilder', function () {
           await broadcaster(null, issuerPk, setTransaction.transaction);
 
           check = await deployed.check().call();
-          assert.ok(check === 16n);
+          assert.ok(check.eq(16));
       });
   });
 
