@@ -42,7 +42,8 @@ const baseConfig = {
             path.resolve(__dirname, 'src')
         ],
         fallback: {
-            'querystring': require.resolve("querystring-es3"),
+            'querystring-es3': require.resolve("querystring-es3"),
+            'events': require.resolve("events/")
         },
     },
     devtool: 'source-map',
