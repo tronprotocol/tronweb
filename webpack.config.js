@@ -2,8 +2,10 @@ const path = require('path');
 const externals = require('webpack-node-externals');
 
 const basePlugins = [
+    ["@babel/plugin-proposal-private-methods", { "loose": true }],
+    ["@babel/plugin-proposal-private-property-in-object", { "loose": true }],
+    ["@babel/plugin-proposal-class-properties", { "loose": true }],
     '@babel/plugin-proposal-numeric-separator',
-    '@babel/plugin-proposal-class-properties',
     '@babel/plugin-transform-runtime',
     '@babel/plugin-proposal-object-rest-spread'
 ];
@@ -16,12 +18,12 @@ const baseConfig = {
         rules: [
             {
                 test: /\.js$/,
-                exclude: /(node_modules|bower_components)/,
+                exclude: /(node_modules\/(?!ethers)|bower_components)/,
                 use: {
                     loader: 'babel-loader',
                     options: {
                         presets: [
-                            ['@babel/env', {
+                            ['@babel/preset-env', {
                                 targets: {
                                     browsers: [
                                         '>0.25%',
@@ -30,7 +32,7 @@ const baseConfig = {
                                 }
                             }]
                         ],
-                        plugins: basePlugins
+                        plugins: basePlugins,
                     }
                 }
             }
@@ -71,12 +73,12 @@ module.exports = [
             rules: [
                 {
                     test: /\.js$/,
-                    exclude: /(node_modules|bower_components)/,
+                    exclude: /(node_modules\/(?!ethers)|bower_components)/,
                     use: {
                         loader: 'babel-loader',
                         options: {
                             presets: [
-                                ['@babel/env', {
+                                ['@babel/preset-env', {
                                     targets: {
                                         node: 6
                                     },
@@ -89,7 +91,7 @@ module.exports = [
                 }
             ]
         },
-        externals: [ externals() ],
+        externals: [ externals({ allowlist: ['ethers'] }) ],
         target: 'node'
     },
     {
