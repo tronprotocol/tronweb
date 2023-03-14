@@ -758,7 +758,7 @@ export default class Trx {
                 }
             }
             return callback(null,
-                utils.crypto.signTransaction(privateKey, transaction)
+                await utils.crypto.signTransaction(privateKey, transaction)
             );
         } catch (ex) {
             callback(ex);
@@ -901,7 +901,7 @@ export default class Trx {
             if (!txCheck(transaction)) {
                 return callback('Invalid transaction');
             }
-            return callback(null, utils.crypto.signTransaction(privateKey, transaction));
+            return callback(null, await utils.crypto.signTransaction(privateKey, transaction));
         } catch (ex) {
             callback(ex);
         }

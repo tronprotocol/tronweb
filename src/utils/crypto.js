@@ -7,11 +7,6 @@ import * as secp from '@noble/secp256k1';
 import {keccak256, sha256, SigningKey, computeHmac, concat} from './ethersUtils';
 import {TypedDataEncoder} from './typedData';
 
-// Enable sync API for noble-secp256k1
-secp.utils.hmacSha256Sync = function(key, ...messages) {
-    return new Uint8Array(hexStr2byteArray(computeHmac("sha256", key, concat(messages)).replace(/^0x/, '')));
-}
-
 function normalizePrivateKeyBytes(priKeyBytes) {
     return hexStr2byteArray(byteArray2hexStr(priKeyBytes).padStart(64, '0'));
 }
@@ -57,12 +52,12 @@ export function decodeBase58Address(base58Sting) {
     throw new Error('Invalid address provided');
 }
 
-export function signTransaction(priKeyBytes, transaction) {
+export async function signTransaction(priKeyBytes, transaction) {
     if (typeof priKeyBytes === 'string')
         priKeyBytes = hexStr2byteArray(priKeyBytes);
 
     const txID = transaction.txID;
-    const signature = ECKeySign(hexStr2byteArray(txID), priKeyBytes);
+    const signature = await ECKeySign(hexStr2byteArray(txID), priKeyBytes);
 
     if (Array.isArray(transaction.signature)) {
         if (!transaction.signature.includes(signature))
@@ -76,12 +71,12 @@ export function arrayToBase64String(a) {
     return btoa(String.fromCharCode(...a));
 }
 
-export function signBytes(privateKey, contents) {
+export async function signBytes(privateKey, contents) {
     if (typeof privateKey === 'string')
         privateKey = hexStr2byteArray(privateKey);
 
     const hashBytes = SHA256(contents);
-    const signBytes = ECKeySign(hashBytes, privateKey);
+    const signBytes = await ECKeySign(hashBytes, privateKey);
 
     return signBytes;
 }
@@ -226,8 +221,8 @@ export function getPubKeyFromPriKey(priKeyBytes) {
     return pubkeyBytes;
 }
 
-export function ECKeySign(hashBytes, priKeyBytes) {
-    const [signature, recovery] = secp.signSync(byteArray2hexStr(hashBytes), byteArray2hexStr(priKeyBytes), { recovered: true, der: false })
+export async function ECKeySign(hashBytes, priKeyBytes) {
+    const [signature, recovery] = await secp.sign(byteArray2hexStr(hashBytes), byteArray2hexStr(priKeyBytes), { recovered: true, der: false })
 
     const r = Buffer.from(signature.slice(0, 32)).toString('hex');
     const s = Buffer.from(signature.slice(32, 64)).toString('hex');
