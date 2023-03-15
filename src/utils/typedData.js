@@ -1,6 +1,6 @@
 //import { TypedDataDomain, TypedDataField } from "@ethersproject/providerabstract-signer";
 import TronWeb from "../index";
-import { id, keccak256, concat, defineProperties, getBigInt, getBytes, hexlify, isHexString, mask, toBeHex, toTwos, zeroPadValue, assertArgument } from "ethers";
+import { id, keccak256, concat, defineProperties, getBigInt, getBytes, hexlify, mask, toTwos, toBeHex, zeroPadValue, assertArgument } from "ethers";
 import {  ADDRESS_PREFIX_REGEX } from './address';
 
 function getAddress(address) {
@@ -74,6 +74,7 @@ function getBaseEncoder(type) {
             return function (_value) {
                 const value = getBigInt(_value, "value");
                 assertArgument(value >= boundsLower && value <= boundsUpper, `value out-of-bounds for ${type}`, "value", value);
+                if (!signed) return toBeHex(value, 32);
                 return toBeHex(toTwos(value, 256), 32);
             };
         }
