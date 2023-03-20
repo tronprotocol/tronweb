@@ -2148,19 +2148,27 @@ describe('TronWeb.transactionBuilder', function () {
 
     describe("#clearabi", async function () {
 
-        let transaction;
-        let contract;
+        let transactions = [];
+        let contracts = [];
         before(async function () {
             this.timeout(20000);
 
-            transaction = await tronWeb.transactionBuilder.createSmartContract({
+            transactions.push(await tronWeb.transactionBuilder.createSmartContract({
                 abi: testConstant.abi,
                 bytecode: testConstant.bytecode
-            }, accounts.hex[7]);
-            await broadcaster(null, accounts.pks[7], transaction);
+            }, accounts.hex[7]));
+            transactions.push(await tronWeb.transactionBuilder.createSmartContract({
+                abi: testConstant.abi,
+                bytecode: testConstant.bytecode
+            }, accounts.hex[7]));
+            transactions.forEach(async (tx) => {
+                contracts.push(await broadcaster(null, accounts.pks[7], tx));
+            });
+            
             while (true) {
-                const tx = await tronWeb.trx.getTransactionInfo(transaction.txID);
-                if (Object.keys(tx).length === 0) {
+                const tx1 = await tronWeb.trx.getTransactionInfo(transactions[0].txID);
+                const tx2 = await tronWeb.trx.getTransactionInfo(transactions[1].txID);
+                if (Object.keys(tx1).length === 0 || Object.keys(tx2).length === 0) {
                     await wait(3);
                     continue;
                 } else {
@@ -2172,31 +2180,46 @@ describe('TronWeb.transactionBuilder', function () {
         it('should clear contract abi', async function () {
             this.timeout(10000);
 
-            const contractAddress = transaction.contract_address;
-            const ownerAddress = accounts.hex[7];
+            const params = [
+                [transactions[0], accounts.hex[7], {permissionId: 2}],
+                [transactions[1], accounts.hex[7]],
+            ];
+            for (const param of params) {
+                const contractAddress = param[0].contract_address;
+                const ownerAddress = param[1];
 
-            // verify contract abi before
-            contract = await tronWeb.trx.getContract(contractAddress);
-            assert.isTrue(Object.keys(contract.abi).length > 0)
+                // verify contract abi before
+                const contract = await tronWeb.trx.getContract(contractAddress);
+                assert.isTrue(Object.keys(contract.abi).length > 0)
 
-            // clear abi
-            transaction = await tronWeb.transactionBuilder.clearABI(contractAddress, ownerAddress);
-            assert.isTrue(!transaction.visible &&
-                transaction.raw_data.contract[0].parameter.type_url === 'type.googleapis.com/protocol.ClearABIContract');
-            transaction = await broadcaster(null, accounts.pks[7], transaction);
-            assert.isTrue(transaction.receipt.result);
+                // clear abi
+                const transaction = await tronWeb.transactionBuilder.clearABI(contractAddress, ownerAddress, param[2]);
+                const parameter = txPars(transaction);
+                assert.isTrue(!transaction.visible &&
+                    transaction.raw_data.contract[0].parameter.type_url === 'type.googleapis.com/protocol.ClearABIContract');
+                assert.equal(transaction.txID.length, 64);
+                assert.equal(parameter.value.contract_address, tronWeb.address.toHex(contractAddress));
+                assert.equal(parameter.value.owner_address, tronWeb.address.toHex(ownerAddress));
+                assert.equal(transaction.raw_data.contract[0].Permission_id, param[2]?.permissionId);
 
-            // verify contract abi after
-            while (true) {
-                contract = await tronWeb.trx.getContract(contractAddress);
-                if (Object.keys(contract.abi).length > 0) {
-                    await wait(3);
-                    continue;
-                } else {
-                    break;
+                if (param.length === 2) {
+                    const res = await broadcaster(null, accounts.pks[7], transaction);
+                    assert.isTrue(res.receipt.result);
+
+                    let contract;
+                    // verify contract abi after
+                    while (true) {
+                        contract = await tronWeb.trx.getContract(contractAddress);
+                        if (Object.keys(contract.abi).length > 0) {
+                            await wait(3);
+                            continue;
+                        } else {
+                            break;
+                        }
+                    }
+                    assert.isTrue(Object.keys(contract.abi).length === 0);
                 }
             }
-            assert.isTrue(Object.keys(contract.abi).length === 0);
         });
     });
 
@@ -2662,15 +2685,21 @@ describe('TronWeb.transactionBuilder', function () {
                 ]
             };
             const params = [
-                [accounts.hex[6], permissionData.owner, permissionData.witness, permissionData.actives] // No suppored for multiSign
+                [accounts.hex[6], permissionData.owner, permissionData.witness, permissionData.actives, {permissionId: 2}],
+                [accounts.hex[6], permissionData.owner, permissionData.witness, permissionData.actives],
             ];
             for (let param of params) {
                 const transaction = await tronWeb.transactionBuilder.updateAccountPermissions(
                     ...param
                 );
-                const authResult =
-                    TronWeb.utils.transaction.txCheck(transaction);
-                assert.equal(authResult, true);
+                const parameter = txPars(transaction);
+                assert.equal(transaction.txID.length, 64);
+                assert.equal(parameter.value.owner_address, param[0]);
+                assert.deepEqual(parameter.value.owner, param[1]);
+                assert.deepEqual(parameter.value.witness, param[2]);
+                assert.deepEqual(parameter.value.actives, param[3][0]);
+                assert.equal(parameter.type_url, 'type.googleapis.com/protocol.AccountPermissionUpdateContract');
+                assert.equal(transaction.raw_data.contract[0].Permission_id, param[4]?.permissionId);
             }
         });
     });

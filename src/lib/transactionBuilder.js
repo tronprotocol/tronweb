@@ -20,31 +20,6 @@ function fromUtf8(value) {
     return self.tronWeb.fromUtf8(value).replace(/^0x/, '');
 }
 
-function resultManager(transaction, data, options, callback) {
-    if (typeof options === 'function') {
-        callback = options;
-    }
-
-    if (typeof data === 'function') {
-        callback = data;
-        data = null;
-    }
-
-    if (transaction.Error)
-        return callback(transaction.Error);
-
-    if (transaction.result && transaction.result.message) {
-        return callback(
-            self.tronWeb.toUtf8(transaction.result.message)
-        );
-    }
-    const authResult = txCheckWithArgs(transaction, data, options);
-    if(authResult) {
-        return callback(null, transaction);
-    }
-    return callback('Invalid transaction');
-}
-
 function resultManagerTriggerSmartContract(transaction, data, options, callback) {
     if (transaction.Error)
         return callback(transaction.Error);
@@ -1326,9 +1301,22 @@ export default class TransactionBuilder {
         }
     }
 
-    clearABI(contractAddress, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {        
+    clearABI(contractAddress, ownerAddress = this.tronWeb.defaultAddress.hex, options, callback = false) {     
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
+        if (utils.isFunction(ownerAddress)) {
+            callback = ownerAddress;
+            ownerAddress = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(ownerAddress)) {
+            options = ownerAddress;
+            ownerAddress = this.tronWeb.defaultAddress.hex;
+        }
+        
         if (!callback)
-            return this.injectPromise(this.clearABI, contractAddress, ownerAddress);
+            return this.injectPromise(this.clearABI, contractAddress, ownerAddress, options);
 
         if (!this.tronWeb.isAddress(contractAddress))
             return callback('Invalid contract address provided');
@@ -1345,7 +1333,7 @@ export default class TransactionBuilder {
             delete this.tronWeb.trx.cache.contracts[contractAddress]
         }
 
-        createTransaction(this.tronWeb, 'ClearABIContract', data)
+        createTransaction(this.tronWeb, 'ClearABIContract', data, options?.permissionId)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
 
@@ -1358,7 +1346,7 @@ export default class TransactionBuilder {
         }
 
         if (utils.isFunction(ownerAddress)) {
-            callback = address;
+            callback = ownerAddress;
             ownerAddress = this.tronWeb.defaultAddress.hex;
         } else if (utils.isObject(ownerAddress)) {
             options = ownerAddress;
@@ -2360,11 +2348,18 @@ export default class TransactionBuilder {
         return true
     }
 
-    updateAccountPermissions(ownerAddress = this.tronWeb.defaultAddress.hex,
-                             ownerPermissions = false,
-                             witnessPermissions = false,
-                             activesPermissions = false,
-                             callback = false) {
+    updateAccountPermissions(
+        ownerAddress = this.tronWeb.defaultAddress.hex,
+        ownerPermissions = false,
+        witnessPermissions = false,
+        activesPermissions = false,
+        options,
+        callback = false
+    ) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
 
         if (utils.isFunction(activesPermissions)) {
             callback = activesPermissions;
@@ -2382,7 +2377,7 @@ export default class TransactionBuilder {
         }
 
         if (!callback)
-            return this.injectPromise(this.updateAccountPermissions, ownerAddress, ownerPermissions, witnessPermissions, activesPermissions);
+            return this.injectPromise(this.updateAccountPermissions, ownerAddress, ownerPermissions, witnessPermissions, activesPermissions, options);
 
         if (!this.tronWeb.isAddress(ownerAddress))
             return callback('Invalid ownerAddress provided');
@@ -2418,7 +2413,7 @@ export default class TransactionBuilder {
             data.actives = activesPermissions.length === 1 ? activesPermissions[0] : activesPermissions
         }
 
-        createTransaction(this.tronWeb, 'AccountPermissionUpdateContract', data)
+        createTransaction(this.tronWeb, 'AccountPermissionUpdateContract', data, options?.permissionId)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
