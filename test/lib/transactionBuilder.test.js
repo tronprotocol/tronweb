@@ -563,17 +563,19 @@ describe('TronWeb.transactionBuilder', function () {
     describe('#setAccountId()', function () {
 
         it(`should set account id accounts[4]`, async function () {
+            const params = [
+                [TronWeb.toHex('abcabc110'), accounts.b58[4], {permissionId: 2}],
+                [TronWeb.toHex('testtest'), accounts.b58[4]],
+            ]
 
-            const ids = ['abcabc110', 'testtest', 'jackieshen110'];
-
-            for (let id of ids) {
-                let accountId = TronWeb.toHex(id);
-                const transaction = await tronWeb.transactionBuilder.setAccountId(accountId, accounts.b58[4]);
+            for (let param of params) {
+                const transaction = await tronWeb.transactionBuilder.setAccountId(...param);
                 const parameter = txPars(transaction);
                 assert.equal(transaction.txID.length, 64);
-                assert.equal(parameter.value.account_id, accountId.slice(2));
+                assert.equal(parameter.value.account_id, param[0].slice(2));
                 assert.equal(parameter.value.owner_address, accounts.hex[4]);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.SetAccountIdContract');
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[2] ? param[2]['permissionId'] : 0);
             }
 
         });
@@ -2200,8 +2202,25 @@ describe('TronWeb.transactionBuilder', function () {
 
     describe("#updateBrokerage", async function () {
 
+        before(async function () {
+            await broadcaster(tronWeb.transactionBuilder.sendTrx(accounts.b58[1], 10000e6), PRIVATE_KEY);
+            await broadcaster(tronWeb.transactionBuilder.applyForSR(accounts.b58[1], 'abc.tron.network'), accounts.pks[1])
+        })
+
         it('should update sr brokerage successfully', async function () {
-            // const transaction = await tronWeb.transactionBuilder.updateBrokerage(10, accounts.hex[1]);
+            const params = [
+                [10, accounts.hex[1], {permissionId: 2}],
+                [20, accounts.hex[1]],
+            ];
+            for (const param of params) {
+                const transaction = await tronWeb.transactionBuilder.updateBrokerage(...param);
+                const parameter = txPars(transaction);
+                assert.equal(transaction.txID.length, 64);
+                assert.equal(parameter.value.brokerage, param[0]);
+                assert.equal(parameter.value.owner_address, param[1]);
+                assert.equal(parameter.type_url, 'type.googleapis.com/protocol.UpdateBrokerageContract');
+                assert.equal(transaction.raw_data.contract[0].Permission_id, param[2]?.permissionId);
+            }
         });
 
         it('should throw invalid brokerage provided error', async function () {

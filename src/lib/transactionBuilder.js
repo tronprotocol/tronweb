@@ -1351,9 +1351,22 @@ export default class TransactionBuilder {
 
     }
 
-    updateBrokerage(brokerage, ownerAddress = this.tronWeb.defaultAddress.hex, callback = false) {
+    updateBrokerage(brokerage, ownerAddress = this.tronWeb.defaultAddress.hex, options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
+        if (utils.isFunction(ownerAddress)) {
+            callback = address;
+            ownerAddress = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(ownerAddress)) {
+            options = ownerAddress;
+            ownerAddress = this.tronWeb.defaultAddress.hex;
+        }
+
         if (!callback)
-            return this.injectPromise(this.updateBrokerage, brokerage, ownerAddress);
+            return this.injectPromise(this.updateBrokerage, brokerage, ownerAddress, options);
 
         if (!utils.isNotNullOrUndefined(brokerage))
             return callback('Invalid brokerage provided');
@@ -1369,7 +1382,7 @@ export default class TransactionBuilder {
             owner_address: toHex(ownerAddress)
         };
 
-        createTransaction(this.tronWeb, 'UpdateBrokerageContract', data)
+        createTransaction(this.tronWeb, 'UpdateBrokerageContract', data, options?.permissionId)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -1610,14 +1623,22 @@ export default class TransactionBuilder {
             .catch(err => callback(err));
     }
 
-    setAccountId(accountId, address = this.tronWeb.defaultAddress.hex, callback = false) {
+    setAccountId(accountId, address = this.tronWeb.defaultAddress.hex, options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (utils.isFunction(address)) {
             callback = address;
+            address = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(address)) {
+            options = address;
             address = this.tronWeb.defaultAddress.hex;
         }
 
         if (!callback) {
-            return this.injectPromise(this.setAccountId, accountId, address);
+            return this.injectPromise(this.setAccountId, accountId, address, options);
         }
 
         if (accountId && utils.isString(accountId) && accountId.startsWith('0x')) {
@@ -1650,7 +1671,7 @@ export default class TransactionBuilder {
             owner_address: toHex(address),
         }
 
-        createTransaction(this.tronWeb, 'SetAccountIdContract', data)
+        createTransaction(this.tronWeb, 'SetAccountIdContract', data, options?.permissionId)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
