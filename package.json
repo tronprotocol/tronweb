@@ -32,7 +32,7 @@
         "@tronweb3/google-protobuf": "^3.21.2",
         "axios": "^0.26.1",
         "bignumber.js": "^9.0.1",
-        "ethers": "^6.1.0",
+        "ethers": "^6.2.0",
         "eventemitter3": "^3.1.0",
         "events": "^3.3.0",
         "injectpromise": "^1.0.0",
