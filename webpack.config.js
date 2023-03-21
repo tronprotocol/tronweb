@@ -91,7 +91,7 @@ module.exports = [
                 }
             ]
         },
-        externals: [ externals({ allowlist: ['ethers'] }) ],
+        externals: [ externals({ allowlist: ['ethers', '@noble/hashes/ripemd160', '@noble/hashes/crypto', '@noble/hashes/scrypt', '@noble/hashes/sha3', '@noble/secp256k1'] }) ],
         target: 'node'
     },
     {
