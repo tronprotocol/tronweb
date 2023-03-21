@@ -2221,6 +2221,20 @@ describe('TronWeb.transactionBuilder', function () {
                 }
             }
         });
+
+        it('should throw Invalid contract address provided', async function () {
+            await assertThrow(
+                tronWeb.transactionBuilder.clearABI(null, accounts.hex[1]),
+                'Invalid contract address provided'
+            );
+        });
+
+        it('should throw Invalid owner address provided', async function () {
+            await assertThrow(
+                tronWeb.transactionBuilder.clearABI(transactions[0].contract_address, null),
+                'Invalid owner address provided'
+            );
+        });
     });
 
     describe("#updateBrokerage", async function () {
