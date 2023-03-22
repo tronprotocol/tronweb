@@ -108,9 +108,7 @@ export function genPriKey() {
     const priKey = secp.utils.randomPrivateKey();
     let priKeyHex = byteArray2hexStr(priKey);
 
-    while (priKeyHex.length < 64) {
-        priKeyHex = `0${priKeyHex}`;
-    }
+    priKeyHex = priKeyHex.padStart(64, '0');
 
     return hexStr2byteArray(priKeyHex);
 }

@@ -767,7 +767,7 @@ export default class Trx {
 
     static signString(message, privateKey, useTronHeader = true) {
         message = message.replace(/^0x/, '');
-        const value = '0x' + privateKey.replace(/^0x/, '');
+        const value = `0x${privateKey.replace(/^0x/, '')}`;
         const signingKey = new SigningKey(value);
         const messageBytes = [
             ...toUtf8Bytes(useTronHeader ? TRX_MESSAGE_HEADER : ETH_MESSAGE_HEADER),
