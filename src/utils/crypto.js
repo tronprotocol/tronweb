@@ -4,7 +4,7 @@ import {base64DecodeFromString, hexStr2byteArray} from './code';
 import {encode58, decode58} from './base58';
 import {byte2hexStr, byteArray2hexStr} from './bytes';
 import * as secp from '@noble/secp256k1';
-import {keccak256, sha256, SigningKey, computeHmac, concat} from './ethersUtils';
+import {keccak256, sha256, SigningKey} from './ethersUtils';
 import {TypedDataEncoder} from './typedData';
 
 function normalizePrivateKeyBytes(priKeyBytes) {
