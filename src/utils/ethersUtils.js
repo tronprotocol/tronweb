@@ -12,7 +12,6 @@ import {
     Mnemonic,
     Wordlist,
     wordlists,
-    computeHmac,
     Wallet as ethersWallet,
     HDNodeWallet as ethersHDNodeWallet,
     getBytes,
@@ -52,5 +51,4 @@ export {
     Wordlist,
     wordlists,
     isValidMnemonic,
-    computeHmac,
 };
