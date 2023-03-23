@@ -395,7 +395,8 @@ export class ParamType {
         }
         if (baseType === "tuple") {
             if (components == null) {
-                throw new Error("");
+                // throw new Error("");
+                components = Object.freeze([]);
             }
         }
         else if (components != null) {
