@@ -1,5 +1,4 @@
 import utils from 'utils';
-import {ADDRESS_PREFIX_REGEX} from 'utils/address';
 import {encodeParamsV2ByABI, decodeParamsV2ByABI} from 'utils/abi';
 import injectpromise from 'injectpromise';
 
@@ -11,7 +10,7 @@ const getFunctionSelector = abi => {
     if(abi.type === 'event') {
       return iface.getEvent(abi.name).format(utils.ethersUtils.FormatTypes.sighash);
     }
-    return iface.getFunction(abi.name).format(utils.ethersUtils.FormatTypes.sighash)
+    return iface.getFunction(abi.name).format(utils.ethersUtils.FormatTypes.sighash);
 }
 
 const decodeOutput = (abi, output) => {

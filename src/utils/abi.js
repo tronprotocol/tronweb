@@ -1,7 +1,8 @@
-import {AbiCoder, arrayify} from './ethersUtils';
+import { AbiCoder } from '@ethersproject/abi';
+import BigNumber from 'bignumber.js';
+import {arrayify} from './ethersUtils';
 import TronWeb from 'index';
 import {ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX} from 'utils/address';
-import BigNumber from 'bignumber.js';
 
 const abiCoder = new AbiCoder();
 
