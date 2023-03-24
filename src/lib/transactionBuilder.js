@@ -526,10 +526,6 @@ export default class TransactionBuilder {
             resource: resource
         }
 
-        if (options && options.permissionId) {
-            data.Permission_id = options.permissionId;
-        }
-
         createTransaction(this.tronWeb, 'UnfreezeBalanceV2Contract', data, options?.permissionId)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
