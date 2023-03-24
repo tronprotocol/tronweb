@@ -2420,7 +2420,7 @@ export default class TransactionBuilder {
             return this.injectPromise(this.newTxID, transaction);
 
         const contract = transaction.raw_data.contract[0];
-        const tx = await this.createTransaction(contract.type, contract.parameter.value, contract.Permission_id, {
+        const tx = await createTransaction(this.tronWeb, contract.type, contract.parameter.value, contract.Permission_id, {
             fee_limit: transaction.raw_data.fee_limit,
             data: transaction.raw_data.data,
             expiration: transaction.raw_data.expiration,
