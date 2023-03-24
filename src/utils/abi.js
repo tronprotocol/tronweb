@@ -1,6 +1,4 @@
 import { AbiCoder } from '@ethersproject/abi';
-import BigNumber from 'bignumber.js';
-import {arrayify} from './ethersUtils';
 import TronWeb from 'index';
 import {ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX} from 'utils/address';
 
@@ -19,14 +17,13 @@ function deepCopy(target) {
         Object.prototype.toString.call(target) !== '[object Object]' &&
         Object.prototype.toString.call(target) !== '[object Array]'
     ) {
-        if (typeof target === 'bigint') return BigNumber(target);
         return target;
     }
     const newTarget = _isArray(target) ? [] : {};
 
-    Object.keys(target).forEach(key => {
-      newTarget[key] = deepCopy(target[key])
-    });
+    Object.keys(target).forEach(key =>
+        newTarget[key] = target[key] instanceof Object && !target[key]._isBigNumber ? deepCopy(target[key]) : target[key]
+    );
 
     return newTarget;
 }
@@ -56,8 +53,6 @@ export function decodeParams(names, types, output, ignoreMethodHash) {
     return abiCoder.decode(types, output).reduce((obj, arg, index) => {
         if (types[index] == 'address')
             arg = ADDRESS_PREFIX + arg.substr(2).toLowerCase();
-        else if (typeof arg === 'bigint')
-            arg = BigNumber(arg);
 
         if (names.length)
             obj[names[index]] = arg;
@@ -222,18 +217,7 @@ export function decodeParamsV2ByABI(funABI, data) {
       return typeDef.type.replace(/trcToken/, 'uint256') + name;
 
     return typeDef.type + name;
-  };
-
-  const convertBytes = bytesArr => {
-    if (Array.isArray(bytesArr)) {
-      bytesArr.forEach((bytes, idx) => {
-        bytesArr[idx] = convertBytes(bytes);
-      });
-      return bytesArr;
-    } else {
-      return arrayify(bytesArr);
-    }
-  };
+  }
 
   const decodeResult = (outputs = [], result) => {
     if (outputs.length)
@@ -256,14 +240,6 @@ export function decodeParamsV2ByABI(funABI, data) {
             } else decodeResult(output.components, result[i]);
 
             if(name) result[name] = result[i];
-          }
-          else if (/^bytes\d*\[/.test(type)) {
-            convertBytes(result[i]);
-            if (name) result[name] = result[i];
-          }
-          else if (/^bytes\d*/.test(type)) {
-            result[i] = arrayify(result[i]);
-            if (name) result[name] = result[i];
           }
       });
   };

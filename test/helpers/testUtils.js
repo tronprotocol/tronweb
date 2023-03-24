@@ -1,8 +1,8 @@
 const TronWeb = require('../setup/TronWeb');
 const ethers = require('ethers');
-const BigNumber = require('bignumber.js');
+const { BigNumber } = require('@ethersproject/bignumber');
 
-const bnify = BigNumber;
+const bnify = BigNumber.from;
 
 const getValues = (object, named) => {
   if (Array.isArray(object)) {
@@ -15,8 +15,7 @@ const getValues = (object, named) => {
 
   switch (object.type) {
       case 'number':
-      case 'bigint':
-          return ethers.getBigInt(object.value);
+          return bnify(object.value);
 
       case 'boolean':
       case 'string':
@@ -51,8 +50,8 @@ const equals = (actual, expected) => {
       return true;
   }
 
-  if (['bigint', 'number'].includes(typeof(actual))) { actual = bnify(actual); }
-  if (['bigint', 'number'].includes(typeof(expected))) { expected = bnify(expected); }
+  if (typeof(actual) === 'number') { actual = bnify(actual); }
+  if (typeof(expected) === 'number') { expected = bnify(expected); }
 
   // BigNumber
   if (actual.eq) {
@@ -68,6 +67,9 @@ const equals = (actual, expected) => {
 
   // Uint8Array
   if (expected.buffer) {
+      if (!ethers.isHexString(actual)) { return false; }
+      actual = TronWeb.utils.ethersUtils.arrayify(actual);
+
       if (!actual.buffer || actual.length !== expected.length) { return false; }
       for (let i = 0; i < actual.length; i++) {
           if (actual[i] !== expected[i]) { return false; }
