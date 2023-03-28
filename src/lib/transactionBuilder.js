@@ -78,7 +78,7 @@ function createTransaction(tronWeb, type, value, Permission_id, options = {}) {
             };
             const pb = txJsonToPb(tx);
             tx.txID = txPbToTxID(pb).replace(/^0x/, '');
-            tx.raw_data_hex = txPbToRawDataHex(pb);
+            tx.raw_data_hex = txPbToRawDataHex(pb).toLowerCase();
             return tx;
         });
 }
