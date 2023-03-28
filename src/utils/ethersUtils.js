@@ -15,6 +15,7 @@ import {
     Wallet as ethersWallet,
     HDNodeWallet as ethersHDNodeWallet,
     getBytes,
+    computeHmac,
 } from 'ethers';
 
 import { Interface } from './interface.js';
@@ -29,6 +30,10 @@ const FormatTypes = {
     json: 'json',
 };
 const isValidMnemonic = Mnemonic.isValidMnemonic;
+
+computeHmac.register((algorithm, key, data) => {
+    return computeHmac._(algorithm, Buffer.from(key), Buffer.from(data));
+});
 
 export {
     keccak256,
