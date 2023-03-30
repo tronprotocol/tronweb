@@ -31,7 +31,7 @@
         "axios": "^0.26.1",
         "bignumber.js": "^9.0.1",
         "elliptic": "^6.5.4",
-        "ethers": "^5.4.4",
+        "ethers": "^5.7.2",
         "eventemitter3": "^3.1.0",
         "@tronweb3/google-protobuf": "^3.21.2",
         "injectpromise": "^1.0.0",
