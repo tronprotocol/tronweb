@@ -15,7 +15,7 @@ import SideChain from 'lib/sidechain';
 import { keccak256 } from 'utils/ethersUtils';
 import { ADDRESS_PREFIX, TRON_BIP39_PATH_INDEX_0 } from 'utils/address';
 
-const DEFAULT_VERSION = '3.5.0';
+const DEFAULT_VERSION = '4.7.1';
 
 const FEE_LIMIT = 150000000;
 
@@ -180,8 +180,6 @@ export default class TronWeb extends EventEmitter {
 
         this.fullNode = fullNode;
         this.fullNode.setStatusPage('wallet/getnowblock');
-
-        this.getFullnodeVersion();
     }
 
     setSolidityNode(solidityNode) {
