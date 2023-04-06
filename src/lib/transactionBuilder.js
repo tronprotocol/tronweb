@@ -340,7 +340,9 @@ export default class TransactionBuilder {
             owner_address: toHex(address),
             frozen_balance: parseInt(amount),
             frozen_duration: parseInt(duration),
-            resource: resource
+        };
+        if (resource !== 'BANDWIDTH') {
+            data.resource = resource;
         }
 
         if (utils.isNotNullOrUndefined(receiverAddress) && toHex(receiverAddress) !== toHex(address)) {
@@ -405,7 +407,9 @@ export default class TransactionBuilder {
 
         const data = {
             owner_address: toHex(address),
-            resource: resource
+        };
+        if (resource !== 'BANDWIDTH') {
+            data.resource = resource;
         }
 
         if (utils.isNotNullOrUndefined(receiverAddress) && toHex(receiverAddress) !== toHex(address)) {
@@ -466,7 +470,9 @@ export default class TransactionBuilder {
         const data = {
             owner_address: toHex(address),
             frozen_balance: parseInt(amount),
-            resource: resource
+        };
+        if (resource !== 'BANDWIDTH') {
+            data.resource = resource;
         }
 
         createTransaction(this.tronWeb, 'FreezeBalanceV2Contract', data, options?.permissionId)
@@ -522,8 +528,10 @@ export default class TransactionBuilder {
 
         const data = {
             owner_address: toHex(address),
-            unfreeze_balance: parseInt(amount), 
-            resource: resource
+            unfreeze_balance: parseInt(amount),
+        };
+        if (resource !== 'BANDWIDTH') {
+            data.resource = resource;
         }
 
         createTransaction(this.tronWeb, 'UnfreezeBalanceV2Contract', data, options?.permissionId)
@@ -603,8 +611,12 @@ export default class TransactionBuilder {
             owner_address: toHex(address),
             receiver_address: toHex(receiverAddress),
             balance: parseInt(amount),
-            resource: resource,
-            lock
+        };
+        if (resource !== 'BANDWIDTH') {
+            data.resource = resource;
+        }
+        if (lock) {
+            data.lock = lock;
         }
 
         createTransaction(this.tronWeb, 'DelegateResourceContract', data, options?.permissionId)
@@ -671,7 +683,9 @@ export default class TransactionBuilder {
             owner_address: toHex(address),
             receiver_address: toHex(receiverAddress),
             balance: parseInt(amount),
-            resource: resource
+        };
+        if (resource !== 'BANDWIDTH') {
+            data.resource = resource;
         }
 
         createTransaction(this.tronWeb, 'UnDelegateResourceContract', data, options?.permissionId)
