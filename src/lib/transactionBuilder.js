@@ -57,7 +57,7 @@ function getHeaderInfo(node) {
 }
 
 async function createTransaction(tronWeb, type, value, Permission_id, options = {}) {
-    const metaData = await getHeaderInfo(tronWeb.fullNode)
+    const metaData = await getHeaderInfo(tronWeb.fullNode);
     const tx = {
         visible: false,
         txID: '',
@@ -1498,10 +1498,10 @@ export default class TransactionBuilder {
             end_time: parseInt(saleEnd),
             free_asset_net_limit: parseInt(freeBandwidth),
             public_free_asset_net_limit: parseInt(freeBandwidthLimit),
-            frozen_supply: {
+            frozen_supply: [{
                 frozen_amount: parseInt(frozenAmount),
                 frozen_days: parseInt(frozenDuration)
-            }
+            }]
         };
         ['name', 'abbr', 'description', 'url'].forEach((key) => {
             if (!data[key]) {
