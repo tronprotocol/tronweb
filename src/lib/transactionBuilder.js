@@ -2400,12 +2400,22 @@ export default class TransactionBuilder {
             owner_address: ownerAddress
         }
         if (ownerPermissions) {
+            // for compatible with old way of building transaction from chain which type prop is omitted
+            if ('type' in ownerPermissions) {
+                delete ownerPermissions.type;
+            }
             data.owner = ownerPermissions
         }
         if (witnessPermissions) {
+            // for compatible with old way of building transaction from chain which type prop is Witness
+            witnessPermissions.type = 'Witness';
             data.witness = witnessPermissions
         }
         if (activesPermissions) {
+            // for compatible with old way of building transaction from chain which type prop is Active
+            activesPermissions.forEach((activePermissions) => {
+                activePermissions.type = 'Active';
+            });
             data.actives = activesPermissions.length === 1 ? activesPermissions[0] : activesPermissions
         }
 
