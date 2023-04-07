@@ -1296,10 +1296,18 @@ export default class TransactionBuilder {
             if (args.function_selector) {
                 args.data = keccak256(Buffer.from(args.function_selector, 'utf-8')).toString().substring(2, 10) + args.parameter;
             }
-            createTransaction(this.tronWeb, 'TriggerSmartContract', args, options.permissionId, {
-                fee_limit: parseInt(feeLimit),
-            })
-                .then(transaction => {
+            createTransaction(
+                this.tronWeb,
+                'TriggerSmartContract', 
+                {
+                    data: args.data,
+                    owner_address: args.owner_address,
+                    contract_address: args.contract_address,
+                },
+                options.permissionId,
+                {
+                    fee_limit: parseInt(feeLimit),
+                }).then(transaction => {
                     callback(null, {
                         result: {
                             result: true,
