@@ -1307,15 +1307,15 @@ export default class TransactionBuilder {
                 options.permissionId,
                 {
                     fee_limit: parseInt(feeLimit),
-                }).then(transaction => {
-                    callback(null, {
-                        result: {
-                            result: true,
-                        },
-                        transaction,
-                    })
+                }
+            ).then(transaction => {
+                callback(null, {
+                    result: {
+                        result: true,
+                    },
+                    transaction,
                 })
-                .catch(err => callback(err));
+            }).catch(err => callback(err));
         }
     }
 
