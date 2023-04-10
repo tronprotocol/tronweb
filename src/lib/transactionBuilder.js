@@ -20,6 +20,10 @@ function fromUtf8(value) {
     return self.tronWeb.fromUtf8(value).replace(/^0x/, '');
 }
 
+function deepCopyJson(json) {
+    return JSON.parse(JSON.stringify(json));
+}
+
 function resultManagerTriggerSmartContract(transaction, data, options, callback) {
     if (transaction.Error)
         return callback(transaction.Error);
@@ -2422,23 +2426,26 @@ export default class TransactionBuilder {
             owner_address: ownerAddress
         }
         if (ownerPermissions) {
+            const _ownerPermissions = deepCopyJson(ownerPermissions);
             // for compatible with old way of building transaction from chain which type prop is omitted
-            if ('type' in ownerPermissions) {
-                delete ownerPermissions.type;
+            if ('type' in _ownerPermissions) {
+                delete _ownerPermissions.type;
             }
-            data.owner = ownerPermissions;
+            data.owner = _ownerPermissions;
         }
         if (witnessPermissions) {
+            const _witnessPermissions = deepCopyJson(witnessPermissions);
             // for compatible with old way of building transaction from chain which type prop is Witness
-            witnessPermissions.type = 'Witness';
-            data.witness = witnessPermissions;
+            _witnessPermissions.type = 'Witness';
+            data.witness = _witnessPermissions;
         }
         if (activesPermissions) {
+            const _activesPermissions = deepCopyJson(activesPermissions);
             // for compatible with old way of building transaction from chain which type prop is Active
-            activesPermissions.forEach((activePermissions) => {
+            _activesPermissions.forEach((activePermissions) => {
                 activePermissions.type = 'Active';
             });
-            data.actives = activesPermissions;
+            data.actives = _activesPermissions;
         }
 
         createTransaction(this.tronWeb, 'AccountPermissionUpdateContract', data, options?.permissionId)
