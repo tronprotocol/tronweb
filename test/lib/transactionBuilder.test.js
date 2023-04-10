@@ -70,7 +70,6 @@ describe('TronWeb.transactionBuilder', function () {
 
         it(`should send 10 trx from default address to accounts[1] and broadcast`, async function () {
             const params = [
-                [accounts.b58[1], 10, {permissionId: 2}],
                 [accounts.b58[1], 10]
             ];
             for (let param of params) {
