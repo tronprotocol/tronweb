@@ -520,7 +520,8 @@ const buildClearABIContract = (value, options) => {
     return buildCommonTransaction(
         clearABIContract,
         Transaction.Contract.ContractType.CLEARABICONTRACT,
-        'ClearABIContract'
+        'ClearABIContract',
+        options.Permission_id
     );
 };
 
@@ -534,7 +535,8 @@ const buildUpdateBrokerageContract = (value, options) => {
     return buildCommonTransaction(
         updateBrokerageContract,
         Transaction.Contract.ContractType.UPDATEBROKERAGECONTRACT,
-        'UpdateBrokerageContract'
+        'UpdateBrokerageContract',
+        options.Permission_id
     );
 };
 
