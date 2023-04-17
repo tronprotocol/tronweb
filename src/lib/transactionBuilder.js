@@ -1105,7 +1105,7 @@ export default class TransactionBuilder {
                         payInfo: { abi }
                     }
                 }
-                callback(null, transaction)
+                callback(null, transaction);
             })
             .catch(err => callback(err));
     }
@@ -1321,8 +1321,7 @@ export default class TransactionBuilder {
                     fee_limit: parseInt(feeLimit),
                 }
             ).then(transaction => {
-                if(`${__MODE__}` === 'mTronWeb' && functionSelector) {
-                    console.log(functionSelector, process.env.mode)
+                if(pathInfo === 'triggersmartcontract' && `${__MODE__}` === 'mTronWeb' && functionSelector) {
                     transaction = {
                         ...transaction,
                         payInfo: { function_selector: functionSelector }
