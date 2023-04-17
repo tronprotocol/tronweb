@@ -1,5 +1,6 @@
 const path = require('path');
 const externals = require('webpack-node-externals');
+const webpack = require('webpack');
 
 const basePlugins = [
     '@babel/plugin-proposal-numeric-separator',
@@ -8,10 +9,21 @@ const basePlugins = [
     '@babel/plugin-proposal-object-rest-spread'
 ];
 
+const VARIABLES = {
+    __MODE__: JSON.stringify('mTronWeb')
+};
+
 const mode = process.env.NODE_ENV || 'production'
+
+const plugins= [];
+
+plugins.push(
+    new webpack.DefinePlugin(VARIABLES)
+);
 
 const baseConfig = {
     entry: path.resolve(__dirname, 'src', 'index.js'),
+    plugins: plugins,
     module: {
         rules: [
             {
