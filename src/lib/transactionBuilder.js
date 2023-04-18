@@ -1321,7 +1321,7 @@ export default class TransactionBuilder {
                     fee_limit: parseInt(feeLimit),
                 }
             ).then(transaction => {
-                if(pathInfo === 'triggersmartcontract' && `${__MODE__}` === 'mTronWeb' && functionSelector) {
+                if(`${__MODE__}` === 'mTronWeb' && functionSelector) {
                     transaction = {
                         ...transaction,
                         payInfo: { function_selector: functionSelector }
