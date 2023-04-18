@@ -1098,7 +1098,15 @@ export default class TransactionBuilder {
                 tx.contract_address = genContractAddress(args.owner_address, tx.txID);
                 return tx;
             })
-            .then(transaction => callback(null, transaction))
+            .then(transaction => {
+                if(`${__MODE__}` === 'mTronWeb' && abi) {
+                    transaction = {
+                        ...transaction,
+                        payInfo: { abi }
+                    }
+                }
+                callback(null, transaction);
+            })
             .catch(err => callback(err));
     }
 
@@ -1313,6 +1321,12 @@ export default class TransactionBuilder {
                     fee_limit: parseInt(feeLimit),
                 }
             ).then(transaction => {
+                if(`${__MODE__}` === 'mTronWeb' && functionSelector) {
+                    transaction = {
+                        ...transaction,
+                        payInfo: { function_selector: functionSelector }
+                    }
+                }
                 callback(null, {
                     result: {
                         result: true,
