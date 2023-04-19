@@ -1308,14 +1308,24 @@ export default class TransactionBuilder {
             if (args.function_selector) {
                 args.data = keccak256(Buffer.from(args.function_selector, 'utf-8')).toString().substring(2, 10) + args.parameter;
             }
+            const value = {
+                data: args.data,
+                owner_address: args.owner_address,
+                contract_address: args.contract_address,
+            };
+            if (args.call_value) {
+                value.call_value = args.call_value;
+            }
+            if (args.call_token_value) {
+                value.call_token_value = args.call_token_value;
+            }
+            if (args.token_id) {
+                value.token_id = args.token_id;
+            }
             createTransaction(
                 this.tronWeb,
                 'TriggerSmartContract', 
-                {
-                    data: args.data,
-                    owner_address: args.owner_address,
-                    contract_address: args.contract_address,
-                },
+                value,
                 options.permissionId,
                 {
                     fee_limit: parseInt(feeLimit),
