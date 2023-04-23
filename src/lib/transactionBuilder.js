@@ -2232,7 +2232,7 @@ export default class TransactionBuilder {
         const data = {
             owner_address: toHex(ownerAddress),
             exchange_id: parseInt(exchangeID),
-            token_id: this.tronWeb.fromAscii(tokenName),
+            token_id: this.tronWeb.fromAscii(tokenName).replace(/^0x/, ''),
             quant: parseInt(tokenAmountSold),
             expected: parseInt(tokenAmountExpected)
         };
