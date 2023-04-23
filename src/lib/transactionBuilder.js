@@ -2433,7 +2433,7 @@ export default class TransactionBuilder {
         }
 
         const data = {
-            owner_address: ownerAddress
+            owner_address: toHex(ownerAddress)
         }
         if (ownerPermissions) {
             const _ownerPermissions = deepCopyJson(ownerPermissions);
