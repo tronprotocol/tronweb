@@ -1098,15 +1098,7 @@ export default class TransactionBuilder {
                 tx.contract_address = genContractAddress(args.owner_address, tx.txID);
                 return tx;
             })
-            .then(transaction => {
-                if(`${__MODE__}` === 'mTronWeb' && abi) {
-                    transaction = {
-                        ...transaction,
-                        payInfo: { abi }
-                    }
-                }
-                callback(null, transaction);
-            })
+            .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
 
@@ -1331,18 +1323,12 @@ export default class TransactionBuilder {
                     fee_limit: parseInt(feeLimit),
                 }
             ).then(transaction => {
-                if(`${__MODE__}` === 'mTronWeb' && functionSelector) {
-                    transaction = {
-                        ...transaction,
-                        payInfo: { function_selector: functionSelector }
-                    }
-                }
                 callback(null, {
                     result: {
                         result: true,
                     },
                     transaction,
-                })
+                });
             }).catch(err => callback(err));
         }
     }
@@ -2246,7 +2232,7 @@ export default class TransactionBuilder {
         const data = {
             owner_address: toHex(ownerAddress),
             exchange_id: parseInt(exchangeID),
-            token_id: this.tronWeb.fromAscii(tokenName),
+            token_id: this.tronWeb.fromAscii(tokenName).replace(/^0x/, ''),
             quant: parseInt(tokenAmountSold),
             expected: parseInt(tokenAmountExpected)
         };

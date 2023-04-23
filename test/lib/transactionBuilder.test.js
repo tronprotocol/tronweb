@@ -2074,7 +2074,6 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(tx.raw_data.contract[0].parameter.value.new_contract.origin_energy_limit, 1e7);
                 assert.equal(tx.raw_data.fee_limit, 8e7);
                 assert.equal(tx.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
-                assert.isUndefined(tx.payInfo);
             }
         });
 
