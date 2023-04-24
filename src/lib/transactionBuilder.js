@@ -1687,7 +1687,7 @@ export default class TransactionBuilder {
             return;
 
         const data = {
-            account_id: accountId,
+            account_id: fromUtf8(accountId),
             owner_address: toHex(address),
         }
 
