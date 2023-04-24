@@ -1687,7 +1687,7 @@ export default class TransactionBuilder {
             return;
 
         const data = {
-            account_id: accountId,
+            account_id: fromUtf8(accountId),
             owner_address: toHex(address),
         }
 
@@ -2433,7 +2433,7 @@ export default class TransactionBuilder {
         }
 
         const data = {
-            owner_address: ownerAddress
+            owner_address: toHex(ownerAddress)
         }
         if (ownerPermissions) {
             const _ownerPermissions = deepCopyJson(ownerPermissions);
