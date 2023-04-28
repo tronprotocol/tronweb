@@ -1297,39 +1297,60 @@ export default class TransactionBuilder {
             pathInfo = `wallet${options.confirmed ? 'solidity' : ''}/${pathInfo}`;
             this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(pathInfo, args, 'post').then(transaction => resultManagerTriggerSmartContract(transaction, args, options, callback)).catch(err => callback(err));
         } else {
-            if (args.function_selector) {
-                args.data = keccak256(Buffer.from(args.function_selector, 'utf-8')).toString().substring(2, 10) + args.parameter;
-            }
-            const value = {
-                data: args.data,
-                owner_address: args.owner_address,
-                contract_address: args.contract_address,
-            };
-            if (args.call_value) {
-                value.call_value = args.call_value;
-            }
-            if (args.call_token_value) {
-                value.call_token_value = args.call_token_value;
-            }
-            if (args.token_id) {
-                value.token_id = args.token_id;
-            }
-            createTransaction(
-                this.tronWeb,
-                'TriggerSmartContract', 
-                value,
-                options.permissionId,
-                {
-                    fee_limit: parseInt(feeLimit),
-                }
-            ).then(transaction => {
-                callback(null, {
-                    result: {
-                        result: true,
-                    },
-                    transaction,
-                });
-            }).catch(err => callback(err));
+            this.tronWeb.trx.getContract(args.contract_address)
+                .then((contract) => {
+                    let abi = contract.abi;
+                    if (utils.isString(abi)) {
+                        abi = JSON.parse(abi);
+                    }
+                    abi = abi?.entrys || [];
+                    const functionName = args.function_selector.split('(')[0];
+                    const functionAbi = abi.find((functionAbi) => functionAbi.name === functionName);
+                    if (['view', 'pure'].includes(functionAbi?.stateMutability.toLowerCase())) {
+                        const pathInfo = `wallet${options.confirmed ? 'solidity' : ''}/triggerconstantcontract`;
+                        this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(pathInfo, args, 'post').then(transaction => resultManagerTriggerSmartContract(transaction, args, options, callback)).catch(err => callback(err));
+                        return true;
+                    }
+                    return false;
+                })
+                .then((hasProcessed) => {
+                    if (hasProcessed) return true;
+                    if (args.function_selector) {
+                        args.data = keccak256(Buffer.from(args.function_selector, 'utf-8')).toString().substring(2, 10) + args.parameter;
+                    }
+                    const value = {
+                        data: args.data,
+                        owner_address: args.owner_address,
+                        contract_address: args.contract_address,
+                    };
+                    if (args.call_value) {
+                        value.call_value = args.call_value;
+                    }
+                    if (args.call_token_value) {
+                        value.call_token_value = args.call_token_value;
+                    }
+                    if (args.token_id) {
+                        value.token_id = args.token_id;
+                    }
+                    createTransaction(
+                        this.tronWeb,
+                        'TriggerSmartContract', 
+                        value,
+                        options.permissionId,
+                        {
+                            fee_limit: parseInt(feeLimit),
+                        }
+                    ).then(transaction => {
+                        callback(null, {
+                            result: {
+                                result: true,
+                            },
+                            transaction,
+                        });
+                    }).catch(err => callback(err));
+                    return true;
+                })
+                .catch(err => callback(err));
         }
     }
 
