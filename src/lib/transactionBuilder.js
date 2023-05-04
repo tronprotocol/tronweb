@@ -1,6 +1,6 @@
 import TronWeb from 'index';
 import utils from 'utils';
-import {AbiCoder} from 'utils/ethersUtils';
+import {AbiCoder, Interface} from 'utils/ethersUtils';
 import Validator from 'paramValidator';
 import {ADDRESS_PREFIX_REGEX} from 'utils/address';
 import injectpromise from 'injectpromise';
@@ -1304,10 +1304,29 @@ export default class TransactionBuilder {
                         abi = JSON.parse(abi);
                     }
                     abi = abi?.entrys || [];
-                    const functionName = args.function_selector.split('(')[0];
-                    const functionAbi = abi.find((functionAbi) => functionAbi.name === functionName);
-                    if (['view', 'pure'].includes(functionAbi?.stateMutability.toLowerCase())) {
+                    const keccak256FunctionSelector = keccak256(Buffer.from(args.function_selector, 'utf-8')).toString().substring(2, 10);
+                    const targetFunctionAbi = abi.find((functionAbi) => {
+                        functionAbi.type = functionAbi.type && functionAbi.type.toLowerCase();
+                        if (functionAbi.type !== 'function') return false;
+
+                        functionAbi.stateMutability = functionAbi.stateMutability && functionAbi.stateMutability.toLowerCase();
+
+                        functionAbi.inputs = functionAbi.inputs || [];
+                        functionAbi.outputs = functionAbi.outputs || [];
+
+                        let iface;
+                        try {
+                            // If failed to build interface, assume it to be not found.
+                            iface = new Interface([functionAbi]);
+                        } catch {
+                            return false;
+                        }
+
+                        return iface.getSighash(iface.getFunction(functionAbi.name)).replace(/^0x/, '') === keccak256FunctionSelector;
+                    });
+                    if (['view', 'pure'].includes(targetFunctionAbi?.stateMutability?.toLowerCase())) {
                         const pathInfo = `wallet${options.confirmed ? 'solidity' : ''}/triggerconstantcontract`;
+                        options._isConstant = true;
                         this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(pathInfo, args, 'post').then(transaction => resultManagerTriggerSmartContract(transaction, args, options, callback)).catch(err => callback(err));
                         return true;
                     }
