@@ -24,6 +24,31 @@ function deepCopyJson(json) {
     return JSON.parse(JSON.stringify(json));
 }
 
+function resultManager(transaction, data, options, callback) {
+    if (typeof options === 'function') {
+        callback = options;
+    }
+
+    if (typeof data === 'function') {
+        callback = data;
+        data = null;
+    }
+
+    if (transaction.Error)
+        return callback(transaction.Error);
+
+    if (transaction.result && transaction.result.message) {
+        return callback(
+            self.tronWeb.toUtf8(transaction.result.message)
+        );
+    }
+    const authResult = txCheckWithArgs(transaction, data, options);
+    if(authResult) {
+        return callback(null, transaction);
+    }
+    return callback('Invalid transaction');
+}
+
 function resultManagerTriggerSmartContract(transaction, data, options, callback) {
     if (transaction.Error)
         return callback(transaction.Error);
@@ -2468,20 +2493,50 @@ export default class TransactionBuilder {
             .catch(err => callback(err));
     }
 
-    async newTxID(transaction, callback) {
+    async newTxID(transaction, options, callback) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
 
         if (!callback)
-            return this.injectPromise(this.newTxID, transaction);
+            return this.injectPromise(this.newTxID, transaction, options);
 
-        const contract = transaction.raw_data.contract[0];
-        const tx = await createTransaction(this.tronWeb, contract.type, contract.parameter.value, contract.Permission_id, {
-            fee_limit: transaction.raw_data.fee_limit,
-            data: transaction.raw_data.data,
-            expiration: transaction.raw_data.expiration,
-        }).catch(err => callback('Error generating a new transaction id.'));
-        tx.signature = transaction.signature;
-        tx.visible = transaction.visible;
-        callback(null, tx);
+        if (options?.txLocal) {
+            const contract = transaction.raw_data.contract[0];
+            createTransaction(this.tronWeb, contract.type, contract.parameter.value, contract.Permission_id, {
+                fee_limit: transaction.raw_data.fee_limit,
+                data: transaction.raw_data.data,
+                expiration: transaction.raw_data.expiration,
+            }).then((tx) => {
+                tx.signature = transaction.signature;
+                tx.visible = transaction.visible;
+                callback(null, tx);
+            }).catch((err) => callback('Error generating a new transaction id.'));
+            return;
+        }
+        
+        this.tronWeb.fullNode
+            .request(
+                'wallet/getsignweight',
+                transaction,
+                'post'
+            )
+            .then(newTransaction => {
+                if (typeof transaction.visible === 'boolean') {
+                    newTransaction.transaction.transaction.visible = transaction.visible
+                }
+                return resultManager(
+                    newTransaction.transaction.transaction,
+                    {
+                        ...transaction.raw_data.contract[0].parameter.value,
+                        Permission_id: transaction.raw_data.contract[0].Permission_id,
+                    },
+                    { data: transaction.raw_data.data, fee_limit: transaction.raw_data.fee_limit },
+                    callback
+                );
+            })
+            .catch(err => callback('Error generating a new transaction id.'));
     }
 
     async alterTransaction(transaction, options = {}, callback = false) {
