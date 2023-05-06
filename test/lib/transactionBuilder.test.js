@@ -2131,6 +2131,7 @@ describe('TronWeb.transactionBuilder', function () {
     describe("#triggerConstantContract", async function () {
 
         let transaction;
+        let contractAddress;
         before(async function () {
             this.timeout(20000);
 
@@ -2148,12 +2149,12 @@ describe('TronWeb.transactionBuilder', function () {
                     break;
                 }
             }
+            contractAddress = transaction.contract_address;
         })
 
         it('should trigger constant contract successfully', async function () {
             this.timeout(20000);
 
-            const contractAddress = transaction.contract_address;
             const issuerAddress = accounts.hex[6];
             const functionSelector = 'testPure(uint256,uint256)';
             const parameter = [
@@ -2165,6 +2166,30 @@ describe('TronWeb.transactionBuilder', function () {
             for (let i = 0; i < 2; i++) {
                 if (i === 1) options.permissionId = 2;
                 transaction = await tronWeb.transactionBuilder.triggerConstantContract(contractAddress, functionSelector, options,
+                    parameter, issuerAddress);
+                assert.isTrue(transaction.result.result &&
+                    transaction.transaction.raw_data.contract[0].parameter.type_url === 'type.googleapis.com/protocol.TriggerSmartContract');
+                assert.equal(transaction.constant_result, '0000000000000000000000000000000000000000000000000000000000000004');
+                transaction = await broadcaster(null, accounts.pks[6], transaction.transaction);
+                assert.isTrue(transaction.receipt.result)
+                assert.equal(transaction.transaction.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
+            }
+        });
+
+        it('should trigger constant contract with triggerSmartContract successfully', async function () {
+            this.timeout(20000);
+
+            const issuerAddress = accounts.hex[6];
+            const functionSelector = 'testPure(uint256,uint256)';
+            const parameter = [
+                {type: 'uint256', value: 1},
+                {type: 'uint256', value: 2}
+            ]
+            const options = {};
+
+            for (let i = 0; i < 2; i++) {
+                if (i === 1) options.permissionId = 2;
+                transaction = await tronWeb.transactionBuilder.triggerSmartContract(contractAddress, functionSelector, options,
                     parameter, issuerAddress);
                 assert.isTrue(transaction.result.result &&
                     transaction.transaction.raw_data.contract[0].parameter.type_url === 'type.googleapis.com/protocol.TriggerSmartContract');
@@ -2875,10 +2900,14 @@ describe('TronWeb.transactionBuilder', function () {
 
     describe("#triggerSmartContractWithRawParam", async function () {
 
-        it('should create or trigger a smart contract with rawParameter', async function () {
-            const issuerAddress = accounts.hex[0];
-            const issuerPk = accounts.pks[0];
-            const transaction = await tronWeb.transactionBuilder.createSmartContract(
+        let transaction;
+        let issuerAddress;
+        let issuerPk;
+
+        before(async () => {
+            issuerAddress = accounts.hex[0];
+            issuerPk = accounts.pks[0];
+            transaction = await tronWeb.transactionBuilder.createSmartContract(
                 {
                     abi: rawParam.abi,
                     bytecode: rawParam.bytecode,
@@ -2899,7 +2928,9 @@ describe('TronWeb.transactionBuilder', function () {
                     break;
                 }
             }
+        })
 
+        it('should trigger a smart contract with rawParameter', async function () {
             const deployed = await tronWeb
                 .contract()
                 .at(transaction.contract_address);
@@ -2920,6 +2951,28 @@ describe('TronWeb.transactionBuilder', function () {
 
             check = await deployed.check().call();
             assert.equal(check, 2);
+        });
+
+        it('should trigger a smart contract locally with rawParameter', async function () {
+            const deployed = await tronWeb
+                .contract()
+                .at(transaction.contract_address);
+
+            const setTransaction = await tronWeb.transactionBuilder.triggerSmartContract(
+                transaction.contract_address,
+                "setCheck(uint256)",
+                {
+                    rawParameter:
+                        "0x0000000000000000000000000000000000000000000000000000000000000003",
+                    txLocal: true,
+                },
+                [],
+                issuerAddress
+            );
+            await broadcaster(null, issuerPk, setTransaction.transaction);
+
+            check = await deployed.check().call();
+            assert.equal(check, 3);
         });
     });
 
@@ -2990,6 +3043,24 @@ describe('TronWeb.transactionBuilder', function () {
 
           check = await deployed.check().call();
           assert.ok(check.eq(16));
+
+          const setTransaction2 = await tronWeb.transactionBuilder.triggerSmartContract(
+            transaction.contract_address,
+            "setCheck(uint256)",
+            {
+                funcABIV2: funcABIV2.abi[2],
+                parametersV2: [
+                  15
+                ],
+                txLocal: true,
+            },
+            [],
+            issuerAddress
+        );
+        await broadcaster(null, issuerPk, setTransaction2.transaction);
+
+        check = await deployed.check().call();
+        assert.ok(check.eq(15));
       });
   });
 

@@ -1126,6 +1126,7 @@ export default class TransactionBuilder {
 
     estimateEnergy(...params) {
         params[2].estimateEnergy = true;
+        params[2].txLocal = false;
         return this.triggerSmartContract(...params);
     }
 
@@ -1282,18 +1283,22 @@ export default class TransactionBuilder {
         if (utils.isNotNullOrUndefined(tokenId))
             args.token_id = parseInt(tokenId)
 
+        if (!(options._isConstant || options.estimateEnergy)) {
+            args.fee_limit = parseInt(feeLimit)
+        }
+
         if (options.permissionId) {
             args.Permission_id = options.permissionId;
         }
 
-        let pathInfo = 'triggersmartcontract';
-        if(options._isConstant) {
-            pathInfo = 'triggerconstantcontract';
-        } else if (options.estimateEnergy) {
-            pathInfo = 'estimateenergy';
-        }
+        if (!options.txLocal) {
+            let pathInfo = 'triggersmartcontract';
+            if(options._isConstant) {
+                pathInfo = 'triggerconstantcontract';
+            } else if (options.estimateEnergy) {
+                pathInfo = 'estimateenergy';
+            }
 
-        if (pathInfo !== 'triggersmartcontract') {
             pathInfo = `wallet${options.confirmed ? 'solidity' : ''}/${pathInfo}`;
             this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(pathInfo, args, 'post').then(transaction => resultManagerTriggerSmartContract(transaction, args, options, callback)).catch(err => callback(err));
         } else {
@@ -1320,7 +1325,7 @@ export default class TransactionBuilder {
                 value,
                 options.permissionId,
                 {
-                    fee_limit: parseInt(feeLimit),
+                    fee_limit: args.fee_limit,
                 }
             ).then(transaction => {
                 callback(null, {
