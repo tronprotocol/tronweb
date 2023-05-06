@@ -1,6 +1,6 @@
 import TronWeb from 'index';
 import utils from 'utils';
-import {AbiCoder, Interface} from 'utils/ethersUtils';
+import {AbiCoder} from 'utils/ethersUtils';
 import Validator from 'paramValidator';
 import {ADDRESS_PREFIX_REGEX} from 'utils/address';
 import injectpromise from 'injectpromise';
@@ -1126,6 +1126,7 @@ export default class TransactionBuilder {
 
     estimateEnergy(...params) {
         params[2].estimateEnergy = true;
+        params[2].txLocal = false;
         return this.triggerSmartContract(...params);
     }
 
@@ -1282,94 +1283,58 @@ export default class TransactionBuilder {
         if (utils.isNotNullOrUndefined(tokenId))
             args.token_id = parseInt(tokenId)
 
+        if (!(options._isConstant || options.estimateEnergy)) {
+            args.fee_limit = parseInt(feeLimit)
+        }
+
         if (options.permissionId) {
             args.Permission_id = options.permissionId;
         }
 
-        let pathInfo = 'triggersmartcontract';
-        if(options._isConstant) {
-            pathInfo = 'triggerconstantcontract';
-        } else if (options.estimateEnergy) {
-            pathInfo = 'estimateenergy';
-        }
+        if (!options.txLocal) {
+            let pathInfo = 'triggersmartcontract';
+            if(options._isConstant) {
+                pathInfo = 'triggerconstantcontract';
+            } else if (options.estimateEnergy) {
+                pathInfo = 'estimateenergy';
+            }
 
-        if (pathInfo !== 'triggersmartcontract') {
             pathInfo = `wallet${options.confirmed ? 'solidity' : ''}/${pathInfo}`;
             this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(pathInfo, args, 'post').then(transaction => resultManagerTriggerSmartContract(transaction, args, options, callback)).catch(err => callback(err));
         } else {
-            this.tronWeb.trx.getContract(args.contract_address)
-                .then((contract) => {
-                    let abi = contract.abi;
-                    if (utils.isString(abi)) {
-                        abi = JSON.parse(abi);
-                    }
-                    abi = abi?.entrys || [];
-                    const keccak256FunctionSelector = keccak256(Buffer.from(args.function_selector, 'utf-8')).toString().substring(2, 10);
-                    const targetFunctionAbi = abi.find((functionAbi) => {
-                        functionAbi.type = functionAbi.type && functionAbi.type.toLowerCase();
-                        if (functionAbi.type !== 'function') return false;
-
-                        functionAbi.stateMutability = functionAbi.stateMutability && functionAbi.stateMutability.toLowerCase();
-
-                        functionAbi.inputs = functionAbi.inputs || [];
-                        functionAbi.outputs = functionAbi.outputs || [];
-
-                        let iface;
-                        try {
-                            // If failed to build interface, assume it to be not found.
-                            iface = new Interface([functionAbi]);
-                        } catch {
-                            return false;
-                        }
-
-                        return iface.getSighash(iface.getFunction(functionAbi.name)).replace(/^0x/, '') === keccak256FunctionSelector;
-                    });
-                    if (['view', 'pure'].includes(targetFunctionAbi?.stateMutability?.toLowerCase())) {
-                        const pathInfo = `wallet${options.confirmed ? 'solidity' : ''}/triggerconstantcontract`;
-                        options._isConstant = true;
-                        this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(pathInfo, args, 'post').then(transaction => resultManagerTriggerSmartContract(transaction, args, options, callback)).catch(err => callback(err));
-                        return true;
-                    }
-                    return false;
-                })
-                .then((hasProcessed) => {
-                    if (hasProcessed) return true;
-                    if (args.function_selector) {
-                        args.data = keccak256(Buffer.from(args.function_selector, 'utf-8')).toString().substring(2, 10) + args.parameter;
-                    }
-                    const value = {
-                        data: args.data,
-                        owner_address: args.owner_address,
-                        contract_address: args.contract_address,
-                    };
-                    if (args.call_value) {
-                        value.call_value = args.call_value;
-                    }
-                    if (args.call_token_value) {
-                        value.call_token_value = args.call_token_value;
-                    }
-                    if (args.token_id) {
-                        value.token_id = args.token_id;
-                    }
-                    createTransaction(
-                        this.tronWeb,
-                        'TriggerSmartContract', 
-                        value,
-                        options.permissionId,
-                        {
-                            fee_limit: parseInt(feeLimit),
-                        }
-                    ).then(transaction => {
-                        callback(null, {
-                            result: {
-                                result: true,
-                            },
-                            transaction,
-                        });
-                    }).catch(err => callback(err));
-                    return true;
-                })
-                .catch(err => callback(err));
+            if (args.function_selector) {
+                args.data = keccak256(Buffer.from(args.function_selector, 'utf-8')).toString().substring(2, 10) + args.parameter;
+            }
+            const value = {
+                data: args.data,
+                owner_address: args.owner_address,
+                contract_address: args.contract_address,
+            };
+            if (args.call_value) {
+                value.call_value = args.call_value;
+            }
+            if (args.call_token_value) {
+                value.call_token_value = args.call_token_value;
+            }
+            if (args.token_id) {
+                value.token_id = args.token_id;
+            }
+            createTransaction(
+                this.tronWeb,
+                'TriggerSmartContract', 
+                value,
+                options.permissionId,
+                {
+                    fee_limit: args.fee_limit,
+                }
+            ).then(transaction => {
+                callback(null, {
+                    result: {
+                        result: true,
+                    },
+                    transaction,
+                });
+            }).catch(err => callback(err));
         }
     }
 

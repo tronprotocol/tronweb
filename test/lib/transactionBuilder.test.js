@@ -2900,10 +2900,14 @@ describe('TronWeb.transactionBuilder', function () {
 
     describe("#triggerSmartContractWithRawParam", async function () {
 
-        it('should create or trigger a smart contract with rawParameter', async function () {
-            const issuerAddress = accounts.hex[0];
-            const issuerPk = accounts.pks[0];
-            const transaction = await tronWeb.transactionBuilder.createSmartContract(
+        let transaction;
+        let issuerAddress;
+        let issuerPk;
+
+        before(async () => {
+            issuerAddress = accounts.hex[0];
+            issuerPk = accounts.pks[0];
+            transaction = await tronWeb.transactionBuilder.createSmartContract(
                 {
                     abi: rawParam.abi,
                     bytecode: rawParam.bytecode,
@@ -2924,7 +2928,9 @@ describe('TronWeb.transactionBuilder', function () {
                     break;
                 }
             }
+        })
 
+        it('should trigger a smart contract with rawParameter', async function () {
             const deployed = await tronWeb
                 .contract()
                 .at(transaction.contract_address);
@@ -2945,6 +2951,28 @@ describe('TronWeb.transactionBuilder', function () {
 
             check = await deployed.check().call();
             assert.equal(check, 2);
+        });
+
+        it('should trigger a smart contract locally with rawParameter', async function () {
+            const deployed = await tronWeb
+                .contract()
+                .at(transaction.contract_address);
+
+            const setTransaction = await tronWeb.transactionBuilder.triggerSmartContract(
+                transaction.contract_address,
+                "setCheck(uint256)",
+                {
+                    rawParameter:
+                        "0x0000000000000000000000000000000000000000000000000000000000000003",
+                    txLocal: true,
+                },
+                [],
+                issuerAddress
+            );
+            await broadcaster(null, issuerPk, setTransaction.transaction);
+
+            check = await deployed.check().call();
+            assert.equal(check, 3);
         });
     });
 
@@ -3015,6 +3043,24 @@ describe('TronWeb.transactionBuilder', function () {
 
           check = await deployed.check().call();
           assert.ok(check.eq(16));
+
+          const setTransaction2 = await tronWeb.transactionBuilder.triggerSmartContract(
+            transaction.contract_address,
+            "setCheck(uint256)",
+            {
+                funcABIV2: funcABIV2.abi[2],
+                parametersV2: [
+                  15
+                ],
+                txLocal: true,
+            },
+            [],
+            issuerAddress
+        );
+        await broadcaster(null, issuerPk, setTransaction2.transaction);
+
+        check = await deployed.check().call();
+        assert.ok(check.eq(15));
       });
   });
 
