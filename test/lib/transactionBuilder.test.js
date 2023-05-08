@@ -2823,6 +2823,26 @@ describe('TronWeb.transactionBuilder', function () {
 
     describe("Alter existent transactions", async function () {
 
+        describe('#newTxID', async function () {
+            it('should keep txID unchanged when txLocal is true', async function () {
+                const receiver = accounts.b58[42]
+                const sender = accounts.hex[43]
+                const transaction = await tronWeb.transactionBuilder.sendTrx(receiver, 10, sender);
+                const previousId = transaction.txID;
+                const transactionLater = await tronWeb.transactionBuilder.newTxID(transaction, { txLocal: true });
+                assert.equal(previousId, transactionLater.txID);
+            })
+
+            it('should keep txID unchanged when txLocal is unset', async function () {
+                const receiver = accounts.b58[42]
+                const sender = accounts.hex[43]
+                const transaction = await tronWeb.transactionBuilder.sendTrx(receiver, 10, sender);
+                const previousId = transaction.txID;
+                const transactionLater = await tronWeb.transactionBuilder.newTxID(transaction);
+                assert.equal(previousId, transactionLater.txID);
+            })
+        })
+
         describe("#extendExpiration", async function () {
 
             it('should extend the expiration', async function () {
@@ -2835,6 +2855,23 @@ describe('TronWeb.transactionBuilder', function () {
                 let transaction = await tronWeb.transactionBuilder.sendTrx(receiver, 10, sender);
                 const previousId = transaction.txID;
                 transaction = await tronWeb.transactionBuilder.extendExpiration(transaction, 3600);
+                await broadcaster(null, privateKey, transaction);
+
+                assert.notEqual(transaction.txID, previousId)
+                assert.equal(balance - await tronWeb.trx.getUnconfirmedBalance(sender), 10);
+
+            });
+
+            it('should extend the expiration when txLocal is ture', async function () {
+                await wait(3);
+                const receiver = accounts.b58[42]
+                const sender = accounts.hex[43]
+                const privateKey = accounts.pks[43]
+                const balance = await tronWeb.trx.getUnconfirmedBalance(sender);
+
+                let transaction = await tronWeb.transactionBuilder.sendTrx(receiver, 10, sender);
+                const previousId = transaction.txID;
+                transaction = await tronWeb.transactionBuilder.extendExpiration(transaction, 3600, { txLocal: true });
                 await broadcaster(null, privateKey, transaction);
 
                 assert.notEqual(transaction.txID, previousId)
@@ -2867,6 +2904,27 @@ describe('TronWeb.transactionBuilder', function () {
 
             });
 
+            it('should add a data field when txLocal is true', async function () {
+
+                this.timeout(20000)
+                await wait(3);
+                const receiver = accounts.b58[44]
+                const sender = accounts.hex[45]
+                const privateKey = accounts.pks[45]
+                const balance = await tronWeb.trx.getUnconfirmedBalance(sender);
+
+                let transaction = await tronWeb.transactionBuilder.sendTrx(receiver, 10, sender);
+                const data = "Sending money to Bill.";
+                transaction = await tronWeb.transactionBuilder.addUpdateData(transaction, data, {txLocal: true});
+                const id = transaction.txID;
+                await broadcaster(null, privateKey, transaction);
+                await waitChainData('tx', id);
+                assert.equal(balance - await tronWeb.trx.getUnconfirmedBalance(sender), 10 + 1e6); // change chain data at a cost of 1e6
+                const unconfirmedTx = await tronWeb.trx.getTransaction(id)
+                assert.equal(tronWeb.toUtf8(unconfirmedTx.raw_data.data), data);
+
+            });
+
         });
 
         describe("#alterTransaction", async function () {
@@ -2886,6 +2944,26 @@ describe('TronWeb.transactionBuilder', function () {
                 const previousId = transaction.txID;
                 const data = "Sending money to Bill.";
                 transaction = await tronWeb.transactionBuilder.alterTransaction(transaction, {data});
+                const id = transaction.txID;
+                assert.notEqual(id, previousId)
+                await broadcaster(null, privateKey, transaction);
+                await waitChainData('tx', id);
+                const unconfirmedTx = await tronWeb.trx.getTransaction(id)
+                assert.equal(tronWeb.toUtf8(unconfirmedTx.raw_data.data), data);
+
+            });
+
+            it('should alter the transaction adding a data field when txLocal is true', async function () {
+
+                const receiver = accounts.b58[40]
+                const sender = accounts.hex[41]
+                const privateKey = accounts.pks[41]
+                // const balance = await tronWeb.trx.getUnconfirmedBalance(sender);
+
+                let transaction = await tronWeb.transactionBuilder.sendTrx(receiver, 10, sender);
+                const previousId = transaction.txID;
+                const data = "Sending money to Bill.";
+                transaction = await tronWeb.transactionBuilder.alterTransaction(transaction, {data, txLocal: true});
                 const id = transaction.txID;
                 assert.notEqual(id, previousId)
                 await broadcaster(null, privateKey, transaction);

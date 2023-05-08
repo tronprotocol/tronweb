@@ -2507,7 +2507,10 @@ export default class TransactionBuilder {
             createTransaction(this.tronWeb, contract.type, contract.parameter.value, contract.Permission_id, {
                 fee_limit: transaction.raw_data.fee_limit,
                 data: transaction.raw_data.data,
+                ref_block_bytes: transaction.raw_data.ref_block_bytes,
+                ref_block_hash: transaction.raw_data.ref_block_hash,
                 expiration: transaction.raw_data.expiration,
+                timestamp: transaction.raw_data.timestamp,
             }).then((tx) => {
                 tx.signature = transaction.signature;
                 tx.visible = transaction.visible;
@@ -2562,27 +2565,39 @@ export default class TransactionBuilder {
             transaction.raw_data.expiration += options.extension;
         }
 
-        this.newTxID(transaction, callback)
+        this.newTxID(transaction, { txLocal: options.txLocal }, callback)
     }
 
-    async extendExpiration(transaction, extension, callback = false) {
+    async extendExpiration(transaction, extension, options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (!callback)
-            return this.injectPromise(this.extendExpiration, transaction, extension);
+            return this.injectPromise(this.extendExpiration, transaction, extension, options);
 
-        this.alterTransaction(transaction, {extension}, callback);
+        this.alterTransaction(transaction, {extension, txLocal: options?.txLocal}, callback);
     }
 
-    async addUpdateData(transaction, data, dataFormat = 'utf8', callback = false) {
+    async addUpdateData(transaction, data, dataFormat = 'utf8', options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
 
         if (utils.isFunction(dataFormat)) {
             callback = dataFormat;
             dataFormat = 'utf8';
+        } else if (utils.isObject(dataFormat)) {
+            options = dataFormat;
+            dataFormat = 'utf8';
         }
 
         if (!callback)
-            return this.injectPromise(this.addUpdateData, transaction, data, dataFormat);
+            return this.injectPromise(this.addUpdateData, transaction, data, dataFormat, options);
 
-        this.alterTransaction(transaction, {data, dataFormat}, callback);
+        this.alterTransaction(transaction, {data, dataFormat, txLocal: options?.txLocal}, callback);
     }
 
 }
