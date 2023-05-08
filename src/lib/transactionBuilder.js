@@ -24,6 +24,31 @@ function deepCopyJson(json) {
     return JSON.parse(JSON.stringify(json));
 }
 
+function resultManager(transaction, data, options, callback) {
+    if (typeof options === 'function') {
+        callback = options;
+    }
+
+    if (typeof data === 'function') {
+        callback = data;
+        data = null;
+    }
+
+    if (transaction.Error)
+        return callback(transaction.Error);
+
+    if (transaction.result && transaction.result.message) {
+        return callback(
+            self.tronWeb.toUtf8(transaction.result.message)
+        );
+    }
+    const authResult = txCheckWithArgs(transaction, data, options);
+    if(authResult) {
+        return callback(null, transaction);
+    }
+    return callback('Invalid transaction');
+}
+
 function resultManagerTriggerSmartContract(transaction, data, options, callback) {
     if (transaction.Error)
         return callback(transaction.Error);
@@ -2468,20 +2493,53 @@ export default class TransactionBuilder {
             .catch(err => callback(err));
     }
 
-    async newTxID(transaction, callback) {
+    async newTxID(transaction, options, callback) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
 
         if (!callback)
-            return this.injectPromise(this.newTxID, transaction);
+            return this.injectPromise(this.newTxID, transaction, options);
 
-        const contract = transaction.raw_data.contract[0];
-        const tx = await createTransaction(this.tronWeb, contract.type, contract.parameter.value, contract.Permission_id, {
-            fee_limit: transaction.raw_data.fee_limit,
-            data: transaction.raw_data.data,
-            expiration: transaction.raw_data.expiration,
-        }).catch(err => callback('Error generating a new transaction id.'));
-        tx.signature = transaction.signature;
-        tx.visible = transaction.visible;
-        callback(null, tx);
+        if (options?.txLocal) {
+            const contract = transaction.raw_data.contract[0];
+            createTransaction(this.tronWeb, contract.type, contract.parameter.value, contract.Permission_id, {
+                fee_limit: transaction.raw_data.fee_limit,
+                data: transaction.raw_data.data,
+                ref_block_bytes: transaction.raw_data.ref_block_bytes,
+                ref_block_hash: transaction.raw_data.ref_block_hash,
+                expiration: transaction.raw_data.expiration,
+                timestamp: transaction.raw_data.timestamp,
+            }).then((tx) => {
+                tx.signature = transaction.signature;
+                tx.visible = transaction.visible;
+                callback(null, tx);
+            }).catch((err) => callback('Error generating a new transaction id.'));
+            return;
+        }
+        
+        this.tronWeb.fullNode
+            .request(
+                'wallet/getsignweight',
+                transaction,
+                'post'
+            )
+            .then(newTransaction => {
+                if (typeof transaction.visible === 'boolean') {
+                    newTransaction.transaction.transaction.visible = transaction.visible
+                }
+                return resultManager(
+                    newTransaction.transaction.transaction,
+                    {
+                        ...transaction.raw_data.contract[0].parameter.value,
+                        Permission_id: transaction.raw_data.contract[0].Permission_id,
+                    },
+                    { data: transaction.raw_data.data, fee_limit: transaction.raw_data.fee_limit },
+                    callback
+                );
+            })
+            .catch(err => callback('Error generating a new transaction id.'));
     }
 
     async alterTransaction(transaction, options = {}, callback = false) {
@@ -2507,27 +2565,39 @@ export default class TransactionBuilder {
             transaction.raw_data.expiration += options.extension;
         }
 
-        this.newTxID(transaction, callback)
+        this.newTxID(transaction, { txLocal: options.txLocal }, callback)
     }
 
-    async extendExpiration(transaction, extension, callback = false) {
+    async extendExpiration(transaction, extension, options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
         if (!callback)
-            return this.injectPromise(this.extendExpiration, transaction, extension);
+            return this.injectPromise(this.extendExpiration, transaction, extension, options);
 
-        this.alterTransaction(transaction, {extension}, callback);
+        this.alterTransaction(transaction, {extension, txLocal: options?.txLocal}, callback);
     }
 
-    async addUpdateData(transaction, data, dataFormat = 'utf8', callback = false) {
+    async addUpdateData(transaction, data, dataFormat = 'utf8', options, callback = false) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
 
         if (utils.isFunction(dataFormat)) {
             callback = dataFormat;
             dataFormat = 'utf8';
+        } else if (utils.isObject(dataFormat)) {
+            options = dataFormat;
+            dataFormat = 'utf8';
         }
 
         if (!callback)
-            return this.injectPromise(this.addUpdateData, transaction, data, dataFormat);
+            return this.injectPromise(this.addUpdateData, transaction, data, dataFormat, options);
 
-        this.alterTransaction(transaction, {data, dataFormat}, callback);
+        this.alterTransaction(transaction, {data, dataFormat, txLocal: options?.txLocal}, callback);
     }
 
 }
