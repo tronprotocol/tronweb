@@ -1777,8 +1777,11 @@ export default class TransactionBuilder {
         if (this.validator.notValid([
             {
                 name: 'Name',
-                type: 'not-empty-string',
-                value: accountName
+                type: 'string',
+                lte: 200,
+                gte: 0,
+                value: accountName,
+                msg: 'Invalid accountName'
             },
             {
                 name: 'origin',
