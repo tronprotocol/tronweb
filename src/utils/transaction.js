@@ -520,7 +520,8 @@ const buildClearABIContract = (value, options) => {
     return buildCommonTransaction(
         clearABIContract,
         Transaction.Contract.ContractType.CLEARABICONTRACT,
-        'ClearABIContract'
+        'ClearABIContract',
+        options.Permission_id
     );
 };
 
@@ -534,7 +535,8 @@ const buildUpdateBrokerageContract = (value, options) => {
     return buildCommonTransaction(
         updateBrokerageContract,
         Transaction.Contract.ContractType.UPDATEBROKERAGECONTRACT,
-        'UpdateBrokerageContract'
+        'UpdateBrokerageContract',
+        options.Permission_id
     );
 };
 
@@ -1052,6 +1054,10 @@ const compareTransaction = (transaction, transactionPb) => {
     
 };
 
+const txPbToRawDataHex = (pb) => {
+    return byteArray2hexStr(pb.getRawData().serializeBinary());
+};
+
 const txCheck = (transaction) => {
     const transactionPb = txJsonToPb(transaction);
     return compareTransaction(transaction, transactionPb);
@@ -1075,6 +1081,7 @@ const txPbToTxID = (transactionPb) => {
 export {
     txJsonToPb,
     txPbToTxID,
+    txPbToRawDataHex,
     txJsonToPbWithArgs,
     txCheckWithArgs,
     txCheck,
