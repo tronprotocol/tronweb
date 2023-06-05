@@ -183,6 +183,10 @@ Contact the team at https://cn.developers.tron.network/docs/online-technical-sup
 
 ## Recent History
 
+__5.2.0__
+- Support build transactions locally with protobuf 
+- Support multi-sign for `setAccountId`, `updateBrokerage`, `clearABI`, `updateAccountPermissions` function in `transactionBuilder` lib
+
 __5.1.0__
 - Add `freezeBalanceV2`, `unfreezeBalanceV2`, `delegateResource`, `undelegateResource` and `withdrawExpireUnfreeze` function in transactiobBuiler lib to support stakeV2 
 - Support `tronWeb.transactionBuilder.estimateEnergy` to estimate energy for triggersmartcontract transaction

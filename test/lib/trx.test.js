@@ -801,7 +801,7 @@ describe('TronWeb.trx', function () {
                 ownerPermission.keys  = [];
                 let activePermission = { type: 2, permission_name: 'active0' };
                 activePermission.threshold = threshold;
-                activePermission.operations = '7fff1fc0037e0000000000000000000000000000000000000000000000000000';
+                activePermission.operations = '7fff1fc0033ec107000000000000000000000000000000000000000000000000';
                 activePermission.keys = [];
 
                 for (let i = idxS; i < idxE; i++) {
@@ -828,7 +828,7 @@ describe('TronWeb.trx', function () {
 
             it('should multi-sign a transaction by owner permission', async function () {
 
-                const transaction = await tronWeb.transactionBuilder.freezeBalance(10e5, 3, 'BANDWIDTH', accounts.b58[ownerIdx]);
+                const transaction = await tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.b58[ownerIdx]);
                 let signedTransaction = transaction;
                 for (let i = idxS; i < idxE; i++) {
                     signedTransaction = await tronWeb.trx.multiSign(signedTransaction, accounts.pks[i], 0);
@@ -839,12 +839,14 @@ describe('TronWeb.trx', function () {
                 // broadcast multi-sign transaction
                 const result = await tronWeb.trx.broadcast(signedTransaction);
                 assert.isTrue(result.result);
+                await waitChainData('tx', result.transaction.txID);
+                await wait(10);
 
             });
 
             it('should multi-sign a transaction by owner permission (permission id inside tx)', async function () {
 
-                const transaction = await tronWeb.transactionBuilder.freezeBalance(10e5, 3, 'BANDWIDTH', accounts.b58[ownerIdx], {permissionId: 0});
+                const transaction = await tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.b58[ownerIdx], {permissionId: 0});
                 let signedTransaction = transaction;
                 for (let i = idxS; i < idxE; i++) {
                     signedTransaction = await tronWeb.trx.multiSign(signedTransaction, accounts.pks[i]);
@@ -855,13 +857,15 @@ describe('TronWeb.trx', function () {
                 // broadcast multi-sign transaction
                 const result = await tronWeb.trx.broadcast(signedTransaction);
                 assert.isTrue(result.result);
+                await waitChainData('tx', result.transaction.txID);
+                await wait(10);
 
             });
 
             it('should verify weight after multi-sign by owner permission', async function () {
 
                 // create transaction and do multi-sign
-                const transaction = await tronWeb.transactionBuilder.freezeBalance(10e5, 3, 'BANDWIDTH', accounts.b58[ownerIdx]);
+                const transaction = await tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.b58[ownerIdx]);
 
                 // sign and verify sign weight
                 let signedTransaction = transaction;
@@ -882,13 +886,15 @@ describe('TronWeb.trx', function () {
                 // broadcast multi-sign transaction
                 const result = await tronWeb.trx.broadcast(signedTransaction);
                 assert.isTrue(result.result);
+                await waitChainData('tx', result.transaction.txID);
+                await wait(10);
 
             });
 
             it('should verify weight after multi-sign by owner permission (permission id inside tx)', async function () {
 
                 // create transaction and do multi-sign
-                const transaction = await tronWeb.transactionBuilder.freezeBalance(10e5, 3, 'BANDWIDTH', accounts.b58[ownerIdx], {permissionId: 0});
+                const transaction = await tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.b58[ownerIdx], {permissionId: 0});
 
                 // sign and verify sign weight
                 let signedTransaction = transaction;
@@ -937,7 +943,7 @@ describe('TronWeb.trx', function () {
 
             it('should multi-sign a transaction by active permission', async function () {
 
-                const transaction = await tronWeb.transactionBuilder.freezeBalance(10e5, 3, 'BANDWIDTH', accounts.b58[ownerIdx]);
+                const transaction = await tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.b58[ownerIdx]);
                 let signedTransaction = transaction;
                 for (let i = idxS; i < idxE; i++) {
                     signedTransaction = await tronWeb.trx.multiSign(signedTransaction, accounts.pks[i], 2);
@@ -948,12 +954,14 @@ describe('TronWeb.trx', function () {
                 // broadcast multi-sign transaction
                 const result = await tronWeb.trx.broadcast(signedTransaction);
                 assert.isTrue(result.result);
+                await waitChainData('tx', result.transaction.txID);
+                await wait(10);
 
             });
 
             it('should multi-sign a transaction by active permission (permission id inside tx)', async function () {
 
-                const transaction = await tronWeb.transactionBuilder.freezeBalance(10e5, 3, 'BANDWIDTH', accounts.b58[ownerIdx], {permissionId: 2});
+                const transaction = await tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.b58[ownerIdx], {permissionId: 2});
                 let signedTransaction = transaction;
                 for (let i = idxS; i < idxE; i++) {
                     signedTransaction = await tronWeb.trx.multiSign(signedTransaction, accounts.pks[i]);
@@ -964,13 +972,15 @@ describe('TronWeb.trx', function () {
                 // broadcast multi-sign transaction
                 const result = await tronWeb.trx.broadcast(signedTransaction);
                 assert.isTrue(result.result);
+                await waitChainData('tx', result.transaction.txID);
+                await wait(10);
 
             });
 
             it('should verify weight after multi-sign by active permission', async function () {
 
                 // create transaction and do multi-sign
-                const transaction = await tronWeb.transactionBuilder.freezeBalance(10e5, 3, 'BANDWIDTH', accounts.b58[ownerIdx]);
+                const transaction = await tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.b58[ownerIdx]);
 
                 // sign and verify sign weight
                 let signedTransaction = transaction;
@@ -991,13 +1001,15 @@ describe('TronWeb.trx', function () {
                 // broadcast multi-sign transaction
                 const result = await tronWeb.trx.broadcast(signedTransaction);
                 assert.isTrue(result.result);
+                await waitChainData('tx', result.transaction.txID);
+                await wait(10);
 
             });
 
             it('should verify weight after multi-sign by active permission (permission id inside tx)', async function () {
 
                 // create transaction and do multi-sign
-                const transaction = await tronWeb.transactionBuilder.freezeBalance(10e5, 3, 'BANDWIDTH', accounts.b58[ownerIdx], {permissionId: 2});
+                const transaction = await tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.b58[ownerIdx], {permissionId: 2});
 
                 // sign and verify sign weight
                 let signedTransaction = transaction;
@@ -1373,7 +1385,7 @@ describe('TronWeb.trx', function () {
             let signedTransaction;
 
             before(async function () {
-                transaction = await tronWeb.transactionBuilder.freezeBalance(10e5, 3, 'BANDWIDTH', accounts.b58[idx]);
+                transaction = await tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.b58[idx]);
                 signedTransaction = await tronWeb.trx.sign(transaction, accounts.pks[idx]);
             });
 
@@ -1436,7 +1448,7 @@ describe('TronWeb.trx', function () {
             before(async function(){
                 this.timeout(10000);
 
-                transaction = await tronWeb.trx.freezeBalance(10e5, 3, 'BANDWIDTH', { privateKey: accounts.pks[idx], address: accounts.hex[idx] });
+                transaction = await broadcaster(tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.hex[idx]), accounts.pks[idx]);
                 transaction = transaction.transaction;
                 await waitChainData('tx', transaction.txID);
             });
@@ -1511,7 +1523,7 @@ describe('TronWeb.trx', function () {
             it('should throw invalid index error by transaction from block', async function () {
                 await assertThrow(
                     tronWeb.trx.getTransactionFromBlock(currBlockNum, -1),
-                    'Invalid transaction index provided'
+                    'Transaction not found in block'
                 );
             });
 
@@ -1524,7 +1536,7 @@ describe('TronWeb.trx', function () {
             let transaction;
 
             before(async function(){
-                transaction = await tronWeb.trx.freezeBalance(10e5, 3, 'BANDWIDTH', { privateKey: accounts.pks[idx], address: accounts.hex[idx] });
+                transaction = await broadcaster(tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.hex[idx]), accounts.pks[idx]);
                 transaction = transaction.transaction;
             });
 
@@ -1551,7 +1563,8 @@ describe('TronWeb.trx', function () {
             let transaction;
 
             before(async function(){
-                transaction = (await tronWeb.trx.freezeBalance(10e5, 3, 'BANDWIDTH', { privateKey: accounts.pks[idx], address: accounts.hex[idx] })).transaction;
+                transaction = await broadcaster(tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.hex[idx]), accounts.pks[idx]);
+                transaction = transaction.transaction;
                 await waitChainData('tx', transaction.txID);
             });
 
@@ -1578,7 +1591,7 @@ describe('TronWeb.trx', function () {
             let transaction;
 
             before(async function(){
-                transaction = await tronWeb.trx.freezeBalance(10e5, 3, 'BANDWIDTH', { privateKey: accounts.pks[idx], address: accounts.hex[idx] });
+                transaction = await broadcaster(tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.hex[idx]), accounts.pks[idx]);
             });
 
             it('should get confirmed transaction by tx id', async function () {
