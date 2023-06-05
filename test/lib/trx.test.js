@@ -922,7 +922,7 @@ describe('TronWeb.trx', function () {
 
                 const transaction = await tronWeb.transactionBuilder.freezeBalance(10e5, 3, 'BANDWIDTH', accounts.b58[ownerIdx]);
                 try {
-                    await tronWeb.trx.multiSign(transaction, (accounts.pks[ownerIdx] + '123'), 0);
+                    await tronWeb.trx.multiSign(transaction, (accounts.pks[ownerIdx] + '123'), 2);
                 } catch (e) {
                     assert.isTrue(e.indexOf('has no permission to sign') != -1);
                 }

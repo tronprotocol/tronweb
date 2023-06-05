@@ -1781,7 +1781,6 @@ export default class TransactionBuilder {
                 lte: 200,
                 gte: 0,
                 value: accountName,
-                msg: 'Invalid accountName'
             },
             {
                 name: 'origin',
