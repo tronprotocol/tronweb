@@ -9,7 +9,7 @@ const pollAccountFor = require('../helpers/pollAccountFor');
 const _ = require('lodash');
 const tronWebBuilder = require('../helpers/tronWebBuilder');
 const assertEqualHex = require('../helpers/assertEqualHex');
-const { testRevert, testConstant, arrayParam, rawParam, funcABIV2, funcABIV2_2, funcABIV2_3, funcABIV2_4, testSetVal } = require('../fixtures/contracts');
+const { testRevert, testConstant, arrayParam, rawParam, funcABIV2, funcABIV2_2, funcABIV2_3, funcABIV2_4, testSetVal, testPayable } = require('../fixtures/contracts');
 const waitChainData = require('../helpers/waitChainData');
 const { equals, getValues } = require('../helpers/testUtils');
 
@@ -367,10 +367,9 @@ describe('TronWeb.transactionBuilder', function () {
 
             options.description = '';
 
-            await assertThrow(
-                tronWeb.transactionBuilder.createToken(options),
-                'Invalid token description provided'
-            );
+            // should allow empty description
+            await tronWeb.transactionBuilder.createToken(options);
+            assert.isTrue(true);
 
         });
 
@@ -398,6 +397,12 @@ describe('TronWeb.transactionBuilder', function () {
                 'Invalid token url provided'
             );
 
+            options.url = 'https://www.example.com/#' + 'a'.repeat(256);
+            await assertThrow(
+                tronWeb.transactionBuilder.createToken(options),
+                'Invalid token url provided'
+            );
+
         });
 
         it('should throw if freeBandwidth is invalid', async function () {
@@ -416,6 +421,11 @@ describe('TronWeb.transactionBuilder', function () {
                 tronWeb.transactionBuilder.createToken(options),
                 'Invalid Free bandwidth amount provided'
             );
+
+            // freeBandwidth is optional
+            delete options.freeBandwidth;
+            await tronWeb.transactionBuilder.createToken(options);
+            assert.isTrue(true);
 
         });
 
@@ -436,6 +446,11 @@ describe('TronWeb.transactionBuilder', function () {
                 tronWeb.transactionBuilder.createToken(options),
                 'Invalid Free bandwidth limit provided'
             );
+
+            // freeBandwidthLimit is optional
+            delete options.freeBandwidthLimit;
+            await tronWeb.transactionBuilder.createToken(options);
+            assert.isTrue(true);
 
         });
 
@@ -693,12 +708,10 @@ describe('TronWeb.transactionBuilder', function () {
                 'Invalid token description provided'
             );
 
+            // should allow description to be empty
             options.description = '';
-
-            await assertThrow(
-                tronWeb.transactionBuilder.updateToken(options, accounts.hex[2]),
-                'Invalid token description provided'
-            );
+            await tronWeb.transactionBuilder.updateToken(options, accounts.hex[2]);
+            assert.isTrue(true);
 
         });
 
@@ -727,6 +740,11 @@ describe('TronWeb.transactionBuilder', function () {
                 'Invalid token url provided'
             );
 
+            options.url = 'https://www.example.com/#' + 'a'.repeat(256);
+            await assertThrow(
+                tronWeb.transactionBuilder.updateToken(options, accounts.hex[2]),
+                'Invalid token url provided'
+            );
         });
 
         it('should throw if freeBandwidth is invalid', async function () {
@@ -1207,6 +1225,12 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         // TODO add invalid params throws
+        it('should throw Invalid url provided error', async function () {
+            assertThrow(
+                tronWeb.transactionBuilder.applyForSR(accounts.b58[20], url + '#' + 'abc'.repeat(Math.ceil(256 / 3))),
+                'Invalid url provided',
+            );
+        });
     });
 
     describe("#freezeBalance", async function () {
@@ -2126,6 +2150,18 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(tx.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
             }
         });
+
+        it('should allow default account to create a payable contract with callvalue == 0', async function () {
+            const options = {
+                abi: testPayable.abi,
+                bytecode: testPayable.bytecode,
+                callValue: 0,
+            };
+            const tx = await tronWeb.transactionBuilder.createSmartContract(options);
+            assert.equal(tx.raw_data.contract[0].parameter.value.new_contract.consume_user_resource_percent, 100);
+            assert.equal(tx.raw_data.contract[0].parameter.value.new_contract.origin_energy_limit, 1e7);
+            assert.equal(tx.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
+        })
     });
 
     describe("#triggerConstantContract", async function () {
