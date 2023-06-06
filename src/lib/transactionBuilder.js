@@ -822,7 +822,14 @@ export default class TransactionBuilder {
                 type: 'url',
                 value: url,
                 msg: 'Invalid url provided'
-            }
+            },
+            {
+                name: 'url',
+                type: 'string',
+                value: url,
+                lte: 256,
+                msg: 'Invalid url provided'
+            },
         ], callback))
             return;
 
@@ -1012,9 +1019,6 @@ export default class TransactionBuilder {
             }
         ], callback))
             return;
-
-        if (payable && callValue == 0 && tokenValue == 0)
-            return callback('When contract is payable, options.callValue or options.tokenValue must be a positive integer');
 
         if (!payable && (callValue > 0 || tokenValue > 0))
             return callback('When contract is not payable, options.callValue and options.tokenValue must be 0');
@@ -1574,7 +1578,7 @@ export default class TransactionBuilder {
         const {
             name = false,
             abbreviation = false,
-            description = false,
+            description = '',
             url = false,
             totalSupply = 0,
             trxRatio = 1, // How much TRX will `tokenRatio` cost?
@@ -1608,8 +1612,10 @@ export default class TransactionBuilder {
             },
             {
                 name: 'token abbreviation',
-                type: 'not-empty-string',
-                value: abbreviation
+                type: 'string',
+                value: abbreviation,
+                lte: 32,
+                gt: 0
             },
             {
                 name: 'token name',
@@ -1618,13 +1624,20 @@ export default class TransactionBuilder {
             },
             {
                 name: 'token description',
-                type: 'not-empty-string',
-                value: description
+                type: 'string',
+                value: description,
+                lte: 200
             },
             {
                 name: 'token url',
                 type: 'url',
                 value: url
+            },
+            {
+                name: 'token url',
+                type: 'string',
+                value: url,
+                lte: 256,
             },
             {
                 name: 'issuer',
@@ -1642,18 +1655,6 @@ export default class TransactionBuilder {
                 type: 'integer',
                 value: saleEnd,
                 gt: saleStart
-            },
-            {
-                name: 'Free bandwidth amount',
-                type: 'integer',
-                value: freeBandwidth,
-                gte: 0
-            },
-            {
-                name: 'Free bandwidth limit',
-                type: 'integer',
-                value: freeBandwidthLimit,
-                gte: 0
             },
             {
                 name: 'Frozen supply',
@@ -1687,8 +1688,8 @@ export default class TransactionBuilder {
             num: parseInt(tokenRatio),
             start_time: parseInt(saleStart),
             end_time: parseInt(saleEnd),
-            free_asset_net_limit: parseInt(freeBandwidth),
-            public_free_asset_net_limit: parseInt(freeBandwidthLimit),
+            // free_asset_net_limit: parseInt(freeBandwidth),
+            // public_free_asset_net_limit: parseInt(freeBandwidthLimit),
             frozen_supply: [{
                 frozen_amount: parseInt(frozenAmount),
                 frozen_days: parseInt(frozenDuration)
@@ -1701,6 +1702,12 @@ export default class TransactionBuilder {
         });
         if (!(parseInt(frozenAmount) > 0)) {
             delete data.frozen_supply
+        }
+        if (freeBandwidth && !isNaN(parseInt(freeBandwidth)) && parseInt(freeBandwidth) >= 0) {
+            data.free_asset_net_limit = parseInt(freeBandwidth);
+        }
+        if (freeBandwidthLimit && !isNaN(parseInt(freeBandwidthLimit)) && parseInt(freeBandwidthLimit) >= 0) {
+            data.public_free_asset_net_limit = parseInt(freeBandwidthLimit);
         }
         if (precision && !isNaN(parseInt(precision))) {
             data.precision = parseInt(precision);
@@ -1866,7 +1873,7 @@ export default class TransactionBuilder {
             return this.injectPromise(this.updateToken, options, issuerAddress);
 
         const {
-            description = false,
+            description = '',
             url = false,
             freeBandwidth = 0, // The creator's "donated" bandwidth for use by token holders
             freeBandwidthLimit = 0 // Out of `totalFreeBandwidth`, the amount each token holder get
@@ -1876,13 +1883,20 @@ export default class TransactionBuilder {
         if (this.validator.notValid([
             {
                 name: 'token description',
-                type: 'not-empty-string',
-                value: description
+                type: 'string',
+                value: description,
+                lte: 200
             },
             {
                 name: 'token url',
                 type: 'url',
                 value: url
+            },
+            {
+                name: 'token url',
+                type: 'string',
+                value: url,
+                lte: 256,
             },
             {
                 name: 'issuer',
