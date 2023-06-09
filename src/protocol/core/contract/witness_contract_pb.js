@@ -13,7 +13,13 @@
 
 var jspb = require('@tronweb3/google-protobuf');
 var goog = jspb;
-var global = (function() { return this || window || global || self || Function('return this')(); }).call(null);
+var global =
+  (typeof globalThis !== 'undefined' && globalThis) ||
+  (typeof window !== 'undefined' && window) ||
+  (typeof global !== 'undefined' && global) ||
+  (typeof self !== 'undefined' && self) ||
+  (function () { return this; }).call(null) ||
+  Function('return this')();
 
 goog.exportSymbol('proto.protocol.VoteWitnessContract', null, global);
 goog.exportSymbol('proto.protocol.VoteWitnessContract.Vote', null, global);

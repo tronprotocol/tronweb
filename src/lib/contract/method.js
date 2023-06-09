@@ -36,7 +36,8 @@ export default class Method {
             feeLimit: this.tronWeb.feeLimit,
             callValue: 0,
             userFeePercentage: 100,
-            shouldPollResponse: false // Only used for sign()
+            shouldPollResponse: false, // Only used for sign()
+            pollTimes: 20
         };
     }
 
@@ -242,7 +243,7 @@ export default class Method {
                 return callback(null, signedTransaction.txID);
 
             const checkResult = async (index = 0) => {
-                if (index === 20) {
+                if (index === options.pollTimes) {
                     return callback({
                         error: 'Cannot find result in solidity node',
                         transaction: signedTransaction
