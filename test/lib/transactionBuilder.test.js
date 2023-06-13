@@ -584,7 +584,7 @@ describe('TronWeb.transactionBuilder', function () {
 
             await assertThrow(
                 tronWeb.transactionBuilder.updateAccount(123, accounts.b58[4]),
-                'Invalid Name provided'
+                'Invalid accountName'
             );
 
         });
