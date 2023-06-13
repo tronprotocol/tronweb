@@ -28,6 +28,12 @@
     },
     "dependencies": {
         "@babel/runtime": "^7.0.0",
+        "@ethersproject/bignumber": "^5.7.0",
+        "@ethersproject/bytes": "^5.7.0",
+        "@ethersproject/keccak256": "^5.7.0",
+        "@ethersproject/logger": "^5.7.0",
+        "@ethersproject/properties": "^5.7.0",
+        "@ethersproject/strings": "^5.7.0",
         "@tronweb3/google-protobuf": "^3.21.2",
         "axios": "^0.26.1",
         "bignumber.js": "^9.0.1",
