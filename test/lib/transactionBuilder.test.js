@@ -369,7 +369,6 @@ describe('TronWeb.transactionBuilder', function () {
 
             // should allow empty description
             await tronWeb.transactionBuilder.createToken(options);
-            assert.isTrue(true);
 
         });
 
@@ -425,7 +424,6 @@ describe('TronWeb.transactionBuilder', function () {
             // freeBandwidth is optional
             delete options.freeBandwidth;
             await tronWeb.transactionBuilder.createToken(options);
-            assert.isTrue(true);
 
         });
 
@@ -450,7 +448,6 @@ describe('TronWeb.transactionBuilder', function () {
             // freeBandwidthLimit is optional
             delete options.freeBandwidthLimit;
             await tronWeb.transactionBuilder.createToken(options);
-            assert.isTrue(true);
 
         });
 
@@ -711,7 +708,6 @@ describe('TronWeb.transactionBuilder', function () {
             // should allow description to be empty
             options.description = '';
             await tronWeb.transactionBuilder.updateToken(options, accounts.hex[2]);
-            assert.isTrue(true);
 
         });
 

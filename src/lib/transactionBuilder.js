@@ -1688,8 +1688,6 @@ export default class TransactionBuilder {
             num: parseInt(tokenRatio),
             start_time: parseInt(saleStart),
             end_time: parseInt(saleEnd),
-            // free_asset_net_limit: parseInt(freeBandwidth),
-            // public_free_asset_net_limit: parseInt(freeBandwidthLimit),
             frozen_supply: [{
                 frozen_amount: parseInt(frozenAmount),
                 frozen_days: parseInt(frozenDuration)
@@ -1788,6 +1786,7 @@ export default class TransactionBuilder {
                 lte: 200,
                 gte: 0,
                 value: accountName,
+                msg: 'Invalid accountName'
             },
             {
                 name: 'origin',
