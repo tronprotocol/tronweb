@@ -35,7 +35,6 @@
         "bignumber.js": "^9.0.1",
         "ethers": "^6.2.0",
         "eventemitter3": "^3.1.0",
-        "events": "^3.3.0",
         "injectpromise": "^1.0.0",
         "lodash": "^4.17.21",
         "querystring-es3": "^0.2.1",
