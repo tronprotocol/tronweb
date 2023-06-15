@@ -37,7 +37,6 @@ export default class Method {
             callValue: 0,
             userFeePercentage: 100,
             shouldPollResponse: false, // Only used for sign()
-            pollTimes: 20
         };
     }
 
@@ -243,7 +242,7 @@ export default class Method {
                 return callback(null, signedTransaction.txID);
 
             const checkResult = async (index = 0) => {
-                if (index === options.pollTimes) {
+                if (index === (options.pollTimes || 20)) {
                     return callback({
                         error: 'Cannot find result in solidity node',
                         transaction: signedTransaction
