@@ -183,6 +183,13 @@ Contact the team at https://cn.developers.tron.network/docs/online-technical-sup
 
 ## Recent History
 
+__5.3.0__
+- Replace `elliptic` with `@noble/secp256k1` 
+- Bump ethers to ^6.6.0
+- Optimize argument validation for `createToken`, `updateToken` and `applyForSR` 
+- callValue can be 0 when the contract constructor is payable
+- Support shouldPollResponse to customize poll times ([#368](https://github.com/tronprotocol/tronweb/issues/368))
+
 __5.2.0__
 - Support build transactions locally with protobuf 
 - Support multi-sign for `setAccountId`, `updateBrokerage`, `clearABI`, `updateAccountPermissions` function in `transactionBuilder` lib
