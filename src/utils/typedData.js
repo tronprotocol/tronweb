@@ -1,4 +1,3 @@
-//import { TypedDataDomain, TypedDataField } from "@ethersproject/providerabstract-signer";
 import TronWeb from "../index";
 import { id, keccak256, concat, defineProperties, getBigInt, getBytes, hexlify, mask, toTwos, toBeHex, zeroPadValue, assertArgument } from "ethers";
 import {  ADDRESS_PREFIX_REGEX } from './address';
