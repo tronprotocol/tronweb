@@ -568,10 +568,63 @@ export default class TransactionBuilder {
             .catch(err => callback(err));
     }
 
-    delegateResource(amount = 0, receiverAddress, resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, lock = false, options, callback = false) {
+    cancelUnfreezeBalanceV2(address = this.tronWeb.defaultAddress.hex, options, callback = false) {
         if (utils.isFunction(options)) {
             callback = options;
             options = {};
+        }
+
+        if (utils.isFunction(address)) {
+            callback = address;
+            options = {};
+            address = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(address)) {
+            options = address;
+            address = this.tronWeb.defaultAddress.hex;
+        }
+
+        if (!callback)
+            return this.injectPromise(this.cancelUnfreezeBalanceV2, address, options);
+
+        if (this.validator.notValid([
+            {
+                name: 'origin',
+                type: 'address',
+                value: address,
+            }
+        ], callback))
+            return;
+
+        const data = {
+            owner_address: toHex(address),
+        };
+
+        createTransaction(this.tronWeb, 'CancelAllUnfreezeV2Contract', data, options?.permissionId)
+            .then(transaction => callback(null, transaction))
+            .catch(err => callback(err));
+    }
+
+    delegateResource(
+        amount = 0,
+        receiverAddress,
+        resource = "BANDWIDTH",
+        address = this.tronWeb.defaultAddress.hex,
+        lock = false,
+        lockPeriod,
+        options,
+        callback = false
+    ) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
+        if (utils.isFunction(lockPeriod)) {
+            callback = lockPeriod;
+            lockPeriod = undefined;
+        } else if (utils.isObject(lockPeriod)) {
+            options = lockPeriod;
+            lockPeriod = undefined;
         }
 
         if (utils.isFunction(lock)) {
@@ -599,7 +652,7 @@ export default class TransactionBuilder {
         }
 
         if (!callback)
-            return this.injectPromise(this.delegateResource, amount, receiverAddress, resource, address, lock, options);
+            return this.injectPromise(this.delegateResource, amount, receiverAddress, resource, address, lock, lockPeriod, options);
 
         if (this.validator.notValid([
             {
@@ -628,6 +681,13 @@ export default class TransactionBuilder {
                 name: 'lock',
                 type: 'boolean',
                 value: lock
+            },
+            {
+                name: 'lock period',
+                type: 'integer',
+                gte: 0,
+                value: lockPeriod,
+                optional: true,
             }
         ], callback))
             return;
@@ -646,6 +706,9 @@ export default class TransactionBuilder {
         }
         if (lock) {
             data.lock = lock;
+            if (utils.isNotNullOrUndefined(lockPeriod)) {
+                data.lock_period = lockPeriod;
+            }
         }
 
         createTransaction(this.tronWeb, 'DelegateResourceContract', data, options?.permissionId)
