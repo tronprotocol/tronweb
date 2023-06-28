@@ -1965,16 +1965,6 @@ export default class TransactionBuilder {
                 type: 'address',
                 value: issuerAddress
             },
-            {
-                name: 'Free bandwidth amount',
-                type: 'positive-integer',
-                value: freeBandwidth
-            },
-            {
-                name: 'Free bandwidth limit',
-                type: 'positive-integer',
-                value: freeBandwidthLimit
-            }
         ], callback))
             return;
 
@@ -1982,9 +1972,14 @@ export default class TransactionBuilder {
             owner_address: toHex(issuerAddress),
             description: fromUtf8(description),
             url: fromUtf8(url),
-            new_limit: parseInt(freeBandwidth),
-            new_public_limit: parseInt(freeBandwidthLimit)
         };
+
+        if (freeBandwidth && !isNaN(parseInt(freeBandwidth)) && parseInt(freeBandwidth) >= 0) {
+            data.new_limit = parseInt(freeBandwidth);
+        }
+        if (freeBandwidthLimit && !isNaN(parseInt(freeBandwidthLimit)) && parseInt(freeBandwidthLimit) >= 0) {
+            data.new_public_limit = parseInt(freeBandwidthLimit);
+        }
 
         createTransaction(this.tronWeb, 'UpdateAssetContract', data, options?.permissionId)
             .then(transaction => callback(null, transaction))
