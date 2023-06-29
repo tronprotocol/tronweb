@@ -1310,7 +1310,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
     });
 
-    describe.only("#freezeBalanceV2", async function () {
+    describe("#freezeBalanceV2", async function () {
         it('should allows accounts[1] to freeze its balance by freezeBalanceV2', async function () {
             const params = [
                 [500e6, 'BANDWIDTH', accounts.b58[1], {permissionId: 2}],
@@ -1553,7 +1553,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
     })
 
-    describe.only("#delegateResource", async function () {
+    describe("#delegateResource", async function () {
         before(async () => {
             const transaction = await tronWeb.transactionBuilder.freezeBalanceV2(500e6, 'BANDWIDTH');
             await broadcaster(null, PRIVATE_KEY, transaction);
