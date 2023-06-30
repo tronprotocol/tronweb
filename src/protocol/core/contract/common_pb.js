@@ -21,14 +21,14 @@ var global =
   (function () { return this; }).call(null) ||
   Function('return this')();
 
-goog.exportSymbol('proto.protocol.ResourceCode', null, global);
+goog.exportSymbol('TronWebProto.ResourceCode', null, global);
 /**
  * @enum {number}
  */
-proto.protocol.ResourceCode = {
+TronWebProto.ResourceCode = {
   BANDWIDTH: 0,
   ENERGY: 1,
   TRON_POWER: 2
 };
 
-goog.object.extend(exports, proto.protocol);
+goog.object.extend(exports, TronWebProto);
