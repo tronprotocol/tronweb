@@ -3,9 +3,11 @@ import {base64EncodeToString} from './code';
 import {base64DecodeFromString, hexStr2byteArray} from './code';
 import {encode58, decode58} from './base58';
 import {byte2hexStr, byteArray2hexStr} from './bytes';
-import * as secp from '@noble/secp256k1';
 import {keccak256, sha256, SigningKey} from './ethersUtils';
 import {TypedDataEncoder} from './typedData';
+import * as ec from "ethereum-cryptography/secp256k1";
+
+const secp = ec.secp256k1 ?? ec;
 
 function normalizePrivateKeyBytes(priKeyBytes) {
     return hexStr2byteArray(byteArray2hexStr(priKeyBytes).padStart(64, '0'));
@@ -52,12 +54,12 @@ export function decodeBase58Address(base58Sting) {
     throw new Error('Invalid address provided');
 }
 
-export async function signTransaction(priKeyBytes, transaction) {
+export function signTransaction(priKeyBytes, transaction) {
     if (typeof priKeyBytes === 'string')
         priKeyBytes = hexStr2byteArray(priKeyBytes);
 
     const txID = transaction.txID;
-    const signature = await ECKeySign(hexStr2byteArray(txID), priKeyBytes);
+    const signature = ECKeySign(hexStr2byteArray(txID), priKeyBytes);
 
     if (Array.isArray(transaction.signature)) {
         if (!transaction.signature.includes(signature))
@@ -71,12 +73,12 @@ export function arrayToBase64String(a) {
     return btoa(String.fromCharCode(...a));
 }
 
-export async function signBytes(privateKey, contents) {
+export function signBytes(privateKey, contents) {
     if (typeof privateKey === 'string')
         privateKey = hexStr2byteArray(privateKey);
 
     const hashBytes = SHA256(contents);
-    const signBytes = await ECKeySign(hashBytes, privateKey);
+    const signBytes = ECKeySign(hashBytes, privateKey);
 
     return signBytes;
 }
@@ -206,7 +208,7 @@ export function getAddressFromPriKeyBase64String(priKeyBase64String) {
 }
 
 export function getPubKeyFromPriKey(priKeyBytes) {
-    const pubkey = secp.Point.fromPrivateKey(new Uint8Array(normalizePrivateKeyBytes(priKeyBytes)));
+    const pubkey = secp.ProjectivePoint.fromPrivateKey(new Uint8Array(normalizePrivateKeyBytes(priKeyBytes)));
     const x = pubkey.x;
     const y = pubkey.y;
 
@@ -219,13 +221,12 @@ export function getPubKeyFromPriKey(priKeyBytes) {
     return pubkeyBytes;
 }
 
-export async function ECKeySign(hashBytes, priKeyBytes) {
-    const [signature, recovery] = await secp.sign(byteArray2hexStr(hashBytes), byteArray2hexStr(priKeyBytes), { recovered: true, der: false })
+export function ECKeySign(hashBytes, priKeyBytes) {
+    const signature = secp.sign(byteArray2hexStr(hashBytes), byteArray2hexStr(priKeyBytes))
 
-    const r = Buffer.from(signature.slice(0, 32)).toString('hex');
-    const s = Buffer.from(signature.slice(32, 64)).toString('hex');
-
-    const v = recovery + 27;
+    const r = signature.r.toString(16);
+    const s = signature.s.toString(16);
+    const v = signature.recovery + 27;
 
     return r.padStart(64, '0') + s.padStart(64, '0') + byte2hexStr(v);
 }

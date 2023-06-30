@@ -29,10 +29,10 @@
     "dependencies": {
         "@babel/runtime": "^7.0.0",
         "@ethersproject/abi": "^5.7.0",
-        "@noble/secp256k1": "1.7.1",
         "@tronweb3/google-protobuf": "^3.21.2",
         "axios": "^0.26.1",
         "bignumber.js": "^9.0.1",
+        "ethereum-cryptography": "^2.0.0",
         "ethers": "^6.6.0",
         "eventemitter3": "^3.1.0",
         "injectpromise": "^1.0.0",
