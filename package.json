@@ -29,7 +29,6 @@
     "dependencies": {
         "@babel/runtime": "^7.0.0",
         "@ethersproject/abi": "^5.7.0",
-        "@noble/secp256k1": "1.7.1",
         "@tronweb3/google-protobuf": "^3.21.2",
         "axios": "^0.26.1",
         "bignumber.js": "^9.0.1",
