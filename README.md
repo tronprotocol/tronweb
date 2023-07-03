@@ -183,6 +183,9 @@ Contact the team at https://cn.developers.tron.network/docs/online-technical-sup
 
 ## Recent History
 
+__5.1.1__
+- Support [TIP541](https://github.com/tronprotocol/tips/blob/master/tip-541.md) and [TIP542](https://github.com/tronprotocol/tips/blob/master/tip-542.md)
+
 __5.1.0__
 - Add `freezeBalanceV2`, `unfreezeBalanceV2`, `delegateResource`, `undelegateResource` and `withdrawExpireUnfreeze` function in transactiobBuiler lib to support stakeV2 
 - Support `tronWeb.transactionBuilder.estimateEnergy` to estimate energy for triggersmartcontract transaction

@@ -10,3 +10,4 @@ yarn-error.log
 .idea/
 example/
 test/lib/dist/
+yarn.lock

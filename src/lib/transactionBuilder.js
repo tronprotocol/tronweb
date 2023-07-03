@@ -527,11 +527,83 @@ export default class TransactionBuilder {
 
         this.tronWeb.fullNode.request('wallet/unfreezebalancev2', data, 'post').then(transaction => resultManager(transaction, data, options, callback)).catch(err => callback(err));
     }
-
-    delegateResource(amount = 0, receiverAddress, resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, lock = false, options, callback = false) {
+    cancelUnfreezeBalanceV2(
+        address = this.tronWeb.defaultAddress.hex,
+        options,
+        callback = false
+    ) {
         if (utils.isFunction(options)) {
             callback = options;
             options = {};
+        }
+
+        if (utils.isFunction(address)) {
+            callback = address;
+            options = {};
+            address = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(address)) {
+            options = address;
+            address = this.tronWeb.defaultAddress.hex;
+        }
+
+        if (!callback)
+            return this.injectPromise(
+                this.cancelUnfreezeBalanceV2,
+                address,
+                options
+            );
+
+        if (
+            this.validator.notValid(
+                [
+                    {
+                        name: 'origin',
+                        type: 'address',
+                        value: address,
+                    },
+                ],
+                callback
+            )
+        )
+            return;
+
+        const data = {
+            owner_address: toHex(address),
+        };
+
+        if (options && options.permissionId) {
+            data.Permission_id = options.permissionId;
+        }
+
+        this.tronWeb.fullNode
+            .request('wallet/cancelallunfreezev2', data, 'post')
+            .then((transaction) =>
+                resultManager(transaction, data, options, callback)
+            )
+            .catch((err) => callback(err));
+    }
+
+    delegateResource(
+        amount = 0,
+        receiverAddress,
+        resource = 'BANDWIDTH',
+        address = this.tronWeb.defaultAddress.hex,
+        lock = false,
+        lockPeriod,
+        options,
+        callback = false
+    ) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
+        if (utils.isFunction(lockPeriod)) {
+            callback = lockPeriod;
+            lockPeriod = undefined;
+        } else if (utils.isObject(lockPeriod)) {
+            options = lockPeriod;
+            lockPeriod = undefined;
         }
 
         if (utils.isFunction(lock)) {
@@ -552,48 +624,71 @@ export default class TransactionBuilder {
 
         if (utils.isFunction(resource)) {
             callback = resource;
-            resource = "BANDWIDTH";
+            resource = 'BANDWIDTH';
         } else if (utils.isObject(resource)) {
             options = resource;
-            resource = "BANDWIDTH";
+            resource = 'BANDWIDTH';
         }
 
         if (!callback)
-            return this.injectPromise(this.delegateResource, amount, receiverAddress, resource, address, lock, options);
+            return this.injectPromise(
+                this.delegateResource,
+                amount,
+                receiverAddress,
+                resource,
+                address,
+                lock,
+                lockPeriod,
+                options
+            );
 
-        if (this.validator.notValid([
-            {
-                name: 'amount',
-                type: 'integer',
-                gt: 0,
-                value: amount
-            },
-            {
-                name: 'resource',
-                type: 'resource',
-                value: resource,
-                msg: 'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"'
-            },
-            {
-                name: 'receiver',
-                type: 'address',
-                value: receiverAddress
-            },
-            {
-                name: 'origin',
-                type: 'address',
-                value: address
-            },
-            {
-                name: 'lock',
-                type: 'boolean',
-                value: lock
-            }
-        ], callback))
+        if (
+            this.validator.notValid(
+                [
+                    {
+                        name: 'amount',
+                        type: 'integer',
+                        gt: 0,
+                        value: amount,
+                    },
+                    {
+                        name: 'resource',
+                        type: 'resource',
+                        value: resource,
+                        msg: 'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"',
+                    },
+                    {
+                        name: 'receiver',
+                        type: 'address',
+                        value: receiverAddress,
+                    },
+                    {
+                        name: 'origin',
+                        type: 'address',
+                        value: address,
+                    },
+                    {
+                        name: 'lock',
+                        type: 'boolean',
+                        value: lock,
+                    },
+                    {
+                        name: 'lock period',
+                        type: 'integer',
+                        gte: 0,
+                        value: lockPeriod,
+                        optional: true,
+                    },
+                ],
+                callback
+            )
+        )
             return;
 
-        if(toHex(receiverAddress) === toHex(address)) {
-            return callback('Receiver address must not be the same as owner address');
+        if (toHex(receiverAddress) === toHex(address)) {
+            return callback(
+                'Receiver address must not be the same as owner address'
+            );
         }
 
         const data = {
@@ -601,16 +696,27 @@ export default class TransactionBuilder {
             receiver_address: toHex(receiverAddress),
             balance: parseInt(amount),
             resource: resource,
-            lock
+        };
+
+        if (lock) {
+            data.lock = lock;
+            if (utils.isNotNullOrUndefined(lockPeriod)) {
+                data.lock_period = lockPeriod;
+            }
         }
 
         if (options && options.permissionId) {
             data.Permission_id = options.permissionId;
         }
 
-        this.tronWeb.fullNode.request('wallet/delegateresource', data, 'post').then(transaction => resultManager(transaction, data, options, callback)).catch(err => callback(err));
+        this.tronWeb.fullNode
+            .request('wallet/delegateresource', data, 'post')
+            .then((transaction) =>
+                resultManager(transaction, data, options, callback)
+            )
+            .catch((err) => callback(err));
     }
-
+    
     undelegateResource(amount = 0, receiverAddress, resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, options, callback = false) {
         if (utils.isFunction(options)) {
             callback = options;

@@ -13,16 +13,22 @@
 
 var jspb = require('@tronweb3/google-protobuf');
 var goog = jspb;
-var global = (function() { return this || window || global || self || Function('return this')(); }).call(null);
+var global =
+  (typeof globalThis !== 'undefined' && globalThis) ||
+  (typeof window !== 'undefined' && window) ||
+  (typeof global !== 'undefined' && global) ||
+  (typeof self !== 'undefined' && self) ||
+  (function () { return this; }).call(null) ||
+  Function('return this')();
 
-goog.exportSymbol('proto.protocol.ResourceCode', null, global);
+goog.exportSymbol('TronWebProto.ResourceCode', null, global);
 /**
  * @enum {number}
  */
-proto.protocol.ResourceCode = {
+TronWebProto.ResourceCode = {
   BANDWIDTH: 0,
   ENERGY: 1,
   TRON_POWER: 2
 };
 
-goog.object.extend(exports, proto.protocol);
+goog.object.extend(exports, TronWebProto);
