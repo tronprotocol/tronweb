@@ -12,6 +12,10 @@ insert_final_newline = true
 [*.json]
 indent_size = 4
 
+[*.ts]
+indent_size = 4
+quote_type = single
+
 [*.js]
 indent_size = 4
 quote_type = single
