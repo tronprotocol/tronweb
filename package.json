@@ -39,7 +39,8 @@
         "test-no-accounts": "node scripts/test-node.js && npx mocha 'test/**/*.test.js'",
         "test:browser": "npm run-script newaccount && node scripts/test-browser.js && npx karma start --single-run --browsers ChromeHeadless",
         "coverage": "npm run-script test:browser && npm run-script test",
-        "btest": "npm run build:dev && npm run test"
+        "btest": "npm run build:dev && npm run test",
+        "format-all": "prettier --write ./src"
     },
     "husky": {
         "hooks": {
@@ -52,6 +53,7 @@
         "@tronweb3/google-protobuf": "^3.21.2",
         "axios": "^0.26.1",
         "bignumber.js": "^9.0.1",
+        "eslint-config-prettier": "^8.8.0",
         "ethereum-cryptography": "^2.0.0",
         "ethers": "^6.2.0",
         "eventemitter3": "^3.1.0",
@@ -75,12 +77,14 @@
         "@types/estree": "^1.0.1",
         "@types/json-schema": "^7.0.12",
         "@types/validator": "^13.7.17",
+        "@typescript-eslint/eslint-plugin": "^5.61.0",
+        "@typescript-eslint/parser": "^5.61.0",
         "babel-loader": "^8.0.2",
         "babel-plugin-istanbul": "^6.1.1",
         "babel-plugin-source-map-support": "^2.1.3",
         "chai": "^4.1.2",
         "chalk": "^2.4.1",
-        "eslint": "^8.38.0",
+        "eslint": "^8.44.0",
         "eslint-import-resolver-typescript": "^3.5.5",
         "globby": "^13.1.3",
         "husky": "^7.0.0",
