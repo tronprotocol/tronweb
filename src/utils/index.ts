@@ -9,7 +9,7 @@
 // import { TypedDataEncoder as _TypedDataEncoder } from "./typedData";
 // import * as transaction from "./transaction";
 
-import * as validations from "./validations";
+import * as validations from './validations';
 
 export default {
     ...validations,
