@@ -1294,6 +1294,8 @@ export default class TransactionBuilder {
 
             args.function_selector = functionSelector;
             args.parameter = parameters;
+        } else if (options.input) {
+            args.data = options.input;
         }
 
         args.call_value = parseInt(callValue)

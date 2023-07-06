@@ -22,6 +22,7 @@ const {
     getTokenOptions,
     isProposalApproved
 } = require('../helpers/config');
+const { keccak256, AbiCoder } = require('ethers');
 
 describe('TronWeb.transactionBuilder', function () {
 
@@ -3368,6 +3369,117 @@ describe('TronWeb.transactionBuilder', function () {
       assert.ok(equals(check, ['TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY', 1000100, 'TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY']));
     });
   });
+
+  describe.only('#triggerSmartContractWithData', async function() {
+    let transaction;
+    let contract1Address;
+    let issuerAddress;
+    let issuerPk;
+
+    before(async function () {
+        this.timeout(20000);
+        issuerAddress = accounts.hex[0];
+        issuerPk = accounts.pks[0];
+        transaction = await tronWeb.transactionBuilder.createSmartContract(
+            {
+                abi: rawParam.abi,
+                bytecode: rawParam.bytecode,
+                rawParameter:
+                    "0x0000000000000000000000000000000000000000000000000000000000000001",
+            },
+            issuerAddress
+        );
+        await broadcaster(null, issuerPk, transaction);
+        while (true) {
+            const tx = await tronWeb.trx.getTransactionInfo(
+                transaction.txID
+            );
+            if (Object.keys(tx).length === 0) {
+                await wait(3);
+                continue;
+            } else {
+                break;
+            }
+        }
+        contract1Address = transaction.contract_address;
+
+        transaction = await tronWeb.transactionBuilder.createSmartContract({
+            abi: testConstant.abi,
+            bytecode: testConstant.bytecode
+        }, accounts.hex[6]);
+        await broadcaster(null, accounts.pks[6], transaction);
+        while (true) {
+            const tx = await tronWeb.trx.getTransactionInfo(transaction.txID);
+            if (Object.keys(tx).length === 0) {
+                await wait(3);
+                continue;
+            } else {
+                break;
+            }
+        }
+        
+    })
+
+    it('should trigger smart contract with data successfully', async function () {
+        this.timeout(20000);
+
+        const contractAddress = transaction.contract_address;
+        const issuerAddress = accounts.hex[6];
+        const functionSelector = 'testPure(uint256,uint256)';
+        const parameters = [
+            {type: 'uint256', value: 1},
+            {type: 'uint256', value: 2}
+        ]
+        const options = {
+            _isConstant: true,
+        };
+
+        const abiCoder = new AbiCoder();
+        let types = [];
+        const values = [];
+
+        for (let i = 0; i < parameters.length; i++) {
+            let {type, value} = parameters[i];
+            types.push(type);
+            values.push(value);
+        }
+        options.input = keccak256(Buffer.from(functionSelector, 'utf-8')).toString().substring(2, 10) + abiCoder.encode(types, values).replace(/^(0x)/, '');
+
+        for (let i = 0; i < 2; i++) {
+            if (i === 1) options.permissionId = 2;
+            transaction = await tronWeb.transactionBuilder.triggerSmartContract(contractAddress, null, options, [], issuerAddress);
+            assert.isTrue(transaction.result.result &&
+                transaction.transaction.raw_data.contract[0].parameter.type_url === 'type.googleapis.com/protocol.TriggerSmartContract');
+            assert.equal(transaction.constant_result, '0000000000000000000000000000000000000000000000000000000000000004');
+            transaction = await broadcaster(null, accounts.pks[6], transaction.transaction);
+            assert.isTrue(transaction.receipt.result)
+            assert.equal(transaction.transaction.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
+        }
+    });
+
+    it('should trigger a smart contract with data', async function () {
+        const deployed = await tronWeb
+            .contract()
+            .at(contract1Address);
+        let check = await deployed.check().call();
+        assert.equal(check, 1);
+
+        const setTransaction = await tronWeb.transactionBuilder.triggerSmartContract(
+            contract1Address,
+            null,
+            {
+                input: keccak256(Buffer.from('setCheck(uint256)', 'utf-8')).toString().substring(2, 10) +
+                    "0000000000000000000000000000000000000000000000000000000000000002",
+            },
+            [],
+            issuerAddress
+        );
+        await broadcaster(null, issuerPk, setTransaction.transaction);
+
+        check = await deployed.check().call();
+        assert.equal(check, 2);
+    });
+  })
 
   describe("#estimateEnergy", async function () {
 
