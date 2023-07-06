@@ -1,5 +1,5 @@
 import { AbiCoder } from '@ethersproject/abi';
-import TronWeb from 'index';
+import TronWeb from '../index';
 import { ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX } from './address';
 
 const abiCoder = new AbiCoder();
@@ -23,17 +23,16 @@ function deepCopy(target: any) {
 
     Object.keys(target).forEach(
         (key) =>
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             //@ts-ignore
-            (newTarget[key] =
-                target[key] instanceof Object && !target[key]._isBigNumber ? deepCopy(target[key]) : target[key])
+            (newTarget[key] = target[key] instanceof Object && !target[key]._isBigNumber ? deepCopy(target[key]) : target[key])
     );
 
     return newTarget;
 }
 
 export function decodeParams(names: string[], types: string[], output: string, ignoreMethodHash: boolean) {
-    if (ignoreMethodHash && output.replace(/^0x/, '').length % 64 === 8)
-        output = '0x' + output.replace(/^0x/, '').substring(8);
+    if (ignoreMethodHash && output.replace(/^0x/, '').length % 64 === 8) output = '0x' + output.replace(/^0x/, '').substring(8);
 
     if (output.replace(/^0x/, '').length % 64) {
         throw new Error('The encoded string is not valid. Its length must be a multiple of 64.');
@@ -128,7 +127,7 @@ export function encodeParamsV2ByABI(funABI: ABIType, args: any[]) {
     const convertAddresses = (addrArr: string | string[]) => {
         if (Array.isArray(addrArr)) {
             addrArr.forEach((addrs, i) => {
-                addrArr[i] = convertAddresses(addrs);
+                addrArr[i] = convertAddresses(addrs) as string;
             });
             return addrArr;
         } else {
@@ -200,7 +199,7 @@ export function decodeParamsV2ByABI(funABI: ABIType, data: string | Uint8Array) 
     const convertAddresses = (addrArr: string | string[]) => {
         if (Array.isArray(addrArr)) {
             addrArr.forEach((addrs, i) => {
-                addrArr[i] = convertAddresses(addrs);
+                addrArr[i] = convertAddresses(addrs) as string;
             });
             return addrArr;
         } else {
@@ -245,10 +244,12 @@ export function decodeParamsV2ByABI(funABI: ABIType, data: string | Uint8Array) 
                 if (result[i])
                     if (type === 'address') {
                         result[i] = TronWeb.address.toHex(result[i]);
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         //@ts-ignore
                         if (name) result[name] = TronWeb.address.toHex(result[name]);
                     } else if (type.match(/^([^\x5b]*)(\x5b|$)/)![0] === 'address[') {
                         convertAddresses(result[i]);
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         //@ts-ignore
                         if (name) convertAddresses(result[name]);
                     } else if (type.indexOf('tuple') === 0) {
@@ -257,6 +258,7 @@ export function decodeParamsV2ByABI(funABI: ABIType, data: string | Uint8Array) 
                             mapTuple(output.components!, result[i], dimension);
                         } else decodeResult(output.components!, result[i]);
 
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         //@ts-ignore
                         if (name) result[name] = result[i];
                     }
@@ -265,13 +267,11 @@ export function decodeParamsV2ByABI(funABI: ABIType, data: string | Uint8Array) 
 
     // Only decode if there supposed to be fields
     if (funABI.outputs && funABI.outputs.length > 0) {
-        let outputTypes: any[] = [];
+        const outputTypes: any[] = [];
         for (let i = 0; i < funABI.outputs.length; i++) {
             const type = funABI.outputs[i].type;
             const name = funABI.outputs[i].name ? ` ${funABI.outputs[i].name}` : '';
-            outputTypes.push(
-                type.indexOf('tuple') === 0 ? buildFullTypeNameDefinition(funABI.outputs[i]) : type + name
-            );
+            outputTypes.push(type.indexOf('tuple') === 0 ? buildFullTypeNameDefinition(funABI.outputs[i]) : type + name);
         }
         convertTypeNames(outputTypes);
 
