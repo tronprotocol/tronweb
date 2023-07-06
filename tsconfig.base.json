@@ -18,7 +18,8 @@
         "rootDir": "./",
         "strict": true,
         "sourceMap": true,
-        "target": "es2022"
+        "target": "es2022",
+        "resolveJsonModule": true
     },
     "exclude": ["src/protocol/**/*"],
     "include": ["src/**/*", "test/**/*"]
