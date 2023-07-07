@@ -1224,6 +1224,79 @@ export default class TransactionBuilder {
         return this._triggerSmartContract(...params);
     }
 
+    async deployConstantContract(options = {}) {
+        const {
+            input,
+            ownerAddress,
+            tokenId,
+            tokenValue,
+            callValue = 0,
+        } = options;
+        
+        this.validator.notValid([
+            {
+                name: 'input',
+                type: 'not-empty-string',
+                value: input,
+            },
+            {
+                name: 'callValue',
+                type: 'integer',
+                value: callValue,
+                gte: 0
+            },
+            {
+                name: 'owner',
+                type: 'address',
+                value: ownerAddress
+            },
+            {
+                name: 'tokenValue',
+                type: 'integer',
+                value: tokenValue,
+                gte: 0,
+                optional: true
+            },
+            {
+                name: 'tokenId',
+                type: 'integer',
+                value: tokenId,
+                gte: 0,
+                optional: true
+            }
+        ], (str) => {
+            throw new Error(str);
+        });
+        
+        const args = {
+            data: input,
+            owner_address: toHex(ownerAddress),
+            call_value: callValue,
+        }
+
+        if (tokenId) {
+            args.token_id = tokenId;
+        }
+        if (tokenValue) {
+            args.call_token_value = tokenValue;
+        }
+
+        const pathInfo = `wallet${options.confirmed ? 'solidity' : ''}/estimateenergy`;
+        return this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode']
+            .request(pathInfo, args, 'post')
+            .then(transaction => {
+                if (transaction.Error)
+                    throw new Error(transaction.Error);
+
+                if (transaction.result && transaction.result.message) {
+                    throw new Error(
+                        this.tronWeb.toUtf8(transaction.result.message)
+                    );
+                }
+                return transaction;
+            });
+    }
+
     _getTriggerSmartContractArgs(
         contractAddress,
         functionSelector,

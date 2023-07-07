@@ -3370,7 +3370,7 @@ describe('TronWeb.transactionBuilder', function () {
     });
   });
 
-  describe.only('#triggerSmartContractWithData', async function() {
+  describe('#triggerSmartContractWithData', async function() {
     let transaction;
     let contract1Address;
     let issuerAddress;
@@ -3542,4 +3542,16 @@ describe('TronWeb.transactionBuilder', function () {
         }
     });
   });
+
+  describe('#deployConstantContract', async function () {
+    it('should get the estimated energy of deploying a contract', async function () {
+        const receipt = await tronWeb.transactionBuilder.deployConstantContract({
+            input: testSetVal.bytecode,
+            ownerAddress: accounts.hex[1],
+        });
+        assert.isTrue(receipt.result.result);
+        assert.isDefined(receipt.energy_required);
+        assert.isNumber(receipt.energy_required);
+    })
+  })
 });
