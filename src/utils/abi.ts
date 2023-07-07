@@ -31,7 +31,7 @@ function deepCopy(target: any) {
     return newTarget;
 }
 
-export function decodeParams(names: string[], types: string[], output: string, ignoreMethodHash: boolean) {
+export function decodeParams(names: string[], types: string[], output: string, ignoreMethodHash: boolean = false) {
     if (ignoreMethodHash && output.replace(/^0x/, '').length % 64 === 8) output = '0x' + output.replace(/^0x/, '').substring(8);
 
     if (output.replace(/^0x/, '').length % 64) {

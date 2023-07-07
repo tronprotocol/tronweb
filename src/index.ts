@@ -1,12 +1,12 @@
 import providers from './lib/providers';
-import type { Providers } from './lib/providers';
+import type { Providers } from './lib/providers/index';
 import utils from './utils';
 import BigNumber from 'bignumber.js';
 import EventEmitter from 'eventemitter3';
 import { version } from '../package.json';
 import semver from 'semver';
 
-import TransactionBuilder from './lib/TransactionBuilder';
+// import TransactionBuilder from './lib/TransactionBuilder';
 // import Trx from 'lib/trx';
 // import Contract from 'lib/contract';
 // import Plugin from 'lib/plugin';
@@ -36,7 +36,7 @@ function isValidOptions(options: unknown): options is TronWebOptions {
 export default class TronWeb extends EventEmitter {
     static providers = providers;
     static BigNumber = BigNumber;
-    static TransactionBuilder = TransactionBuilder;
+    // static TransactionBuilder = TransactionBuilder;
     // static Trx = Trx;
     // static Contract = Contract;
     // static Plugin = Plugin;
@@ -44,7 +44,8 @@ export default class TronWeb extends EventEmitter {
     // static version = version;
     static utils = utils;
 
-    transactionBuilder: TransactionBuilder;
+    utils: typeof utils;
+    // transactionBuilder: TransactionBuilder;
     providers: Providers;
     BigNumber: typeof BigNumber;
     defaultBlock: number | false;
@@ -77,11 +78,11 @@ export default class TronWeb extends EventEmitter {
         if (isValidOptions(options)) {
             fullNode = options.fullNode || options.fullHost;
             sideOptions = solidityNode as string;
-            solidityNode = options.solidityNode || options.fullHost;
-            eventServer = options.eventServer || options.fullHost;
+            solidityNode = (options.solidityNode || options.fullHost)!;
+            eventServer = (options.eventServer || options.fullHost)!;
             headers = options.headers || false;
             eventHeaders = options.eventHeaders || headers;
-            privateKey = options.privateKey;
+            privateKey = options.privateKey!;
         } else {
             fullNode = options;
         }
@@ -92,10 +93,10 @@ export default class TronWeb extends EventEmitter {
         if (utils.isString(eventServer)) eventServer = new providers.HttpProvider(eventServer);
 
         // this.event = new Event(this);
-        this.transactionBuilder = new TransactionBuilder(this);
+        // this.transactionBuilder = new TransactionBuilder(this);
         // this.trx = new Trx(this);
         // this.plugin = new Plugin(this, options);
-        // this.utils = utils;
+        this.utils = utils;
 
         this.setFullNode(fullNode as HttpProvider);
         this.setSolidityNode(solidityNode as HttpProvider);

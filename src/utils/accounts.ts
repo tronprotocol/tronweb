@@ -23,10 +23,6 @@ export function generateAccount() {
     };
 }
 
-type RandomParamType = {
-    path?: string;
-};
-
 export function generateRandom() {
     const account = ethersWallet.createRandom();
 
