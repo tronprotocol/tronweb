@@ -1,11 +1,7 @@
 const path = require('path');
 const externals = require('webpack-node-externals');
 
-const {
-    baseConfig,
-    nodePlugins,
-    basePlugins,
-} = require('./webpack.base.config');
+const { baseConfig, nodePlugins, basePlugins } = require('./webpack.base.config');
 
 module.exports = [
     {
@@ -20,7 +16,7 @@ module.exports = [
             rules: [
                 {
                     test: /\.js$/,
-                    exclude: /(node_modules\/(?!ethers)|bower_components)/,
+                    exclude: /(node_modules|bower_components)/,
                     use: {
                         loader: 'babel-loader',
                         options: {
@@ -39,9 +35,17 @@ module.exports = [
                         },
                     },
                 },
+                {
+                    test: /\.ts$/,
+                    loader: 'ts-loader',
+                    options: {
+                        configFile: path.resolve(__dirname, 'tsconfig.cjs.json'),
+                    },
+                    exclude: ['/node_modules/', '/test/'],
+                },
             ],
         },
-        externals: [externals({ allowlist: ['ethers'] })],
+        externals: [externals()],
         target: 'node',
     },
     {
@@ -50,7 +54,7 @@ module.exports = [
             rules: [
                 {
                     test: /\.js$/,
-                    exclude: /(node_modules\/(?!ethers)|bower_components)/,
+                    exclude: /(node_modules|bower_components)/,
                     use: {
                         loader: 'babel-loader',
                         options: {
@@ -72,10 +76,7 @@ module.exports = [
                     test: /\.ts$/,
                     loader: 'ts-loader',
                     options: {
-                        configFile: path.resolve(
-                            __dirname,
-                            'tsconfig.cjs.json'
-                        ),
+                        configFile: path.resolve(__dirname, 'tsconfig.cjs.json'),
                     },
                     exclude: ['/node_modules/', '/test/'],
                 },
