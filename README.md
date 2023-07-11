@@ -189,6 +189,9 @@ __5.3.0__
 - Optimize argument validation for `createToken`, `updateToken` and `applyForSR` 
 - callValue can be 0 when the contract constructor is payable
 - Support shouldPollResponse to customize poll times ([#368](https://github.com/tronprotocol/tronweb/issues/368))
+- Support [Tip541](https://github.com/tronprotocol/tips/issues/541) by `transactionBuilder.cancelUnfreezeBalanceV2`
+- Support [Tip542](https://github.com/tronprotocol/tips/issues/542) by adding a parameter in `transactionBuilder.delegateResource`
+- Support estimate the energy used in contract deployment by `transactionBuilder.deployConstantContract`
 
 __5.2.0__
 - Support build transactions locally with protobuf 
