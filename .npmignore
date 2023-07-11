@@ -8,3 +8,7 @@ scripts
 src
 demo
 .vscode
+test-git-hash
+test-report
+pre-commit-result
+.editorconfig

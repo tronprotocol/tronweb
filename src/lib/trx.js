@@ -635,9 +635,9 @@ export default class Trx {
             ...utils.code.hexStr2byteArray(message)
         ];
 
-        const messageDigest = keccak256(messageBytes);
+        const messageDigest = keccak256(new Uint8Array(messageBytes));
         const recovered = recoverAddress(messageDigest, {
-            recoveryParam: signature.substring(128, 130) == '1c' ? 1 : 0,
+            yParity: signature.substring(128, 130) == '1c' ? 1 : 0,
             r: '0x' + signature.substring(0, 64),
             s: '0x' + signature.substring(64, 128)
         });
@@ -689,7 +689,7 @@ export default class Trx {
 
         const messageDigest = utils._TypedDataEncoder.hash(domain, types, value);
         const recovered = recoverAddress(messageDigest, {
-            recoveryParam: signature.substring(128, 130) == '1c' ? 1 : 0,
+            yParity: signature.substring(128, 130) == '1c' ? 1 : 0,
             r: '0x' + signature.substring(0, 64),
             s: '0x' + signature.substring(64, 128),
         });
@@ -767,19 +767,14 @@ export default class Trx {
 
     static signString(message, privateKey, useTronHeader = true) {
         message = message.replace(/^0x/, '');
-        const value ={
-            toHexString: function() {
-                return '0x' + privateKey
-            },
-            value: privateKey
-        }
+        const value = `0x${privateKey.replace(/^0x/, '')}`;
         const signingKey = new SigningKey(value);
         const messageBytes = [
             ...toUtf8Bytes(useTronHeader ? TRX_MESSAGE_HEADER : ETH_MESSAGE_HEADER),
             ...utils.code.hexStr2byteArray(message)
         ];
-        const messageDigest = keccak256(messageBytes);
-        const signature = signingKey.signDigest(messageDigest);
+        const messageDigest = keccak256(new Uint8Array(messageBytes));
+        const signature = signingKey.sign(messageDigest);
         const signatureHex = [
             '0x',
             signature.r.substring(2),

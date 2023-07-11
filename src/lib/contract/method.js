@@ -1,5 +1,4 @@
 import utils from 'utils';
-import {ADDRESS_PREFIX_REGEX} from 'utils/address';
 import {encodeParamsV2ByABI, decodeParamsV2ByABI} from 'utils/abi';
 import injectpromise from 'injectpromise';
 
@@ -11,7 +10,7 @@ const getFunctionSelector = abi => {
     if(abi.type === 'event') {
       return iface.getEvent(abi.name).format(utils.ethersUtils.FormatTypes.sighash);
     }
-    return iface.getFunction(abi.name).format(utils.ethersUtils.FormatTypes.sighash)
+    return iface.getFunction(abi.name).format(utils.ethersUtils.FormatTypes.sighash);
 }
 
 const decodeOutput = (abi, output) => {
@@ -37,7 +36,7 @@ export default class Method {
             feeLimit: this.tronWeb.feeLimit,
             callValue: 0,
             userFeePercentage: 100,
-            shouldPollResponse: false // Only used for sign()
+            shouldPollResponse: false, // Only used for sign()
         };
     }
 
@@ -243,7 +242,7 @@ export default class Method {
                 return callback(null, signedTransaction.txID);
 
             const checkResult = async (index = 0) => {
-                if (index === 20) {
+                if (index === (options.pollTimes || 20)) {
                     return callback({
                         error: 'Cannot find result in solidity node',
                         transaction: signedTransaction

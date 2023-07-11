@@ -5,8 +5,7 @@ const broadcaster = require('../helpers/broadcaster');
 const wait = require('../helpers/wait');
 const waitChainData = require('../helpers/waitChainData');
 const { testRevert, testConstant } = require('../fixtures/contracts');
-const ethers = require('ethers');
-const AbiCoder = ethers.utils.AbiCoder;
+const AbiCoder = TronWeb.utils.ethersUtils.AbiCoder;
 const assert = chai.assert;
 
 const {

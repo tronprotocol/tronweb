@@ -6,7 +6,7 @@ import {
     getPubKeyFromPriKey,
     pkToAddress,
 } from './crypto';
-import {ethersWallet} from './ethersUtils'
+import {ethersHDNodeWallet, Mnemonic} from './ethersUtils'
 import {TRON_BIP39_PATH_INDEX_0} from './address'
 import utils from './index';
 
@@ -39,31 +39,31 @@ export function generateRandom(options) {
         throw new Error(INVALID_TRON_PATH_ERROR_MSG);
     }
 
-    const account = ethersWallet.createRandom(options);
+    const account = ethersHDNodeWallet.createRandom(options.password, options.path, options.wordlist);
 
     const result = {
         mnemonic: account.mnemonic,
         privateKey: account.privateKey,
-        publicKey: account.publicKey,
+        publicKey: account.signingKey.publicKey,
         address: pkToAddress(account.privateKey.replace(/^0x/, ''))
     }
     
     return result;
 }
 
-export function generateAccountWithMnemonic(mnemonic, path, wordlist = 'en') {
+export function generateAccountWithMnemonic(mnemonic, path, wordlist = null) {
     if(!path) {
         path = TRON_BIP39_PATH_INDEX_0;
     }
     if(!String(path).match(/^m\/44\'\/195\'/)) {
         throw new Error(INVALID_TRON_PATH_ERROR_MSG);
     }
-    const account =  ethersWallet.fromMnemonic(mnemonic, path, wordlist);
+    const account =  ethersHDNodeWallet.fromMnemonic(Mnemonic.fromPhrase(mnemonic, null, wordlist), path);
 
     const result = {
         mnemonic: account.mnemonic,
         privateKey: account.privateKey,
-        publicKey: account.publicKey,
+        publicKey: account.signingKey.publicKey,
         address: pkToAddress(account.privateKey.replace(/^0x/, ''))
     }
 

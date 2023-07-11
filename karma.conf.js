@@ -82,7 +82,6 @@ module.exports = function (config) {
         },
         plugins: [
             require("karma-webpack"),
-            require("istanbul-instrumenter-loader"),
             require("karma-mocha"),
             require("karma-coverage"),
             require("karma-chrome-launcher"),

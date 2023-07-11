@@ -21,6 +21,8 @@ export default class SideChain {
         this.sidechain.trx.multiSign = (...args) => {
             return self.multiSign(...args);
         };
+
+        console.warn("TronWeb: 'tronWeb.sidechain' is deprecated and may be removed in the future. Please use the 'sunweb' sdk instead. For more information, see: https://github.com/tronprotocol/sun-network/tree/develop/js-sdk");
     }
     setMainGatewayAddress(mainGatewayAddress) {
         if (!this.isAddress(mainGatewayAddress))

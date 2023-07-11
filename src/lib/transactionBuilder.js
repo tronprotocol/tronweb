@@ -1,6 +1,6 @@
 import TronWeb from 'index';
 import utils from 'utils';
-import {AbiCoder} from 'utils/ethersUtils';
+import { AbiCoder } from '@ethersproject/abi';
 import Validator from 'paramValidator';
 import {ADDRESS_PREFIX_REGEX} from 'utils/address';
 import injectpromise from 'injectpromise';
@@ -568,10 +568,63 @@ export default class TransactionBuilder {
             .catch(err => callback(err));
     }
 
-    delegateResource(amount = 0, receiverAddress, resource = "BANDWIDTH", address = this.tronWeb.defaultAddress.hex, lock = false, options, callback = false) {
+    cancelUnfreezeBalanceV2(address = this.tronWeb.defaultAddress.hex, options, callback = false) {
         if (utils.isFunction(options)) {
             callback = options;
             options = {};
+        }
+
+        if (utils.isFunction(address)) {
+            callback = address;
+            options = {};
+            address = this.tronWeb.defaultAddress.hex;
+        } else if (utils.isObject(address)) {
+            options = address;
+            address = this.tronWeb.defaultAddress.hex;
+        }
+
+        if (!callback)
+            return this.injectPromise(this.cancelUnfreezeBalanceV2, address, options);
+
+        if (this.validator.notValid([
+            {
+                name: 'origin',
+                type: 'address',
+                value: address,
+            }
+        ], callback))
+            return;
+
+        const data = {
+            owner_address: toHex(address),
+        };
+
+        createTransaction(this.tronWeb, 'CancelAllUnfreezeV2Contract', data, options?.permissionId)
+            .then(transaction => callback(null, transaction))
+            .catch(err => callback(err));
+    }
+
+    delegateResource(
+        amount = 0,
+        receiverAddress,
+        resource = "BANDWIDTH",
+        address = this.tronWeb.defaultAddress.hex,
+        lock = false,
+        lockPeriod,
+        options,
+        callback = false
+    ) {
+        if (utils.isFunction(options)) {
+            callback = options;
+            options = {};
+        }
+
+        if (utils.isFunction(lockPeriod)) {
+            callback = lockPeriod;
+            lockPeriod = undefined;
+        } else if (utils.isObject(lockPeriod)) {
+            options = lockPeriod;
+            lockPeriod = undefined;
         }
 
         if (utils.isFunction(lock)) {
@@ -599,7 +652,7 @@ export default class TransactionBuilder {
         }
 
         if (!callback)
-            return this.injectPromise(this.delegateResource, amount, receiverAddress, resource, address, lock, options);
+            return this.injectPromise(this.delegateResource, amount, receiverAddress, resource, address, lock, lockPeriod, options);
 
         if (this.validator.notValid([
             {
@@ -628,6 +681,13 @@ export default class TransactionBuilder {
                 name: 'lock',
                 type: 'boolean',
                 value: lock
+            },
+            {
+                name: 'lock period',
+                type: 'integer',
+                gte: 0,
+                value: lockPeriod,
+                optional: true,
             }
         ], callback))
             return;
@@ -646,6 +706,9 @@ export default class TransactionBuilder {
         }
         if (lock) {
             data.lock = lock;
+            if (utils.isNotNullOrUndefined(lockPeriod)) {
+                data.lock_period = lockPeriod;
+            }
         }
 
         createTransaction(this.tronWeb, 'DelegateResourceContract', data, options?.permissionId)
@@ -822,7 +885,14 @@ export default class TransactionBuilder {
                 type: 'url',
                 value: url,
                 msg: 'Invalid url provided'
-            }
+            },
+            {
+                name: 'url',
+                type: 'string',
+                value: url,
+                lte: 256,
+                msg: 'Invalid url provided'
+            },
         ], callback))
             return;
 
@@ -1013,9 +1083,6 @@ export default class TransactionBuilder {
         ], callback))
             return;
 
-        if (payable && callValue == 0 && tokenValue == 0)
-            return callback('When contract is payable, options.callValue or options.tokenValue must be a positive integer');
-
         if (!payable && (callValue > 0 || tokenValue > 0))
             return callback('When contract is not payable, options.callValue and options.tokenValue must be 0');
 
@@ -1157,6 +1224,79 @@ export default class TransactionBuilder {
         return this._triggerSmartContract(...params);
     }
 
+    async deployConstantContract(options = {}) {
+        const {
+            input,
+            ownerAddress,
+            tokenId,
+            tokenValue,
+            callValue = 0,
+        } = options;
+        
+        this.validator.notValid([
+            {
+                name: 'input',
+                type: 'not-empty-string',
+                value: input,
+            },
+            {
+                name: 'callValue',
+                type: 'integer',
+                value: callValue,
+                gte: 0
+            },
+            {
+                name: 'owner',
+                type: 'address',
+                value: ownerAddress
+            },
+            {
+                name: 'tokenValue',
+                type: 'integer',
+                value: tokenValue,
+                gte: 0,
+                optional: true
+            },
+            {
+                name: 'tokenId',
+                type: 'integer',
+                value: tokenId,
+                gte: 0,
+                optional: true
+            }
+        ], (str) => {
+            throw new Error(str);
+        });
+        
+        const args = {
+            data: input,
+            owner_address: toHex(ownerAddress),
+            call_value: callValue,
+        }
+
+        if (tokenId) {
+            args.token_id = tokenId;
+        }
+        if (tokenValue) {
+            args.call_token_value = tokenValue;
+        }
+
+        const pathInfo = `wallet${options.confirmed ? 'solidity' : ''}/estimateenergy`;
+        return this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode']
+            .request(pathInfo, args, 'post')
+            .then(transaction => {
+                if (transaction.Error)
+                    throw new Error(transaction.Error);
+
+                if (transaction.result && transaction.result.message) {
+                    throw new Error(
+                        this.tronWeb.toUtf8(transaction.result.message)
+                    );
+                }
+                return transaction;
+            });
+    }
+
     _getTriggerSmartContractArgs(
         contractAddress,
         functionSelector,
@@ -1227,6 +1367,8 @@ export default class TransactionBuilder {
 
             args.function_selector = functionSelector;
             args.parameter = parameters;
+        } else if (options.input) {
+            args.data = options.input;
         }
 
         args.call_value = parseInt(callValue)
@@ -1574,7 +1716,7 @@ export default class TransactionBuilder {
         const {
             name = false,
             abbreviation = false,
-            description = false,
+            description = '',
             url = false,
             totalSupply = 0,
             trxRatio = 1, // How much TRX will `tokenRatio` cost?
@@ -1608,8 +1750,10 @@ export default class TransactionBuilder {
             },
             {
                 name: 'token abbreviation',
-                type: 'not-empty-string',
-                value: abbreviation
+                type: 'string',
+                value: abbreviation,
+                lte: 32,
+                gt: 0
             },
             {
                 name: 'token name',
@@ -1618,13 +1762,20 @@ export default class TransactionBuilder {
             },
             {
                 name: 'token description',
-                type: 'not-empty-string',
-                value: description
+                type: 'string',
+                value: description,
+                lte: 200
             },
             {
                 name: 'token url',
                 type: 'url',
                 value: url
+            },
+            {
+                name: 'token url',
+                type: 'string',
+                value: url,
+                lte: 256,
             },
             {
                 name: 'issuer',
@@ -1642,18 +1793,6 @@ export default class TransactionBuilder {
                 type: 'integer',
                 value: saleEnd,
                 gt: saleStart
-            },
-            {
-                name: 'Free bandwidth amount',
-                type: 'integer',
-                value: freeBandwidth,
-                gte: 0
-            },
-            {
-                name: 'Free bandwidth limit',
-                type: 'integer',
-                value: freeBandwidthLimit,
-                gte: 0
             },
             {
                 name: 'Frozen supply',
@@ -1687,8 +1826,6 @@ export default class TransactionBuilder {
             num: parseInt(tokenRatio),
             start_time: parseInt(saleStart),
             end_time: parseInt(saleEnd),
-            free_asset_net_limit: parseInt(freeBandwidth),
-            public_free_asset_net_limit: parseInt(freeBandwidthLimit),
             frozen_supply: [{
                 frozen_amount: parseInt(frozenAmount),
                 frozen_days: parseInt(frozenDuration)
@@ -1701,6 +1838,12 @@ export default class TransactionBuilder {
         });
         if (!(parseInt(frozenAmount) > 0)) {
             delete data.frozen_supply
+        }
+        if (freeBandwidth && !isNaN(parseInt(freeBandwidth)) && parseInt(freeBandwidth) >= 0) {
+            data.free_asset_net_limit = parseInt(freeBandwidth);
+        }
+        if (freeBandwidthLimit && !isNaN(parseInt(freeBandwidthLimit)) && parseInt(freeBandwidthLimit) >= 0) {
+            data.public_free_asset_net_limit = parseInt(freeBandwidthLimit);
         }
         if (precision && !isNaN(parseInt(precision))) {
             data.precision = parseInt(precision);
@@ -1779,7 +1922,7 @@ export default class TransactionBuilder {
                 name: 'Name',
                 type: 'string',
                 lte: 200,
-                gte: 0,
+                gt: 0,
                 value: accountName,
                 msg: 'Invalid accountName'
             },
@@ -1867,7 +2010,7 @@ export default class TransactionBuilder {
             return this.injectPromise(this.updateToken, options, issuerAddress);
 
         const {
-            description = false,
+            description = '',
             url = false,
             freeBandwidth = 0, // The creator's "donated" bandwidth for use by token holders
             freeBandwidthLimit = 0 // Out of `totalFreeBandwidth`, the amount each token holder get
@@ -1877,8 +2020,9 @@ export default class TransactionBuilder {
         if (this.validator.notValid([
             {
                 name: 'token description',
-                type: 'not-empty-string',
-                value: description
+                type: 'string',
+                value: description,
+                lte: 200
             },
             {
                 name: 'token url',
@@ -1886,20 +2030,16 @@ export default class TransactionBuilder {
                 value: url
             },
             {
+                name: 'token url',
+                type: 'string',
+                value: url,
+                lte: 256,
+            },
+            {
                 name: 'issuer',
                 type: 'address',
                 value: issuerAddress
             },
-            {
-                name: 'Free bandwidth amount',
-                type: 'positive-integer',
-                value: freeBandwidth
-            },
-            {
-                name: 'Free bandwidth limit',
-                type: 'positive-integer',
-                value: freeBandwidthLimit
-            }
         ], callback))
             return;
 
@@ -1907,9 +2047,14 @@ export default class TransactionBuilder {
             owner_address: toHex(issuerAddress),
             description: fromUtf8(description),
             url: fromUtf8(url),
-            new_limit: parseInt(freeBandwidth),
-            new_public_limit: parseInt(freeBandwidthLimit)
         };
+
+        if (freeBandwidth && !isNaN(parseInt(freeBandwidth)) && parseInt(freeBandwidth) >= 0) {
+            data.new_limit = parseInt(freeBandwidth);
+        }
+        if (freeBandwidthLimit && !isNaN(parseInt(freeBandwidthLimit)) && parseInt(freeBandwidthLimit) >= 0) {
+            data.new_public_limit = parseInt(freeBandwidthLimit);
+        }
 
         createTransaction(this.tronWeb, 'UpdateAssetContract', data, options?.permissionId)
             .then(transaction => callback(null, transaction))

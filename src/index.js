@@ -435,7 +435,7 @@ export default class TronWeb extends EventEmitter {
         return account
     }
 
-    static fromMnemonic(mnemonic, path = TRON_BIP39_PATH_INDEX_0, wordlist = 'en') {
+    static fromMnemonic(mnemonic, path = TRON_BIP39_PATH_INDEX_0, wordlist = null) {
         const account = utils.accounts.generateAccountWithMnemonic(mnemonic, path, wordlist);
 
         return account
