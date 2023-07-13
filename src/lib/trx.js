@@ -513,8 +513,11 @@ export default class Trx {
         if (!utils.isInteger(start) || start < 0)
             return callback('Invalid start of range provided');
 
-        if (!utils.isInteger(end) || end <= start)
+        if (!utils.isInteger(end) || end < start)
             return callback('Invalid end of range provided');
+
+        if (end + 1 - start > 100)
+            return callback('Invalid range size, which should be no more than 100.');
 
         this.tronWeb.fullNode.request('wallet/getblockbylimitnext', {
             startNum: parseInt(start),
