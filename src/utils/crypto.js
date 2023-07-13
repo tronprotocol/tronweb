@@ -5,7 +5,7 @@ import {encode58, decode58} from './base58';
 import {byte2hexStr, byteArray2hexStr} from './bytes';
 import {keccak256, sha256, SigningKey} from './ethersUtils';
 import {TypedDataEncoder} from './typedData';
-import * as ec from "ethereum-cryptography/secp256k1";
+import * as ec from "ethereum-cryptography/secp256k1.js";
 
 const secp = ec.secp256k1 ?? ec;
 
