@@ -8,7 +8,7 @@ const tests = [
         name: 'string("hello world")',
         message: 'hello world',
         messageHash: '0xcf02daeb2bea196ed5692322a66ed50080ce74ff8cb711199f1b04f3c13bc10d',
-        privateKey: '01',
+        privateKey: '0000000000000000000000000000000000000000000000000000000000000001',
         signature: '0x0dc0b53d525e0103a6013061cf18e60cf158809149f2b8994a545af65a7004cb1eeaff560e801ab51b28df5d42549aa024c2aa7e9d34de1e01294b9afb5e6c7e1c'
     },
     // message starts with 0x, and wanted to be treated as bytes, use TronWeb.utils.ethersUtils.arrayify to deal with the message first

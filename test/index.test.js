@@ -958,9 +958,9 @@ describe('TronWeb Instance', function () {
             const tronWeb = tronWebBuilder.createInstance();
 
             const accountCreated = await tronWeb.createRandom()
-    
             const newAccount = await tronWeb.fromMnemonic(accountCreated.mnemonic.phrase);
-      
+
+            assert.equal(newAccount.privateKey, accountCreated.privateKey);
             assert.equal(newAccount.privateKey.substring(2).length, 64);
             assert.equal(newAccount.publicKey.substring(2).length, 130);
             let address = tronWeb.address.fromPrivateKey(newAccount.privateKey.substring(2));

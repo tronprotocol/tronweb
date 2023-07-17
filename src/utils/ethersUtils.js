@@ -1,20 +1,39 @@
-import { utils, Wallet as ethersWallet } from "ethers";
+import {
+    keccak256,
+    sha256,
+    toUtf8Bytes,
+    toUtf8String,
+    recoverAddress,
+    SigningKey,
+    AbiCoder,
+    Signature,
+    concat,
+    id,
+    Mnemonic,
+    Wordlist,
+    wordlists,
+    Wallet as ethersWallet,
+    HDNodeWallet as ethersHDNodeWallet,
+    getBytes,
+    computeHmac,
+} from 'ethers';
 
-const keccak256 = utils.keccak256;
-const sha256 = utils.sha256;
-const toUtf8Bytes = utils.toUtf8Bytes;
-const toUtf8String = utils.toUtf8String;
-const recoverAddress = utils.recoverAddress;
-const SigningKey = utils.SigningKey;
-const AbiCoder = utils.AbiCoder;
-const Interface = utils.Interface;
-const FormatTypes = utils.FormatTypes;
-const arrayify = utils.arrayify;
-const splitSignature = utils.splitSignature;
-const joinSignature = utils.joinSignature;
-const concat = utils.concat;
-const id = utils.id;
-const isValidMnemonic = utils.isValidMnemonic;
+import { Interface } from './interface.js';
+
+const splitSignature = (sigBytes) => Signature.from(sigBytes);
+const joinSignature = (splitSig) => Signature.from(splitSig).serialized;
+const arrayify = (value) => getBytes(value);
+const FormatTypes = {
+    sighash: 'sighash',
+    minimal: 'minimal',
+    full: 'full',
+    json: 'json',
+};
+const isValidMnemonic = Mnemonic.isValidMnemonic;
+
+computeHmac.register((algorithm, key, data) => {
+    return computeHmac._(algorithm, Buffer.from(key), Buffer.from(data));
+});
 
 export {
     keccak256,
@@ -30,7 +49,11 @@ export {
     joinSignature,
     arrayify,
     ethersWallet,
+    ethersHDNodeWallet,
     concat,
     id,
-    isValidMnemonic
+    Mnemonic,
+    Wordlist,
+    wordlists,
+    isValidMnemonic,
 };

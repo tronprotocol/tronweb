@@ -10,6 +10,10 @@ export function hashMessage(message) {
         message = toUtf8Bytes(message);
     }
 
+    if (Array.isArray(message)) {
+        message = new Uint8Array(message);
+    }
+
     return keccak256(concat([
         toUtf8Bytes(TRON_MESSAGE_PREFIX),
         toUtf8Bytes(String(message.length)),
@@ -24,7 +28,7 @@ export function signMessage(message, privateKey) {
     
     const signingKey = new SigningKey(privateKey);
     const messageDigest = hashMessage(message);
-    const signature = signingKey.signDigest(messageDigest);
+    const signature = signingKey.sign(messageDigest);
     
     return joinSignature(signature)
 }

@@ -3,9 +3,15 @@ import {base64EncodeToString} from './code';
 import {base64DecodeFromString, hexStr2byteArray} from './code';
 import {encode58, decode58} from './base58';
 import {byte2hexStr, byteArray2hexStr} from './bytes';
-import {ec as EC} from 'elliptic';
 import {keccak256, sha256, SigningKey} from './ethersUtils';
 import {TypedDataEncoder} from './typedData';
+import * as ec from "ethereum-cryptography/secp256k1";
+
+const secp = ec.secp256k1 ?? ec;
+
+function normalizePrivateKeyBytes(priKeyBytes) {
+    return hexStr2byteArray(byteArray2hexStr(priKeyBytes).padStart(64, '0'));
+}
 
 export function getBase58CheckAddress(addressBytes) {
     const hash0 = SHA256(addressBytes);
@@ -78,16 +84,11 @@ export function signBytes(privateKey, contents) {
 }
 
 export function _signTypedData(domain, types, value, privateKey) {
-    const key = {
-        toHexString: function () {
-            return '0x' + privateKey;
-        },
-        value: privateKey,
-    };
+    const key = `0x${privateKey.replace(/^0x/, '')}`;
     const signingKey = new SigningKey(key);
 
     const messageDigest = TypedDataEncoder.hash(domain, types, value);
-    const signature = signingKey.signDigest(messageDigest);
+    const signature = signingKey.sign(messageDigest);
     const signatureHex = [
         '0x',
         signature.r.substring(2),
@@ -106,15 +107,10 @@ export function getRowBytesFromTransactionBase64(base64Data) {
 }
 
 export function genPriKey() {
-    const ec = new EC('secp256k1');
-    const key = ec.genKeyPair();
-    const priKey = key.getPrivate();
+    const priKey = secp.utils.randomPrivateKey();
+    let priKeyHex = byteArray2hexStr(priKey);
 
-    let priKeyHex = priKey.toString('hex');
-
-    while (priKeyHex.length < 64) {
-        priKeyHex = `0${priKeyHex}`;
-    }
+    priKeyHex = priKeyHex.padStart(64, '0');
 
     return hexStr2byteArray(priKeyHex);
 }
@@ -123,7 +119,7 @@ export function computeAddress(pubBytes) {
     if (pubBytes.length === 65)
         pubBytes = pubBytes.slice(1);
 
-    const hash = keccak256(pubBytes).toString().substring(2);
+    const hash = keccak256(new Uint8Array(pubBytes)).toString().substring(2);
     const addressHex = ADDRESS_PREFIX + hash.substring(24);
 
     return hexStr2byteArray(addressHex);
@@ -212,23 +208,12 @@ export function getAddressFromPriKeyBase64String(priKeyBase64String) {
 }
 
 export function getPubKeyFromPriKey(priKeyBytes) {
-    const ec = new EC('secp256k1');
-    const key = ec.keyFromPrivate(priKeyBytes, 'bytes');
-    const pubkey = key.getPublic();
+    const pubkey = secp.ProjectivePoint.fromPrivateKey(new Uint8Array(normalizePrivateKeyBytes(priKeyBytes)));
     const x = pubkey.x;
     const y = pubkey.y;
 
-    let xHex = x.toString('hex');
-
-    while (xHex.length < 64) {
-        xHex = `0${xHex}`;
-    }
-
-    let yHex = y.toString('hex');
-
-    while (yHex.length < 64) {
-        yHex = `0${yHex}`;
-    }
+    let xHex = x.toString(16).padStart(64, '0');
+    let yHex = y.toString(16).padStart(64, '0');
 
     const pubkeyHex = `04${xHex}${yHex}`;
     const pubkeyBytes = hexStr2byteArray(pubkeyHex);
@@ -237,29 +222,13 @@ export function getPubKeyFromPriKey(priKeyBytes) {
 }
 
 export function ECKeySign(hashBytes, priKeyBytes) {
-    const ec = new EC('secp256k1');
-    const key = ec.keyFromPrivate(priKeyBytes, 'bytes');
-    const signature = key.sign(hashBytes);
-    const r = signature.r;
-    const s = signature.s;
-    const id = signature.recoveryParam;
+    const signature = secp.sign(byteArray2hexStr(hashBytes), byteArray2hexStr(priKeyBytes))
 
-    let rHex = r.toString('hex');
+    const r = signature.r.toString(16);
+    const s = signature.s.toString(16);
+    const v = signature.recovery + 27;
 
-    while (rHex.length < 64) {
-        rHex = `0${rHex}`;
-    }
-
-    let sHex = s.toString('hex');
-
-    while (sHex.length < 64) {
-        sHex = `0${sHex}`;
-    }
-
-    const idHex = byte2hexStr(id);
-    const signHex = rHex + sHex + idHex;
-
-    return signHex;
+    return r.padStart(64, '0') + s.padStart(64, '0') + byte2hexStr(v);
 }
 
 export function SHA256(msgBytes) {
