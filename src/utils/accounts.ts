@@ -36,7 +36,7 @@ export function generateRandom() {
     return result;
 }
 
-export function generateAccountWithMnemonic(mnemonic: string, path: string, wordlist: Wordlist | null = null) {
+export function generateAccountWithMnemonic(mnemonic: string, path?: string, wordlist: Wordlist | null = null) {
     if (!path) {
         path = TRON_BIP39_PATH_INDEX_0;
     }
