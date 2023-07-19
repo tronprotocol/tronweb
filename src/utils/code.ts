@@ -1,11 +1,4 @@
-import {
-    byte2hexStr,
-    bytesToString,
-    hextoString,
-    byteArray2hexStr,
-    base64DecodeFromString,
-    base64EncodeToString,
-} from './bytes';
+import { byte2hexStr, bytesToString, hextoString, byteArray2hexStr, base64DecodeFromString, base64EncodeToString } from './bytes';
 import type { BytesLike } from './bytes';
 
 export function bin2String(array: BytesLike) {
@@ -13,7 +6,7 @@ export function bin2String(array: BytesLike) {
     return bytesToString(array);
 }
 
-export function arrayEquals(array1: any[], array2: any[], strict: boolean) {
+export function arrayEquals(array1: any[], array2: any[], strict: boolean = false) {
     if (array1.length != array2.length) return false;
 
     for (let i = 0; i < array1.length; i++) {
@@ -26,8 +19,6 @@ export function arrayEquals(array1: any[], array2: any[], strict: boolean) {
 }
 
 export function stringToBytes(str: string) {
-    if (typeof str !== 'string') throw new Error('The passed string is not a string');
-
     const bytes = new Array();
     let len: number;
     let c: number;
@@ -78,8 +69,6 @@ export function isHexChar(c: string) {
 
 // set strict as true: if the length of str is odd, add 0 before the str to make its length as even
 export function hexStr2byteArray(str: string, strict = false) {
-    if (typeof str !== 'string') throw new Error('The passed string is not a string');
-
     let len = str.length;
 
     if (strict) {
@@ -145,8 +134,6 @@ export function isNumber(c: string) {
 //return other: error
 export function getStringType(str: string) {
     if (null == str) return -1;
-
-    if (typeof str != 'string') return -1;
 
     if (str.length == 0 || str == '') return -1;
 

@@ -3,8 +3,6 @@ import { Base64 } from './base64';
 export type BytesLike = number[] | Uint8Array;
 
 export function byte2hexStr(byte: number) {
-    if (typeof byte !== 'number') throw new Error('Input must be a number');
-
     if (byte < 0 || byte > 255) throw new Error('Input must be a byte');
 
     const hexByteMap = '0123456789ABCDEF';
@@ -17,8 +15,6 @@ export function byte2hexStr(byte: number) {
 }
 
 export function bytesToString(arr: BytesLike) {
-    if (typeof arr === 'string') return arr;
-
     let str = '';
 
     for (let i = 0; i < arr.length; i++) {

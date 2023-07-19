@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-// @ts-ignore
 import TronWeb from '../setup/TronWeb';
 import jlog from './jlog';
 
