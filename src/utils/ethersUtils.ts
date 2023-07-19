@@ -18,7 +18,7 @@ import {
     computeHmac,
 } from 'ethers';
 
-import type { BytesLike, SignatureLike } from 'ethers';
+import { BytesLike, SignatureLike } from 'ethers';
 
 import { Interface } from './interface';
 

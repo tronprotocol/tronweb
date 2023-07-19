@@ -1,4 +1,4 @@
-import type { BytesLike } from './bytes';
+import { BytesLike } from './bytes';
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const ALPHABET_MAP = {} as Record<string, number>;
 

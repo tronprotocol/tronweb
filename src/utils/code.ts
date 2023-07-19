@@ -1,12 +1,5 @@
-import {
-    byte2hexStr,
-    bytesToString,
-    hextoString,
-    byteArray2hexStr,
-    base64DecodeFromString,
-    base64EncodeToString,
-} from './bytes';
-import type { BytesLike } from './bytes';
+import { byte2hexStr, bytesToString, hextoString, byteArray2hexStr, base64DecodeFromString, base64EncodeToString } from './bytes';
+import { BytesLike } from './bytes';
 
 export function bin2String(array: BytesLike) {
     // TODO Do we need this alias?

@@ -2,7 +2,7 @@ import { isAddress, toHex } from '../utils/address';
 import { isNotNullOrUndefined, isInteger, isString, isObject, isValidURL, isHex, isBoolean } from '../utils/validations';
 
 export type ValidatorParamType = {
-    value?: string | number | boolean;
+    value?: string | number | boolean | Record<string, unknown> | unknown[];
     type: unknown;
     name?: string;
     msg?: string;
