@@ -1,5 +1,7 @@
 {
     "compilerOptions": {
+        "allowJs": true,
+        "checkJs": false,
         "declaration": false,
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
@@ -21,6 +23,6 @@
         "target": "es2022",
         "resolveJsonModule": true
     },
-    "exclude": ["src/protocol/**/*"],
+    // "exclude": ["src/protocol/**/*"],
     "include": ["src/**/*", "test/**/*"]
 }

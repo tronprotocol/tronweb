@@ -1,12 +1,14 @@
+// @ts-nocheck
 import providers from './lib/providers';
-import type { Providers } from './lib/providers';
+import type { Providers } from './lib/providers/index';
 import utils from './utils';
 import BigNumber from 'bignumber.js';
 import EventEmitter from 'eventemitter3';
+
 import { version } from '../package.json';
 import semver from 'semver';
 
-import TransactionBuilder from './lib/TransactionBuilder';
+// import TransactionBuilder from './lib/TransactionBuilder';
 // import Trx from 'lib/trx';
 // import Contract from 'lib/contract';
 // import Plugin from 'lib/plugin';
@@ -36,15 +38,16 @@ function isValidOptions(options: unknown): options is TronWebOptions {
 export default class TronWeb extends EventEmitter {
     static providers = providers;
     static BigNumber = BigNumber;
-    static TransactionBuilder = TransactionBuilder;
+    // static TransactionBuilder = TransactionBuilder;
     // static Trx = Trx;
     // static Contract = Contract;
     // static Plugin = Plugin;
     // static Event = Event;
     // static version = version;
+    utils: typeof TronWeb.utils;
     static utils = utils;
 
-    transactionBuilder: TransactionBuilder;
+    // transactionBuilder: TransactionBuilder;
     providers: Providers;
     BigNumber: typeof BigNumber;
     defaultBlock: number | false;
@@ -77,11 +80,11 @@ export default class TronWeb extends EventEmitter {
         if (isValidOptions(options)) {
             fullNode = options.fullNode || options.fullHost;
             sideOptions = solidityNode as string;
-            solidityNode = options.solidityNode || options.fullHost;
-            eventServer = options.eventServer || options.fullHost;
+            solidityNode = (options.solidityNode || options.fullHost)!;
+            eventServer = (options.eventServer || options.fullHost)!;
             headers = options.headers || false;
             eventHeaders = options.eventHeaders || headers;
-            privateKey = options.privateKey;
+            privateKey = options.privateKey!;
         } else {
             fullNode = options;
         }
@@ -92,10 +95,10 @@ export default class TronWeb extends EventEmitter {
         if (utils.isString(eventServer)) eventServer = new providers.HttpProvider(eventServer);
 
         // this.event = new Event(this);
-        this.transactionBuilder = new TransactionBuilder(this);
+        // this.transactionBuilder = new TransactionBuilder(this);
         // this.trx = new Trx(this);
         // this.plugin = new Plugin(this, options);
-        // this.utils = utils;
+        this.utils = utils;
 
         this.setFullNode(fullNode as HttpProvider);
         this.setSolidityNode(solidityNode as HttpProvider);
@@ -111,29 +114,32 @@ export default class TronWeb extends EventEmitter {
             base58: false,
         };
 
-        [
-            'sha3',
-            'toHex',
-            'toUtf8',
-            'fromUtf8',
-            'toAscii',
-            'fromAscii',
-            'toDecimal',
-            'fromDecimal',
-            'toSun',
-            'fromSun',
-            'toBigNumber',
-            'isAddress',
-            'createAccount',
-            'address',
-            'version',
-            'createRandom',
-            'fromMnemonic',
-        ].forEach((key) => {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            this[key] = TronWeb[key];
-        });
+        // [
+        //     'sha3',
+        //     'toHex',
+        //     'toUtf8',
+        //     'fromUtf8',
+        //     'toAscii',
+        //     'fromAscii',
+        //     'toDecimal',
+        //     'fromDecimal',
+        //     'toSun',
+        //     'fromSun',
+        //     'toBigNumber',
+        //     'isAddress',
+        //     'createAccount',
+        //     'address',
+        //     'version',
+        //     'createRandom',
+        //     'fromMnemonic',
+        // ].forEach((key) => {
+        //     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //     // @ts-ignore
+        //     this[key] = TronWeb[key];
+        // });
+        this.sha3 = TronWeb.sha3;
+        this.fromUtf8 = TronWeb.fromUtf8;
+        this.address = TronWeb.address;
         // for sidechain
         // if (typeof sideOptions === 'object' && (sideOptions.fullNode || sideOptions.fullHost)) {
         //     this.sidechain = new SideChain(sideOptions, TronWeb, this, privateKey);
@@ -304,6 +310,7 @@ export default class TronWeb extends EventEmitter {
     //     return new Contract(this, abi, address);
     // }
 
+    address: typeof TronWeb.address;
     static get address() {
         return {
             fromHex(address: string) {
@@ -318,9 +325,10 @@ export default class TronWeb extends EventEmitter {
         };
     }
 
-    // static sha3(string, prefix = true) {
-    //     return (prefix ? '0x' : '') + keccak256(Buffer.from(string, 'utf-8')).toString().substring(2);
-    // }
+    sha3: typeof TronWeb.sha3;
+    static sha3(string: string, prefix = true) {
+        return (prefix ? '0x' : '') + keccak256(Buffer.from(string, 'utf-8')).toString().substring(2);
+    }
 
     // static toHex(val) {
     //     if (utils.isBoolean(val)) return TronWeb.fromDecimal(+val);
@@ -352,6 +360,7 @@ export default class TronWeb extends EventEmitter {
     //     }
     // }
 
+    fromUtf8: typeof TronWeb.fromUtf8;
     static fromUtf8(string: string) {
         if (!utils.isString(string)) {
             throw new Error('The passed value is not a valid utf-8 string');

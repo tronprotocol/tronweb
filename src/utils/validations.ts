@@ -135,7 +135,7 @@ export function parseEvent(event: EventQueryDataType, { inputs: abi }: { inputs:
     return event;
 }
 
-export function padLeft(input: string, padding: string, amount: number): string {
+export function padLeft(input: string | number, padding: string, amount: number): string {
     let res = input.toString();
 
     while (res.length < amount) res = padding + res;

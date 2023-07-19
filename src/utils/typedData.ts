@@ -1,7 +1,7 @@
 import TronWeb from '../index';
-import { keccak256 } from 'ethers';
-import { recoverAddress } from 'ethers';
 import {
+    keccak256,
+    recoverAddress,
     concat,
     defineProperties,
     getBigInt,
@@ -14,12 +14,9 @@ import {
     toTwos,
     zeroPadValue,
     assertArgument,
+    id,
 } from 'ethers';
-
-import { id } from 'ethers';
-
-import type { SignatureLike } from 'ethers';
-import type { BigNumberish, BytesLike } from 'ethers';
+import type { BigNumberish, BytesLike, SignatureLike } from 'ethers';
 
 import { ADDRESS_PREFIX_REGEX } from './address';
 
@@ -109,12 +106,7 @@ const domainFieldNames: Array<string> = ['name', 'version', 'chainId', 'verifyin
 
 function checkString(key: string): (value: any) => string {
     return function (value: any) {
-        assertArgument(
-            typeof value === 'string',
-            `invalid domain value for ${JSON.stringify(key)}`,
-            `domain.${key}`,
-            value
-        );
+        assertArgument(typeof value === 'string', `invalid domain value for ${JSON.stringify(key)}`, `domain.${key}`, value);
         return value;
     };
 }
@@ -130,6 +122,7 @@ const domainChecks: Record<string, (value: any) => any> = {
         }
         return toQuantity(value);
     },
+    // @ts-ignore
     verifyingContract: function (value: any) {
         try {
             return getTronAddress(value).toLowerCase();
@@ -164,12 +157,7 @@ function getBaseEncoder(type: string): null | ((value: any) => string) {
             return function (_value: BigNumberish) {
                 const value = getBigInt(_value, 'value');
 
-                assertArgument(
-                    value >= boundsLower && value <= boundsUpper,
-                    `value out-of-bounds for ${type}`,
-                    'value',
-                    value
-                );
+                assertArgument(value >= boundsLower && value <= boundsUpper, `value out-of-bounds for ${type}`, 'value', value);
 
                 return toBeHex(signed ? toTwos(value, 256) : value, 32);
             };
@@ -181,12 +169,7 @@ function getBaseEncoder(type: string): null | ((value: any) => string) {
         const match = type.match(/^bytes(\d+)$/);
         if (match) {
             const width = parseInt(match[1]);
-            assertArgument(
-                width !== 0 && width <= 32 && match[1] === String(width),
-                'invalid bytes width',
-                'type',
-                type
-            );
+            assertArgument(width !== 0 && width <= 32 && match[1] === String(width), 'invalid bytes width', 'type', type);
 
             return function (value: BytesLike) {
                 const bytes = getBytes(value);
@@ -298,12 +281,7 @@ export class TypedDataEncoder {
 
                 // Get the base type (drop any array specifiers)
                 const baseType = (<any>field.type.match(/^([^\x5b]*)(\x5b|$)/))[1] || null;
-                assertArgument(
-                    baseType !== name,
-                    `circular type reference to ${JSON.stringify(baseType)}`,
-                    'types',
-                    types
-                );
+                assertArgument(baseType !== name, `circular type reference to ${JSON.stringify(baseType)}`, 'types', types);
 
                 // Is this a base encoding type?
                 const encoder = getBaseEncoder(baseType);
@@ -375,6 +353,7 @@ export class TypedDataEncoder {
         return encoder;
     }
 
+    // @ts-ignore
     #getEncoder(type: string): (value: any) => string {
         // Basic encoder type (address, bool, uint256, etc)
         {
@@ -432,7 +411,7 @@ export class TypedDataEncoder {
     encodeType(name: string): string {
         const result = this.#fullTypes.get(name);
         assertArgument(result, `unknown type: ${JSON.stringify(name)}`, 'name', name);
-        return result;
+        return result!;
     }
 
     /**
@@ -555,22 +534,14 @@ export class TypedDataEncoder {
     /**
      *  Return the fully encoded [[link-eip-712]] %%value%% for %%types%% with %%domain%%.
      */
-    static encode(
-        domain: TypedDataDomain,
-        types: Record<string, Array<TypedDataField>>,
-        value: Record<string, any>
-    ): string {
+    static encode(domain: TypedDataDomain, types: Record<string, Array<TypedDataField>>, value: Record<string, any>): string {
         return concat(['0x1901', TypedDataEncoder.hashDomain(domain), TypedDataEncoder.from(types).hash(value)]);
     }
 
     /**
      *  Return the hash of the fully encoded [[link-eip-712]] %%value%% for %%types%% with %%domain%%.
      */
-    static hash(
-        domain: TypedDataDomain,
-        types: Record<string, Array<TypedDataField>>,
-        value: Record<string, any>
-    ): string {
+    static hash(domain: TypedDataDomain, types: Record<string, Array<TypedDataField>>, value: Record<string, any>): string {
         return keccak256(TypedDataEncoder.encode(domain, types, value));
     }
 
@@ -639,11 +610,7 @@ export class TypedDataEncoder {
      *  Returns the JSON-encoded payload expected by nodes which implement
      *  the JSON-RPC [[link-eip-712]] method.
      */
-    static getPayload(
-        domain: TypedDataDomain,
-        types: Record<string, Array<TypedDataField>>,
-        value: Record<string, any>
-    ): any {
+    static getPayload(domain: TypedDataDomain, types: Record<string, Array<TypedDataField>>, value: Record<string, any>): any {
         // Validate the domain fields
         TypedDataEncoder.hashDomain(domain);
 

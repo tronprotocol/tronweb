@@ -1,3 +1,4 @@
+// @ts-nocheck
 const google_protobuf_any_pb = require('@tronweb3/google-protobuf/google/protobuf/any_pb');
 
 const { Transaction, Permission, Key } = require('../protocol/core/Tron_pb');
@@ -425,9 +426,7 @@ const buildCreateSmartContract = (value, options) => {
 
             entryBuilder.setPayable(payable);
             if (stateMutability) {
-                entryBuilder.setStatemutability(
-                    SmartContract.ABI.Entry.StateMutabilityType[stateMutability.toUpperCase()]
-                );
+                entryBuilder.setStatemutability(SmartContract.ABI.Entry.StateMutabilityType[stateMutability.toUpperCase()]);
             }
 
             return entryBuilder;
@@ -547,12 +546,8 @@ const buildAssetIssueContract = (value, options) => {
     assetIssueContract.setPublicFreeAssetNetLimit(public_free_asset_net_limit);
     if (frozen_supply) {
         let frozenSupplyContract = new AssetIssueContract.FrozenSupply();
-        frozenSupplyContract.setFrozenAmount(
-            frozen_supply.length ? frozen_supply[0].frozen_amount : frozen_supply.frozen_amount
-        );
-        frozenSupplyContract.setFrozenDays(
-            frozen_supply.length ? frozen_supply[0].frozen_days : frozen_supply.frozen_days
-        );
+        frozenSupplyContract.setFrozenAmount(frozen_supply.length ? frozen_supply[0].frozen_amount : frozen_supply.frozen_amount);
+        frozenSupplyContract.setFrozenDays(frozen_supply.length ? frozen_supply[0].frozen_days : frozen_supply.frozen_days);
         assetIssueContract.addFrozenSupply(frozenSupplyContract);
     }
     return buildCommonTransaction(

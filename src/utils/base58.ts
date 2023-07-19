@@ -6,7 +6,7 @@ for (let i = 0; i < ALPHABET.length; i++) ALPHABET_MAP[ALPHABET.charAt(i)] = i;
 
 const BASE = 58;
 
-export function encode58(buffer: BytesLike) {
+export function encode58(buffer: BytesLike | string) {
     if (buffer.length === 0) return '';
 
     let i: number;
@@ -17,6 +17,7 @@ export function encode58(buffer: BytesLike) {
     for (i = 0; i < buffer.length; i++) {
         for (j = 0; j < digits.length; j++) digits[j] <<= 8;
 
+        // @ts-ignore
         digits[0] += buffer[i];
         let carry = 0;
 
