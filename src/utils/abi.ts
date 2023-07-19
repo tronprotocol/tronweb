@@ -84,6 +84,10 @@ function extractArrayDim(type: string) {
     return (size.match(/\]\[/g) || []).length + 1;
 }
 
+export interface ABI {
+    entrys?: ABIType[];
+}
+
 export type ParamType = {
     readonly name: string;
     readonly type: string;

@@ -28,7 +28,7 @@ export function fromPrivateKey(privateKey: string, strict = false) {
     }
 }
 
-export function isAddress(address: string): boolean {
+export function isAddress(address: unknown): boolean {
     if (!address || !isString(address)) return false;
 
     // Convert HEX to Base58
