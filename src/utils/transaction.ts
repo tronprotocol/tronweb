@@ -1,8 +1,10 @@
 // @ts-nocheck
-const google_protobuf_any_pb = require('@tronweb3/google-protobuf/google/protobuf/any_pb');
+import google_protobuf_any_pb from '@tronweb3/google-protobuf/google/protobuf/any_pb.js';
 
-const { Transaction, Permission, Key } = require('../protocol/core/Tron_pb');
+import * as TronPb from '../protocol/core/Tron_pb.cjs';
+const { Transaction, Permission, Key } = TronPb;
 
+import * as balanceContractPb from '../protocol/core/contract/balance_contract_pb.cjs';
 const {
     TransferContract,
     FreezeBalanceContract,
@@ -13,14 +15,12 @@ const {
     WithdrawExpireUnfreezeContract,
     DelegateResourceContract,
     UnDelegateResourceContract,
-} = require('../protocol/core/contract/balance_contract_pb');
-const {
-    TransferAssetContract,
-    ParticipateAssetIssueContract,
-    AssetIssueContract,
-    UpdateAssetContract,
-} = require('../protocol/core/contract/asset_issue_contract_pb');
+} = balanceContractPb;
 
+import * as assetIssueContractPb from '../protocol/core/contract/asset_issue_contract_pb.cjs';
+const { TransferAssetContract, ParticipateAssetIssueContract, AssetIssueContract, UpdateAssetContract } = assetIssueContractPb;
+
+import * as smartContractPb from '../protocol/core/contract/smart_contract_pb.cjs';
 const {
     TriggerSmartContract,
     ClearABIContract,
@@ -28,37 +28,30 @@ const {
     UpdateSettingContract,
     CreateSmartContract,
     SmartContract,
-} = require('../protocol/core/contract/smart_contract_pb');
+} = smartContractPb;
 
-const { ResourceCode } = require('../protocol/core/contract/common_pb');
+import * as commonPb from '../protocol/core/contract/common_pb.cjs';
+const { ResourceCode } = commonPb;
 
-const { WitnessCreateContract, VoteWitnessContract } = require('../protocol/core/contract/witness_contract_pb');
+import * as witnessContractPb from '../protocol/core/contract/witness_contract_pb.cjs';
+const { WitnessCreateContract, VoteWitnessContract } = witnessContractPb;
 
-const { UpdateBrokerageContract } = require('../protocol/core/contract/storage_contract_pb');
+import * as storageContractPb from '../protocol/core/contract/storage_contract_pb.cjs';
+const { UpdateBrokerageContract } = storageContractPb;
 
-const {
-    AccountCreateContract,
-    AccountUpdateContract,
-    SetAccountIdContract,
-    AccountPermissionUpdateContract,
-} = require('../protocol/core/contract/account_contract_pb');
+import * as accountContractPb from '../protocol/core/contract/account_contract_pb.cjs';
+const { AccountCreateContract, AccountUpdateContract, SetAccountIdContract, AccountPermissionUpdateContract } = accountContractPb;
 
-const {
-    ProposalCreateContract,
-    ProposalDeleteContract,
-    ProposalApproveContract,
-} = require('../protocol/core/contract/proposal_contract_pb');
+import * as proposalContractPb from '../protocol/core/contract/proposal_contract_pb.cjs';
+const { ProposalCreateContract, ProposalDeleteContract, ProposalApproveContract } = proposalContractPb;
 
-const {
-    ExchangeCreateContract,
-    ExchangeInjectContract,
-    ExchangeWithdrawContract,
-    ExchangeTransactionContract,
-} = require('../protocol/core/contract/exchange_contract_pb');
+import * as exchangeContractPb from '../protocol/core/contract/exchange_contract_pb.cjs';
+const { ExchangeCreateContract, ExchangeInjectContract, ExchangeWithdrawContract, ExchangeTransactionContract } =
+    exchangeContractPb;
 
-import { byteArray2hexStr } from './bytes';
-import { sha256, keccak256 } from './ethersUtils';
-import TronWeb from '../index';
+import { byteArray2hexStr } from './bytes.js';
+import { sha256, keccak256 } from './ethersUtils.js';
+import TronWeb from '../index.js';
 
 const fromHexString = (hexString: string) => {
     if (!hexString || hexString.length === 0) return new Uint8Array([]);

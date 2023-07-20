@@ -1,6 +1,6 @@
 // @ts-nocheck
-import tronWebBuilder from './tronWebBuilder';
-import wait from './wait';
+import tronWebBuilder from './tronWebBuilder.js';
+import wait from './wait.js';
 import chalk from 'chalk';
 const tronWeb = tronWebBuilder.createInstance();
 

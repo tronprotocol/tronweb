@@ -1,5 +1,5 @@
 import chai from 'chai';
-import tronWebBuilder from '../helpers/tronWebBuilder';
+import tronWebBuilder from '../helpers/tronWebBuilder.js';
 import BigNumber from 'bignumber.js';
 
 const assert = chai.assert;

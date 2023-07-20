@@ -1,6 +1,6 @@
-import { hexStr2byteArray, byteArray2hexStr } from './code';
-import { decodeBase58Address, getBase58CheckAddress, isAddressValid, pkToAddress } from './crypto';
-import { isHex, isString } from './validations';
+import { hexStr2byteArray, byteArray2hexStr } from './code.js';
+import { decodeBase58Address, getBase58CheckAddress, isAddressValid, pkToAddress } from './crypto.js';
+import { isHex, isString } from './validations.js';
 
 export const ADDRESS_SIZE = 34;
 export const ADDRESS_PREFIX = '41';

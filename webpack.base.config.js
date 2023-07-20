@@ -15,6 +15,9 @@ const baseConfig = {
     entry: path.resolve(__dirname, 'src', 'index.ts'),
     resolve: {
         extensions: ['.ts', '.js', '.cjs'],
+        extensionAlias: {
+            '.js': ['.ts', '.js', 'cjs'],
+        },
         modules: ['node_modules', path.resolve(__dirname, 'src')],
         fallback: {
             'querystring-es3': require.resolve('querystring-es3'),
