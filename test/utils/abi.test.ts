@@ -1,8 +1,8 @@
 import chai from 'chai';
-import config from '../helpers/config';
-import tronWebBuilder from '../helpers/tronWebBuilder';
-import testUtils from '../helpers/testUtils';
-import diskUtils from '../testcases/src/disk-utils';
+import config from '../helpers/config.js';
+import tronWebBuilder from '../helpers/tronWebBuilder.js';
+import testUtils from '../helpers/testUtils.js';
+import diskUtils from '../testcases/src/disk-utils.js';
 
 const assert = chai.assert;
 const { ADDRESS_HEX, ADDRESS_BASE58 } = config;

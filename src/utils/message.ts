@@ -1,7 +1,7 @@
-import { keccak256, toUtf8Bytes, concat, recoverAddress, SigningKey, joinSignature } from './ethersUtils';
-import { ADDRESS_PREFIX } from './address';
-import { getBase58CheckAddress } from './crypto';
-import { hexStr2byteArray } from './code';
+import { keccak256, toUtf8Bytes, concat, recoverAddress, SigningKey, joinSignature } from './ethersUtils.js';
+import { ADDRESS_PREFIX } from './address.js';
+import { getBase58CheckAddress } from './crypto.js';
+import { hexStr2byteArray } from './code.js';
 
 export const TRON_MESSAGE_PREFIX = '\x19TRON Signed Message:\n';
 

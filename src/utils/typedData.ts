@@ -1,4 +1,4 @@
-import TronWeb from '../index';
+import TronWeb from '../index.js';
 import {
     keccak256,
     recoverAddress,
@@ -18,7 +18,7 @@ import {
 } from 'ethers';
 import type { BigNumberish, BytesLike, SignatureLike } from 'ethers';
 
-import { ADDRESS_PREFIX_REGEX } from './address';
+import { ADDRESS_PREFIX_REGEX } from './address.js';
 
 function getAddress(address: string) {
     return TronWeb.address.toHex(address).replace(ADDRESS_PREFIX_REGEX, '0x');

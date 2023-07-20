@@ -1,5 +1,5 @@
 import axios, { Axios, AxiosRequestHeaders, Method } from 'axios';
-import { hasProperties, isObject, isValidURL } from '../../utils/validations';
+import { hasProperties, isObject, isValidURL } from '../../utils/validations.js';
 
 export default class HttpProvider {
     host: string;

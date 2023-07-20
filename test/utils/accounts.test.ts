@@ -1,6 +1,6 @@
 import chai from 'chai';
-import tronWebBuilder from '../helpers/tronWebBuilder';
-import assertThrow from '../helpers/assertThrow';
+import tronWebBuilder from '../helpers/tronWebBuilder.js';
+import assertThrow from '../helpers/assertThrow.js';
 
 const assert = chai.assert;
 

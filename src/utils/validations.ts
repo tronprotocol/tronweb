@@ -1,8 +1,8 @@
 import BigNumber from 'bignumber.js';
 import validator from 'validator';
-import { ParamType } from './abi';
+import { ParamType } from './abi.js';
 
-import { ADDRESS_PREFIX } from './address';
+import { ADDRESS_PREFIX } from './address.js';
 
 export function isValidURL(url: string): boolean {
     if (typeof url !== 'string') return false;

@@ -1,7 +1,7 @@
 // @ts-nocheck
-import providers from './lib/providers';
-import type { Providers } from './lib/providers/index';
-import utils from './utils';
+import providers from './lib/providers/index.js';
+import type { Providers } from './lib/providers/index.js';
+import utils from './utils/index.js';
 import BigNumber from 'bignumber.js';
 import EventEmitter from 'eventemitter3';
 
@@ -14,14 +14,14 @@ import semver from 'semver';
 // import Plugin from 'lib/plugin';
 // import Event from 'lib/event';
 // import SideChain from 'lib/sidechain';
-import { keccak256 } from './utils/ethersUtils';
-import { ADDRESS_PREFIX, fromHex, fromPrivateKey, isAddress, toHex, TRON_BIP39_PATH_INDEX_0 } from './utils/address';
+import { keccak256 } from './utils/ethersUtils.js';
+import { ADDRESS_PREFIX, fromHex, fromPrivateKey, isAddress, toHex, TRON_BIP39_PATH_INDEX_0 } from './utils/address.js';
 import { AxiosRequestHeaders } from 'axios';
-import HttpProvider from './lib/providers/HttpProvider';
-import { decodeBase58Address, getBase58CheckAddress, isAddressValid, pkToAddress } from './utils/crypto';
-import { byteArray2hexStr } from './utils/bytes';
-import { hexStr2byteArray } from './utils/code';
-import { isString } from './utils/validations';
+import HttpProvider from './lib/providers/HttpProvider.js';
+import { decodeBase58Address, getBase58CheckAddress, isAddressValid, pkToAddress } from './utils/crypto.js';
+import { byteArray2hexStr } from './utils/bytes.js';
+import { hexStr2byteArray } from './utils/code.js';
+import { isString } from './utils/validations.js';
 import { DefaultAddress, NodeService, TronWebOptions } from './types/TronWeb';
 
 const DEFAULT_VERSION = '4.7.1';

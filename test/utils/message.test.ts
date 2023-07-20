@@ -1,10 +1,10 @@
 import chai from 'chai';
-import tronWebBuilder from '../helpers/tronWebBuilder';
+import tronWebBuilder from '../helpers/tronWebBuilder.js';
 const TronWeb = tronWebBuilder.TronWeb;
 
 const assert = chai.assert;
 
-import messageCases from '../testcases/src/sign-message';
+import messageCases from '../testcases/src/sign-message.js';
 const tests = messageCases.tests;
 
 describe('TronWeb.utils.message', function () {

@@ -1,4 +1,4 @@
-import tronWebBuilder from './tronWebBuilder';
+import tronWebBuilder from './tronWebBuilder.js';
 
 const amount = Number(process.argv[2]) || 10;
 

@@ -1,11 +1,10 @@
-import { ADDRESS_PREFIX, ADDRESS_PREFIX_BYTE, ADDRESS_SIZE } from './address';
-import { base64EncodeToString } from './code';
-import { base64DecodeFromString, hexStr2byteArray } from './code';
-import { encode58, decode58 } from './base58';
-import { BytesLike, byte2hexStr, byteArray2hexStr } from './bytes';
-import { keccak256, sha256, SigningKey } from './ethersUtils';
-import { TypedDataEncoder } from './typedData';
-import * as ec from 'ethereum-cryptography/secp256k1';
+import { ADDRESS_PREFIX, ADDRESS_PREFIX_BYTE, ADDRESS_SIZE } from './address.js';
+import { base64EncodeToString, base64DecodeFromString, hexStr2byteArray } from './code.js';
+import { encode58, decode58 } from './base58.js';
+import { BytesLike, byte2hexStr, byteArray2hexStr } from './bytes.js';
+import { keccak256, sha256, SigningKey } from './ethersUtils.js';
+import { TypedDataEncoder } from './typedData.js';
+import * as ec from 'ethereum-cryptography/secp256k1.js';
 
 const secp = ec.secp256k1 ?? ec;
 import { TypedDataDomain, TypedDataField } from 'ethers';
@@ -92,12 +91,7 @@ export function _signTypedData(
 
     const messageDigest = TypedDataEncoder.hash(domain, types, value);
     const signature = signingKey.sign(messageDigest);
-    const signatureHex = [
-        '0x',
-        signature.r.substring(2),
-        signature.s.substring(2),
-        Number(signature.v).toString(16),
-    ].join('');
+    const signatureHex = ['0x', signature.r.substring(2), signature.s.substring(2), Number(signature.v).toString(16)].join('');
     return signatureHex;
 }
 

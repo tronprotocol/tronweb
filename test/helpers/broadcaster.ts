@@ -1,4 +1,4 @@
-const tronWebBuilder = require('../helpers/tronWebBuilder');
+const tronWebBuilder = require('../helpers/tronWebBuilder.js');
 
 export default async function (func: Function, pk: string, transaction?: any) {
     const tronWeb = tronWebBuilder.createInstance();

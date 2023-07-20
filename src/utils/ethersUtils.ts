@@ -20,7 +20,7 @@ import {
 
 import type { BytesLike, SignatureLike } from 'ethers';
 
-import { Interface } from './interface';
+import { Interface } from './interface.js';
 
 const splitSignature = (sigBytes: SignatureLike) => Signature.from(sigBytes);
 const joinSignature = (splitSig: SignatureLike) => Signature.from(splitSig).serialized;

@@ -1,4 +1,4 @@
-import { Base64 } from './base64';
+import { Base64 } from './base64.js';
 
 export type BytesLike = number[] | Uint8Array;
 
