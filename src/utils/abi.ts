@@ -1,6 +1,6 @@
 import { AbiCoder } from '@ethersproject/abi';
-import TronWeb from '../index';
-import { ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX } from './address';
+import TronWeb from '../index.js';
+import { ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX } from './address.js';
 
 const abiCoder = new AbiCoder();
 
@@ -82,6 +82,10 @@ function extractSize(type: string) {
 function extractArrayDim(type: string) {
     const size = extractSize(type);
     return (size.match(/\]\[/g) || []).length + 1;
+}
+
+export interface ABI {
+    entrys?: ABIType[];
 }
 
 export type ParamType = {

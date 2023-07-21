@@ -3,6 +3,7 @@ module.exports = {
         browser: true,
         es2021: true,
         node: true,
+        mocha: true,
     },
     extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'prettier'],
     overrides: [
@@ -15,6 +16,15 @@ module.exports = {
                 sourceType: 'script',
             },
         },
+        {
+            env: {
+                node: true,
+            },
+            files: ['./test/**'],
+            rules: {
+                '@typescript-eslint/no-var-requires': 'off',
+            },
+        },
     ],
     parser: '@typescript-eslint/parser',
     parserOptions: {
@@ -22,5 +32,8 @@ module.exports = {
         sourceType: 'module',
     },
     plugins: ['@typescript-eslint'],
-    rules: {},
+    rules: {
+        'no-unused-vars': 'off',
+        '@typescript-eslint/no-unused-vars': 'warn',
+    },
 };

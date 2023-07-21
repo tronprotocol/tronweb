@@ -1,4 +1,4 @@
-import HttpProvider from './HttpProvider';
+import HttpProvider from './HttpProvider.js';
 export interface Providers {
     HttpProvider: typeof HttpProvider;
 }

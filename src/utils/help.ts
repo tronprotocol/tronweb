@@ -1,7 +1,7 @@
-import { hexStr2byteArray } from './code';
-import { ADDRESS_PREFIX } from './address';
-import { getBase58CheckAddress, decodeBase58Address } from './crypto';
-import { byteArray2hexStr } from './bytes';
+import { hexStr2byteArray } from './code.js';
+import { ADDRESS_PREFIX } from './address.js';
+import { getBase58CheckAddress, decodeBase58Address } from './crypto.js';
+import { byteArray2hexStr } from './bytes.js';
 
 export function hexStringToBase58(sHexString: string) {
     if (sHexString.length < 2 || (sHexString.length & 1) != 0) return '';

@@ -1,4 +1,4 @@
-import tronWebBuilder from '../../helpers/tronWebBuilder';
+import tronWebBuilder from '../../helpers/tronWebBuilder.js';
 const TronWeb = tronWebBuilder.TronWeb;
 
 const tests = [

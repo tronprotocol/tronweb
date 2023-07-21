@@ -1,8 +1,8 @@
 import chalk from 'chalk';
-import TronWeb from '../setup/TronWeb';
-import jlog from './jlog';
+import TronWeb from '../setup/TronWeb.js';
+import jlog from './jlog.js';
 
-import config from './config';
+import config from './config.js';
 const { FULL_NODE_API, PRIVATE_KEY } = config;
 
 const createInstance = (extraOptions = {}) => {
