@@ -1,13 +1,11 @@
-import TronWeb from '../../index';
-import { AbiCoder } from '../../utils/ethersUtils';
-import { ADDRESS_PREFIX_REGEX, toHex } from '../../utils/address';
-import { ABIType, encodeParamsV2ByABI } from '../../utils/abi';
-import { CreateSmartContractTransaction, SignedTransaction, Transaction, TransactionCapsule } from '../../types/Transaction';
-import { keccak256 } from '../../utils/ethersUtils';
-import Validator from '../../paramValidator/index';
-
-import { GetSignWeightResponse } from '../../types/APIResponse';
-import { isArray, isInteger, isNotNullOrUndefined, isObject, isString } from '../../utils/validations';
+import TronWeb from '../../index.js';
+import { AbiCoder, keccak256 } from '../../utils/ethersUtils.js';
+import { ADDRESS_PREFIX_REGEX, toHex } from '../../utils/address.js';
+import { ABIType, encodeParamsV2ByABI } from '../../utils/abi.js';
+import { CreateSmartContractTransaction, SignedTransaction, Transaction, TransactionCapsule } from '../../types/Transaction.js';
+import Validator from '../../paramValidator/index.js';
+import { GetSignWeightResponse } from '../../types/APIResponse.js';
+import { isArray, isInteger, isNotNullOrUndefined, isObject, isString } from '../../utils/validations.js';
 import {
     AccountPermissionUpdateContract,
     AssetIssueContract,
@@ -21,7 +19,7 @@ import {
     UnDelegateResourceContract,
     UnfreezeBalanceV2Contract,
     UpdateAssetContract,
-} from '../../types/Contract';
+} from '../../types/Contract.js';
 import {
     AlterTransactionOptions,
     CreateSmartContractOptions,
@@ -41,8 +39,8 @@ import {
     TxLocal,
     UpdateTokenOptions,
     VoteInfo,
-} from './helper';
-import { Address } from '../../types/Trx';
+} from './helper.js';
+import { Address } from '../../types/Trx.js';
 
 export default class TransactionBuilder {
     tronWeb: TronWeb;

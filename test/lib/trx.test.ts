@@ -16,7 +16,7 @@ const tests = signMessageTests.tests;
 const testRevertContract = contracts.testRevert;
 const { ADDRESS_BASE58, PRIVATE_KEY, getTokenOptions, SIGNED_HEX_TRANSACTION, FULL_NODE_API } = config;
 
-describe.only('TronWeb.trx', function () {
+describe('TronWeb.trx', function () {
     let accounts: {
         hex: Address[];
         b58: Address[];

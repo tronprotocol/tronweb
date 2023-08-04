@@ -1,5 +1,5 @@
-import { Permission } from './Contract';
-import { SignedTransaction, Transaction } from './Transaction';
+import { Permission } from './Contract.js';
+import { SignedTransaction, Transaction } from './Transaction.js';
 
 type HTTPMap<T extends string | number | symbol, U> = Record<T, U>[];
 
