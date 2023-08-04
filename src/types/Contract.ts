@@ -37,8 +37,8 @@ export enum ContractType {
     ShieldedTransferContract = 'ShieldedTransferContract',
     MarketSellAssetContract = 'MarketSellAssetContract',
     MarketCancelOrderContract = 'MarketCancelOrderContract',
-    FreezeBalanceV2Contract = 'Contract',
-    UnfreezeBalanceV2Contract = 'Contract',
+    FreezeBalanceV2Contract = 'FreezeBalanceV2Contract',
+    UnfreezeBalanceV2Contract = 'UnfreezeBalanceV2Contract',
     WithdrawExpireUnfreezeContract = 'WithdrawExpireUnfreezeContract',
     DelegateResourceContract = 'DelegateResourceContract',
     UnDelegateResourceContract = 'UnDelegateResourceContract',
@@ -70,7 +70,7 @@ export interface PermissionKey {
 export interface Permission {
     type: number;
     /** Owner id=0, Witness id=1, Active id start by 2 */
-    id: number;
+    id?: number;
     permission_name: string;
     threshold: number;
     operations?: string;

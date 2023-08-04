@@ -29,7 +29,6 @@
         "build:all": "npm run clean:all && npm run build:esm && npm run build:cjs && npm run build:types && npm run build:dist",
         "prepare": "npm run build",
         "build": "npm run clean && webpack --config webpack.config.js --progress --color",
-        "build:es": "npm run clean && webpack --config webpack.es.config.js --progress --color",
         "build:dev": "NODE_ENV=development npm run build",
         "clean:all": "rimraf dist lib",
         "clean": "rimraf dist",
@@ -61,10 +60,9 @@
         "eventemitter3": "^3.1.0",
         "events": "^3.3.0",
         "injectpromise": "^1.0.0",
-        "lodash": "^4.17.21",
         "querystring-es3": "^0.2.1",
         "semver": "^5.6.0",
-        "typescript": "^5.0.4",
+        "typescript": "^5.1.6",
         "validator": "^13.7.0"
     },
     "devDependencies": {

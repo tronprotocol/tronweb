@@ -112,10 +112,7 @@ export interface PermissionId {
 
 export type NumberLike = string | number;
 
-export enum Resource {
-    BANDWIDTH = 'BANDWIDTH',
-    ENERGY = 'ENERGY',
-}
+export type Resource = 'BANDWIDTH' | 'ENERGY';
 
 export interface VoteInfo {
     [srAddress: string]: number;
@@ -150,7 +147,7 @@ export interface CreateSmartContractOptions {
     /**
      * Abi string
      */
-    abi: string;
+    abi: string | { entrys: ABIType[] } | ABIType[];
     /**
      * Bytecode, default hexString.
      */
@@ -278,11 +275,11 @@ export interface CreateTokenOptions {
     /**
      * @todo: desc
      */
-    voteScore: number;
+    voteScore?: number;
     /**
      * Precision of issued tokens.
      */
-    precision: number;
+    precision?: number;
     /**
      * Optional, for multi-signature use.
      */

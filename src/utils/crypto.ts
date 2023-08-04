@@ -8,6 +8,7 @@ import * as ec from 'ethereum-cryptography/secp256k1.js';
 
 const secp = ec.secp256k1 ?? ec;
 import { TypedDataDomain, TypedDataField } from 'ethers';
+import { SignedTransaction } from '../types/Transaction.js';
 
 function normalizePrivateKeyBytes(priKeyBytes: BytesLike) {
     return hexStr2byteArray(byteArray2hexStr(priKeyBytes).padStart(64, '0'));
@@ -55,7 +56,7 @@ export function decodeBase58Address(base58Sting: string) {
 }
 
 // @TODO transaction type should be determined.
-export function signTransaction(priKeyBytes: string | BytesLike, transaction: any) {
+export function signTransaction(priKeyBytes: string | BytesLike, transaction: any): SignedTransaction {
     if (typeof priKeyBytes === 'string') priKeyBytes = hexStr2byteArray(priKeyBytes);
 
     const txID = transaction.txID;

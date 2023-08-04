@@ -8,8 +8,8 @@ import EventEmitter from 'eventemitter3';
 import { version } from '../package.json';
 import semver from 'semver';
 
-// import TransactionBuilder from './lib/TransactionBuilder';
-// import Trx from 'lib/trx';
+import TransactionBuilder from './lib/TransactionBuilder/TransactionBuilder.js';
+import Trx from './lib/trx.js';
 // import Contract from 'lib/contract';
 // import Plugin from 'lib/plugin';
 // import Event from 'lib/event';
@@ -38,8 +38,8 @@ function isValidOptions(options: unknown): options is TronWebOptions {
 export default class TronWeb extends EventEmitter {
     static providers = providers;
     static BigNumber = BigNumber;
-    // static TransactionBuilder = TransactionBuilder;
-    // static Trx = Trx;
+    static TransactionBuilder = TransactionBuilder;
+    static Trx = Trx;
     // static Contract = Contract;
     // static Plugin = Plugin;
     // static Event = Event;
@@ -47,7 +47,8 @@ export default class TronWeb extends EventEmitter {
     utils: typeof TronWeb.utils;
     static utils = utils;
 
-    // transactionBuilder: TransactionBuilder;
+    trx: Trx;
+    transactionBuilder: TransactionBuilder;
     providers: Providers;
     BigNumber: typeof BigNumber;
     defaultBlock: number | false;
@@ -95,8 +96,8 @@ export default class TronWeb extends EventEmitter {
         if (utils.isString(eventServer)) eventServer = new providers.HttpProvider(eventServer);
 
         // this.event = new Event(this);
-        // this.transactionBuilder = new TransactionBuilder(this);
-        // this.trx = new Trx(this);
+        this.transactionBuilder = new TransactionBuilder(this);
+        this.trx = new Trx(this);
         // this.plugin = new Plugin(this, options);
         this.utils = utils;
 
@@ -140,6 +141,13 @@ export default class TronWeb extends EventEmitter {
         this.sha3 = TronWeb.sha3;
         this.fromUtf8 = TronWeb.fromUtf8;
         this.address = TronWeb.address;
+        this.toUtf8 = TronWeb.toUtf8;
+        this.isAddress = TronWeb.isAddress;
+        this.fromAscii = TronWeb.fromAscii;
+        this.toHex = TronWeb.toHex;
+        this.toBigNumber = TronWeb.toBigNumber;
+        this.fromDecimal = TronWeb.fromDecimal;
+        this.createAccount = TronWeb.createAccount;
         // for sidechain
         // if (typeof sideOptions === 'object' && (sideOptions.fullNode || sideOptions.fullHost)) {
         //     this.sidechain = new SideChain(sideOptions, TronWeb, this, privateKey);
@@ -330,35 +338,38 @@ export default class TronWeb extends EventEmitter {
         return (prefix ? '0x' : '') + keccak256(Buffer.from(string, 'utf-8')).toString().substring(2);
     }
 
-    // static toHex(val) {
-    //     if (utils.isBoolean(val)) return TronWeb.fromDecimal(+val);
+    toHex: typeof TronWeb.toHex;
+    static toHex(val: any) {
+        if (utils.isBoolean(val)) return TronWeb.fromDecimal(+val);
 
-    //     if (utils.isBigNumber(val)) return TronWeb.fromDecimal(val);
+        if (utils.isBigNumber(val)) return TronWeb.fromDecimal(val);
 
-    //     if (typeof val === 'object') return TronWeb.fromUtf8(JSON.stringify(val));
+        if (typeof val === 'object') return TronWeb.fromUtf8(JSON.stringify(val));
 
-    //     if (utils.isString(val)) {
-    //         if (/^(-|)0x/.test(val)) return val;
+        if (utils.isString(val)) {
+            if (/^(-|)0x/.test(val)) return val;
 
-    //         if (!isFinite(val) || /^\s*$/.test(val)) return TronWeb.fromUtf8(val);
-    //     }
+            // @ts-ignore
+            if (!isFinite(val) || /^\s*$/.test(val)) return TronWeb.fromUtf8(val);
+        }
 
-    //     let result = TronWeb.fromDecimal(val);
-    //     if (result === '0xNaN') {
-    //         throw new Error('The passed value is not convertible to a hex string');
-    //     } else {
-    //         return result;
-    //     }
-    // }
+        let result = TronWeb.fromDecimal(val);
+        if (result === '0xNaN') {
+            throw new Error('The passed value is not convertible to a hex string');
+        } else {
+            return result;
+        }
+    }
 
-    // static toUtf8(hex) {
-    //     if (utils.isHex(hex)) {
-    //         hex = hex.replace(/^0x/, '');
-    //         return Buffer.from(hex, 'hex').toString('utf8');
-    //     } else {
-    //         throw new Error('The passed value is not a valid hex string');
-    //     }
-    // }
+    toUtf8: typeof TronWeb.toUtf8;
+    static toUtf8(hex: string) {
+        if (utils.isHex(hex)) {
+            hex = hex.replace(/^0x/, '');
+            return Buffer.from(hex, 'hex').toString('utf8');
+        } else {
+            throw new Error('The passed value is not a valid hex string');
+        }
+    }
 
     fromUtf8: typeof TronWeb.fromUtf8;
     static fromUtf8(string: string) {
@@ -386,23 +397,25 @@ export default class TronWeb extends EventEmitter {
     //     }
     // }
 
-    // static fromAscii(string, padding) {
-    //     if (!utils.isString(string)) {
-    //         throw new Error('The passed value is not a valid utf-8 string');
-    //     }
-    //     return '0x' + Buffer.from(string, 'ascii').toString('hex').padEnd(padding, '0');
-    // }
+    fromAscii: typeof TronWeb.fromAscii;
+    static fromAscii(string: string, padding?: number) {
+        if (!utils.isString(string)) {
+            throw new Error('The passed value is not a valid utf-8 string');
+        }
+        return '0x' + Buffer.from(string, 'ascii').toString('hex').padEnd(padding!, '0');
+    }
 
     // static toDecimal(value) {
     //     return TronWeb.toBigNumber(value).toNumber();
     // }
 
-    // static fromDecimal(value) {
-    //     const number = TronWeb.toBigNumber(value);
-    //     const result = number.toString(16);
+    fromDecimal: typeof TronWeb.fromDecimal;
+    static fromDecimal(value: number | BigNumber) {
+        const number = TronWeb.toBigNumber(value);
+        const result = number.toString(16);
 
-    //     return number.isLessThan(0) ? '-0x' + result.substr(1) : '0x' + result;
-    // }
+        return number.isLessThan(0) ? '-0x' + result.substr(1) : '0x' + result;
+    }
 
     // static fromSun(sun) {
     //     const trx = TronWeb.toBigNumber(sun).div(1_000_000);
@@ -414,23 +427,26 @@ export default class TronWeb extends EventEmitter {
     //     return utils.isBigNumber(trx) ? sun : sun.toString(10);
     // }
 
-    // static toBigNumber(amount = 0) {
-    //     if (utils.isBigNumber(amount)) return amount;
+    toBigNumber: typeof TronWeb.toBigNumber;
+    static toBigNumber(amount: string | number | BigNumber = 0) {
+        if (utils.isBigNumber(amount)) return amount;
 
-    //     if (utils.isString(amount) && /^(-|)0x/.test(amount)) return new BigNumber(amount.replace('0x', ''), 16);
+        if (utils.isString(amount) && /^(-|)0x/.test(amount)) return new BigNumber(amount.replace('0x', ''), 16);
 
-    //     return new BigNumber(amount.toString(10), 10);
-    // }
+        return new BigNumber(amount.toString(10), 10);
+    }
 
+    isAddress: typeof TronWeb.isAddress;
     static isAddress(address = ''): boolean {
         return isAddress(address);
     }
 
-    // static async createAccount() {
-    //     const account = utils.accounts.generateAccount();
+    createAccount: typeof TronWeb.createAccount;
+    static async createAccount() {
+        const account = utils.accounts.generateAccount();
 
-    //     return account;
-    // }
+        return account;
+    }
 
     // static createRandom(options) {
     //     const account = utils.accounts.generateRandom(options);

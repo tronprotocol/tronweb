@@ -1,8 +1,8 @@
 import { Permission } from './Contract';
-import { TransactionCapsule } from './Transaction';
+import { Transaction, TransactionCapsule } from './Transaction';
 
 export interface BlockHeaderRawData {
-    number: 1000000;
+    number: number;
     txTrieRoot: string;
     witness_address: string;
     parentHash: string;
@@ -15,6 +15,12 @@ export interface BlockHeader {
 }
 export interface BlockWithoutDetail {
     blockID: string;
+    block_header: BlockHeader;
+}
+
+export interface Block {
+    blockID: string;
+    transactions: Transaction[];
     block_header: BlockHeader;
 }
 
