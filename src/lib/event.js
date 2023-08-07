@@ -1,5 +1,5 @@
-import TronWeb from 'index';
-import utils from 'utils';
+import TronWeb from '../index';
+import utils from '../utils';
 import providers from "./providers";
 import querystring from "querystring-es3";
 import injectpromise from 'injectpromise';

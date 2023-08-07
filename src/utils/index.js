@@ -11,7 +11,7 @@ import * as transaction from './transaction';
 
 import validator from 'validator';
 import BigNumber from 'bignumber.js';
-import {ADDRESS_PREFIX} from 'utils/address';
+import {ADDRESS_PREFIX} from '../utils/address';
 
 const utils = {
     isValidURL(url) {

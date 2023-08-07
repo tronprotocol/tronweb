@@ -1,5 +1,5 @@
 import injectpromise from 'injectpromise';
-import Validator from 'paramValidator';
+import Validator from '../paramValidator';
 
 export default class SideChain {
     constructor(sideOptions, TronWeb = false, mainchain = false, privateKey = false) {

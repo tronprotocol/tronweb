@@ -1,19 +1,19 @@
-import providers from 'lib/providers';
-import utils from 'utils';
+import providers from './lib/providers';
+import utils from './utils';
 import BigNumber from 'bignumber.js';
 import EventEmitter from 'eventemitter3';
-import { version } from '../package.json';
+import { version } from './../package.json';
 import semver from 'semver';
 import injectpromise from 'injectpromise';
 
-import TransactionBuilder from 'lib/transactionBuilder';
-import Trx from 'lib/trx';
-import Contract from 'lib/contract';
-import Plugin from 'lib/plugin';
-import Event from 'lib/event';
-import SideChain from 'lib/sidechain';
-import { keccak256 } from 'utils/ethersUtils';
-import { ADDRESS_PREFIX, TRON_BIP39_PATH_INDEX_0 } from 'utils/address';
+import TransactionBuilder from './lib/transactionBuilder';
+import Trx from './lib/trx';
+import Contract from './lib/contract';
+import Plugin from './lib/plugin';
+import Event from './lib/event';
+import SideChain from './lib/sidechain';
+import { keccak256 } from './utils/ethersUtils';
+import { ADDRESS_PREFIX, TRON_BIP39_PATH_INDEX_0 } from './utils/address';
 
 const DEFAULT_VERSION = '4.7.1';
 

@@ -1,7 +1,7 @@
-import TronWeb from 'index';
-import utils from 'utils';
-import { keccak256, toUtf8Bytes, recoverAddress, SigningKey } from 'utils/ethersUtils';
-import { ADDRESS_PREFIX } from 'utils/address';
+import TronWeb from '../index';
+import utils from '../utils';
+import { keccak256, toUtf8Bytes, recoverAddress, SigningKey } from '../utils/ethersUtils';
+import { ADDRESS_PREFIX } from '../utils/address';
 import Validator from "../paramValidator";
 import injectpromise from 'injectpromise';
 import { txCheck } from '../utils/transaction';
@@ -668,7 +668,7 @@ export default class Trx {
     static verifyMessageV2(message, signature) {
         return utils.message.verifyMessage(message, signature);
     }
-    
+
     verifyTypedData(domain, types, value, signature, address = this.tronWeb.defaultAddress.base58, callback = false) {
         if (utils.isFunction(address)) {
             callback = address;
@@ -786,9 +786,9 @@ export default class Trx {
 
     /**
      * sign message v2 for verified header length
-     * 
-     * @param {message to be signed, should be Bytes or string} message 
-     * @param {privateKey for signature} privateKey 
+     *
+     * @param {message to be signed, should be Bytes or string} message
+     * @param {privateKey for signature} privateKey
      * @param {reserved} options
      * @param {callback function} callback
      */
@@ -797,7 +797,7 @@ export default class Trx {
             callback = options;
             options = {};
         }
-        
+
         if (utils.isFunction(privateKey)) {
             callback = privateKey;
             privateKey = this.tronWeb.defaultPrivateKey;
@@ -1400,7 +1400,7 @@ export default class Trx {
             callback = options;
             options = { confirmed: true };
         }
-        
+
         if(utils.isFunction(address)) {
             callback = address;
             address = this.tronWeb.defaultAddress.hex
@@ -1427,7 +1427,7 @@ export default class Trx {
             callback = options;
             options = { confirmed: true };
         }
-        
+
         if(utils.isFunction(resource)) {
             callback = resource;
             resource = 'BANDWIDTH';
@@ -1437,13 +1437,13 @@ export default class Trx {
             callback = address;
             address = this.tronWeb.defaultAddress.hex;
         }
-        
+
         if (!callback)
             return this.injectPromise(this.getCanDelegatedMaxSize, address, resource, options);
 
         if (!this.tronWeb.isAddress(address))
             return callback('Invalid address provided');
-        
+
         if (this.validator.notValid([
             {
                 name: 'resource',
@@ -1478,10 +1478,10 @@ export default class Trx {
 
         if (!callback)
             return this.injectPromise(this.getAvailableUnfreezeCount, address, options);
-        
+
         if (!this.tronWeb.isAddress(address))
             return callback('Invalid address provided');
-        
+
         this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(`wallet${options.confirmed ? 'solidity' : ''}/getavailableunfreezecount`, {
             owner_address: toHex(address),
         }, 'post').then(data => {

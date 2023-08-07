@@ -1,5 +1,5 @@
 import {hexStr2byteArray} from './code';
-import {ADDRESS_PREFIX} from 'utils/address';
+import {ADDRESS_PREFIX} from '../utils/address';
 import {
     getBase58CheckAddress,
     decodeBase58Address,

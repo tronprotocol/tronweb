@@ -1,5 +1,5 @@
-import TronWeb from 'index';
-import utils from 'utils';
+import TronWeb from '../../index';
+import utils from '../../utils';
 import Method from './method';
 import injectpromise from 'injectpromise';
 

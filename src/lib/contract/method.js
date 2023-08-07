@@ -1,5 +1,5 @@
-import utils from 'utils';
-import {encodeParamsV2ByABI, decodeParamsV2ByABI} from 'utils/abi';
+import utils from '../../utils';
+import {encodeParamsV2ByABI, decodeParamsV2ByABI} from '../../utils/abi';
 import injectpromise from 'injectpromise';
 
 const getFunctionSelector = abi => {
@@ -331,7 +331,7 @@ export default class Method {
                 if(options.size) {
                     params.size = options.size;
                 }
-                
+
                 if (options.resourceNode) {
                     if (/full/i.test(options.resourceNode))
                         params.onlyUnconfirmed = true

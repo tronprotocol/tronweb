@@ -1,5 +1,5 @@
-import TronWeb from 'index';
-import utils from 'utils';
+import TronWeb from '../index';
+import utils from '../utils';
 import semver from 'semver';
 
 export default class Plugin {

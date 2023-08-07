@@ -717,12 +717,12 @@ getSelector(fragment: ErrorFragment | FunctionFragment): string {
                 if (type. === "address") {
                 }
             };
-    
+
             const descend = function (inputs: Array<ParamType>, values: ReadonlyArray<any>) {
                 if (inputs.length !== values.length) { throw new Error("length mismatch"); }
-                
+
             };
-    
+
             const result: Array<any> = [ ];
             values.forEach((value, index) => {
                 if (value == null) {
