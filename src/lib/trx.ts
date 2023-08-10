@@ -35,7 +35,7 @@ function toHex(value: string) {
 
 type SignedStringOrSignedTransaction<T extends string | Transaction | SignedTransaction> = T extends string
     ? string
-    : SignedTransaction;
+    : SignedTransaction & T;
 
 export default class Trx {
     tronWeb: TronWeb;
@@ -744,7 +744,7 @@ export default class Trx {
         return this.tronWeb.fullNode.request('wallet/getsignweight', transaction, 'post');
     }
 
-    async sendRawTransaction(signedTransaction: SignedTransaction): Promise<BroadcastReturn> {
+    async sendRawTransaction<T extends SignedTransaction>(signedTransaction: T): Promise<BroadcastReturn<T>> {
         if (!utils.isObject(signedTransaction)) {
             throw new Error('Invalid transaction provided');
         }
@@ -753,7 +753,7 @@ export default class Trx {
             throw new Error('Transaction is not signed');
         }
 
-        const result = await this.tronWeb.fullNode.request<Omit<BroadcastReturn, 'transaction'>>(
+        const result = await this.tronWeb.fullNode.request<Omit<BroadcastReturn<T>, 'transaction'>>(
             'wallet/broadcasttransaction',
             signedTransaction,
             'post'
@@ -784,7 +784,7 @@ export default class Trx {
         return result;
     }
 
-    async sendTransaction(to: string, amount: number, options: AddressOptions = {}): Promise<BroadcastReturn> {
+    async sendTransaction(to: string, amount: number, options: AddressOptions = {}): Promise<BroadcastReturn<SignedTransaction>> {
         if (typeof options === 'string') options = { privateKey: options };
 
         if (!this.tronWeb.isAddress(to)) {
@@ -817,7 +817,7 @@ export default class Trx {
         amount: number,
         tokenID: string | number,
         options: AddressOptions = {}
-    ): Promise<BroadcastReturn> {
+    ): Promise<BroadcastReturn<SignedTransaction>> {
         if (typeof options === 'string') options = { privateKey: options };
 
         if (!this.tronWeb.isAddress(to)) {
@@ -868,7 +868,7 @@ export default class Trx {
         resource: Resource = 'BANDWIDTH',
         options: AddressOptions = {},
         receiverAddress?: string
-    ): Promise<BroadcastReturn> {
+    ): Promise<BroadcastReturn<SignedTransaction>> {
         if (typeof options === 'string') options = { privateKey: options };
 
         if (!['BANDWIDTH', 'ENERGY'].includes(resource)) {
@@ -918,7 +918,7 @@ export default class Trx {
         resource: Resource = 'BANDWIDTH',
         options: AddressOptions = {},
         receiverAddress: string
-    ): Promise<BroadcastReturn> {
+    ): Promise<BroadcastReturn<SignedTransaction>> {
         if (typeof options === 'string') options = { privateKey: options };
 
         if (!['BANDWIDTH', 'ENERGY'].includes(resource)) {
@@ -956,7 +956,7 @@ export default class Trx {
      *
      * @return modified Transaction Object
      */
-    async updateAccount(accountName: string, options: AddressOptions = {}): Promise<BroadcastReturn> {
+    async updateAccount(accountName: string, options: AddressOptions = {}): Promise<BroadcastReturn<SignedTransaction>> {
         if (typeof options === 'string') options = { privateKey: options };
 
         if (!utils.isString(accountName) || !accountName.length) {

@@ -12,7 +12,7 @@ import TransactionBuilder from './lib/TransactionBuilder/TransactionBuilder.js';
 import Trx from './lib/trx.js';
 // import Contract from 'lib/contract';
 // import Plugin from 'lib/plugin';
-// import Event from 'lib/event';
+import Event from './lib/event.js';
 // import SideChain from 'lib/sidechain';
 import { keccak256 } from './utils/ethersUtils.js';
 import { ADDRESS_PREFIX, fromHex, fromPrivateKey, isAddress, toHex, TRON_BIP39_PATH_INDEX_0 } from './utils/address.js';
@@ -42,11 +42,12 @@ export default class TronWeb extends EventEmitter {
     static Trx = Trx;
     // static Contract = Contract;
     // static Plugin = Plugin;
-    // static Event = Event;
+    static Event = Event;
     // static version = version;
     utils: typeof TronWeb.utils;
     static utils = utils;
 
+    event: Event;
     trx: Trx;
     transactionBuilder: TransactionBuilder;
     providers: Providers;
@@ -59,6 +60,7 @@ export default class TronWeb extends EventEmitter {
 
     fullNode!: HttpProvider;
     solidityNode!: HttpProvider;
+    eventServer?: HttpProvider;
 
     constructor(options: TronWebOptions);
     constructor(fullNode: NodeService, solidityNode: NodeService, eventServer: NodeService, sideOptions: TronWebOptions);
@@ -103,7 +105,7 @@ export default class TronWeb extends EventEmitter {
 
         this.setFullNode(fullNode as HttpProvider);
         this.setSolidityNode(solidityNode as HttpProvider);
-        // this.setEventServer(eventServer);
+        this.setEventServer(eventServer);
 
         this.providers = providers;
         this.BigNumber = BigNumber;
@@ -163,9 +165,9 @@ export default class TronWeb extends EventEmitter {
             this.setFullNodeHeader(headers);
         }
 
-        // if (eventHeaders) {
-        //     this.setEventHeader(eventHeaders);
-        // }
+        if (eventHeaders) {
+            this.setEventHeader(eventHeaders);
+        }
     }
 
     // async getFullnodeVersion() {
@@ -244,9 +246,9 @@ export default class TronWeb extends EventEmitter {
         this.solidityNode.setStatusPage('walletsolidity/getnowblock');
     }
 
-    // setEventServer(...params) {
-    //     this.event.setServer(...params);
-    // }
+    setEventServer(...params) {
+        this.event.setServer(...params);
+    }
 
     // setHeader(headers = {}) {
     //     const fullNode = new providers.HttpProvider(this.fullNode.host, 30000, false, false, headers);
@@ -266,10 +268,10 @@ export default class TronWeb extends EventEmitter {
         this.setSolidityNode(solidityNode);
     }
 
-    // setEventHeader(headers = {}) {
-    //     const eventServer = new providers.HttpProvider(this.eventServer.host, 30000, false, false, headers);
-    //     this.setEventServer(eventServer);
-    // }
+    setEventHeader(headers = {}) {
+        const eventServer = new providers.HttpProvider(this.eventServer.host, 30000, false, false, headers);
+        this.setEventServer(eventServer);
+    }
 
     // currentProviders() {
     //     return {
