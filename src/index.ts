@@ -47,7 +47,6 @@ export default class TronWeb extends EventEmitter {
     utils: typeof TronWeb.utils;
     static utils = utils;
 
-    trx: Trx;
     transactionBuilder: TransactionBuilder;
     providers: Providers;
     BigNumber: typeof BigNumber;

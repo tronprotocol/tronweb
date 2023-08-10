@@ -1,6 +1,7 @@
 import { AbiCoder } from '@ethersproject/abi';
 import TronWeb from '../index.js';
 import { ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX } from './address.js';
+import { FunctionFragment, AbiParamsCommon, AbiInputsType } from '../types/ABI.js';
 
 const abiCoder = new AbiCoder();
 
@@ -31,7 +32,7 @@ function deepCopy(target: any) {
     return newTarget;
 }
 
-export function decodeParams(names: string[], types: string[], output: string, ignoreMethodHash: boolean = false) {
+export function decodeParams(names: string[], types: string[], output: string, ignoreMethodHash = false) {
     if (ignoreMethodHash && output.replace(/^0x/, '').length % 64 === 8) output = '0x' + output.replace(/^0x/, '').substring(8);
 
     if (output.replace(/^0x/, '').length % 64) {
@@ -84,33 +85,33 @@ function extractArrayDim(type: string) {
     return (size.match(/\]\[/g) || []).length + 1;
 }
 
-export interface ABI {
-    entrys?: ABIType[];
-}
+// export interface ABI {
+//     entrys?: ABIType[];
+// }
 
-export type ParamType = {
-    readonly name: string;
-    readonly type: string;
-    readonly baseType: string;
-    readonly internalType?: string;
-    readonly indexed: null | boolean;
-    readonly components: null | ReadonlyArray<ParamType>;
-};
+// export type ParamType = {
+//     readonly name: string;
+//     readonly type: string;
+//     readonly baseType: string;
+//     readonly internalType?: string;
+//     readonly indexed: null | boolean;
+//     readonly components: null | ReadonlyArray<ParamType>;
+// };
 
-export type ABIType = {
-    readonly name?: string;
-    readonly inputs?: ReadonlyArray<ParamType>;
-    readonly outputs?: ReadonlyArray<ParamType>;
-    readonly stateMutability: 'pure' | 'view' | 'nonpayable' | 'payable';
-    readonly type: 'function' | 'constructor' | 'fallback' | 'function' | 'event' | 'error';
-};
+// export type ABIType = {
+//     readonly name?: string;
+//     readonly inputs: ReadonlyArray<ParamType>;
+//     readonly outputs: ReadonlyArray<ParamType>;
+//     readonly stateMutability: 'pure' | 'view' | 'nonpayable' | 'payable';
+//     readonly type: 'function' | 'constructor' | 'fallback' | 'function' | 'event' | 'error';
+// };
 
-export function encodeParamsV2ByABI(funABI: ABIType, args: any[]) {
+export function encodeParamsV2ByABI(funABI: FunctionFragment, args: any[]) {
     const types: string[] = [];
 
-    const buildFullTypeDefinition = (typeDef: ParamType): string => {
+    const buildFullTypeDefinition = (typeDef: AbiParamsCommon): string => {
         if (typeDef && typeDef.type.indexOf('tuple') === 0 && typeDef.components) {
-            const innerTypes = typeDef.components.map((innerType: ParamType) => {
+            const innerTypes = typeDef.components.map((innerType: AbiParamsCommon) => {
                 return buildFullTypeDefinition(innerType);
             });
             return `tuple(${innerTypes.join(',')})${extractSize(typeDef.type)}`;
@@ -139,7 +140,7 @@ export function encodeParamsV2ByABI(funABI: ABIType, args: any[]) {
         }
     };
 
-    const mapTuple = (components: ReadonlyArray<ParamType>, args: any[], dimension: number) => {
+    const mapTuple = (components: ReadonlyArray<FunctionFragment>, args: any[], dimension: number) => {
         if (dimension > 1) {
             if (args.length) {
                 args.forEach((arg) => {
@@ -155,9 +156,9 @@ export function encodeParamsV2ByABI(funABI: ABIType, args: any[]) {
         }
     };
 
-    const encodeArgs = (inputs: ReadonlyArray<ParamType> = [], args: any[]) => {
+    const encodeArgs = (inputs: ReadonlyArray<AbiParamsCommon> = [], args: any[]) => {
         if (inputs.length)
-            inputs.forEach((input: ParamType, i: number) => {
+            inputs.forEach((input: AbiParamsCommon, i: number) => {
                 const type = input.type;
 
                 if (args[i])
@@ -192,7 +193,7 @@ export function encodeParamsV2ByABI(funABI: ABIType, args: any[]) {
     return abiCoder.encode(types, args);
 }
 
-export function decodeParamsV2ByABI(funABI: ABIType, data: string | Uint8Array) {
+export function decodeParamsV2ByABI(funABI: FunctionFragment | AbiInputsType, data: string | Uint8Array) {
     const convertTypeNames = (types: string[]) => {
         for (let i = 0; i < types.length; i++) {
             const type = types[i];
@@ -211,7 +212,7 @@ export function decodeParamsV2ByABI(funABI: ABIType, data: string | Uint8Array) 
         }
     };
 
-    const mapTuple = (components: ReadonlyArray<ParamType>, args: string[] | string[][], dimension: number) => {
+    const mapTuple = (components: ReadonlyArray<AbiParamsCommon>, args: string[] | string[][], dimension: number) => {
         if (dimension > 1) {
             if (args.length) {
                 args.forEach((arg) => {
@@ -227,7 +228,7 @@ export function decodeParamsV2ByABI(funABI: ABIType, data: string | Uint8Array) 
         }
     };
 
-    const buildFullTypeNameDefinition = (typeDef: ParamType): string => {
+    const buildFullTypeNameDefinition = (typeDef: AbiParamsCommon): string => {
         const name = typeDef.name ? ` ${typeDef.name}` : '';
         if (typeDef && typeDef.type.indexOf('tuple') === 0 && typeDef.components) {
             const innerTypes = typeDef.components.map((innerType) => {
@@ -240,7 +241,7 @@ export function decodeParamsV2ByABI(funABI: ABIType, data: string | Uint8Array) 
         return typeDef.type + name;
     };
 
-    const decodeResult = (outputs: ReadonlyArray<ParamType>, result: any[]) => {
+    const decodeResult = (outputs: ReadonlyArray<AbiParamsCommon>, result: any[]) => {
         if (outputs.length)
             outputs.forEach((output, i) => {
                 const { type, name } = output;
@@ -270,7 +271,7 @@ export function decodeParamsV2ByABI(funABI: ABIType, data: string | Uint8Array) 
     };
 
     // Only decode if there supposed to be fields
-    if (funABI.outputs && funABI.outputs.length > 0) {
+    if ('outputs' in funABI && funABI.outputs && funABI.outputs.length > 0) {
         const outputTypes: any[] = [];
         for (let i = 0; i < funABI.outputs.length; i++) {
             const type = funABI.outputs[i].type;
