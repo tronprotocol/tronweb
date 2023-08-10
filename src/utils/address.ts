@@ -15,11 +15,13 @@ export function fromHex(address: string) {
 
     return getBase58CheckAddress(hexStr2byteArray(address.replace(/^0x/, ADDRESS_PREFIX)));
 }
+
 export function toHex(address: string) {
     if (isHex(address)) return address.toLowerCase().replace(/^0x/, ADDRESS_PREFIX);
 
     return byteArray2hexStr(decodeBase58Address(address) as number[]).toLowerCase();
 }
+
 export function fromPrivateKey(privateKey: string, strict = false) {
     try {
         return pkToAddress(privateKey, strict);

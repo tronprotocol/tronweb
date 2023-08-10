@@ -248,3 +248,7 @@ export function pkToAddress(privateKey: string, strict: boolean = false) {
 
     return getBase58CheckAddress(com_addressBytes);
 }
+
+export function sha3(string: string, prefix = true) {
+    return (prefix ? '0x' : '') + keccak256(Buffer.from(string, 'utf-8')).toString().substring(2);
+}
