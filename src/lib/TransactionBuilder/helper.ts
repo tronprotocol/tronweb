@@ -1,14 +1,12 @@
-import TronWeb from '../../index';
+import TronWeb from '../../index.js';
+import { ABIType } from '../../utils/abi.js';
+import { Transaction, TransactionCapsule } from '../../types/Transaction.js';
+import { txCheckWithArgs, txJsonToPb, txPbToTxID, txPbToRawDataHex } from '../../utils/transaction.js';
+import { keccak256 } from '../../utils/ethersUtils.js';
+import { BlockWithoutDetail } from '../../types/APIResponse.js';
+import HttpProvider from '../providers/HttpProvider.js';
+import { ContractParamter, ContractType } from '../../types/Contract.js';
 
-import { ABIType } from '../../utils/abi';
-import { Transaction, TransactionCapsule } from '../../types/Transaction';
-import { txCheckWithArgs, txJsonToPb, txPbToTxID, txPbToRawDataHex } from '../../utils/transaction';
-import { keccak256 } from '../../utils/ethersUtils';
-
-import { BlockWithoutDetail } from '../../types/APIResponse';
-import HttpProvider from '../providers/HttpProvider';
-
-import { ContractParamter, ContractType } from '../../types/Contract';
 export function fromUtf8(value: string) {
     return TronWeb.fromUtf8(value).replace(/^0x/, '');
 }
@@ -112,10 +110,7 @@ export interface PermissionId {
 
 export type NumberLike = string | number;
 
-export enum Resource {
-    BANDWIDTH = 'BANDWIDTH',
-    ENERGY = 'ENERGY',
-}
+export type Resource = 'BANDWIDTH' | 'ENERGY';
 
 export interface VoteInfo {
     [srAddress: string]: number;
@@ -150,7 +145,7 @@ export interface CreateSmartContractOptions {
     /**
      * Abi string
      */
-    abi: string;
+    abi: string | { entrys: ABIType[] } | ABIType[];
     /**
      * Bytecode, default hexString.
      */
@@ -278,11 +273,11 @@ export interface CreateTokenOptions {
     /**
      * @todo: desc
      */
-    voteScore: number;
+    voteScore?: number;
     /**
      * Precision of issued tokens.
      */
-    precision: number;
+    precision?: number;
     /**
      * Optional, for multi-signature use.
      */

@@ -2,7 +2,7 @@
 import google_protobuf_any_pb from '@tronweb3/google-protobuf/google/protobuf/any_pb.js';
 
 import * as TronPb from '../protocol/core/Tron_pb.cjs';
-const { Transaction, Permission, Key } = TronPb;
+const { Transaction, Permission, Key } = TronPb.default;
 
 import * as balanceContractPb from '../protocol/core/contract/balance_contract_pb.cjs';
 const {
@@ -15,10 +15,11 @@ const {
     WithdrawExpireUnfreezeContract,
     DelegateResourceContract,
     UnDelegateResourceContract,
-} = balanceContractPb;
+} = balanceContractPb.default;
 
 import * as assetIssueContractPb from '../protocol/core/contract/asset_issue_contract_pb.cjs';
-const { TransferAssetContract, ParticipateAssetIssueContract, AssetIssueContract, UpdateAssetContract } = assetIssueContractPb;
+const { TransferAssetContract, ParticipateAssetIssueContract, AssetIssueContract, UpdateAssetContract } =
+    assetIssueContractPb.default;
 
 import * as smartContractPb from '../protocol/core/contract/smart_contract_pb.cjs';
 const {
@@ -28,26 +29,27 @@ const {
     UpdateSettingContract,
     CreateSmartContract,
     SmartContract,
-} = smartContractPb;
+} = smartContractPb.default;
 
 import * as commonPb from '../protocol/core/contract/common_pb.cjs';
-const { ResourceCode } = commonPb;
+const { ResourceCode } = commonPb.default;
 
 import * as witnessContractPb from '../protocol/core/contract/witness_contract_pb.cjs';
-const { WitnessCreateContract, VoteWitnessContract } = witnessContractPb;
+const { WitnessCreateContract, VoteWitnessContract } = witnessContractPb.default;
 
 import * as storageContractPb from '../protocol/core/contract/storage_contract_pb.cjs';
-const { UpdateBrokerageContract } = storageContractPb;
+const { UpdateBrokerageContract } = storageContractPb.default;
 
 import * as accountContractPb from '../protocol/core/contract/account_contract_pb.cjs';
-const { AccountCreateContract, AccountUpdateContract, SetAccountIdContract, AccountPermissionUpdateContract } = accountContractPb;
+const { AccountCreateContract, AccountUpdateContract, SetAccountIdContract, AccountPermissionUpdateContract } =
+    accountContractPb.default;
 
 import * as proposalContractPb from '../protocol/core/contract/proposal_contract_pb.cjs';
-const { ProposalCreateContract, ProposalDeleteContract, ProposalApproveContract } = proposalContractPb;
+const { ProposalCreateContract, ProposalDeleteContract, ProposalApproveContract } = proposalContractPb.default;
 
 import * as exchangeContractPb from '../protocol/core/contract/exchange_contract_pb.cjs';
 const { ExchangeCreateContract, ExchangeInjectContract, ExchangeWithdrawContract, ExchangeTransactionContract } =
-    exchangeContractPb;
+    exchangeContractPb.default;
 
 import { byteArray2hexStr } from './bytes.js';
 import { sha256, keccak256 } from './ethersUtils.js';

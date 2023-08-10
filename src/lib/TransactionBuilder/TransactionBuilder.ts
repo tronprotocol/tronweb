@@ -1,13 +1,11 @@
-import TronWeb from '../../index';
-import { AbiCoder } from '../../utils/ethersUtils';
-import { ADDRESS_PREFIX_REGEX, toHex } from '../../utils/address';
-import { ABIType, encodeParamsV2ByABI } from '../../utils/abi';
-import { CreateSmartContractTransaction, SignedTransaction, Transaction, TransactionCapsule } from '../../types/Transaction';
-import { keccak256 } from '../../utils/ethersUtils';
-import Validator from '../../paramValidator/index';
-
-import { GetSignWeightResponse } from '../../types/APIResponse';
-import { isArray, isInteger, isNotNullOrUndefined, isObject, isString } from '../../utils/validations';
+import TronWeb from '../../index.js';
+import { AbiCoder, keccak256 } from '../../utils/ethersUtils.js';
+import { ADDRESS_PREFIX_REGEX, toHex } from '../../utils/address.js';
+import { ABIType, encodeParamsV2ByABI } from '../../utils/abi.js';
+import { CreateSmartContractTransaction, SignedTransaction, Transaction, TransactionCapsule } from '../../types/Transaction.js';
+import Validator from '../../paramValidator/index.js';
+import { GetSignWeightResponse } from '../../types/APIResponse.js';
+import { isArray, isInteger, isNotNullOrUndefined, isObject, isString } from '../../utils/validations.js';
 import {
     AccountPermissionUpdateContract,
     AssetIssueContract,
@@ -21,7 +19,7 @@ import {
     UnDelegateResourceContract,
     UnfreezeBalanceV2Contract,
     UpdateAssetContract,
-} from '../../types/Contract';
+} from '../../types/Contract.js';
 import {
     AlterTransactionOptions,
     CreateSmartContractOptions,
@@ -41,7 +39,8 @@ import {
     TxLocal,
     UpdateTokenOptions,
     VoteInfo,
-} from './helper';
+} from './helper.js';
+import { Address } from '../../types/Trx.js';
 
 export default class TransactionBuilder {
     tronWeb: TronWeb;
@@ -192,7 +191,7 @@ export default class TransactionBuilder {
     async freezeBalance(
         amount: NumberLike = 0,
         duration: NumberLike = 3,
-        resource = Resource.BANDWIDTH,
+        resource: Resource = 'BANDWIDTH',
         ownerAddress: string = this.tronWeb.defaultAddress.hex as string,
         receiverAddress?: string,
         options: PermissionId = {}
@@ -245,7 +244,7 @@ export default class TransactionBuilder {
     }
 
     async unfreezeBalance(
-        resource = Resource.BANDWIDTH,
+        resource: Resource = 'BANDWIDTH',
         address: string = this.tronWeb.defaultAddress.hex as string,
         receiverAddress?: string,
         options: PermissionId = {}
@@ -285,7 +284,7 @@ export default class TransactionBuilder {
 
     async freezeBalanceV2(
         amount = 0,
-        resource: Resource = Resource.BANDWIDTH,
+        resource: Resource = 'BANDWIDTH',
         address: string = this.tronWeb.defaultAddress.hex as string,
         options: PermissionId = {}
     ) {
@@ -321,7 +320,7 @@ export default class TransactionBuilder {
 
     async unfreezeBalanceV2(
         amount = 0,
-        resource: Resource = Resource.BANDWIDTH,
+        resource: Resource = 'BANDWIDTH',
         address: string = this.tronWeb.defaultAddress.hex as string,
         options: PermissionId = {}
     ) {
@@ -373,7 +372,7 @@ export default class TransactionBuilder {
     async delegateResource(
         amount: NumberLike = 0,
         receiverAddress: string,
-        resource: Resource = Resource.BANDWIDTH,
+        resource: Resource = 'BANDWIDTH',
         address: string = this.tronWeb.defaultAddress.hex as string,
         lock = false,
         lockPeriod?: number,
@@ -440,7 +439,7 @@ export default class TransactionBuilder {
     async undelegateResource(
         amount: NumberLike = 0,
         receiverAddress: string,
-        resource: Resource = Resource.BANDWIDTH,
+        resource: Resource = 'BANDWIDTH',
         address: string = this.tronWeb.defaultAddress.hex as string,
         options: PermissionId = {}
     ) {
@@ -597,7 +596,7 @@ export default class TransactionBuilder {
         // @ts-ignore
         const tokenId = options.tokenId || options.token_id;
 
-        let { abi = false, parameters = [] } = options;
+        let { abi, parameters = [] } = options;
         const { bytecode = false, name = '' } = options;
         if (abi && isString(abi)) {
             try {
@@ -607,10 +606,10 @@ export default class TransactionBuilder {
             }
         }
 
-        const newAbi = abi as unknown as Record<string, unknown>;
-        let entries: ABIType[] | null = null;
-        if (newAbi.entrys) {
-            entries = newAbi.entrys as ABIType[];
+        const newAbi = abi as { entrys: ABIType[] } | ABIType[];
+        let entries: ABIType[] | null = newAbi as ABIType[];
+        if ((newAbi as { entrys: ABIType[] }).entrys) {
+            entries = (newAbi as { entrys: ABIType[] }).entrys;
         }
 
         if (!isArray(entries)) throw new Error('Invalid options.abi provided');
@@ -1491,7 +1490,7 @@ export default class TransactionBuilder {
      * Can only be created by a current Super Representative.
      */
     async createProposal(
-        parameters: Record<string, string>[],
+        parameters: Record<string, string | number> | Record<string, string | number>[],
         issuerAddress: string = this.tronWeb.defaultAddress.hex as string,
         options: PermissionId = {}
     ) {
@@ -1513,7 +1512,7 @@ export default class TransactionBuilder {
 
         const data = {
             owner_address: toHex(issuerAddress as string),
-            parameters: parameters,
+            parameters: newParams,
         };
         return createTransaction(this.tronWeb, ContractType.ProposalCreateContract, data, options?.permissionId);
     }
@@ -1934,22 +1933,22 @@ export default class TransactionBuilder {
     async updateAccountPermissions(
         ownerAddress = this.tronWeb.defaultAddress.hex,
         ownerPermission: Permission,
-        witnessPermission: Permission,
-        activesPermissions: Permission | Permission[],
+        witnessPermission?: Permission,
+        activesPermissions?: Permission | Permission[],
         options: PermissionId = {}
     ) {
-        if (!TronWeb.isAddress(ownerAddress)) throw new Error('Invalid ownerAddress provided');
+        if (!TronWeb.isAddress(ownerAddress as Address)) throw new Error('Invalid ownerAddress provided');
 
         if (!this.checkPermissions(ownerPermission, 0)) {
             throw new Error('Invalid ownerPermissions provided');
         }
 
-        if (!this.checkPermissions(witnessPermission, 1)) {
+        if (!this.checkPermissions(witnessPermission!, 1)) {
             throw new Error('Invalid witnessPermissions provided');
         }
 
         if (!Array.isArray(activesPermissions)) {
-            activesPermissions = [activesPermissions];
+            activesPermissions = [activesPermissions!];
         }
 
         for (const activesPermission of activesPermissions) {
@@ -2041,7 +2040,7 @@ export default class TransactionBuilder {
 
         if (options.data) {
             if (options.dataFormat !== 'hex') options.data = TronWeb.toHex(options.data);
-            options.data = options.data.replace(/^0x/, '');
+            options.data = options.data!.replace(/^0x/, '');
             if (options.data.length === 0) throw new Error('Invalid data provided');
             transaction.raw_data.data = options.data;
         }

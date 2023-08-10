@@ -79,13 +79,13 @@ describe('TronWeb.utils.accounts', function () {
             it('should throw when options param has a bip39 path of an another chain', async function () {
                 const tronWeb = tronWebBuilder.createInstance();
 
-                await assertThrow(() => tronWeb.utils.accounts.generateRandom(), 'Invalid tron path provided');
+                await assertThrow(new Promise(() => tronWeb.utils.accounts.generateRandom()), 'Invalid tron path provided');
             });
 
             it('should throw when options param has an invalid bip39 path', async function () {
                 const tronWeb = tronWebBuilder.createInstance();
 
-                await assertThrow(() => tronWeb.utils.accounts.generateRandom(), 'Invalid tron path provided');
+                await assertThrow(new Promise(() => tronWeb.utils.accounts.generateRandom()), 'Invalid tron path provided');
             });
         });
     });
@@ -131,7 +131,7 @@ describe('TronWeb.utils.accounts', function () {
                 const path = '11';
 
                 await assertThrow(
-                    () => tronWeb.utils.accounts.generateAccountWithMnemonic(accountCreated.mnemonic!.phrase, path),
+                    new Promise(() => tronWeb.utils.accounts.generateAccountWithMnemonic(accountCreated.mnemonic!.phrase, path)),
                     'Invalid tron path provided'
                 );
             });
@@ -144,7 +144,7 @@ describe('TronWeb.utils.accounts', function () {
                 const path = "m/44'/60'/0'/0/1";
 
                 await assertThrow(
-                    () => tronWeb.utils.accounts.generateAccountWithMnemonic(accountCreated.mnemonic!.phrase, path),
+                    new Promise(() => tronWeb.utils.accounts.generateAccountWithMnemonic(accountCreated.mnemonic!.phrase, path)),
                     'Invalid tron path provided'
                 );
             });

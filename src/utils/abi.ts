@@ -99,8 +99,8 @@ export type ParamType = {
 
 export type ABIType = {
     readonly name?: string;
-    readonly inputs: ReadonlyArray<ParamType>;
-    readonly outputs: ReadonlyArray<ParamType>;
+    readonly inputs?: ReadonlyArray<ParamType>;
+    readonly outputs?: ReadonlyArray<ParamType>;
     readonly stateMutability: 'pure' | 'view' | 'nonpayable' | 'payable';
     readonly type: 'function' | 'constructor' | 'fallback' | 'function' | 'event' | 'error';
 };
