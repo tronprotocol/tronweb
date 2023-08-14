@@ -1,7 +1,7 @@
 import TronWeb from '../../index.js';
 import { AbiCoder, keccak256 } from '../../utils/ethersUtils.js';
 import { ADDRESS_PREFIX_REGEX, toHex } from '../../utils/address.js';
-import { ABIType, encodeParamsV2ByABI } from '../../utils/abi.js';
+import { encodeParamsV2ByABI } from '../../utils/abi.js';
 import { CreateSmartContractTransaction, SignedTransaction, Transaction, TransactionCapsule } from '../../types/Transaction.js';
 import Validator from '../../paramValidator/index.js';
 import { GetSignWeightResponse } from '../../types/APIResponse.js';
@@ -41,6 +41,7 @@ import {
     VoteInfo,
 } from './helper.js';
 import { Address } from '../../types/Trx.js';
+import { ConstructorFragment, ContractAbiInterface, FunctionFragment } from '../../types/ABI.js';
 
 export default class TransactionBuilder {
     tronWeb: TronWeb;
@@ -606,16 +607,16 @@ export default class TransactionBuilder {
             }
         }
 
-        const newAbi = abi as { entrys: ABIType[] } | ABIType[];
-        let entries: ABIType[] | null = newAbi as ABIType[];
-        if ((newAbi as { entrys: ABIType[] }).entrys) {
-            entries = (newAbi as { entrys: ABIType[] }).entrys;
+        const newAbi = abi as { entrys: ContractAbiInterface } | ContractAbiInterface;
+        let entries: ContractAbiInterface | null = newAbi as ContractAbiInterface;
+        if ((newAbi as { entrys: ContractAbiInterface }).entrys) {
+            entries = (newAbi as { entrys: ContractAbiInterface }).entrys;
         }
 
         if (!isArray(entries)) throw new Error('Invalid options.abi provided');
 
         const payable = entries.some((func) => {
-            return func.type === 'constructor' && 'payable' === func.stateMutability.toLowerCase();
+            return func.type === 'constructor' && 'payable' === (func as ConstructorFragment).stateMutability.toLowerCase();
         });
 
         this.validator.notValid([
@@ -905,7 +906,10 @@ export default class TransactionBuilder {
 
             // work for abiv2 if passed the function abi in options
             if (options.funcABIV2) {
-                parameterStr = encodeParamsV2ByABI(options.funcABIV2, options.parametersV2 as unknown[]).replace(/^(0x)/, '');
+                parameterStr = encodeParamsV2ByABI(
+                    options.funcABIV2 as FunctionFragment,
+                    options.parametersV2 as unknown[]
+                ).replace(/^(0x)/, '');
             }
 
             if (options.shieldedParameter && isString(options.shieldedParameter)) {

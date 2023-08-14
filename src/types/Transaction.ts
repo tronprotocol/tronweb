@@ -40,6 +40,7 @@ export interface TransactionCapsule {
         message?: string;
     };
     transaction: Transaction;
+    constant_result?: any[];
 }
 
 export interface SignedTransaction extends Transaction {

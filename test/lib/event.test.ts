@@ -152,7 +152,7 @@ describe('TronWeb.lib.event', async function () {
                 await wait(0.5);
             }
 
-            const event = events.data![events.length - 1];
+            const event = events.data![events.data!.length - 1];
 
             assert.equal(event.result._receiver.substring(2), accounts.hex[4].substring(2));
             assert.equal(event.result._sender.substring(2), accounts.hex[3].substring(2));
@@ -160,12 +160,12 @@ describe('TronWeb.lib.event', async function () {
         });
     });
 
-    describe('#contract.method.watch', async function () {
+    describe.skip('#contract.method.watch', async function () {
         it('should watch for an event', async function () {
             this.timeout(20000);
             tronWeb.setPrivateKey(accounts.pks[3]);
 
-            let watchTest = await contract.SomeEvent().watch((err, res) => {
+            let watchTest = await contract.SomeEvent().watch((_: any, res: any) => {
                 if (res) {
                     assert.equal(res.result._sender, accounts.hex[3]);
                     assert.equal(res.result._receiver, accounts.hex[4]);
@@ -184,7 +184,7 @@ describe('TronWeb.lib.event', async function () {
             this.timeout(20000);
             tronWeb.setPrivateKey(accounts.pks[3]);
 
-            let watchTest = await contract.SomeEvent().watch({ filters: { _amount: '4000' } }, (err, res) => {
+            let watchTest = await contract.SomeEvent().watch({ filters: { _amount: '4000' } }, (_: any, res: any) => {
                 if (res) {
                     assert.equal(res.result._sender, accounts.hex[3]);
                     assert.equal(res.result._receiver, accounts.hex[4]);

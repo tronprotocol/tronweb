@@ -11,7 +11,6 @@ import { Address, Exchange, Proposal, Token } from '../../src/types/Trx.js';
 import { CreateSmartContractTransaction, SignedTransaction, Transaction } from '../../src/types/Transaction.js';
 import { Permission } from '../../src/types/Contract.js';
 import contracts from '../fixtures/contracts.js';
-import { ABIType } from '../../src/utils/abi.js';
 const tests = signMessageTests.tests;
 const testRevertContract = contracts.testRevert;
 const { ADDRESS_BASE58, PRIVATE_KEY, getTokenOptions, SIGNED_HEX_TRANSACTION, FULL_NODE_API } = config;
@@ -1971,7 +1970,7 @@ describe('TronWeb.trx', function () {
 
             transaction = await tronWeb.transactionBuilder.createSmartContract(
                 {
-                    abi: testRevertContract.abi as ABIType[],
+                    abi: testRevertContract.abi,
                     bytecode: testRevertContract.bytecode,
                 },
                 accounts.hex[idx]

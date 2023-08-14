@@ -10,7 +10,7 @@ import semver from 'semver';
 
 import TransactionBuilder from './lib/TransactionBuilder/TransactionBuilder.js';
 import Trx from './lib/trx.js';
-// import Contract from 'lib/contract';
+import Contract from './lib/contract/index.js';
 // import Plugin from 'lib/plugin';
 import Event from './lib/event.js';
 // import SideChain from 'lib/sidechain';
@@ -23,6 +23,8 @@ import { byteArray2hexStr } from './utils/bytes.js';
 import { hexStr2byteArray } from './utils/code.js';
 import { isString } from './utils/validations.js';
 import { DefaultAddress, NodeService, TronWebOptions } from './types/TronWeb';
+import { ContractAbiInterface } from './types/ABI.js';
+import { Address } from './types/Trx.js';
 
 const DEFAULT_VERSION = '4.7.1';
 
@@ -40,7 +42,7 @@ export default class TronWeb extends EventEmitter {
     static BigNumber = BigNumber;
     static TransactionBuilder = TransactionBuilder;
     static Trx = Trx;
-    // static Contract = Contract;
+    static Contract = Contract;
     // static Plugin = Plugin;
     static Event = Event;
     // static version = version;
@@ -97,7 +99,7 @@ export default class TronWeb extends EventEmitter {
 
         if (utils.isString(eventServer)) eventServer = new providers.HttpProvider(eventServer);
 
-        // this.event = new Event(this);
+        this.event = new Event(this);
         this.transactionBuilder = new TransactionBuilder(this);
         this.trx = new Trx(this);
         // this.plugin = new Plugin(this, options);
@@ -246,8 +248,8 @@ export default class TronWeb extends EventEmitter {
         this.solidityNode.setStatusPage('walletsolidity/getnowblock');
     }
 
-    setEventServer(...params) {
-        this.event.setServer(...params);
+    setEventServer(eventServer: NodeService, healthcheck?: string) {
+        this.event.setServer(eventServer, healthcheck);
     }
 
     // setHeader(headers = {}) {
@@ -269,7 +271,7 @@ export default class TronWeb extends EventEmitter {
     }
 
     setEventHeader(headers = {}) {
-        const eventServer = new providers.HttpProvider(this.eventServer.host, 30000, false, false, headers);
+        const eventServer = new providers.HttpProvider(this.eventServer!.host, 30000, '', '', headers);
         this.setEventServer(eventServer);
     }
 
@@ -316,9 +318,9 @@ export default class TronWeb extends EventEmitter {
     //     return this.event.getEventsByTransactionID(...params);
     // }
 
-    // contract(abi = [], address = false) {
-    //     return new Contract(this, abi, address);
-    // }
+    contract(abi?: ContractAbiInterface = [], address?: Address) {
+        return new Contract(this, abi, address);
+    }
 
     address: typeof TronWeb.address;
     static get address() {
