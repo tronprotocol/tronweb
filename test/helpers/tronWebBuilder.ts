@@ -6,7 +6,7 @@ import config from './config.js';
 const { FULL_NODE_API, PRIVATE_KEY } = config;
 
 const createInstance = (extraOptions = {}) => {
-    let options = Object.assign(
+    const options = Object.assign(
         {
             fullHost: FULL_NODE_API,
             privateKey: PRIVATE_KEY,
@@ -50,7 +50,7 @@ const getTestAccounts = async (block: number) => {
             : undefined;
     accounts.pks = typeof block === 'number' ? accountsJson.more[index!].privateKeys : accountsJson.privateKeys;
     for (let i = 0; i < accounts.pks.length; i++) {
-        let addr = TronWeb.address.fromPrivateKey(accounts.pks[i]) as string;
+        const addr = TronWeb.address.fromPrivateKey(accounts.pks[i]) as string;
         accounts.b58.push(addr);
         accounts.hex.push(TronWeb.address.toHex(addr));
     }

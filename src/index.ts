@@ -8,7 +8,7 @@ import EventEmitter from 'eventemitter3';
 import { version } from '../package.json';
 import semver from 'semver';
 
-// import TransactionBuilder from './lib/TransactionBuilder';
+import TransactionBuilder from './lib/TransactionBuilder';
 // import Trx from 'lib/trx';
 // import Contract from 'lib/contract';
 // import Plugin from 'lib/plugin';
@@ -38,7 +38,7 @@ function isValidOptions(options: unknown): options is TronWebOptions {
 export default class TronWeb extends EventEmitter {
     static providers = providers;
     static BigNumber = BigNumber;
-    // static TransactionBuilder = TransactionBuilder;
+    static TransactionBuilder = TransactionBuilder;
     // static Trx = Trx;
     // static Contract = Contract;
     // static Plugin = Plugin;
@@ -47,7 +47,7 @@ export default class TronWeb extends EventEmitter {
     utils: typeof TronWeb.utils;
     static utils = utils;
 
-    // transactionBuilder: TransactionBuilder;
+    transactionBuilder: TransactionBuilder;
     providers: Providers;
     BigNumber: typeof BigNumber;
     defaultBlock: number | false;
@@ -330,35 +330,35 @@ export default class TronWeb extends EventEmitter {
         return (prefix ? '0x' : '') + keccak256(Buffer.from(string, 'utf-8')).toString().substring(2);
     }
 
-    // static toHex(val) {
-    //     if (utils.isBoolean(val)) return TronWeb.fromDecimal(+val);
+    static toHex(val) {
+        if (utils.isBoolean(val)) return TronWeb.fromDecimal(+val);
 
-    //     if (utils.isBigNumber(val)) return TronWeb.fromDecimal(val);
+        if (utils.isBigNumber(val)) return TronWeb.fromDecimal(val);
 
-    //     if (typeof val === 'object') return TronWeb.fromUtf8(JSON.stringify(val));
+        if (typeof val === 'object') return TronWeb.fromUtf8(JSON.stringify(val));
 
-    //     if (utils.isString(val)) {
-    //         if (/^(-|)0x/.test(val)) return val;
+        if (utils.isString(val)) {
+            if (/^(-|)0x/.test(val)) return val;
 
-    //         if (!isFinite(val) || /^\s*$/.test(val)) return TronWeb.fromUtf8(val);
-    //     }
+            if (!isFinite(val) || /^\s*$/.test(val)) return TronWeb.fromUtf8(val);
+        }
 
-    //     let result = TronWeb.fromDecimal(val);
-    //     if (result === '0xNaN') {
-    //         throw new Error('The passed value is not convertible to a hex string');
-    //     } else {
-    //         return result;
-    //     }
-    // }
+        const result = TronWeb.fromDecimal(val);
+        if (result === '0xNaN') {
+            throw new Error('The passed value is not convertible to a hex string');
+        } else {
+            return result;
+        }
+    }
 
-    // static toUtf8(hex) {
-    //     if (utils.isHex(hex)) {
-    //         hex = hex.replace(/^0x/, '');
-    //         return Buffer.from(hex, 'hex').toString('utf8');
-    //     } else {
-    //         throw new Error('The passed value is not a valid hex string');
-    //     }
-    // }
+    static toUtf8(hex) {
+        if (utils.isHex(hex)) {
+            hex = hex.replace(/^0x/, '');
+            return Buffer.from(hex, 'hex').toString('utf8');
+        } else {
+            throw new Error('The passed value is not a valid hex string');
+        }
+    }
 
     fromUtf8: typeof TronWeb.fromUtf8;
     static fromUtf8(string: string) {
@@ -368,69 +368,69 @@ export default class TronWeb extends EventEmitter {
         return '0x' + Buffer.from(string, 'utf8').toString('hex');
     }
 
-    // static toAscii(hex) {
-    //     if (utils.isHex(hex)) {
-    //         let str = '';
-    //         let i = 0,
-    //             l = hex.length;
-    //         if (hex.substring(0, 2) === '0x') {
-    //             i = 2;
-    //         }
-    //         for (; i < l; i += 2) {
-    //             let code = parseInt(hex.substr(i, 2), 16);
-    //             str += String.fromCharCode(code);
-    //         }
-    //         return str;
-    //     } else {
-    //         throw new Error('The passed value is not a valid hex string');
-    //     }
-    // }
+    static toAscii(hex) {
+        if (utils.isHex(hex)) {
+            let str = '';
+            let i = 0;
+            const l = hex.length;
+            if (hex.substring(0, 2) === '0x') {
+                i = 2;
+            }
+            for (; i < l; i += 2) {
+                const code = parseInt(hex.substr(i, 2), 16);
+                str += String.fromCharCode(code);
+            }
+            return str;
+        } else {
+            throw new Error('The passed value is not a valid hex string');
+        }
+    }
 
-    // static fromAscii(string, padding) {
-    //     if (!utils.isString(string)) {
-    //         throw new Error('The passed value is not a valid utf-8 string');
-    //     }
-    //     return '0x' + Buffer.from(string, 'ascii').toString('hex').padEnd(padding, '0');
-    // }
+    static fromAscii(string, padding = 0) {
+        if (!utils.isString(string)) {
+            throw new Error('The passed value is not a valid utf-8 string');
+        }
+        return '0x' + Buffer.from(string, 'ascii').toString('hex').padEnd(padding, '0');
+    }
 
-    // static toDecimal(value) {
-    //     return TronWeb.toBigNumber(value).toNumber();
-    // }
+    static toDecimal(value) {
+        return TronWeb.toBigNumber(value).toNumber();
+    }
 
-    // static fromDecimal(value) {
-    //     const number = TronWeb.toBigNumber(value);
-    //     const result = number.toString(16);
+    static fromDecimal(value) {
+        const number = TronWeb.toBigNumber(value);
+        const result = number.toString(16);
 
-    //     return number.isLessThan(0) ? '-0x' + result.substr(1) : '0x' + result;
-    // }
+        return number.isLessThan(0) ? '-0x' + result.substr(1) : '0x' + result;
+    }
 
-    // static fromSun(sun) {
-    //     const trx = TronWeb.toBigNumber(sun).div(1_000_000);
-    //     return utils.isBigNumber(sun) ? trx : trx.toString(10);
-    // }
+    static fromSun(sun) {
+        const trx = TronWeb.toBigNumber(sun).div(1_000_000);
+        return utils.isBigNumber(sun) ? trx : trx.toString(10);
+    }
 
-    // static toSun(trx) {
-    //     const sun = TronWeb.toBigNumber(trx).times(1_000_000);
-    //     return utils.isBigNumber(trx) ? sun : sun.toString(10);
-    // }
+    static toSun(trx) {
+        const sun = TronWeb.toBigNumber(trx).times(1_000_000);
+        return utils.isBigNumber(trx) ? sun : sun.toString(10);
+    }
 
-    // static toBigNumber(amount = 0) {
-    //     if (utils.isBigNumber(amount)) return amount;
+    static toBigNumber(amount = 0) {
+        if (utils.isBigNumber(amount)) return amount;
 
-    //     if (utils.isString(amount) && /^(-|)0x/.test(amount)) return new BigNumber(amount.replace('0x', ''), 16);
+        if (utils.isString(amount) && /^(-|)0x/.test(amount)) return new BigNumber(amount.replace('0x', ''), 16);
 
-    //     return new BigNumber(amount.toString(10), 10);
-    // }
+        return new BigNumber(amount.toString(10), 10);
+    }
 
-    static isAddress(address = ''): boolean {
+    static isAddress(address: unknown = ''): boolean {
         return isAddress(address);
     }
 
-    // static async createAccount() {
-    //     const account = utils.accounts.generateAccount();
+    static async createAccount() {
+        const account = utils.accounts.generateAccount();
 
-    //     return account;
-    // }
+        return account;
+    }
 
     // static createRandom(options) {
     //     const account = utils.accounts.generateRandom(options);

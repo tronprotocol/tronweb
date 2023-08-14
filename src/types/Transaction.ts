@@ -1,7 +1,7 @@
-import { ContractParamter, ContractType } from './Contract';
+import { ContractParamter, ContractType } from './Contract.js';
 
-export interface ContractParamterCapsule {
-    value: ContractParamter;
+export interface ContractParamterCapsule<T = ContractParamter> {
+    value: T;
     type_url: string;
 }
 export interface TransactionContract {

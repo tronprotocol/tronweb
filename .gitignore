@@ -10,6 +10,6 @@ yarn-error.log
 .idea/
 example/
 test/lib/dist/
-lib/
+/lib/
 !src/lib
 

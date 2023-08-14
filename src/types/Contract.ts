@@ -80,7 +80,7 @@ export interface Permission {
 export interface TransferContract {
     to_address: string;
     owner_address: string;
-    amount: string;
+    amount: number;
 }
 
 export interface TransferAssetContract {
@@ -94,7 +94,7 @@ export interface ParticipateAssetIssueContract {
     to_address: string;
     owner_address: string;
     asset_name: string;
-    amount: string;
+    amount: number;
 }
 
 export interface TriggerSmartContract {
@@ -232,7 +232,7 @@ export interface SetAccountIdContract {
 
 export interface ProposalCreateContract {
     owner_address: string;
-    parameters: Record<string, string>[];
+    parameters: Record<string, string | number>[];
 }
 
 export interface ProposalDeleteContract {
@@ -303,6 +303,16 @@ export interface UpdateAssetContract {
     new_public_limit?: number;
 }
 
+export interface WitnessCreateContract {
+    owner_address: string;
+    url: string;
+}
+
+export interface VoteWitnessContract {
+    owner_address: string;
+    votes: { vote_address: string; vote_count: number }[];
+}
+
 export type ContractParamter =
     | TransferContract
     | TransferAssetContract
@@ -334,4 +344,6 @@ export type ContractParamter =
     | UpdateSettingContract
     | UpdateEnergyLimitContract
     | AccountPermissionUpdateContract
-    | UpdateAssetContract;
+    | UpdateAssetContract
+    | WitnessCreateContract
+    | VoteWitnessContract;

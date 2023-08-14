@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 
-export default async function (func: Function, expectedError: any, expectedErrorContains?: any) {
+export default async function (func: () => unknown, expectedError?: any, expectedErrorContains?: any) {
     let errMsg;
     try {
         await func;
@@ -14,7 +14,7 @@ export default async function (func: Function, expectedError: any, expectedError
             if (!Array.isArray(expectedErrorContains)) {
                 expectedErrorContains = [expectedErrorContains];
             }
-            for (let expected of expectedErrorContains) {
+            for (const expected of expectedErrorContains) {
                 assert.notEqual(errMsg.indexOf(expected), -1);
             }
         }

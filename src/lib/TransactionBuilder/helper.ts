@@ -112,10 +112,7 @@ export interface PermissionId {
 
 export type NumberLike = string | number;
 
-export enum Resource {
-    BANDWIDTH = 'BANDWIDTH',
-    ENERGY = 'ENERGY',
-}
+export type Resource = 'BANDWIDTH' | 'ENERGY';
 
 export interface VoteInfo {
     [srAddress: string]: number;
@@ -192,6 +189,10 @@ export interface TriggerSmartContractOptions {
      * @todo: Create transaction locally instead of send request to server.
      */
     txLocal?: boolean;
+    /**
+     * Optional, for multi-signature use
+     */
+    permissionId?: number;
 }
 // @todo: confirm
 export interface InternalTriggerSmartContractOptions extends TriggerSmartContractOptions {

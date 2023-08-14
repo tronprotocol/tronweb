@@ -192,7 +192,7 @@ export default class TransactionBuilder {
     async freezeBalance(
         amount: NumberLike = 0,
         duration: NumberLike = 3,
-        resource = Resource.BANDWIDTH,
+        resource = 'BANDWIDTH',
         ownerAddress: string = this.tronWeb.defaultAddress.hex as string,
         receiverAddress?: string,
         options: PermissionId = {}
@@ -234,7 +234,7 @@ export default class TransactionBuilder {
             frozen_duration: parseInt(String(duration)),
         };
         if (resource !== 'BANDWIDTH') {
-            data.resource = resource;
+            data.resource = resource as Resource;
         }
 
         if (isNotNullOrUndefined(receiverAddress) && toHex(receiverAddress as string) !== toHex(ownerAddress as string)) {
@@ -245,7 +245,7 @@ export default class TransactionBuilder {
     }
 
     async unfreezeBalance(
-        resource = Resource.BANDWIDTH,
+        resource = 'BANDWIDTH',
         address: string = this.tronWeb.defaultAddress.hex as string,
         receiverAddress?: string,
         options: PermissionId = {}
@@ -273,7 +273,7 @@ export default class TransactionBuilder {
             owner_address: toHex(address as string),
         };
         if (resource !== 'BANDWIDTH') {
-            data.resource = resource;
+            data.resource = resource as Resource;
         }
 
         if (isNotNullOrUndefined(receiverAddress) && toHex(receiverAddress as string) !== toHex(address as string)) {
@@ -285,7 +285,7 @@ export default class TransactionBuilder {
 
     async freezeBalanceV2(
         amount = 0,
-        resource: Resource = Resource.BANDWIDTH,
+        resource: Resource = 'BANDWIDTH',
         address: string = this.tronWeb.defaultAddress.hex as string,
         options: PermissionId = {}
     ) {
@@ -321,7 +321,7 @@ export default class TransactionBuilder {
 
     async unfreezeBalanceV2(
         amount = 0,
-        resource: Resource = Resource.BANDWIDTH,
+        resource: Resource = 'BANDWIDTH',
         address: string = this.tronWeb.defaultAddress.hex as string,
         options: PermissionId = {}
     ) {
@@ -373,7 +373,7 @@ export default class TransactionBuilder {
     async delegateResource(
         amount: NumberLike = 0,
         receiverAddress: string,
-        resource: Resource = Resource.BANDWIDTH,
+        resource: Resource = 'BANDWIDTH',
         address: string = this.tronWeb.defaultAddress.hex as string,
         lock = false,
         lockPeriod?: number,
@@ -440,7 +440,7 @@ export default class TransactionBuilder {
     async undelegateResource(
         amount: NumberLike = 0,
         receiverAddress: string,
-        resource: Resource = Resource.BANDWIDTH,
+        resource: Resource = 'BANDWIDTH',
         address: string = this.tronWeb.defaultAddress.hex as string,
         options: PermissionId = {}
     ) {
@@ -822,7 +822,7 @@ export default class TransactionBuilder {
         options: InternalTriggerSmartContractOptions = {},
         parameters: TriggerSmartContractFunctionParameter[] = [],
         issuerAddress: string = this.tronWeb.defaultAddress.hex as string
-    ) {
+    ): Promise<TransactionCapsule> {
         options._isConstant = true;
         return this._triggerSmartContract(contractAddress, functionSelector, options, parameters, issuerAddress);
     }
@@ -833,7 +833,7 @@ export default class TransactionBuilder {
         options: InternalTriggerSmartContractOptions = {},
         parameters: TriggerSmartContractFunctionParameter[] = [],
         issuerAddress: string = this.tronWeb.defaultAddress.hex as string
-    ) {
+    ): Promise<TransactionCapsule> {
         options._isConstant = true;
         options.confirmed = true;
         return this._triggerSmartContract(contractAddress, functionSelector, options, parameters, issuerAddress);
