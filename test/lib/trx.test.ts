@@ -1970,7 +1970,7 @@ describe('TronWeb.trx', function () {
 
             transaction = await tronWeb.transactionBuilder.createSmartContract(
                 {
-                    abi: testRevertContract.abi as any[],
+                    abi: testRevertContract.abi,
                     bytecode: testRevertContract.bytecode,
                 },
                 accounts.hex[idx]

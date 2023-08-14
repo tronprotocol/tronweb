@@ -5,6 +5,7 @@ import { keccak256 } from '../../utils/ethersUtils.js';
 import { BlockWithoutDetail } from '../../types/APIResponse.js';
 import HttpProvider from '../providers/HttpProvider.js';
 import { ContractParamter, ContractType } from '../../types/Contract.js';
+import { AbiFragment, ContractAbiInterface } from '../../types/ABI.js';
 
 export function fromUtf8(value: string) {
     return TronWeb.fromUtf8(value).replace(/^0x/, '');
@@ -144,7 +145,7 @@ export interface CreateSmartContractOptions {
     /**
      * Abi string
      */
-    abi: string | { entrys: unknown[] } | unknown[];
+    abi: string | { entrys: ContractAbiInterface } | ContractAbiInterface;
     /**
      * Bytecode, default hexString.
      */
@@ -205,6 +206,8 @@ export interface TriggerSmartContractOptions {
 }
 // @todo: confirm
 export interface InternalTriggerSmartContractOptions extends TriggerSmartContractOptions {
+    funcABIV2?: AbiFragment;
+    parametersV2?: unknown[];
     shieldedParameter?: string;
     rawParameter?: string;
     _isConstant?: boolean;

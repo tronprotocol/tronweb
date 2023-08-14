@@ -184,11 +184,11 @@ enum BroadcastReturn_response_code {
     OTHER_ERROR = 20,
 }
 
-export interface BroadcastReturn {
+export interface BroadcastReturn<T extends SignedTransaction> {
     result: boolean;
     code: BroadcastReturn_response_code;
     message: string;
-    transaction: SignedTransaction;
+    transaction: T;
 }
 
 export interface BroadcastHexReturn {

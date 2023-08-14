@@ -1,12 +1,8 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
-import utils from '../../utils/index';
-import { encodeParamsV2ByABI, decodeParamsV2ByABI } from '../../utils/abi';
-import TronWeb from '../../index';
-import Contract from './index';
-import { deepCopyJson } from '../TransactionBuilder/helper';
-
-import { sha3 } from '../../utils/crypto';
+import utils from '../../utils/index.js';
+import { encodeParamsV2ByABI, decodeParamsV2ByABI } from '../../utils/abi.js';
+import TronWeb from '../../index.js';
+import Contract from './index.js';
+import { sha3 } from '../../utils/crypto.js';
 
 interface CallOptionsInterface {
     feeLimit?: number;
@@ -17,7 +13,19 @@ interface CallOptionsInterface {
     shouldPollResponse?: boolean;
     from?: string | false;
     rawParameter?: string;
-    _isConstant: true;
+    _isConstant?: true;
+}
+
+interface SendOptionsInterface {
+    from?: string | false;
+    feeLimit?: number;
+    callValue?: number;
+    rawParameter?: string;
+    userFeePercentage?: number;
+    shouldPollResponse?: boolean;
+    pollTimes?: number;
+    rawResponse?: boolean;
+    keepTxID?: boolean;
 }
 
 import type {
@@ -29,10 +37,9 @@ import type {
     EventFragment,
     AbiInputsType,
     AbiOutputsType,
-    AbiFragment,
 } from '../../types/ABI';
 
-type AbiFragmentNoErrConstructor = FunctionFragment | EventFragment | FallbackFragment | ReceiveFragment;
+export type AbiFragmentNoErrConstructor = FunctionFragment | EventFragment | FallbackFragment | ReceiveFragment;
 
 const getFunctionSelector = (abi: AbiFragmentNoErrConstructor) => {
     if ('stateMutability' in abi) {
@@ -116,7 +123,7 @@ export default class Method {
 
                 return await this._call([], [], options);
             },
-            send: async (options = {}, privateKey = this.tronWeb.defaultPrivateKey) => {
+            send: async (options: SendOptionsInterface = {}, privateKey = this.tronWeb.defaultPrivateKey) => {
                 options = {
                     ...options,
                     rawParameter,
@@ -160,25 +167,25 @@ export default class Method {
             value,
         }));
 
-        const transaction = this.tronWeb.transactionBuilder.triggerSmartContract(
+        const transaction = await this.tronWeb.transactionBuilder.triggerSmartContract(
             this.contract.address,
-            this.functionSelector,
+            this.functionSelector!,
             options,
             parameters,
-            options.from ? this.tronWeb.address.toHex(options.from) : false
+            options.from ? this.tronWeb.address.toHex(options.from) : undefined
         );
 
         if (!utils.hasProperty(transaction, 'constant_result')) {
             throw new Error('Failed to execute');
         }
 
-        const len = transaction.constant_result[0].length;
+        const len = transaction.constant_result![0].length;
         if (len === 0 || len % 64 === 8) {
             let msg = 'The call has been reverted or has thrown an error.';
             if (len !== 0) {
                 msg += ' Error message: ';
                 let msg2 = '';
-                const chunk = transaction.constant_result[0].substring(8);
+                const chunk = transaction.constant_result![0].substring(8);
                 for (let i = 0; i < len - 8; i += 64) {
                     msg2 += this.tronWeb.toUtf8(chunk.substring(i, i + 64));
                 }
@@ -190,7 +197,7 @@ export default class Method {
             throw new Error(msg);
         }
 
-        let output = decodeOutput(this.abi, '0x' + transaction.constant_result[0]);
+        let output = decodeOutput(this.abi, '0x' + transaction.constant_result![0]);
 
         if (output.length === 1 && Object.keys(output).length === 1) {
             output = output[0];
@@ -198,7 +205,7 @@ export default class Method {
         return output;
     }
 
-    async _send(types, args, options = {}, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
+    async _send(types: [], args: [], options: SendOptionsInterface = {}, privateKey = this.tronWeb.defaultPrivateKey) {
         if (types.length !== args.length) {
             throw new Error('Invalid argument count provided');
         }
@@ -211,7 +218,7 @@ export default class Method {
             throw new Error('Calling smart contracts requires you to load the contract first');
         }
 
-        const { stateMutability } = this.abi;
+        const { stateMutability } = this.abi as { stateMutability: StateMutabilityTypes };
 
         if (['pure', 'view'].includes(stateMutability.toLowerCase())) {
             throw new Error(`Methods with state mutability "${stateMutability}" must use call()`);
@@ -236,10 +243,10 @@ export default class Method {
         const address = privateKey ? this.tronWeb.address.fromPrivateKey(privateKey) : this.tronWeb.defaultAddress.base58;
         const transaction = await this.tronWeb.transactionBuilder.triggerSmartContract(
             this.contract.address,
-            this.functionSelector,
+            this.functionSelector!,
             options,
             parameters,
-            this.tronWeb.address.toHex(address)
+            this.tronWeb.address.toHex(address as string)
         );
 
         if (!transaction.result || !transaction.result.result) {
@@ -262,7 +269,7 @@ export default class Method {
         if (broadcast.code) {
             const err = {
                 error: broadcast.code,
-                message: broadcast.code,
+                message: broadcast.code as unknown as string,
             };
             if (broadcast.message) err.message = this.tronWeb.toUtf8(broadcast.message);
             const error = new Error(err.message);
@@ -332,7 +339,7 @@ export default class Method {
             return decoded;
         };
 
-        checkResult();
+        return checkResult();
     }
 
     // async _watch(options = {}, callback = false) {

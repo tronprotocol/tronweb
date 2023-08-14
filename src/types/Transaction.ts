@@ -41,7 +41,7 @@ export interface TransactionCapsule {
     };
     transaction: Transaction;
     energy_required?: number;
-    constant_result?: string;
+    constant_result?: any[];
 }
 
 export interface SignedTransaction extends Transaction {

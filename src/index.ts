@@ -11,9 +11,9 @@ import semver from 'semver';
 
 import TransactionBuilder from './lib/TransactionBuilder/TransactionBuilder.js';
 import Trx from './lib/trx.js';
-import Contract from './lib/contract';
+import Contract from './lib/contract/index.js';
 // import Plugin from 'lib/plugin';
-// import Event from 'lib/event';
+import Event from './lib/event.js';
 // import SideChain from 'lib/sidechain';
 import { keccak256 } from './utils/ethersUtils.js';
 import { ADDRESS_PREFIX, fromHex, fromPrivateKey, isAddress, toHex, TRON_BIP39_PATH_INDEX_0 } from './utils/address.js';
@@ -24,6 +24,8 @@ import { byteArray2hexStr } from './utils/bytes.js';
 import { hexStr2byteArray } from './utils/code.js';
 import { isString } from './utils/validations.js';
 import { DefaultAddress, NodeService, TronWebOptions } from './types/TronWeb';
+import { ContractAbiInterface } from './types/ABI.js';
+import { Address } from './types/Trx.js';
 
 const DEFAULT_VERSION = '4.7.1';
 
@@ -43,11 +45,13 @@ export default class TronWeb extends EventEmitter {
     static Trx = Trx;
     static Contract = Contract;
     // static Plugin = Plugin;
-    // static Event = Event;
+    static Event = Event;
     // static version = version;
     utils: typeof TronWeb.utils;
     static utils = utils;
 
+    event: Event;
+    trx: Trx;
     transactionBuilder: TransactionBuilder;
     trx: Trx;
     providers: Providers;
@@ -60,6 +64,7 @@ export default class TronWeb extends EventEmitter {
 
     fullNode!: HttpProvider;
     solidityNode!: HttpProvider;
+    eventServer?: HttpProvider;
 
     constructor(options: TronWebOptions);
     constructor(fullNode: NodeService, solidityNode: NodeService, eventServer: NodeService, sideOptions: TronWebOptions);
@@ -96,7 +101,7 @@ export default class TronWeb extends EventEmitter {
 
         if (utils.isString(eventServer)) eventServer = new providers.HttpProvider(eventServer);
 
-        // this.event = new Event(this);
+        this.event = new Event(this);
         this.transactionBuilder = new TransactionBuilder(this);
         this.trx = new Trx(this);
         // this.plugin = new Plugin(this, options);
@@ -104,7 +109,7 @@ export default class TronWeb extends EventEmitter {
 
         this.setFullNode(fullNode as HttpProvider);
         this.setSolidityNode(solidityNode as HttpProvider);
-        // this.setEventServer(eventServer);
+        this.setEventServer(eventServer);
 
         this.providers = providers;
         this.BigNumber = BigNumber;
@@ -164,9 +169,9 @@ export default class TronWeb extends EventEmitter {
             this.setFullNodeHeader(headers);
         }
 
-        // if (eventHeaders) {
-        //     this.setEventHeader(eventHeaders);
-        // }
+        if (eventHeaders) {
+            this.setEventHeader(eventHeaders);
+        }
     }
 
     // async getFullnodeVersion() {
@@ -245,9 +250,9 @@ export default class TronWeb extends EventEmitter {
         this.solidityNode.setStatusPage('walletsolidity/getnowblock');
     }
 
-    // setEventServer(...params) {
-    //     this.event.setServer(...params);
-    // }
+    setEventServer(eventServer: NodeService, healthcheck?: string) {
+        this.event.setServer(eventServer, healthcheck);
+    }
 
     // setHeader(headers = {}) {
     //     const fullNode = new providers.HttpProvider(this.fullNode.host, 30000, false, false, headers);
@@ -267,10 +272,10 @@ export default class TronWeb extends EventEmitter {
         this.setSolidityNode(solidityNode);
     }
 
-    // setEventHeader(headers = {}) {
-    //     const eventServer = new providers.HttpProvider(this.eventServer.host, 30000, false, false, headers);
-    //     this.setEventServer(eventServer);
-    // }
+    setEventHeader(headers = {}) {
+        const eventServer = new providers.HttpProvider(this.eventServer!.host, 30000, '', '', headers);
+        this.setEventServer(eventServer);
+    }
 
     // currentProviders() {
     //     return {
@@ -315,7 +320,7 @@ export default class TronWeb extends EventEmitter {
     //     return this.event.getEventsByTransactionID(...params);
     // }
 
-    contract(abi = [], address = '') {
+    contract(abi?: ContractAbiInterface = [], address?: Address) {
         return new Contract(this, abi, address);
     }
 

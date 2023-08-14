@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import validator from 'validator';
-
 import { ADDRESS_PREFIX } from './address.js';
+import { AbiParamsCommon } from '../types/ABI.js';
 
 export function isValidURL(url: string): boolean {
     if (typeof url !== 'string') return false;
@@ -110,7 +110,7 @@ export function mapEvent(event: EventQueryDataType) {
     return data;
 }
 
-export function parseEvent(event: EventQueryDataType, { inputs: abi }: { inputs: ReadonlyArray<any> }) {
+export function parseEvent(event: EventQueryDataType, { inputs: abi }: { inputs: ReadonlyArray<AbiParamsCommon> }) {
     if (!event.result) return event;
 
     if (isObject(event.result)) {
