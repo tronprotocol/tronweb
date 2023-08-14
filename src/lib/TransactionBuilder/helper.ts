@@ -1,5 +1,4 @@
 import TronWeb from '../../index.js';
-import { ABIType } from '../../utils/abi.js';
 import { Transaction, TransactionCapsule } from '../../types/Transaction.js';
 import { txCheckWithArgs, txJsonToPb, txPbToTxID, txPbToRawDataHex } from '../../utils/transaction.js';
 import { keccak256 } from '../../utils/ethersUtils.js';
@@ -145,7 +144,7 @@ export interface CreateSmartContractOptions {
     /**
      * Abi string
      */
-    abi: string | { entrys: ABIType[] } | ABIType[];
+    abi: string | { entrys: unknown[] } | unknown[];
     /**
      * Bytecode, default hexString.
      */
@@ -164,6 +163,12 @@ export interface CreateSmartContractOptions {
      * Optional, for multi-signature use
      */
     permissionId?: number;
+    /**
+     * Optional, raw parameters such as 0x0000000000000000000000000000000000000000000000000000000000000001.
+     */
+    rawParameter?: string;
+    funcABIV2?: unknown;
+    parametersV2?: unknown;
 }
 
 export interface TriggerSmartContractOptions {
@@ -191,11 +196,15 @@ export interface TriggerSmartContractOptions {
      * Optional, for multi-signature use
      */
     permissionId?: number;
+    /**
+     * Optional, raw parameters such as 0x0000000000000000000000000000000000000000000000000000000000000001.
+     */
+    rawParameter?: string;
+    funcABIV2?: unknown;
+    parametersV2?: unknown;
 }
 // @todo: confirm
 export interface InternalTriggerSmartContractOptions extends TriggerSmartContractOptions {
-    funcABIV2?: ABIType;
-    parametersV2?: unknown[];
     shieldedParameter?: string;
     rawParameter?: string;
     _isConstant?: boolean;

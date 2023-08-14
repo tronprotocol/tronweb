@@ -1,20 +1,20 @@
-import { ContractParamter, ContractType } from './Contract.js';
+import { ContractParamter, ContractType, CreateSmartContract } from './Contract.js';
 
 export interface ContractParamterCapsule<T = ContractParamter> {
     value: T;
     type_url: string;
 }
-export interface TransactionContract {
+export interface TransactionContract<T = ContractParamter> {
     type: ContractType;
-    parameter: ContractParamterCapsule;
+    parameter: ContractParamterCapsule<T>;
     Permission_id?: number;
 }
 
-export interface Transaction {
+export interface Transaction<T = ContractParamter> {
     visible: boolean;
     txID: string;
     raw_data: {
-        contract: TransactionContract[];
+        contract: TransactionContract<T>[];
         ref_block_bytes: string;
         ref_block_hash: string;
         expiration: number;
@@ -26,7 +26,7 @@ export interface Transaction {
     raw_data_hex: string;
 }
 
-export interface CreateSmartContractTransaction extends Transaction {
+export interface CreateSmartContractTransaction extends Transaction<CreateSmartContract> {
     /**
      * Address of smart contract.
      */
@@ -40,6 +40,8 @@ export interface TransactionCapsule {
         message?: string;
     };
     transaction: Transaction;
+    energy_required?: number;
+    constant_result?: string;
 }
 
 export interface SignedTransaction extends Transaction {

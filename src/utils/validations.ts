@@ -1,6 +1,5 @@
 import BigNumber from 'bignumber.js';
 import validator from 'validator';
-import { ParamType } from './abi.js';
 
 import { ADDRESS_PREFIX } from './address.js';
 
@@ -111,7 +110,7 @@ export function mapEvent(event: EventQueryDataType) {
     return data;
 }
 
-export function parseEvent(event: EventQueryDataType, { inputs: abi }: { inputs: ReadonlyArray<ParamType> }) {
+export function parseEvent(event: EventQueryDataType, { inputs: abi }: { inputs: ReadonlyArray<any> }) {
     if (!event.result) return event;
 
     if (isObject(event.result)) {

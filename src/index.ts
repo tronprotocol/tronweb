@@ -11,7 +11,7 @@ import semver from 'semver';
 
 import TransactionBuilder from './lib/TransactionBuilder/TransactionBuilder.js';
 import Trx from './lib/trx.js';
-// import Contract from 'lib/contract';
+import Contract from './lib/contract';
 // import Plugin from 'lib/plugin';
 // import Event from 'lib/event';
 // import SideChain from 'lib/sidechain';
@@ -41,7 +41,7 @@ export default class TronWeb extends EventEmitter {
     static BigNumber = BigNumber;
     static TransactionBuilder = TransactionBuilder;
     static Trx = Trx;
-    // static Contract = Contract;
+    static Contract = Contract;
     // static Plugin = Plugin;
     // static Event = Event;
     // static version = version;
@@ -219,9 +219,9 @@ export default class TronWeb extends EventEmitter {
         this.emit('addressChanged', { hex, base58 });
     }
 
-    // fullnodeSatisfies(version) {
-    //     return semver.satisfies(this.fullnodeVersion, version);
-    // }
+    fullnodeSatisfies(version: string) {
+        return semver.satisfies(this.fullnodeVersion, version);
+    }
 
     isValidProvider(provider: unknown) {
         return Object.values(providers).some((knownProvider) => provider instanceof knownProvider);
@@ -315,9 +315,9 @@ export default class TronWeb extends EventEmitter {
     //     return this.event.getEventsByTransactionID(...params);
     // }
 
-    // contract(abi = [], address = false) {
-    //     return new Contract(this, abi, address);
-    // }
+    contract(abi = [], address = '') {
+        return new Contract(this, abi, address);
+    }
 
     address: typeof TronWeb.address;
     static get address() {
@@ -381,7 +381,7 @@ export default class TronWeb extends EventEmitter {
         return '0x' + Buffer.from(string, 'utf8').toString('hex');
     }
 
-    static toAscii(hex) {
+    static toAscii(hex: string) {
         if (utils.isHex(hex)) {
             let str = '';
             let i = 0;
@@ -407,7 +407,7 @@ export default class TronWeb extends EventEmitter {
         return '0x' + Buffer.from(string, 'ascii').toString('hex').padEnd(padding!, '0');
     }
 
-    static toDecimal(value) {
+    static toDecimal(value: string) {
         return TronWeb.toBigNumber(value).toNumber();
     }
 
@@ -419,12 +419,12 @@ export default class TronWeb extends EventEmitter {
         return number.isLessThan(0) ? '-0x' + result.substr(1) : '0x' + result;
     }
 
-    static fromSun(sun) {
+    static fromSun(sun: number) {
         const trx = TronWeb.toBigNumber(sun).div(1_000_000);
         return utils.isBigNumber(sun) ? trx : trx.toString(10);
     }
 
-    static toSun(trx) {
+    static toSun(trx: number) {
         const sun = TronWeb.toBigNumber(trx).times(1_000_000);
         return utils.isBigNumber(trx) ? sun : sun.toString(10);
     }

@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 
-export default async function (func: () => unknown, expectedError?: any, expectedErrorContains?: any) {
+export default async function (func: unknown, expectedError?: any, expectedErrorContains?: any) {
     let errMsg;
     try {
         await func;

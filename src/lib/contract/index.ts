@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 import TronWeb from '../../index';
 import utils from '../../utils/index';
 import Method from './method';
@@ -14,7 +16,7 @@ export default class Contract {
     lastBlock?: false | number;
     methods?: Record<any, any>;
     methodInstances?: Record<any, any>;
-    props?: [];
+    props: [];
 
     constructor(tronWeb: TronWeb, abi = [], address: string) {
         if (!tronWeb || !(tronWeb instanceof TronWeb)) throw new Error('Expected instance of TronWeb');
@@ -104,7 +106,8 @@ export default class Contract {
     //     this.eventCallback = false;
     // }
 
-    hasProperty(property) {
+    hasProperty(property: string) {
+        // eslint-disable-next-line no-prototype-builtins
         return this.hasOwnProperty(property) || this.__proto__.hasOwnProperty(property);
     }
 

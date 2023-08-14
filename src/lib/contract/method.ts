@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 import utils from '../../utils/index';
 import { encodeParamsV2ByABI, decodeParamsV2ByABI } from '../../utils/abi';
 import TronWeb from '../../index';

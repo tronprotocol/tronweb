@@ -1,5 +1,4 @@
 import { Resource } from '../lib/TransactionBuilder/helper';
-import { ABI } from '../utils/abi';
 export enum ContractType {
     AccountCreateContract = 'AccountCreateContract',
     TransferContract = 'TransferContract',
@@ -173,7 +172,7 @@ export interface CreateSmartContract {
         name: string;
         origin_address: string;
         contract_address: string;
-        abi: ABI;
+        abi: any;
         bytecode: string;
         call_value: number;
         consume_user_resource_percent: number;
@@ -187,7 +186,7 @@ export interface ClearABIContract {
 }
 
 export interface UpdateBrokerageContract {
-    brokerage: string;
+    brokerage: number;
     owner_address: string;
 }
 
