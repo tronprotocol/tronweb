@@ -12,4 +12,5 @@ example/
 test/lib/dist/
 /lib/
 !src/lib
+!test/lib
 

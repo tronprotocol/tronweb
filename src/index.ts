@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 import providers from './lib/providers/index.js';
 import type { Providers } from './lib/providers/index.js';
@@ -8,8 +9,8 @@ import EventEmitter from 'eventemitter3';
 import { version } from '../package.json';
 import semver from 'semver';
 
-import TransactionBuilder from './lib/TransactionBuilder';
-// import Trx from 'lib/trx';
+import TransactionBuilder from './lib/TransactionBuilder/TransactionBuilder.js';
+import Trx from './lib/trx.js';
 // import Contract from 'lib/contract';
 // import Plugin from 'lib/plugin';
 // import Event from 'lib/event';
@@ -39,7 +40,7 @@ export default class TronWeb extends EventEmitter {
     static providers = providers;
     static BigNumber = BigNumber;
     static TransactionBuilder = TransactionBuilder;
-    // static Trx = Trx;
+    static Trx = Trx;
     // static Contract = Contract;
     // static Plugin = Plugin;
     // static Event = Event;
@@ -48,6 +49,7 @@ export default class TronWeb extends EventEmitter {
     static utils = utils;
 
     transactionBuilder: TransactionBuilder;
+    trx: Trx;
     providers: Providers;
     BigNumber: typeof BigNumber;
     defaultBlock: number | false;
@@ -95,8 +97,8 @@ export default class TronWeb extends EventEmitter {
         if (utils.isString(eventServer)) eventServer = new providers.HttpProvider(eventServer);
 
         // this.event = new Event(this);
-        // this.transactionBuilder = new TransactionBuilder(this);
-        // this.trx = new Trx(this);
+        this.transactionBuilder = new TransactionBuilder(this);
+        this.trx = new Trx(this);
         // this.plugin = new Plugin(this, options);
         this.utils = utils;
 
@@ -140,6 +142,13 @@ export default class TronWeb extends EventEmitter {
         this.sha3 = TronWeb.sha3;
         this.fromUtf8 = TronWeb.fromUtf8;
         this.address = TronWeb.address;
+        this.toUtf8 = TronWeb.toUtf8;
+        this.isAddress = TronWeb.isAddress;
+        this.fromAscii = TronWeb.fromAscii;
+        this.toHex = TronWeb.toHex;
+        this.toBigNumber = TronWeb.toBigNumber;
+        this.fromDecimal = TronWeb.fromDecimal;
+        this.createAccount = TronWeb.createAccount;
         // for sidechain
         // if (typeof sideOptions === 'object' && (sideOptions.fullNode || sideOptions.fullHost)) {
         //     this.sidechain = new SideChain(sideOptions, TronWeb, this, privateKey);
@@ -330,7 +339,8 @@ export default class TronWeb extends EventEmitter {
         return (prefix ? '0x' : '') + keccak256(Buffer.from(string, 'utf-8')).toString().substring(2);
     }
 
-    static toHex(val) {
+    toHex: typeof TronWeb.toHex;
+    static toHex(val: any) {
         if (utils.isBoolean(val)) return TronWeb.fromDecimal(+val);
 
         if (utils.isBigNumber(val)) return TronWeb.fromDecimal(val);
@@ -340,6 +350,8 @@ export default class TronWeb extends EventEmitter {
         if (utils.isString(val)) {
             if (/^(-|)0x/.test(val)) return val;
 
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             if (!isFinite(val) || /^\s*$/.test(val)) return TronWeb.fromUtf8(val);
         }
 
@@ -351,7 +363,8 @@ export default class TronWeb extends EventEmitter {
         }
     }
 
-    static toUtf8(hex) {
+    toUtf8: typeof TronWeb.toUtf8;
+    static toUtf8(hex: string) {
         if (utils.isHex(hex)) {
             hex = hex.replace(/^0x/, '');
             return Buffer.from(hex, 'hex').toString('utf8');
@@ -386,18 +399,20 @@ export default class TronWeb extends EventEmitter {
         }
     }
 
-    static fromAscii(string, padding = 0) {
+    fromAscii: typeof TronWeb.fromAscii;
+    static fromAscii(string: string, padding?: number) {
         if (!utils.isString(string)) {
             throw new Error('The passed value is not a valid utf-8 string');
         }
-        return '0x' + Buffer.from(string, 'ascii').toString('hex').padEnd(padding, '0');
+        return '0x' + Buffer.from(string, 'ascii').toString('hex').padEnd(padding!, '0');
     }
 
     static toDecimal(value) {
         return TronWeb.toBigNumber(value).toNumber();
     }
 
-    static fromDecimal(value) {
+    fromDecimal: typeof TronWeb.fromDecimal;
+    static fromDecimal(value: number | BigNumber) {
         const number = TronWeb.toBigNumber(value);
         const result = number.toString(16);
 
@@ -414,7 +429,8 @@ export default class TronWeb extends EventEmitter {
         return utils.isBigNumber(trx) ? sun : sun.toString(10);
     }
 
-    static toBigNumber(amount = 0) {
+    toBigNumber: typeof TronWeb.toBigNumber;
+    static toBigNumber(amount: string | number | BigNumber = 0) {
         if (utils.isBigNumber(amount)) return amount;
 
         if (utils.isString(amount) && /^(-|)0x/.test(amount)) return new BigNumber(amount.replace('0x', ''), 16);
@@ -422,10 +438,12 @@ export default class TronWeb extends EventEmitter {
         return new BigNumber(amount.toString(10), 10);
     }
 
-    static isAddress(address: unknown = ''): boolean {
+    isAddress: typeof TronWeb.isAddress;
+    static isAddress(address = ''): boolean {
         return isAddress(address);
     }
 
+    createAccount: typeof TronWeb.createAccount;
     static async createAccount() {
         const account = utils.accounts.generateAccount();
 
