@@ -282,7 +282,7 @@ export default class Method {
             return signedTransaction.txID;
         }
 
-        const checkResult = async (index = 0) => {
+        const checkResult: (index: number) => any = async (index) => {
             if (index === (options.pollTimes || 20)) {
                 const error = new Error('Cannot find result in solidity node');
                 // @ts-ignore
@@ -295,9 +295,8 @@ export default class Method {
             const output = await this.tronWeb.trx.getTransactionInfo(signedTransaction.txID);
 
             if (!Object.keys(output).length) {
-                return setTimeout(() => {
-                    checkResult(index + 1);
-                }, 3000);
+                await new Promise((r) => setTimeout(r, 3000));
+                return checkResult(index + 1);
             }
 
             if (output.result && output.result === 'FAILED') {
@@ -339,7 +338,7 @@ export default class Method {
             return decoded;
         };
 
-        return checkResult();
+        return checkResult(0);
     }
 
     // async _watch(options = {}, callback = false) {

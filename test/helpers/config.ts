@@ -1,7 +1,10 @@
-const fullHost = 'http://127.0.0.1:' + (process.env.HOST_PORT || 9090);
+// const fullHost = 'http://127.0.0.1:' + (process.env.HOST_PORT || 9090);
+// const PK = '';
+const fullHost = 'https://nile.trongrid.io';
+const PK = '5353e96fc5c695d09cb873c927966695e410bf08c8bee1b52154961b18ff7bca';
 
 export default {
-    PRIVATE_KEY: process.env.PRIVATE_KEY as string,
+    PRIVATE_KEY: PK || (process.env.PRIVATE_KEY as string),
     CONSUME_USER_RESOURCE_PERCENT: 30,
     FEE_LIMIT: 100000000,
     FULL_NODE_API: fullHost,

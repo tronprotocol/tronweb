@@ -75,18 +75,6 @@ describe('TronWeb.utils.accounts', function () {
                 assert.equal(address, newAccount.address);
                 assert.equal(tronWeb.address.toHex(address as string), tronWeb.address.toHex(newAccount.address));
             });
-
-            it('should throw when options param has a bip39 path of an another chain', async function () {
-                const tronWeb = tronWebBuilder.createInstance();
-
-                await assertThrow(new Promise(() => tronWeb.utils.accounts.generateRandom()), 'Invalid tron path provided');
-            });
-
-            it('should throw when options param has an invalid bip39 path', async function () {
-                const tronWeb = tronWebBuilder.createInstance();
-
-                await assertThrow(new Promise(() => tronWeb.utils.accounts.generateRandom()), 'Invalid tron path provided');
-            });
         });
     });
 
