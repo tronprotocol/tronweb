@@ -34,7 +34,7 @@
         "clean:all": "rimraf dist lib",
         "clean": "rimraf dist",
         "newaccount": "node scripts/test-node.js && node lib/commonjs/test/helpers/newAccounts 100",
-        "test": "npm run-script newaccount && npx mocha 'lib/commonjs/test/**/*.test.js' --timeout 120000",
+        "test": "npm run build:cjs && npm run-script newaccount && npx mocha 'lib/commonjs/test/**/*.test.js' --timeout 120000",
         "test:esm": "npm run-script newaccount && npx mocha 'lib/esm/test/**/*.test.js' --timeout 120000",
         "testAbi": "node scripts/test-node.js && node test/helpers/newAccounts 1 && npx mocha 'test/**/abi.test.js' --timeout 120000",
         "testTx": "node scripts/test-node.js && node test/helpers/newAccounts 100 && npx mocha 'test/**/transaction.test.js' --timeout 120000",
