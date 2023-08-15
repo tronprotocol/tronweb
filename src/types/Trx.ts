@@ -286,4 +286,5 @@ export interface TransactionInfo {
     unfreeze_amount: number;
     withdraw_expire_amount: number;
     cancel_unfreezeV2_amount: HTTPMap<string, number>;
+    exchange_id: string;
 }

@@ -1,3 +1,4 @@
+/* eslint-disable no-constant-condition */
 import { assert } from 'chai';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
 import broadcaster from '../helpers/broadcaster.js';
@@ -77,7 +78,7 @@ describe('TronWeb.lib.event', async function () {
             '5353e96fc5c695d09cb873c927966695e410bf08c8bee1b52154961b18ff7bca' // for nile
         );
 
-        contractAddress = result.receipt.transaction.contract_address;
+        contractAddress = result.receipt.transaction.contract_address!;
         contract = (await tronWeb.contract().at(contractAddress)) as unknown as IContract;
     });
 
@@ -91,7 +92,7 @@ describe('TronWeb.lib.event', async function () {
         it('should emit an unconfirmed event and get it', async function () {
             this.timeout(60000);
             tronWeb.setPrivateKey(accounts.pks[1]);
-            let txId = await contract.emitNow(accounts.hex[2], 2000).send({
+            const txId = await contract.emitNow(accounts.hex[2], 2000).send({
                 from: accounts.hex[1],
             });
             eventLength++;
@@ -112,14 +113,14 @@ describe('TronWeb.lib.event', async function () {
         it('should emit an event, wait for confirmation and get it', async function () {
             this.timeout(60000);
             tronWeb.setPrivateKey(accounts.pks[1]);
-            let output = await contract.emitNow(accounts.hex[2], 2000).send({
+            const output = await contract.emitNow(accounts.hex[2], 2000).send({
                 from: accounts.hex[1],
                 shouldPollResponse: true,
                 rawResponse: true,
             });
             eventLength++;
 
-            let txId = output.id;
+            const txId = output.id;
             let events;
             while (true) {
                 events = await tronWeb.event.getEventsByTransactionID(txId);

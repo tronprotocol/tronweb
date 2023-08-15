@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { assert } from 'chai';
 import assertThrow from '../helpers/assertThrow.js';
 import wait from '../helpers/wait.js';
@@ -44,7 +45,7 @@ describe('TronWeb.trx', function () {
             it('should get account by hex or base58 address', async function () {
                 const addressType = ['hex', 'b58'];
                 let account;
-                for (let type of addressType) {
+                for (const type of addressType) {
                     account = await tronWeb.trx.getAccount(accounts[type as keyof typeof accounts][idx]);
                     assert.equal(account.address, accounts.hex[idx]);
                 }
@@ -68,6 +69,7 @@ describe('TronWeb.trx', function () {
 
             it('should get confirmed account by id', async function () {
                 this.timeout(20000);
+                // eslint-disable-next-line no-constant-condition
                 while (true) {
                     const account = await tronWeb.trx.getAccountById(accountId);
                     if (Object.keys(account).length === 0) {
@@ -82,7 +84,7 @@ describe('TronWeb.trx', function () {
 
             it('should throw accountId is not valid error', async function () {
                 const ids = ['', '12', '616161616262626231313131313131313131313131313131313131313131313131313131313131'];
-                for (let id of ids) {
+                for (const id of ids) {
                     await assertThrow(tronWeb.trx.getAccountById(id), 'Invalid accountId provided');
                 }
             });
@@ -94,7 +96,7 @@ describe('TronWeb.trx', function () {
             it('should get account resource by hex or base58 address', async function () {
                 const addressType = ['hex', 'b58'];
                 let accountResource;
-                for (let type of addressType) {
+                for (const type of addressType) {
                     accountResource = await tronWeb.trx.getAccountResources(accounts[type as keyof typeof accounts][idx]);
                     assert.isDefined(accountResource.freeNetLimit);
                     assert.isDefined(accountResource.TotalEnergyLimit);
@@ -125,7 +127,7 @@ describe('TronWeb.trx', function () {
             it('should get the resource delegation information', async function () {
                 const addressType = ['hex', 'b58'];
                 let delegationInfo;
-                for (let type of addressType) {
+                for (const type of addressType) {
                     delegationInfo = await tronWeb.trx.getDelegatedResourceV2(
                         accounts[type as keyof typeof accounts][idx],
                         accounts[type as keyof typeof accounts][idx + 1]
@@ -191,7 +193,7 @@ describe('TronWeb.trx', function () {
             it('should get the resource delegation account information', async function () {
                 const addressType = ['hex', 'b58'];
                 let delegationInfo;
-                for (let type of addressType) {
+                for (const type of addressType) {
                     delegationInfo = await tronWeb.trx.getDelegatedResourceAccountIndexV2(
                         accounts[type as keyof typeof accounts][idx]
                     );
@@ -244,7 +246,7 @@ describe('TronWeb.trx', function () {
 
             it('should get the max resource can delegate', async function () {
                 const addressType = ['hex', 'b58'];
-                for (let type of addressType) {
+                for (const type of addressType) {
                     const { max_size } = await tronWeb.trx.getCanDelegatedMaxSize(
                         accounts[type as keyof typeof accounts][idx],
                         'ENERGY'
@@ -300,7 +302,7 @@ describe('TronWeb.trx', function () {
 
             it('should get the times user can do UnFreezeBalanceV2', async function () {
                 const addressType = ['hex', 'b58'];
-                for (let type of addressType) {
+                for (const type of addressType) {
                     const { count } = await tronWeb.trx.getAvailableUnfreezeCount(accounts[type as keyof typeof accounts][idx]);
                     assert.isNumber(count);
                 }
@@ -353,7 +355,7 @@ describe('TronWeb.trx', function () {
 
             it('should get the amount of a widrawUnfreeze operation', async function () {
                 const addressType = ['hex', 'b58'];
-                for (let type of addressType) {
+                for (const type of addressType) {
                     const { amount } = await tronWeb.trx.getCanWithdrawUnfreezeAmount(
                         accounts[type as keyof typeof accounts][idx],
                         Date.now()
@@ -404,7 +406,7 @@ describe('TronWeb.trx', function () {
             it('should get balance by hex or base58 address', async function () {
                 const addressType = ['hex', 'b58'];
                 let balance;
-                for (let type of addressType) {
+                for (const type of addressType) {
                     balance = await tronWeb.trx.getBalance(accounts[type as keyof typeof accounts][idx]);
                     assert.isTrue(balance >= 0);
                 }
@@ -417,7 +419,7 @@ describe('TronWeb.trx', function () {
             it('should get bandwith by hex or base58 address', async function () {
                 const addressType = ['hex', 'b58'];
                 let bp;
-                for (let type of addressType) {
+                for (const type of addressType) {
                     bp = await tronWeb.trx.getBandwidth(accounts[type as keyof typeof accounts][idx]);
                     assert.isTrue(bp >= 0);
                 }
@@ -468,7 +470,7 @@ describe('TronWeb.trx', function () {
 
             it('should throw accountId is not valid error', async function () {
                 const ids = ['', '12', '616161616262626231313131313131313131313131313131313131313131313131313131313131'];
-                for (let id of ids) {
+                for (const id of ids) {
                     await assertThrow(tronWeb.trx.getUnconfirmedAccountById(id), 'Invalid accountId provided');
                 }
             });
@@ -714,15 +716,15 @@ describe('TronWeb.trx', function () {
             before(async function () {
                 this.timeout(10000);
                 // update account permission
-                let ownerAddress = accounts.hex[ownerIdx];
-                let ownerPk = accounts.pks[ownerIdx];
-                let ownerPermission: Permission = {
+                const ownerAddress = accounts.hex[ownerIdx];
+                const ownerPk = accounts.pks[ownerIdx];
+                const ownerPermission: Permission = {
                     type: 0,
                     permission_name: 'owner',
                     threshold,
                     keys: [],
                 };
-                let activePermission: Permission = {
+                const activePermission: Permission = {
                     type: 2,
                     permission_name: 'active0',
                     threshold,
@@ -731,8 +733,8 @@ describe('TronWeb.trx', function () {
                 };
 
                 for (let i = idxS; i < idxE; i++) {
-                    let address = accounts.hex[i];
-                    let weight = 1;
+                    const address = accounts.hex[i];
+                    const weight = 1;
                     ownerPermission.keys.push({ address: address, weight: weight });
                     activePermission.keys.push({ address: address, weight: weight });
                 }
@@ -852,7 +854,7 @@ describe('TronWeb.trx', function () {
             it('should multi-sign duplicated a transaction by owner permission', async function () {
                 const transaction = await tronWeb.transactionBuilder.freezeBalance(10e5, 3, 'BANDWIDTH', accounts.b58[ownerIdx]);
                 try {
-                    let signedTransaction = await tronWeb.trx.multiSign(transaction, accounts.pks[ownerIdx], 0);
+                    const signedTransaction = await tronWeb.trx.multiSign(transaction, accounts.pks[ownerIdx], 0);
                     await tronWeb.trx.multiSign(signedTransaction, accounts.pks[ownerIdx], 0);
                 } catch (e: any) {
                     assert.isTrue(e.message.indexOf('already sign transaction') != -1);
@@ -959,7 +961,7 @@ describe('TronWeb.trx', function () {
             it('should multi-sign duplicated a transaction by active permission', async function () {
                 const transaction = await tronWeb.transactionBuilder.freezeBalance(10e5, 3, 'BANDWIDTH', accounts.b58[ownerIdx]);
                 try {
-                    let signedTransaction = await tronWeb.trx.multiSign(transaction, accounts.pks[ownerIdx], 2);
+                    const signedTransaction = await tronWeb.trx.multiSign(transaction, accounts.pks[ownerIdx], 2);
                     await tronWeb.trx.multiSign(signedTransaction, accounts.pks[ownerIdx], 2);
                 } catch (e: any) {
                     assert.isTrue(e.message.indexOf('already sign transaction') != -1);
@@ -974,7 +976,7 @@ describe('TronWeb.trx', function () {
                         'BANDWIDTH',
                         accounts.b58[ownerIdx]
                     );
-                    let signedTransaction = await tronWeb.trx.multiSign(transaction, accounts.pks[ownerIdx], 0);
+                    const signedTransaction = await tronWeb.trx.multiSign(transaction, accounts.pks[ownerIdx], 0);
                     await tronWeb.trx.multiSign(signedTransaction, accounts.pks[ownerIdx], 2);
                 } catch (e: any) {
                     assert.isTrue(e.message.indexOf('not contained of permission') != -1);
@@ -1004,10 +1006,10 @@ describe('TronWeb.trx', function () {
     describe('#Block Test', function () {
         describe('#getBlock', async function () {
             it('should get earliest or latest block', async function () {
-                let earliestParentHash = '957dc2d350daecc7bb6a38f3938ebde0a0c1cedafe15f0edae4256a2907449f6';
+                const earliestParentHash = '957dc2d350daecc7bb6a38f3938ebde0a0c1cedafe15f0edae4256a2907449f6';
                 const blockType = ['earliest', 'latest'];
                 let block;
-                for (let type of blockType) {
+                for (const type of blockType) {
                     block = await tronWeb.trx.getBlock(type);
                     if (type === 'earliest') {
                         assert.equal(earliestParentHash, block.block_header.raw_data.parentHash);
@@ -1058,7 +1060,7 @@ describe('TronWeb.trx', function () {
                     [-1, 5, 'start'],
                     [1, -5, 'end'],
                 ];
-                for (let range of ranges) {
+                for (const range of ranges) {
                     await assertThrow(tronWeb.trx.getBlockRange(range[0], range[1]), `Invalid ${range[2]} of range provided`);
                 }
             });
@@ -1067,7 +1069,7 @@ describe('TronWeb.trx', function () {
         describe('#getBlockTransactionCount', async function () {
             it("should get transaction count by block number, 'latest' or 'earliest'", async function () {
                 const blockType = [1, 'latest', 'earliest'];
-                for (let type of blockType) {
+                for (const type of blockType) {
                     const count = await tronWeb.trx.getBlockTransactionCount(type);
                     assert.isNumber(count);
                 }
@@ -1405,6 +1407,7 @@ describe('TronWeb.trx', function () {
 
             it('should get transaction info by id', async function () {
                 this.timeout(20000);
+                // eslint-disable-next-line no-constant-condition
                 while (true) {
                     const tx = await tronWeb.trx.getTransactionInfo(transaction.txID);
                     if (Object.keys(tx).length === 0) {
@@ -1462,6 +1465,7 @@ describe('TronWeb.trx', function () {
 
             it('should get confirmed transaction by tx id', async function () {
                 this.timeout(20000);
+                // eslint-disable-next-line no-constant-condition
                 while (true) {
                     try {
                         const tx = await tronWeb.trx.getConfirmedTransaction(transaction.txID);
@@ -1645,7 +1649,7 @@ describe('TronWeb.trx', function () {
 
             it('should get token by name', async function () {
                 const tokens = await tronWeb.trx.listTokens(5, 0);
-                for (let token of tokens) {
+                for (const token of tokens) {
                     const tk = await tronWeb.trx.getTokenFromID(token.id);
                     assert.equal(tk.id, token.id);
                 }
@@ -1675,7 +1679,7 @@ describe('TronWeb.trx', function () {
 
             it('should get token by issued address', async function () {
                 const tokens = await tronWeb.trx.listTokens(5, 0);
-                for (let token of tokens) {
+                for (const token of tokens) {
                     const tk = await tronWeb.trx.getTokensIssuedByAddress(token.owner_address);
                     assert.equal(tk[Object.keys(tk)[0]]['id'], token.id);
                 }
@@ -1690,7 +1694,7 @@ describe('TronWeb.trx', function () {
             it('should list all tokens by limit', async function () {
                 const tokens = await tronWeb.trx.listTokens(10, 0);
                 assert.isArray(tokens);
-                for (let token of tokens) {
+                for (const token of tokens) {
                     assert.isDefined(token.id);
                 }
             });
@@ -1707,7 +1711,7 @@ describe('TronWeb.trx', function () {
         describe('#parseToken', async function () {
             it('should list all tokens by limit', async function () {
                 const tokens = await tronWeb.trx.listTokens(10, 0);
-                for (let token of tokens) {
+                for (const token of tokens) {
                     const cloneToken = JSON.parse(JSON.stringify(token));
                     token.name = tronWeb.fromUtf8(token.name);
                     token.abbr = tronWeb.fromUtf8(token.abbr);
@@ -1734,7 +1738,7 @@ describe('TronWeb.trx', function () {
             before(async function () {
                 this.timeout(20000);
 
-                let tokenNames = [];
+                const tokenNames = [];
 
                 // create token
                 for (let i = idxS; i < idxE; i++) {
@@ -1773,7 +1777,7 @@ describe('TronWeb.trx', function () {
             it('should get exchange by id', async function () {
                 const exchanges = await tronWeb.trx.listExchanges();
                 assert.isArray(exchanges);
-                for (let exchange of exchanges) {
+                for (const exchange of exchanges) {
                     assert.isDefined(exchange.exchange_id);
                 }
             });
@@ -1787,7 +1791,7 @@ describe('TronWeb.trx', function () {
             before(async function () {
                 this.timeout(20000);
 
-                let tokenNames = [];
+                const tokenNames = [];
 
                 // create token
                 for (let i = idxS; i < idxE; i++) {
@@ -1828,7 +1832,7 @@ describe('TronWeb.trx', function () {
                 const exchanges = await tronWeb.trx.listExchangesPaginated(10, 0);
                 assert.isArray(exchanges);
                 assert.isTrue(exchanges.length > 0);
-                for (let exchange of exchanges) {
+                for (const exchange of exchanges) {
                     assert.isDefined(exchange.exchange_id);
                 }
             });
@@ -1843,7 +1847,7 @@ describe('TronWeb.trx', function () {
             before(async function () {
                 this.timeout(20000);
 
-                let tokenNames = [];
+                const tokenNames = [];
 
                 // create token
                 for (let i = idxS; i < idxE; i++) {
@@ -1886,7 +1890,7 @@ describe('TronWeb.trx', function () {
             });
 
             it('should get exchange by id', async function () {
-                for (let exchange of exchanges) {
+                for (const exchange of exchanges) {
                     const ex = await tronWeb.trx.getExchangeByID(exchange.exchange_id);
                     assert.equal(ex.exchange_id, exchange.exchange_id);
                 }
@@ -1909,7 +1913,7 @@ describe('TronWeb.trx', function () {
 
             before(async function () {
                 // create proposal
-                let parameters = [
+                const parameters = [
                     { key: 0, value: 100000 },
                     { key: 1, value: 2 },
                 ];
@@ -1923,7 +1927,7 @@ describe('TronWeb.trx', function () {
             });
 
             it('should get proposal by id', async function () {
-                for (let proposal of proposals) {
+                for (const proposal of proposals) {
                     const ps = await tronWeb.trx.getProposal(proposal.proposal_id);
                     assert.equal(ps.proposal_id, proposal.proposal_id);
                 }
@@ -1938,7 +1942,7 @@ describe('TronWeb.trx', function () {
             before(async function () {
                 // create proposal
                 for (let i = 0; i < 5; i++) {
-                    let parameters = [
+                    const parameters = [
                         { key: i + 1, value: 100000 },
                         { key: i + 2, value: 2 },
                     ];
@@ -1952,7 +1956,7 @@ describe('TronWeb.trx', function () {
 
             it('should list seeds node', async function () {
                 const proposals = await tronWeb.trx.listProposals();
-                for (let proposal of proposals) {
+                for (const proposal of proposals) {
                     assert.isDefined(proposal.proposal_id);
                     assert.isDefined(proposal.proposer_address);
                 }
@@ -2007,7 +2011,7 @@ describe('TronWeb.trx', function () {
             const srs = await tronWeb.trx.listSuperRepresentatives();
             assert.isArray(srs);
 
-            for (let sr of srs) {
+            for (const sr of srs) {
                 assert.isDefined(sr.address);
                 assert.isDefined(sr.voteCount);
                 assert.isDefined(sr.latestBlockNum);
@@ -2024,28 +2028,28 @@ describe('TronWeb.trx', function () {
 
     describe('#getReward', async function () {
         it('should get the reward', async function () {
-            let reward = await tronWeb.trx.getReward(accounts.b58[0]);
+            const reward = await tronWeb.trx.getReward(accounts.b58[0]);
             assert.equal(reward, 0);
         });
     });
 
     describe('#getUnconfirmedReward', async function () {
         it('should get the reward', async function () {
-            let reward = await tronWeb.trx.getUnconfirmedReward(accounts.b58[0]);
+            const reward = await tronWeb.trx.getUnconfirmedReward(accounts.b58[0]);
             assert.equal(reward, 0);
         });
     });
 
     describe('#getBrokerage', async function () {
         it('should get the brokerage', async function () {
-            let brokerage = await tronWeb.trx.getBrokerage(accounts.hex[0]);
+            const brokerage = await tronWeb.trx.getBrokerage(accounts.hex[0]);
             assert.equal(brokerage, 20);
         });
     });
 
     describe('#getUnconfirmedBrokerage', async function () {
         it('should get the brokerage', async function () {
-            let brokerage = await tronWeb.trx.getUnconfirmedBrokerage(accounts.hex[0]);
+            const brokerage = await tronWeb.trx.getUnconfirmedBrokerage(accounts.hex[0]);
             assert.equal(brokerage, 20);
         });
     });

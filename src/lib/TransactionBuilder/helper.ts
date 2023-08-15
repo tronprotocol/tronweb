@@ -164,6 +164,12 @@ export interface CreateSmartContractOptions {
      * Optional, for multi-signature use
      */
     permissionId?: number;
+    /**
+     * Optional, raw parameters such as 0x0000000000000000000000000000000000000000000000000000000000000001.
+     */
+    rawParameter?: string;
+    funcABIV2?: AbiFragment;
+    parametersV2?: unknown[];
 }
 
 export interface TriggerSmartContractOptions {
@@ -187,6 +193,16 @@ export interface TriggerSmartContractOptions {
      * @todo: Create transaction locally instead of send request to server.
      */
     txLocal?: boolean;
+    /**
+     * Optional, for multi-signature use
+     */
+    permissionId?: number;
+    /**
+     * Optional, raw parameters such as 0x0000000000000000000000000000000000000000000000000000000000000001.
+     */
+    rawParameter?: string;
+    funcABIV2?: AbiFragment;
+    parametersV2?: unknown[];
 }
 // @todo: confirm
 export interface InternalTriggerSmartContractOptions extends TriggerSmartContractOptions {

@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 import providers from './lib/providers/index.js';
 import type { Providers } from './lib/providers/index.js';
@@ -52,6 +53,7 @@ export default class TronWeb extends EventEmitter {
     event: Event;
     trx: Trx;
     transactionBuilder: TransactionBuilder;
+    trx: Trx;
     providers: Providers;
     BigNumber: typeof BigNumber;
     defaultBlock: number | false;
@@ -222,9 +224,9 @@ export default class TronWeb extends EventEmitter {
         this.emit('addressChanged', { hex, base58 });
     }
 
-    // fullnodeSatisfies(version) {
-    //     return semver.satisfies(this.fullnodeVersion, version);
-    // }
+    fullnodeSatisfies(version: string) {
+        return semver.satisfies(this.fullnodeVersion, version);
+    }
 
     isValidProvider(provider: unknown) {
         return Object.values(providers).some((knownProvider) => provider instanceof knownProvider);
@@ -353,11 +355,12 @@ export default class TronWeb extends EventEmitter {
         if (utils.isString(val)) {
             if (/^(-|)0x/.test(val)) return val;
 
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             if (!isFinite(val) || /^\s*$/.test(val)) return TronWeb.fromUtf8(val);
         }
 
-        let result = TronWeb.fromDecimal(val);
+        const result = TronWeb.fromDecimal(val);
         if (result === '0xNaN') {
             throw new Error('The passed value is not convertible to a hex string');
         } else {
@@ -383,23 +386,23 @@ export default class TronWeb extends EventEmitter {
         return '0x' + Buffer.from(string, 'utf8').toString('hex');
     }
 
-    // static toAscii(hex) {
-    //     if (utils.isHex(hex)) {
-    //         let str = '';
-    //         let i = 0,
-    //             l = hex.length;
-    //         if (hex.substring(0, 2) === '0x') {
-    //             i = 2;
-    //         }
-    //         for (; i < l; i += 2) {
-    //             let code = parseInt(hex.substr(i, 2), 16);
-    //             str += String.fromCharCode(code);
-    //         }
-    //         return str;
-    //     } else {
-    //         throw new Error('The passed value is not a valid hex string');
-    //     }
-    // }
+    static toAscii(hex: string) {
+        if (utils.isHex(hex)) {
+            let str = '';
+            let i = 0;
+            const l = hex.length;
+            if (hex.substring(0, 2) === '0x') {
+                i = 2;
+            }
+            for (; i < l; i += 2) {
+                const code = parseInt(hex.substr(i, 2), 16);
+                str += String.fromCharCode(code);
+            }
+            return str;
+        } else {
+            throw new Error('The passed value is not a valid hex string');
+        }
+    }
 
     fromAscii: typeof TronWeb.fromAscii;
     static fromAscii(string: string, padding?: number) {
@@ -409,9 +412,9 @@ export default class TronWeb extends EventEmitter {
         return '0x' + Buffer.from(string, 'ascii').toString('hex').padEnd(padding!, '0');
     }
 
-    // static toDecimal(value) {
-    //     return TronWeb.toBigNumber(value).toNumber();
-    // }
+    static toDecimal(value: string) {
+        return TronWeb.toBigNumber(value).toNumber();
+    }
 
     fromDecimal: typeof TronWeb.fromDecimal;
     static fromDecimal(value: number | BigNumber) {
@@ -421,15 +424,15 @@ export default class TronWeb extends EventEmitter {
         return number.isLessThan(0) ? '-0x' + result.substr(1) : '0x' + result;
     }
 
-    // static fromSun(sun) {
-    //     const trx = TronWeb.toBigNumber(sun).div(1_000_000);
-    //     return utils.isBigNumber(sun) ? trx : trx.toString(10);
-    // }
+    static fromSun(sun: number) {
+        const trx = TronWeb.toBigNumber(sun).div(1_000_000);
+        return utils.isBigNumber(sun) ? trx : trx.toString(10);
+    }
 
-    // static toSun(trx) {
-    //     const sun = TronWeb.toBigNumber(trx).times(1_000_000);
-    //     return utils.isBigNumber(trx) ? sun : sun.toString(10);
-    // }
+    static toSun(trx: number) {
+        const sun = TronWeb.toBigNumber(trx).times(1_000_000);
+        return utils.isBigNumber(trx) ? sun : sun.toString(10);
+    }
 
     toBigNumber: typeof TronWeb.toBigNumber;
     static toBigNumber(amount: string | number | BigNumber = 0) {
