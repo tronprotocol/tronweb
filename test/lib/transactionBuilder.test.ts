@@ -9,7 +9,7 @@ import {
     TriggerSmartContractOptions,
     VoteInfo,
 } from '../../src/lib/TransactionBuilder/helper';
-import { ContractParamterCapsule, SignedTransaction } from '../../src/types/Transaction';
+import { ContractParamterCapsule, CreateSmartContractTransaction, SignedTransaction } from '../../src/types/Transaction';
 
 import chai from 'chai';
 const assert = chai.assert;
@@ -187,7 +187,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         it(`should allow accounts[2] to create a TestToken and broadcast`, async function () {
             const options = getTokenOptions();
-            const transaction = tronWeb.transactionBuilder.createToken(options, accounts.b58[2]);
+            const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.b58[2]);
             const res = await broadcaster(transaction, accounts.pks[2]);
             assert.isTrue(res.receipt.result);
         });
@@ -494,7 +494,7 @@ describe('TronWeb.transactionBuilder', function () {
             const newName = 'New name';
             const param: [string, string] = [newName, accounts.b58[3]];
 
-            const transaction = tronWeb.transactionBuilder.updateAccount(...param);
+            const transaction = await tronWeb.transactionBuilder.updateAccount(...param);
             const res = await broadcaster(transaction, accounts.pks[3]);
             assert.isTrue(res.receipt.result);
         });
@@ -529,7 +529,7 @@ describe('TronWeb.transactionBuilder', function () {
         it(`should set account id accounts[4] and broadcast`, async function () {
             const param: Parameters<TransactionBuilder['setAccountId']> = [TronWeb.toHex('testtest'), accounts.b58[4]];
 
-            const transaction = tronWeb.transactionBuilder.setAccountId(...param);
+            const transaction = await tronWeb.transactionBuilder.setAccountId(...param);
             const res = await broadcaster(transaction, accounts.pks[4]);
             assert.isTrue(res.receipt.result);
         });
@@ -586,7 +586,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it(`should allow accounts[2] to update a TestToken and broadcast`, async function () {
-            const transaction = tronWeb.transactionBuilder.updateToken(UPDATED_TEST_TOKEN_OPTIONS, accounts.b58[2]);
+            const transaction = await tronWeb.transactionBuilder.updateToken(UPDATED_TEST_TOKEN_OPTIONS, accounts.b58[2]);
             const res = await broadcaster(transaction, accounts.pks[2]);
             assert.isTrue(res.receipt.result);
         });
@@ -738,7 +738,7 @@ describe('TronWeb.transactionBuilder', function () {
         it(`should allow accounts[2] to purchase a token created by accounts[5] and broadcast`, async function () {
             await wait(60);
             const param: Parameters<TransactionBuilder['purchaseToken']> = [accounts.b58[5], tokenID, 20, accounts.b58[2]];
-            const transaction = tronWeb.transactionBuilder.purchaseToken(...param);
+            const transaction = await tronWeb.transactionBuilder.purchaseToken(...param);
 
             const res = await broadcaster(transaction, accounts.pks[2]);
             console.log(res, tokenID);
@@ -879,7 +879,7 @@ describe('TronWeb.transactionBuilder', function () {
         it('should allow accounts [6]  to send a token to accounts[1] and broadcast', async function () {
             await wait(5);
             const param: [string, number, string, string, PermissionId?] = [accounts.b58[1], 5, tokenID, accounts.b58[6]];
-            const transaction = tronWeb.transactionBuilder.sendToken(...param);
+            const transaction = await tronWeb.transactionBuilder.sendToken(...param);
             const res = await broadcaster(transaction, accounts.pks[6]);
             console.log(res);
             assert.isTrue(res.receipt.result);
@@ -962,7 +962,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should allow the SR account to create a new proposal as an array of objects and broadcast', async function () {
             const input: Parameters<typeof tronWeb.transactionBuilder.createProposal> = [parameters, ADDRESS_BASE58];
-            const transaction = tronWeb.transactionBuilder.createProposal(...input);
+            const transaction = await tronWeb.transactionBuilder.createProposal(...input);
             const res = await broadcaster(transaction);
             assert.isTrue(res.receipt.result);
         });
@@ -1022,7 +1022,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should allow the SR to delete its own proposal and broadcast', async function () {
             const param: Parameters<typeof tronWeb.transactionBuilder.deleteProposal> = [proposals[0].proposal_id];
-            const transaction = tronWeb.transactionBuilder.deleteProposal(...param);
+            const transaction = await tronWeb.transactionBuilder.deleteProposal(...param);
             const res = await broadcaster(transaction);
             assert.isTrue(res.receipt.result);
         });
@@ -1053,7 +1053,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it('should allow accounts[0] to apply for SR and broadcast', async function () {
-            const transaction = tronWeb.transactionBuilder.applyForSR(accounts.b58[20], url);
+            const transaction = await tronWeb.transactionBuilder.applyForSR(accounts.b58[20], url);
             const res = await broadcaster(transaction, accounts.pks[20]);
             assert.isTrue(res.receipt.result);
         });
@@ -2001,7 +2001,7 @@ describe('TronWeb.transactionBuilder', function () {
                     break;
                 }
             }
-            const deployed = await tronWeb.contract().at(transaction.contract_address);
+            const deployed: any = await tronWeb.contract().at(transaction.contract_address);
             for (let j = 25; j <= 28; j++) {
                 let bal = await deployed.balances(accounts.hex[j]).call();
                 bal = bal.toNumber();
@@ -2651,7 +2651,7 @@ describe('TronWeb.transactionBuilder', function () {
     });
 
     describe('#updateSetting', function () {
-        let transaction: { txID: any; contract_address: any };
+        let transaction: CreateSmartContractTransaction;
         before(async function () {
             this.timeout(20000);
 
@@ -2687,7 +2687,7 @@ describe('TronWeb.transactionBuilder', function () {
     });
 
     describe('#updateEnergyLimit', function () {
-        let transaction: { txID: string; contract_address: string };
+        let transaction: CreateSmartContractTransaction;
         before(async function () {
             this.timeout(20000);
 
@@ -2937,7 +2937,7 @@ describe('TronWeb.transactionBuilder', function () {
     });
 
     describe('#triggerSmartContractWithRawParam', async function () {
-        let transaction: { txID: string; contract_address: string };
+        let transaction: CreateSmartContractTransaction;
         let issuerAddress: string;
         let issuerPk: string;
 
@@ -2965,7 +2965,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it('should trigger a smart contract with rawParameter', async function () {
-            const deployed = await tronWeb.contract().at(transaction.contract_address);
+            const deployed: any = await tronWeb.contract().at(transaction.contract_address);
             let check = await deployed.check().call();
             assert.equal(check, 1);
 
@@ -2985,7 +2985,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it('should trigger a smart contract locally with rawParameter', async function () {
-            const deployed = await tronWeb.contract().at(transaction.contract_address);
+            const deployed: any = await tronWeb.contract().at(transaction.contract_address);
 
             const setTransaction = await tronWeb.transactionBuilder.triggerSmartContract(
                 transaction.contract_address,
@@ -3029,7 +3029,7 @@ describe('TronWeb.transactionBuilder', function () {
                 }
             }
 
-            const deployed = await tronWeb.contract().at(transaction.contract_address);
+            const deployed: any = await tronWeb.contract().at(transaction.contract_address);
             let check = await deployed.check().call();
             assert.ok(check.eq(1));
 
@@ -3205,7 +3205,7 @@ describe('TronWeb.transactionBuilder', function () {
     });
 
     describe('#estimateEnergy', async function () {
-        let transaction: { txID: string; contract_address: string };
+        let transaction: CreateSmartContractTransaction;
         before(async function () {
             this.timeout(20000);
             transaction = await tronWeb.transactionBuilder.createSmartContract(

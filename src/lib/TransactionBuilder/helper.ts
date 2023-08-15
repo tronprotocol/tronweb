@@ -168,8 +168,8 @@ export interface CreateSmartContractOptions {
      * Optional, raw parameters such as 0x0000000000000000000000000000000000000000000000000000000000000001.
      */
     rawParameter?: string;
-    funcABIV2?: unknown;
-    parametersV2?: unknown;
+    funcABIV2?: AbiFragment;
+    parametersV2?: unknown[];
 }
 
 export interface TriggerSmartContractOptions {
@@ -201,8 +201,8 @@ export interface TriggerSmartContractOptions {
      * Optional, raw parameters such as 0x0000000000000000000000000000000000000000000000000000000000000001.
      */
     rawParameter?: string;
-    funcABIV2?: unknown;
-    parametersV2?: unknown;
+    funcABIV2?: AbiFragment;
+    parametersV2?: unknown[];
 }
 // @todo: confirm
 export interface InternalTriggerSmartContractOptions extends TriggerSmartContractOptions {

@@ -1,3 +1,4 @@
+/* eslint-disable no-constant-condition */
 import { assert } from 'chai';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
 import broadcaster from '../helpers/broadcaster.js';
@@ -74,7 +75,7 @@ describe('TronWeb.lib.event', async function () {
             accounts.pks[0]
         );
 
-        contractAddress = result.receipt.transaction.contract_address;
+        contractAddress = result.receipt.transaction.contract_address as string;
         contract = await tronWeb.contract().at(contractAddress);
     });
 
@@ -88,7 +89,7 @@ describe('TronWeb.lib.event', async function () {
         it('should emit an unconfirmed event and get it', async function () {
             this.timeout(60000);
             tronWeb.setPrivateKey(accounts.pks[1]);
-            let txId = await contract.emitNow(accounts.hex[2], 2000).send({
+            const txId = await contract.emitNow(accounts.hex[2], 2000).send({
                 from: accounts.hex[1],
             });
             eventLength++;
@@ -109,14 +110,14 @@ describe('TronWeb.lib.event', async function () {
         it('should emit an event, wait for confirmation and get it', async function () {
             this.timeout(60000);
             tronWeb.setPrivateKey(accounts.pks[1]);
-            let output = await contract.emitNow(accounts.hex[2], 2000).send({
+            const output = await contract.emitNow(accounts.hex[2], 2000).send({
                 from: accounts.hex[1],
                 shouldPollResponse: true,
                 rawResponse: true,
             });
             eventLength++;
 
-            let txId = output.id;
+            const txId = output.id;
             let events;
             while (true) {
                 events = await tronWeb.event.getEventsByTransactionID(txId);
@@ -165,7 +166,7 @@ describe('TronWeb.lib.event', async function () {
             this.timeout(20000);
             tronWeb.setPrivateKey(accounts.pks[3]);
 
-            let watchTest = await contract.SomeEvent().watch((_: any, res: any) => {
+            const watchTest = await contract.SomeEvent().watch((_: any, res: any) => {
                 if (res) {
                     assert.equal(res.result._sender, accounts.hex[3]);
                     assert.equal(res.result._receiver, accounts.hex[4]);
@@ -184,7 +185,7 @@ describe('TronWeb.lib.event', async function () {
             this.timeout(20000);
             tronWeb.setPrivateKey(accounts.pks[3]);
 
-            let watchTest = await contract.SomeEvent().watch({ filters: { _amount: '4000' } }, (_: any, res: any) => {
+            const watchTest = await contract.SomeEvent().watch({ filters: { _amount: '4000' } }, (_: any, res: any) => {
                 if (res) {
                     assert.equal(res.result._sender, accounts.hex[3]);
                     assert.equal(res.result._receiver, accounts.hex[4]);

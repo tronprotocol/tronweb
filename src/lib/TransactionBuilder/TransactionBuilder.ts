@@ -982,7 +982,7 @@ export default class TransactionBuilder {
         };
 
         if (functionSelector && isString(functionSelector)) {
-            functionSelector = functionSelector.replace(/s*/g, '');
+            functionSelector = functionSelector.replace(/\s*/g, '');
             let parameterStr;
             if (parameters.length) {
                 const abiCoder = new AbiCoder();
@@ -2248,7 +2248,7 @@ export default class TransactionBuilder {
     }
 
     async extendExpiration(transaction: SignedTransaction, extension: number, options: TxLocal = {}) {
-        await this.alterTransaction(transaction, { extension, txLocal: options?.txLocal });
+        return await this.alterTransaction(transaction, { extension, txLocal: options?.txLocal });
     }
 
     async addUpdateData(transaction: Transaction, data: string, dataFormat: string | TxLocal = 'utf8', options: TxLocal = {}) {

@@ -6,16 +6,16 @@ const tronWebBuilder = require('./tronWebBuilder');
 
 module.exports = async function pollAccountFor(address, property, value = false, interval = 3, timeout = 10000) {
     const tronWeb = tronWebBuilder.createInstance();
-    let now = Date.now();
+    const now = Date.now();
     // eslint-disable-next-line no-constant-condition
     while (true) {
         if (Date.now() > now + timeout) {
             throw new Error('Timeout...');
         }
         wait(interval);
-        let result = await tronWeb.trx.getAccount(address);
+        const result = await tronWeb.trx.getAccount(address);
         if (typeof property === 'string') {
-            let data = _.get(result, property);
+            const data = _.get(result, property);
             if (data) {
                 if (value) {
                     if (data == value) return Promise.resolve(result);
