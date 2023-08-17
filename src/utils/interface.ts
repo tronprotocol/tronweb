@@ -37,7 +37,7 @@ import {
     Fragment,
     FunctionFragment,
     ParamType,
-} from 'ethers';
+} from './fragments.js';
 import { Typed } from 'ethers';
 
 import type { BigNumberish, BytesLike, CallExceptionError, CallExceptionTransaction } from 'ethers';
@@ -1075,22 +1075,17 @@ export class Interface {
     }
 */
     // Create the filter for the event with search criteria (e.g. for eth_filterLog)
-    encodeFilterTopics(
-        fragment: EventFragment | string,
-        values: ReadonlyArray<any>
-    ): Array<null | string | Array<string>> {
+    encodeFilterTopics(fragment: EventFragment | string, values: ReadonlyArray<any>): Array<null | string | Array<string>> {
         if (typeof fragment === 'string') {
             const f = this.getEvent(fragment);
             assertArgument(f, 'unknown event', 'eventFragment', fragment);
             fragment = f;
         }
 
-        assert(
-            values.length <= fragment.inputs.length,
-            `too many arguments for ${fragment.format()}`,
-            'UNEXPECTED_ARGUMENT',
-            { count: values.length, expectedCount: fragment.inputs.length }
-        );
+        assert(values.length <= fragment.inputs.length, `too many arguments for ${fragment.format()}`, 'UNEXPECTED_ARGUMENT', {
+            count: values.length,
+            expectedCount: fragment.inputs.length,
+        });
 
         const topics: Array<null | string | Array<string>> = [];
         if (!fragment.anonymous) {
@@ -1153,10 +1148,7 @@ export class Interface {
         return topics;
     }
 
-    encodeEventLog(
-        fragment: EventFragment | string,
-        values: ReadonlyArray<any>
-    ): { data: string; topics: Array<string> } {
+    encodeEventLog(fragment: EventFragment | string, values: ReadonlyArray<any>): { data: string; topics: Array<string> } {
         if (typeof fragment === 'string') {
             const f = this.getEvent(fragment);
             assertArgument(f, 'unknown event', 'eventFragment', fragment);

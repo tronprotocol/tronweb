@@ -21,7 +21,7 @@ describe('TronWeb.lib.event', async function () {
 
     before(async function () {
         tronWeb = tronWebBuilder.createInstance();
-        // accounts = await tronWebBuilder.getTestAccounts(-1);
+        accounts = await tronWebBuilder.getTestAccounts(-1);
 
         const result = await broadcaster<CreateSmartContractTransaction>(
             tronWeb.transactionBuilder.createSmartContract(

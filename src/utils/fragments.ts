@@ -703,8 +703,7 @@ export class ParamType {
                 if (format !== 'sighash') {
                     result += this.type;
                 }
-                result +=
-                    '(' + this.components.map((comp) => comp.format(format)).join(format === 'full' ? ', ' : ',') + ')';
+                result += '(' + this.components.map((comp) => comp.format(format)).join(format === 'full' ? ', ' : ',') + ')';
             } else {
                 result += this.type;
             }
@@ -1321,13 +1320,7 @@ export class ConstructorFragment extends Fragment {
     /**
      *  @private
      */
-    constructor(
-        guard: any,
-        type: FragmentType,
-        inputs: ReadonlyArray<ParamType>,
-        payable: boolean,
-        gas: null | bigint
-    ) {
+    constructor(guard: any, type: FragmentType, inputs: ReadonlyArray<ParamType>, payable: boolean, gas: null | bigint) {
         super(guard, type, inputs);
         Object.defineProperty(this, internal, {
             value: ConstructorFragmentInternal,
@@ -1339,12 +1332,9 @@ export class ConstructorFragment extends Fragment {
      *  Returns a string representation of this constructor as %%format%%.
      */
     format(format?: FormatType): string {
-        assert(
-            format != null && format !== 'sighash',
-            'cannot format a constructor for sighash',
-            'UNSUPPORTED_OPERATION',
-            { operation: 'format(sighash)' }
-        );
+        assert(format != null && format !== 'sighash', 'cannot format a constructor for sighash', 'UNSUPPORTED_OPERATION', {
+            operation: 'format(sighash)',
+        });
 
         if (format === 'json') {
             return JSON.stringify({

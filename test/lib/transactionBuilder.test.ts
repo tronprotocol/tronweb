@@ -62,6 +62,7 @@ const {
     testPayable,
 } = Contracts;
 import Config from '../helpers/config';
+import { IContract } from '../../src/lib/contract';
 const { ADDRESS_HEX, ADDRESS_BASE58, UPDATED_TEST_TOKEN_OPTIONS, PRIVATE_KEY, getTokenOptions, isProposalApproved } = Config;
 
 describe('TronWeb.transactionBuilder', function () {
@@ -741,7 +742,6 @@ describe('TronWeb.transactionBuilder', function () {
             const transaction = await tronWeb.transactionBuilder.purchaseToken(...param);
 
             const res = await broadcaster(transaction, accounts.pks[2]);
-            console.log(res, tokenID);
             assert.isTrue(res.receipt.result);
         });
 
@@ -3185,7 +3185,7 @@ describe('TronWeb.transactionBuilder', function () {
                 }
             }
 
-            const deployed: any = await tronWeb.contract(funcABIV2_4.abi as any, transaction.contract_address);
+            const deployed: IContract = tronWeb.contract(funcABIV2_4.abi, transaction.contract_address) as unknown as IContract;
             const txID = await deployed
                 .setStruct(['TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY', 1000100, 'TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY'])
                 .send();
