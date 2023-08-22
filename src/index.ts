@@ -1,5 +1,4 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 import providers from './lib/providers/index.js';
 import type { Providers } from './lib/providers/index.js';
 import utils from './utils/index.js';
@@ -12,13 +11,10 @@ import Trx from './lib/trx.js';
 import Contract from './lib/contract/index.js';
 // import Plugin from 'lib/plugin';
 import Event from './lib/event.js';
-import { keccak256 } from './utils/ethersUtils.js';
-import { ADDRESS_PREFIX, fromHex, fromPrivateKey, isAddress, toHex, TRON_BIP39_PATH_INDEX_0 } from './utils/address.js';
+import { keccak256, Wordlist } from './utils/ethersUtils.js';
+import { fromHex, fromPrivateKey, isAddress, toHex, TRON_BIP39_PATH_INDEX_0 } from './utils/address.js';
 import { AxiosRequestHeaders } from 'axios';
 import HttpProvider from './lib/providers/HttpProvider.js';
-import { decodeBase58Address, getBase58CheckAddress, isAddressValid, pkToAddress } from './utils/crypto.js';
-import { byteArray2hexStr } from './utils/bytes.js';
-import { hexStr2byteArray } from './utils/code.js';
 import { isString } from './utils/validations.js';
 import { DefaultAddress, NodeService, TronWebOptions } from './types/TronWeb';
 import { ContractAbiInterface } from './types/ABI.js';
@@ -37,6 +33,7 @@ function isValidOptions(options: unknown): options is TronWebOptions {
         (!!(options as TronWebOptions).fullNode || !!(options as TronWebOptions).fullHost)
     );
 }
+
 export default class TronWeb extends EventEmitter {
     static providers = providers;
     static BigNumber = BigNumber;
@@ -51,7 +48,6 @@ export default class TronWeb extends EventEmitter {
     static utils = utils;
 
     event: Event;
-    trx: Trx;
     transactionBuilder: TransactionBuilder;
     trx: Trx;
     providers: Providers;
@@ -74,7 +70,7 @@ export default class TronWeb extends EventEmitter {
     constructor(
         options: TronWebOptions | NodeService,
         solidityNode: NodeService = '',
-        eventServer: NodeService,
+        eventServer: NodeService = '',
         sideOptions: string | TronWebOptions = '',
         privateKey = ''
     ) {
@@ -122,6 +118,29 @@ export default class TronWeb extends EventEmitter {
         };
 
         this.version = TronWeb.version;
+        [
+            'sha3',
+            'toHex',
+            'toUtf8',
+            'fromUtf8',
+            'toAscii',
+            'fromAscii',
+            'toDecimal',
+            'fromDecimal',
+            'toSun',
+            'fromSun',
+            'toBigNumber',
+            'isAddress',
+            'createAccount',
+            'address',
+            'version',
+            'createRandom',
+            'fromMnemonic',
+        ].forEach((key) => {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            this[key] = TronWeb[key];
+        });
         this.sha3 = TronWeb.sha3;
         this.fromUtf8 = TronWeb.fromUtf8;
         this.address = TronWeb.address;
@@ -233,9 +252,9 @@ export default class TronWeb extends EventEmitter {
     }
 
     setHeader(headers = {}) {
-        const fullNode = new providers.HttpProvider(this.fullNode.host, 30000, false, false, headers);
-        const solidityNode = new providers.HttpProvider(this.solidityNode.host, 30000, false, false, headers);
-        const eventServer = new providers.HttpProvider(this.eventServer.host, 30000, false, false, headers);
+        const fullNode = new providers.HttpProvider(this.fullNode.host, 30000, '', '', headers);
+        const solidityNode = new providers.HttpProvider(this.solidityNode.host, 30000, '', '', headers);
+        const eventServer = new providers.HttpProvider(this.eventServer?.host || '', 30000, '', '', headers);
 
         this.setFullNode(fullNode);
         this.setSolidityNode(solidityNode);
@@ -277,8 +296,8 @@ export default class TronWeb extends EventEmitter {
         return this.event.getEventsByTransactionID(...params);
     }
 
-    contract(abi?: ContractAbiInterface = [], address?: Address) {
-        return new Contract(this, abi, address);
+    contract(abi: ContractAbiInterface = [], address?: Address) {
+        return new Contract(this, abi, address as string);
     }
 
     address: typeof TronWeb.address;
@@ -302,7 +321,7 @@ export default class TronWeb extends EventEmitter {
     }
 
     toHex: typeof TronWeb.toHex;
-    static toHex(val: any) {
+    static toHex(val: string | number | Record<string | number | symbol, unknown> | unknown[] | BigNumber) {
         if (utils.isBoolean(val)) return TronWeb.fromDecimal(+val);
 
         if (utils.isBigNumber(val)) return TronWeb.fromDecimal(val);
@@ -317,7 +336,7 @@ export default class TronWeb extends EventEmitter {
             if (!isFinite(val) || /^\s*$/.test(val)) return TronWeb.fromUtf8(val);
         }
 
-        const result = TronWeb.fromDecimal(val);
+        const result = TronWeb.fromDecimal(val as number);
         if (result === '0xNaN') {
             throw new Error('The passed value is not convertible to a hex string');
         } else {
@@ -417,14 +436,14 @@ export default class TronWeb extends EventEmitter {
     }
 
     createRandom: typeof TronWeb.createRandom;
-    static createRandom(password?, path?, wordlist?) {
+    static createRandom(password: string, path: string, wordlist: Wordlist) {
         const account = utils.accounts.generateRandom(password, path, wordlist);
 
         return account;
     }
 
     fromMnemonic: typeof TronWeb.fromMnemonic;
-    static fromMnemonic(mnemonic, path = TRON_BIP39_PATH_INDEX_0, wordlist = null) {
+    static fromMnemonic(mnemonic: string, path = TRON_BIP39_PATH_INDEX_0, wordlist = null) {
         const account = utils.accounts.generateAccountWithMnemonic(mnemonic, path, wordlist);
 
         return account;
