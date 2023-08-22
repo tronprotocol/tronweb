@@ -3135,7 +3135,7 @@ describe('TronWeb.transactionBuilder', function () {
                 }
             }
 
-            const deployed: any = await tronWeb.contract(funcABIV2_3.abi as any, transaction.contract_address);
+            const deployed: IContract = tronWeb.contract(funcABIV2_3.abi, transaction.contract_address) as unknown as IContract;
             const txID = await deployed
                 .setStruct([
                     'TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY',

@@ -2,10 +2,10 @@ import { AxiosRequestHeaders } from 'axios';
 import HttpProvider from '../lib/providers/HttpProvider.js';
 
 export interface TronWebOptions {
-    fullNode?: string;
-    solidityNode?: string;
-    fullHost?: string;
-    eventServer?: string;
+    fullNode?: NodeService;
+    solidityNode?: NodeService;
+    fullHost?: NodeService;
+    eventServer?: NodeService;
     headers?: AxiosRequestHeaders;
     eventHeaders?: AxiosRequestHeaders;
     privateKey?: string;

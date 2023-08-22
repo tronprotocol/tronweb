@@ -209,8 +209,8 @@ describe('TronWeb.lib.event', async function () {
             let events;
             while (true) {
                 events = await tronWeb.event.getEventsByContractAddress(contractAddress, {
-                    event_name: 'SomeEvent',
-                    order_by: 'block_timestamp,asc',
+                    eventName: 'SomeEvent',
+                    orderBy: 'block_timestamp,asc',
                 });
                 if (events.data!.length === eventLength) {
                     break;

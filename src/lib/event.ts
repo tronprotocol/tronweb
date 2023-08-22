@@ -4,13 +4,13 @@ import utils from '../utils/index.js';
 import providers from './providers/index.js';
 
 interface getEventsByContractAddressOptions {
-    event_name?: string;
-    block_number?: number;
-    only_unconfirmed?: boolean;
-    only_confirmed?: boolean;
-    min_block_timestamp?: number;
-    max_block_timestamp?: number;
-    order_by?: 'block_timestamp,desc' | 'block_timestamp,asc';
+    eventName?: string;
+    blockNumber?: number;
+    onlyUnconfirmed?: boolean;
+    onlyConfirmed?: boolean;
+    minBlockTimestamp?: number;
+    maxBlockTimestamp?: number;
+    orderBy?: 'block_timestamp,desc' | 'block_timestamp,asc';
     fingerprint?: string;
     limit?: number;
 }
@@ -64,15 +64,15 @@ export default class Event {
                 .catch(() => false);
     }
 
-    getEventsByContractAddress(contractAddress: string, options: getEventsByContractAddressOptions = {}) {
+    async getEventsByContractAddress(contractAddress: string, options: getEventsByContractAddressOptions = {}) {
         let {
-            event_name,
-            block_number,
-            only_unconfirmed,
-            only_confirmed,
-            min_block_timestamp,
-            max_block_timestamp,
-            order_by,
+            eventName,
+            blockNumber,
+            onlyUnconfirmed,
+            onlyConfirmed,
+            minBlockTimestamp,
+            maxBlockTimestamp,
+            orderBy,
             fingerprint,
             limit,
         }: getEventsByContractAddressOptions = Object.assign(
@@ -90,12 +90,12 @@ export default class Event {
             throw new Error('Invalid contract address provided');
         }
 
-        if (typeof min_block_timestamp !== 'undefined' && !utils.isInteger(min_block_timestamp)) {
-            throw new Error('Invalid min_block_timestamp provided');
+        if (typeof minBlockTimestamp !== 'undefined' && !utils.isInteger(minBlockTimestamp)) {
+            throw new Error('Invalid minBlockTimestamp provided');
         }
 
-        if (typeof max_block_timestamp !== 'undefined' && !utils.isInteger(max_block_timestamp)) {
-            throw new Error('Invalid max_block_timestamp provided');
+        if (typeof maxBlockTimestamp !== 'undefined' && !utils.isInteger(maxBlockTimestamp)) {
+            throw new Error('Invalid maxBlockTimestamp provided');
         }
 
         if (utils.isInteger(limit) && limit > 200) {
@@ -105,24 +105,23 @@ export default class Event {
 
         const qs = {} as any;
 
-        if (event_name) qs.event_name = event_name;
-        if (block_number) qs.block_number = block_number;
-        if (typeof only_unconfirmed === 'boolean') qs.only_unconfirmed = only_unconfirmed;
-        if (typeof only_confirmed === 'boolean') qs.only_confirmed = only_confirmed;
-        if (min_block_timestamp) qs.min_block_timestamp = min_block_timestamp;
-        if (max_block_timestamp) qs.max_block_timestamp = max_block_timestamp;
-        if (order_by) qs.order_by = order_by;
+        if (eventName) qs.event_name = eventName;
+        if (blockNumber) qs.block_number = blockNumber;
+        if (typeof onlyUnconfirmed === 'boolean') qs.only_unconfirmed = onlyUnconfirmed;
+        if (typeof onlyConfirmed === 'boolean') qs.only_confirmed = onlyConfirmed;
+        if (minBlockTimestamp) qs.min_block_timestamp = minBlockTimestamp;
+        if (maxBlockTimestamp) qs.max_block_timestamp = maxBlockTimestamp;
+        if (orderBy) qs.order_by = orderBy;
         if (fingerprint) qs.fingerprint = fingerprint;
         if (utils.isInteger(limit)) qs.limit = limit;
 
-        return this.tronWeb.eventServer
-            .request<EventResponse>(`v1/contract/${contractAddress}/events?${new URLSearchParams(qs).toString()}`)
-            .then((res) => {
-                if (res.success) {
-                    return res;
-                }
-                throw new Error(res.error);
-            });
+        const res = await this.tronWeb.eventServer.request<EventResponse>(
+            `v1/contract/${this.tronWeb.address.fromHex(contractAddress)}/events?${new URLSearchParams(qs).toString()}`
+        );
+        if (res.success) {
+            return res;
+        }
+        throw new Error(res.error);
     }
 
     async getEventsByTransactionID(

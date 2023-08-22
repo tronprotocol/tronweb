@@ -5,8 +5,6 @@ import type { Providers } from './lib/providers/index.js';
 import utils from './utils/index.js';
 import BigNumber from 'bignumber.js';
 import EventEmitter from 'eventemitter3';
-
-import { version } from '../package.json';
 import semver from 'semver';
 
 import TransactionBuilder from './lib/TransactionBuilder/TransactionBuilder.js';
@@ -14,7 +12,6 @@ import Trx from './lib/trx.js';
 import Contract from './lib/contract/index.js';
 // import Plugin from 'lib/plugin';
 import Event from './lib/event.js';
-// import SideChain from 'lib/sidechain';
 import { keccak256 } from './utils/ethersUtils.js';
 import { ADDRESS_PREFIX, fromHex, fromPrivateKey, isAddress, toHex, TRON_BIP39_PATH_INDEX_0 } from './utils/address.js';
 import { AxiosRequestHeaders } from 'axios';
@@ -31,6 +28,8 @@ const DEFAULT_VERSION = '4.7.1';
 
 const FEE_LIMIT = 150000000;
 
+const version = '6.0.0';
+
 function isValidOptions(options: unknown): options is TronWebOptions {
     return (
         !!options &&
@@ -46,7 +45,8 @@ export default class TronWeb extends EventEmitter {
     static Contract = Contract;
     // static Plugin = Plugin;
     static Event = Event;
-    // static version = version;
+    version: typeof TronWeb.version;
+    static version = version;
     utils: typeof TronWeb.utils;
     static utils = utils;
 
@@ -56,7 +56,7 @@ export default class TronWeb extends EventEmitter {
     trx: Trx;
     providers: Providers;
     BigNumber: typeof BigNumber;
-    defaultBlock: number | false;
+    defaultBlock: number | false | 'earliest' | 'latest';
     defaultPrivateKey: string | false;
     defaultAddress: DefaultAddress;
     fullnodeVersion: string;
@@ -68,13 +68,13 @@ export default class TronWeb extends EventEmitter {
 
     constructor(options: TronWebOptions);
     constructor(fullNode: NodeService, solidityNode: NodeService, eventServer: NodeService, sideOptions: TronWebOptions);
-    constructor(fullNode: NodeService, solidityNode: NodeService, eventServer: NodeService, privateKey: string);
+    constructor(fullNode: NodeService, solidityNode: NodeService, eventServer?: NodeService, privateKey?: string);
     /* prettier-ignore */
     constructor(fullNode: NodeService, solidityNode: NodeService, eventServer: NodeService, sideOptions: TronWebOptions, privateKey?: string);
     constructor(
         options: TronWebOptions | NodeService,
         solidityNode: NodeService = '',
-        eventServer: NodeService = '',
+        eventServer: NodeService,
         sideOptions: string | TronWebOptions = '',
         privateKey = ''
     ) {
@@ -121,45 +121,23 @@ export default class TronWeb extends EventEmitter {
             base58: false,
         };
 
-        // [
-        //     'sha3',
-        //     'toHex',
-        //     'toUtf8',
-        //     'fromUtf8',
-        //     'toAscii',
-        //     'fromAscii',
-        //     'toDecimal',
-        //     'fromDecimal',
-        //     'toSun',
-        //     'fromSun',
-        //     'toBigNumber',
-        //     'isAddress',
-        //     'createAccount',
-        //     'address',
-        //     'version',
-        //     'createRandom',
-        //     'fromMnemonic',
-        // ].forEach((key) => {
-        //     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //     // @ts-ignore
-        //     this[key] = TronWeb[key];
-        // });
+        this.version = TronWeb.version;
         this.sha3 = TronWeb.sha3;
         this.fromUtf8 = TronWeb.fromUtf8;
         this.address = TronWeb.address;
+        this.toAscii = TronWeb.toAscii;
         this.toUtf8 = TronWeb.toUtf8;
         this.isAddress = TronWeb.isAddress;
         this.fromAscii = TronWeb.fromAscii;
         this.toHex = TronWeb.toHex;
         this.toBigNumber = TronWeb.toBigNumber;
+        this.toDecimal = TronWeb.toDecimal;
         this.fromDecimal = TronWeb.fromDecimal;
+        this.toSun = TronWeb.toSun;
+        this.fromSun = TronWeb.fromSun;
         this.createAccount = TronWeb.createAccount;
-        // for sidechain
-        // if (typeof sideOptions === 'object' && (sideOptions.fullNode || sideOptions.fullHost)) {
-        //     this.sidechain = new SideChain(sideOptions, TronWeb, this, privateKey);
-        // } else {
-        //     privateKey = privateKey || sideOptions;
-        // }
+        this.createRandom = TronWeb.createRandom;
+        this.fromMnemonic = TronWeb.fromMnemonic;
 
         if (privateKey) this.setPrivateKey(privateKey);
         this.fullnodeVersion = DEFAULT_VERSION;
@@ -174,27 +152,27 @@ export default class TronWeb extends EventEmitter {
         }
     }
 
-    // async getFullnodeVersion() {
-    //     try {
-    //         const nodeInfo = await this.trx.getNodeInfo();
-    //         this.fullnodeVersion = nodeInfo.configNodeInfo.codeVersion;
-    //         if (this.fullnodeVersion.split('.').length === 2) {
-    //             this.fullnodeVersion += '.0';
-    //         }
-    //     } catch (err) {
-    //         this.fullnodeVersion = DEFAULT_VERSION;
-    //     }
-    // }
+    async getFullnodeVersion() {
+        try {
+            const nodeInfo = await this.trx.getNodeInfo();
+            this.fullnodeVersion = nodeInfo.configNodeInfo.codeVersion;
+            if (this.fullnodeVersion.split('.').length === 2) {
+                this.fullnodeVersion += '.0';
+            }
+        } catch (err) {
+            this.fullnodeVersion = DEFAULT_VERSION;
+        }
+    }
 
-    // setDefaultBlock(blockID = false) {
-    //     if ([false, 'latest', 'earliest', 0].includes(blockID)) {
-    //         return (this.defaultBlock = blockID);
-    //     }
+    setDefaultBlock(blockID: false | 'latest' | 'earliest' | number = false) {
+        if ([false, 'latest', 'earliest', 0].includes(blockID)) {
+            return (this.defaultBlock = blockID);
+        }
 
-    //     if (!utils.isInteger(blockID) || !blockID) throw new Error('Invalid block ID provided');
+        if (!utils.isInteger(blockID) || !blockID) throw new Error('Invalid block ID provided');
 
-    //     this.defaultBlock = Math.abs(blockID);
-    // }
+        this.defaultBlock = Math.abs(blockID);
+    }
 
     setPrivateKey(privateKey: string) {
         try {
@@ -254,15 +232,15 @@ export default class TronWeb extends EventEmitter {
         this.event.setServer(eventServer, healthcheck);
     }
 
-    // setHeader(headers = {}) {
-    //     const fullNode = new providers.HttpProvider(this.fullNode.host, 30000, false, false, headers);
-    //     const solidityNode = new providers.HttpProvider(this.solidityNode.host, 30000, false, false, headers);
-    //     const eventServer = new providers.HttpProvider(this.eventServer.host, 30000, false, false, headers);
+    setHeader(headers = {}) {
+        const fullNode = new providers.HttpProvider(this.fullNode.host, 30000, false, false, headers);
+        const solidityNode = new providers.HttpProvider(this.solidityNode.host, 30000, false, false, headers);
+        const eventServer = new providers.HttpProvider(this.eventServer.host, 30000, false, false, headers);
 
-    //     this.setFullNode(fullNode);
-    //     this.setSolidityNode(solidityNode);
-    //     this.setEventServer(eventServer);
-    // }
+        this.setFullNode(fullNode);
+        this.setSolidityNode(solidityNode);
+        this.setEventServer(eventServer);
+    }
 
     setFullNodeHeader(headers = {}) {
         const fullNode = new providers.HttpProvider(this.fullNode.host, 30000, '', '', headers);
@@ -277,48 +255,27 @@ export default class TronWeb extends EventEmitter {
         this.setEventServer(eventServer);
     }
 
-    // currentProviders() {
-    //     return {
-    //         fullNode: this.fullNode,
-    //         solidityNode: this.solidityNode,
-    //         eventServer: this.eventServer,
-    //     };
-    // }
+    currentProviders() {
+        return {
+            fullNode: this.fullNode,
+            solidityNode: this.solidityNode,
+            eventServer: this.eventServer,
+        };
+    }
 
-    // currentProvider() {
-    //     return this.currentProviders();
-    // }
+    currentProvider() {
+        return this.currentProviders();
+    }
 
-    // getEventResult(...params) {
-    //     if (typeof params[1] !== 'object') {
-    //         params[1] = {
-    //             sinceTimestamp: params[1] || 0,
-    //             eventName: params[2] || false,
-    //             blockNumber: params[3] || false,
-    //             size: params[4] || 20,
-    //             page: params[5] || 1,
-    //         };
-    //         params.splice(2, 4);
+    getEventResult(...params: Parameters<Event['getEventsByContractAddress']>): ReturnType<Event['getEventsByContractAddress']> {
+        return this.event.getEventsByContractAddress(...params);
+    }
 
-    //         // callback:
-    //         if (!utils.isFunction(params[2])) {
-    //             if (utils.isFunction(params[1].page)) {
-    //                 params[2] = params[1].page;
-    //                 params[1].page = 1;
-    //             } else if (utils.isFunction(params[1].size)) {
-    //                 params[2] = params[1].size;
-    //                 params[1].size = 20;
-    //                 params[1].page = 1;
-    //             }
-    //         }
-    //     }
-
-    //     return this.event.getEventsByContractAddress(...params);
-    // }
-
-    // getEventByTransactionID(...params) {
-    //     return this.event.getEventsByTransactionID(...params);
-    // }
+    getEventByTransactionID(
+        ...params: Parameters<Event['getEventsByTransactionID']>
+    ): ReturnType<Event['getEventsByTransactionID']> {
+        return this.event.getEventsByTransactionID(...params);
+    }
 
     contract(abi?: ContractAbiInterface = [], address?: Address) {
         return new Contract(this, abi, address);
@@ -386,6 +343,7 @@ export default class TronWeb extends EventEmitter {
         return '0x' + Buffer.from(string, 'utf8').toString('hex');
     }
 
+    toAscii: typeof TronWeb.toAscii;
     static toAscii(hex: string) {
         if (utils.isHex(hex)) {
             let str = '';
@@ -412,7 +370,8 @@ export default class TronWeb extends EventEmitter {
         return '0x' + Buffer.from(string, 'ascii').toString('hex').padEnd(padding!, '0');
     }
 
-    static toDecimal(value: string) {
+    toDecimal: typeof TronWeb.toDecimal;
+    static toDecimal(value: string | number | BigNumber) {
         return TronWeb.toBigNumber(value).toNumber();
     }
 
@@ -424,11 +383,13 @@ export default class TronWeb extends EventEmitter {
         return number.isLessThan(0) ? '-0x' + result.substr(1) : '0x' + result;
     }
 
+    fromSun: typeof TronWeb.fromSun;
     static fromSun(sun: number) {
         const trx = TronWeb.toBigNumber(sun).div(1_000_000);
         return utils.isBigNumber(sun) ? trx : trx.toString(10);
     }
 
+    toSun: typeof TronWeb.toSun;
     static toSun(trx: number) {
         const sun = TronWeb.toBigNumber(trx).times(1_000_000);
         return utils.isBigNumber(trx) ? sun : sun.toString(10);
@@ -455,25 +416,25 @@ export default class TronWeb extends EventEmitter {
         return account;
     }
 
-    // static createRandom(options) {
-    //     const account = utils.accounts.generateRandom(options);
+    createRandom: typeof TronWeb.createRandom;
+    static createRandom(password?, path?, wordlist?) {
+        const account = utils.accounts.generateRandom(password, path, wordlist);
 
-    //     return account;
-    // }
+        return account;
+    }
 
-    // static fromMnemonic(mnemonic, path = TRON_BIP39_PATH_INDEX_0, wordlist = null) {
-    //     const account = utils.accounts.generateAccountWithMnemonic(mnemonic, path, wordlist);
+    fromMnemonic: typeof TronWeb.fromMnemonic;
+    static fromMnemonic(mnemonic, path = TRON_BIP39_PATH_INDEX_0, wordlist = null) {
+        const account = utils.accounts.generateAccountWithMnemonic(mnemonic, path, wordlist);
 
-    //     return account;
-    // }
+        return account;
+    }
 
-    // async isConnected(callback = false) {
-    //     if (!callback) return this.injectPromise(this.isConnected);
-
-    //     return callback(null, {
-    //         fullNode: await this.fullNode.isConnected(),
-    //         solidityNode: await this.solidityNode.isConnected(),
-    //         eventServer: this.eventServer && (await this.eventServer.isConnected()),
-    //     });
-    // }
+    async isConnected(callback = false) {
+        return {
+            fullNode: await this.fullNode.isConnected(),
+            solidityNode: await this.solidityNode.isConnected(),
+            eventServer: this.eventServer && (await this.eventServer.isConnected()),
+        };
+    }
 }

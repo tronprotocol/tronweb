@@ -1,6 +1,6 @@
 import { byteArray2hexStr } from './bytes.js';
 import { getBase58CheckAddress, genPriKey, getAddressFromPriKey, getPubKeyFromPriKey, pkToAddress } from './crypto.js';
-import { ethersWallet, ethersHDNodeWallet, Mnemonic, Wordlist } from './ethersUtils.js';
+import { ethersHDNodeWallet, Mnemonic, Wordlist } from './ethersUtils.js';
 import { TRON_BIP39_PATH_INDEX_0 } from './address.js';
 
 const INVALID_TRON_PATH_ERROR_MSG = 'Invalid tron path provided';
@@ -23,27 +23,29 @@ export function generateAccount() {
     };
 }
 
-export function generateRandom() {
-    const account = ethersWallet.createRandom();
+export function generateRandom(password: string = '', path = TRON_BIP39_PATH_INDEX_0, wordlist?: Wordlist) {
+    const account = ethersHDNodeWallet.createRandom(password, path, wordlist);
 
     const result = {
         mnemonic: account.mnemonic,
         privateKey: account.privateKey,
         publicKey: account.signingKey.publicKey,
         address: pkToAddress(account.privateKey.replace(/^0x/, '')),
+        path: account.path,
     };
 
     return result;
 }
 
-export function generateAccountWithMnemonic(mnemonic: string, path?: string, wordlist: Wordlist | null = null) {
-    if (!path) {
-        path = TRON_BIP39_PATH_INDEX_0;
-    }
+export function generateAccountWithMnemonic(
+    mnemonic: string,
+    path: string = TRON_BIP39_PATH_INDEX_0,
+    wordlist: Wordlist | null = null
+) {
     if (!String(path).match(/^m\/44\'\/195\'/)) {
         throw new Error(INVALID_TRON_PATH_ERROR_MSG);
     }
-    const account = ethersHDNodeWallet.fromMnemonic(Mnemonic.fromPhrase(mnemonic, path, wordlist));
+    const account = ethersHDNodeWallet.fromMnemonic(Mnemonic.fromPhrase(mnemonic, '', wordlist), path);
 
     const result = {
         mnemonic: account.mnemonic,
