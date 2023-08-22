@@ -32,6 +32,7 @@ function isValidOptions(options: unknown): options is TronWebOptions {
         (!!(options as TronWebOptions).fullNode || !!(options as TronWebOptions).fullHost)
     );
 }
+
 export default class TronWeb extends EventEmitter {
     providers: Providers;
     static providers = providers;
@@ -116,6 +117,29 @@ export default class TronWeb extends EventEmitter {
         };
 
         this.version = TronWeb.version;
+        [
+            'sha3',
+            'toHex',
+            'toUtf8',
+            'fromUtf8',
+            'toAscii',
+            'fromAscii',
+            'toDecimal',
+            'fromDecimal',
+            'toSun',
+            'fromSun',
+            'toBigNumber',
+            'isAddress',
+            'createAccount',
+            'address',
+            'version',
+            'createRandom',
+            'fromMnemonic',
+        ].forEach((key) => {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            this[key] = TronWeb[key];
+        });
         this.sha3 = TronWeb.sha3;
         this.fromUtf8 = TronWeb.fromUtf8;
         this.address = TronWeb.address;
@@ -296,7 +320,7 @@ export default class TronWeb extends EventEmitter {
     }
 
     toHex: typeof TronWeb.toHex;
-    static toHex(val: any) {
+    static toHex(val: string | number | Record<string | number | symbol, unknown> | unknown[] | BigNumber) {
         if (utils.isBoolean(val)) return TronWeb.fromDecimal(+val);
 
         if (utils.isBigNumber(val)) return TronWeb.fromDecimal(val);
@@ -311,7 +335,7 @@ export default class TronWeb extends EventEmitter {
             if (!isFinite(val) || /^\s*$/.test(val)) return TronWeb.fromUtf8(val);
         }
 
-        const result = TronWeb.fromDecimal(val);
+        const result = TronWeb.fromDecimal(val as number);
         if (result === '0xNaN') {
             throw new Error('The passed value is not convertible to a hex string');
         } else {
