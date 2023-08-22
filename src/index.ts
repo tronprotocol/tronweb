@@ -1,5 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 import providers from './lib/providers/index.js';
 import type { Providers } from './lib/providers/index.js';
 import utils from './utils/index.js';
@@ -10,15 +8,12 @@ import semver from 'semver';
 import TransactionBuilder from './lib/TransactionBuilder/TransactionBuilder.js';
 import Trx from './lib/trx.js';
 import Contract from './lib/contract/index.js';
-// import Plugin from 'lib/plugin';
+import Plugin from './lib/plugin.js';
 import Event from './lib/event.js';
 import { keccak256 } from './utils/ethersUtils.js';
-import { ADDRESS_PREFIX, fromHex, fromPrivateKey, isAddress, toHex, TRON_BIP39_PATH_INDEX_0 } from './utils/address.js';
+import { fromHex, fromPrivateKey, isAddress, toHex } from './utils/address.js';
 import { AxiosRequestHeaders } from 'axios';
 import HttpProvider from './lib/providers/HttpProvider.js';
-import { decodeBase58Address, getBase58CheckAddress, isAddressValid, pkToAddress } from './utils/crypto.js';
-import { byteArray2hexStr } from './utils/bytes.js';
-import { hexStr2byteArray } from './utils/code.js';
 import { isString } from './utils/validations.js';
 import { DefaultAddress, NodeService, TronWebOptions } from './types/TronWeb';
 import { ContractAbiInterface } from './types/ABI.js';
@@ -38,24 +33,24 @@ function isValidOptions(options: unknown): options is TronWebOptions {
     );
 }
 export default class TronWeb extends EventEmitter {
+    providers: Providers;
     static providers = providers;
+    BigNumber: typeof BigNumber;
     static BigNumber = BigNumber;
+    transactionBuilder: TransactionBuilder;
     static TransactionBuilder = TransactionBuilder;
+    trx: Trx;
     static Trx = Trx;
     static Contract = Contract;
-    // static Plugin = Plugin;
+    plugin: Plugin;
+    static Plugin = Plugin;
+    event: Event;
     static Event = Event;
     version: typeof TronWeb.version;
     static version = version;
     utils: typeof TronWeb.utils;
     static utils = utils;
 
-    event: Event;
-    trx: Trx;
-    transactionBuilder: TransactionBuilder;
-    trx: Trx;
-    providers: Providers;
-    BigNumber: typeof BigNumber;
     defaultBlock: number | false | 'earliest' | 'latest';
     defaultPrivateKey: string | false;
     defaultAddress: DefaultAddress;
@@ -67,15 +62,13 @@ export default class TronWeb extends EventEmitter {
     eventServer?: HttpProvider;
 
     constructor(options: TronWebOptions);
-    constructor(fullNode: NodeService, solidityNode: NodeService, eventServer: NodeService, sideOptions: TronWebOptions);
     constructor(fullNode: NodeService, solidityNode: NodeService, eventServer?: NodeService, privateKey?: string);
     /* prettier-ignore */
-    constructor(fullNode: NodeService, solidityNode: NodeService, eventServer: NodeService, sideOptions: TronWebOptions, privateKey?: string);
+    constructor(fullNode: NodeService, solidityNode: NodeService, eventServer: NodeService, privateKey?: string);
     constructor(
         options: TronWebOptions | NodeService,
         solidityNode: NodeService = '',
-        eventServer: NodeService,
-        sideOptions: string | TronWebOptions = '',
+        eventServer?: NodeService,
         privateKey = ''
     ) {
         super();
@@ -86,7 +79,6 @@ export default class TronWeb extends EventEmitter {
 
         if (isValidOptions(options)) {
             fullNode = options.fullNode || options.fullHost;
-            sideOptions = solidityNode as string;
             solidityNode = (options.solidityNode || options.fullHost)!;
             eventServer = (options.eventServer || options.fullHost)!;
             headers = options.headers || false;
@@ -104,12 +96,14 @@ export default class TronWeb extends EventEmitter {
         this.event = new Event(this);
         this.transactionBuilder = new TransactionBuilder(this);
         this.trx = new Trx(this);
-        // this.plugin = new Plugin(this, options);
+        this.plugin = new Plugin(this, {
+            disablePlugins: isValidOptions(options) ? options.disablePlugins : false,
+        });
         this.utils = utils;
 
         this.setFullNode(fullNode as HttpProvider);
         this.setSolidityNode(solidityNode as HttpProvider);
-        this.setEventServer(eventServer);
+        this.setEventServer(eventServer!);
 
         this.providers = providers;
         this.BigNumber = BigNumber;
@@ -171,7 +165,7 @@ export default class TronWeb extends EventEmitter {
 
         if (!utils.isInteger(blockID) || !blockID) throw new Error('Invalid block ID provided');
 
-        this.defaultBlock = Math.abs(blockID);
+        return (this.defaultBlock = Math.abs(blockID));
     }
 
     setPrivateKey(privateKey: string) {
@@ -233,9 +227,9 @@ export default class TronWeb extends EventEmitter {
     }
 
     setHeader(headers = {}) {
-        const fullNode = new providers.HttpProvider(this.fullNode.host, 30000, false, false, headers);
-        const solidityNode = new providers.HttpProvider(this.solidityNode.host, 30000, false, false, headers);
-        const eventServer = new providers.HttpProvider(this.eventServer.host, 30000, false, false, headers);
+        const fullNode = new providers.HttpProvider(this.fullNode.host, 30000, '', '', headers);
+        const solidityNode = new providers.HttpProvider(this.solidityNode.host, 30000, '', '', headers);
+        const eventServer = new providers.HttpProvider(this.eventServer!.host, 30000, '', '', headers);
 
         this.setFullNode(fullNode);
         this.setSolidityNode(solidityNode);
@@ -277,8 +271,8 @@ export default class TronWeb extends EventEmitter {
         return this.event.getEventsByTransactionID(...params);
     }
 
-    contract(abi?: ContractAbiInterface = [], address?: Address) {
-        return new Contract(this, abi, address);
+    contract(abi: ContractAbiInterface = [], address?: Address) {
+        return new Contract(this, abi, address!);
     }
 
     address: typeof TronWeb.address;
@@ -417,15 +411,19 @@ export default class TronWeb extends EventEmitter {
     }
 
     createRandom: typeof TronWeb.createRandom;
-    static createRandom(password?, path?, wordlist?) {
-        const account = utils.accounts.generateRandom(password, path, wordlist);
+    static createRandom(
+        ...params: Parameters<(typeof utils)['accounts']['generateRandom']>
+    ): ReturnType<(typeof utils)['accounts']['generateRandom']> {
+        const account = utils.accounts.generateRandom(...params);
 
         return account;
     }
 
     fromMnemonic: typeof TronWeb.fromMnemonic;
-    static fromMnemonic(mnemonic, path = TRON_BIP39_PATH_INDEX_0, wordlist = null) {
-        const account = utils.accounts.generateAccountWithMnemonic(mnemonic, path, wordlist);
+    static fromMnemonic(
+        ...params: Parameters<(typeof utils)['accounts']['generateAccountWithMnemonic']>
+    ): ReturnType<(typeof utils)['accounts']['generateAccountWithMnemonic']> {
+        const account = utils.accounts.generateAccountWithMnemonic(...params);
 
         return account;
     }

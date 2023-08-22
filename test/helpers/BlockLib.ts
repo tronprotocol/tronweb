@@ -1,6 +1,6 @@
 import TronWeb from '../setup/TronWeb.js';
 
-class BlockLib {
+export default class BlockLib {
     tronWeb: TronWeb;
     constructor(tronWeb: TronWeb) {
         if (!tronWeb) throw new Error('Expected instances of TronWeb and utils');
@@ -20,5 +20,3 @@ class BlockLib {
         };
     }
 }
-
-module.exports = BlockLib;

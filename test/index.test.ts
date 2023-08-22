@@ -24,7 +24,7 @@ const {
     // TEST_TRON_HEADER_JWT_PRIVATE_KEY,
 } = Config;
 
-describe.only('TronWeb Instance', function () {
+describe('TronWeb Instance', function () {
     describe('#constructor()', function () {
         it('should create a full instance', function () {
             const tronWeb = tronWebBuilder.createInstance();
@@ -716,7 +716,7 @@ describe.only('TronWeb Instance', function () {
             const tronWeb = tronWebBuilder.createInstance();
 
             const accountCreated = tronWeb.createRandom();
-            const newAccount = tronWeb.fromMnemonic(accountCreated.mnemonic?.phrase);
+            const newAccount = tronWeb.fromMnemonic(accountCreated.mnemonic!.phrase);
 
             assert.equal(newAccount.privateKey, accountCreated.privateKey);
             assert.equal(newAccount.privateKey.substring(2).length, 64);

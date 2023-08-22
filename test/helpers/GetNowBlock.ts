@@ -2,7 +2,7 @@ import TronWeb from '../setup/TronWeb.js';
 
 let someParameter: any;
 
-class GetNowBlock {
+export default class GetNowBlock {
     tronWeb: TronWeb;
     constructor(tronWeb: TronWeb) {
         if (!tronWeb) throw new Error('Expected instance of TronWeb');
@@ -44,5 +44,3 @@ class GetNowBlock {
         };
     }
 }
-
-module.exports = GetNowBlock;

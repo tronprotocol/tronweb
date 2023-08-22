@@ -9,6 +9,7 @@ export interface TronWebOptions {
     headers?: AxiosRequestHeaders;
     eventHeaders?: AxiosRequestHeaders;
     privateKey?: string;
+    disablePlugins?: boolean;
 }
 export interface DefaultAddress {
     hex: string | false;
