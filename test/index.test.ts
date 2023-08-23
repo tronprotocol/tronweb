@@ -485,6 +485,7 @@ describe('TronWeb Instance', function () {
 
         it('should throw an error if the value is not convertible', function () {
             assert.throws(() => {
+                // @ts-ignore
                 TronWeb.toHex(TronWeb);
             }, 'The passed value is not convertible to a hex string');
         });

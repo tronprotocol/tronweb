@@ -25,7 +25,7 @@ export default class GetNowBlock {
             someParameter = options.someParameter;
         }
         return {
-            requires: '^5.3.0',
+            requires: '^6.0.0',
             components: {
                 trx: {
                     // will be overridden

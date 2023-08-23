@@ -320,7 +320,7 @@ export default class TronWeb extends EventEmitter {
     }
 
     toHex: typeof TronWeb.toHex;
-    static toHex(val: string | number | Record<string | number | symbol, unknown> | unknown[] | BigNumber) {
+    static toHex(val: string | number | boolean | Record<string | number | symbol, unknown> | unknown[] | BigNumber) {
         if (utils.isBoolean(val)) return TronWeb.fromDecimal(+val);
 
         if (utils.isBigNumber(val)) return TronWeb.fromDecimal(val);
