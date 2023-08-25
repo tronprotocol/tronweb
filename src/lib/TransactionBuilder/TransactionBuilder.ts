@@ -26,6 +26,7 @@ import {
     CreateTokenOptions,
     createTransaction,
     deepCopyJson,
+    DeployConstantContractOptions,
     fromUtf8,
     genContractAddress,
     InternalTriggerSmartContractOptions,
@@ -965,6 +966,71 @@ export default class TransactionBuilder {
         return this._triggerSmartContract(contractAddress, functionSelector, options, parameters, issuerAddress);
     }
 
+    async deployConstantContract(
+        options: DeployConstantContractOptions = { input: '', ownerAddress: '' }
+    ): Promise<TransactionCapsule> {
+        const { input, ownerAddress, tokenId, tokenValue, callValue = 0 } = options;
+
+        this.validator.notValid([
+            {
+                name: 'input',
+                type: 'not-empty-string',
+                value: input,
+            },
+            {
+                name: 'callValue',
+                type: 'integer',
+                value: callValue,
+                gte: 0,
+            },
+            {
+                name: 'owner',
+                type: 'address',
+                value: ownerAddress,
+            },
+            {
+                name: 'tokenValue',
+                type: 'integer',
+                value: tokenValue,
+                gte: 0,
+                optional: true,
+            },
+            {
+                name: 'tokenId',
+                type: 'integer',
+                value: tokenId,
+                gte: 0,
+                optional: true,
+            },
+        ]);
+
+        const args: any = {
+            data: input,
+            owner_address: toHex(ownerAddress),
+            call_value: callValue,
+        };
+
+        if (tokenId) {
+            args.token_id = tokenId;
+        }
+        if (tokenValue) {
+            args.call_token_value = tokenValue;
+        }
+
+        const pathInfo = `wallet${options.confirmed ? 'solidity' : ''}/estimateenergy`;
+        const transaction: TransactionCapsule = await this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(
+            pathInfo,
+            args,
+            'post'
+        );
+        if (transaction.Error) throw new Error(transaction.Error);
+
+        if (transaction.result && transaction.result.message) {
+            throw new Error(this.tronWeb.toUtf8(transaction.result.message));
+        }
+        return transaction;
+    }
+
     _getTriggerSmartContractArgs(
         contractAddress: string,
         functionSelector: string,
@@ -1307,8 +1373,8 @@ export default class TransactionBuilder {
             description = '',
             url = false,
             totalSupply = 0,
-            trxRatio = 1, // How much TRX will `tokenRatio` cost?
-            tokenRatio = 1, // How many tokens will `trxRatio` afford?
+            trxRatio = 1, // How much TRX will `tokenRatio` cost
+            tokenRatio = 1, // How many tokens will `trxRatio` afford
             saleStart = Date.now(),
             saleEnd = false,
             freeBandwidth = 0, // The creator's "donated" bandwidth for use by token holders

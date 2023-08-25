@@ -854,12 +854,12 @@ export class Interface {
     }
     */
 
-    _decodeParams(params: ReadonlyArray<ParamType>, data: BytesLike): Result {
-        return this.#abiCoder.decode(params, data);
+    _decodeParams(params: ReadonlyArray<ParamType | string>, data: BytesLike): Result {
+        return this.#abiCoder.decode(params as any, data);
     }
 
     _encodeParams(params: ReadonlyArray<ParamType>, values: ReadonlyArray<any>): string {
-        return this.#abiCoder.encode(params, values);
+        return this.#abiCoder.encode(params as any, values);
     }
 
     /**
@@ -975,7 +975,7 @@ export class Interface {
         const bytes = getBytesCopy(data);
         if (bytes.length % 32 === 0) {
             try {
-                return this.#abiCoder.decode(fragment.outputs, bytes);
+                return this.#abiCoder.decode(fragment.outputs as any, bytes);
             } catch (error) {
                 message = 'could not decode result data';
             }
@@ -1001,7 +1001,7 @@ export class Interface {
             const ef = this.getError(selector);
             if (ef) {
                 try {
-                    const args = this.#abiCoder.decode(ef.inputs, data.slice(4));
+                    const args = this.#abiCoder.decode(ef.inputs as any, data.slice(4));
                     error.revert = {
                         name: ef.name,
                         signature: ef.format(),
@@ -1042,7 +1042,7 @@ export class Interface {
             assertArgument(f, 'unknown function', 'fragment', fragment);
             fragment = f;
         }
-        return hexlify(this.#abiCoder.encode(fragment.outputs, values || []));
+        return hexlify(this.#abiCoder.encode(fragment.outputs as any, values || []));
     }
     /*
     spelunk(inputs: Array<ParamType>, values: ReadonlyArray<any>, processfunc: (type: string, value: any) => Promise<any>): Promise<Array<any>> {
@@ -1186,7 +1186,7 @@ export class Interface {
         });
 
         return {
-            data: this.#abiCoder.encode(dataTypes, dataValues),
+            data: this.#abiCoder.encode(dataTypes as any, dataValues),
             topics: topics,
         };
     }
@@ -1234,8 +1234,8 @@ export class Interface {
             }
         });
 
-        const resultIndexed = topics != null ? this.#abiCoder.decode(indexed, concat(topics)) : null;
-        const resultNonIndexed = this.#abiCoder.decode(nonIndexed, data, true);
+        const resultIndexed = topics != null ? this.#abiCoder.decode(indexed as any, concat(topics)) : null;
+        const resultNonIndexed = this.#abiCoder.decode(nonIndexed as any, data, true);
 
         //const result: (Array<any> & { [ key: string ]: any }) = [ ];
         const values: Array<any> = [];
@@ -1287,7 +1287,7 @@ export class Interface {
             return null;
         }
 
-        const args = this.#abiCoder.decode(fragment.inputs, data.slice(4));
+        const args = this.#abiCoder.decode(fragment.inputs as any, data.slice(4));
         return new TransactionDescription(fragment, fragment.selector, args, value);
     }
 
@@ -1330,7 +1330,7 @@ export class Interface {
             return null;
         }
 
-        const args = this.#abiCoder.decode(fragment.inputs, dataSlice(hexData, 4));
+        const args = this.#abiCoder.decode(fragment.inputs as any, dataSlice(hexData, 4));
         return new ErrorDescription(fragment, fragment.selector, args);
     }
 

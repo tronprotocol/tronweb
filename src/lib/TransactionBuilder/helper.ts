@@ -322,6 +322,15 @@ export interface UpdateTokenOptions extends PermissionId {
     freeBandwidthLimit?: number;
 }
 
+export interface DeployConstantContractOptions {
+    input: string;
+    ownerAddress: string;
+    tokenId?: string | number;
+    tokenValue?: string | number;
+    callValue?: number;
+    confirmed?: boolean;
+}
+
 export interface AlterTransactionOptions {
     data?: string;
     dataFormat?: string;

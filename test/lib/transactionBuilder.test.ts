@@ -492,7 +492,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it(`should update accounts[3] and broadcast`, async function () {
-            const newName = 'New name';
+            const newName = 'New name2';
             const param: [string, string] = [newName, accounts.b58[3]];
 
             const transaction = await tronWeb.transactionBuilder.updateAccount(...param);
@@ -528,7 +528,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it(`should set account id accounts[4] and broadcast`, async function () {
-            const param: Parameters<TransactionBuilder['setAccountId']> = [TronWeb.toHex('testtest'), accounts.b58[4]];
+            const param: Parameters<TransactionBuilder['setAccountId']> = [TronWeb.toHex('testtest2'), accounts.b58[4]];
 
             const transaction = await tronWeb.transactionBuilder.setAccountId(...param);
             const res = await broadcaster(transaction, accounts.pks[4]);
@@ -737,8 +737,8 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it(`should allow accounts[2] to purchase a token created by accounts[5] and broadcast`, async function () {
-            await wait(60);
-            const param: Parameters<TransactionBuilder['purchaseToken']> = [accounts.b58[5], tokenID, 20, accounts.b58[2]];
+            await wait(50); // 60 will failed because broadcast error
+            const param: Parameters<TransactionBuilder['purchaseToken']> = [accounts.b58[5], tokenID, 10, accounts.b58[2]];
             const transaction = await tronWeb.transactionBuilder.purchaseToken(...param);
 
             const res = await broadcaster(transaction, accounts.pks[2]);
@@ -881,7 +881,7 @@ describe('TronWeb.transactionBuilder', function () {
             const param: [string, number, string, string, PermissionId?] = [accounts.b58[1], 5, tokenID, accounts.b58[6]];
             const transaction = await tronWeb.transactionBuilder.sendToken(...param);
             const res = await broadcaster(transaction, accounts.pks[6]);
-            console.log(res);
+            // console.log(res);
             assert.isTrue(res.receipt.result);
         });
 
@@ -3271,6 +3271,17 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.isDefined(result.energy_required);
                 assert.isNumber(result.energy_required);
             }
+        });
+    });
+    describe('#deployConstantContract', async function () {
+        it('should get the estimated energy of deploying a contract', async function () {
+            const receipt = await tronWeb.transactionBuilder.deployConstantContract({
+                input: testSetVal.bytecode,
+                ownerAddress: accounts.hex[1],
+            });
+            assert.isTrue(receipt.result.result);
+            assert.isDefined(receipt.energy_required);
+            assert.isNumber(receipt.energy_required);
         });
     });
 });
