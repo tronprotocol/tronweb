@@ -65,6 +65,13 @@ import Config from '../helpers/config';
 import { IContract } from '../../src/lib/contract';
 const { ADDRESS_HEX, ADDRESS_BASE58, UPDATED_TEST_TOKEN_OPTIONS, PRIVATE_KEY, getTokenOptions, isProposalApproved } = Config;
 
+/**
+ * Following cases should be test in Nile testnet:
+ * - should create a TestToken without freezing anything in 3.6.0
+ * - #unfreezeBalance
+ * - #withdrawBalance
+ */
+
 describe('TronWeb.transactionBuilder', function () {
     let accounts: any;
     let tronWeb: TronWeb;
@@ -1040,7 +1047,7 @@ describe('TronWeb.transactionBuilder', function () {
         // TODO add invalid params throws
     });
 
-    describe.skip('#applyForSR', async function () {
+    describe('#applyForSR', async function () {
         const url = 'https://xtron.network';
 
         it('should allow accounts[0] to apply for SR', async function () {
@@ -1936,7 +1943,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
     });
 
-    describe.skip('#vote', async function () {
+    describe('#vote', async function () {
         // this is not testable because on Tron Quickstart (like on Shasta) it is not possible to vote
 
         const url = 'https://xtron.network';
@@ -1990,8 +1997,8 @@ describe('TronWeb.transactionBuilder', function () {
                     [bals[0], bals[1], bals[2], bals[3]],
                 ],
             } as unknown as CreateSmartContractOptions;
-            const transaction = await tronWeb.transactionBuilder.createSmartContract(options, accounts.hex[0]);
-            await broadcaster(null, accounts.pks[0], transaction);
+            const transaction = await tronWeb.transactionBuilder.createSmartContract(options, accounts.hex[10]);
+            await broadcaster(null, accounts.pks[10], transaction);
             while (true) {
                 const tx = await tronWeb.trx.getTransactionInfo(transaction.txID);
                 if (Object.keys(tx).length === 0) {
@@ -2535,8 +2542,8 @@ describe('TronWeb.transactionBuilder', function () {
     });
 
     describe('#withdrawExchangeTokens', async function () {
-        const idxS = 0;
-        const idxE = 2;
+        const idxS = 30;
+        const idxE = 32;
         const tokenNames: any[] = [];
         let exchangeId = 0;
 
@@ -2942,8 +2949,8 @@ describe('TronWeb.transactionBuilder', function () {
         let issuerPk: string;
 
         before(async () => {
-            issuerAddress = accounts.hex[0];
-            issuerPk = accounts.pks[0];
+            issuerAddress = accounts.hex[40];
+            issuerPk = accounts.pks[40];
             transaction = await tronWeb.transactionBuilder.createSmartContract(
                 {
                     abi: rawParam.abi,
@@ -3006,8 +3013,8 @@ describe('TronWeb.transactionBuilder', function () {
 
     describe('#triggerSmartContractWithFuncABIV2 (V1 input)', async function () {
         it('should create or trigger a smart contract with funcABIV2 (V1 input)', async function () {
-            const issuerAddress = accounts.hex[0];
-            const issuerPk = accounts.pks[0];
+            const issuerAddress = accounts.hex[40];
+            const issuerPk = accounts.pks[40];
 
             const transaction = await tronWeb.transactionBuilder.createSmartContract(
                 {
@@ -3084,8 +3091,8 @@ describe('TronWeb.transactionBuilder', function () {
     describe('#triggerSmartContractWithFuncABIV2 (V2 input)', async function () {
         it('should create or trigger a smart contract with funcABIV2 (V2 input)', async function () {
             // const coder = tronWeb.utils.abi;
-            const issuerAddress = accounts.hex[0];
-            const issuerPk = accounts.pks[0];
+            const issuerAddress = accounts.hex[40];
+            const issuerPk = accounts.pks[40];
             const abi = JSON.parse(funcABIV2_2.interface);
             const bytecode = funcABIV2_2.bytecode;
             const outputValues = getValues(JSON.parse(funcABIV2_2.values));
@@ -3114,8 +3121,8 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it('should create or trigger a smart contract with funcABIV2 (V2 input test send )', async function () {
-            const issuerAddress = accounts.hex[0];
-            const issuerPk = accounts.pks[0];
+            const issuerAddress = accounts.hex[40];
+            const issuerPk = accounts.pks[40];
 
             const transaction = await tronWeb.transactionBuilder.createSmartContract(
                 {
@@ -3164,8 +3171,8 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it('should create or trigger a smart contract with funcABIV2 (V2 input trcToken )', async function () {
-            const issuerAddress = accounts.hex[0];
-            const issuerPk = accounts.pks[0];
+            const issuerAddress = accounts.hex[40];
+            const issuerPk = accounts.pks[40];
 
             const transaction = await tronWeb.transactionBuilder.createSmartContract(
                 {
