@@ -15,7 +15,7 @@ export type ValidatorParamType = {
     optional?: boolean;
 };
 
-export default class Validator {
+export class Validator {
     invalid(param: ValidatorParamType) {
         return param.msg || `Invalid ${param.name}${param.type === 'address' ? ' address' : ''} provided`;
     }

@@ -1,9 +1,9 @@
-import TronWeb from '../../index.js';
+import { TronWeb } from '../../index.js';
 import { AbiCoder, keccak256 } from '../../utils/ethersUtils.js';
 import { ADDRESS_PREFIX_REGEX, toHex } from '../../utils/address.js';
 import { encodeParamsV2ByABI } from '../../utils/abi.js';
 import { CreateSmartContractTransaction, SignedTransaction, Transaction, TransactionCapsule } from '../../types/Transaction.js';
-import Validator from '../../paramValidator/index.js';
+import { Validator } from '../../paramValidator/index.js';
 import { GetSignWeightResponse } from '../../types/APIResponse.js';
 import { isArray, isInteger, isNotNullOrUndefined, isObject, isString, isValidURL } from '../../utils/validations.js';
 import {
@@ -44,7 +44,7 @@ import {
 import { Address } from '../../types/Trx.js';
 import { ConstructorFragment, ContractAbiInterface, FunctionFragment } from '../../types/ABI.js';
 
-export default class TransactionBuilder {
+export class TransactionBuilder {
     tronWeb: TronWeb;
     validator: Validator;
     constructor(tronWeb?: TronWeb) {

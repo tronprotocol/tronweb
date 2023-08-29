@@ -2,7 +2,7 @@ import TronWeb from '../index.js';
 import utils from '../utils/index.js';
 import { keccak256, toUtf8Bytes, recoverAddress, SigningKey } from '../utils/ethersUtils.js';
 import { ADDRESS_PREFIX } from '../utils/address.js';
-import Validator from '../paramValidator/index.js';
+import { Validator } from '../paramValidator/index.js';
 import { txCheck } from '../utils/transaction.js';
 import { Block } from '../types/APIResponse.js';
 import {
@@ -37,7 +37,7 @@ type SignedStringOrSignedTransaction<T extends string | Transaction | SignedTran
     ? string
     : SignedTransaction & T;
 
-export default class Trx {
+export class Trx {
     tronWeb: TronWeb;
     cache: { contracts: Record<string, any> }; // todo: cache record should have contract type value
     validator: Validator;

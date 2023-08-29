@@ -5,6 +5,9 @@
     "main": "./lib/commonjs/index.js",
     "module": "./lib/esm/index.js",
     "types": "./lib/types/index.d.ts",
+    "files": [
+        "lib"
+    ],
     "exports": {
         ".": {
             "types": "./lib/types/index.d.ts",
@@ -22,19 +25,21 @@
         "tronweb"
     ],
     "scripts": {
-        "build:esm": "tsc --project tsconfig.esm.json && echo '{\"type\": \"module\"}' > ./lib/esm/package.json",
-        "build:cjs": "tsc --project tsconfig.cjs.json && echo '{\"type\": \"commonjs\"}' > ./lib/commonjs/package.json && npm run copy-protocol",
+        "build:esm": "tsc --project tsconfig.esm.json && echo '{\"type\": \"module\"}' > ./lib/esm/package.json && npm run copy-protocol:esm",
+        "build:cjs": "tsc --project tsconfig.cjs.json && echo '{\"type\": \"commonjs\"}' > ./lib/commonjs/package.json && npm run copy-protocol:cjs",
         "build:types": "tsc --project tsconfig.types.json",
+        "build:test": "tsc --project tsconfig.test.json && echo '{\"type\": \"commonjs\"}' > ./lib/commonjs/package.json && cp -R ./src/protocol ./lib/commonjs/src/",
         "build:dist": "webpack --config webpack.config.js --progress --color",
         "build:all": "npm run clean:all && npm run build:esm && npm run build:cjs && npm run build:types && npm run build:dist",
-        "copy-protocol": "cp -R ./src/protocol ./lib/commonjs/src",
+        "copy-protocol:cjs": "cp -R ./src/protocol ./lib/commonjs/",
+        "copy-protocol:esm": "cp -R ./src/protocol ./lib/esm/",
         "prepare": "npm run build",
         "build": "npm run clean && webpack --config webpack.config.js --progress --color",
         "build:dev": "NODE_ENV=development npm run build",
         "clean:all": "rimraf dist lib",
         "clean": "rimraf dist",
         "newaccount": "node scripts/test-node.js && node lib/commonjs/test/helpers/newAccounts 100",
-        "test": "npm run build:cjs && npm run-script newaccount && npx mocha 'lib/commonjs/test/**/*.test.js' --timeout 120000",
+        "test": "npm run build:test && npm run-script newaccount && npx mocha 'lib/commonjs/test/**/*.test.js' --timeout 120000",
         "test:esm": "npm run-script newaccount && npx mocha 'lib/esm/test/**/*.test.js' --timeout 120000",
         "testAbi": "node scripts/test-node.js && node test/helpers/newAccounts 1 && npx mocha 'test/**/abi.test.js' --timeout 120000",
         "testTx": "node scripts/test-node.js && node test/helpers/newAccounts 100 && npx mocha 'test/**/transaction.test.js' --timeout 120000",

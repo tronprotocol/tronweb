@@ -1,7 +1,7 @@
 import utils from '../../utils/index.js';
 import { encodeParamsV2ByABI, decodeParamsV2ByABI } from '../../utils/abi.js';
 import TronWeb from '../../index.js';
-import Contract from './index.js';
+import { Contract } from './index.js';
 import { sha3 } from '../../utils/crypto.js';
 
 interface CallOptionsInterface {
@@ -64,7 +64,7 @@ const decodeOutput = (abi: AbiFragmentNoErrConstructor, output: string) => {
     return decodeParamsV2ByABI(abi, output);
 };
 
-export default class Method {
+export class Method {
     tronWeb: TronWeb;
     contract: Contract;
     abi: AbiFragmentNoErrConstructor;

@@ -44,7 +44,7 @@ import {
     WitnessCreateContract,
 } from '../../src/types/Contract.js';
 import TronWeb from '../setup/TronWeb.js';
-import TransactionBuilder from '../../src/lib/TransactionBuilder/TransactionBuilder.js';
+import { TransactionBuilder } from '../../src/lib/TransactionBuilder/TransactionBuilder.js';
 import Contracts from '../fixtures/contracts';
 import waitChainData from '../helpers/waitChainData';
 import testUtils from '../helpers/testUtils';

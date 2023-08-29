@@ -20,7 +20,7 @@ interface PluginInterfaceReturn {
 
 type PluginOptions = any;
 
-export default class Plugin {
+export class Plugin {
     tronWeb: TronWeb;
     pluginNoOverride: string[];
     disablePlugins: boolean;

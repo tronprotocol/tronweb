@@ -1,6 +1,6 @@
 import TronWeb from '../../index.js';
 import utils from '../../utils/index.js';
-import Method, { AbiFragmentNoErrConstructor } from './method.js';
+import { Method, AbiFragmentNoErrConstructor } from './method.js';
 import type { ContractAbiInterface } from '../../types/ABI.js';
 import { Address } from '../../types/Trx.js';
 import { CreateSmartContractOptions } from '../TransactionBuilder/helper.js';
@@ -9,7 +9,7 @@ export interface IContract {
     [key: string | number | symbol]: (...args: any[]) => ReturnType<Method['onMethod']>;
 }
 
-export default class Contract {
+export class Contract {
     tronWeb: TronWeb;
     abi: ContractAbiInterface;
     address: false | string;

@@ -5,7 +5,7 @@ import broadcaster from '../../helpers/broadcaster.js';
 import tronWebBuilder from '../../helpers/tronWebBuilder.js';
 import TronWeb from '../../setup/TronWeb.js';
 import contracts from '../../fixtures/contracts';
-import Contract, { IContract } from '../../../src/lib/contract';
+import { IContract, Contract } from '../../../src/lib/contract';
 
 const testCustomError = contracts.testCustomError;
 

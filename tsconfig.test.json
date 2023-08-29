@@ -1,0 +1,10 @@
+{
+    "exclude": ["src/protocol/**/*"],
+    "include": ["src/**/*", "test/**/*"],
+    "extends": "./tsconfig.base.json",
+    "compilerOptions": {
+        "module": "commonjs",
+        "outDir": "./lib/commonjs",
+        "rootDir": "."
+    }
+}

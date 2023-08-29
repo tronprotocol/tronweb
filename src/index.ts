@@ -1,19 +1,18 @@
-import providers from './lib/providers/index.js';
+import { HttpProvider, providers } from './lib/providers/index.js';
 import type { Providers } from './lib/providers/index.js';
 import utils from './utils/index.js';
 import BigNumber from 'bignumber.js';
 import EventEmitter from 'eventemitter3';
 import semver from 'semver';
 
-import TransactionBuilder from './lib/TransactionBuilder/TransactionBuilder.js';
-import Trx from './lib/trx.js';
-import Contract from './lib/contract/index.js';
-import Plugin from './lib/plugin.js';
-import Event from './lib/event.js';
+import { TransactionBuilder } from './lib/TransactionBuilder/TransactionBuilder.js';
+import { Trx } from './lib/trx.js';
+import { Contract } from './lib/contract/index.js';
+import { Plugin } from './lib/plugin.js';
+import { Event } from './lib/event.js';
 import { keccak256 } from './utils/ethersUtils.js';
 import { fromHex, fromPrivateKey, isAddress, toHex } from './utils/address.js';
 import { AxiosRequestHeaders } from 'axios';
-import HttpProvider from './lib/providers/HttpProvider.js';
 import { isString } from './utils/validations.js';
 import { DefaultAddress, NodeService, TronWebOptions } from './types/TronWeb';
 import { ContractAbiInterface } from './types/ABI.js';
@@ -33,7 +32,7 @@ function isValidOptions(options: unknown): options is TronWebOptions {
     );
 }
 
-export default class TronWeb extends EventEmitter {
+export class TronWeb extends EventEmitter {
     providers: Providers;
     static providers = providers;
     BigNumber: typeof BigNumber;
@@ -460,3 +459,4 @@ export default class TronWeb extends EventEmitter {
         };
     }
 }
+export default TronWeb;

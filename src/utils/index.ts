@@ -12,7 +12,7 @@ import * as transaction from './transaction';
 
 import * as validations from './validations';
 
-export default {
+const utils = {
     ...validations,
     address,
     code,
@@ -26,3 +26,17 @@ export default {
     transaction,
     ethersUtils,
 };
+export default utils;
+export * from './accounts';
+export * from './address';
+export * from './base58';
+export * from './bytes';
+export * from './crypto';
+export * from './code';
+export * from './abi';
+export * from './message';
+export * from './ethersUtils';
+export * from './typedData';
+export * from './transaction';
+
+export * from './validations';

@@ -15,12 +15,12 @@
         "preserveSymlinks": true,
         "preserveWatchOutput": true,
         "pretty": false,
-        "rootDir": "./",
+        "rootDir": "./src",
         "strict": true,
         "sourceMap": true,
         "target": "es2022",
         "resolveJsonModule": true
     },
     "exclude": ["src/protocol/**/*"],
-    "include": ["src/**/*", "test/**/*"]
+    "include": ["src/**/*"]
 }

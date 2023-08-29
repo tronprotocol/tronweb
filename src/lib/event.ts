@@ -1,7 +1,7 @@
 import TronWeb from '../index.js';
 import { NodeService } from '../types/TronWeb.js';
 import utils from '../utils/index.js';
-import providers from './providers/index.js';
+import { HttpProvider } from './providers/index.js';
 
 export interface GetEventResultOptions {
     /**
@@ -70,7 +70,7 @@ interface EventResponse {
     };
 }
 
-export default class Event {
+export class Event {
     tronWeb: TronWeb;
 
     constructor(tronWeb: TronWeb) {
@@ -81,7 +81,7 @@ export default class Event {
     setServer(eventServer: NodeService, healthcheck = 'healthcheck') {
         if (!eventServer) return (this.tronWeb.eventServer = undefined);
 
-        if (utils.isString(eventServer)) eventServer = new providers.HttpProvider(eventServer);
+        if (utils.isString(eventServer)) eventServer = new HttpProvider(eventServer);
 
         if (!this.tronWeb.isValidProvider(eventServer)) throw new Error('Invalid event server provided');
 
