@@ -95,7 +95,7 @@ describe('TronWeb.transactionBuilder', function () {
     describe('#sendTrx()', function () {
         it(`should send 0.00001 trx from default address to accounts[1]`, async function () {
             const params: Parameters<TransactionBuilder['sendTrx']>[] = [
-                [accounts.b58[1], 10, { permissionId: 2 }],
+                [accounts.b58[1], 10, tronWeb.defaultAddress.hex as string, { permissionId: 2 }],
                 [accounts.b58[1], 10],
             ];
             for (const param of params) {
@@ -110,7 +110,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.TransferContract');
                 assert.equal(
                     transaction.raw_data.contract[0].Permission_id || 0,
-                    param[2] ? (param[2] as PermissionId)['permissionId'] : 0
+                    param[3] ? (param[3] as PermissionId)['permissionId'] : 0
                 );
             }
         });
@@ -1010,7 +1010,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should allow the SR to delete its own proposal', async function () {
             const params: Parameters<TransactionBuilder['deleteProposal']>[] = [
-                [proposals[0].proposal_id, { permissionId: 2 }],
+                [proposals[0].proposal_id, tronWeb.defaultAddress.hex as string, { permissionId: 2 }],
                 [proposals[0].proposal_id],
             ];
             for (const param of params) {
@@ -1020,10 +1020,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.owner_address, ADDRESS_HEX);
                 assert.equal(parameter.value.proposal_id, proposals[0].proposal_id);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.ProposalDeleteContract');
-                assert.equal(
-                    transaction.raw_data.contract[0].Permission_id || 0,
-                    param[1] ? (param[1] as PermissionId)['permissionId'] : 0
-                );
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[2] ? param[2]['permissionId'] : 0);
             }
         });
 
@@ -1076,8 +1073,8 @@ describe('TronWeb.transactionBuilder', function () {
 
     describe('#freezeBalance', async function () {
         it('should allows accounts[1] to freeze its balance', async function () {
-            const params = [
-                [100e6, 3, 'BANDWIDTH', accounts.b58[1], { permissionId: 2 }],
+            const params: Parameters<TransactionBuilder['freezeBalance']>[] = [
+                [100e6, 3, 'BANDWIDTH', accounts.b58[1], undefined, { permissionId: 2 }],
                 [100e6, 3, 'BANDWIDTH', accounts.b58[1]],
             ];
 
@@ -1090,7 +1087,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.frozen_balance, 100e6);
                 assert.equal(parameter.value.frozen_duration, 3);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.FreezeBalanceContract');
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[4] ? param[4]['permissionId'] : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[5] ? param[5]['permissionId'] : 0);
             }
         });
 
@@ -1115,8 +1112,8 @@ describe('TronWeb.transactionBuilder', function () {
         }
 
         it('should unfreeze balance', async function () {
-            const params = [
-                ['BANDWIDTH', accounts.b58[1], { permissionId: 2 }],
+            const params: Parameters<TransactionBuilder['unfreezeBalance']>[] = [
+                ['BANDWIDTH', accounts.b58[1], undefined, { permissionId: 2 }],
                 ['BANDWIDTH', accounts.b58[1]],
             ];
 
@@ -1134,7 +1131,10 @@ describe('TronWeb.transactionBuilder', function () {
         // witnessAccount does not have any reward
 
         it(`should withdraw balance`, async function () {
-            const params = [[accounts.b58[1], { permissionId: 2 }], [accounts.b58[1]]];
+            const params: Parameters<TransactionBuilder['withdrawBlockRewards']>[] = [
+                [accounts.b58[1], { permissionId: 2 }],
+                [accounts.b58[1]],
+            ];
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.withdrawBlockRewards(...param);
                 const authResult = TronWeb.utils.transaction.txCheck(transaction);
@@ -1145,7 +1145,7 @@ describe('TronWeb.transactionBuilder', function () {
 
     describe('#freezeBalanceV2', async function () {
         it('should allows accounts[1] to freeze its balance by freezeBalanceV2', async function () {
-            const params = [
+            const params: Parameters<TransactionBuilder['freezeBalanceV2']>[] = [
                 [500e6, 'BANDWIDTH', accounts.b58[1], { permissionId: 2 }],
                 [500e6, 'BANDWIDTH', accounts.b58[1]],
             ];
@@ -1175,9 +1175,9 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it('should throw if frozen balance is invalid', async function () {
-            const params = [
-                ['-100', 'BANDWIDTH', accounts.b58[1], { permissionId: 2 }],
-                ['-100', 'BANDWIDTH', accounts.b58[1]],
+            const params: Parameters<TransactionBuilder['freezeBalanceV2']>[] = [
+                [-100, 'BANDWIDTH', accounts.b58[1], { permissionId: 2 }],
+                [-100, 'BANDWIDTH', accounts.b58[1]],
             ];
 
             for (const param of params) {
@@ -1240,7 +1240,7 @@ describe('TronWeb.transactionBuilder', function () {
 
     describe('#unfreezeBalanceV2', async function () {
         it('should allows accounts[1] to unfreeze its balance', async function () {
-            const params = [
+            const params: Parameters<TransactionBuilder['unfreezeBalanceV2']>[] = [
                 [100e6, 'BANDWIDTH', accounts.b58[1], { permissionId: 2 }],
                 [100e6, 'BANDWIDTH', accounts.b58[1]],
             ];
@@ -1292,7 +1292,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it('should allows accounts[1] to unfreeze its balance', async function () {
-            const params = [
+            const params: Parameters<TransactionBuilder['unfreezeBalanceV2']>[] = [
                 [100e6, 'ENERGY', accounts.b58[1], { permissionId: 2 }],
                 [100e6, 'ENERGY', accounts.b58[1]],
             ];
@@ -1355,7 +1355,10 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it('should allow accounts[1] to cancel unfreezeBalanceV2', async function () {
-            const params = [[accounts.b58[1], { permissionId: 2 }], [accounts.b58[2]]];
+            const params: Parameters<TransactionBuilder['cancelUnfreezeBalanceV2']>[] = [
+                [accounts.b58[1], { permissionId: 2 }],
+                [accounts.b58[2]],
+            ];
 
             for (let i = 0; i < 2; i++) {
                 const param = params[i];
@@ -1394,8 +1397,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should allows accounts[1] to delegate its resource', async function () {
             const params: Parameters<typeof tronWeb.transactionBuilder.delegateResource>[] = [
-                // @ts-ignore
-                [100e6, accounts.b58[7], 'BANDWIDTH', accounts.b58[1], { permissionId: 2 }],
+                [100e6, accounts.b58[7], 'BANDWIDTH', accounts.b58[1], false, 0, { permissionId: 2 }],
                 [100e6, accounts.b58[7], 'BANDWIDTH', accounts.b58[1]],
             ];
 
@@ -1409,8 +1411,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
                 assert.equal(parameter.value.balance, 100e6);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.DelegateResourceContract');
-                // @ts-ignore
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[4] ? param[4].permissionId : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[6] ? param[6].permissionId : 0);
             }
         });
 
@@ -1439,8 +1440,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should throw if owner address is invalid', async function () {
             const params: Parameters<typeof tronWeb.transactionBuilder.delegateResource>[] = [
-                // @ts-ignore
-                [100e6, accounts.b58[7], 'BANDWIDTH', 'ddssddd', { permissionId: 2 }],
+                [100e6, accounts.b58[7], 'BANDWIDTH', 'ddssddd', false, 0, { permissionId: 2 }],
                 [100e6, accounts.b58[7], 'BANDWIDTH', 'ddssddd'],
             ];
 
@@ -1451,8 +1451,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should throw if frozen balance is invalid', async function () {
             const params: Parameters<typeof tronWeb.transactionBuilder.delegateResource>[] = [
-                // @ts-ignore
-                ['-100', accounts.b58[7], 'BANDWIDTH', accounts.b58[1], { permissionId: 2 }],
+                ['-100', accounts.b58[7], 'BANDWIDTH', accounts.b58[1], false, 0, { permissionId: 2 }],
                 ['-100', accounts.b58[7], 'BANDWIDTH', accounts.b58[1]],
             ];
 
@@ -1463,8 +1462,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should throw if resource is invalid', async function () {
             const params: Parameters<typeof tronWeb.transactionBuilder.delegateResource>[] = [
-                // @ts-ignore
-                [100e6, accounts.b58[7], 'aabbccdd' as Resource, accounts.b58[1], { permissionId: 2 }],
+                [100e6, accounts.b58[7], 'aabbccdd' as Resource, accounts.b58[1], false, 0, { permissionId: 2 }],
                 [100e6, accounts.b58[7], 'aabbccdd' as Resource, accounts.b58[1]],
             ];
 
@@ -1478,8 +1476,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should throw if receiver address is invalid', async function () {
             const params: Parameters<typeof tronWeb.transactionBuilder.delegateResource>[] = [
-                // @ts-ignore
-                [100e6, 'adskjkkk', 'BANDWIDTH', accounts.b58[1], { permissionId: 2 }],
+                [100e6, 'adskjkkk', 'BANDWIDTH', accounts.b58[1], false, 0, { permissionId: 2 }],
                 [100e6, 'adskjkkk', 'BANDWIDTH', accounts.b58[1]],
             ];
 
@@ -1490,8 +1487,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should throw if receiver address is the same as from address', async function () {
             const params: Parameters<typeof tronWeb.transactionBuilder.delegateResource>[] = [
-                // @ts-ignore
-                [100e6, accounts.b58[1], 'BANDWIDTH', accounts.b58[1], { permissionId: 2 }],
+                [100e6, accounts.b58[1], 'BANDWIDTH', accounts.b58[1], false, 0, { permissionId: 2 }],
                 [100e6, accounts.b58[1], 'BANDWIDTH', accounts.b58[1]],
             ];
 
@@ -1524,8 +1520,6 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should allow defaultAdress to delegate its resource if from address is omitted', async function () {
             const params: Parameters<typeof tronWeb.transactionBuilder.delegateResource>[] = [
-                // @ts-ignore
-                [100e6, accounts.b58[7], 'BANDWIDTH', { permissionId: 2 }],
                 [100e6, accounts.b58[7], 'BANDWIDTH'],
             ];
 
@@ -1538,17 +1532,12 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
                 assert.equal(parameter.value.balance, 100e6);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.DelegateResourceContract');
-                // @ts-ignore
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[3] ? param[3]['permissionId'] : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, 0);
             }
         });
 
         it('should allow defaultAdress to delegate its resource if resource is omitted', async function () {
-            const params: Parameters<typeof tronWeb.transactionBuilder.delegateResource>[] = [
-                // @ts-ignore
-                [100e6, accounts.b58[7], { permissionId: 2 }],
-                [100e6, accounts.b58[7]],
-            ];
+            const params: Parameters<typeof tronWeb.transactionBuilder.delegateResource>[] = [[100e6, accounts.b58[7]]];
 
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.delegateResource(...param);
@@ -1559,15 +1548,13 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
                 assert.equal(parameter.value.balance, 100e6);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.DelegateResourceContract');
-                // @ts-ignore
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[2] ? param[2]['permissionId'] : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, 0);
             }
         });
 
         it('should allow accounts[1] to delegate its resource', async function () {
             const params: Parameters<typeof tronWeb.transactionBuilder.delegateResource>[] = [
-                // @ts-ignore
-                [100e6, accounts.b58[7], 'ENERGY', accounts.b58[1], { permissionId: 2 }],
+                [100e6, accounts.b58[7], 'ENERGY', accounts.b58[1], false, 0, { permissionId: 2 }],
                 [100e6, accounts.b58[7], 'ENERGY', accounts.b58[1]],
             ];
 
@@ -1581,15 +1568,13 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
                 assert.equal(parameter.value.balance, 100e6);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.DelegateResourceContract');
-                // @ts-ignore
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[4] ? param[4]['permissionId'] : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[6] ? param[6]['permissionId'] : 0);
             }
         });
 
         it('should throw if owner address is invalid', async function () {
             const params: Parameters<typeof tronWeb.transactionBuilder.delegateResource>[] = [
-                // @ts-ignore
-                [100e6, accounts.b58[7], 'ENERGY', 'ddssddd', { permissionId: 2 }],
+                [100e6, accounts.b58[7], 'ENERGY', 'ddssddd', false, 0, { permissionId: 2 }],
                 [100e6, accounts.b58[7], 'ENERGY', 'ddssddd'],
             ];
 
@@ -1600,8 +1585,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should throw if frozen balance is invalid', async function () {
             const params: Parameters<typeof tronWeb.transactionBuilder.delegateResource>[] = [
-                // @ts-ignore
-                ['-100', accounts.b58[7], 'ENERGY', accounts.b58[1], { permissionId: 2 }],
+                ['-100', accounts.b58[7], 'ENERGY', accounts.b58[1], false, 0, { permissionId: 2 }],
                 ['-100', accounts.b58[7], 'ENERGY', accounts.b58[1]],
             ];
 
@@ -1612,8 +1596,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should throw if receiver address is invalid', async function () {
             const params: Parameters<typeof tronWeb.transactionBuilder.delegateResource>[] = [
-                // @ts-ignore
-                [100e6, 'adskjkkk', 'ENERGY', accounts.b58[1], { permissionId: 2 }],
+                [100e6, 'adskjkkk', 'ENERGY', accounts.b58[1], false, 0, { permissionId: 2 }],
                 [100e6, 'adskjkkk', 'ENERGY', accounts.b58[1]],
             ];
 
@@ -1624,8 +1607,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should throw if receiver address is the same as from address', async function () {
             const params: Parameters<typeof tronWeb.transactionBuilder.delegateResource>[] = [
-                // @ts-ignore
-                [100e6, accounts.b58[1], 'ENERGY', accounts.b58[1], { permissionId: 2 }],
+                [100e6, accounts.b58[1], 'ENERGY', accounts.b58[1], false, 0, { permissionId: 2 }],
                 [100e6, accounts.b58[1], 'ENERGY', accounts.b58[1]],
             ];
 
@@ -1639,8 +1621,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should allow accounts[1] to delegate its resource if lock is true', async function () {
             const params: Parameters<typeof tronWeb.transactionBuilder.delegateResource>[] = [
-                // @ts-ignore
-                [100e6, accounts.b58[7], 'ENERGY', accounts.b58[1], true, { permissionId: 2 }],
+                [100e6, accounts.b58[7], 'ENERGY', accounts.b58[1], true, 0, { permissionId: 2 }],
                 [100e6, accounts.b58[7], 'ENERGY', accounts.b58[1], true],
             ];
 
@@ -1653,17 +1634,12 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
                 assert.equal(parameter.value.balance, 100e6);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.DelegateResourceContract');
-                // @ts-ignore
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[5] ? param[5]['permissionId'] : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[6] ? param[6]['permissionId'] : 0);
             }
         });
 
         it('should allow defaultAdress to delegate its resource if from address is omitted', async function () {
-            const params: Parameters<typeof tronWeb.transactionBuilder.delegateResource>[] = [
-                // @ts-ignore
-                [100e6, accounts.b58[7], 'ENERGY', { permissionId: 2 }],
-                [100e6, accounts.b58[7], 'ENERGY'],
-            ];
+            const params: Parameters<typeof tronWeb.transactionBuilder.delegateResource>[] = [[100e6, accounts.b58[7], 'ENERGY']];
 
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.delegateResource(...param);
@@ -1674,8 +1650,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
                 assert.equal(parameter.value.balance, 100e6);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.DelegateResourceContract');
-                // @ts-ignore
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[3] ? param[3]['permissionId'] : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, 0);
             }
         });
     });
@@ -1769,11 +1744,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it('should allow defaultAdress to undelegate its resource if from address is omitted', async function () {
-            const params: Parameters<TransactionBuilder['undelegateResource']>[] = [
-                // @ts-ignore
-                [100e6, accounts.b58[7], 'BANDWIDTH', { permissionId: 2 }],
-                [100e6, accounts.b58[7], 'BANDWIDTH'],
-            ];
+            const params: Parameters<TransactionBuilder['undelegateResource']>[] = [[100e6, accounts.b58[7], 'BANDWIDTH']];
 
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.undelegateResource(...param);
@@ -1784,17 +1755,12 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
                 assert.equal(parameter.value.balance, 100e6);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.UnDelegateResourceContract');
-                // @ts-ignore
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[3] ? param[3]['permissionId'] : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, 0);
             }
         });
 
         it('should allow defaultAdress to undelegate its resource if resource is omitted', async function () {
-            const params: Parameters<TransactionBuilder['undelegateResource']>[] = [
-                // @ts-ignore
-                [100e6, accounts.b58[7], { permissionId: 2 }],
-                [100e6, accounts.b58[7]],
-            ];
+            const params: Parameters<TransactionBuilder['undelegateResource']>[] = [[100e6, accounts.b58[7]]];
 
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.undelegateResource(...param);
@@ -1805,8 +1771,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
                 assert.equal(parameter.value.balance, 100e6);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.UnDelegateResourceContract');
-                // @ts-ignore
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[2] ? param[2]['permissionId'] : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, 0);
             }
         });
 
@@ -1878,11 +1843,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it('should allow defaultAdress to undelegate its resource if from address is omitted', async function () {
-            const params: Parameters<TransactionBuilder['undelegateResource']>[] = [
-                // @ts-ignore
-                [100e6, accounts.b58[7], 'ENERGY', { permissionId: 2 }],
-                [100e6, accounts.b58[7], 'ENERGY'],
-            ];
+            const params: Parameters<TransactionBuilder['undelegateResource']>[] = [[100e6, accounts.b58[7], 'ENERGY']];
 
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.undelegateResource(...param);
@@ -1893,8 +1854,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
                 assert.equal(parameter.value.balance, 100e6);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.UnDelegateResourceContract');
-                // @ts-ignore
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[3] ? param[3]['permissionId'] : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, 0);
             }
         });
     });
@@ -1919,7 +1879,10 @@ describe('TronWeb.transactionBuilder', function () {
             await wait(65);
         });
         it('should allows accounts[1] to withdraw its undelegated resource', async function () {
-            const params = [[accounts.b58[1], { permissionId: 2 }], [accounts.b58[1]]];
+            const params: Parameters<TransactionBuilder['withdrawExpireUnfreeze']>[] = [
+                [accounts.b58[1], { permissionId: 2 }],
+                [accounts.b58[1]],
+            ];
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.withdrawExpireUnfreeze(...param);
 
@@ -2529,8 +2492,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
         it(`should inject exchange tokens`, async function () {
             const params: Parameters<TransactionBuilder['injectExchangeTokens']>[] = [
-                // @ts-ignore
-                [exchangeId as unknown as number, tokenNames[0], 10, { permissionId: 2 }],
+                [exchangeId as unknown as number, tokenNames[0], 10, tronWeb.defaultAddress.hex as string, { permissionId: 2 }],
                 [exchangeId as unknown as number, tokenNames[0], 10],
             ];
             for (const param of params) {
@@ -2585,8 +2547,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
         it(`should withdraw exchange tokens`, async function () {
             const params: Parameters<TransactionBuilder['withdrawExchangeTokens']>[] = [
-                // @ts-ignore
-                [exchangeId, tokenNames[0], 10, { permissionId: 2 }],
+                [exchangeId, tokenNames[0], 10, tronWeb.defaultAddress.hex as string, { permissionId: 2 }],
                 [exchangeId, tokenNames[0], 10],
             ];
             for (const param of params) {
@@ -2637,8 +2598,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
         it(`should trade exchange tokens`, async function () {
             const params: Parameters<TransactionBuilder['tradeExchangeTokens']>[] = [
-                // @ts-ignore
-                [exchangeId, tokenNames[0], 10, 5, { permissionId: 2 }],
+                [exchangeId, tokenNames[0], 10, 5, tronWeb.defaultAddress.hex as string, { permissionId: 2 }],
                 [exchangeId, tokenNames[0], 10, 5],
             ];
             for (const param of params) {
@@ -2890,7 +2850,9 @@ describe('TronWeb.transactionBuilder', function () {
 
                 let transaction = await tronWeb.transactionBuilder.sendTrx(receiver, 10, sender);
                 const data = 'Sending money to Bill.';
-                transaction = (await tronWeb.transactionBuilder.addUpdateData(transaction, data, { txLocal: true })) as any;
+                transaction = (await tronWeb.transactionBuilder.addUpdateData(transaction, data, 'utf8', {
+                    txLocal: true,
+                })) as any;
                 const id = transaction.txID;
                 await broadcaster(null, privateKey, transaction);
                 await waitChainData('tx', id);

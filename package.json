@@ -6,7 +6,8 @@
     "module": "./lib/esm/index.js",
     "types": "./lib/types/index.d.ts",
     "files": [
-        "lib"
+        "lib",
+        "dist"
     ],
     "exports": {
         ".": {
