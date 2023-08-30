@@ -422,7 +422,7 @@ export class TronWeb extends EventEmitter {
     }
 
     isAddress: typeof TronWeb.isAddress;
-    static isAddress(address = ''): boolean {
+    static isAddress(address: unknown = ''): boolean {
         return isAddress(address);
     }
 
