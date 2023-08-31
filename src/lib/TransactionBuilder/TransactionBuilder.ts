@@ -21,32 +21,34 @@ import {
     UpdateAssetContract,
 } from '../../types/Contract.js';
 import {
+    createTransaction,
+    deepCopyJson,
+    fromUtf8,
+    genContractAddress,
+    resultManager,
+    resultManagerTriggerSmartContract,
+} from './helper.js';
+import {
     AlterTransactionOptions,
     CreateSmartContractOptions,
     CreateTokenOptions,
-    createTransaction,
-    deepCopyJson,
     DeployConstantContractOptions,
-    fromUtf8,
-    genContractAddress,
-    InternalTriggerSmartContractOptions,
+    TriggerConstantContractOptions,
     NumberLike,
     PermissionId,
     Resource,
-    resultManager,
-    resultManagerTriggerSmartContract,
-    TriggerSmartContractFunctionParameter,
+    ContractFunctionParameter,
     TriggerSmartContractOptions,
     TxLocal,
     UpdateTokenOptions,
     VoteInfo,
-} from './helper.js';
+} from '../../types/TransactionBuilder';
 import { Address } from '../../types/Trx.js';
 import { ConstructorFragment, ContractAbiInterface, FunctionFragment } from '../../types/ABI.js';
 
 export class TransactionBuilder {
-    tronWeb: TronWeb;
-    validator: Validator;
+    private tronWeb: TronWeb;
+    private validator: Validator;
     constructor(tronWeb?: TronWeb) {
         if (!tronWeb || !(tronWeb instanceof TronWeb)) {
             throw new Error('Expected instance of TronWeb');
@@ -805,7 +807,7 @@ export class TransactionBuilder {
         contractAddress: string,
         functionSelector: string,
         options?: TriggerSmartContractOptions,
-        parameters?: TriggerSmartContractFunctionParameter[],
+        parameters?: ContractFunctionParameter[],
         issuerAddress?: string
     ): Promise<TransactionCapsule> {
         const params: Parameters<typeof this._triggerSmartContractLocal> = [
@@ -831,8 +833,8 @@ export class TransactionBuilder {
     async triggerConstantContract(
         contractAddress: string,
         functionSelector: string,
-        options: InternalTriggerSmartContractOptions = {},
-        parameters: TriggerSmartContractFunctionParameter[] = [],
+        options: TriggerConstantContractOptions = {},
+        parameters: ContractFunctionParameter[] = [],
         issuerAddress: string = this.tronWeb.defaultAddress.hex as string
     ): Promise<TransactionCapsule> {
         options._isConstant = true;
@@ -842,8 +844,8 @@ export class TransactionBuilder {
     async triggerConfirmedConstantContract(
         contractAddress: string,
         functionSelector: string,
-        options: InternalTriggerSmartContractOptions = {},
-        parameters: TriggerSmartContractFunctionParameter[] = [],
+        options: TriggerConstantContractOptions = {},
+        parameters: ContractFunctionParameter[] = [],
         issuerAddress: string = this.tronWeb.defaultAddress.hex as string
     ): Promise<TransactionCapsule> {
         options._isConstant = true;
@@ -854,8 +856,8 @@ export class TransactionBuilder {
     async estimateEnergy(
         contractAddress: string,
         functionSelector: string,
-        options: InternalTriggerSmartContractOptions = {},
-        parameters: TriggerSmartContractFunctionParameter[] = [],
+        options: TriggerConstantContractOptions = {},
+        parameters: ContractFunctionParameter[] = [],
         issuerAddress: string = this.tronWeb.defaultAddress.hex as string
     ) {
         options.estimateEnergy = true;
@@ -930,8 +932,8 @@ export class TransactionBuilder {
     _getTriggerSmartContractArgs(
         contractAddress: string,
         functionSelector: string,
-        options: InternalTriggerSmartContractOptions,
-        parameters: TriggerSmartContractFunctionParameter[],
+        options: TriggerConstantContractOptions,
+        parameters: ContractFunctionParameter[],
         issuerAddress: string,
         tokenValue?: number,
         tokenId?: string,
@@ -1018,8 +1020,8 @@ export class TransactionBuilder {
     async _triggerSmartContractLocal(
         contractAddress: string,
         functionSelector: string,
-        options: InternalTriggerSmartContractOptions = {},
-        parameters: TriggerSmartContractFunctionParameter[] = [],
+        options: TriggerConstantContractOptions = {},
+        parameters: ContractFunctionParameter[] = [],
         issuerAddress = this.tronWeb.defaultAddress.hex as string
     ) {
         const { tokenValue, tokenId, callValue, feeLimit } = Object.assign(
@@ -1124,8 +1126,8 @@ export class TransactionBuilder {
     async _triggerSmartContract(
         contractAddress: string,
         functionSelector: string,
-        options: InternalTriggerSmartContractOptions = {},
-        parameters: TriggerSmartContractFunctionParameter[] = [],
+        options: TriggerSmartContractOptions = {},
+        parameters: ContractFunctionParameter[] = [],
         issuerAddress: string = this.tronWeb.defaultAddress.hex as string
     ) {
         const { tokenValue, tokenId, callValue, feeLimit } = Object.assign(

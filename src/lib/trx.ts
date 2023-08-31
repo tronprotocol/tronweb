@@ -23,7 +23,7 @@ import {
 } from '../types/Trx.js';
 import { SignedTransaction, Transaction } from '../types/Transaction.js';
 import { TypedDataDomain, TypedDataField } from '../utils/typedData.js';
-import { Resource } from './TransactionBuilder/helper.js';
+import { Resource } from '../types/TransactionBuilder';
 
 const TRX_MESSAGE_HEADER = '\x19TRON Signed Message:\n32';
 // it should be: '\x15TRON Signed Message:\n32';
@@ -38,9 +38,9 @@ type SignedStringOrSignedTransaction<T extends string | Transaction | SignedTran
     : SignedTransaction & T;
 
 export class Trx {
-    tronWeb: TronWeb;
-    cache: { contracts: Record<string, any> }; // todo: cache record should have contract type value
-    validator: Validator;
+    private tronWeb: TronWeb;
+    private cache: { contracts: Record<string, any> }; // todo: cache record should have contract type value
+    private validator: Validator;
 
     signMessage;
     sendAsset;
@@ -66,7 +66,7 @@ export class Trx {
         this.signTransaction = this.sign;
     }
 
-    _parseToken(token: any): Token {
+    private _parseToken(token: any): Token {
         return {
             ...token,
             name: this.tronWeb.toUtf8(token.name),
@@ -1407,7 +1407,7 @@ export class Trx {
             });
     }
 
-    async _getBrokerage(address = this.tronWeb.defaultAddress.hex, options: { confirmed?: boolean }): Promise<number> {
+    private async _getBrokerage(address = this.tronWeb.defaultAddress.hex, options: { confirmed?: boolean }): Promise<number> {
         this.validator.notValid([
             {
                 name: 'origin',

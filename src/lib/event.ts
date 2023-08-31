@@ -44,7 +44,7 @@ export interface GetEventResultOptions {
     maxBlockTimestamp?: number;
 }
 
-interface EventResponse {
+export interface EventResponse {
     success: boolean;
     error?: string;
     data?: {
@@ -71,7 +71,7 @@ interface EventResponse {
 }
 
 export class Event {
-    tronWeb: TronWeb;
+    private tronWeb: TronWeb;
 
     constructor(tronWeb: TronWeb) {
         if (!tronWeb || !(tronWeb instanceof TronWeb)) throw new Error('Expected instance of TronWeb');

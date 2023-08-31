@@ -3,12 +3,12 @@
 import {
     CreateSmartContractOptions,
     CreateTokenOptions,
-    InternalTriggerSmartContractOptions,
+    TriggerConstantContractOptions,
     PermissionId,
     Resource,
     TriggerSmartContractOptions,
     VoteInfo,
-} from '../../src/lib/TransactionBuilder/helper';
+} from '../../src/types/TransactionBuilder';
 import { ContractParamterCapsule, CreateSmartContractTransaction, SignedTransaction } from '../../src/types/Transaction';
 
 import chai from 'chai';
@@ -2342,7 +2342,7 @@ describe('TronWeb.transactionBuilder', function () {
                 { type: 'uint256', value: 1 },
                 { type: 'uint256', value: 2 },
             ];
-            const options: InternalTriggerSmartContractOptions = {
+            const options: TriggerConstantContractOptions = {
                 _isConstant: true,
             };
 
@@ -3202,7 +3202,7 @@ describe('TronWeb.transactionBuilder', function () {
             const issuerAddress = accounts.hex[5];
             const functionSelector = 'set(uint256)';
             const parameter = [{ type: 'uint256', value: 1 }];
-            const options: InternalTriggerSmartContractOptions = { estimateEnergy: true };
+            const options: TriggerConstantContractOptions = { estimateEnergy: true };
 
             for (let i = 0; i < 2; i++) {
                 if (i === 1) options.permissionId = 2;
@@ -3225,7 +3225,7 @@ describe('TronWeb.transactionBuilder', function () {
             const issuerAddress = accounts.hex[5];
             const functionSelector = 'set(uint256)';
             const parameter = [{ type: 'uint256', value: 2 }];
-            const options: InternalTriggerSmartContractOptions = { estimateEnergy: true, confirmed: true };
+            const options: TriggerConstantContractOptions = { estimateEnergy: true, confirmed: true };
 
             for (let i = 0; i < 2; i++) {
                 if (i === 1) options.permissionId = 2;
