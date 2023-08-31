@@ -53,7 +53,7 @@ const { ExchangeCreateContract, ExchangeInjectContract, ExchangeWithdrawContract
 
 import { byteArray2hexStr } from './bytes.js';
 import { sha256, keccak256 } from './ethersUtils.js';
-import TronWeb from '../index.js';
+import TronWeb from '../tronweb.js';
 
 const fromHexString = (hexString: string) => {
     if (!hexString || hexString.length === 0) return new Uint8Array([]);

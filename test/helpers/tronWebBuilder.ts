@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import TronWeb from '../setup/TronWeb.js';
+import { TronWeb } from '../setup/TronWeb.js';
 import jlog from './jlog.js';
 
 import config from './config.js';

@@ -1,4 +1,4 @@
-import TronWeb from '../index.js';
+import TronWeb from '../tronweb.js';
 import utils from '../utils/index.js';
 import { keccak256, toUtf8Bytes, recoverAddress, SigningKey } from '../utils/ethersUtils.js';
 import { ADDRESS_PREFIX } from '../utils/address.js';
@@ -66,7 +66,7 @@ export class Trx {
         this.signTransaction = this.sign;
     }
 
-    private _parseToken(token: any): Token {
+    _parseToken(token: any): Token {
         return {
             ...token,
             name: this.tronWeb.toUtf8(token.name),

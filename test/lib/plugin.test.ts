@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
-import TronWeb from '../setup/TronWeb.js';
+import { TronWeb } from '../setup/TronWeb.js';
 import GetNowBlock from '../helpers/GetNowBlock.js';
 import BlockLib from '../helpers/BlockLib.js';
 

@@ -118,7 +118,7 @@ export interface TriggerSmartContractOptions {
      */
     rawParameter?: string;
     /**
-     * Create transaction locally instead of send request to server.
+     * Create transaction locally.
      */
     txLocal?: boolean;
     /**
@@ -126,6 +126,9 @@ export interface TriggerSmartContractOptions {
      * Optional.
      */
     permissionId?: number;
+    _isConstant?: boolean;
+    estimateEnergy?: boolean;
+    confirmed?: boolean;
 }
 export interface TriggerConstantContractOptions extends TriggerSmartContractOptions {
     _isConstant?: boolean;

@@ -1,4 +1,4 @@
-import { TronWeb } from '../../index.js';
+import { TronWeb } from '../../tronweb.js';
 import { AbiCoder, keccak256 } from '../../utils/ethersUtils.js';
 import { ADDRESS_PREFIX_REGEX, toHex } from '../../utils/address.js';
 import { encodeParamsV2ByABI } from '../../utils/abi.js';

@@ -3,7 +3,7 @@ import { assert } from 'chai';
 import wait from '../../helpers/wait.js';
 import broadcaster from '../../helpers/broadcaster.js';
 import tronWebBuilder from '../../helpers/tronWebBuilder.js';
-import TronWeb from '../../setup/TronWeb.js';
+import { TronWeb } from '../../setup/TronWeb.js';
 import contracts from '../../fixtures/contracts';
 import { IContract, Contract } from '../../../src/lib/contract';
 

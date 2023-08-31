@@ -4,7 +4,7 @@ import tronWebBuilder from '../helpers/tronWebBuilder.js';
 import broadcaster from '../helpers/broadcaster.js';
 import wait from '../helpers/wait.js';
 import { Address } from '../../src/types/Trx.js';
-import TronWeb from '../setup/TronWeb.js';
+import { TronWeb } from '../setup/TronWeb.js';
 import { CreateSmartContractTransaction } from '../../src/types/Transaction.js';
 import { IContract } from '../../src/lib/contract/index.js';
 

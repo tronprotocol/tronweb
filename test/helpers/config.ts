@@ -1,4 +1,4 @@
-import TronWeb from '../setup/node.js';
+import { TronWeb } from '../setup/node.js';
 
 const fullHost = 'http://127.0.0.1:' + (process.env.HOST_PORT || 9090);
 // const fullHost = 'https://nile.trongrid.io';

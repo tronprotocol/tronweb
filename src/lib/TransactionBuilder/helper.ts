@@ -1,4 +1,4 @@
-import TronWeb from '../../index.js';
+import TronWeb from '../../tronweb.js';
 import { Transaction, TransactionCapsule } from '../../types/Transaction.js';
 import { txCheckWithArgs, txJsonToPb, txPbToTxID, txPbToRawDataHex } from '../../utils/transaction.js';
 import { keccak256 } from '../../utils/ethersUtils.js';

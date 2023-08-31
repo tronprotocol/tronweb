@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import Config from './helpers/config.js';
-import TronWeb from './setup/TronWeb.js';
+import { TronWeb } from './setup/TronWeb.js';
 import tronWebBuilder from './helpers/tronWebBuilder.js';
 import BigNumber from 'bignumber.js';
 import broadcaster from './helpers/broadcaster.js';

@@ -1,4 +1,4 @@
-import TronWeb from '../index.js';
+import TronWeb from '../tronweb.js';
 import utils from '../utils/index.js';
 import semver from 'semver';
 

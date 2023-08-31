@@ -1,4 +1,4 @@
-import TronWeb from '../setup/TronWeb.js';
+import { TronWeb } from '../setup/TronWeb.js';
 
 let someParameter: any;
 

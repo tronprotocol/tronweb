@@ -4,7 +4,7 @@ import { assert } from 'chai';
 import assertThrow from '../../helpers/assertThrow.js';
 import broadcaster from '../../helpers/broadcaster.js';
 import tronWebBuilder from '../../helpers/tronWebBuilder.js';
-import TronWeb from '../../setup/TronWeb.js';
+import { TronWeb } from '../../setup/TronWeb.js';
 import contracts from '../../fixtures/contracts.js';
 const testRevertContract = contracts.testRevert;
 const testSetValContract = contracts.testSetVal;

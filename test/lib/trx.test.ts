@@ -4,7 +4,7 @@ import assertThrow from '../helpers/assertThrow.js';
 import wait from '../helpers/wait.js';
 import broadcaster from '../helpers/broadcaster.js';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
-import TronWeb from '../setup/TronWeb.js';
+import { TronWeb } from '../setup/TronWeb.js';
 import waitChainData from '../helpers/waitChainData.js';
 import signMessageTests from '../testcases/src/sign-message.js';
 import config from '../helpers/config.js';

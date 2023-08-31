@@ -1,5 +1,5 @@
 // @ts-ignore
-import TronWeb from '../setup/TronWeb.js';
+import { TronWeb } from '../setup/TronWeb.js';
 import { isHexString } from 'ethers';
 import { BigNumber } from '@ethersproject/bignumber';
 
