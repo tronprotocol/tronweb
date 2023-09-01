@@ -9,7 +9,7 @@ import {
     TriggerSmartContractOptions,
     VoteInfo,
 } from '../../src/types/TransactionBuilder';
-import { ContractParamterCapsule, CreateSmartContractTransaction, SignedTransaction } from '../../src/types/Transaction';
+import { ContractParamterWrapper, CreateSmartContractTransaction, SignedTransaction } from '../../src/types/Transaction';
 
 import chai from 'chai';
 const assert = chai.assert;
@@ -101,7 +101,7 @@ describe('TronWeb.transactionBuilder', function () {
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.sendTrx(...param);
 
-                const parameter = txPars(transaction) as ContractParamterCapsule<TransferContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<TransferContract>;
 
                 assert.equal(transaction.txID.length, 64);
                 assert.equal(parameter.value.amount, 10);
@@ -130,7 +130,7 @@ describe('TronWeb.transactionBuilder', function () {
             ];
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.sendTrx(...param);
-                const parameter = txPars(transaction) as ContractParamterCapsule<TransferContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<TransferContract>;
 
                 assert.equal(transaction.txID.length, 64);
                 assert.equal(parameter.value.amount, 10);
@@ -183,7 +183,7 @@ describe('TronWeb.transactionBuilder', function () {
             for (let i = 0; i < 2; i++) {
                 if (i === 1) options.permissionId = 2;
                 const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.b58[2]);
-                const parameter = txPars(transaction) as ContractParamterCapsule<AssetIssueContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<AssetIssueContract>;
                 assert.equal(transaction.txID.length, 64);
                 assert.equal(parameter.value.total_supply, options.totalSupply);
                 await assertEqualHex(parameter.value.abbr, options.abbreviation);
@@ -210,7 +210,7 @@ describe('TronWeb.transactionBuilder', function () {
                     if (i === 1) options.permissionId = 2;
                     const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.b58[8 + i]);
 
-                    const parameter = txPars(transaction) as ContractParamterCapsule<AssetIssueContract>;
+                    const parameter = txPars(transaction) as ContractParamterWrapper<AssetIssueContract>;
                     assert.equal(transaction.txID.length, 64);
                     assert.equal(parameter.value.vote_score, options.voteScore);
                     assert.equal(parameter.value.precision, options.precision);
@@ -243,7 +243,7 @@ describe('TronWeb.transactionBuilder', function () {
             for (let i = 0; i < 2; i++) {
                 if (i === 1) options.permissionId = 2;
                 const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.b58[46]);
-                const parameter = txPars(transaction) as ContractParamterCapsule<AssetIssueContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<AssetIssueContract>;
                 await assertEqualHex(parameter.value.abbr, options.abbreviation);
                 assert.equal(transaction.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
             }
@@ -255,7 +255,7 @@ describe('TronWeb.transactionBuilder', function () {
             for (let i = 0; i < 2; i++) {
                 if (i === 1) options.permissionId = 2;
                 const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.b58[47]);
-                const parameter = txPars(transaction) as ContractParamterCapsule<AssetIssueContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<AssetIssueContract>;
                 await assertEqualHex(parameter.value.abbr, options.abbreviation);
                 assert.equal(transaction.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
             }
@@ -271,7 +271,7 @@ describe('TronWeb.transactionBuilder', function () {
                 for (let i = 0; i < 2; i++) {
                     if (i === 1) options.permissionId = 2;
                     const transaction = await tronWeb.transactionBuilder.createToken(options);
-                    const parameter = txPars(transaction) as ContractParamterCapsule<AssetIssueContract>;
+                    const parameter = txPars(transaction) as ContractParamterWrapper<AssetIssueContract>;
                     await assertEqualHex(parameter.value.abbr, options.abbreviation);
                     assert.equal(transaction.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
                 }
@@ -433,7 +433,7 @@ describe('TronWeb.transactionBuilder', function () {
             it(`should allow accounts[2] to create a TestToken`, async function () {
                 const options = getTokenOptions();
                 const transaction = await tronWeb.transactionBuilder.createAsset(options, accounts.b58[2]);
-                const parameter = txPars(transaction) as ContractParamterCapsule<AssetIssueContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<AssetIssueContract>;
                 assert.equal(transaction.txID.length, 64);
                 assert.equal(parameter.value.total_supply, options.totalSupply);
                 await assertEqualHex(parameter.value.abbr, options.abbreviation);
@@ -454,7 +454,7 @@ describe('TronWeb.transactionBuilder', function () {
 
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.createAccount(...param);
-                const parameter = txPars(transaction) as ContractParamterCapsule<AccountCreateContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<AccountCreateContract>;
                 assert.equal(transaction.txID.length, 64);
                 assert.equal(parameter.value.owner_address, accounts.hex[3]);
                 assert.equal(parameter.value.account_address, tronWeb.address.toHex(inactiveAccountAddress).toLowerCase());
@@ -488,7 +488,7 @@ describe('TronWeb.transactionBuilder', function () {
 
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.updateAccount(...param);
-                const parameter = txPars(transaction) as ContractParamterCapsule<AccountUpdateContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<AccountUpdateContract>;
 
                 assert.equal(transaction.txID.length, 64);
                 await assertEqualHex(parameter.value.account_name, newName);
@@ -525,7 +525,7 @@ describe('TronWeb.transactionBuilder', function () {
 
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.setAccountId(...param);
-                const parameter = txPars(transaction) as ContractParamterCapsule<SetAccountIdContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<SetAccountIdContract>;
                 assert.equal(transaction.txID.length, 64);
                 assert.equal(parameter.value.account_id, param[0].slice(2));
                 assert.equal(parameter.value.owner_address, accounts.hex[4]);
@@ -583,7 +583,7 @@ describe('TronWeb.transactionBuilder', function () {
             for (let i = 0; i < 2; i++) {
                 if (i === 1) UPDATED_TEST_TOKEN_OPTIONS.permissionId = 2;
                 const transaction = await tronWeb.transactionBuilder.updateToken(UPDATED_TEST_TOKEN_OPTIONS, accounts.b58[2]);
-                const parameter = txPars(transaction) as ContractParamterCapsule<UpdateAssetContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<UpdateAssetContract>;
                 assert.equal(transaction.txID.length, 64);
                 await assertEqualHex(parameter.value.description, UPDATED_TEST_TOKEN_OPTIONS.description);
                 await assertEqualHex(parameter.value.url, UPDATED_TEST_TOKEN_OPTIONS.url);
@@ -677,7 +677,7 @@ describe('TronWeb.transactionBuilder', function () {
         describe('#updateAsset()', async function () {
             it(`should allow accounts[2] to update a TestToken`, async function () {
                 const transaction = await tronWeb.transactionBuilder.updateAsset(UPDATED_TEST_TOKEN_OPTIONS, accounts.b58[2]);
-                const parameter = txPars(transaction) as ContractParamterCapsule<UpdateAssetContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<UpdateAssetContract>;
                 assert.equal(transaction.txID.length, 64);
                 await assertEqualHex(parameter.value.description, UPDATED_TEST_TOKEN_OPTIONS.description);
                 await assertEqualHex(parameter.value.url, UPDATED_TEST_TOKEN_OPTIONS.url);
@@ -733,7 +733,7 @@ describe('TronWeb.transactionBuilder', function () {
                 await wait(4);
 
                 const transaction = await tronWeb.transactionBuilder.purchaseToken(...param);
-                const parameter = txPars(transaction) as ContractParamterCapsule<ParticipateAssetIssueContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<ParticipateAssetIssueContract>;
                 assert.equal(transaction.txID.length, 64);
                 assert.equal(parameter.value.amount, 20);
                 assert.equal(parameter.value.owner_address, accounts.hex[2]);
@@ -856,7 +856,7 @@ describe('TronWeb.transactionBuilder', function () {
 
                 const transaction = await tronWeb.transactionBuilder.sendToken(...param);
 
-                const parameter = txPars(transaction) as ContractParamterCapsule<TransferContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<TransferContract>;
 
                 assert.equal(parameter.value.amount, 5);
                 assert.equal(parameter.value.owner_address, accounts.hex[7]);
@@ -874,7 +874,7 @@ describe('TronWeb.transactionBuilder', function () {
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.sendToken(...param);
 
-                const parameter = txPars(transaction) as ContractParamterCapsule<TransferContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<TransferContract>;
 
                 assert.equal(parameter.value.amount, 5);
                 assert.equal(parameter.value.owner_address, accounts.hex[6]);
@@ -940,7 +940,7 @@ describe('TronWeb.transactionBuilder', function () {
             for (const input of inputs) {
                 const transaction = await tronWeb.transactionBuilder.createProposal(...input);
 
-                const parameter = txPars(transaction) as ContractParamterCapsule<ProposalCreateContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<ProposalCreateContract>;
 
                 assert.equal(parameter.value.owner_address, ADDRESS_HEX);
                 assert.equal(parameter.value.parameters[0].value, parameters[0].value);
@@ -958,7 +958,7 @@ describe('TronWeb.transactionBuilder', function () {
             for (const input of inputs) {
                 const transaction = await tronWeb.transactionBuilder.createProposal(...input);
 
-                const parameter = txPars(transaction) as ContractParamterCapsule<ProposalCreateContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<ProposalCreateContract>;
 
                 assert.equal(parameter.value.owner_address, ADDRESS_HEX);
                 assert.equal(parameter.value.parameters[0].value, parameters[0].value);
@@ -1015,7 +1015,7 @@ describe('TronWeb.transactionBuilder', function () {
             ];
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.deleteProposal(...param);
-                const parameter = txPars(transaction) as ContractParamterCapsule<ProposalDeleteContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<ProposalDeleteContract>;
 
                 assert.equal(parameter.value.owner_address, ADDRESS_HEX);
                 assert.equal(parameter.value.proposal_id, proposals[0].proposal_id);
@@ -1049,7 +1049,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should allow accounts[0] to apply for SR', async function () {
             const transaction = await tronWeb.transactionBuilder.applyForSR(accounts.b58[20], url);
-            const parameter = txPars(transaction) as ContractParamterCapsule<WitnessCreateContract>;
+            const parameter = txPars(transaction) as ContractParamterWrapper<WitnessCreateContract>;
 
             assert.equal(parameter.value.owner_address, accounts.hex[20]);
             await assertEqualHex(parameter.value.url, url);
@@ -1081,7 +1081,7 @@ describe('TronWeb.transactionBuilder', function () {
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.freezeBalance(...param);
 
-                const parameter = txPars(transaction) as ContractParamterCapsule<FreezeBalanceContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<FreezeBalanceContract>;
                 // jlog(parameter)
                 assert.equal(parameter.value.owner_address, accounts.hex[1]);
                 assert.equal(parameter.value.frozen_balance, 100e6);
@@ -1154,7 +1154,7 @@ describe('TronWeb.transactionBuilder', function () {
                 const transaction = await tronWeb.transactionBuilder.freezeBalanceV2(...param);
                 await broadcaster(null, accounts.pks[1], transaction);
 
-                const parameter = txPars(transaction) as ContractParamterCapsule<FreezeBalanceV2Contract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<FreezeBalanceV2Contract>;
                 // jlog(parameter)
                 assert.equal(parameter.value.owner_address, accounts.hex[1]);
                 assert.equal(parameter.value.frozen_balance, 500e6);
@@ -1206,7 +1206,7 @@ describe('TronWeb.transactionBuilder', function () {
                 const transaction = await tronWeb.transactionBuilder.freezeBalanceV2(...param);
                 await broadcaster(null, accounts.pks[1], transaction);
 
-                const parameter = txPars(transaction) as ContractParamterCapsule<FreezeBalanceV2Contract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<FreezeBalanceV2Contract>;
                 // jlog(parameter)
                 assert.equal(parameter.value.owner_address, accounts.hex[1]);
                 assert.equal(parameter.value.frozen_balance, 500e6);
@@ -1249,7 +1249,7 @@ describe('TronWeb.transactionBuilder', function () {
                 const transaction = await tronWeb.transactionBuilder.unfreezeBalanceV2(...param);
                 await broadcaster(null, accounts.pks[1], transaction);
 
-                const parameter = txPars(transaction) as ContractParamterCapsule<UnfreezeBalanceV2Contract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<UnfreezeBalanceV2Contract>;
                 // jlog(parameter)
                 assert.equal(parameter.value.owner_address, accounts.hex[1]);
                 assert.equal(parameter.value.unfreeze_balance, 100e6);
@@ -1301,7 +1301,7 @@ describe('TronWeb.transactionBuilder', function () {
                 const transaction = await tronWeb.transactionBuilder.unfreezeBalanceV2(...param);
                 await broadcaster(null, accounts.pks[1], transaction);
 
-                const parameter = txPars(transaction) as ContractParamterCapsule<UnfreezeBalanceV2Contract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<UnfreezeBalanceV2Contract>;
                 // jlog(parameter)
                 assert.equal(parameter.value.owner_address, accounts.hex[1]);
                 assert.equal(parameter.value.unfreeze_balance, 100e6);
@@ -1405,7 +1405,7 @@ describe('TronWeb.transactionBuilder', function () {
                 const transaction = await tronWeb.transactionBuilder.delegateResource(...param);
                 await broadcaster(null, accounts.pks[1], transaction);
 
-                const parameter = txPars(transaction) as ContractParamterCapsule<DelegateResourceContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<DelegateResourceContract>;
                 // jlog(parameter)
                 assert.equal(parameter.value.owner_address, accounts.hex[1]);
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
@@ -1426,7 +1426,7 @@ describe('TronWeb.transactionBuilder', function () {
                 const tx = await broadcaster(null, accounts.pks[1], transaction);
                 assert.isTrue(tx.receipt.result);
 
-                const parameter = txPars(transaction) as ContractParamterCapsule<DelegateResourceContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<DelegateResourceContract>;
                 // jlog(parameter)
                 assert.equal(parameter.value.owner_address, accounts.hex[1]);
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
@@ -1508,7 +1508,7 @@ describe('TronWeb.transactionBuilder', function () {
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.delegateResource(...param);
 
-                const parameter = txPars(transaction) as ContractParamterCapsule<DelegateResourceContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<DelegateResourceContract>;
                 // jlog(parameter)
                 assert.equal(parameter.value.owner_address, accounts.hex[1]);
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
@@ -1526,7 +1526,7 @@ describe('TronWeb.transactionBuilder', function () {
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.delegateResource(...param);
 
-                const parameter = txPars(transaction) as ContractParamterCapsule<DelegateResourceContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<DelegateResourceContract>;
                 // jlog(parameter)
                 assert.equal(parameter.value.owner_address, tronWeb.defaultAddress.hex);
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
@@ -1542,7 +1542,7 @@ describe('TronWeb.transactionBuilder', function () {
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.delegateResource(...param);
 
-                const parameter = txPars(transaction) as ContractParamterCapsule<DelegateResourceContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<DelegateResourceContract>;
                 // jlog(parameter)
                 assert.equal(parameter.value.owner_address, tronWeb.defaultAddress.hex);
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
@@ -1562,7 +1562,7 @@ describe('TronWeb.transactionBuilder', function () {
                 const transaction = await tronWeb.transactionBuilder.delegateResource(...param);
                 await broadcaster(null, accounts.pks[1], transaction);
 
-                const parameter = txPars(transaction) as ContractParamterCapsule<DelegateResourceContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<DelegateResourceContract>;
                 // jlog(parameter)
                 assert.equal(parameter.value.owner_address, accounts.hex[1]);
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
@@ -1628,7 +1628,7 @@ describe('TronWeb.transactionBuilder', function () {
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.delegateResource(...param);
 
-                const parameter = txPars(transaction) as ContractParamterCapsule<DelegateResourceContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<DelegateResourceContract>;
                 // jlog(parameter)
                 assert.equal(parameter.value.owner_address, accounts.hex[1]);
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
@@ -1644,7 +1644,7 @@ describe('TronWeb.transactionBuilder', function () {
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.delegateResource(...param);
 
-                const parameter = txPars(transaction) as ContractParamterCapsule<DelegateResourceContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<DelegateResourceContract>;
                 // jlog(parameter)
                 assert.equal(parameter.value.owner_address, tronWeb.defaultAddress.hex);
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
@@ -1672,7 +1672,7 @@ describe('TronWeb.transactionBuilder', function () {
                 const transaction = await tronWeb.transactionBuilder.undelegateResource(...param);
                 await broadcaster(null, accounts.pks[1], transaction);
 
-                const parameter = txPars(transaction) as ContractParamterCapsule<UnDelegateResourceContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<UnDelegateResourceContract>;
                 // jlog(parameter)
                 assert.equal(parameter.value.owner_address, accounts.hex[1]);
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
@@ -1749,7 +1749,7 @@ describe('TronWeb.transactionBuilder', function () {
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.undelegateResource(...param);
 
-                const parameter = txPars(transaction) as ContractParamterCapsule<UnDelegateResourceContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<UnDelegateResourceContract>;
                 // jlog(parameter)
                 assert.equal(parameter.value.owner_address, tronWeb.defaultAddress.hex);
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
@@ -1765,7 +1765,7 @@ describe('TronWeb.transactionBuilder', function () {
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.undelegateResource(...param);
 
-                const parameter = txPars(transaction) as ContractParamterCapsule<UnDelegateResourceContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<UnDelegateResourceContract>;
                 // jlog(parameter)
                 assert.equal(parameter.value.owner_address, tronWeb.defaultAddress.hex);
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
@@ -1785,7 +1785,7 @@ describe('TronWeb.transactionBuilder', function () {
                 const transaction = await tronWeb.transactionBuilder.undelegateResource(...param);
                 await broadcaster(null, accounts.pks[1], transaction);
 
-                const parameter = txPars(transaction) as ContractParamterCapsule<UnDelegateResourceContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<UnDelegateResourceContract>;
                 // jlog(parameter)
                 assert.equal(parameter.value.owner_address, accounts.hex[1]);
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
@@ -1848,7 +1848,7 @@ describe('TronWeb.transactionBuilder', function () {
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.undelegateResource(...param);
 
-                const parameter = txPars(transaction) as ContractParamterCapsule<UnDelegateResourceContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<UnDelegateResourceContract>;
                 // jlog(parameter)
                 assert.equal(parameter.value.owner_address, tronWeb.defaultAddress.hex);
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
@@ -1922,7 +1922,7 @@ describe('TronWeb.transactionBuilder', function () {
             votes[accounts.hex[0]] = 5;
 
             const transaction = await tronWeb.transactionBuilder.vote(votes, accounts.b58[1]);
-            const parameter = txPars(transaction) as ContractParamterCapsule<VoteWitnessContract>;
+            const parameter = txPars(transaction) as ContractParamterWrapper<VoteWitnessContract>;
 
             assert.equal(parameter.value.owner_address, accounts.hex[1]);
             assert.equal(parameter.value.votes[0].vote_address, accounts.hex[0]);
@@ -2218,7 +2218,7 @@ describe('TronWeb.transactionBuilder', function () {
 
                 // clear abi
                 const transaction = await tronWeb.transactionBuilder.clearABI(contractAddress, ownerAddress, param[2]);
-                const parameter = txPars(transaction) as ContractParamterCapsule<ClearABIContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<ClearABIContract>;
                 assert.isTrue(
                     !transaction.visible &&
                         transaction.raw_data.contract[0].parameter.type_url === 'type.googleapis.com/protocol.ClearABIContract'
@@ -2275,7 +2275,7 @@ describe('TronWeb.transactionBuilder', function () {
             ];
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.updateBrokerage(...param);
-                const parameter = txPars(transaction) as ContractParamterCapsule<UpdateBrokerageContract>;
+                const parameter = txPars(transaction) as ContractParamterWrapper<UpdateBrokerageContract>;
                 assert.equal(transaction.txID.length, 64);
                 assert.equal(parameter.value.brokerage, param[0]);
                 assert.equal(parameter.value.owner_address, param[1]);
@@ -2422,7 +2422,7 @@ describe('TronWeb.transactionBuilder', function () {
                 10e3,
                 accounts.hex[toIdx1]
             );
-            let parameter = txPars(transaction) as ContractParamterCapsule<ExchangeCreateContract>;
+            let parameter = txPars(transaction) as ContractParamterWrapper<ExchangeCreateContract>;
 
             assert.equal(transaction.txID.length, 64);
             assert.equal(TronWeb.toUtf8(parameter.value.first_token_id), tokenNames[0]);
@@ -2438,7 +2438,7 @@ describe('TronWeb.transactionBuilder', function () {
                 accounts.hex[toIdx1],
                 { permissionId: 2 }
             );
-            parameter = txPars(transaction) as ContractParamterCapsule<ExchangeCreateContract>;
+            parameter = txPars(transaction) as ContractParamterWrapper<ExchangeCreateContract>;
 
             assert.equal(transaction.txID.length, 64);
             assert.equal(TronWeb.toUtf8(parameter.value.first_token_id), tokenNames[0]);

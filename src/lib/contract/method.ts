@@ -4,7 +4,7 @@ import TronWeb from '../../tronweb.js';
 import { Contract } from './index.js';
 import { sha3 } from '../../utils/crypto.js';
 
-interface CallOptionsInterface {
+export interface CallOptions {
     feeLimit?: number;
     callValue?: number;
     callTokenValue?: number;
@@ -16,7 +16,7 @@ interface CallOptionsInterface {
     _isConstant?: true;
 }
 
-interface SendOptionsInterface {
+export interface SendOptions {
     from?: string | false;
     feeLimit?: number;
     callValue?: number;
@@ -115,7 +115,7 @@ export class Method {
             rawParameter = encodeParamsV2ByABI(this.abi, args);
         }
         return {
-            call: async (options: CallOptionsInterface = {}) => {
+            call: async (options: CallOptions = {}) => {
                 options = {
                     ...options,
                     rawParameter,
@@ -123,7 +123,7 @@ export class Method {
 
                 return await this._call([], [], options);
             },
-            send: async (options: SendOptionsInterface = {}, privateKey = this.tronWeb.defaultPrivateKey) => {
+            send: async (options: SendOptions = {}, privateKey = this.tronWeb.defaultPrivateKey) => {
                 options = {
                     ...options,
                     rawParameter,
@@ -135,7 +135,7 @@ export class Method {
         };
     }
 
-    async _call(types: [], args: [], options: CallOptionsInterface = {}) {
+    async _call(types: [], args: [], options: CallOptions = {}) {
         if (types.length !== args.length) {
             throw new Error('Invalid argument count provided');
         }
@@ -205,7 +205,7 @@ export class Method {
         return output;
     }
 
-    async _send(types: [], args: [], options: SendOptionsInterface = {}, privateKey = this.tronWeb.defaultPrivateKey) {
+    async _send(types: [], args: [], options: SendOptions = {}, privateKey = this.tronWeb.defaultPrivateKey) {
         if (types.length !== args.length) {
             throw new Error('Invalid argument count provided');
         }

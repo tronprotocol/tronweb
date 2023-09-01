@@ -242,3 +242,5 @@ export class Contract {
     //     };
     // }
 }
+
+export { CallOptions, SendOptions, AbiFragmentNoErrConstructor, Method } from './method';

@@ -14,7 +14,7 @@ import { keccak256 } from './utils/ethersUtils.js';
 import { fromHex, fromPrivateKey, isAddress, toHex } from './utils/address.js';
 import { AxiosRequestHeaders } from 'axios';
 import { isString } from './utils/validations.js';
-import { DefaultAddress, NodeService, TronWebOptions } from './types/TronWeb.js';
+import { DefaultAddress, NodeProvider, TronWebOptions } from './types/TronWeb.js';
 import { ContractAbiInterface } from './types/ABI.js';
 import { Address } from './types/Trx.js';
 
@@ -62,13 +62,13 @@ export class TronWeb extends EventEmitter {
     eventServer?: HttpProvider;
 
     constructor(options: TronWebOptions);
-    constructor(fullNode: NodeService, solidityNode: NodeService, eventServer?: NodeService, privateKey?: string);
+    constructor(fullNode: NodeProvider, solidityNode: NodeProvider, eventServer?: NodeProvider, privateKey?: string);
     /* prettier-ignore */
-    constructor(fullNode: NodeService, solidityNode: NodeService, eventServer: NodeService, privateKey?: string);
+    constructor(fullNode: NodeProvider, solidityNode: NodeProvider, eventServer: NodeProvider, privateKey?: string);
     constructor(
-        options: TronWebOptions | NodeService,
-        solidityNode: NodeService = '',
-        eventServer?: NodeService,
+        options: TronWebOptions | NodeProvider,
+        solidityNode: NodeProvider = '',
+        eventServer?: NodeProvider,
         privateKey = ''
     ) {
         super();
@@ -245,7 +245,7 @@ export class TronWeb extends EventEmitter {
         this.solidityNode.setStatusPage('walletsolidity/getnowblock');
     }
 
-    setEventServer(eventServer: NodeService, healthcheck?: string) {
+    setEventServer(eventServer: NodeProvider, healthcheck?: string) {
         this.event.setServer(eventServer, healthcheck);
     }
 

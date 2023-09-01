@@ -1,5 +1,5 @@
 import { Permission } from './Contract';
-import { Transaction, TransactionCapsule } from './Transaction';
+import { Transaction, TransactionWrapper } from './Transaction';
 
 export interface BlockHeaderRawData {
     number: number;
@@ -29,5 +29,5 @@ export interface GetSignWeightResponse {
     result: {
         code: string;
     };
-    transaction: TransactionCapsule;
+    transaction: TransactionWrapper;
 }

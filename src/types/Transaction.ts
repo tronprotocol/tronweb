@@ -1,12 +1,12 @@
 import { ContractParamter, ContractType, CreateSmartContract } from './Contract.js';
 
-export interface ContractParamterCapsule<T = ContractParamter> {
+export interface ContractParamterWrapper<T = ContractParamter> {
     value: T;
     type_url: string;
 }
 export interface TransactionContract<T = ContractParamter> {
     type: ContractType;
-    parameter: ContractParamterCapsule<T>;
+    parameter: ContractParamterWrapper<T>;
     Permission_id?: number;
 }
 
@@ -33,7 +33,7 @@ export interface CreateSmartContractTransaction extends Transaction<CreateSmartC
     contract_address: string;
 }
 // @todo: to be confirm
-export interface TransactionCapsule {
+export interface TransactionWrapper {
     Error?: string;
     result: {
         result: boolean;

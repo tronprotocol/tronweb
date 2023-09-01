@@ -1,5 +1,5 @@
 import TronWeb from '../tronweb.js';
-import { NodeService } from '../types/TronWeb.js';
+import { NodeProvider } from '../types/TronWeb.js';
 import utils from '../utils/index.js';
 import { HttpProvider } from './providers/index.js';
 
@@ -78,7 +78,7 @@ export class Event {
         this.tronWeb = tronWeb;
     }
 
-    setServer(eventServer: NodeService, healthcheck = 'healthcheck') {
+    setServer(eventServer: NodeProvider, healthcheck = 'healthcheck') {
         if (!eventServer) return (this.tronWeb.eventServer = undefined);
 
         if (utils.isString(eventServer)) eventServer = new HttpProvider(eventServer);

@@ -2,10 +2,10 @@ import { AxiosRequestHeaders } from 'axios';
 import HttpProvider from '../lib/providers/HttpProvider.js';
 
 export interface TronWebOptions {
-    fullNode?: NodeService;
-    solidityNode?: NodeService;
-    fullHost?: NodeService;
-    eventServer?: NodeService;
+    fullNode?: NodeProvider;
+    solidityNode?: NodeProvider;
+    fullHost?: NodeProvider;
+    eventServer?: NodeProvider;
     headers?: AxiosRequestHeaders;
     eventHeaders?: AxiosRequestHeaders;
     privateKey?: string;
@@ -16,5 +16,4 @@ export interface DefaultAddress {
     base58: string | false;
 }
 
-// @todo: confirm name
-export type NodeService = string | HttpProvider;
+export type NodeProvider = string | HttpProvider;

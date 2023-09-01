@@ -2,7 +2,7 @@ import { TronWeb } from '../../tronweb.js';
 import { AbiCoder, keccak256 } from '../../utils/ethersUtils.js';
 import { ADDRESS_PREFIX_REGEX, toHex } from '../../utils/address.js';
 import { encodeParamsV2ByABI } from '../../utils/abi.js';
-import { CreateSmartContractTransaction, SignedTransaction, Transaction, TransactionCapsule } from '../../types/Transaction.js';
+import { CreateSmartContractTransaction, SignedTransaction, Transaction, TransactionWrapper } from '../../types/Transaction.js';
 import { Validator } from '../../paramValidator/index.js';
 import { GetSignWeightResponse } from '../../types/APIResponse.js';
 import { isArray, isInteger, isNotNullOrUndefined, isObject, isString } from '../../utils/validations.js';
@@ -809,7 +809,7 @@ export class TransactionBuilder {
         options?: TriggerSmartContractOptions,
         parameters?: ContractFunctionParameter[],
         issuerAddress?: string
-    ): Promise<TransactionCapsule> {
+    ): Promise<TransactionWrapper> {
         const params: Parameters<typeof this._triggerSmartContractLocal> = [
             contractAddress,
             functionSelector,
@@ -836,7 +836,7 @@ export class TransactionBuilder {
         options: TriggerConstantContractOptions = {},
         parameters: ContractFunctionParameter[] = [],
         issuerAddress: string = this.tronWeb.defaultAddress.hex as string
-    ): Promise<TransactionCapsule> {
+    ): Promise<TransactionWrapper> {
         options._isConstant = true;
         return this._triggerSmartContract(contractAddress, functionSelector, options, parameters, issuerAddress);
     }
@@ -847,7 +847,7 @@ export class TransactionBuilder {
         options: TriggerConstantContractOptions = {},
         parameters: ContractFunctionParameter[] = [],
         issuerAddress: string = this.tronWeb.defaultAddress.hex as string
-    ): Promise<TransactionCapsule> {
+    ): Promise<TransactionWrapper> {
         options._isConstant = true;
         options.confirmed = true;
         return this._triggerSmartContract(contractAddress, functionSelector, options, parameters, issuerAddress);
@@ -866,7 +866,7 @@ export class TransactionBuilder {
 
     async deployConstantContract(
         options: DeployConstantContractOptions = { input: '', ownerAddress: '' }
-    ): Promise<TransactionCapsule> {
+    ): Promise<TransactionWrapper> {
         const { input, ownerAddress, tokenId, tokenValue, callValue = 0 } = options;
 
         this.validator.notValid([
@@ -916,7 +916,7 @@ export class TransactionBuilder {
         }
 
         const pathInfo = `wallet${options.confirmed ? 'solidity' : ''}/estimateenergy`;
-        const transaction: TransactionCapsule = await this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(
+        const transaction: TransactionWrapper = await this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(
             pathInfo,
             args,
             'post'
@@ -1201,7 +1201,7 @@ export class TransactionBuilder {
         }
 
         pathInfo = `wallet${options.confirmed ? 'solidity' : ''}/${pathInfo}`;
-        const transaction: TransactionCapsule = await this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(
+        const transaction: TransactionWrapper = await this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode'].request(
             pathInfo,
             args,
             'post'
@@ -2111,7 +2111,7 @@ export class TransactionBuilder {
                 res.transaction.transaction.visible = transaction.visible;
             }
             return resultManager(
-                res.transaction.transaction as unknown as TransactionCapsule,
+                res.transaction.transaction as unknown as TransactionWrapper,
                 {
                     ...transaction.raw_data.contract[0].parameter.value,
                     Permission_id: transaction.raw_data.contract[0].Permission_id,

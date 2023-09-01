@@ -1,4 +1,4 @@
-import { Permission } from './Contract.js';
+import { AccountType, Permission } from './Contract.js';
 import { SignedTransaction, Transaction } from './Transaction.js';
 
 type HTTPMap<T extends string | number | symbol, U> = Record<T, U>[];
@@ -33,12 +33,6 @@ export interface Token {
 export interface Frozen {
     frozen_balance: number;
     expire_time: number;
-}
-
-export enum AccountType {
-    Normal = 0,
-    AssetIssue = 1,
-    Contract = 2,
 }
 
 export interface Vote {

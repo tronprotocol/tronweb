@@ -1,5 +1,5 @@
 import TronWeb from '../../tronweb.js';
-import { Transaction, TransactionCapsule } from '../../types/Transaction.js';
+import { Transaction, TransactionWrapper } from '../../types/Transaction.js';
 import { txCheckWithArgs, txJsonToPb, txPbToTxID, txPbToRawDataHex } from '../../utils/transaction.js';
 import { keccak256 } from '../../utils/ethersUtils.js';
 import { BlockWithoutDetail } from '../../types/APIResponse.js';
@@ -14,7 +14,7 @@ export function fromUtf8(value: string) {
 export function deepCopyJson<T = unknown>(json: object): T {
     return JSON.parse(JSON.stringify(json));
 }
-export function resultManager(transaction: TransactionCapsule, data: unknown, options: TriggerConstantContractOptions) {
+export function resultManager(transaction: TransactionWrapper, data: unknown, options: TriggerConstantContractOptions) {
     if (transaction.Error) throw new Error(transaction.Error);
 
     if (transaction.result && transaction.result.message) {
@@ -28,7 +28,7 @@ export function resultManager(transaction: TransactionCapsule, data: unknown, op
 }
 
 export function resultManagerTriggerSmartContract(
-    transaction: TransactionCapsule,
+    transaction: TransactionWrapper,
     data: unknown,
     options: TriggerConstantContractOptions
 ) {
