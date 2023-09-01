@@ -4,19 +4,17 @@
     "description": "JavaScript SDK that encapsulates the TRON HTTP API",
     "main": "./lib/commonjs/index.js",
     "module": "./lib/esm/index.js",
-    "types": "./lib/types/index.d.ts",
+    "types": "./lib/esm/index.d.ts",
     "files": [
         "lib",
         "dist"
     ],
     "exports": {
         ".": {
-            "types": "./lib/types/index.d.ts",
             "import": "./lib/esm/index.js",
             "require": "./lib/commonjs/index.js"
         },
         "./utils": {
-            "types": "./lib/types/utils/index.d.ts",
             "import": "./lib/esm/utils/index.js",
             "require": "./lib/commonjs/utils/index.js"
         }
@@ -31,7 +29,7 @@
         "build:types": "tsc --project tsconfig.types.json",
         "build:test": "tsc --project tsconfig.test.json && echo '{\"type\": \"commonjs\"}' > ./lib/commonjs/package.json && cp -R ./src/protocol ./lib/commonjs/src/",
         "build:dist": "webpack --config webpack.config.js --progress --color",
-        "build:all": "npm run clean:all && npm run build:esm && npm run build:cjs && npm run build:types && npm run build:dist",
+        "build:all": "npm run clean:all && npm run build:esm && npm run build:cjs && npm run build:dist",
         "copy-protocol:cjs": "cp -R ./src/protocol ./lib/commonjs/",
         "copy-protocol:esm": "cp -R ./src/protocol ./lib/esm/",
         "prepare": "npm run build",
