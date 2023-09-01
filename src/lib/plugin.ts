@@ -62,8 +62,12 @@ export class Plugin {
                 let className = plugin.constructor.name;
                 let classInstanceName = className.substring(0, 1).toLowerCase() + className.substring(1);
                 if (className !== classInstanceName) {
-                    Object.assign(TronWeb, className, Plugin);
-                    Object.assign(this.tronWeb, classInstanceName, plugin);
+                    Object.assign(TronWeb, {
+                        [className]: Plugin,
+                    });
+                    Object.assign(this.tronWeb, {
+                        [classInstanceName]: plugin,
+                    });
                     result.libs.push(className);
                 }
             } else {
