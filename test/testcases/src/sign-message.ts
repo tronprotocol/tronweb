@@ -1,5 +1,5 @@
 import tronWebBuilder from '../../helpers/tronWebBuilder.js';
-const TronWeb = tronWebBuilder.TronWeb;
+const utils = tronWebBuilder.utils;
 
 const tests = [
     // message is string
@@ -16,7 +16,7 @@ const tests = [
     {
         address: 'TVEZYjZyemfJoLUdGtzsM2ua1HAnbsNgAF',
         name: 'bytes(0x47173285...4cb01fad)',
-        message: TronWeb.utils.ethersUtils.arrayify('0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad'),
+        message: utils.ethersUtils.arrayify('0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad'),
         messageHash: '0x66733cf31ee3f133db9561efdca3d65ba930bdf57fb1af3b6cc0ba4966ecc882',
         privateKey: '51d1d6047622bca92272d36b297799ecc152dc2ef91b229debf84fc41e8c73ee',
         signature:
@@ -25,7 +25,7 @@ const tests = [
     {
         address: 'TBzEvowPVErmNWVegYMQcurDF3jgHU4VME',
         name: 'zero-prefixed signature',
-        message: TronWeb.utils.ethersUtils.arrayify(TronWeb.utils.ethersUtils.id('0x7f23b5eed5bc7e89f267f339561b2697faab234a2')),
+        message: utils.ethersUtils.arrayify(utils.ethersUtils.id('0x7f23b5eed5bc7e89f267f339561b2697faab234a2')),
         messageHash: '0xc6bb689ca3663d132c07540d31f46e03b0e4291d990c77083c136a234f079455',
         privateKey: '59f40af46420081988724249fb743e7597c8ddc1cbbc0738b96ceb1dbb149373',
         signature:

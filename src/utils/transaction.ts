@@ -1,10 +1,10 @@
 // @ts-nocheck
 import google_protobuf_any_pb from '@tronweb3/google-protobuf/google/protobuf/any_pb.js';
 
-import * as TronPb from '../protocol/core/Tron_pb.cjs';
-const { Transaction, Permission, Key } = TronPb.default;
+import '../protocol/core/Tron_pb.cjs';
+const { Transaction, Permission, Key } = globalThis.TronWebProto;
 
-import * as balanceContractPb from '../protocol/core/contract/balance_contract_pb.cjs';
+import '../protocol/core/contract/balance_contract_pb.cjs';
 const {
     TransferContract,
     FreezeBalanceContract,
@@ -15,13 +15,12 @@ const {
     WithdrawExpireUnfreezeContract,
     DelegateResourceContract,
     UnDelegateResourceContract,
-} = balanceContractPb.default;
+} = globalThis.TronWebProto;
 
-import * as assetIssueContractPb from '../protocol/core/contract/asset_issue_contract_pb.cjs';
-const { TransferAssetContract, ParticipateAssetIssueContract, AssetIssueContract, UpdateAssetContract } =
-    assetIssueContractPb.default;
+import '../protocol/core/contract/asset_issue_contract_pb.cjs';
+const { TransferAssetContract, ParticipateAssetIssueContract, AssetIssueContract, UpdateAssetContract } = globalThis.TronWebProto;
 
-import * as smartContractPb from '../protocol/core/contract/smart_contract_pb.cjs';
+import '../protocol/core/contract/smart_contract_pb.cjs';
 const {
     TriggerSmartContract,
     ClearABIContract,
@@ -29,27 +28,27 @@ const {
     UpdateSettingContract,
     CreateSmartContract,
     SmartContract,
-} = smartContractPb.default;
+} = globalThis.TronWebProto;
 
-import * as commonPb from '../protocol/core/contract/common_pb.cjs';
-const { ResourceCode } = commonPb.default;
+import '../protocol/core/contract/common_pb.cjs';
+const { ResourceCode } = globalThis.TronWebProto;
 
-import * as witnessContractPb from '../protocol/core/contract/witness_contract_pb.cjs';
-const { WitnessCreateContract, VoteWitnessContract } = witnessContractPb.default;
+import '../protocol/core/contract/witness_contract_pb.cjs';
+const { WitnessCreateContract, VoteWitnessContract } = globalThis.TronWebProto;
 
-import * as storageContractPb from '../protocol/core/contract/storage_contract_pb.cjs';
-const { UpdateBrokerageContract } = storageContractPb.default;
+import '../protocol/core/contract/storage_contract_pb.cjs';
+const { UpdateBrokerageContract } = globalThis.TronWebProto;
 
-import * as accountContractPb from '../protocol/core/contract/account_contract_pb.cjs';
+import '../protocol/core/contract/account_contract_pb.cjs';
 const { AccountCreateContract, AccountUpdateContract, SetAccountIdContract, AccountPermissionUpdateContract } =
-    accountContractPb.default;
+    globalThis.TronWebProto;
 
-import * as proposalContractPb from '../protocol/core/contract/proposal_contract_pb.cjs';
-const { ProposalCreateContract, ProposalDeleteContract, ProposalApproveContract } = proposalContractPb.default;
+import '../protocol/core/contract/proposal_contract_pb.cjs';
+const { ProposalCreateContract, ProposalDeleteContract, ProposalApproveContract } = globalThis.TronWebProto;
 
-import * as exchangeContractPb from '../protocol/core/contract/exchange_contract_pb.cjs';
+import '../protocol/core/contract/exchange_contract_pb.cjs';
 const { ExchangeCreateContract, ExchangeInjectContract, ExchangeWithdrawContract, ExchangeTransactionContract } =
-    exchangeContractPb.default;
+    globalThis.TronWebProto;
 
 import { byteArray2hexStr } from './bytes.js';
 import { sha256, keccak256 } from './ethersUtils.js';
@@ -883,7 +882,7 @@ const txJsonToPb = (transaction) => {
     const contractJson = rawData.contract[0];
     const data = contractJson.parameter.value;
     const options = { Permission_id: contractJson.Permission_id };
-    const transactionObj = contractJsonToProtobuf(contractJson, data, options);
+    const transactionObj = contractJsonToProtobuf(contractJson, data, options) as any;
 
     const rawDataObj = transactionObj.getRawData();
     rawDataObj.setRefBlockBytes(fromHexString(rawData.ref_block_bytes));
@@ -915,7 +914,7 @@ const txJsonToPbWithArgs = (transaction, args: any = {}, options: any = {}) => {
 
     const transactionObj = contractJsonToProtobuf(contractJson, args, {
         Permission_id: args?.Permission_id,
-    });
+    }) as any;
 
     const rawDataObj = transactionObj.getRawData();
     rawDataObj.setRefBlockBytes(fromHexString(rawData.ref_block_bytes));
