@@ -1,2 +1,2 @@
 // @ts-ignore
-export { TronWeb } from '../../src/tronweb.js';
+export * from '../../src/index.js';

@@ -34,22 +34,14 @@ function isValidOptions(options: unknown): options is TronWebOptions {
 
 export class TronWeb extends EventEmitter {
     providers: Providers;
-    static providers = providers;
     BigNumber: typeof BigNumber;
-    static BigNumber = BigNumber;
     transactionBuilder: TransactionBuilder;
-    static TransactionBuilder = TransactionBuilder;
     trx: Trx;
-    static Trx = Trx;
-    static Contract = Contract;
     plugin: Plugin;
-    static Plugin = Plugin;
     event: Event;
-    static Event = Event;
     version: typeof TronWeb.version;
     static version = version;
-    utils: typeof TronWeb.utils;
-    static utils = utils;
+    utils: typeof utils;
 
     defaultBlock: number | false | 'earliest' | 'latest';
     defaultPrivateKey: string | false;

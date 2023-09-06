@@ -1,6 +1,6 @@
 import utils from '../../utils/index.js';
 import { encodeParamsV2ByABI, decodeParamsV2ByABI } from '../../utils/abi.js';
-import TronWeb from '../../tronweb.js';
+import { TronWeb } from '../../tronweb.js';
 import { Contract } from './index.js';
 import { sha3 } from '../../utils/crypto.js';
 

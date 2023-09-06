@@ -1,5 +1,5 @@
 import { AbiCoder } from '@ethersproject/abi';
-import TronWeb from '../tronweb.js';
+import { TronWeb } from '../tronweb.js';
 import { ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX } from './address.js';
 import { FunctionFragment, AbiParamsCommon, AbiInputsType } from '../types/ABI.js';
 

@@ -4,7 +4,7 @@ import assertThrow from '../helpers/assertThrow.js';
 import wait from '../helpers/wait.js';
 import broadcaster from '../helpers/broadcaster.js';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
-import { TronWeb } from '../setup/TronWeb.js';
+import { TronWeb, Trx } from '../setup/TronWeb.js';
 import waitChainData from '../helpers/waitChainData.js';
 import signMessageTests from '../testcases/src/sign-message.js';
 import config from '../helpers/config.js';
@@ -33,7 +33,7 @@ describe('TronWeb.trx', function () {
     // Contrstuctor Test
     describe('#constructor()', function () {
         it('should have been set a full instance in tronWeb', function () {
-            assert.instanceOf(tronWeb.trx, TronWeb.Trx);
+            assert.instanceOf(tronWeb.trx, Trx);
         });
     });
 
@@ -667,7 +667,7 @@ describe('TronWeb.trx', function () {
             it('should sign typed data with private key', function () {
                 const idx = 14;
 
-                const signature = TronWeb.Trx._signTypedData(domain, types, value, accounts.pks[idx]);
+                const signature = Trx._signTypedData(domain, types, value, accounts.pks[idx]);
 
                 const tDomain = {
                     ...domain,
@@ -685,9 +685,9 @@ describe('TronWeb.trx', function () {
                     },
                     tAddr: ['TT5rFsXYCrnzdE2q1WdR9F2SuVY59A4hoM', 'TT5rFsXYCrnzdE2q1WdR9F2SuVY59A4hoM'],
                 };
-                const tSignature = TronWeb.Trx._signTypedData(tDomain, types, tValue, accounts.pks[idx]);
+                const tSignature = Trx._signTypedData(tDomain, types, tValue, accounts.pks[idx]);
 
-                const result = TronWeb.Trx.verifyTypedData(domain, types, value, signature, accounts.b58[idx]);
+                const result = Trx.verifyTypedData(domain, types, value, signature, accounts.b58[idx]);
 
                 assert.isTrue(signature.startsWith('0x'));
                 assert.equal(tSignature, signature);
@@ -698,8 +698,8 @@ describe('TronWeb.trx', function () {
                 const idx = 14;
 
                 try {
-                    const signature = TronWeb.Trx._signTypedData(domain, types, value, accounts.pks[idx - 1]);
-                    TronWeb.Trx.verifyTypedData(domain, types, value, signature, accounts.b58[idx]);
+                    const signature = Trx._signTypedData(domain, types, value, accounts.pks[idx - 1]);
+                    Trx.verifyTypedData(domain, types, value, signature, accounts.b58[idx]);
                 } catch (error) {
                     assert.equal(error, 'Signature does not match');
                     console.log(error);

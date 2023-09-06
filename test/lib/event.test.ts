@@ -4,7 +4,7 @@ import tronWebBuilder from '../helpers/tronWebBuilder.js';
 import broadcaster from '../helpers/broadcaster.js';
 import wait from '../helpers/wait.js';
 import { Address } from '../../src/types/Trx.js';
-import { TronWeb } from '../setup/TronWeb.js';
+import { TronWeb, Event } from '../setup/TronWeb.js';
 import { CreateSmartContractTransaction } from '../../src/types/Transaction.js';
 import { IContract } from '../../src/lib/contract/index.js';
 
@@ -82,7 +82,7 @@ describe('TronWeb.lib.event', async function () {
 
     describe('#constructor()', function () {
         it('should have been set a full instance in tronWeb', function () {
-            assert.instanceOf(tronWeb.event, TronWeb.Event);
+            assert.instanceOf(tronWeb.event, Event);
         });
     });
 

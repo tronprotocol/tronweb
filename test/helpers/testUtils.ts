@@ -1,5 +1,5 @@
 // @ts-ignore
-import { TronWeb } from '../setup/TronWeb.js';
+import { TronWeb, utils } from '../setup/TronWeb.js';
 import { isHexString } from 'ethers';
 import { BigNumber } from '@ethersproject/bignumber';
 
@@ -23,7 +23,7 @@ const getValues = (object: any, named?: string[]) => {
             return object.value;
 
         case 'buffer':
-            return TronWeb.utils.ethersUtils.arrayify(object.value);
+            return utils.ethersUtils.arrayify(object.value);
 
         case 'tuple':
             let result: any[] = getValues(object.value, named);
@@ -85,7 +85,7 @@ const equals = (actual: any, expected: any) => {
         if (!isHexString(actual)) {
             return false;
         }
-        actual = TronWeb.utils.ethersUtils.arrayify(actual);
+        actual = utils.ethersUtils.arrayify(actual);
 
         if (!actual.buffer || actual.length !== expected.length) {
             return false;

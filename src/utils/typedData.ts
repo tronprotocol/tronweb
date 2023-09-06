@@ -1,4 +1,4 @@
-import TronWeb from '../tronweb.js';
+import { TronWeb } from '../tronweb.js';
 import {
     keccak256,
     recoverAddress,

@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
-import { TronWeb } from '../setup/TronWeb.js';
+import { TronWeb, Plugin } from '../setup/TronWeb.js';
 import GetNowBlock from '../helpers/GetNowBlock.js';
 import BlockLib from '../helpers/BlockLib.js';
 
@@ -13,7 +13,7 @@ describe('TronWeb.lib.plugin', async function () {
 
     describe('#constructor()', function () {
         it('should have been set a full instance in tronWeb', function () {
-            assert.instanceOf(tronWeb.plugin, TronWeb.Plugin);
+            assert.instanceOf(tronWeb.plugin, Plugin);
         });
     });
 

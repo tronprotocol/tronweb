@@ -1,4 +1,4 @@
-import TronWeb from '../tronweb.js';
+import { TronWeb } from '../tronweb.js';
 import utils from '../utils/index.js';
 import { keccak256, toUtf8Bytes, recoverAddress, SigningKey } from '../utils/ethersUtils.js';
 import { ADDRESS_PREFIX } from '../utils/address.js';

@@ -1,4 +1,4 @@
-import * as utils from './utils/index.js';
+import utils from './utils/index.js';
 export { utils };
 
 export { BigNumber } from 'bignumber.js';

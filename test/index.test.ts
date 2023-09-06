@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import Config from './helpers/config.js';
-import { TronWeb } from './setup/TronWeb.js';
+import { TronWeb, providers } from './setup/TronWeb.js';
 import tronWebBuilder from './helpers/tronWebBuilder.js';
 import BigNumber from 'bignumber.js';
 import broadcaster from './helpers/broadcaster.js';
@@ -8,7 +8,7 @@ import wait from './helpers/wait.js';
 import { Address } from '../src/types/Trx.js';
 import { IContract } from '../src/lib/contract/index.js';
 
-const HttpProvider = TronWeb.providers.HttpProvider;
+const HttpProvider = providers.HttpProvider;
 const {
     ADDRESS_HEX,
     ADDRESS_BASE58,

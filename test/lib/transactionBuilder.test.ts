@@ -43,7 +43,7 @@ import {
     VoteWitnessContract,
     WitnessCreateContract,
 } from '../../src/types/Contract.js';
-import { TronWeb } from '../setup/TronWeb.js';
+import { TronWeb, utils } from '../setup/TronWeb.js';
 import { TransactionBuilder } from '../../src/lib/TransactionBuilder/TransactionBuilder.js';
 import Contracts from '../fixtures/contracts';
 import waitChainData from '../helpers/waitChainData';
@@ -88,7 +88,7 @@ describe('TronWeb.transactionBuilder', function () {
 
     describe('#constructor()', function () {
         it('should have been set a full instance in tronWeb', function () {
-            assert.instanceOf(tronWeb.transactionBuilder, TronWeb.TransactionBuilder);
+            assert.instanceOf(tronWeb.transactionBuilder, TransactionBuilder);
         });
     });
 
@@ -1120,7 +1120,7 @@ describe('TronWeb.transactionBuilder', function () {
             for (const param of params) {
                 await freezeBandWith();
                 const transaction = await tronWeb.transactionBuilder.unfreezeBalance(...param);
-                const authResult = TronWeb.utils.transaction.txCheck(transaction);
+                const authResult = utils.transaction.txCheck(transaction);
                 assert.equal(authResult, true);
             }
         });
@@ -1137,7 +1137,7 @@ describe('TronWeb.transactionBuilder', function () {
             ];
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.withdrawBlockRewards(...param);
-                const authResult = TronWeb.utils.transaction.txCheck(transaction);
+                const authResult = utils.transaction.txCheck(transaction);
                 assert.equal(authResult, true);
             }
         });
@@ -2497,7 +2497,7 @@ describe('TronWeb.transactionBuilder', function () {
             ];
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.injectExchangeTokens(...param);
-                const authResult = TronWeb.utils.transaction.txCheck(transaction);
+                const authResult = utils.transaction.txCheck(transaction);
                 assert.equal(authResult, true);
             }
         });
@@ -2542,7 +2542,7 @@ describe('TronWeb.transactionBuilder', function () {
             exchangeId = receipt.exchange_id as unknown as number;
 
             transaction.raw_data_hex = transaction.raw_data_hex + '00';
-            const authResult2 = TronWeb.utils.transaction.txCheck(transaction);
+            const authResult2 = utils.transaction.txCheck(transaction);
             assert.equal(authResult2, false);
         });
         it(`should withdraw exchange tokens`, async function () {
@@ -2552,7 +2552,7 @@ describe('TronWeb.transactionBuilder', function () {
             ];
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.withdrawExchangeTokens(...param);
-                const authResult = TronWeb.utils.transaction.txCheck(transaction);
+                const authResult = utils.transaction.txCheck(transaction);
                 assert.equal(authResult, true);
             }
         });
@@ -2603,15 +2603,15 @@ describe('TronWeb.transactionBuilder', function () {
             ];
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.tradeExchangeTokens(...param);
-                const authResult = TronWeb.utils.transaction.txCheck(transaction);
+                const authResult = utils.transaction.txCheck(transaction);
                 assert.equal(authResult, true);
 
                 transaction.raw_data_hex = transaction.raw_data_hex + '00';
-                const authResult2 = TronWeb.utils.transaction.txCheck(transaction);
+                const authResult2 = utils.transaction.txCheck(transaction);
                 assert.equal(authResult2, false);
 
                 transaction.txID = transaction.txID + '00';
-                const authResult3 = TronWeb.utils.transaction.txCheck(transaction);
+                const authResult3 = utils.transaction.txCheck(transaction);
                 assert.equal(authResult3, false);
             }
         });
@@ -2647,7 +2647,7 @@ describe('TronWeb.transactionBuilder', function () {
             ];
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.updateSetting(...param);
-                const authResult = TronWeb.utils.transaction.txCheck(transaction);
+                const authResult = utils.transaction.txCheck(transaction);
                 assert.equal(authResult, true);
             }
         });
@@ -2683,7 +2683,7 @@ describe('TronWeb.transactionBuilder', function () {
             ];
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.updateEnergyLimit(...param);
-                const authResult = TronWeb.utils.transaction.txCheck(transaction);
+                const authResult = utils.transaction.txCheck(transaction);
                 assert.equal(authResult, true);
             }
         });

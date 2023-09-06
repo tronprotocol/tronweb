@@ -1,4 +1,4 @@
-import TronWeb from '../../tronweb.js';
+import { TronWeb } from '../../tronweb.js';
 import utils from '../../utils/index.js';
 import { Method, AbiFragmentNoErrConstructor } from './method.js';
 import type { ContractAbiInterface } from '../../types/ABI.js';
