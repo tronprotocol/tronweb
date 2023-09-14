@@ -181,6 +181,14 @@ export interface CreateSmartContract {
     };
 }
 
+export interface DeployConstantContract {
+    data: string;
+    owner_address: string;
+    call_value?: number;
+    token_id?: number | string;
+    call_token_value?: number | string;
+}
+
 export interface ClearABIContract {
     contract_address: string;
     owner_address: string;
