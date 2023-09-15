@@ -58,7 +58,7 @@ export interface TransactionWrapper {
     /**
      * Result of calling contract function which is decorated by `view` or `pure`.
      */
-    constant_result?: unknown;
+    constant_result?: any;
 }
 
 export interface SignedTransaction extends Transaction {
