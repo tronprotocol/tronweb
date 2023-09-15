@@ -1,6 +1,9 @@
 import { AbiFragment, ContractAbiInterface } from './ABI';
 
 export interface PermissionId {
+    /**
+     * Permission id for multi-sign.
+     */
     permissionId?: number;
 }
 
@@ -79,11 +82,11 @@ export interface CreateSmartContractOptions {
 
 export interface TriggerSmartContractOptions {
     /**
-     * The maximum TRX burns for resource consumption（1TRX = 1,000,000SUN）.
+     * The maximum TRX burns for resource consumption in SUN（1TRX = 1,000,000SUN）.
      */
     feeLimit?: number;
     /**
-     * The TRX transfer to the contract for each call（1TRX = 1,000,000SUN）
+     * The TRX transfer to the contract for each call in SUN（1TRX = 1,000,000SUN）
      */
     callValue?: number;
     /**
@@ -96,7 +99,7 @@ export interface TriggerSmartContractOptions {
     tokenValue?: number;
     /**
      * JSON format for contract function.
-     * For example: { "type":"function", "inputs": [{"name":"a","type":"uint256"}], "name":"foo", "outputs": [] }.
+     * For example: `{ "type":"function", "inputs": [{"name":"a","type":"uint256"}], "name":"foo", "outputs": [] }`.
      * If exists, the `parameters` will be ignored.
      * Optional.
      */
@@ -127,11 +130,16 @@ export interface TriggerSmartContractOptions {
      */
     permissionId?: number;
     _isConstant?: boolean;
-    estimateEnergy?: boolean;
+    /**
+     * If use solidity node to trigger smart contract.
+     */
     confirmed?: boolean;
 }
 export interface TriggerConstantContractOptions extends TriggerSmartContractOptions {
     _isConstant?: boolean;
+    /**
+     * Whether the request only aims to estimating energy not trigger contract actually.
+     */
     estimateEnergy?: boolean;
     /**
      * If use solidity node to trigger smart contract.
@@ -240,11 +248,30 @@ export interface UpdateTokenOptions extends PermissionId {
 }
 
 export interface DeployConstantContractOptions {
+    /**
+     * The bytecode of contract to be deployed.
+     */
     input: string;
+    /**
+     * Owner address of the new contract.
+     */
     ownerAddress: string;
+    /**
+     * The id of token to be transfered to the new contract.
+     * Optional.
+     */
     tokenId?: string | number;
+    /**
+     * The amount of token to be transfered to the new contract.
+     */
     tokenValue?: string | number;
+    /**
+     * Amount of TRX transferred with this transaction, measured in SUN (1TRX = 1,000,000 SUN).
+     */
     callValue?: number;
+    /**
+     * Whether send request to solidity node.
+     */
     confirmed?: boolean;
 }
 

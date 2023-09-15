@@ -32,16 +32,33 @@ export interface CreateSmartContractTransaction extends Transaction<CreateSmartC
      */
     contract_address: string;
 }
-// @todo: to be confirm
+
+/**
+ * `TransactionWrapper` interface is returned when user trigger a smart contract.
+ */
 export interface TransactionWrapper {
     Error?: string;
     result: {
         result: boolean;
         message?: string;
     };
+    /**
+     * The transaction object created by calling contract function.
+     */
     transaction: Transaction;
+    /**
+     * Energy required for successfully deploying new contract or trigger contract.
+     * This is returned in `transactionBuilder.estimateEnergy()` and `transactionBuilder.deployConstantContract()`
+     */
     energy_required?: number;
-    constant_result?: any;
+    /**
+     * Energy used by triggering contract.
+     */
+    energy_used?: number;
+    /**
+     * Result of calling contract function which is decorated by `view` or `pure`.
+     */
+    constant_result?: string[];
 }
 
 export interface SignedTransaction extends Transaction {

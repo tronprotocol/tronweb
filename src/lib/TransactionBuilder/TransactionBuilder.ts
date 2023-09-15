@@ -12,6 +12,7 @@ import {
     ContractType,
     CreateSmartContract,
     DelegateResourceContract,
+    DeployConstantContract,
     FreezeBalanceContract,
     FreezeBalanceV2Contract,
     Permission,
@@ -859,14 +860,13 @@ export class TransactionBuilder {
         options: TriggerConstantContractOptions = {},
         parameters: ContractFunctionParameter[] = [],
         issuerAddress: string = this.tronWeb.defaultAddress.hex as string
-    ) {
+    ): Promise<{ result: { result: boolean }; energy_required: number }> {
         options.estimateEnergy = true;
-        return this._triggerSmartContract(contractAddress, functionSelector, options, parameters, issuerAddress);
+        const result = await this._triggerSmartContract(contractAddress, functionSelector, options, parameters, issuerAddress);
+        return result as { result: { result: boolean }; energy_required: number };
     }
 
-    async deployConstantContract(
-        options: DeployConstantContractOptions = { input: '', ownerAddress: '' }
-    ): Promise<TransactionWrapper> {
+    async deployConstantContract(options: DeployConstantContractOptions = { input: '', ownerAddress: '' }) {
         const { input, ownerAddress, tokenId, tokenValue, callValue = 0 } = options;
 
         this.validator.notValid([
@@ -902,7 +902,7 @@ export class TransactionBuilder {
             },
         ]);
 
-        const args: any = {
+        const args: DeployConstantContract = {
             data: input,
             owner_address: toHex(ownerAddress),
             call_value: callValue,
@@ -926,7 +926,7 @@ export class TransactionBuilder {
         if (transaction.result && transaction.result.message) {
             throw new Error(this.tronWeb.toUtf8(transaction.result.message));
         }
-        return transaction;
+        return transaction as { result: { result: boolean }; energy_required: number };
     }
 
     _getTriggerSmartContractArgs(
@@ -1126,7 +1126,7 @@ export class TransactionBuilder {
     async _triggerSmartContract(
         contractAddress: string,
         functionSelector: string,
-        options: TriggerSmartContractOptions = {},
+        options: TriggerConstantContractOptions = {},
         parameters: ContractFunctionParameter[] = [],
         issuerAddress: string = this.tronWeb.defaultAddress.hex as string
     ) {
