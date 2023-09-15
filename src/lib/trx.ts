@@ -645,7 +645,7 @@ export class Trx {
      * @param {reserved} options
      * @param {callback function} callback
      */
-    signMessageV2(message: string | Uint8Array, privateKey = this.tronWeb.defaultPrivateKey, options = {}, callback = false) {
+    signMessageV2(message: string | Uint8Array, privateKey = this.tronWeb.defaultPrivateKey) {
         return Trx.signMessageV2(message, privateKey as string);
     }
 

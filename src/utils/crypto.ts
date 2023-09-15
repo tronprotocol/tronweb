@@ -4,10 +4,8 @@ import { encode58, decode58 } from './base58.js';
 import { BytesLike, byte2hexStr, byteArray2hexStr } from './bytes.js';
 import { keccak256, sha256, SigningKey } from './ethersUtils.js';
 import { TypedDataEncoder } from './typedData.js';
-import * as ec from 'ethereum-cryptography/secp256k1.js';
-
-const secp = ec.secp256k1 ?? ec;
-import { TypedDataDomain, TypedDataField } from 'ethers';
+import { secp256k1 as secp } from 'ethereum-cryptography/secp256k1';
+import type { TypedDataDomain, TypedDataField } from 'ethers';
 import { SignedTransaction } from '../types/Transaction.js';
 
 function normalizePrivateKeyBytes(priKeyBytes: BytesLike) {
