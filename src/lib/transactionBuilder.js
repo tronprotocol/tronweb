@@ -1307,6 +1307,7 @@ export default class TransactionBuilder {
         tokenId,
         callValue,
         feeLimit,
+        callback
     ) {
         const args = {
             contract_address: toHex(contractAddress),
@@ -1483,7 +1484,8 @@ export default class TransactionBuilder {
             tokenValue,
             tokenId,
             callValue,
-            feeLimit
+            feeLimit,
+            callback
         );
 
         if (args.function_selector) {
@@ -1616,7 +1618,8 @@ export default class TransactionBuilder {
             tokenValue,
             tokenId,
             callValue,
-            feeLimit
+            feeLimit,
+            callback
         );
 
         let pathInfo = 'triggersmartcontract';
