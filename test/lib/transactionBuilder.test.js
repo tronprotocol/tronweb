@@ -3552,6 +3552,17 @@ describe('TronWeb.transactionBuilder', function () {
         assert.isTrue(receipt.result.result);
         assert.isDefined(receipt.energy_required);
         assert.isNumber(receipt.energy_required);
-    })
+    });
+
+    it('should get the estimated energy of deploying a contract by estimateEnergy api', async function () {
+        const receipt = await tronWeb.transactionBuilder.deployConstantContract({
+            input: testSetVal.bytecode,
+            ownerAddress: accounts.hex[1],
+            estimateEnergy: true,
+        });
+        assert.isTrue(receipt.result.result);
+        assert.isDefined(receipt.energy_required);
+        assert.isNumber(receipt.energy_required);
+    });
   })
 });
