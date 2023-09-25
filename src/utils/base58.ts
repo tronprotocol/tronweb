@@ -17,6 +17,7 @@ export function encode58(buffer: BytesLike | string) {
     for (i = 0; i < buffer.length; i++) {
         for (j = 0; j < digits.length; j++) digits[j] <<= 8;
 
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         digits[0] += buffer[i];
         let carry = 0;

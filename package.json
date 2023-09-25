@@ -32,7 +32,7 @@
         "build:all": "npm run clean:all && npm run build:esm && npm run build:cjs && npm run build:dist",
         "copy-protocol:cjs": "cp -R ./src/protocol ./lib/commonjs/",
         "copy-protocol:esm": "cp -R ./src/protocol ./lib/esm/",
-        "prepare": "npm run build",
+        "prepare": "husky install && npm run build",
         "build": "npm run clean && webpack --config webpack.config.js --progress --color",
         "build:dev": "NODE_ENV=development npm run build",
         "clean:all": "rimraf dist lib",
@@ -46,7 +46,9 @@
         "test:browser": "npm run-script newaccount && node scripts/test-browser.js && npx karma start --single-run --browsers ChromeHeadless",
         "coverage": "npm run-script test:browser && npm run-script test",
         "btest": "npm run build:dev && npm run test",
-        "format-all": "prettier --write ./src"
+        "format-all": "prettier --write ./src",
+        "lint": "eslint src",
+        "lint:fix": "eslint src --fix"
     },
     "husky": {
         "hooks": {

@@ -96,6 +96,7 @@ export function _signTypedData(
 
 export function getRowBytesFromTransactionBase64(base64Data: string): Uint8Array {
     const bytesDecode = base64DecodeFromString(base64Data);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const transaction = proto.protocol.Transaction.deserializeBinary(bytesDecode);
     const raw = transaction.getRawData();
@@ -122,7 +123,7 @@ export function computeAddress(pubBytes: BytesLike) {
 }
 
 export function getAddressFromPriKey(priKeyBytes: BytesLike) {
-    let pubBytes = getPubKeyFromPriKey(priKeyBytes);
+    const pubBytes = getPubKeyFromPriKey(priKeyBytes);
     return computeAddress(pubBytes);
 }
 
@@ -208,8 +209,8 @@ export function getPubKeyFromPriKey(priKeyBytes: BytesLike) {
     const x = pubkey.x;
     const y = pubkey.y;
 
-    let xHex = x.toString(16).padStart(64, '0');
-    let yHex = y.toString(16).padStart(64, '0');
+    const xHex = x.toString(16).padStart(64, '0');
+    const yHex = y.toString(16).padStart(64, '0');
 
     const pubkeyHex = `04${xHex}${yHex}`;
     const pubkeyBytes = hexStr2byteArray(pubkeyHex);
@@ -240,7 +241,7 @@ export function passwordToAddress(password: string) {
     return getBase58CheckAddress(com_addressBytes);
 }
 
-export function pkToAddress(privateKey: string, strict: boolean = false) {
+export function pkToAddress(privateKey: string, strict = false) {
     const com_priKeyBytes = hexStr2byteArray(privateKey, strict);
     const com_addressBytes = getAddressFromPriKey(com_priKeyBytes);
 

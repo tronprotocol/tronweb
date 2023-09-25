@@ -110,6 +110,7 @@ export class Contract {
     // }
 
     hasProperty(property: number | string | symbol) {
+        // eslint-disable-next-line no-prototype-builtins
         return this.hasOwnProperty(property) || (this as unknown as IContract).__proto__.hasOwnProperty(property);
     }
 

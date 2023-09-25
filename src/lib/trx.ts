@@ -224,10 +224,8 @@ export class Trx {
             ]);
 
             return [
-                // @ts-ignore
-                ...from.map((tx) => ((tx.direction = 'from'), tx)),
-                // @ts-ignore
-                ...to.map((tx) => ((tx.direction = 'to'), tx)),
+                ...from.map((tx) => (((tx as any).direction = 'from'), tx)),
+                ...to.map((tx) => (((tx as any).direction = 'to'), tx)),
             ].sort((a, b) => {
                 return b.raw_data.timestamp - a.raw_data.timestamp;
             });
@@ -671,7 +669,7 @@ export class Trx {
         return utils.crypto._signTypedData(domain, types, value, privateKey);
     }
 
-    async multiSign(transaction: Transaction, privateKey = this.tronWeb.defaultPrivateKey, permissionId: number = 0) {
+    async multiSign(transaction: Transaction, privateKey = this.tronWeb.defaultPrivateKey, permissionId = 0) {
         if (!utils.isObject(transaction) || !transaction.raw_data || !transaction.raw_data.contract) {
             throw new Error('Invalid transaction provided');
         }
@@ -863,8 +861,8 @@ export class Trx {
      * @param callback
      */
     async freezeBalance(
-        amount: number = 0,
-        duration: number = 3,
+        amount = 0,
+        duration = 3,
         resource: Resource = 'BANDWIDTH',
         options: AddressOptions = {},
         receiverAddress?: string
