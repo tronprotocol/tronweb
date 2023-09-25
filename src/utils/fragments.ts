@@ -204,7 +204,7 @@ class TokenString {
         this.#offset = 0;
     }
 
-    #subTokenString(from: number = 0, to: number = 0): TokenString {
+    #subTokenString(from = 0, to = 0): TokenString {
         return new TokenString(
             this.#tokens.slice(from, to).map((t) => {
                 return Object.freeze(
@@ -317,8 +317,8 @@ function lex(text: string): TokenString {
         throw new Error(`invalid token ${token} at ${offset}: ${message}`);
     };
 
-    let brackets: Array<number> = [];
-    let commas: Array<number> = [];
+    const brackets: Array<number> = [];
+    const commas: Array<number> = [];
 
     let offset = 0;
     while (offset < text.length) {
@@ -342,7 +342,7 @@ function lex(text: string): TokenString {
         };
         tokens.push(token);
 
-        let type = SimpleTokens[cur[0]] || '';
+        const type = SimpleTokens[cur[0]] || '';
         if (type) {
             token.type = type;
             token.text = cur[0];
@@ -420,7 +420,7 @@ function lex(text: string): TokenString {
 
 // Check only one of `allowed` is in `set`
 function allowSingle(set: ReadonlySet<string>, allowed: ReadonlySet<string>): void {
-    let included: Array<string> = [];
+    const included: Array<string> = [];
     for (const key in allowed.keys()) {
         if (set.has(key)) {
             included.push(key);
@@ -448,6 +448,7 @@ function consumeName(type: string, tokens: TokenString): string {
 // ...all keywords matching allowed, returning the keywords
 function consumeKeywords(tokens: TokenString, allowed?: ReadonlySet<string>): ReadonlySet<string> {
     const keywords: Set<string> = new Set();
+    // eslint-disable-next-line no-constant-condition
     while (true) {
         const keyword = tokens.peekType('KEYWORD');
 
@@ -467,7 +468,7 @@ function consumeKeywords(tokens: TokenString, allowed?: ReadonlySet<string>): Re
 
 // ...all visibility keywords, returning the coalesced mutability
 function consumeMutability(tokens: TokenString): 'payable' | 'nonpayable' | 'view' | 'pure' {
-    let modifiers = consumeKeywords(tokens, KwVisib);
+    const modifiers = consumeKeywords(tokens, KwVisib);
 
     // Detect conflicting modifiers
     allowSingle(modifiers, setify('constant payable nonpayable'.split(' ')));
@@ -679,7 +680,7 @@ export class ParamType {
             format = 'sighash';
         }
         if (format === 'json') {
-            let result: any = {
+            const result: any = {
                 type: this.baseType === 'tuple' ? 'tuple' : this.type,
                 name: this.name || undefined,
             };
@@ -766,8 +767,7 @@ export class ParamType {
             if (this.arrayLength !== -1 && value.length !== this.arrayLength) {
                 throw new Error('array is wrong length');
             }
-            const _this = this;
-            return value.map((v) => _this.arrayChildren.walk(v, process));
+            return value.map((v) => this.arrayChildren?.walk(v, process));
         }
 
         if (this.isTuple()) {
@@ -777,8 +777,7 @@ export class ParamType {
             if (value.length !== this.components.length) {
                 throw new Error('array is wrong length');
             }
-            const _this = this;
-            return value.map((v, i) => _this.components[i].walk(v, process));
+            return value.map((v, i) => this.components?.[i].walk(v, process));
         }
 
         return process(this.type, value);
@@ -947,7 +946,7 @@ export class ParamType {
 
         let type = obj.type;
 
-        let arrayMatch = type.match(regexArrayType);
+        const arrayMatch = type.match(regexArrayType);
         if (arrayMatch) {
             const arrayLength = parseInt(arrayMatch[2] || '-1');
             const arrayChildren = ParamType.from({
@@ -1020,7 +1019,9 @@ export abstract class Fragment {
             // Try parsing JSON...
             try {
                 Fragment.from(JSON.parse(obj));
-            } catch (e) {}
+            } catch (e) {
+                //
+            }
 
             // ...otherwise, use the human-readable lexer
             return Fragment.from(lex(obj));

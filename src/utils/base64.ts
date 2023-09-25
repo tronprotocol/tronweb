@@ -74,6 +74,7 @@ export class Base64 {
         let enc4: number;
         let i = 0;
 
+        // eslint-disable-next-line no-useless-escape
         input = input.replace(/[^A-Za-z0-9\+\/\=]/g, '');
 
         while (i < input.length) {
@@ -107,6 +108,7 @@ export class Base64 {
         let enc4: number;
         let i = 0;
 
+        // eslint-disable-next-line no-useless-escape
         input = input.replace(/[^A-Za-z0-9\+\/\=]/g, '');
 
         while (i < input.length) {

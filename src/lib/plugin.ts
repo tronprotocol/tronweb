@@ -37,7 +37,7 @@ export class Plugin {
             requires: '0.0.0',
             components: {},
         };
-        let result: {
+        const result: {
             libs: any[];
             plugged: any[];
             skipped: any[];
@@ -59,8 +59,8 @@ export class Plugin {
         if (semver.satisfies(TronWeb.version, pluginInterface.requires)) {
             if (pluginInterface.fullClass) {
                 // plug the entire class at the same level of tronWeb.trx
-                let className = plugin.constructor.name;
-                let classInstanceName = className.substring(0, 1).toLowerCase() + className.substring(1);
+                const className = plugin.constructor.name;
+                const classInstanceName = className.substring(0, 1).toLowerCase() + className.substring(1);
                 if (className !== classInstanceName) {
                     Object.assign(TronWeb, {
                         [className]: Plugin,
@@ -72,13 +72,14 @@ export class Plugin {
                 }
             } else {
                 // plug methods into a class, like trx
-                for (let component in pluginInterface.components) {
+                for (const component in pluginInterface.components) {
+                    // eslint-disable-next-line no-prototype-builtins
                     if (!this.tronWeb.hasOwnProperty(component)) {
                         continue;
                     }
-                    let methods = pluginInterface.components[component];
-                    let pluginNoOverride = (this.tronWeb as any)[component].pluginNoOverride || [];
-                    for (let method in methods) {
+                    const methods = pluginInterface.components[component];
+                    const pluginNoOverride = (this.tronWeb as any)[component].pluginNoOverride || [];
+                    for (const method in methods) {
                         if (
                             method === 'constructor' ||
                             ((this.tronWeb as any)[component][method] &&

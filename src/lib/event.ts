@@ -94,7 +94,13 @@ export class Event {
     }
 
     async getEventsByContractAddress(contractAddress: string, options: GetEventResultOptions = {}) {
-        let {
+        const newOptions = Object.assign(
+            {
+                limit: 20,
+            },
+            options
+        );
+        const {
             eventName,
             blockNumber,
             onlyUnconfirmed,
@@ -103,13 +109,8 @@ export class Event {
             maxBlockTimestamp,
             orderBy,
             fingerprint,
-            limit,
-        } = Object.assign(
-            {
-                limit: 20,
-            },
-            options
-        );
+        } = newOptions;
+        let { limit } = newOptions;
 
         if (!this.tronWeb.eventServer) {
             throw new Error('No event server configured');
