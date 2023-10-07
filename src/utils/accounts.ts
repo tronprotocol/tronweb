@@ -23,7 +23,7 @@ export function generateAccount() {
     };
 }
 
-export function generateRandom(password: string = '', path = TRON_BIP39_PATH_INDEX_0, wordlist?: Wordlist) {
+export function generateRandom(password = '', path = TRON_BIP39_PATH_INDEX_0, wordlist?: Wordlist) {
     const account = ethersHDNodeWallet.createRandom(password, path, wordlist);
 
     const result = {
@@ -43,6 +43,7 @@ export function generateAccountWithMnemonic(
     password: string = '',
     wordlist: Wordlist | null = null
 ) {
+    // eslint-disable-next-line no-useless-escape
     if (!String(path).match(/^m\/44\'\/195\'/)) {
         throw new Error(INVALID_TRON_PATH_ERROR_MSG);
     }

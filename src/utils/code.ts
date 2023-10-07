@@ -13,7 +13,7 @@ export function bin2String(array: BytesLike) {
     return bytesToString(array);
 }
 
-export function arrayEquals(array1: any[], array2: any[], strict: boolean = false) {
+export function arrayEquals(array1: any[], array2: any[], strict = false) {
     if (array1.length != array2.length) return false;
 
     for (let i = 0; i < array1.length; i++) {
@@ -26,11 +26,9 @@ export function arrayEquals(array1: any[], array2: any[], strict: boolean = fals
 }
 
 export function stringToBytes(str: string) {
-    const bytes = new Array();
-    let len: number;
+    const bytes = [];
+    const len: number = str.length;
     let c: number;
-
-    len = str.length;
 
     for (let i = 0; i < len; i++) {
         c = str.charCodeAt(i);
@@ -84,7 +82,7 @@ export function hexStr2byteArray(str: string, strict = false) {
             len++;
         }
     }
-    const byteArray: number[] = Array();
+    const byteArray: number[] = [];
     let d = 0;
     let j = 0;
     let k = 0;
@@ -157,7 +155,7 @@ export function getStringType(str: string) {
     // } else
     if (str.length == 40) {
         for (; i < 40; i++) {
-            var c = str.charAt(i);
+            const c = str.charAt(i);
 
             if (!isHexChar(c)) break;
         }
@@ -166,7 +164,7 @@ export function getStringType(str: string) {
     if (i == 40) return 1; //40 Hex, Address
 
     for (i = 0; i < str.length; i++) {
-        var c = str.charAt(i);
+        const c = str.charAt(i);
 
         if (!isNumber(c)) break;
     }
@@ -174,7 +172,7 @@ export function getStringType(str: string) {
     if (i == str.length) return 2; // All Decimal number, BlockNumber
 
     for (i = 0; i < str.length; i++) {
-        var c = str.charAt(i);
+        const c = str.charAt(i);
 
         if (c > ' ') return 3; // At least one visible character
     }

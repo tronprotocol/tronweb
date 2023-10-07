@@ -122,11 +122,12 @@ const domainChecks: Record<string, (value: any) => any> = {
         }
         return toQuantity(value);
     },
-    // @ts-ignore
     verifyingContract: function (value: any) {
         try {
             return getTronAddress(value).toLowerCase();
-        } catch (error) {}
+        } catch (error) {
+            //
+        }
         assertArgument(false, `invalid domain value "verifyingContract"`, 'domain.verifyingContract', value);
     },
     salt: function (value: any) {
@@ -353,7 +354,6 @@ export class TypedDataEncoder {
         return encoder;
     }
 
-    // @ts-ignore
     #getEncoder(type: string): (value: any) => string {
         // Basic encoder type (address, bool, uint256, etc)
         {

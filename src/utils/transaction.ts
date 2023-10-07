@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 import google_protobuf_any_pb from '@tronweb3/google-protobuf/google/protobuf/any_pb.js';
 
@@ -69,17 +70,17 @@ const sha3 = (string: string, prefix = true) => {
 };
 
 const buildCommonTransaction = (message, contractType, typeName, permissionId) => {
-    let anyValue = new google_protobuf_any_pb.Any();
+    const anyValue = new google_protobuf_any_pb.Any();
     anyValue.pack(message.serializeBinary(), 'protocol.' + typeName);
-    let contract = new Transaction.Contract();
+    const contract = new Transaction.Contract();
     contract.setType(contractType);
     contract.setParameter(anyValue);
     if (permissionId) {
         contract.setPermissionId(permissionId);
     }
-    let raw = new Transaction.raw();
+    const raw = new Transaction.raw();
     raw.addContract(contract);
-    let transaction = new Transaction();
+    const transaction = new Transaction();
     transaction.setRawData(raw);
     return transaction;
 };
@@ -87,7 +88,7 @@ const buildCommonTransaction = (message, contractType, typeName, permissionId) =
 // wallet/createtransaction for sendTrx
 const buildTransferContract = (value, options) => {
     const { to_address, owner_address, amount } = value;
-    let transferContract = new TransferContract();
+    const transferContract = new TransferContract();
     transferContract.setToAddress(fromHexString(to_address));
     transferContract.setOwnerAddress(fromHexString(owner_address));
     transferContract.setAmount(amount);
@@ -102,7 +103,7 @@ const buildTransferContract = (value, options) => {
 // wallet/transferasset for sendToken
 const buildTransferAssetContract = (value, options) => {
     const { to_address, owner_address, amount, asset_name } = value;
-    let transferContract = new TransferAssetContract();
+    const transferContract = new TransferAssetContract();
     transferContract.setToAddress(fromHexString(to_address));
     transferContract.setOwnerAddress(fromHexString(owner_address));
     transferContract.setAssetName(fromHexString(asset_name.replace(/^0x/, '')));
@@ -117,7 +118,7 @@ const buildTransferAssetContract = (value, options) => {
 
 // wallet/participateassetissue for purchaseToken
 const buildParticipateAssetIssueContract = (value, options) => {
-    let pbObj = new ParticipateAssetIssueContract();
+    const pbObj = new ParticipateAssetIssueContract();
     pbObj.setToAddress(fromHexString(value.to_address));
     pbObj.setOwnerAddress(fromHexString(value.owner_address));
     pbObj.setAssetName(fromHexString(value.asset_name.replace(/^0x/, '')));
@@ -132,7 +133,7 @@ const buildParticipateAssetIssueContract = (value, options) => {
 };
 
 const buildTriggerSmartContract = (value, options) => {
-    let triggerSmartContract = new TriggerSmartContract();
+    const triggerSmartContract = new TriggerSmartContract();
     const {
         owner_address,
         contract_address,
@@ -169,7 +170,7 @@ const buildTriggerSmartContract = (value, options) => {
 };
 
 const buildFreezeBalanceContract = (value, options) => {
-    let freezeBalanceContract = new FreezeBalanceContract();
+    const freezeBalanceContract = new FreezeBalanceContract();
     const { owner_address, frozen_balance, frozen_duration, resource, receiver_address } = value;
     freezeBalanceContract.setOwnerAddress(fromHexString(owner_address));
     freezeBalanceContract.setFrozenBalance(frozen_balance);
@@ -190,7 +191,7 @@ const buildFreezeBalanceContract = (value, options) => {
 };
 
 const buildUnfreezeBalanceContract = (value, options) => {
-    let unfreezeBalanceContract = new UnfreezeBalanceContract();
+    const unfreezeBalanceContract = new UnfreezeBalanceContract();
     const { owner_address, resource, receiver_address } = value;
     unfreezeBalanceContract.setOwnerAddress(fromHexString(owner_address));
     if (resource) {
@@ -209,7 +210,7 @@ const buildUnfreezeBalanceContract = (value, options) => {
 };
 
 const buildWithdrawBalanceContract = (value, options) => {
-    let withdrawbalanceContract = new WithdrawBalanceContract();
+    const withdrawbalanceContract = new WithdrawBalanceContract();
     const { owner_address } = value;
     withdrawbalanceContract.setOwnerAddress(fromHexString(owner_address));
 
@@ -327,15 +328,15 @@ const buildCreateWitness = (value, options) => {
 
 // vote
 const buildVoteWitnessAccount = (value, options) => {
-    let voteWitnessContract = new VoteWitnessContract();
+    const voteWitnessContract = new VoteWitnessContract();
     const { owner_address, votes } = value;
     voteWitnessContract.setOwnerAddress(fromHexString(owner_address));
 
     votes.forEach((voteItem) => {
-        let vote = new VoteWitnessContract.Vote();
+        const vote = new VoteWitnessContract.Vote();
         const { vote_address, vote_count } = voteItem;
         vote.setVoteAddress(fromHexString(vote_address));
-        let numberOfVotes = parseInt(vote_count);
+        const numberOfVotes = parseInt(vote_count);
         vote.setVoteCount(numberOfVotes);
         voteWitnessContract.addVotes(vote);
     });
@@ -349,7 +350,7 @@ const buildVoteWitnessAccount = (value, options) => {
 };
 
 const buildCreateSmartContract = (value, options) => {
-    let params = value?.new_contract
+    const params = value?.new_contract
         ? {
               ...{
                   owner_address: value.owner_address,
@@ -359,21 +360,21 @@ const buildCreateSmartContract = (value, options) => {
               ...value.new_contract,
           }
         : value;
-    let {
+    const {
         owner_address,
         consume_user_resource_percent,
         origin_energy_limit,
         abi,
         bytecode = '',
-        name: contracName,
         parameter = '',
         call_value,
         call_token_value,
         token_id,
-        origin_address,
+        name: contracName,
     } = params;
+    let { origin_address } = params;
 
-    let createSmartContract = new CreateSmartContract();
+    const createSmartContract = new CreateSmartContract();
     createSmartContract.setOwnerAddress(fromHexString(owner_address));
     if (token_id) {
         createSmartContract.setTokenId(token_id);
@@ -508,7 +509,7 @@ const buildAssetIssueContract = (value, options) => {
         vote_score = 0,
         frozen_supply,
     } = value;
-    let assetIssueContract = new AssetIssueContract();
+    const assetIssueContract = new AssetIssueContract();
     assetIssueContract.setOwnerAddress(fromHexString(owner_address));
     if (name) {
         assetIssueContract.setName(fromHexString(name.replace(/^0x/, '')));
@@ -539,7 +540,7 @@ const buildAssetIssueContract = (value, options) => {
     assetIssueContract.setFreeAssetNetLimit(free_asset_net_limit);
     assetIssueContract.setPublicFreeAssetNetLimit(public_free_asset_net_limit);
     if (frozen_supply) {
-        let frozenSupplyContract = new AssetIssueContract.FrozenSupply();
+        const frozenSupplyContract = new AssetIssueContract.FrozenSupply();
         frozenSupplyContract.setFrozenAmount(frozen_supply.length ? frozen_supply[0].frozen_amount : frozen_supply.frozen_amount);
         frozenSupplyContract.setFrozenDays(frozen_supply.length ? frozen_supply[0].frozen_days : frozen_supply.frozen_days);
         assetIssueContract.addFrozenSupply(frozenSupplyContract);
@@ -554,7 +555,7 @@ const buildAssetIssueContract = (value, options) => {
 
 //createAccount
 const buildAccountCreateContract = (value, options) => {
-    let accountCreateContract = new AccountCreateContract();
+    const accountCreateContract = new AccountCreateContract();
     const { account_address, owner_address } = value;
     accountCreateContract.setOwnerAddress(fromHexString(owner_address));
     accountCreateContract.setAccountAddress(fromHexString(account_address.replace(/^0x/, '')));
@@ -568,7 +569,7 @@ const buildAccountCreateContract = (value, options) => {
 
 // updateAccount
 const buildAccountUpdateContract = (value, options) => {
-    let accountUpdateContract = new AccountUpdateContract();
+    const accountUpdateContract = new AccountUpdateContract();
     const { account_name, owner_address } = value;
     accountUpdateContract.setOwnerAddress(fromHexString(owner_address));
     accountUpdateContract.setAccountName(fromHexString(account_name.replace(/^0x/, '')));
@@ -582,7 +583,7 @@ const buildAccountUpdateContract = (value, options) => {
 
 // setAccountId
 const buildSetAccountIdContract = (value, options) => {
-    let setAccountIdContract = new SetAccountIdContract();
+    const setAccountIdContract = new SetAccountIdContract();
     const { account_id, owner_address } = value;
     setAccountIdContract.setOwnerAddress(fromHexString(owner_address));
     setAccountIdContract.setAccountId(fromHexString(account_id.replace(/^0x/, '')));
@@ -595,7 +596,7 @@ const buildSetAccountIdContract = (value, options) => {
 };
 
 const buildProposalCreateContract = (value, options) => {
-    let proposalCreateContract = new ProposalCreateContract();
+    const proposalCreateContract = new ProposalCreateContract();
     const { owner_address, parameters } = value;
     proposalCreateContract.setOwnerAddress(fromHexString(owner_address));
     parameters.forEach((parameter) => {
@@ -610,7 +611,7 @@ const buildProposalCreateContract = (value, options) => {
 };
 
 const buildProposalDeleteContract = (value, options) => {
-    let proposalDeleteContract = new ProposalDeleteContract();
+    const proposalDeleteContract = new ProposalDeleteContract();
     const { owner_address, proposal_id } = value;
     proposalDeleteContract.setOwnerAddress(fromHexString(owner_address));
     proposalDeleteContract.setProposalId(proposal_id);
@@ -623,7 +624,7 @@ const buildProposalDeleteContract = (value, options) => {
 };
 
 const buildVoteProposalContract = (value, options) => {
-    let proposalVoteContract = new ProposalApproveContract();
+    const proposalVoteContract = new ProposalApproveContract();
     const { owner_address, proposal_id, is_add_approval } = value;
     proposalVoteContract.setOwnerAddress(fromHexString(owner_address));
     proposalVoteContract.setProposalId(proposal_id);

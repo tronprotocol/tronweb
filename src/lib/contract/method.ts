@@ -1,3 +1,4 @@
+/* eslint-disable no-control-regex */
 import utils from '../../utils/index.js';
 import { encodeParamsV2ByABI, decodeParamsV2ByABI } from '../../utils/abi.js';
 import { TronWeb } from '../../tronweb.js';
@@ -273,8 +274,7 @@ export class Method {
             };
             if (broadcast.message) err.message = this.tronWeb.toUtf8(broadcast.message);
             const error = new Error(err.message);
-            // @ts-ignore
-            error.error = broadcast.code;
+            (error as any).error = broadcast.code;
             throw error;
         }
 
@@ -284,10 +284,8 @@ export class Method {
 
         const checkResult: (index: number) => any = async (index) => {
             if (index === (options.pollTimes || 20)) {
-                const error = new Error('Cannot find result in solidity node');
-                // @ts-ignore
+                const error: any = new Error('Cannot find result in solidity node');
                 error.error = 'Cannot find result in solidity node';
-                // @ts-ignore
                 error.transaction = signedTransaction;
                 throw error;
             }
@@ -300,23 +298,17 @@ export class Method {
             }
 
             if (output.result && output.result === 'FAILED') {
-                const error = new Error(this.tronWeb.toUtf8(output.resMessage));
-                // @ts-ignore
+                const error: any = new Error(this.tronWeb.toUtf8(output.resMessage));
                 error.error = this.tronWeb.toUtf8(output.resMessage);
-                // @ts-ignore
                 error.transaction = signedTransaction;
-                // @ts-ignore
                 error.output = output;
                 throw error;
             }
 
             if (!utils.hasProperty(output, 'contractResult')) {
-                const error = new Error('Failed to execute: ' + JSON.stringify(output, null, 2));
-                // @ts-ignore
+                const error: any = new Error('Failed to execute: ' + JSON.stringify(output, null, 2));
                 error.error = 'Failed to execute: ' + JSON.stringify(output, null, 2);
-                // @ts-ignore
                 error.transaction = signedTransaction;
-                // @ts-ignore
                 error.output = output;
                 throw error;
             }
