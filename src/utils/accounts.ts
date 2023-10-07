@@ -40,12 +40,13 @@ export function generateRandom(password: string = '', path = TRON_BIP39_PATH_IND
 export function generateAccountWithMnemonic(
     mnemonic: string,
     path: string = TRON_BIP39_PATH_INDEX_0,
+    password: string = '',
     wordlist: Wordlist | null = null
 ) {
     if (!String(path).match(/^m\/44\'\/195\'/)) {
         throw new Error(INVALID_TRON_PATH_ERROR_MSG);
     }
-    const account = ethersHDNodeWallet.fromMnemonic(Mnemonic.fromPhrase(mnemonic, '', wordlist), path);
+    const account = ethersHDNodeWallet.fromMnemonic(Mnemonic.fromPhrase(mnemonic, password, wordlist), path);
 
     const result = {
         mnemonic: account.mnemonic,
