@@ -40,7 +40,7 @@ export function generateRandom(password = '', path = TRON_BIP39_PATH_INDEX_0, wo
 export function generateAccountWithMnemonic(
     mnemonic: string,
     path: string = TRON_BIP39_PATH_INDEX_0,
-    password: string = '',
+    password: string | null | undefined = '',
     wordlist: Wordlist | null = null
 ) {
     // eslint-disable-next-line no-useless-escape
