@@ -1063,10 +1063,10 @@ describe('TronWeb.utils.transaction', function () {
 
                 const sendTrxTransaction = await tronWeb.transactionBuilder.sendTrx(accounts.b58[5], 10000e6);
                 await broadcaster(sendTrxTransaction, PRIVATE_KEY);
-                waitChainData('tx', sendTrxTransaction.txID);
+                await waitChainData('tx', sendTrxTransaction.txID);
                 const applyForSrTransaction = await tronWeb.transactionBuilder.applyForSR(accounts.b58[5], 'url.tron.network');
                 await broadcaster(applyForSrTransaction, accounts.pks[5]);
-                waitChainData('tx', applyForSrTransaction.txID);
+                await waitChainData('tx', applyForSrTransaction.txID);
                 let parameters = [{ "key": 0, "value": 100000 }, { "key": 1, "value": 2 }]
 
                 await broadcaster(tronWeb.transactionBuilder.createProposal(parameters, ADDRESS_BASE58), PRIVATE_KEY)
@@ -2526,10 +2526,10 @@ describe('TronWeb.utils.transaction', function () {
 
                 const sendTrxTransaction = await tronWeb.transactionBuilder.sendTrx(accounts.b58[16], 10000e6);
                 await broadcaster(sendTrxTransaction, PRIVATE_KEY);
-                waitChainData('tx', sendTrxTransaction.txID);
+                await waitChainData('tx', sendTrxTransaction.txID);
                 const applyForSrTransaction = await tronWeb.transactionBuilder.applyForSR(accounts.b58[16], 'url.tron.network');
                 await broadcaster(applyForSrTransaction, accounts.pks[16]);
-                waitChainData('tx', applyForSrTransaction.txID);
+                await waitChainData('tx', applyForSrTransaction.txID);
                 let parameters = [{ "key": 0, "value": 100000 }, { "key": 1, "value": 2 }]
 
                 await broadcaster(tronWeb.transactionBuilder.createProposal(parameters, ADDRESS_BASE58), PRIVATE_KEY)
