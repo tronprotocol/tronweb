@@ -244,4 +244,4 @@ export class Contract {
     // }
 }
 
-export { CallOptions, SendOptions, AbiFragmentNoErrConstructor, Method } from './method';
+export { CallOptions, SendOptions, AbiFragmentNoErrConstructor, Method } from './method.js';
