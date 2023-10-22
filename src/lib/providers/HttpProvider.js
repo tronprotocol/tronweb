@@ -1,5 +1,6 @@
 import axios from 'axios';
 import utils from 'utils';
+import fetchAdapter from "./fetchAdapter";
 
 export default class HttpProvider {
     constructor(host, timeout = 30000, user = false, password = false, headers = {}, statusPage = '/') {
@@ -24,6 +25,7 @@ export default class HttpProvider {
         this.instance = axios.create({
             baseURL: host,
             timeout: timeout,
+            adapter: fetchAdapter,
             headers: headers,
             auth: user && {
                 user,
