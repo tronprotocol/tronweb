@@ -727,9 +727,14 @@ export class TransactionBuilder {
 
                     if (!type || !isString(type) || !type.length) throw new Error('Invalid parameter type provided: ' + type);
 
-                    if (type === 'address') value = toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
-                    else if (type.match(/^([^\x5b]*)(\x5b|$)/)?.[0] === 'address[')
-                        value = value.map((v: string) => toHex(v).replace(ADDRESS_PREFIX_REGEX, '0x'));
+                    const replaceAddressPrefix = (value: unknown): any => {
+                        if (isArray(value)) {
+                            return value.map((v) => replaceAddressPrefix(v));
+                        }
+                        return toHex(value as string).replace(ADDRESS_PREFIX_REGEX, '0x');
+                    };
+                    if (type === 'address') value = replaceAddressPrefix(value);
+                    else if (type.match(/^([^\x5b]*)(\x5b|$)/)?.[0] === 'address[') value = replaceAddressPrefix(value);
                     else if (/trcToken/.test(type)) {
                         type = type.replace(/trcToken/, 'uint256');
                     }
