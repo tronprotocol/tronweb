@@ -542,11 +542,11 @@ export class Trx {
         return base58Address == TronWeb.address.fromHex(address);
     }
 
-    async verifyMessageV2(message: string | Uint8Array, signature: string) {
+    async verifyMessageV2(message: string | Uint8Array | Array<number>, signature: string) {
         return Trx.verifyMessageV2(message, signature);
     }
 
-    static verifyMessageV2(message: string | Uint8Array, signature: string) {
+    static verifyMessageV2(message: string | Uint8Array | Array<number>, signature: string) {
         return utils.message.verifyMessage(message, signature);
     }
 
@@ -643,11 +643,11 @@ export class Trx {
      * @param {reserved} options
      * @param {callback function} callback
      */
-    signMessageV2(message: string | Uint8Array, privateKey = this.tronWeb.defaultPrivateKey) {
+    signMessageV2(message: string | Uint8Array | Array<number>, privateKey = this.tronWeb.defaultPrivateKey) {
         return Trx.signMessageV2(message, privateKey as string);
     }
 
-    static signMessageV2(message: string | Uint8Array, privateKey: string) {
+    static signMessageV2(message: string | Uint8Array | Array<number>, privateKey: string) {
         return utils.message.signMessage(message, privateKey);
     }
 

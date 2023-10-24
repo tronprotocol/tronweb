@@ -5,15 +5,17 @@ import { hexStr2byteArray } from './code.js';
 
 export const TRON_MESSAGE_PREFIX = '\x19TRON Signed Message:\n';
 
-export function hashMessage(message: string | Uint8Array) {
+export function hashMessage(message: string | Uint8Array | Array<number>) {
     if (typeof message === 'string') {
         message = toUtf8Bytes(message);
+    } else if (Array.isArray(message)) {
+        message = new Uint8Array(message);
     }
 
     return keccak256(concat([toUtf8Bytes(TRON_MESSAGE_PREFIX), toUtf8Bytes(String(message.length)), message]));
 }
 
-export function signMessage(message: string | Uint8Array, privateKey: string) {
+export function signMessage(message: string | Uint8Array | Array<number>, privateKey: string) {
     if (!privateKey.match(/^0x/)) {
         privateKey = '0x' + privateKey;
     }
@@ -25,7 +27,7 @@ export function signMessage(message: string | Uint8Array, privateKey: string) {
     return joinSignature(signature);
 }
 
-export function verifyMessage(message: string | Uint8Array, signature: string) {
+export function verifyMessage(message: string | Uint8Array | Array<number>, signature: string) {
     if (!signature.match(/^0x/)) {
         signature = '0x' + signature;
     }
