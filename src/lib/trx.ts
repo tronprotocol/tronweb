@@ -599,6 +599,10 @@ export class Trx {
             return Trx.signString(transaction, privateKey as string, useTronHeader) as SignedStringOrSignedTransaction<T>;
         }
 
+        if (!utils.isObject(transaction)) {
+            throw new Error('Invalid transaction provided');
+        }
+
         if (!multisig && (transaction as SignedTransaction).signature) {
             throw new Error('Transaction is already signed');
         }
