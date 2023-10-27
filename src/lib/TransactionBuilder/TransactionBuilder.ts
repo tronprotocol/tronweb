@@ -1010,6 +1010,8 @@ export class TransactionBuilder {
 
             args.function_selector = functionSelector;
             args.parameter = parameterStr;
+        } else if (options.input) {
+            args.data = options.input;
         }
 
         args.call_value = parseInt(callValue as number);

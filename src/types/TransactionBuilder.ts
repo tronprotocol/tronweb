@@ -121,6 +121,10 @@ export interface TriggerSmartContractOptions {
      */
     rawParameter?: string;
     /**
+     * If functionSelector is not specified, this parameter will be used as data.
+     */
+    input?: string;
+    /**
      * Create transaction locally.
      */
     txLocal?: boolean;
