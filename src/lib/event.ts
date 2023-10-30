@@ -146,7 +146,7 @@ export class Event {
         if (utils.isInteger(limit)) qs.limit = limit;
 
         const res = await this.tronWeb.eventServer.request<EventResponse>(
-            `v1/contract/${this.tronWeb.address.fromHex(contractAddress)}/events?${new URLSearchParams(qs).toString()}`
+            `v1/contracts/${this.tronWeb.address.fromHex(contractAddress)}/events?${new URLSearchParams(qs).toString()}`
         );
         if (res.success) {
             return res;
