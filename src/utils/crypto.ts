@@ -98,7 +98,7 @@ export function getRowBytesFromTransactionBase64(base64Data: string): Uint8Array
     const bytesDecode = base64DecodeFromString(base64Data);
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const transaction = proto.protocol.Transaction.deserializeBinary(bytesDecode);
+    const transaction = globalThis.proto.protocol.Transaction.deserializeBinary(bytesDecode);
     const raw = transaction.getRawData();
 
     return raw.serializeBinary();
