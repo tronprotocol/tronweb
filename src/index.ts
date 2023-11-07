@@ -1,18 +1,38 @@
 import utils from './utils/index.js';
 export { utils };
 
-export { BigNumber } from 'bignumber.js';
+import { BigNumber } from 'bignumber.js';
+export { BigNumber };
 
-export { providers } from './lib/providers/index.js';
+import { providers } from './lib/providers/index.js';
+export { providers };
 
-export { TransactionBuilder } from './lib/TransactionBuilder/TransactionBuilder.js';
+import { TransactionBuilder } from './lib/TransactionBuilder/TransactionBuilder.js';
+export { TransactionBuilder };
 
-export { Trx } from './lib/trx.js';
+import { Trx } from './lib/trx.js';
+export { Trx };
 
-export { Contract } from './lib/contract/index.js';
+import { Contract } from './lib/contract/index.js';
+export { Contract };
 
-export { Event } from './lib/event.js';
+import { Event } from './lib/event.js';
+export { Event };
 
-export { Plugin } from './lib/plugin.js';
+import { Plugin } from './lib/plugin.js';
+export { Plugin };
 
-export { TronWeb } from './tronweb.js';
+import { TronWeb } from './tronweb.js';
+export { TronWeb };
+
+export default {
+    utils,
+    BigNumber,
+    providers,
+    TransactionBuilder,
+    Trx,
+    Contract,
+    Event,
+    Plugin,
+    TronWeb,
+};
