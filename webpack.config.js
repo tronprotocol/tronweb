@@ -53,23 +53,26 @@ module.exports = [
         module: {
             rules: [
                 {
-                    test: /\.ts$/,
+                    test: /\.[jt]s$/,
                     use: [
                         {
                             loader: 'babel-loader',
                             options: {
-                                presets: ['@babel/preset-env'],
+                                presets: [
+                                    [
+                                        '@babel/preset-env',
+                                        {
+                                            targets: {
+                                                browsers: ['>0.25%', 'not dead'],
+                                            },
+                                        },
+                                    ],
+                                    '@babel/preset-typescript',
+                                ],
                                 plugins: basePlugins,
                             },
                         },
-                        {
-                            loader: 'ts-loader',
-                            options: {
-                                configFile: path.resolve(__dirname, 'tsconfig.esm.json'),
-                            },
-                        },
                     ],
-                    exclude: ['/node_modules/', '/test/'],
                 },
             ],
         },
