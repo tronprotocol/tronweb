@@ -76,7 +76,7 @@ module.exports = [
                     test: /\.ts$/,
                     loader: 'ts-loader',
                     options: {
-                        configFile: path.resolve(__dirname, 'tsconfig.cjs.json'),
+                        configFile: path.resolve(__dirname, 'tsconfig.esm.json'),
                     },
                     exclude: ['/node_modules/', '/test/'],
                 },
