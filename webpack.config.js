@@ -1,5 +1,6 @@
 const path = require('path');
 const externals = require('webpack-node-externals');
+const webpack = require('webpack');
 
 const { baseConfig, nodePlugins, basePlugins } = require('./webpack.base.config');
 
@@ -50,6 +51,11 @@ module.exports = [
     },
     {
         ...baseConfig,
+        plugins: [
+            new webpack.ProvidePlugin({
+                Buffer: ['buffer', 'Buffer'],
+            }),
+        ],
         module: {
             rules: [
                 {
