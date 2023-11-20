@@ -7,6 +7,7 @@ import broadcaster from './helpers/broadcaster.js';
 import wait from './helpers/wait.js';
 import { Address } from '../src/types/Trx.js';
 import { IContract } from '../src/lib/contract/index.js';
+import { RawAxiosRequestHeaders } from 'axios';
 
 const HttpProvider = providers.HttpProvider;
 const {
@@ -948,8 +949,8 @@ describe('#testTronGrid', function () {
                 headers: { 'TRON-PRO-API-KEY': TEST_TRON_HEADER_API_KEY },
             });
 
-            assert.equal(tronWeb.fullNode.headers['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
-            assert.equal(tronWeb.eventServer!.headers['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
+            assert.equal((tronWeb.fullNode.headers as RawAxiosRequestHeaders)['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
+            assert.equal((tronWeb.eventServer!.headers as RawAxiosRequestHeaders)['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
 
             const account = await tronWeb.trx.getAccount();
             assert.equal(typeof account, 'object');
@@ -965,8 +966,8 @@ describe('#testTronGrid', function () {
                 eventHeaders: { 'TRON-PRO-API-KEY': TEST_TRON_HEADER_API_KEY },
             });
 
-            assert.equal(tronWeb.fullNode.headers['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
-            assert.equal(tronWeb.eventServer!.headers['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
+            assert.equal((tronWeb.fullNode.headers as RawAxiosRequestHeaders)['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
+            assert.equal((tronWeb.eventServer!.headers as RawAxiosRequestHeaders)['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
 
             const account = await tronWeb.trx.getAccount();
             assert.equal(typeof account, 'object');
@@ -981,8 +982,8 @@ describe('#testTronGrid', function () {
             });
             tronWeb.setHeader({ 'TRON-PRO-API-KEY': TEST_TRON_HEADER_API_KEY });
 
-            assert.equal(tronWeb.fullNode.headers['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
-            assert.equal(tronWeb.eventServer!.headers['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
+            assert.equal((tronWeb.fullNode.headers as RawAxiosRequestHeaders)['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
+            assert.equal((tronWeb.eventServer!.headers as RawAxiosRequestHeaders)['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
 
             const account = await tronWeb.trx.getAccount();
             assert.equal(typeof account, 'object');
@@ -999,8 +1000,8 @@ describe('#testTronGrid', function () {
                 'TRON-PRO-API-KEY': TEST_TRON_HEADER_API_KEY,
             });
 
-            assert.equal(tronWeb.fullNode.headers['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
-            assert.equal(tronWeb.eventServer!.headers['TRON-PRO-API-KEY'], undefined);
+            assert.equal((tronWeb.fullNode.headers as RawAxiosRequestHeaders)['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
+            assert.equal((tronWeb.eventServer!.headers as RawAxiosRequestHeaders)['TRON-PRO-API-KEY'], undefined);
 
             const account = await tronWeb.trx.getAccount();
             assert.equal(typeof account, 'object');
@@ -1020,8 +1021,8 @@ describe('#testTronGrid', function () {
                 'TRON-PRO-API-KEY': TEST_TRON_HEADER_API_KEY,
             });
 
-            assert.equal(tronWeb.fullNode.headers['TRON-PRO-API-KEY'], undefined);
-            assert.equal(tronWeb.eventServer!.headers['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
+            assert.equal((tronWeb.fullNode.headers as RawAxiosRequestHeaders)['TRON-PRO-API-KEY'], undefined);
+            assert.equal((tronWeb.eventServer!.headers as RawAxiosRequestHeaders)['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
 
             try {
                 await tronWeb.trx.getAccount();
@@ -1040,8 +1041,8 @@ describe('#testTronGrid', function () {
                 headers: { 'TRON-PRO-API-KEY': FAKE_KEY },
             });
 
-            assert.equal(tronWeb.fullNode.headers['TRON-PRO-API-KEY'], FAKE_KEY);
-            assert.equal(tronWeb.eventServer!.headers['TRON-PRO-API-KEY'], FAKE_KEY);
+            assert.equal((tronWeb.fullNode.headers as RawAxiosRequestHeaders)['TRON-PRO-API-KEY'], FAKE_KEY);
+            assert.equal((tronWeb.eventServer!.headers as RawAxiosRequestHeaders)['TRON-PRO-API-KEY'], FAKE_KEY);
 
             try {
                 await tronWeb.trx.getAccount();
@@ -1064,8 +1065,8 @@ describe('#testTronGrid', function () {
                 eventHeaders: { 'TRON-PRO-API-KEY': TEST_TRON_HEADER_API_KEY },
             });
 
-            assert.equal(tronWeb.fullNode.headers['TRON-PRO-API-KEY'], FAKE_KEY);
-            assert.equal(tronWeb.eventServer!.headers['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
+            assert.equal((tronWeb.fullNode.headers as RawAxiosRequestHeaders)['TRON-PRO-API-KEY'], FAKE_KEY);
+            assert.equal((tronWeb.eventServer!.headers as RawAxiosRequestHeaders)['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
 
             try {
                 await tronWeb.trx.getAccount();
@@ -1085,8 +1086,8 @@ describe('#testTronGrid', function () {
                 eventHeaders: { 'TRON-PRO-API-KEY': FAKE_KEY },
             });
 
-            assert.equal(tronWeb.fullNode.headers['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
-            assert.equal(tronWeb.eventServer!.headers['TRON-PRO-API-KEY'], FAKE_KEY);
+            assert.equal((tronWeb.fullNode.headers as RawAxiosRequestHeaders)['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
+            assert.equal((tronWeb.eventServer!.headers as RawAxiosRequestHeaders)['TRON-PRO-API-KEY'], FAKE_KEY);
 
             const account = await tronWeb.trx.getAccount();
             assert.equal(typeof account, 'object');
