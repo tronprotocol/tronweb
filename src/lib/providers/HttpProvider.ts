@@ -1,15 +1,17 @@
-import axios, { Axios, AxiosRequestHeaders, Method } from 'axios';
+import axios, { Axios, Method, RawAxiosRequestHeaders, AxiosHeaders, HeadersDefaults } from 'axios';
 import { hasProperties, isObject, isValidURL } from '../../utils/validations.js';
+
+type HeadersType = RawAxiosRequestHeaders | AxiosHeaders | Partial<HeadersDefaults>;
 
 export default class HttpProvider {
     host: string;
     timeout: number;
     user: string;
     password: string;
-    headers: AxiosRequestHeaders;
+    headers: HeadersType;
     statusPage: string;
     instance: Axios;
-    constructor(host: string, timeout = 30000, user = '', password = '', headers: AxiosRequestHeaders = {}, statusPage = '/') {
+    constructor(host: string, timeout = 30000, user = '', password = '', headers: HeadersType = {}, statusPage = '/') {
         if (!isValidURL(host)) throw new Error('Invalid URL provided to HttpProvider');
 
         if (isNaN(timeout) || timeout < 0) throw new Error('Invalid timeout duration provided');
