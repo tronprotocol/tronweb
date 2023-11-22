@@ -117,7 +117,7 @@ export interface TriggerSmartContractOptions {
      */
     shieldedParameter?: string;
     /**
-     * Alias of `rawParameter`. If exists, the `shieldedParameter`, `parametersV2` and `parameters` will be ignored.
+     * Alias of `shieldedParameter`. If exists, the `shieldedParameter`, `parametersV2` and `parameters` will be ignored.
      */
     rawParameter?: string;
     /**
