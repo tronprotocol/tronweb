@@ -250,6 +250,19 @@ const buildCancelFreezeBalanceV2Contract = (value, options) => {
     );
 };
 
+const buildCancelFreezeBalanceV2Contract = (value, options) => {
+    const withdrawExpireUnfreeze = new WithdrawExpireUnfreezeContract();
+    const { owner_address } = value;
+    withdrawExpireUnfreeze.setOwnerAddress(fromHexString(owner_address));
+
+    return buildCommonTransaction(
+        withdrawExpireUnfreeze,
+        Transaction.Contract.ContractType.CANCELALLUNFREEZEV2CONTRACT,
+        'CancelAllUnfreezeV2Contract',
+        options.Permission_id,
+    );
+};
+
 const buildUnfreezeBalanceV2Contract = (value, options) => {
     const unfreezeBalanceV2Contract = new UnfreezeBalanceV2Contract();
     const { owner_address, unfreeze_balance, resource } = value;
