@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "declaration": false,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "importHelpers": true,
+        "lib": ["es2020", "es5"],
+        "moduleResolution": "node",
+        "noEmitOnError": true,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": true,
+        "preserveSymlinks": true,
+        "preserveWatchOutput": true,
+        "pretty": false,
+        "rootDir": "./src",
+        "strict": true,
+        "sourceMap": true,
+        "target": "ES2022",
+        "resolveJsonModule": true
+    },
+    "exclude": ["src/protocol/**/*"],
+    "include": ["src/**/*"]
+}

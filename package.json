@@ -1,25 +1,54 @@
 {
     "name": "tronweb",
-    "version": "5.3.1",
+    "version": "6.0.0",
     "description": "JavaScript SDK that encapsulates the TRON HTTP API",
-    "main": "dist/TronWeb.node.js",
+    "main": "./lib/commonjs/index.js",
+    "module": "./lib/esm/index.js",
+    "types": "./lib/esm/index.d.ts",
+    "files": [
+        "lib",
+        "dist"
+    ],
+    "exports": {
+        ".": {
+            "import": "./lib/esm/index.js",
+            "require": "./lib/commonjs/index.js"
+        },
+        "./utils": {
+            "import": "./lib/esm/utils/index.js",
+            "require": "./lib/commonjs/utils/index.js"
+        }
+    },
     "keywords": [
         "TRON",
         "tronweb"
     ],
     "scripts": {
-        "prepare": "npm run build",
+        "build:esm": "tsc --project tsconfig.esm.json && echo '{\"type\": \"module\"}' > ./lib/esm/package.json && npm run copy-protocol:esm",
+        "build:cjs": "tsc --project tsconfig.cjs.json && echo '{\"type\": \"commonjs\"}' > ./lib/commonjs/package.json && npm run copy-protocol:cjs",
+        "build:types": "tsc --project tsconfig.types.json",
+        "build:test": "tsc --project tsconfig.test.json && echo '{\"type\": \"commonjs\"}' > ./lib/commonjs/package.json && cp -R ./src/protocol ./lib/commonjs/src/",
+        "build:dist": "webpack --config webpack.config.js --progress --color",
+        "build:all": "npm run clean:all && npm run build:esm && npm run build:cjs && npm run build:dist",
+        "copy-protocol:cjs": "cp -R ./src/protocol ./lib/commonjs/",
+        "copy-protocol:esm": "cp -R ./src/protocol ./lib/esm/",
+        "prepare": "husky install && npm run build",
         "build": "npm run clean && webpack --config webpack.config.js --progress --color",
         "build:dev": "NODE_ENV=development npm run build",
+        "clean:all": "rimraf dist lib",
         "clean": "rimraf dist",
-        "newaccount": "node scripts/test-node.js && node test/helpers/newAccounts 100",
-        "test": "npm run-script newaccount && npx mocha 'test/**/*.test.js' --timeout 120000",
+        "newaccount": "node scripts/test-node.js && node lib/commonjs/test/helpers/newAccounts 100",
+        "test": "npm run build:test && npm run-script newaccount && npx mocha 'lib/commonjs/test/**/*.test.js' --timeout 120000",
+        "test:esm": "npm run-script newaccount && npx mocha 'lib/esm/test/**/*.test.js' --timeout 120000",
         "testAbi": "node scripts/test-node.js && node test/helpers/newAccounts 1 && npx mocha 'test/**/abi.test.js' --timeout 120000",
         "testTx": "node scripts/test-node.js && node test/helpers/newAccounts 100 && npx mocha 'test/**/transaction.test.js' --timeout 120000",
         "test-no-accounts": "node scripts/test-node.js && npx mocha 'test/**/*.test.js'",
         "test:browser": "npm run-script newaccount && node scripts/test-browser.js && npx karma start --single-run --browsers ChromeHeadless",
         "coverage": "npm run-script test:browser && npm run-script test",
-        "btest": "npm run build:dev && npm run test"
+        "btest": "npm run build:dev && npm run test",
+        "format-all": "prettier --write ./src",
+        "lint": "eslint src",
+        "lint:fix": "eslint src --fix"
     },
     "husky": {
         "hooks": {
@@ -30,32 +59,50 @@
         "@babel/runtime": "^7.0.0",
         "@ethersproject/abi": "^5.7.0",
         "@tronweb3/google-protobuf": "^3.21.2",
-        "axios": "^0.26.1",
+        "axios": "^1.6.2",
         "bignumber.js": "^9.0.1",
-        "ethereum-cryptography": "^2.0.0",
-        "ethers": "^6.6.0",
+        "eslint-config-prettier": "^8.8.0",
+        "ethereum-cryptography": "^2.1.2",
+        "ethers": "^6.8.0",
         "eventemitter3": "^3.1.0",
+        "events": "^3.3.0",
         "injectpromise": "^1.0.0",
-        "lodash": "^4.17.21",
         "querystring-es3": "^0.2.1",
         "semver": "^5.6.0",
+        "typescript": "^5.1.6",
         "validator": "^13.7.0"
     },
     "devDependencies": {
         "@babel/core": "^7.21.0",
-        "@babel/plugin-proposal-class-properties": "^7.0.0",
-        "@babel/plugin-proposal-numeric-separator": "^7.0.0",
-        "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
-        "@babel/plugin-transform-runtime": "^7.0.0",
-        "@babel/preset-env": "^7.20.2",
+        "@babel/plugin-transform-class-properties": "^7.23.3",
+        "@babel/plugin-transform-numeric-separator": "^7.23.3",
+        "@babel/plugin-transform-object-rest-spread": "^7.23.3",
+        "@babel/plugin-transform-private-methods": "^7.23.3",
+        "@babel/plugin-transform-private-property-in-object": "^7.23.3",
+        "@babel/plugin-transform-runtime": "^7.23.3",
+        "@babel/preset-env": "^7.23.3",
+        "@babel/preset-typescript": "^7.23.3",
+        "@types/chai": "^4.3.6",
+        "@types/estree": "^1.0.1",
+        "@types/json-schema": "^7.0.12",
+        "@types/lodash": "^4.14.197",
+        "@types/mocha": "^10.0.1",
+        "@types/node": "^20.4.2",
+        "@types/validator": "^13.7.17",
+        "@typescript-eslint/eslint-plugin": "^5.61.0",
+        "@typescript-eslint/parser": "^5.61.0",
         "babel-loader": "^8.0.2",
         "babel-plugin-istanbul": "^6.1.1",
         "babel-plugin-source-map-support": "^2.1.3",
-        "chai": "^4.1.2",
+        "buffer": "^6.0.3",
+        "chai": "^4.3.7",
         "chalk": "^2.4.1",
+        "eslint": "^8.44.0",
+        "eslint-import-resolver-typescript": "^3.5.5",
         "globby": "^13.1.3",
         "husky": "^7.0.0",
         "istanbul": "^0.4.5",
+        "json-schema": "^0.4.0",
         "jsonwebtoken": "^9.0.0",
         "karma": "^6.3.17",
         "karma-chrome-launcher": "^2.2.0",
@@ -69,27 +116,19 @@
         "karma-webpack": "^5.0.0",
         "matchdep": "^2.0.0",
         "mocha": "^10.2.0",
+        "prettier": "^2.8.8",
         "puppeteer": "^13.5.1",
         "rimraf": "^3.0.2",
         "source-map-support": "^0.5.19",
-        "webpack": "^5.75.0",
+        "ts-loader": "^9.4.3",
+        "webpack": "^5.78.0",
         "webpack-cli": "^5.0.1",
         "webpack-node-externals": "^3.0.0"
     },
     "author": {
-        "name": "Kondax",
-        "url": "https://github.com/Kondax"
+        "name": "Tron Protocol",
+        "url": "https://github.com/tronprotocol"
     },
-    "contributors": [
-        {
-            "name": "Francesco Sullo",
-            "url": "https://github.com/sullof"
-        },
-        {
-            "name": "TRON-US",
-            "url": "https://github.com/tron-us"
-        }
-    ],
     "homepage": "https://tronweb.network",
     "license": "MIT",
     "repository": "https://github.com/tronprotocol/tronweb.git"
