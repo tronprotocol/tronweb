@@ -85,30 +85,6 @@ function extractArrayDim(type: string) {
     return (size.match(/\]\[/g) || []).length + 1;
 }
 
-// export interface ABI {
-//     entrys?: ABIType[];
-// }
-
-// export type ParamType = {
-//     readonly name: string;
-//     readonly type: string;
-//     readonly baseType?: string;
-//     readonly internalType?: string;
-//     readonly indexed?: null | boolean;
-//     readonly components?: null | ReadonlyArray<ParamType>;
-// };
-
-// export type ABIType = {
-//     readonly anonymous?: boolean;
-//     readonly constant?: boolean;
-//     readonly name?: string;
-//     readonly inputs?: ReadonlyArray<ParamType>;
-//     readonly outputs?: ReadonlyArray<ParamType>;
-//     readonly stateMutability: 'pure' | 'view' | 'nonpayable' | 'payable';
-//     readonly payable?: boolean;
-//     readonly type: 'function' | 'constructor' | 'fallback' | 'function' | 'event' | 'error';
-// };
-
 export function encodeParamsV2ByABI(funABI: FunctionFragment, args: any[]) {
     const types: string[] = [];
 

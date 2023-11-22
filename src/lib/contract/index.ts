@@ -47,68 +47,6 @@ export class Contract {
         this.loadAbi(abi);
     }
 
-    // async _getEvents(options = {}) {
-    //     const events = await this.tronWeb.event.getEventsByContractAddress(this.address, options);
-    //     const [latestEvent] = events.sort((a, b) => b.block - a.block);
-    //     const newEvents = events.filter((event, index) => {
-    //         if (
-    //             options.resourceNode &&
-    //             event.resourceNode &&
-    //             options.resourceNode.toLowerCase() !== event.resourceNode.toLowerCase()
-    //         ) {
-    //             return false;
-    //         }
-
-    //         const duplicate = events.slice(0, index).some((priorEvent) => JSON.stringify(priorEvent) == JSON.stringify(event));
-
-    //         if (duplicate) return false;
-
-    //         if (!this.lastBlock) return true;
-
-    //         return event.block > this.lastBlock;
-    //     });
-
-    //     if (latestEvent) this.lastBlock = latestEvent.block;
-
-    //     return newEvents;
-    // }
-
-    // async _startEventListener(options = {}, callback) {
-    //     if (utils.isFunction(options)) {
-    //         callback = options;
-    //         options = {};
-    //     }
-
-    //     if (this.eventListener) clearInterval(this.eventListener);
-
-    //     if (!this.tronWeb.eventServer) throw new Error('Event server is not configured');
-
-    //     if (!this.address) throw new Error('Contract is not configured with an address');
-
-    //     this.eventCallback = callback;
-    //     await this._getEvents(options);
-
-    //     this.eventListener = setInterval(() => {
-    //         this._getEvents(options)
-    //             .then((newEvents) =>
-    //                 newEvents.forEach((event) => {
-    //                     this.eventCallback && this.eventCallback(event);
-    //                 })
-    //             )
-    //             .catch((err) => {
-    //                 console.error('Failed to get event list', err);
-    //             });
-    //     }, 3000);
-    // }
-
-    // _stopEventListener() {
-    //     if (!this.eventListener) return;
-
-    //     clearInterval(this.eventListener);
-    //     this.eventListener = false;
-    //     this.eventCallback = false;
-    // }
-
     hasProperty(property: number | string | symbol) {
         // eslint-disable-next-line no-prototype-builtins
         return this.hasOwnProperty(property) || (this as unknown as IContract).__proto__.hasOwnProperty(property);
@@ -209,39 +147,6 @@ export class Contract {
             throw new Error(ex);
         }
     }
-
-    // events(options = {}, callback = false) {
-    //     if (utils.isFunction(options)) {
-    //         callback = options;
-    //         options = {};
-    //     }
-
-    //     if (!utils.isFunction(callback)) throw new Error('Callback function expected');
-
-    //     const self = this;
-
-    //     return {
-    //         start(startCallback = false) {
-    //             if (!startCallback) {
-    //                 self._startEventListener(options, callback);
-    //                 return this;
-    //             }
-
-    //             self._startEventListener(options, callback)
-    //                 .then(() => {
-    //                     startCallback();
-    //                 })
-    //                 .catch((err) => {
-    //                     startCallback(err);
-    //                 });
-
-    //             return this;
-    //         },
-    //         stop() {
-    //             self._stopEventListener();
-    //         },
-    //     };
-    // }
 }
 
 export { CallOptions, SendOptions, AbiFragmentNoErrConstructor, Method } from './method.js';

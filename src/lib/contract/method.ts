@@ -132,7 +132,6 @@ export class Method {
 
                 return await this._send([], [], options, privateKey);
             },
-            // watch: (...methodArgs) => this._watch(...methodArgs),
         };
     }
 
@@ -332,99 +331,4 @@ export class Method {
 
         return checkResult(0);
     }
-
-    // async _watch(options = {}, callback = false) {
-    //     if (utils.isFunction(options)) {
-    //         callback = options;
-    //         options = {};
-    //     }
-
-    //     if (!utils.isFunction(callback)) throw new Error('Expected callback to be provided');
-
-    //     if (!this.contract.address) return callback('Smart contract is missing address');
-
-    //     if (!this.abi.type || !/event/i.test(this.abi.type)) return callback('Invalid method type for event watching');
-
-    //     if (!this.tronWeb.eventServer) return callback('No event server configured');
-
-    //     let listener = false;
-    //     let lastBlock = false;
-    //     let since = Date.now() - 1000;
-
-    //     const getEvents = async () => {
-    //         try {
-    //             const params = {
-    //                 since,
-    //                 eventName: this.name,
-    //                 sort: 'block_timestamp',
-    //                 blockNumber: 'latest',
-    //                 filters: options.filters,
-    //             };
-
-    //             if (options.size) {
-    //                 params.size = options.size;
-    //             }
-
-    //             if (options.resourceNode) {
-    //                 if (/full/i.test(options.resourceNode)) params.onlyUnconfirmed = true;
-    //                 else params.onlyConfirmed = true;
-    //             }
-
-    //             const events = await this.tronWeb.event.getEventsByContractAddress(this.contract.address, params);
-    //             const [latestEvent] = events.sort((a, b) => b.block - a.block);
-    //             const newEvents = events.filter((event, index) => {
-    //                 if (
-    //                     options.resourceNode &&
-    //                     event.resourceNode &&
-    //                     options.resourceNode.toLowerCase() !== event.resourceNode.toLowerCase()
-    //                 ) {
-    //                     return false;
-    //                 }
-
-    //                 const duplicate = events
-    //                     .slice(0, index)
-    //                     .some((priorEvent) => JSON.stringify(priorEvent) == JSON.stringify(event));
-
-    //                 if (duplicate) return false;
-
-    //                 if (!lastBlock) return true;
-
-    //                 return event.block > lastBlock;
-    //             });
-
-    //             if (latestEvent) lastBlock = latestEvent.block;
-
-    //             return newEvents;
-    //         } catch (ex) {
-    //             return Promise.reject(ex);
-    //         }
-    //     };
-
-    //     const bindListener = () => {
-    //         if (listener) clearInterval(listener);
-
-    //         listener = setInterval(() => {
-    //             getEvents()
-    //                 .then((events) =>
-    //                     events.forEach((event) => {
-    //                         callback(null, utils.parseEvent(event, this.abi));
-    //                     })
-    //                 )
-    //                 .catch((err) => callback(err));
-    //         }, 3000);
-    //     };
-
-    //     await getEvents();
-    //     bindListener();
-
-    //     return {
-    //         start: bindListener,
-    //         stop: () => {
-    //             if (!listener) return;
-
-    //             clearInterval(listener);
-    //             listener = false;
-    //         },
-    //     };
-    // }
 }
