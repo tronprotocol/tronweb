@@ -183,6 +183,22 @@ Contact the team at https://cn.developers.tron.network/docs/online-technical-sup
 
 ## Recent History
 
+__6.0.0__
+- Add full type definition for Typescript.
+- Change Default exports to Named exports.
+- Change `TronWeb.createRandom(options)` to `TronWeb.createRandom(password, path, wordlist)`.
+- Change `TronWeb.fromMnemonic(mnemonic, path, wordlist)` to `TronWeb.fromMnemonic(mnemonic, path, password, wordlist)`.
+- All methods in `Trx` and `TransactionBuilder` perform an strict check for type and position of parameters.
+- All methods in TronWeb will throw an `Error` instance instead of a string. `e.message` should be used to access error information.
+- Update `TronWeb#event` API with new backend service([#422](https://github.com/tronprotocol/tronweb/issues/422)).
+- Remove `Contract#watch()` method.
+- Support multi-dimension address array parameters in `TransactionBuilder#triggerSmartContract()`([#433](https://github.com/tronprotocol/tronweb/issues/433)).
+
+__5.3.1__
+-   Fix `getBlockRange()` error for range of 1 ([#398](https://github.com/tronprotocol/tronweb/issues/398)).
+-  Add support for `estimateenergy` in  `TransactionBuilder#deployConstantContract()` API.
+
+
 __5.3.0__
 - Replace `elliptic` with `ethereum-cryptography/secp256k1` 
 - Bump ethers to ^6.6.0
