@@ -108,29 +108,6 @@ export class TronWeb extends EventEmitter {
         };
 
         this.version = TronWeb.version;
-        [
-            'sha3',
-            'toHex',
-            'toUtf8',
-            'fromUtf8',
-            'toAscii',
-            'fromAscii',
-            'toDecimal',
-            'fromDecimal',
-            'toSun',
-            'fromSun',
-            'toBigNumber',
-            'isAddress',
-            'createAccount',
-            'address',
-            'version',
-            'createRandom',
-            'fromMnemonic',
-        ].forEach((key) => {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            this[key] = TronWeb[key];
-        });
         this.sha3 = TronWeb.sha3;
         this.fromUtf8 = TronWeb.fromUtf8;
         this.address = TronWeb.address;
