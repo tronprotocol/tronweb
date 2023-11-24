@@ -12,7 +12,7 @@ import { Plugin } from './lib/plugin.js';
 import { Event } from './lib/event.js';
 import { keccak256 } from './utils/ethersUtils.js';
 import { fromHex, fromPrivateKey, isAddress, toHex } from './utils/address.js';
-import { AxiosRequestHeaders } from 'axios';
+import { HeadersType } from './lib/providers/HttpProvider.js';
 import { isString } from './utils/validations.js';
 import { DefaultAddress, NodeProvider, TronWebOptions } from './types/TronWeb.js';
 import { ContractAbiInterface } from './types/ABI.js';
@@ -66,8 +66,8 @@ export class TronWeb extends EventEmitter {
         super();
 
         let fullNode;
-        let headers: AxiosRequestHeaders | false = false;
-        let eventHeaders: AxiosRequestHeaders | false = false;
+        let headers: HeadersType | false = false;
+        let eventHeaders: HeadersType | false = false;
 
         if (isValidOptions(options)) {
             fullNode = options.fullNode || options.fullHost;

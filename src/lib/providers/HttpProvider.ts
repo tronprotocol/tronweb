@@ -1,7 +1,7 @@
 import axios, { Axios, Method, RawAxiosRequestHeaders, AxiosHeaders, HeadersDefaults } from 'axios';
 import { hasProperties, isObject, isValidURL } from '../../utils/validations.js';
 
-type HeadersType = RawAxiosRequestHeaders | AxiosHeaders | Partial<HeadersDefaults>;
+export type HeadersType = RawAxiosRequestHeaders | AxiosHeaders | Partial<HeadersDefaults>;
 
 export default class HttpProvider {
     host: string;
