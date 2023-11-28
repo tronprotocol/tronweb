@@ -39,7 +39,7 @@ type SignedStringOrSignedTransaction<T extends string | Transaction | SignedTran
 
 export class Trx {
     private tronWeb: TronWeb;
-    private cache: { contracts: Record<string, any> }; // todo: cache record should have contract type value
+    private cache: { contracts: Record<string, any> };
     private validator: Validator;
 
     signMessage;
@@ -487,7 +487,6 @@ export class Trx {
         return Math.floor(num / 1000);
     }
 
-    // todo add contract type
     async getContract(contractAddress: string): Promise<any> {
         if (!this.tronWeb.isAddress(contractAddress)) {
             throw new Error('Invalid contract address provided');

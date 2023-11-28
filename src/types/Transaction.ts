@@ -19,7 +19,6 @@ export interface Transaction<T = ContractParamter> {
         ref_block_hash: string;
         expiration: number;
         timestamp: number;
-        // @todo: confirm these exist
         data?: unknown;
         fee_limit?: unknown;
     };
