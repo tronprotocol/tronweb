@@ -4,7 +4,7 @@ import {
     CreateSmartContractOptions,
     CreateTokenOptions,
     TriggerConstantContractOptions,
-    PermissionId,
+    TransactionCommonOptions,
     Resource,
     TriggerSmartContractOptions,
     VoteInfo,
@@ -110,7 +110,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.TransferContract');
                 assert.equal(
                     transaction.raw_data.contract[0].Permission_id || 0,
-                    param[3] ? (param[3] as PermissionId)['permissionId'] : 0
+                    param[3] ? (param[3] as TransactionCommonOptions)['permissionId'] : 0
                 );
             }
         });
@@ -447,7 +447,7 @@ describe('TronWeb.transactionBuilder', function () {
         it('should create an account by account[3]', async function () {
             const inactiveAccount = await TronWeb.createAccount();
             const inactiveAccountAddress = inactiveAccount.address.base58;
-            const params: [string, string, PermissionId?][] = [
+            const params: [string, string, TransactionCommonOptions?][] = [
                 [inactiveAccountAddress, accounts.b58[3], { permissionId: 2 }],
                 [inactiveAccountAddress, accounts.b58[3]],
             ];
@@ -518,7 +518,7 @@ describe('TronWeb.transactionBuilder', function () {
 
     describe('#setAccountId()', function () {
         it(`should set account id accounts[4]`, async function () {
-            const params: [string, string, PermissionId?][] = [
+            const params: [string, string, TransactionCommonOptions?][] = [
                 [TronWeb.toHex('abcabc110'), accounts.b58[4], { permissionId: 2 }],
                 [TronWeb.toHex('testtest'), accounts.b58[4]],
             ];
@@ -769,7 +769,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should throw if the token Id is invalid', async function () {
             await assertThrow(
-                tronWeb.transactionBuilder.purchaseToken(accounts.b58[5], 123432, 20, accounts.b58[2]),
+                tronWeb.transactionBuilder.purchaseToken(accounts.b58[5], '123432', 20, accounts.b58[2]),
                 'Invalid token ID provided'
             );
         });
@@ -796,7 +796,7 @@ describe('TronWeb.transactionBuilder', function () {
             );
 
             await assertThrow(
-                tronWeb.transactionBuilder.purchaseToken(accounts.b58[5], tokenID, 'some-amount', accounts.b58[2]),
+                tronWeb.transactionBuilder.purchaseToken(accounts.b58[5], tokenID, 'some-amount' as unknown as number, accounts.b58[2]),
                 'Invalid amount provided'
             );
         });
@@ -839,7 +839,7 @@ describe('TronWeb.transactionBuilder', function () {
         it('should allow accounts [7]  to send a token to accounts[1]', async function () {
             this.timeout(20000);
 
-            const params: [string, number, string, string, PermissionId?][] = [
+            const params: [string, number, string, string, TransactionCommonOptions?][] = [
                 [accounts.b58[1], 5, tokenID, accounts.b58[7], { permissionId: 2 }],
                 [accounts.b58[1], 5, tokenID, accounts.b58[7]],
             ];
@@ -866,7 +866,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it('should allow accounts [6]  to send a token to accounts[1]', async function () {
-            const params: [string, number, string, string, PermissionId?][] = [
+            const params: [string, number, string, string, TransactionCommonOptions?][] = [
                 [accounts.b58[1], 5, tokenID, accounts.b58[6], { permissionId: 2 }],
                 [accounts.b58[1], 5, tokenID, accounts.b58[6]],
             ];
@@ -885,7 +885,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should allow accounts [6]  to send a token to accounts[1] and broadcast', async function () {
             await wait(5);
-            const param: [string, number, string, string, PermissionId?] = [accounts.b58[1], 5, tokenID, accounts.b58[6]];
+            const param: [string, number, string, string, TransactionCommonOptions?] = [accounts.b58[1], 5, tokenID, accounts.b58[6]];
             const transaction = await tronWeb.transactionBuilder.sendToken(...param);
             const res = await broadcaster(transaction, accounts.pks[6]);
             // console.log(res);
@@ -901,7 +901,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should throw if the token Id is invalid', async function () {
             await assertThrow(
-                tronWeb.transactionBuilder.sendToken(accounts.b58[1], 5, 143234, accounts.b58[7]),
+                tronWeb.transactionBuilder.sendToken(accounts.b58[1], 5, '143234', accounts.b58[7]),
                 'Invalid token ID provided'
             );
         });
@@ -920,7 +920,7 @@ describe('TronWeb.transactionBuilder', function () {
             );
 
             await assertThrow(
-                tronWeb.transactionBuilder.sendToken(accounts.b58[1], 'amount', tokenID, accounts.b58[7]),
+                tronWeb.transactionBuilder.sendToken(accounts.b58[1], 'amount' as unknown as number, tokenID, accounts.b58[7]),
                 'Invalid amount provided'
             );
         });
@@ -933,7 +933,7 @@ describe('TronWeb.transactionBuilder', function () {
         ];
 
         it('should allow the SR account to create a new proposal as a single object', async function () {
-            const inputs: [any, string, PermissionId?][] = [
+            const inputs: [any, string, TransactionCommonOptions?][] = [
                 [parameters[0], ADDRESS_BASE58, { permissionId: 2 }],
                 [parameters[0], ADDRESS_BASE58],
             ];
@@ -1451,8 +1451,8 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should throw if frozen balance is invalid', async function () {
             const params: Parameters<typeof tronWeb.transactionBuilder.delegateResource>[] = [
-                ['-100', accounts.b58[7], 'BANDWIDTH', accounts.b58[1], false, 0, { permissionId: 2 }],
-                ['-100', accounts.b58[7], 'BANDWIDTH', accounts.b58[1]],
+                [-100, accounts.b58[7], 'BANDWIDTH', accounts.b58[1], false, 0, { permissionId: 2 }],
+                [-100, accounts.b58[7], 'BANDWIDTH', accounts.b58[1]],
             ];
 
             for (const param of params) {
@@ -1585,8 +1585,8 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should throw if frozen balance is invalid', async function () {
             const params: Parameters<typeof tronWeb.transactionBuilder.delegateResource>[] = [
-                ['-100', accounts.b58[7], 'ENERGY', accounts.b58[1], false, 0, { permissionId: 2 }],
-                ['-100', accounts.b58[7], 'ENERGY', accounts.b58[1]],
+                [-100, accounts.b58[7], 'ENERGY', accounts.b58[1], false, 0, { permissionId: 2 }],
+                [-100, accounts.b58[7], 'ENERGY', accounts.b58[1]],
             ];
 
             for (const param of params) {
@@ -1695,8 +1695,8 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should throw if frozen balance is invalid', async function () {
             const params: Parameters<TransactionBuilder['undelegateResource']>[] = [
-                ['-100', accounts.b58[7], 'BANDWIDTH', accounts.b58[1], { permissionId: 2 }],
-                ['-100', accounts.b58[7], 'BANDWIDTH', accounts.b58[1]],
+                [-100, accounts.b58[7], 'BANDWIDTH', accounts.b58[1], { permissionId: 2 }],
+                [-100, accounts.b58[7], 'BANDWIDTH', accounts.b58[1]],
             ];
 
             for (const param of params) {
@@ -1808,8 +1808,8 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should throw if frozen balance is invalid', async function () {
             const params: Parameters<TransactionBuilder['undelegateResource']>[] = [
-                ['-100', accounts.b58[7], 'ENERGY', accounts.b58[1], { permissionId: 2 }],
-                ['-100', accounts.b58[7], 'ENERGY', accounts.b58[1]],
+                [-100, accounts.b58[7], 'ENERGY', accounts.b58[1], { permissionId: 2 }],
+                [-100, accounts.b58[7], 'ENERGY', accounts.b58[1]],
             ];
 
             for (const param of params) {
