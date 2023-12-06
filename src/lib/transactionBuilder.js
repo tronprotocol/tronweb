@@ -1281,7 +1281,7 @@ export default class TransactionBuilder {
             args.call_token_value = tokenValue;
         }
 
-        const pathInfo = `wallet${options.confirmed ? 'solidity' : ''}/estimateenergy`;
+        const pathInfo = `wallet${options.confirmed ? 'solidity' : ''}/${options.estimateEnergy ? 'estimateenergy' : 'triggerconstantcontract'}`;
         return this.tronWeb[options.confirmed ? 'solidityNode' : 'fullNode']
             .request(pathInfo, args, 'post')
             .then(transaction => {
@@ -1292,6 +1292,15 @@ export default class TransactionBuilder {
                     throw new Error(
                         this.tronWeb.toUtf8(transaction.result.message)
                     );
+                }
+                return transaction;
+            })
+            .then((transaction) => {
+                if (transaction.energy_used) {
+                    return {
+                        result: transaction.result,
+                        energy_required: transaction.energy_used,
+                    };
                 }
                 return transaction;
             });
