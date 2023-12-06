@@ -41,7 +41,7 @@ Any new TRON feature will be incorporated into TronWeb. Changes to the API to im
 __[tronweb.network](https://tronweb.network)__
 
 ## Compatibility
-- Version built for Node.js v6 and above
+- Version built for Node.js v14 and above
 - Version built for browsers with more than 0.25% market share
 
 You can access either version specifically from the [dist](dist) folder.
