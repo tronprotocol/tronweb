@@ -185,7 +185,7 @@ Contact the team at https://cn.developers.tron.network/docs/online-technical-sup
 
 ## Recent History
 
-__6.0.0__
+__6.0.0-beta.0__
 - Add full type definition for Typescript.
 - Change Default exports to Named exports.
 - Change `TronWeb.createRandom(options)` to `TronWeb.createRandom(password, path, wordlist)`.
