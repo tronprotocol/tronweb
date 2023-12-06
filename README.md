@@ -161,14 +161,6 @@ const tronWeb = new TronWeb({
 )
 ```
 
-## A full example
-
-The better way to understand how to work with TronWeb is go to the demo directory in this repository.
-
-If you'd like to connect with tronlink app and chrome extention and develop a dapp on tron, you could run the demo in path demo/tron-dapp-react-demo.
-
-If you'd like to develop only with tronweb dependency, you could run the demo in path demo/tronweb-demo.
-
 ## Contributions
 
 In order to contribute you can
@@ -176,9 +168,9 @@ In order to contribute you can
 * fork this repo and clone it locally
 * install the dependencies — `npm i`
 * do your changes to the code
-* build the TronWeb dist files — `npm run build`
+* build the TronWeb dist files — `npm run build:all`
 * run a local private network using Tron Quickstart
-* run the tests — `npm test:node`
+* run the tests — `npm run test`
 * push your changes and open a pull request
 
 Contact the team at https://cn.developers.tron.network/docs/online-technical-support
