@@ -57,11 +57,11 @@ You can also ship TronWeb in a Chrome extension.
 
 ### Node.js
 ```bash
-npm install tronweb
+npm install tronweb@beta
 ```
 or
 ```bash
-yarn add tronweb
+yarn add tronweb@beta
 ```
 
 ### Browser
