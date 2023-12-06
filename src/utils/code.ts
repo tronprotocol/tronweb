@@ -9,7 +9,6 @@ import {
 import type { BytesLike } from './bytes.js';
 
 export function bin2String(array: BytesLike) {
-    // TODO Do we need this alias?
     return bytesToString(array);
 }
 
@@ -144,15 +143,6 @@ export function getStringType(str: string) {
 
     let i = 0;
 
-    // TODO Should we return 1 if someone passes a full, 42-chars long address?
-    // if (str.length == 42 && /^41/.test(str)) {
-    //     for (; i < 40; i++) {
-    //         var c = str.charAt(i+2);
-    //
-    //         if (!isHexChar(c))
-    //             break;
-    //     }
-    // } else
     if (str.length == 40) {
         for (; i < 40; i++) {
             const c = str.charAt(i);

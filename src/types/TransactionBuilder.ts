@@ -1,11 +1,12 @@
 import { AbiFragment, ContractAbiInterface } from './ABI';
 
-export interface PermissionId {
+export interface TransactionCommonOptions {
     /**
      * Permission id for multi-sign.
      */
     permissionId?: number;
 }
+
 
 export type NumberLike = string | number;
 
@@ -229,7 +230,7 @@ export interface CreateTokenOptions {
     permissionId?: number;
 }
 
-export interface UpdateTokenOptions extends PermissionId {
+export interface UpdateTokenOptions extends TransactionCommonOptions {
     /**
      * The description of token.
      * Optional.
