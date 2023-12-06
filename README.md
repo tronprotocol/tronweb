@@ -41,7 +41,7 @@ Any new TRON feature will be incorporated into TronWeb. Changes to the API to im
 __[tronweb.network](https://tronweb.network)__
 
 ## Compatibility
-- Version built for Node.js v6 and above
+- Version built for Node.js v14 and above
 - Version built for browsers with more than 0.25% market share
 
 You can access either version specifically from the [dist](dist) folder.
@@ -57,11 +57,11 @@ You can also ship TronWeb in a Chrome extension.
 
 ### Node.js
 ```bash
-npm install tronweb
+npm install tronweb@beta
 ```
 or
 ```bash
-yarn add tronweb
+yarn add tronweb@beta
 ```
 
 ### Browser
@@ -161,14 +161,6 @@ const tronWeb = new TronWeb({
 )
 ```
 
-## A full example
-
-The better way to understand how to work with TronWeb is go to the demo directory in this repository.
-
-If you'd like to connect with tronlink app and chrome extention and develop a dapp on tron, you could run the demo in path demo/tron-dapp-react-demo.
-
-If you'd like to develop only with tronweb dependency, you could run the demo in path demo/tronweb-demo.
-
 ## Contributions
 
 In order to contribute you can
@@ -176,16 +168,16 @@ In order to contribute you can
 * fork this repo and clone it locally
 * install the dependencies — `npm i`
 * do your changes to the code
-* build the TronWeb dist files — `npm run build`
+* build the TronWeb dist files — `npm run build:all`
 * run a local private network using Tron Quickstart
-* run the tests — `npm test:node`
+* run the tests — `npm run test`
 * push your changes and open a pull request
 
 Contact the team at https://cn.developers.tron.network/docs/online-technical-support
 
 ## Recent History
 
-__6.0.0__
+__6.0.0-beta.0__
 - Add full type definition for Typescript.
 - Change Default exports to Named exports.
 - Change `TronWeb.createRandom(options)` to `TronWeb.createRandom(password, path, wordlist)`.
