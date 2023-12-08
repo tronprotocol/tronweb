@@ -183,6 +183,10 @@ Contact the team at https://cn.developers.tron.network/docs/online-technical-sup
 
 ## Recent History
 
+__5.3.1__
+- Fix `getBlockRange()` error for range of 1 ([#398](https://github.com/tronprotocol/tronweb/issues/398)).
+- Add support for `estimateenergy` in  `TransactionBuilder#deployConstantContract()` API.
+
 __5.3.0__
 - Replace `elliptic` with `ethereum-cryptography/secp256k1` 
 - Bump ethers to ^6.6.0
