@@ -85,8 +85,14 @@ function getHeaderInfo(node) {
         });
 }
 
+function containsValidHeaderInfo(options = {}) {
+    return typeof options['ref_block_bytes'] === 'string'
+        && typeof options['ref_block_hash'] === 'string'
+        && typeof options['expiration'] === 'number'
+        && typeof options['timestamp'] === 'number';
+}
+
 async function createTransaction(tronWeb, type, value, Permission_id, options = {}) {
-    const metaData = await getHeaderInfo(tronWeb.fullNode);
     const tx = {
         visible: false,
         txID: '',
@@ -99,7 +105,7 @@ async function createTransaction(tronWeb, type, value, Permission_id, options = 
                 },
                 type,
             }],
-            ...metaData,
+            ...(containsValidHeaderInfo(options) ? {} : await getHeaderInfo(tronWeb.fullNode)),
             ...options,
         },
     };
@@ -173,7 +179,7 @@ export default class TransactionBuilder {
             amount: amount,
         };
 
-        createTransaction(this.tronWeb, 'TransferContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'TransferContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -233,7 +239,7 @@ export default class TransactionBuilder {
             amount: parseInt(amount)
         };
 
-        createTransaction(this.tronWeb, 'TransferAssetContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'TransferAssetContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -292,7 +298,7 @@ export default class TransactionBuilder {
             amount: parseInt(amount)
         };
 
-        createTransaction(this.tronWeb, 'ParticipateAssetIssueContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'ParticipateAssetIssueContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -378,7 +384,7 @@ export default class TransactionBuilder {
             data.receiver_address = toHex(receiverAddress)
         }
 
-        createTransaction(this.tronWeb, 'FreezeBalanceContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'FreezeBalanceContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -445,7 +451,7 @@ export default class TransactionBuilder {
             data.receiver_address = toHex(receiverAddress)
         }
 
-        createTransaction(this.tronWeb, 'UnfreezeBalanceContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'UnfreezeBalanceContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -504,7 +510,7 @@ export default class TransactionBuilder {
             data.resource = resource;
         }
 
-        createTransaction(this.tronWeb, 'FreezeBalanceV2Contract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'FreezeBalanceV2Contract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -563,7 +569,7 @@ export default class TransactionBuilder {
             data.resource = resource;
         }
 
-        createTransaction(this.tronWeb, 'UnfreezeBalanceV2Contract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'UnfreezeBalanceV2Contract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -599,7 +605,7 @@ export default class TransactionBuilder {
             owner_address: toHex(address),
         };
 
-        createTransaction(this.tronWeb, 'CancelAllUnfreezeV2Contract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'CancelAllUnfreezeV2Contract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -711,7 +717,7 @@ export default class TransactionBuilder {
             }
         }
 
-        createTransaction(this.tronWeb, 'DelegateResourceContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'DelegateResourceContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -780,7 +786,7 @@ export default class TransactionBuilder {
             data.resource = resource;
         }
 
-        createTransaction(this.tronWeb, 'UnDelegateResourceContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'UnDelegateResourceContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -815,7 +821,7 @@ export default class TransactionBuilder {
             owner_address: toHex(address)
         }
 
-        createTransaction(this.tronWeb, 'WithdrawExpireUnfreezeContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'WithdrawExpireUnfreezeContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -850,7 +856,7 @@ export default class TransactionBuilder {
             owner_address: toHex(address)
         };
 
-        createTransaction(this.tronWeb, 'WithdrawBalanceContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'WithdrawBalanceContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -902,7 +908,7 @@ export default class TransactionBuilder {
             url: fromUtf8(url),
         };
 
-        createTransaction(this.tronWeb, 'WitnessCreateContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'WitnessCreateContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -974,7 +980,7 @@ export default class TransactionBuilder {
             votes,
         };
 
-        createTransaction(this.tronWeb, 'VoteWitnessContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'VoteWitnessContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -1186,7 +1192,10 @@ export default class TransactionBuilder {
                 resolve(contract);
             })
             .then(async contract => {
-                const tx = await createTransaction(this.tronWeb, 'CreateSmartContract', contract, options?.permissionId, { fee_limit: args.fee_limit })
+                const tx = await createTransaction(this.tronWeb, 'CreateSmartContract', contract, options?.permissionId, {
+                    ...(options?.blockHeader || {}),
+                    fee_limit: args.fee_limit
+                })
                 tx.contract_address = genContractAddress(args.owner_address, tx.txID);
                 return tx;
             })
@@ -1518,6 +1527,7 @@ export default class TransactionBuilder {
             value,
             options.permissionId,
             {
+                ...(options?.blockHeader || {}),
                 fee_limit: args.fee_limit,
             }
         ).then(transaction => {
@@ -1671,7 +1681,7 @@ export default class TransactionBuilder {
             delete this.tronWeb.trx.cache.contracts[contractAddress]
         }
 
-        createTransaction(this.tronWeb, 'ClearABIContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'ClearABIContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
 
@@ -1708,7 +1718,7 @@ export default class TransactionBuilder {
             owner_address: toHex(ownerAddress)
         };
 
-        createTransaction(this.tronWeb, 'UpdateBrokerageContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'UpdateBrokerageContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -1861,7 +1871,7 @@ export default class TransactionBuilder {
             data.vote_score = parseInt(voteScore)
         }
 
-        createTransaction(this.tronWeb, 'AssetIssueContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'AssetIssueContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -1903,7 +1913,7 @@ export default class TransactionBuilder {
             account_address: toHex(accountAddress),
         };
 
-        createTransaction(this.tronWeb, 'AccountCreateContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'AccountCreateContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -1948,7 +1958,7 @@ export default class TransactionBuilder {
             owner_address: toHex(address),
         };
 
-        createTransaction(this.tronWeb, 'AccountUpdateContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'AccountUpdateContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -2001,7 +2011,7 @@ export default class TransactionBuilder {
             owner_address: toHex(address),
         }
 
-        createTransaction(this.tronWeb, 'SetAccountIdContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'SetAccountIdContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -2065,7 +2075,7 @@ export default class TransactionBuilder {
             data.new_public_limit = parseInt(freeBandwidthLimit);
         }
 
-        createTransaction(this.tronWeb, 'UpdateAssetContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'UpdateAssetContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -2134,7 +2144,7 @@ export default class TransactionBuilder {
             parameters: parameters
         };
 
-        createTransaction(this.tronWeb, 'ProposalCreateContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'ProposalCreateContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -2180,7 +2190,7 @@ export default class TransactionBuilder {
             proposal_id: parseInt(proposalID)
         };
 
-        createTransaction(this.tronWeb, 'ProposalDeleteContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'ProposalDeleteContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -2232,7 +2242,7 @@ export default class TransactionBuilder {
             is_add_approval: isApproval
         };
 
-        createTransaction(this.tronWeb, 'ProposalApproveContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'ProposalApproveContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -2291,7 +2301,7 @@ export default class TransactionBuilder {
             second_token_balance: trxBalance
         };
 
-        createTransaction(this.tronWeb, 'ExchangeCreateContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'ExchangeCreateContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -2356,7 +2366,7 @@ export default class TransactionBuilder {
             second_token_balance: secondTokenBalance
         };
 
-        createTransaction(this.tronWeb, 'ExchangeCreateContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'ExchangeCreateContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -2416,7 +2426,7 @@ export default class TransactionBuilder {
             quant: parseInt(tokenAmount)
         };
 
-        createTransaction(this.tronWeb, 'ExchangeInjectContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'ExchangeInjectContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -2476,7 +2486,7 @@ export default class TransactionBuilder {
             quant: parseInt(tokenAmount)
         };
 
-        createTransaction(this.tronWeb, 'ExchangeWithdrawContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'ExchangeWithdrawContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -2549,7 +2559,7 @@ export default class TransactionBuilder {
             expected: parseInt(tokenAmountExpected)
         };
 
-        createTransaction(this.tronWeb, 'ExchangeTransactionContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'ExchangeTransactionContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -2605,7 +2615,7 @@ export default class TransactionBuilder {
             consume_user_resource_percent: userFeePercentage
         };
 
-        createTransaction(this.tronWeb, 'UpdateSettingContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'UpdateSettingContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -2662,7 +2672,7 @@ export default class TransactionBuilder {
             origin_energy_limit: originEnergyLimit
         };
 
-        createTransaction(this.tronWeb, 'UpdateEnergyLimitContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'UpdateEnergyLimitContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
@@ -2770,7 +2780,7 @@ export default class TransactionBuilder {
             data.actives = _activesPermissions;
         }
 
-        createTransaction(this.tronWeb, 'AccountPermissionUpdateContract', data, options?.permissionId)
+        createTransaction(this.tronWeb, 'AccountPermissionUpdateContract', data, options?.permissionId, options?.blockHeader)
             .then(transaction => callback(null, transaction))
             .catch(err => callback(err));
     }
