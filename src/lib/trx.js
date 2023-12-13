@@ -1,6 +1,6 @@
 import TronWeb from 'index';
 import utils from 'utils';
-import { keccak256, toUtf8Bytes, recoverAddress, SigningKey } from 'utils/ethersUtils';
+import { keccak256, toUtf8Bytes, recoverAddress, SigningKey, Signature } from 'utils/ethersUtils';
 import { ADDRESS_PREFIX } from 'utils/address';
 import Validator from "../paramValidator";
 import injectpromise from 'injectpromise';
@@ -632,18 +632,13 @@ export default class Trx {
 
     static verifySignature(message, address, signature, useTronHeader = true) {
         message = message.replace(/^0x/, '');
-        signature = signature.replace(/^0x/, '');
         const messageBytes = [
             ...toUtf8Bytes(useTronHeader ? TRX_MESSAGE_HEADER : ETH_MESSAGE_HEADER),
             ...utils.code.hexStr2byteArray(message)
         ];
 
         const messageDigest = keccak256(new Uint8Array(messageBytes));
-        const recovered = recoverAddress(messageDigest, {
-            yParity: signature.substring(128, 130) == '1c' ? 1 : 0,
-            r: '0x' + signature.substring(0, 64),
-            s: '0x' + signature.substring(64, 128)
-        });
+        const recovered = recoverAddress(messageDigest, Signature.from(signature));
 
         const tronAddress = ADDRESS_PREFIX + recovered.substr(2);
         const base58Address = TronWeb.address.fromHex(tronAddress);
@@ -688,14 +683,8 @@ export default class Trx {
     }
 
     static verifyTypedData(domain, types, value, signature, address) {
-        signature = signature.replace(/^0x/, '');
-
         const messageDigest = utils._TypedDataEncoder.hash(domain, types, value);
-        const recovered = recoverAddress(messageDigest, {
-            yParity: signature.substring(128, 130) == '1c' ? 1 : 0,
-            r: '0x' + signature.substring(0, 64),
-            s: '0x' + signature.substring(64, 128),
-        });
+        const recovered = recoverAddress(messageDigest, Signature.from(signature));
 
         const tronAddress = ADDRESS_PREFIX + recovered.substr(2);
         const base58Address = TronWeb.address.fromHex(tronAddress);
