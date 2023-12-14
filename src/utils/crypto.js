@@ -3,8 +3,9 @@ import {base64EncodeToString} from './code';
 import {base64DecodeFromString, hexStr2byteArray} from './code';
 import {encode58, decode58} from './base58';
 import {byte2hexStr, byteArray2hexStr} from './bytes';
-import {keccak256, sha256, SigningKey} from './ethersUtils';
+import {arrayify, keccak256, recoverAddress, sha256, Signature, SigningKey} from './ethersUtils';
 import {TypedDataEncoder} from './typedData';
+import {txPbToTxID, txJsonToPb} from './transaction';
 import { secp256k1 as secp } from "ethereum-cryptography/secp256k1.js";
 
 function normalizePrivateKeyBytes(priKeyBytes) {
@@ -65,6 +66,15 @@ export function signTransaction(priKeyBytes, transaction) {
     } else
         transaction.signature = [signature];
     return transaction;
+}
+
+export function recoverTransactionSigner(transaction, signature) {
+    signature = '0x' + signature.replace(/^0x/, '');
+    
+    const transactionID = txPbToTxID(txJsonToPb(transaction));
+    const recovered = recoverAddress(arrayify(transactionID), Signature.from(signature));
+    const tronAddress = ADDRESS_PREFIX + recovered.substring(2);
+    return tronAddress;
 }
 
 export function arrayToBase64String(a) {

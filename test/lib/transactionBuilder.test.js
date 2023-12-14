@@ -25,7 +25,7 @@ const {
 } = require('../helpers/config');
 const { keccak256, AbiCoder } = require('ethers');
 
-describe.only('TronWeb.transactionBuilder', function () {
+describe('TronWeb.transactionBuilder', function () {
 
     let accounts;
     let tronWeb;
@@ -691,7 +691,7 @@ describe.only('TronWeb.transactionBuilder', function () {
 
     });
 
-    describe.only('#updateToken()', function () {
+    describe('#updateToken()', function () {
 
         let tokenOptions
         let tokenID
@@ -3546,7 +3546,7 @@ describe.only('TronWeb.transactionBuilder', function () {
     });
   });
 
-  describe.only('#triggerSmartContractWithData', async function() {
+  describe('#triggerSmartContractWithData', async function() {
     let transaction;
     let contract1Address;
     let issuerAddress;

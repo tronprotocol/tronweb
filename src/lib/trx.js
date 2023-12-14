@@ -5,6 +5,7 @@ import { ADDRESS_PREFIX } from 'utils/address';
 import Validator from "../paramValidator";
 import injectpromise from 'injectpromise';
 import { txCheck } from '../utils/transaction';
+import { recoverTransactionSigner } from '../utils/crypto';
 
 const TRX_MESSAGE_HEADER = '\x19TRON Signed Message:\n32';
 // it should be: '\x15TRON Signed Message:\n32';
@@ -604,6 +605,16 @@ export default class Trx {
             this.cache.contracts[contractAddress] = contract;
             callback(null, contract);
         }).catch(err => callback(err));
+    }
+
+    async verifyTransactionSigner(transaction, signature, address = this.tronWeb.defaultAddress.base58) {
+        return Trx.verifyTransactionSigner(transaction, signature, address);
+    }
+
+    static verifyTransactionSigner(transaction, signature, address) {
+        const recoveredAddress = recoverTransactionSigner(transaction, signature);
+        const base58Address = TronWeb.address.fromHex(recoveredAddress);
+        return address === base58Address;
     }
 
     async verifyMessage(message = false, signature = false, address = this.tronWeb.defaultAddress.base58, useTronHeader = true, callback = false) {

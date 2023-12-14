@@ -609,6 +609,24 @@ describe('TronWeb.trx', function () {
             });
         });
 
+        describe('#verifyTransactionSigner', async function () {
+            const idx = 14;
+            let transaction;
+            let signature;
+
+            before(async function () {
+                const tx = await tronWeb.transactionBuilder.sendTrx(accounts.b58[idx-1], 10, accounts.b58[idx]);
+                transaction = JSON.parse(JSON.stringify(tx));
+                await tronWeb.trx.sign(tx, accounts.pks[idx]);
+                signature = tx.signature[0];
+            });
+
+            it('should verify signature of signed transaction', async function () {
+                const result = await tronWeb.trx.verifyTransactionSigner(transaction, signature, accounts.b58[idx]);
+                assert.isTrue(result);
+            });
+        });
+
 
         describe("#signMessage", async function () {
 
