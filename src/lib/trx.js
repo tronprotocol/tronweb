@@ -1747,4 +1747,11 @@ export default class Trx {
             }).catch(err => callback(err));
     }
 
+    async getBandwidthPrices() {
+        return this.tronWeb.fullNode.request('wallet/getbandwidthprices', {}, 'post');
+    }
+
+    async getEnergyPrices() {
+        return this.tronWeb.fullNode.request('wallet/getenergyprices', {}, 'post');
+    }
 };

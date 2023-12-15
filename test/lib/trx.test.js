@@ -2297,4 +2297,20 @@ describe('TronWeb.trx', function () {
             });
         });
     });
+
+    describe('#getBandwidthPrices', async function () {
+        it('should getBandwidthPrices from fullNode', async function () {
+            const res = await tronWeb.trx.getBandwidthPrices();
+            console.log(res);
+            assert.isString(res.prices);
+        })
+    });
+
+    describe('#getEnergyPrices', async function () {
+        it('should getEnergyPrices from fullNode', async function () {
+            const res = await tronWeb.trx.getEnergyPrices();
+            console.log(res);
+            assert.isString(res.prices);
+        })
+    })
 });
