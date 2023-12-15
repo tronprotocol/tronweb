@@ -1120,10 +1120,13 @@ export default class TransactionBuilder {
                     if (!type || !utils.isString(type) || !type.length)
                         return callback('Invalid parameter type provided: ' + type);
 
-                    if (type === 'address')
-                        value = toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
-                    else if (type.match(/^([^\x5b]*)(\x5b|$)/)[0] === 'address[')
-                        value = value.map(v => toHex(v).replace(ADDRESS_PREFIX_REGEX, '0x'));
+                    const replaceAddressPrefix = (value) => {
+                        if (utils.isArray(value)) {
+                            return value.map((v) => replaceAddressPrefix(v));
+                        }
+                        return toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
+                    };
+                    if (type.startsWith('address')) value = replaceAddressPrefix(value);
                     else if (/trcToken/.test(type)) {
                         type = type.replace(/trcToken/, 'uint256')
                     }
@@ -1345,10 +1348,13 @@ export default class TransactionBuilder {
                     if (!type || !utils.isString(type) || !type.length)
                         return callback('Invalid parameter type provided: ' + type);
 
-                    if (type === 'address')
-                        value = toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
-                    else if (type.match(/^([^\x5b]*)(\x5b|$)/)[0] === 'address[')
-                        value = value.map(v => toHex(v).replace(ADDRESS_PREFIX_REGEX, '0x'));
+                    const replaceAddressPrefix = (value) => {
+                        if (utils.isArray(value)) {
+                            return value.map((v) => replaceAddressPrefix(v));
+                        }
+                        return toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
+                    };
+                    if (type.startsWith('address')) value = replaceAddressPrefix(value);
 
                     types.push(type);
                     values.push(value);
