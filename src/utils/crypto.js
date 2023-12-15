@@ -69,10 +69,14 @@ export function signTransaction(priKeyBytes, transaction) {
 }
 
 export function recoverTransactionSigner(transaction, signature) {
+    const transactionId = txPbToTxID(txJsonToPb(transaction));
+    return recoverTransactionIdSigner(transactionId, signature);
+}
+
+export function recoverTransactionIdSigner(transactionId, signature) {
     signature = '0x' + signature.replace(/^0x/, '');
-    
-    const transactionID = txPbToTxID(txJsonToPb(transaction));
-    const recovered = recoverAddress(arrayify(transactionID), Signature.from(signature));
+
+    const recovered = recoverAddress(arrayify(transactionId), Signature.from(signature));
     const tronAddress = ADDRESS_PREFIX + recovered.substring(2);
     return tronAddress;
 }
