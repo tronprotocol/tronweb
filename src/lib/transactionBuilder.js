@@ -1346,7 +1346,7 @@ export default class TransactionBuilder {
                     let {type, value} = parameters[i];
 
                     if (!type || !utils.isString(type) || !type.length)
-                        return callback('Invalid parameter type provided: ' + type);
+                        throw new Error('Invalid parameter type provided: ' + type);
 
                     const replaceAddressPrefix = (value) => {
                         if (utils.isArray(value)) {
@@ -1360,20 +1360,15 @@ export default class TransactionBuilder {
                     values.push(value);
                 }
 
-                try {
-                    // workaround for unsupported trcToken type
-                    types = types.map(type => {
-                        if (/trcToken/.test(type)) {
-                            type = type.replace(/trcToken/, 'uint256')
-                        }
-                        return type
-                    })
+                // workaround for unsupported trcToken type
+                types = types.map(type => {
+                    if (/trcToken/.test(type)) {
+                        type = type.replace(/trcToken/, 'uint256')
+                    }
+                    return type
+                });
 
-                    parameters = abiCoder.encode(types, values).replace(/^(0x)/, '');
-
-                } catch (ex) {
-                    return callback(ex);
-                }
+                parameters = abiCoder.encode(types, values).replace(/^(0x)/, '');
             } else parameters = '';
 
             // work for abiv2 if passed the function abi in options
@@ -1498,17 +1493,22 @@ export default class TransactionBuilder {
         ], callback))
             return;
 
-        const args = this._getTriggerSmartContractArgs(
-            contractAddress,
-            functionSelector,
-            options,
-            parameters,
-            issuerAddress,
-            tokenValue,
-            tokenId,
-            callValue,
-            feeLimit
-        );
+        let args;
+        try {
+            args = this._getTriggerSmartContractArgs(
+                contractAddress,
+                functionSelector,
+                options,
+                parameters,
+                issuerAddress,
+                tokenValue,
+                tokenId,
+                callValue,
+                feeLimit
+            );
+        } catch (err) {
+            return callback(err);
+        }
 
         if (args.function_selector) {
             args.data = keccak256(Buffer.from(args.function_selector, 'utf-8')).toString().substring(2, 10) + args.parameter;
@@ -1632,17 +1632,22 @@ export default class TransactionBuilder {
         ], callback))
             return;
 
-        const args = this._getTriggerSmartContractArgs(
-            contractAddress,
-            functionSelector,
-            options,
-            parameters,
-            issuerAddress,
-            tokenValue,
-            tokenId,
-            callValue,
-            feeLimit
-        );
+        let args;
+        try {
+            args = this._getTriggerSmartContractArgs(
+                contractAddress,
+                functionSelector,
+                options,
+                parameters,
+                issuerAddress,
+                tokenValue,
+                tokenId,
+                callValue,
+                feeLimit
+            );
+        } catch (err) {
+            return callback(err);
+        }
 
         let pathInfo = 'triggersmartcontract';
         if(options._isConstant) {
