@@ -74,6 +74,7 @@ export function recoverTransactionSigner(transaction, signature) {
 }
 
 export function recoverTransactionIdSigner(transactionId, signature) {
+    transactionId = '0x' + transactionId.replace(/^0x/, '');
     signature = '0x' + signature.replace(/^0x/, '');
 
     const recovered = recoverAddress(arrayify(transactionId), Signature.from(signature));

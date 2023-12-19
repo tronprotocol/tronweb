@@ -618,7 +618,7 @@ export default class Trx {
     }
 
     async verifyTransactionIdSigner(transactionId, signature, address = this.tronWeb.defaultAddress.base58) {
-        return Trx.verifyTransactionSigner(transactionId, signature, address);
+        return Trx.verifyTransactionIdSigner(transactionId, signature, address);
     }
 
     static verifyTransactionIdSigner(transactionId, signature, address) {

@@ -639,7 +639,7 @@ describe('TronWeb.trx', function () {
                 signature = tx.signature[0];
             });
 
-            it('should verify signature of signed transaction', async function () {
+            it('should verify signature of signed transactionId', async function () {
                 const result = await tronWeb.trx.verifyTransactionIdSigner(transactionId, signature, accounts.b58[idx]);
                 assert.isTrue(result);
             });
@@ -2301,7 +2301,6 @@ describe('TronWeb.trx', function () {
     describe('#getBandwidthPrices', async function () {
         it('should getBandwidthPrices from fullNode', async function () {
             const res = await tronWeb.trx.getBandwidthPrices();
-            console.log(res);
             assert.isString(res.prices);
         })
     });
@@ -2309,7 +2308,6 @@ describe('TronWeb.trx', function () {
     describe('#getEnergyPrices', async function () {
         it('should getEnergyPrices from fullNode', async function () {
             const res = await tronWeb.trx.getEnergyPrices();
-            console.log(res);
             assert.isString(res.prices);
         })
     })
