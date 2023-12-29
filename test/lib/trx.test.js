@@ -609,42 +609,36 @@ describe('TronWeb.trx', function () {
             });
         });
 
-        describe('#verifyTransactionSigner', async function () {
+        describe('#ecRecover', async function () {
             const idx = 14;
             let transaction;
-            let signature;
 
             before(async function () {
-                const tx = await tronWeb.transactionBuilder.sendTrx(accounts.b58[idx-1], 10, accounts.b58[idx]);
-                transaction = JSON.parse(JSON.stringify(tx));
-                await tronWeb.trx.sign(tx, accounts.pks[idx]);
-                signature = tx.signature[0];
+                transaction = await tronWeb.transactionBuilder.sendTrx(accounts.b58[idx-1], 10, accounts.b58[idx]);
+                await tronWeb.trx.sign(transaction, accounts.pks[idx]);
             });
 
             it('should verify signature of signed transaction', async function () {
-                const result = await tronWeb.trx.verifyTransactionSigner(transaction, signature, accounts.b58[idx]);
-                assert.isTrue(result);
+                const recoveredAddress = await tronWeb.trx.ecRecover(transaction);
+                assert.equal(tronWeb.address.toHex(recoveredAddress), accounts.hex[idx]);
+            });
+
+            it('should throw Invalid transaction error', async function() {
+                const tx = JSON.parse(JSON.stringify(transaction));
+                tx.txID += 't';
+                assertThrow(async () => {
+                    await tronWeb.trx.ecRecover(tx);
+                }, 'Invalid transaction');
+            });
+
+            it('should throw Transaction is not signed error', async function() {
+                const tx = JSON.parse(JSON.stringify(transaction));
+                delete tx.signature;
+                assertThrow(async () => {
+                    await tronWeb.trx.ecRecover(tx);
+                }, 'Transaction is not signed');
             });
         });
-
-        describe('#verifyTransactionIdSigner', async function () {
-            const idx = 14;
-            let transactionId;
-            let signature;
-
-            before(async function () {
-                const tx = await tronWeb.transactionBuilder.sendTrx(accounts.b58[idx-1], 10, accounts.b58[idx]);
-                transactionId = tx.txID;
-                await tronWeb.trx.sign(tx, accounts.pks[idx]);
-                signature = tx.signature[0];
-            });
-
-            it('should verify signature of signed transactionId', async function () {
-                const result = await tronWeb.trx.verifyTransactionIdSigner(transactionId, signature, accounts.b58[idx]);
-                assert.isTrue(result);
-            });
-        });
-
 
         describe("#signMessage", async function () {
 

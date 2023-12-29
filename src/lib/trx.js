@@ -5,7 +5,7 @@ import { ADDRESS_PREFIX } from 'utils/address';
 import Validator from "../paramValidator";
 import injectpromise from 'injectpromise';
 import { txCheck } from '../utils/transaction';
-import { recoverTransactionSigner, recoverTransactionIdSigner } from '../utils/crypto';
+import { ecRecover } from '../utils/crypto';
 
 const TRX_MESSAGE_HEADER = '\x19TRON Signed Message:\n32';
 // it should be: '\x15TRON Signed Message:\n32';
@@ -607,24 +607,21 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
-    async verifyTransactionSigner(transaction, signature, address = this.tronWeb.defaultAddress.base58) {
-        return Trx.verifyTransactionSigner(transaction, signature, address);
+    ecRecover(transaction) {
+        return Trx.ecRecover(transaction);
     }
 
-    static verifyTransactionSigner(transaction, signature, address) {
-        const recoveredAddress = recoverTransactionSigner(transaction, signature);
-        const base58Address = TronWeb.address.fromHex(recoveredAddress);
-        return address === base58Address;
-    }
-
-    async verifyTransactionIdSigner(transactionId, signature, address = this.tronWeb.defaultAddress.base58) {
-        return Trx.verifyTransactionIdSigner(transactionId, signature, address);
-    }
-
-    static verifyTransactionIdSigner(transactionId, signature, address) {
-        const recoveredAddress = recoverTransactionIdSigner(transactionId, signature);
-        const base58Address = TronWeb.address.fromHex(recoveredAddress);
-        return address === base58Address;
+    static ecRecover(transaction) {
+        if (!txCheck(transaction)) {
+            throw new Error('Invalid transaction');
+        }
+        if (!transaction.signature?.length) {
+            throw new Error('Transaction is not signed');
+        }
+        if (transaction.signature.length === 1) {
+            return ecRecover(transaction.txID, transaction.signature[0]);
+        }
+        return transaction.signature.map((sig) => ecRecover(transaction.txID, sig));
     }
 
     async verifyMessage(message = false, signature = false, address = this.tronWeb.defaultAddress.base58, useTronHeader = true, callback = false) {
