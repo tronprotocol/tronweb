@@ -2054,6 +2054,20 @@ describe('TronWeb.trx', function () {
         });
     });
 
+    describe('#getBandwidthPrices', async function () {
+        it('should get bandwidth prices', async function () {
+            const prices = await tronWeb.trx.getBandwidthPrices();
+            assert.isString(prices);
+        });
+    });
+
+    describe('#getEnergyPrices', async function () {
+        it('should get energy prices', async function () {
+            const prices = await tronWeb.trx.getEnergyPrices();
+            assert.isString(prices);
+        });
+    });
+
     describe('#signMessageV2', async function () {
         tests.forEach(function (test) {
             it('signs a message "' + test.name + '"', async function () {

@@ -1,10 +1,12 @@
 import { AbiFragment, ContractAbiInterface } from './ABI';
+import { Transaction } from './Transaction';
 
 export interface TransactionCommonOptions {
     /**
      * Permission id for multi-sign.
      */
     permissionId?: number;
+    blockHeader?: Partial<Transaction['raw_data']>;
 }
 
 
@@ -16,7 +18,7 @@ export interface VoteInfo {
     [srAddress: string]: number;
 }
 
-export interface CreateSmartContractOptions {
+export interface CreateSmartContractOptions extends TransactionCommonOptions {
     /**
      * The maximum TRX burns for resource consumption（1TRX = 1,000,000SUN）.
      */
@@ -61,10 +63,6 @@ export interface CreateSmartContractOptions {
      */
     name?: string;
     /**
-     * Optional, for multi-signature use
-     */
-    permissionId?: number;
-    /**
      * Optional. raw parameters encoded according to [ABI Specification](https://docs.soliditylang.org/en/latest/abi-spec.html)
      * For example: 0x0000000000000000000000000000000000000000000000000000000000000001.
      */
@@ -81,7 +79,7 @@ export interface CreateSmartContractOptions {
     parametersV2?: unknown[];
 }
 
-export interface TriggerSmartContractOptions {
+export interface TriggerSmartContractOptions extends TransactionCommonOptions {
     /**
      * The maximum TRX burns for resource consumption in SUN（1TRX = 1,000,000SUN）.
      */
@@ -129,11 +127,6 @@ export interface TriggerSmartContractOptions {
      * Create transaction locally.
      */
     txLocal?: boolean;
-    /**
-     * For multi-signature use.
-     * Optional.
-     */
-    permissionId?: number;
     _isConstant?: boolean;
     /**
      * If use solidity node to trigger smart contract.
@@ -157,7 +150,7 @@ export interface ContractFunctionParameter {
     value: unknown;
 }
 
-export interface CreateTokenOptions {
+export interface CreateTokenOptions extends TransactionCommonOptions {
     /**
      * Token name, default string.
      */
@@ -224,10 +217,6 @@ export interface CreateTokenOptions {
      * Precision of issued tokens.
      */
     precision?: number;
-    /**
-     * Optional, for multi-signature use.
-     */
-    permissionId?: number;
 }
 
 export interface UpdateTokenOptions extends TransactionCommonOptions {
