@@ -179,7 +179,7 @@ Contact the team at https://cn.developers.tron.network/docs/online-technical-sup
 
 __6.0.0-beta.1__
 - Support [TIP586](https://github.com/tronprotocol/tips/blob/master/tip-586.md) with `trx.getBandwidthPrices` and `trx.getEnergyPrices`.
-- Support custom header info when creating transaction.
+- Support custom block header info when creating transaction.
 
 __6.0.0-beta.0__
 - Add full type definition for Typescript.
