@@ -199,6 +199,7 @@ describe('TronWeb.transactionBuilder', function () {
                         ...options,
                         blockHeader: await getHeaderInfo(tronWeb.fullNode),
                     },
+                    accounts.b58[2],
                 ],
             ];
             for (let param of params) {
@@ -617,6 +618,7 @@ describe('TronWeb.transactionBuilder', function () {
                         ...UPDATED_TEST_TOKEN_OPTIONS,
                         blockHeader: await getHeaderInfo(tronWeb.fullNode),
                     },
+                    accounts.b58[2],
                 ],
             ];
             for (let param of params) {
