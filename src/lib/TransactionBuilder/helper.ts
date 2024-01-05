@@ -70,10 +70,27 @@ export function getHeaderInfo(node: HttpProvider) {
 }
 
 function checkBlockHeader(options = {} as Partial<Transaction['raw_data']>): boolean {
-    return typeof options['ref_block_bytes'] === 'string'
-        && typeof options['ref_block_hash'] === 'string'
-        && typeof options['expiration'] === 'number'
-        && typeof options['timestamp'] === 'number';
+    if (
+        typeof options['ref_block_bytes'] === 'undefined' &&
+        typeof options['ref_block_hash'] === 'undefined' &&
+        typeof options['expiration'] === 'undefined' &&
+        typeof options['timestamp'] === 'undefined'
+    ) {
+        return false;
+    }
+    if (typeof options['ref_block_bytes'] !== 'string') {
+        throw new Error('Invalid ref_block_bytes provided.');
+    }
+    if (typeof options['ref_block_hash'] !== 'string') {
+        throw new Error('Invalid ref_block_hash provided.');
+    }
+    if (typeof options['expiration'] !== 'number') {
+        throw new Error('Invalid expiration provided.');
+    }
+    if (typeof options['timestamp'] !== 'number') {
+        throw new Error('Invalid timestamp provided.');
+    }
+    return true;
 }
 
 export async function createTransaction(
@@ -81,7 +98,7 @@ export async function createTransaction(
     type: ContractType,
     value: ContractParamter,
     Permission_id?: number,
-    options = {} as Partial<Omit<Transaction['raw_data'], 'contract'>>,
+    options = {} as Partial<Omit<Transaction['raw_data'], 'contract'>>
 ): Promise<Transaction> {
     const tx: Transaction = {
         visible: false,
@@ -97,7 +114,7 @@ export async function createTransaction(
                     type,
                 },
             ],
-            ...(checkBlockHeader(options) ? {} as Transaction['raw_data'] : await getHeaderInfo(tronWeb.fullNode)),
+            ...(checkBlockHeader(options) ? ({} as Transaction['raw_data']) : await getHeaderInfo(tronWeb.fullNode)),
             ...options,
         },
     };
