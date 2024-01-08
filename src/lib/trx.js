@@ -1745,10 +1745,24 @@ export default class Trx {
     }
 
     async getBandwidthPrices() {
-        return this.tronWeb.fullNode.request('wallet/getbandwidthprices', {}, 'post');
+        return this.tronWeb.fullNode.request('wallet/getbandwidthprices', {}, 'post')
+            .then((result = {}) => {
+                if (typeof result.prices === 'undefined') {
+                    throw new Error('Not found.');
+                }
+
+                return result.prices;
+            });
     }
 
     async getEnergyPrices() {
-        return this.tronWeb.fullNode.request('wallet/getenergyprices', {}, 'post');
+        return this.tronWeb.fullNode.request('wallet/getenergyprices', {}, 'post')
+            .then((result = {}) => {
+                if (typeof result.prices === 'undefined') {
+                    throw new Error('Not found.');
+                }
+
+                return result.prices;
+            });
     }
 };
