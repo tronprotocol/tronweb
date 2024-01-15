@@ -619,9 +619,13 @@ export default class Trx {
             throw new Error('Transaction is not signed');
         }
         if (transaction.signature.length === 1) {
-            return ecRecover(transaction.txID, transaction.signature[0]);
+            const tronAddress = ecRecover(transaction.txID, transaction.signature[0]);
+            return TronWeb.address.fromHex(tronAddress);
         }
-        return transaction.signature.map((sig) => ecRecover(transaction.txID, sig));
+        return transaction.signature.map((sig) => {
+            const tronAddress = ecRecover(transaction.txID, sig);
+            return TronWeb.address.fromHex(tronAddress);
+        });
     }
 
     async verifyMessage(message = false, signature = false, address = this.tronWeb.defaultAddress.base58, useTronHeader = true, callback = false) {

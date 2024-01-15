@@ -620,7 +620,7 @@ describe('TronWeb.trx', function () {
 
             it('should verify signature of signed transaction', async function () {
                 const recoveredAddress = await tronWeb.trx.ecRecover(transaction);
-                assert.equal(tronWeb.address.toHex(recoveredAddress), accounts.hex[idx]);
+                assert.equal(recoveredAddress, accounts.b58[idx]);
             });
 
             it('should throw Invalid transaction error', async function() {

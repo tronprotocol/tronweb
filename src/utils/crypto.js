@@ -5,7 +5,6 @@ import {encode58, decode58} from './base58';
 import {byte2hexStr, byteArray2hexStr} from './bytes';
 import {arrayify, keccak256, recoverAddress, sha256, Signature, SigningKey} from './ethersUtils';
 import {TypedDataEncoder} from './typedData';
-import {txPbToTxID, txJsonToPb} from './transaction';
 import { secp256k1 as secp } from "ethereum-cryptography/secp256k1.js";
 
 function normalizePrivateKeyBytes(priKeyBytes) {
