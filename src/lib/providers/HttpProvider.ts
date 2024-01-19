@@ -1,4 +1,4 @@
-import axios, { Method, RawAxiosRequestHeaders, AxiosHeaders, HeadersDefaults } from 'axios';
+import axios, {Method, RawAxiosRequestHeaders, AxiosHeaders, HeadersDefaults, getAdapter} from 'axios';
 import { hasProperties, isObject, isValidURL } from '../../utils/validations.js';
 
 export type HeadersType = RawAxiosRequestHeaders | AxiosHeaders | Partial<HeadersDefaults>;
@@ -35,6 +35,7 @@ export default class HttpProvider {
             baseURL: host,
             timeout: timeout,
             headers: headers,
+            adapter: getAdapter('xhr'),
             auth: user
                 ? {
                       username: user,
