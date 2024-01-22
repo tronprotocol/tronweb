@@ -149,4 +149,5 @@ export class Contract {
     }
 }
 
-export { CallOptions, SendOptions, AbiFragmentNoErrConstructor, Method } from './method.js';
+export type { CallOptions, SendOptions, AbiFragmentNoErrConstructor } from './method.js';
+export { Method } from './method.js';
