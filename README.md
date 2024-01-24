@@ -44,7 +44,7 @@ __[tronweb.network](https://tronweb.network)__
 - Version built for Node.js v14 and above
 - Version built for browsers with more than 0.25% market share
 
-You can access either version specifically from the [dist](dist) folder.
+You can access either version specifically from the dist folder.
 
 TronWeb is also compatible with frontend frameworks such as:
 - Angular
@@ -176,6 +176,10 @@ In order to contribute you can
 Contact the team at https://cn.developers.tron.network/docs/online-technical-support
 
 ## Recent History
+
+__6.0.0-beta.1__
+- Support [TIP586](https://github.com/tronprotocol/tips/blob/master/tip-586.md) with `trx.getBandwidthPrices` and `trx.getEnergyPrices`.
+- Support custom block header info when creating transaction.
 
 __6.0.0-beta.0__
 - Add full type definition for Typescript.

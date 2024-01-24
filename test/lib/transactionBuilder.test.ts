@@ -8,6 +8,7 @@ import {
     Resource,
     TriggerSmartContractOptions,
     VoteInfo,
+    ContractFunctionParameter,
 } from '../../src/types/TransactionBuilder';
 import { ContractParamterWrapper, CreateSmartContractTransaction, SignedTransaction } from '../../src/types/Transaction';
 
@@ -63,6 +64,7 @@ const {
 } = Contracts;
 import Config from '../helpers/config';
 import { IContract } from '../../src/lib/contract';
+import { getHeaderInfo } from '../helpers/getBlockHeader';
 const { ADDRESS_HEX, ADDRESS_BASE58, UPDATED_TEST_TOKEN_OPTIONS, PRIVATE_KEY, getTokenOptions, isProposalApproved } = Config;
 
 /**
@@ -97,6 +99,12 @@ describe('TronWeb.transactionBuilder', function () {
             const params: Parameters<TransactionBuilder['sendTrx']>[] = [
                 [accounts.b58[1], 10, tronWeb.defaultAddress.hex as string, { permissionId: 2 }],
                 [accounts.b58[1], 10],
+                [
+                    accounts.b58[1],
+                    10,
+                    tronWeb.defaultAddress.hex as string,
+                    { blockHeader: await getHeaderInfo(tronWeb.fullNode) },
+                ],
             ];
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.sendTrx(...param);
@@ -108,10 +116,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.owner_address, ADDRESS_HEX);
                 assert.equal(parameter.value.to_address, accounts.hex[1]);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.TransferContract');
-                assert.equal(
-                    transaction.raw_data.contract[0].Permission_id || 0,
-                    param[3] ? (param[3] as TransactionCommonOptions)['permissionId'] : 0
-                );
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[3]?.['permissionId'] || 0);
             }
         });
 
@@ -180,16 +185,32 @@ describe('TronWeb.transactionBuilder', function () {
 
         it(`should allow accounts[2] to create a TestToken`, async function () {
             const options = getTokenOptions();
-            for (let i = 0; i < 2; i++) {
-                if (i === 1) options.permissionId = 2;
-                const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.b58[2]);
+            const params = [
+                [options, accounts.b58[2]],
+                [
+                    {
+                        ...options,
+                        permissionId: 2,
+                    },
+                    accounts.b58[2],
+                ],
+                [
+                    {
+                        ...options,
+                        blockHeader: await getHeaderInfo(tronWeb.fullNode),
+                    },
+                    accounts.b58[2],
+                ],
+            ];
+            for (let param of params) {
+                const transaction = await tronWeb.transactionBuilder.createToken(...param);
                 const parameter = txPars(transaction) as ContractParamterWrapper<AssetIssueContract>;
                 assert.equal(transaction.txID.length, 64);
                 assert.equal(parameter.value.total_supply, options.totalSupply);
                 await assertEqualHex(parameter.value.abbr, options.abbreviation);
                 assert.equal(parameter.value.owner_address, accounts.hex[2]);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.AssetIssueContract');
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[0].permissionId || 0);
             }
         });
 
@@ -450,6 +471,7 @@ describe('TronWeb.transactionBuilder', function () {
             const params: [string, string, TransactionCommonOptions?][] = [
                 [inactiveAccountAddress, accounts.b58[3], { permissionId: 2 }],
                 [inactiveAccountAddress, accounts.b58[3]],
+                [inactiveAccountAddress, accounts.b58[3], { blockHeader: await getHeaderInfo(tronWeb.fullNode) }],
             ];
 
             for (const param of params) {
@@ -459,7 +481,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.owner_address, accounts.hex[3]);
                 assert.equal(parameter.value.account_address, tronWeb.address.toHex(inactiveAccountAddress).toLowerCase());
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.AccountCreateContract');
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[2] ? param[2]['permissionId'] : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[2]?.['permissionId'] || 0);
             }
         });
 
@@ -484,6 +506,7 @@ describe('TronWeb.transactionBuilder', function () {
             const params: Parameters<TransactionBuilder['updateAccount']>[] = [
                 [newName, accounts.b58[3], { permissionId: 2 }],
                 [newName, accounts.b58[3]],
+                [newName, accounts.b58[3], { blockHeader: await getHeaderInfo(tronWeb.fullNode) }],
             ];
 
             for (const param of params) {
@@ -494,7 +517,7 @@ describe('TronWeb.transactionBuilder', function () {
                 await assertEqualHex(parameter.value.account_name, newName);
                 assert.equal(parameter.value.owner_address, accounts.hex[3]);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.AccountUpdateContract');
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[2] ? param[2]['permissionId'] : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[2]?.['permissionId'] || 0);
             }
         });
 
@@ -521,6 +544,7 @@ describe('TronWeb.transactionBuilder', function () {
             const params: [string, string, TransactionCommonOptions?][] = [
                 [TronWeb.toHex('abcabc110'), accounts.b58[4], { permissionId: 2 }],
                 [TronWeb.toHex('testtest'), accounts.b58[4]],
+                [TronWeb.toHex('abcabc110'), accounts.b58[4], { blockHeader: await getHeaderInfo(tronWeb.fullNode) }],
             ];
 
             for (const param of params) {
@@ -530,7 +554,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.account_id, param[0].slice(2));
                 assert.equal(parameter.value.owner_address, accounts.hex[4]);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.SetAccountIdContract');
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[2] ? param[2]['permissionId'] : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[2]?.['permissionId'] || 0);
             }
         });
 
@@ -580,16 +604,32 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it(`should allow accounts[2] to update a TestToken`, async function () {
-            for (let i = 0; i < 2; i++) {
-                if (i === 1) UPDATED_TEST_TOKEN_OPTIONS.permissionId = 2;
-                const transaction = await tronWeb.transactionBuilder.updateToken(UPDATED_TEST_TOKEN_OPTIONS, accounts.b58[2]);
+            const params = [
+                [UPDATED_TEST_TOKEN_OPTIONS, accounts.b58[2]],
+                [
+                    {
+                        ...UPDATED_TEST_TOKEN_OPTIONS,
+                        permissionId: 2,
+                    },
+                    accounts.b58[2],
+                ],
+                [
+                    {
+                        ...UPDATED_TEST_TOKEN_OPTIONS,
+                        blockHeader: await getHeaderInfo(tronWeb.fullNode),
+                    },
+                    accounts.b58[2],
+                ],
+            ];
+            for (let param of params) {
+                const transaction = await tronWeb.transactionBuilder.updateToken(...param);
                 const parameter = txPars(transaction) as ContractParamterWrapper<UpdateAssetContract>;
                 assert.equal(transaction.txID.length, 64);
                 await assertEqualHex(parameter.value.description, UPDATED_TEST_TOKEN_OPTIONS.description);
                 await assertEqualHex(parameter.value.url, UPDATED_TEST_TOKEN_OPTIONS.url);
                 assert.equal(parameter.value.owner_address, accounts.hex[2]);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.UpdateAssetContract');
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, UPDATED_TEST_TOKEN_OPTIONS.permissionId || 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[0].permissionId || 0);
             }
         });
 
@@ -727,6 +767,7 @@ describe('TronWeb.transactionBuilder', function () {
             const params: Parameters<TransactionBuilder['purchaseToken']>[] = [
                 [accounts.b58[5], tokenID, 20, accounts.b58[2], { permissionId: 2 }],
                 [accounts.b58[5], tokenID, 20, accounts.b58[2]],
+                [accounts.b58[5], tokenID, 20, accounts.b58[2], { blockHeader: await getHeaderInfo(tronWeb.fullNode) }],
             ];
 
             for (const param of params) {
@@ -739,7 +780,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.owner_address, accounts.hex[2]);
                 assert.equal(parameter.value.to_address, accounts.hex[5]);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.ParticipateAssetIssueContract');
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[4] ? param[4]['permissionId'] : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[4]?.['permissionId'] || 0);
             }
         });
 
@@ -796,7 +837,12 @@ describe('TronWeb.transactionBuilder', function () {
             );
 
             await assertThrow(
-                tronWeb.transactionBuilder.purchaseToken(accounts.b58[5], tokenID, 'some-amount' as unknown as number, accounts.b58[2]),
+                tronWeb.transactionBuilder.purchaseToken(
+                    accounts.b58[5],
+                    tokenID,
+                    'some-amount' as unknown as number,
+                    accounts.b58[2]
+                ),
                 'Invalid amount provided'
             );
         });
@@ -842,6 +888,7 @@ describe('TronWeb.transactionBuilder', function () {
             const params: [string, number, string, string, TransactionCommonOptions?][] = [
                 [accounts.b58[1], 5, tokenID, accounts.b58[7], { permissionId: 2 }],
                 [accounts.b58[1], 5, tokenID, accounts.b58[7]],
+                [accounts.b58[1], 5, tokenID, accounts.b58[7], { blockHeader: await getHeaderInfo(tronWeb.fullNode) }],
             ];
 
             for (const param of params) {
@@ -861,7 +908,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.amount, 5);
                 assert.equal(parameter.value.owner_address, accounts.hex[7]);
                 assert.equal(parameter.value.to_address, accounts.hex[1]);
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[4] ? param[4]['permissionId'] : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[4]?.['permissionId'] || 0);
             }
         });
 
@@ -885,7 +932,12 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should allow accounts [6]  to send a token to accounts[1] and broadcast', async function () {
             await wait(5);
-            const param: [string, number, string, string, TransactionCommonOptions?] = [accounts.b58[1], 5, tokenID, accounts.b58[6]];
+            const param: [string, number, string, string, TransactionCommonOptions?] = [
+                accounts.b58[1],
+                5,
+                tokenID,
+                accounts.b58[6],
+            ];
             const transaction = await tronWeb.transactionBuilder.sendToken(...param);
             const res = await broadcaster(transaction, accounts.pks[6]);
             // console.log(res);
@@ -936,6 +988,7 @@ describe('TronWeb.transactionBuilder', function () {
             const inputs: [any, string, TransactionCommonOptions?][] = [
                 [parameters[0], ADDRESS_BASE58, { permissionId: 2 }],
                 [parameters[0], ADDRESS_BASE58],
+                [parameters[0], ADDRESS_BASE58, { blockHeader: await getHeaderInfo(tronWeb.fullNode) }],
             ];
             for (const input of inputs) {
                 const transaction = await tronWeb.transactionBuilder.createProposal(...input);
@@ -945,7 +998,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.owner_address, ADDRESS_HEX);
                 assert.equal(parameter.value.parameters[0].value, parameters[0].value);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.ProposalCreateContract');
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, input[2] ? input[2]['permissionId'] : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, input[2]?.['permissionId'] || 0);
             }
         });
 
@@ -1012,6 +1065,11 @@ describe('TronWeb.transactionBuilder', function () {
             const params: Parameters<TransactionBuilder['deleteProposal']>[] = [
                 [proposals[0].proposal_id, tronWeb.defaultAddress.hex as string, { permissionId: 2 }],
                 [proposals[0].proposal_id],
+                [
+                    proposals[0].proposal_id,
+                    tronWeb.defaultAddress.hex as string,
+                    { blockHeader: await getHeaderInfo(tronWeb.fullNode) },
+                ],
             ];
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.deleteProposal(...param);
@@ -1020,7 +1078,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.owner_address, ADDRESS_HEX);
                 assert.equal(parameter.value.proposal_id, proposals[0].proposal_id);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.ProposalDeleteContract');
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[2] ? param[2]['permissionId'] : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[2]?.['permissionId'] || 0);
             }
         });
 
@@ -1048,12 +1106,18 @@ describe('TronWeb.transactionBuilder', function () {
         const url = 'https://xtron.network';
 
         it('should allow accounts[0] to apply for SR', async function () {
-            const transaction = await tronWeb.transactionBuilder.applyForSR(accounts.b58[20], url);
-            const parameter = txPars(transaction) as ContractParamterWrapper<WitnessCreateContract>;
+            const params = [
+                [accounts.b58[20], url],
+                [accounts.b58[20], url, { blockHeader: await getHeaderInfo(tronWeb.fullNode) }],
+            ];
+            for (let param of params) {
+                const transaction = await tronWeb.transactionBuilder.applyForSR(...param);
+                const parameter = txPars(transaction) as ContractParamterWrapper<WitnessCreateContract>;
 
-            assert.equal(parameter.value.owner_address, accounts.hex[20]);
-            await assertEqualHex(parameter.value.url, url);
-            assert.equal(parameter.type_url, 'type.googleapis.com/protocol.WitnessCreateContract');
+                assert.equal(parameter.value.owner_address, accounts.hex[20]);
+                await assertEqualHex(parameter.value.url, url);
+                assert.equal(parameter.type_url, 'type.googleapis.com/protocol.WitnessCreateContract');
+            }
         });
 
         it('should allow accounts[0] to apply for SR and broadcast', async function () {
@@ -1076,6 +1140,7 @@ describe('TronWeb.transactionBuilder', function () {
             const params: Parameters<TransactionBuilder['freezeBalance']>[] = [
                 [100e6, 3, 'BANDWIDTH', accounts.b58[1], undefined, { permissionId: 2 }],
                 [100e6, 3, 'BANDWIDTH', accounts.b58[1]],
+                [100e6, 3, 'BANDWIDTH', accounts.b58[1], undefined, { blockHeader: await getHeaderInfo(tronWeb.fullNode) }],
             ];
 
             for (const param of params) {
@@ -1087,7 +1152,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.frozen_balance, 100e6);
                 assert.equal(parameter.value.frozen_duration, 3);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.FreezeBalanceContract');
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[5] ? param[5]['permissionId'] : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[5]?.['permissionId'] || 0);
             }
         });
 
@@ -1115,6 +1180,7 @@ describe('TronWeb.transactionBuilder', function () {
             const params: Parameters<TransactionBuilder['unfreezeBalance']>[] = [
                 ['BANDWIDTH', accounts.b58[1], undefined, { permissionId: 2 }],
                 ['BANDWIDTH', accounts.b58[1]],
+                ['BANDWIDTH', accounts.b58[1], undefined, { blockHeader: await getHeaderInfo(tronWeb.fullNode) }],
             ];
 
             for (const param of params) {
@@ -1134,6 +1200,7 @@ describe('TronWeb.transactionBuilder', function () {
             const params: Parameters<TransactionBuilder['withdrawBlockRewards']>[] = [
                 [accounts.b58[1], { permissionId: 2 }],
                 [accounts.b58[1]],
+                [accounts.b58[1], { blockHeader: await getHeaderInfo(tronWeb.fullNode) }],
             ];
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.withdrawBlockRewards(...param);
@@ -1148,6 +1215,7 @@ describe('TronWeb.transactionBuilder', function () {
             const params: Parameters<TransactionBuilder['freezeBalanceV2']>[] = [
                 [500e6, 'BANDWIDTH', accounts.b58[1], { permissionId: 2 }],
                 [500e6, 'BANDWIDTH', accounts.b58[1]],
+                [500e6, 'BANDWIDTH', accounts.b58[1], { blockHeader: await getHeaderInfo(tronWeb.fullNode) }],
             ];
 
             for (const param of params) {
@@ -1159,7 +1227,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.owner_address, accounts.hex[1]);
                 assert.equal(parameter.value.frozen_balance, 500e6);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.FreezeBalanceV2Contract');
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[3] ? param[3]['permissionId'] : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[3]?.['permissionId'] || 0);
             }
         });
 
@@ -1211,7 +1279,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.owner_address, accounts.hex[1]);
                 assert.equal(parameter.value.frozen_balance, 500e6);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.FreezeBalanceV2Contract');
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[3] ? param[3]['permissionId'] : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[3]?.['permissionId'] || 0);
             }
         });
 
@@ -1243,6 +1311,7 @@ describe('TronWeb.transactionBuilder', function () {
             const params: Parameters<TransactionBuilder['unfreezeBalanceV2']>[] = [
                 [100e6, 'BANDWIDTH', accounts.b58[1], { permissionId: 2 }],
                 [100e6, 'BANDWIDTH', accounts.b58[1]],
+                [100e6, 'BANDWIDTH', accounts.b58[1], { blockHeader: await getHeaderInfo(tronWeb.fullNode) }],
             ];
 
             for (const param of params) {
@@ -1254,7 +1323,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.owner_address, accounts.hex[1]);
                 assert.equal(parameter.value.unfreeze_balance, 100e6);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.UnfreezeBalanceV2Contract');
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[3] ? param[3]['permissionId'] : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[3]?.['permissionId'] || 0);
             }
         });
 
@@ -1358,6 +1427,7 @@ describe('TronWeb.transactionBuilder', function () {
             const params: Parameters<TransactionBuilder['cancelUnfreezeBalanceV2']>[] = [
                 [accounts.b58[1], { permissionId: 2 }],
                 [accounts.b58[2]],
+                [accounts.b58[1], { blockHeader: await getHeaderInfo(tronWeb.fullNode) }],
             ];
 
             for (let i = 0; i < 2; i++) {
@@ -1399,6 +1469,15 @@ describe('TronWeb.transactionBuilder', function () {
             const params: Parameters<typeof tronWeb.transactionBuilder.delegateResource>[] = [
                 [100e6, accounts.b58[7], 'BANDWIDTH', accounts.b58[1], false, 0, { permissionId: 2 }],
                 [100e6, accounts.b58[7], 'BANDWIDTH', accounts.b58[1]],
+                [
+                    100e6,
+                    accounts.b58[7],
+                    'BANDWIDTH',
+                    accounts.b58[1],
+                    false,
+                    0,
+                    { blockHeader: await getHeaderInfo(tronWeb.fullNode) },
+                ],
             ];
 
             for (const param of params) {
@@ -1411,7 +1490,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
                 assert.equal(parameter.value.balance, 100e6);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.DelegateResourceContract');
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[6] ? param[6].permissionId : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[6]?.permissionId || 0);
             }
         });
 
@@ -1666,6 +1745,7 @@ describe('TronWeb.transactionBuilder', function () {
             const params: Parameters<TransactionBuilder['undelegateResource']>[] = [
                 [100e6, accounts.b58[7], 'BANDWIDTH', accounts.b58[1], { permissionId: 2 }],
                 [100e6, accounts.b58[7], 'BANDWIDTH', accounts.b58[1]],
+                [100e6, accounts.b58[7], 'BANDWIDTH', accounts.b58[1], { blockHeader: await getHeaderInfo(tronWeb.fullNode) }],
             ];
 
             for (const param of params) {
@@ -1678,7 +1758,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(parameter.value.receiver_address, accounts.hex[7]);
                 assert.equal(parameter.value.balance, 100e6);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.UnDelegateResourceContract');
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[4] ? param[4]['permissionId'] : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[4]?.['permissionId'] || 0);
             }
         });
 
@@ -1882,6 +1962,7 @@ describe('TronWeb.transactionBuilder', function () {
             const params: Parameters<TransactionBuilder['withdrawExpireUnfreeze']>[] = [
                 [accounts.b58[1], { permissionId: 2 }],
                 [accounts.b58[1]],
+                [accounts.b58[1], { blockHeader: await getHeaderInfo(tronWeb.fullNode) }],
             ];
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.withdrawExpireUnfreeze(...param);
@@ -1890,7 +1971,7 @@ describe('TronWeb.transactionBuilder', function () {
                 // jlog(parameter)
                 assert.equal(parameter.value.owner_address, accounts.hex[1]);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.WithdrawExpireUnfreezeContract');
-                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[1] ? param[1]['permissionId'] : 0);
+                assert.equal(transaction.raw_data.contract[0].Permission_id || 0, param[1]?.['permissionId'] || 0);
             }
         });
 
@@ -1921,13 +2002,19 @@ describe('TronWeb.transactionBuilder', function () {
             const votes: VoteInfo = {};
             votes[accounts.hex[0]] = 5;
 
-            const transaction = await tronWeb.transactionBuilder.vote(votes, accounts.b58[1]);
-            const parameter = txPars(transaction) as ContractParamterWrapper<VoteWitnessContract>;
+            const params = [
+                [votes, accounts.b58[1]],
+                [votes, accounts.b58[1], { blockHeader: await getHeaderInfo(tronWeb.fullNode) }],
+            ];
+            for (let param of params) {
+                const transaction = await tronWeb.transactionBuilder.vote(...param);
+                const parameter = txPars(transaction) as ContractParamterWrapper<VoteWitnessContract>;
 
-            assert.equal(parameter.value.owner_address, accounts.hex[1]);
-            assert.equal(parameter.value.votes[0].vote_address, accounts.hex[0]);
-            assert.equal(parameter.value.votes[0].vote_count, 5);
-            assert.equal(parameter.type_url, 'type.googleapis.com/protocol.VoteWitnessContract');
+                assert.equal(parameter.value.owner_address, accounts.hex[1]);
+                assert.equal(parameter.value.votes[0].vote_address, accounts.hex[0]);
+                assert.equal(parameter.value.votes[0].vote_count, 5);
+                assert.equal(parameter.type_url, 'type.googleapis.com/protocol.VoteWitnessContract');
+            }
         });
     });
 
@@ -1938,13 +2025,27 @@ describe('TronWeb.transactionBuilder', function () {
                 bytecode: testRevert.bytecode,
                 feeLimit: 8e7,
             };
-            for (let i = 0; i < 2; i++) {
-                if (i === 1) options.permissionId = 2;
-                const tx = await tronWeb.transactionBuilder.createSmartContract(options);
+            const params = [
+                [options],
+                [
+                    {
+                        ...options,
+                        permissionId: 2,
+                    },
+                ],
+                [
+                    {
+                        ...options,
+                        blockHeader: await getHeaderInfo(tronWeb.fullNode),
+                    },
+                ],
+            ];
+            for (let param of params) {
+                const tx = await tronWeb.transactionBuilder.createSmartContract(...param);
                 assert.equal(tx.raw_data.contract[0].parameter.value.new_contract.consume_user_resource_percent, 100);
                 assert.equal(tx.raw_data.contract[0].parameter.value.new_contract.origin_energy_limit, 1e7);
                 assert.equal(tx.raw_data.fee_limit, 8e7);
-                assert.equal(tx.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
+                assert.equal(tx.raw_data.contract[0].Permission_id || 0, param[0].permissionId || 0);
             }
         });
 
@@ -2046,16 +2147,20 @@ describe('TronWeb.transactionBuilder', function () {
                 { type: 'uint256', value: 2 },
             ];
             const options: TriggerSmartContractOptions = {};
-
-            for (let i = 0; i < 2; i++) {
-                if (i === 1) options.permissionId = 2;
-                transaction = await tronWeb.transactionBuilder.triggerConstantContract(
+            const params: Array<[string, string, TriggerConstantContractOptions, ContractFunctionParameter[], string]> = [
+                [contractAddress, functionSelector, options, parameter, issuerAddress],
+                [contractAddress, functionSelector, { ...options, permissionId: 2 }, parameter, issuerAddress],
+                [
                     contractAddress,
                     functionSelector,
-                    options,
+                    { ...options, blockHeader: await getHeaderInfo(tronWeb.fullNode) },
                     parameter,
-                    issuerAddress
-                );
+                    issuerAddress,
+                ],
+            ];
+
+            for (let param of params) {
+                transaction = await tronWeb.transactionBuilder.triggerConstantContract(...param);
                 assert.isTrue(
                     transaction.result.result &&
                         transaction.transaction.raw_data.contract[0].parameter.type_url ===
@@ -2064,7 +2169,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(transaction.constant_result, '0000000000000000000000000000000000000000000000000000000000000004');
                 transaction = await broadcaster(null, accounts.pks[6], transaction.transaction);
                 assert.isTrue(transaction.receipt.result);
-                assert.equal(transaction.transaction.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
+                assert.equal(transaction.transaction.raw_data.contract[0].Permission_id || 0, param[2].permissionId || 0);
             }
         });
 
@@ -2185,6 +2290,15 @@ describe('TronWeb.transactionBuilder', function () {
                     accounts.hex[7]
                 )
             );
+            transactions.push(
+                await tronWeb.transactionBuilder.createSmartContract(
+                    {
+                        abi: testConstant.abi,
+                        bytecode: testConstant.bytecode,
+                    },
+                    accounts.hex[7]
+                )
+            );
             transactions.forEach(async (tx) => {
                 contracts.push(await broadcaster(null, accounts.pks[7], tx));
             });
@@ -2192,7 +2306,8 @@ describe('TronWeb.transactionBuilder', function () {
             while (true) {
                 const tx1 = await tronWeb.trx.getTransactionInfo(transactions[0].txID);
                 const tx2 = await tronWeb.trx.getTransactionInfo(transactions[1].txID);
-                if (Object.keys(tx1).length === 0 || Object.keys(tx2).length === 0) {
+                const tx3 = await tronWeb.trx.getTransactionInfo(transactions[2].txID);
+                if (Object.keys(tx1).length === 0 || Object.keys(tx2).length === 0 || Object.keys(tx3).length === 0) {
                     await wait(3);
                     continue;
                 } else {
@@ -2207,6 +2322,7 @@ describe('TronWeb.transactionBuilder', function () {
             const params = [
                 [transactions[0], accounts.hex[7], { permissionId: 2 }],
                 [transactions[1], accounts.hex[7]],
+                [transactions[2], accounts.hex[7], { blockHeader: await getHeaderInfo(tronWeb.fullNode) }],
             ];
             for (const param of params) {
                 const contractAddress = param[0].contract_address;
@@ -2272,6 +2388,7 @@ describe('TronWeb.transactionBuilder', function () {
             const params: Parameters<TransactionBuilder['updateBrokerage']>[] = [
                 [10, accounts.hex[1], { permissionId: 2 }],
                 [20, accounts.hex[1]],
+                [10, accounts.hex[1], { blockHeader: await getHeaderInfo(tronWeb.fullNode) }],
             ];
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.updateBrokerage(...param);
@@ -2415,36 +2532,28 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it('should create token exchange', async function () {
-            let transaction = await tronWeb.transactionBuilder.createTokenExchange(
-                tokenNames[0],
-                10e3,
-                tokenNames[1],
-                10e3,
-                accounts.hex[toIdx1]
-            );
-            let parameter = txPars(transaction) as ContractParamterWrapper<ExchangeCreateContract>;
+            const params: Array<[string, number, string, number, string, TransactionCommonOptions?]> = [
+                [tokenNames[0], 10e3, tokenNames[1], 10e3, accounts.hex[toIdx1], { permissionId: 2 }],
+                [tokenNames[0], 10e3, tokenNames[1], 10e3, accounts.hex[toIdx1]],
+                [
+                    tokenNames[0],
+                    10e3,
+                    tokenNames[1],
+                    10e3,
+                    accounts.hex[toIdx1],
+                    { blockHeader: await getHeaderInfo(tronWeb.fullNode) },
+                ],
+            ];
+            for (let param of params) {
+                let transaction = await tronWeb.transactionBuilder.createTokenExchange(...param);
+                let parameter = txPars(transaction) as ContractParamterWrapper<ExchangeCreateContract>;
 
-            assert.equal(transaction.txID.length, 64);
-            assert.equal(TronWeb.toUtf8(parameter.value.first_token_id), tokenNames[0]);
-            assert.equal(TronWeb.toUtf8(parameter.value.second_token_id), tokenNames[1]);
-            assert.equal(parameter.type_url, 'type.googleapis.com/protocol.ExchangeCreateContract');
-            assert.isUndefined(transaction.raw_data.contract[0].Permission_id);
-
-            transaction = await tronWeb.transactionBuilder.createTokenExchange(
-                tokenNames[0],
-                10e3,
-                tokenNames[1],
-                10e3,
-                accounts.hex[toIdx1],
-                { permissionId: 2 }
-            );
-            parameter = txPars(transaction) as ContractParamterWrapper<ExchangeCreateContract>;
-
-            assert.equal(transaction.txID.length, 64);
-            assert.equal(TronWeb.toUtf8(parameter.value.first_token_id), tokenNames[0]);
-            assert.equal(TronWeb.toUtf8(parameter.value.second_token_id), tokenNames[1]);
-            assert.equal(parameter.type_url, 'type.googleapis.com/protocol.ExchangeCreateContract');
-            assert.equal(transaction.raw_data.contract[0].Permission_id, 2);
+                assert.equal(transaction.txID.length, 64);
+                assert.equal(TronWeb.toUtf8(parameter.value.first_token_id), tokenNames[0]);
+                assert.equal(TronWeb.toUtf8(parameter.value.second_token_id), tokenNames[1]);
+                assert.equal(parameter.type_url, 'type.googleapis.com/protocol.ExchangeCreateContract');
+                assert.equal(transaction.raw_data.contract[0].Permission_id, param[5]?.permissionId);
+            }
         });
     });
 
@@ -2494,6 +2603,13 @@ describe('TronWeb.transactionBuilder', function () {
             const params: Parameters<TransactionBuilder['injectExchangeTokens']>[] = [
                 [exchangeId as unknown as number, tokenNames[0], 10, tronWeb.defaultAddress.hex as string, { permissionId: 2 }],
                 [exchangeId as unknown as number, tokenNames[0], 10],
+                [
+                    exchangeId as unknown as number,
+                    tokenNames[0],
+                    10,
+                    tronWeb.defaultAddress.hex as string,
+                    { blockHeader: await getHeaderInfo(tronWeb.fullNode) },
+                ],
             ];
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.injectExchangeTokens(...param);
@@ -2549,6 +2665,13 @@ describe('TronWeb.transactionBuilder', function () {
             const params: Parameters<TransactionBuilder['withdrawExchangeTokens']>[] = [
                 [exchangeId, tokenNames[0], 10, tronWeb.defaultAddress.hex as string, { permissionId: 2 }],
                 [exchangeId, tokenNames[0], 10],
+                [
+                    exchangeId,
+                    tokenNames[0],
+                    10,
+                    tronWeb.defaultAddress.hex as string,
+                    { blockHeader: await getHeaderInfo(tronWeb.fullNode) },
+                ],
             ];
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.withdrawExchangeTokens(...param);
@@ -2600,6 +2723,14 @@ describe('TronWeb.transactionBuilder', function () {
             const params: Parameters<TransactionBuilder['tradeExchangeTokens']>[] = [
                 [exchangeId, tokenNames[0], 10, 5, tronWeb.defaultAddress.hex as string, { permissionId: 2 }],
                 [exchangeId, tokenNames[0], 10, 5],
+                [
+                    exchangeId,
+                    tokenNames[0],
+                    10,
+                    5,
+                    tronWeb.defaultAddress.hex as string,
+                    { blockHeader: await getHeaderInfo(tronWeb.fullNode) },
+                ],
             ];
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.tradeExchangeTokens(...param);
@@ -2644,6 +2775,7 @@ describe('TronWeb.transactionBuilder', function () {
             const params: Parameters<typeof tronWeb.transactionBuilder.updateSetting>[] = [
                 [transaction.contract_address, 10, accounts.b58[3], { permissionId: 2 }],
                 [transaction.contract_address, 20, accounts.b58[3]],
+                [transaction.contract_address, 10, accounts.b58[3], { blockHeader: await getHeaderInfo(tronWeb.fullNode) }],
             ];
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.updateSetting(...param);
@@ -2680,6 +2812,7 @@ describe('TronWeb.transactionBuilder', function () {
             const params: Parameters<TransactionBuilder['updateSetting']>[] = [
                 [transaction.contract_address, 10e6, accounts.b58[3], { permissionId: 2 }],
                 [transaction.contract_address, 10e6, accounts.b58[3]],
+                [transaction.contract_address, 10e6, accounts.b58[3], { blockHeader: await getHeaderInfo(tronWeb.fullNode) }],
             ];
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.updateEnergyLimit(...param);
@@ -2749,6 +2882,13 @@ describe('TronWeb.transactionBuilder', function () {
             const params: Parameters<TransactionBuilder['updateAccountPermissions']>[] = [
                 [accounts.hex[6], permissionData.owner, permissionData.witness, permissionData.actives, { permissionId: 2 }],
                 [accounts.hex[6], permissionData.owner, permissionData.witness, permissionData.actives],
+                [
+                    accounts.hex[6],
+                    permissionData.owner,
+                    permissionData.witness,
+                    permissionData.actives,
+                    { blockHeader: await getHeaderInfo(tronWeb.fullNode) },
+                ],
             ];
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.updateAccountPermissions(...param);

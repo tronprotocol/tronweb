@@ -69,14 +69,37 @@ export function getHeaderInfo(node: HttpProvider) {
     });
 }
 
+function checkBlockHeader(options = {} as Partial<Transaction['raw_data']>): boolean {
+    if (
+        typeof options['ref_block_bytes'] === 'undefined' &&
+        typeof options['ref_block_hash'] === 'undefined' &&
+        typeof options['expiration'] === 'undefined' &&
+        typeof options['timestamp'] === 'undefined'
+    ) {
+        return false;
+    }
+    if (typeof options['ref_block_bytes'] !== 'string') {
+        throw new Error('Invalid ref_block_bytes provided.');
+    }
+    if (typeof options['ref_block_hash'] !== 'string') {
+        throw new Error('Invalid ref_block_hash provided.');
+    }
+    if (typeof options['expiration'] !== 'number') {
+        throw new Error('Invalid expiration provided.');
+    }
+    if (typeof options['timestamp'] !== 'number') {
+        throw new Error('Invalid timestamp provided.');
+    }
+    return true;
+}
+
 export async function createTransaction(
     tronWeb: TronWeb,
     type: ContractType,
     value: ContractParamter,
     Permission_id?: number,
-    options = {}
+    options = {} as Partial<Omit<Transaction['raw_data'], 'contract'>>
 ): Promise<Transaction> {
-    const metaData = await getHeaderInfo(tronWeb.fullNode);
     const tx: Transaction = {
         visible: false,
         txID: '',
@@ -91,7 +114,7 @@ export async function createTransaction(
                     type,
                 },
             ],
-            ...metaData,
+            ...(checkBlockHeader(options) ? ({} as Transaction['raw_data']) : await getHeaderInfo(tronWeb.fullNode)),
             ...options,
         },
     };
@@ -102,4 +125,15 @@ export async function createTransaction(
     tx.txID = txPbToTxID(pb).replace(/^0x/, '');
     tx.raw_data_hex = txPbToRawDataHex(pb).toLowerCase();
     return tx;
+}
+
+export function getTransactionOptions(options: { blockHeader?: Partial<Transaction['raw_data']> } = {}) {
+    const ret = {} as Partial<Transaction['raw_data']>;
+    if (checkBlockHeader(options.blockHeader)) {
+        ret['ref_block_bytes'] = options.blockHeader!['ref_block_bytes'];
+        ret['ref_block_hash'] = options.blockHeader!['ref_block_hash'];
+        ret['expiration'] = options.blockHeader!['expiration'];
+        ret['timestamp'] = options.blockHeader!['timestamp'];
+    }
+    return ret;
 }

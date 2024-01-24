@@ -1431,4 +1431,26 @@ export class Trx {
                 return result.brokerage;
             });
     }
+
+    async getBandwidthPrices(): Promise<string> {
+        return this.tronWeb.fullNode.request<{ prices?: string }>('wallet/getbandwidthprices', {}, 'post')
+            .then((result = {}) => {
+                if (typeof result.prices === 'undefined') {
+                    throw new Error('Not found.');
+                }
+
+                return result.prices;
+            });
+    }
+
+    async getEnergyPrices(): Promise<string> {
+        return this.tronWeb.fullNode.request<{ prices?: string }>('wallet/getenergyprices', {}, 'post')
+            .then((result = {}) => {
+                if (typeof result.prices === 'undefined') {
+                    throw new Error('Not found.');
+                }
+
+                return result.prices;
+            });
+    }
 }
