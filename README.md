@@ -42,7 +42,7 @@ __[tronweb.network](https://tronweb.network)__
 - Version built for Node.js v6 and above
 - Version built for browsers with more than 0.25% market share
 
-You can access either version specifically from the [dist](dist) folder.
+You can access either version specifically from the dist folder.
 
 TronWeb is also compatible with frontend frameworks such as:
 - Angular
