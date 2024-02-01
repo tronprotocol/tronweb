@@ -109,10 +109,10 @@ export default class Event {
         }
 
         if (onlyConfirmed)
-            qs.onlyConfirmed = onlyConfirmed
+            qs.only_confirmed = onlyConfirmed
 
         if (onlyUnconfirmed && !onlyConfirmed)
-            qs.onlyUnconfirmed = onlyUnconfirmed
+            qs.only_unconfirmed = onlyUnconfirmed
 
         if (sort)
             qs.sort = sort
