@@ -2294,15 +2294,15 @@ describe('TronWeb.trx', function () {
 
     describe('#getBandwidthPrices', async function () {
         it('should getBandwidthPrices from fullNode', async function () {
-            const res = await tronWeb.trx.getBandwidthPrices();
-            assert.isString(res.prices);
+            const prices = await tronWeb.trx.getBandwidthPrices();
+            assert.isString(prices);
         })
     });
 
     describe('#getEnergyPrices', async function () {
         it('should getEnergyPrices from fullNode', async function () {
-            const res = await tronWeb.trx.getEnergyPrices();
-            assert.isString(res.prices);
+            const prices = await tronWeb.trx.getEnergyPrices();
+            assert.isString(prices);
         })
     })
 });
