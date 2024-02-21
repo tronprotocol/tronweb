@@ -660,7 +660,7 @@ export default class Trx {
         ];
 
         const messageDigest = keccak256(new Uint8Array(messageBytes));
-        const recovered = recoverAddress(messageDigest, Signature.from(signature));
+        const recovered = recoverAddress(messageDigest, Signature.from(`0x${signature.replace(/^0x/, '')}`));
 
         const tronAddress = ADDRESS_PREFIX + recovered.substr(2);
         const base58Address = TronWeb.address.fromHex(tronAddress);
@@ -706,7 +706,7 @@ export default class Trx {
 
     static verifyTypedData(domain, types, value, signature, address) {
         const messageDigest = utils._TypedDataEncoder.hash(domain, types, value);
-        const recovered = recoverAddress(messageDigest, Signature.from(signature));
+        const recovered = recoverAddress(messageDigest, Signature.from(`0x${signature.replace(/^0x/, '')}`));
 
         const tronAddress = ADDRESS_PREFIX + recovered.substr(2);
         const base58Address = TronWeb.address.fromHex(tronAddress);
