@@ -1,10 +1,11 @@
 import TronWeb from 'index';
 import utils from 'utils';
-import { keccak256, toUtf8Bytes, recoverAddress, SigningKey } from 'utils/ethersUtils';
+import { keccak256, toUtf8Bytes, recoverAddress, SigningKey, Signature } from 'utils/ethersUtils';
 import { ADDRESS_PREFIX } from 'utils/address';
 import Validator from "../paramValidator";
 import injectpromise from 'injectpromise';
 import { txCheck } from '../utils/transaction';
+import { ecRecover } from '../utils/crypto';
 
 const TRX_MESSAGE_HEADER = '\x19TRON Signed Message:\n32';
 // it should be: '\x15TRON Signed Message:\n32';
@@ -606,6 +607,27 @@ export default class Trx {
         }).catch(err => callback(err));
     }
 
+    ecRecover(transaction) {
+        return Trx.ecRecover(transaction);
+    }
+
+    static ecRecover(transaction) {
+        if (!txCheck(transaction)) {
+            throw new Error('Invalid transaction');
+        }
+        if (!transaction.signature?.length) {
+            throw new Error('Transaction is not signed');
+        }
+        if (transaction.signature.length === 1) {
+            const tronAddress = ecRecover(transaction.txID, transaction.signature[0]);
+            return TronWeb.address.fromHex(tronAddress);
+        }
+        return transaction.signature.map((sig) => {
+            const tronAddress = ecRecover(transaction.txID, sig);
+            return TronWeb.address.fromHex(tronAddress);
+        });
+    }
+
     async verifyMessage(message = false, signature = false, address = this.tronWeb.defaultAddress.base58, useTronHeader = true, callback = false) {
         if (utils.isFunction(address)) {
             callback = address;
@@ -632,18 +654,13 @@ export default class Trx {
 
     static verifySignature(message, address, signature, useTronHeader = true) {
         message = message.replace(/^0x/, '');
-        signature = signature.replace(/^0x/, '');
         const messageBytes = [
             ...toUtf8Bytes(useTronHeader ? TRX_MESSAGE_HEADER : ETH_MESSAGE_HEADER),
             ...utils.code.hexStr2byteArray(message)
         ];
 
         const messageDigest = keccak256(new Uint8Array(messageBytes));
-        const recovered = recoverAddress(messageDigest, {
-            yParity: signature.substring(128, 130) == '1c' ? 1 : 0,
-            r: '0x' + signature.substring(0, 64),
-            s: '0x' + signature.substring(64, 128)
-        });
+        const recovered = recoverAddress(messageDigest, Signature.from(`0x${signature.replace(/^0x/, '')}`));
 
         const tronAddress = ADDRESS_PREFIX + recovered.substr(2);
         const base58Address = TronWeb.address.fromHex(tronAddress);
@@ -688,14 +705,8 @@ export default class Trx {
     }
 
     static verifyTypedData(domain, types, value, signature, address) {
-        signature = signature.replace(/^0x/, '');
-
         const messageDigest = utils._TypedDataEncoder.hash(domain, types, value);
-        const recovered = recoverAddress(messageDigest, {
-            yParity: signature.substring(128, 130) == '1c' ? 1 : 0,
-            r: '0x' + signature.substring(0, 64),
-            s: '0x' + signature.substring(64, 128),
-        });
+        const recovered = recoverAddress(messageDigest, Signature.from(`0x${signature.replace(/^0x/, '')}`));
 
         const tronAddress = ADDRESS_PREFIX + recovered.substr(2);
         const base58Address = TronWeb.address.fromHex(tronAddress);
@@ -1737,4 +1748,25 @@ export default class Trx {
             }).catch(err => callback(err));
     }
 
+    async getBandwidthPrices() {
+        return this.tronWeb.fullNode.request('wallet/getbandwidthprices', {}, 'post')
+            .then((result = {}) => {
+                if (typeof result.prices === 'undefined') {
+                    throw new Error('Not found.');
+                }
+
+                return result.prices;
+            });
+    }
+
+    async getEnergyPrices() {
+        return this.tronWeb.fullNode.request('wallet/getenergyprices', {}, 'post')
+            .then((result = {}) => {
+                if (typeof result.prices === 'undefined') {
+                    throw new Error('Not found.');
+                }
+
+                return result.prices;
+            });
+    }
 };

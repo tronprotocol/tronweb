@@ -42,7 +42,7 @@ __[tronweb.network](https://tronweb.network)__
 - Version built for Node.js v6 and above
 - Version built for browsers with more than 0.25% market share
 
-You can access either version specifically from the [dist](dist) folder.
+You can access either version specifically from the dist folder.
 
 TronWeb is also compatible with frontend frameworks such as:
 - Angular
@@ -182,6 +182,19 @@ In order to contribute you can
 Contact the team at https://cn.developers.tron.network/docs/online-technical-support
 
 ## Recent History
+
+__5.3.2__
+- Support build transactions locally with block header argument.
+- Support [Tip586](https://github.com/tronprotocol/tips/blob/master/tip-586.md) by `trx.getBandwidthPrices` and `trx.getEnergyPrices`.
+- Support recover transaction signer address by `trx.ecRecover`.
+- Support multi-dimension address array such as address[][] https://github.com/tronprotocol/tronweb/issues/433
+- Fix error when triggerSmartContract with error address due to the undefined callback. https://github.com/tronprotocol/tronweb/issues/429
+- Fix getEventResult filter onlyConfirmed/onlyUnconfirmed not working https://github.com/tronprotocol/tronweb/issues/422
+- Axios update https://github.com/tronprotocol/tronweb/issues/445
+
+__5.3.1__
+- Fix `getBlockRange()` error for range of 1 ([#398](https://github.com/tronprotocol/tronweb/issues/398)).
+- Add support for `estimateenergy` in  `TransactionBuilder#deployConstantContract()` API.
 
 __5.3.0__
 - Replace `elliptic` with `ethereum-cryptography/secp256k1` 
