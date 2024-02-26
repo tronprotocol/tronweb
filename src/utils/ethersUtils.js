@@ -42,6 +42,7 @@ export {
     toUtf8String,
     recoverAddress,
     SigningKey,
+    Signature,
     AbiCoder,
     Interface,
     FormatTypes,
