@@ -1,6 +1,6 @@
 import { TronWeb } from '../tronweb.js';
 import utils from '../utils/index.js';
-import { keccak256, toUtf8Bytes, recoverAddress, SigningKey } from '../utils/ethersUtils.js';
+import { keccak256, toUtf8Bytes, recoverAddress, SigningKey, Signature } from '../utils/ethersUtils.js';
 import { ADDRESS_PREFIX } from '../utils/address.js';
 import { Validator } from '../paramValidator/index.js';
 import { txCheck } from '../utils/transaction.js';
@@ -522,18 +522,13 @@ export class Trx {
 
     static verifySignature(message: string, address: string, signature: string, useTronHeader = true) {
         message = message.replace(/^0x/, '');
-        signature = signature.replace(/^0x/, '');
         const messageBytes = [
             ...toUtf8Bytes(useTronHeader ? TRX_MESSAGE_HEADER : ETH_MESSAGE_HEADER),
             ...utils.code.hexStr2byteArray(message),
         ];
 
         const messageDigest = keccak256(new Uint8Array(messageBytes));
-        const recovered = recoverAddress(messageDigest, {
-            yParity: signature.substring(128, 130) == '1c' ? 1 : 0,
-            r: '0x' + signature.substring(0, 64),
-            s: '0x' + signature.substring(64, 128),
-        });
+        const recovered = recoverAddress(messageDigest, Signature.from(`0x${signature.replace(/^0x/, '')}`));
 
         const tronAddress = ADDRESS_PREFIX + recovered.substr(2);
         const base58Address = TronWeb.address.fromHex(tronAddress);
@@ -568,14 +563,8 @@ export class Trx {
         signature: string,
         address: string
     ) {
-        signature = signature.replace(/^0x/, '');
-
         const messageDigest = utils._TypedDataEncoder.hash(domain, types, value);
-        const recovered = recoverAddress(messageDigest, {
-            yParity: signature.substring(128, 130) == '1c' ? 1 : 0,
-            r: '0x' + signature.substring(0, 64),
-            s: '0x' + signature.substring(64, 128),
-        });
+        const recovered = recoverAddress(messageDigest, Signature.from(`0x${signature.replace(/^0x/, '')}`));
 
         const tronAddress = ADDRESS_PREFIX + recovered.substr(2);
         const base58Address = TronWeb.address.fromHex(tronAddress);
