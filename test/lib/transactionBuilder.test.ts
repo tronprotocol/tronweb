@@ -2879,6 +2879,47 @@ describe('TronWeb.transactionBuilder', function () {
                     },
                 ],
             };
+            const permissionData2 = {
+                "owner": {
+                    "type": 0,
+                    "keys": [
+                    {
+                        "address": accounts.b58[6],
+                        "weight": 1
+                    }
+                    ],
+                    "threshold": 1,
+                    "permission_name": "owner"
+                },
+                "witness": {
+                    "keys": [
+                    {
+                        "address": accounts.b58[6],
+                        "weight": 1
+                    }
+                    ],
+                    "threshold": 1,
+                    "id": 1,
+                    "type": 1,
+                    "permission_name": "witness"
+                },
+                "owner_address": accounts.b58[6],
+                "actives": [
+                    {
+                    "operations": "7fff1fc0033e0000000000000000000000000000000000000000000000000000",
+                    "keys": [
+                        {
+                        "address": accounts.b58[6],
+                        "weight": 1
+                        }
+                    ],
+                    "threshold": 1,
+                    "id": 2,
+                    "type": 2,
+                    "permission_name": "active"
+                    }
+                ]
+            };
             const params: Parameters<TransactionBuilder['updateAccountPermissions']>[] = [
                 [accounts.hex[6], permissionData.owner, permissionData.witness, permissionData.actives, { permissionId: 2 }],
                 [accounts.hex[6], permissionData.owner, permissionData.witness, permissionData.actives],
@@ -2889,6 +2930,7 @@ describe('TronWeb.transactionBuilder', function () {
                     permissionData.actives,
                     { blockHeader: await getHeaderInfo(tronWeb.fullNode) },
                 ],
+                [accounts.hex[6], permissionData2.owner, permissionData2.witness, permissionData2.actives],
             ];
             for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.updateAccountPermissions(...param);
@@ -2900,6 +2942,7 @@ describe('TronWeb.transactionBuilder', function () {
                 // assert.deepEqual(parameter.value.actives, param[3]);
                 assert.equal(parameter.type_url, 'type.googleapis.com/protocol.AccountPermissionUpdateContract');
                 assert.equal(transaction.raw_data.contract[0].Permission_id, param[4]?.permissionId);
+                await tronWeb.trx.sign(transaction, accounts.pks[6]);
             }
         });
     });
