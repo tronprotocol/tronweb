@@ -2,7 +2,7 @@ import { ADDRESS_PREFIX, ADDRESS_PREFIX_BYTE, ADDRESS_SIZE } from './address.js'
 import { base64EncodeToString, base64DecodeFromString, hexStr2byteArray } from './code.js';
 import { encode58, decode58 } from './base58.js';
 import { BytesLike, byte2hexStr, byteArray2hexStr } from './bytes.js';
-import { keccak256, sha256, SigningKey } from './ethersUtils.js';
+import { keccak256, sha256, SigningKey, recoverAddress, arrayify, Signature } from './ethersUtils.js';
 import { TypedDataEncoder } from './typedData.js';
 import { secp256k1 as secp } from 'ethereum-cryptography/secp256k1';
 import type { TypedDataDomain, TypedDataField } from 'ethers';
@@ -64,6 +64,15 @@ export function signTransaction(priKeyBytes: string | BytesLike, transaction: an
         if (!transaction.signature.includes(signature)) transaction.signature.push(signature);
     } else transaction.signature = [signature];
     return transaction;
+}
+
+export function ecRecover(signedData: string, signature: string) {
+    signedData = '0x' + signedData.replace(/^0x/, '');
+    signature = '0x' + signature.replace(/^0x/, '');
+
+    const recovered = recoverAddress(arrayify(signedData), Signature.from(signature));
+    const tronAddress = ADDRESS_PREFIX + recovered.substring(2);
+    return tronAddress;
 }
 
 export function arrayToBase64String(a: number[]) {
