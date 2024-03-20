@@ -28,13 +28,13 @@
 
 ## What is TronWeb?
 
-[TronWeb](https://tronweb.network) aims to deliver a unified, seamless development experience influenced by Ethereum's [Web3](https://github.com/ethereum/web3.js/) implementation. We have taken the core ideas and expanded upon it to unlock the functionality of TRON's unique feature set along with offering new tools for integrating DApps in the browser, Node.js and IoT devices.
+[TronWeb](https://tronweb.network) aims to deliver a unified, seamless development experience influenced by Ethereum's [Web3](https://github.com/ethereum/web3.js/) implementation. We have taken the core ideas and expanded upon them to unlock the functionality of TRON's unique feature set along with offering new tools for integrating DApps in the browser, Node.js and IoT devices.
 
 <font color=red>Please note that this version is an experimental beta version.</font> To better support its use in TypeScript projects, we have rewritten the entire library in TypeScript. And to make the TronWeb API more secure and consistent, there are some breaking changes. <font color=red>Please check out [<font color=red>6.x API documentation</font>](https://tronweb.network/docu/docs/intro/)</font> for detailed changes so you can start using the new TypeScript version of TronWeb early. Any questions or feedback are welcome [here](https://github.com/tronprotocol/tronweb/issues/new).
 
 **Project scope**
 
-Any new TRON feature will be incorporated into TronWeb. Changes to the API to improve quality-of-life are in-scope for the project. We will not necessarilly maintain feature parity with Web3.js going forward as this is a separate project, not a synchronized fork.
+Any new TRON feature will be incorporated into TronWeb. Changes to the API to improve quality-of-life are in-scope for the project. We will not necessarily maintain feature parity with Web3.js going forward as this is a separate project, not a synchronized fork.
 
 ## HomePage
 
@@ -53,6 +53,13 @@ TronWeb is also compatible with frontend frameworks such as:
 
 You can also ship TronWeb in a Chrome extension.
 
+## Recent History
+
+For recent history, see the [CHANGELOG](https://github.com/tronprotocol/tronweb/blob/master/CHANGELOG.md). You can check it out for:
+- New features
+- Dependencies update
+- Bug fix
+
 ## Installation
 
 ### Node.js
@@ -66,7 +73,7 @@ yarn add tronweb@beta
 
 ### Browser
 
-Then easiest way to use TronWeb in a browser is to install it as above and copy the dist file to your working folder. For example:
+The easiest way to use TronWeb in a browser is to install it as above and copy the dist file to your working folder. For example:
 ```
 cp node_modules/tronweb/dist/TronWeb.js ./js/tronweb.js
 ```

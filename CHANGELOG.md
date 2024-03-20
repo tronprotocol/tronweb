@@ -1,4 +1,4 @@
-Changelog
+Change Log
 =========
 
 __6.0.0-beta.2__
