@@ -28,11 +28,11 @@
 
 ## What is TronWeb?
 
-[TronWeb](https://tronweb.network) aims to deliver a unified, seamless development experience influenced by Ethereum's [Web3](https://github.com/ethereum/web3.js/) implementation. We have taken the core ideas and expanded upon it to unlock the functionality of TRON's unique feature set along with offering new tools for integrating DApps in the browser, Node.js and IoT devices.
+[TronWeb](https://tronweb.network) aims to deliver a unified, seamless development experience influenced by Ethereum's [Web3](https://github.com/ethereum/web3.js/) implementation. We have taken the core ideas and expanded upon them to unlock the functionality of TRON's unique feature set along with offering new tools for integrating DApps in the browser, Node.js and IoT devices.
 
 **Project scope**
 
-Any new TRON feature will be incorporated into TronWeb. Changes to the API to improve quality-of-life are in-scope for the project. We will not necessarilly maintain feature parity with Web3.js going forward as this is a separate project, not a synchronized fork.
+Any new TRON feature will be incorporated into TronWeb. Changes to the API to improve quality-of-life are in-scope for the project. We will not necessarily maintain feature parity with Web3.js going forward as this is a separate project, not a synchronized fork.
 
 ## HomePage
 
@@ -64,7 +64,7 @@ yarn add tronweb
 
 ### Browser
 
-Then easiest way to use TronWeb in a browser is to install it as above and copy the dist file to your working folder. For example:
+The easiest way to use TronWeb in a browser is to install it as above and copy the dist file to your working folder. For example:
 ```
 cp node_modules/tronweb/dist/TronWeb.js ./js/tronweb.js
 ```
@@ -161,7 +161,7 @@ const tronWeb = new TronWeb({
 
 ## A full example
 
-The better way to understand how to work with TronWeb is go to the demo directory in this repository.
+The better way to understand how to work with TronWeb is to go to the demo directory in this repository.
 
 If you'd like to connect with tronlink app and chrome extention and develop a dapp on tron, you could run the demo in path demo/tron-dapp-react-demo.
 
