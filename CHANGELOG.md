@@ -4,7 +4,7 @@ Change Log
 __6.0.0-beta.2__
 - Bump ethers from 6.8.0 to 6.11.1
 - Bump ethereum-cryptography from 2.1.2 to 2.1.3
-- Bump ethereum-cryptography from 1.6.2 to 1.6.8
+- Bump axios from 1.6.2 to 1.6.8
 
 __6.0.0-beta.1__
 - Support [TIP586](https://github.com/tronprotocol/tips/blob/master/tip-586.md) with `trx.getBandwidthPrices` and `trx.getEnergyPrices`.
