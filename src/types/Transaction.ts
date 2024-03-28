@@ -51,6 +51,10 @@ export interface TransactionWrapper {
      */
     energy_required?: number;
     /**
+     * The penalty energy consumption.
+     */
+    energy_penalty?: number;
+    /**
      * Energy used by triggering contract.
      */
     energy_used?: number;
