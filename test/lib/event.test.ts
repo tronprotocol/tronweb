@@ -4,9 +4,8 @@ import tronWebBuilder from '../helpers/tronWebBuilder.js';
 import broadcaster from '../helpers/broadcaster.js';
 import wait from '../helpers/wait.js';
 import { Address } from '../../src/types/Trx.js';
-import { TronWeb, Event } from '../setup/TronWeb.js';
+import { TronWeb, Event, Contract } from '../setup/TronWeb.js';
 import { CreateSmartContractTransaction } from '../../src/types/Transaction.js';
-import { IContract } from '../../src/lib/contract/index.js';
 
 describe('TronWeb.lib.event', async function () {
     let accounts: {
@@ -15,7 +14,7 @@ describe('TronWeb.lib.event', async function () {
         pks: string[];
     };
     let tronWeb: TronWeb;
-    let contract: IContract;
+    let contract: Contract;
     let eventLength = 0;
     let contractAddress: Address;
 
@@ -77,7 +76,7 @@ describe('TronWeb.lib.event', async function () {
         );
 
         contractAddress = result.receipt.transaction.contract_address!;
-        contract = (await tronWeb.contract().at(contractAddress)) as unknown as IContract;
+        contract = await tronWeb.contract().at(contractAddress);
     });
 
     describe('#constructor()', function () {
@@ -90,7 +89,7 @@ describe('TronWeb.lib.event', async function () {
         it('should emit an unconfirmed event and get it', async function () {
             this.timeout(60000);
             tronWeb.setPrivateKey(accounts.pks[1]);
-            const txId = await contract.emitNow(accounts.hex[2], 2000).send({
+            const txId = await contract.methods.emitNow(accounts.hex[2], 2000).send({
                 from: accounts.hex[1],
             });
             eventLength++;
@@ -111,7 +110,7 @@ describe('TronWeb.lib.event', async function () {
         it('should emit an event, wait for confirmation and get it', async function () {
             this.timeout(60000);
             tronWeb.setPrivateKey(accounts.pks[1]);
-            const output = await contract.emitNow(accounts.hex[2], 2000).send({
+            const output = await contract.methods.emitNow(accounts.hex[2], 2000).send({
                 from: accounts.hex[1],
                 shouldPollResponse: true,
                 rawResponse: true,
@@ -140,7 +139,7 @@ describe('TronWeb.lib.event', async function () {
         let receiver = '41f00c9a48e6d6baca7c36134e7cad7d43a851e7b2';
         let tronWeb: TronWeb;
         let contractAddress: Address;
-        let contract: IContract;
+        let contract: Contract;
         let eventLength = 0;
 
         before(async function () {
@@ -196,13 +195,13 @@ describe('TronWeb.lib.event', async function () {
             );
 
             contractAddress = result.receipt.transaction.contract_address!;
-            contract = (await tronWeb.contract().at(contractAddress)) as unknown as IContract;
+            contract = await tronWeb.contract().at(contractAddress);
         });
 
         it('should emit an event and wait for it', async function () {
             this.timeout(180000);
             await wait(120); // wait for abi syncing.
-            await contract.emitNow(receiver, 4000).send({
+            await contract.methods.emitNow(receiver, 4000).send({
                 from: sender,
             });
             eventLength++;

@@ -17,9 +17,10 @@ export class Contract {
     bytecode?: false | string;
     deployed?: boolean;
     lastBlock?: false | number;
-    methods: Record<any, any>;
-    methodInstances: Record<any, any>;
+    methods: Record<string | number | symbol, (...args: any) => ReturnType<Method['onMethod']>>;
+    methodInstances: Record<string | number | symbol, Method>;
     props: any[];
+    [key: string | number | symbol]: any;
 
     constructor(tronWeb: TronWeb, abi: ContractAbiInterface = [], address: Address) {
         if (!tronWeb || !(tronWeb instanceof TronWeb)) throw new Error('Expected instance of TronWeb');
@@ -49,14 +50,14 @@ export class Contract {
 
     hasProperty(property: number | string | symbol) {
         // eslint-disable-next-line no-prototype-builtins
-        return this.hasOwnProperty(property) || (this as unknown as IContract).__proto__.hasOwnProperty(property);
+        return this.hasOwnProperty(property) || (this as any).__proto__.hasOwnProperty(property);
     }
 
     loadAbi(abi: ContractAbiInterface) {
         this.abi = abi;
         this.methods = {};
 
-        this.props.forEach((prop) => delete (this as unknown as IContract)[prop]);
+        this.props.forEach((prop: string) => delete (this as any)[prop]);
 
         abi.forEach((func) => {
             // Don't build a method for constructor function. That's handled through contract create.
@@ -77,17 +78,17 @@ export class Contract {
             this.methodInstances[signature] = method;
 
             if (!this.hasProperty(name)) {
-                (this as unknown as IContract)[name] = methodCall;
+                (this as any)[name] = methodCall;
                 this.props.push(name);
             }
 
             if (!this.hasProperty(functionSelector!)) {
-                (this as unknown as IContract)[functionSelector!] = methodCall;
+                (this as any)[functionSelector!] = methodCall;
                 this.props.push(functionSelector);
             }
 
             if (!this.hasProperty(signature)) {
-                (this as unknown as IContract)[signature] = methodCall;
+                (this as any)[signature] = methodCall;
                 this.props.push(signature);
             }
         });
