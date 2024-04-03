@@ -4,7 +4,7 @@ import { keccak256, toUtf8Bytes, recoverAddress, SigningKey, Signature } from '.
 import { ADDRESS_PREFIX } from '../utils/address.js';
 import { Validator } from '../paramValidator/index.js';
 import { txCheck } from '../utils/transaction.js';
-import { ecRecover } from '../utils/crypto';
+import { ecRecover } from '../utils/crypto.js';
 import { Block } from '../types/APIResponse.js';
 import {
     Token,
