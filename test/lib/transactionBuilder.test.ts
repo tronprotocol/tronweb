@@ -63,7 +63,6 @@ const {
     testPayable,
 } = Contracts;
 import Config from '../helpers/config';
-import { IContract } from '../../src/lib/contract';
 import { getHeaderInfo } from '../helpers/getBlockHeader';
 const { ADDRESS_HEX, ADDRESS_BASE58, UPDATED_TEST_TOKEN_OPTIONS, PRIVATE_KEY, getTokenOptions, isProposalApproved } = Config;
 
@@ -3287,7 +3286,7 @@ describe('TronWeb.transactionBuilder', function () {
                 }
             }
 
-            const deployed: IContract = tronWeb.contract(funcABIV2_3.abi, transaction.contract_address) as unknown as IContract;
+            const deployed = tronWeb.contract(funcABIV2_3.abi, transaction.contract_address);
             const txID = await deployed
                 .setStruct([
                     'TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY',
@@ -3337,7 +3336,7 @@ describe('TronWeb.transactionBuilder', function () {
                 }
             }
 
-            const deployed: IContract = tronWeb.contract(funcABIV2_4.abi, transaction.contract_address) as unknown as IContract;
+            const deployed = tronWeb.contract(funcABIV2_4.abi, transaction.contract_address);
             const txID = await deployed
                 .setStruct(['TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY', 1000100, 'TPL66VK2gCXNCD7EJg9pgJRfqcRazjhUZY'])
                 .send();

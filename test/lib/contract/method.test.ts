@@ -1,10 +1,9 @@
-import { IContract } from '../../../src/lib/contract/index.js';
 import { Address } from '../../../src/types/Trx.js';
 import { assert } from 'chai';
 import assertThrow from '../../helpers/assertThrow.js';
 import broadcaster from '../../helpers/broadcaster.js';
 import tronWebBuilder from '../../helpers/tronWebBuilder.js';
-import { TronWeb } from '../../setup/TronWeb.js';
+import { Contract, TronWeb } from '../../setup/TronWeb.js';
 import contracts from '../../fixtures/contracts.js';
 const testRevertContract = contracts.testRevert;
 const testSetValContract = contracts.testSetVal;
@@ -24,8 +23,8 @@ describe('#contract.method', function () {
     });
 
     describe('#send()', function () {
-        let testRevert: IContract;
-        let testSetVal: IContract;
+        let testRevert: Contract;
+        let testSetVal: Contract;
 
         before(async function () {
             const tx = await broadcaster(
@@ -38,7 +37,7 @@ describe('#contract.method', function () {
                 ),
                 accounts.pks[0]
             );
-            testRevert = (await tronWeb.contract().at(tx.transaction.contract_address)) as unknown as IContract;
+            testRevert = await tronWeb.contract().at(tx.transaction.contract_address);
 
             const tx2 = await broadcaster(
                 tronWeb.transactionBuilder.createSmartContract(
@@ -50,7 +49,7 @@ describe('#contract.method', function () {
                 ),
                 accounts.pks[0]
             );
-            testSetVal = (await tronWeb.contract().at(tx2.transaction.contract_address)) as unknown as IContract;
+            testSetVal = await tronWeb.contract().at(tx2.transaction.contract_address);
         });
 
         it('should set accounts[2] as the owner and check it with getOwner(1)', async function () {
@@ -79,7 +78,7 @@ describe('#contract.method', function () {
     });
 
     describe('#call()', function () {
-        let testRevert: IContract;
+        let testRevert: Contract;
 
         before(async function () {
             const tx = await broadcaster(
@@ -92,7 +91,7 @@ describe('#contract.method', function () {
                 ),
                 accounts.pks[0]
             );
-            testRevert = (await tronWeb.contract().at(tx.transaction.contract_address)) as unknown as IContract;
+            testRevert = await tronWeb.contract().at(tx.transaction.contract_address);
             await testRevert.setOwner(accounts.b58[2]).send();
         });
 

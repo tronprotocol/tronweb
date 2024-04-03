@@ -5,9 +5,6 @@ import type { ContractAbiInterface } from '../../types/ABI.js';
 import { Address } from '../../types/Trx.js';
 import { CreateSmartContractOptions } from '../../types/TransactionBuilder.js';
 
-export interface IContract {
-    [key: string | number | symbol]: (...args: any[]) => ReturnType<Method['onMethod']>;
-}
 
 export class Contract {
     tronWeb: TronWeb;

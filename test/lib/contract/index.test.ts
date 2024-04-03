@@ -5,7 +5,7 @@ import broadcaster from '../../helpers/broadcaster.js';
 import tronWebBuilder from '../../helpers/tronWebBuilder.js';
 import { TronWeb } from '../../setup/TronWeb.js';
 import contracts from '../../fixtures/contracts';
-import { IContract, Contract } from '../../../src/lib/contract';
+import { Contract } from '../../../src/lib/contract';
 
 const testCustomError = contracts.testCustomError;
 
@@ -41,7 +41,7 @@ describe('#contract.index', function () {
         });
 
         it('should revert with custom error', async () => {
-            const txid = await (customError as unknown as IContract).test(111).send();
+            const txid = await customError.test(111).send();
             await wait(10);
             const data = await tronWeb.trx.getTransactionInfo(txid);
             const errorData = data.contractResult;
