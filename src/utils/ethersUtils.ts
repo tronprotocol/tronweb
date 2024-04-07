@@ -44,7 +44,6 @@ export {
     recoverAddress,
     Signature,
     SigningKey,
-    Signature,
     AbiCoder,
     Interface,
     FormatTypes,
