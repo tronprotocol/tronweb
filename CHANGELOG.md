@@ -1,6 +1,12 @@
 Change Log
 =========
 
+__6.0.0-beta.3__
+- Support recovering transaction signer address by `trx.ecRecover`.
+- Support both base58 format and hex format address field in keys of `updateAccountPermissions` params.
+- Support type for contract instance.
+- Add demo to show how to use TronWeb.
+
 __6.0.0-beta.2__
 - Bump ethers from 6.8.0 to 6.11.1
 - Bump ethereum-cryptography from 2.1.2 to 2.1.3
