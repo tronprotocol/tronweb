@@ -1,12 +1,11 @@
 import { assert } from 'chai';
 import Config from './helpers/config.js';
-import { TronWeb, providers } from './setup/TronWeb.js';
+import { Contract, TronWeb, providers } from './setup/TronWeb.js';
 import tronWebBuilder from './helpers/tronWebBuilder.js';
 import BigNumber from 'bignumber.js';
 import broadcaster from './helpers/broadcaster.js';
 import wait from './helpers/wait.js';
 import { Address } from '../src/types/Trx.js';
-import { IContract } from '../src/lib/contract/index.js';
 import { RawAxiosRequestHeaders } from 'axios';
 
 const HttpProvider = providers.HttpProvider;
@@ -754,7 +753,7 @@ describe('TronWeb Instance', function () {
         };
         let tronWeb: TronWeb;
         let contractAddress;
-        let contract: IContract;
+        let contract: Contract;
 
         before(async function () {
             tronWeb = tronWebBuilder.createInstance();
@@ -814,13 +813,13 @@ describe('TronWeb Instance', function () {
             );
 
             contractAddress = result.receipt.transaction.contract_address!;
-            contract = (await tronWeb.contract().at(contractAddress)) as unknown as IContract;
+            contract = await tronWeb.contract().at(contractAddress);
         });
 
         it('should emit an unconfirmed event and get it', async function () {
             this.timeout(60000);
             tronWeb.setPrivateKey(accounts.pks[1]);
-            let txId = await contract.emitNow(accounts.hex[2], 2000).send({
+            let txId = await contract.methods.emitNow(accounts.hex[2], 2000).send({
                 from: accounts.hex[1],
             });
             let events;
@@ -845,7 +844,7 @@ describe('TronWeb Instance', function () {
         };
         let tronWeb: TronWeb;
         let contractAddress: Address;
-        let contract: IContract;
+        let contract: Contract;
         let eventLength = 0;
 
         before(async function () {
@@ -906,7 +905,7 @@ describe('TronWeb Instance', function () {
             );
 
             contractAddress = result.receipt.transaction.contract_address!;
-            contract = (await tronWeb.contract().at(contractAddress)) as unknown as IContract;
+            contract = await tronWeb.contract().at(contractAddress);
         });
 
         // available on trongrid
@@ -914,7 +913,7 @@ describe('TronWeb Instance', function () {
             this.timeout(60000);
             await wait(120); // wait for abi syncing.
             tronWeb.setPrivateKey(accounts.pks[3]);
-            await contract.emitNow(accounts.hex[4], 4000).send({
+            await contract.methods.emitNow(accounts.hex[4], 4000).send({
                 from: accounts.hex[3],
             });
             eventLength++;

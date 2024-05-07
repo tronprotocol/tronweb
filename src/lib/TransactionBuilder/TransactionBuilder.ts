@@ -2113,6 +2113,10 @@ export class TransactionBuilder {
             if ('type' in _ownerPermissions) {
                 delete _ownerPermissions.type;
             }
+            _ownerPermissions.keys = _ownerPermissions.keys?.map(({ address, weight }) => ({
+                address: this.tronWeb.address.toHex(address),
+                weight,
+            }));
             data.owner = _ownerPermissions as Permission;
         }
         if (witnessPermission) {
@@ -2121,6 +2125,10 @@ export class TransactionBuilder {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             _witnessPermissions.type = 'Witness';
+            _witnessPermissions.keys = _witnessPermissions.keys.map(({ address, weight }) => ({
+                address: this.tronWeb.address.toHex(address),
+                weight,
+            }));
             data.witness = _witnessPermissions;
         }
         if (activesPermissions) {
@@ -2130,6 +2138,12 @@ export class TransactionBuilder {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
                 activePermissions.type = 'Active';
+            });
+            _activesPermissions.forEach((_activesPermission) => {
+                _activesPermission.keys = _activesPermission.keys.map(({ address, weight }) => ({
+                    address: this.tronWeb.address.toHex(address),
+                    weight,
+                }));
             });
             data.actives = _activesPermissions as Permission[];
         }

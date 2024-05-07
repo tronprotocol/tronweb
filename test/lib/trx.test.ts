@@ -546,6 +546,37 @@ describe('TronWeb.trx', function () {
             });
         });
 
+        describe('#ecRecover', async function () {
+            const idx = 14;
+            let transaction: SignedTransaction;
+
+            before(async function () {
+                const tx = await tronWeb.transactionBuilder.sendTrx(accounts.b58[idx-1], 10, accounts.b58[idx]);
+                transaction = await tronWeb.trx.sign(tx, accounts.pks[idx]);
+            });
+
+            it('should verify signature of signed transaction', async function () {
+                const recoveredAddress = await tronWeb.trx.ecRecover(transaction);
+                assert.equal(recoveredAddress, accounts.b58[idx]);
+            });
+
+            it('should throw Invalid transaction error', async function() {
+                const tx = JSON.parse(JSON.stringify(transaction));
+                tx.txID += 't';
+                assertThrow(async () => {
+                    await tronWeb.trx.ecRecover(tx);
+                }, 'Invalid transaction');
+            });
+
+            it('should throw Transaction is not signed error', async function() {
+                const tx = JSON.parse(JSON.stringify(transaction));
+                delete tx.signature;
+                assertThrow(async () => {
+                    await tronWeb.trx.ecRecover(tx);
+                }, 'Transaction is not signed');
+            });
+        });
+
         describe('#signMessage', async function () {
             const idx = 14;
 
