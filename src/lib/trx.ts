@@ -4,6 +4,7 @@ import { keccak256, toUtf8Bytes, recoverAddress, SigningKey, Signature } from '.
 import { ADDRESS_PREFIX } from '../utils/address.js';
 import { Validator } from '../paramValidator/index.js';
 import { txCheck } from '../utils/transaction.js';
+import { ecRecover } from '../utils/crypto.js';
 import { Block } from '../types/APIResponse.js';
 import {
     Token,
@@ -506,6 +507,27 @@ export class Trx {
         }
         this.cache.contracts[contractAddress] = contract;
         return contract;
+    }
+
+    ecRecover(transaction: SignedTransaction) {
+        return Trx.ecRecover(transaction);
+    }
+
+    static ecRecover(transaction: SignedTransaction): Address | Address[] {
+        if (!txCheck(transaction)) {
+            throw new Error('Invalid transaction');
+        }
+        if (!transaction.signature?.length) {
+            throw new Error('Transaction is not signed');
+        }
+        if (transaction.signature.length === 1) {
+            const tronAddress = ecRecover(transaction.txID, transaction.signature[0]);
+            return TronWeb.address.fromHex(tronAddress);
+        }
+        return transaction.signature.map((sig) => {
+            const tronAddress = ecRecover(transaction.txID, sig);
+            return TronWeb.address.fromHex(tronAddress);
+        });
     }
 
     async verifyMessage(message: string, signature: string, address = this.tronWeb.defaultAddress.base58, useTronHeader = true) {
