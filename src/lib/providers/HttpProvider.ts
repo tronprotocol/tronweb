@@ -1,7 +1,7 @@
 import axios, { Method, RawAxiosRequestHeaders, AxiosHeaders, HeadersDefaults } from 'axios';
 import { hasProperties, isObject, isValidURL } from '../../utils/validations.js';
 
-export type HeadersType = RawAxiosRequestHeaders | AxiosHeaders | Partial<HeadersDefaults>;
+export type HeadersType = RawAxiosRequestHeaders | typeof AxiosHeaders | Partial<HeadersDefaults>;
 
 export interface HttpProviderInstance {
     request<R = any>(config: any): Promise<R>;
