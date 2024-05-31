@@ -25,6 +25,9 @@ export { Plugin };
 import { TronWeb } from './tronweb.js';
 export { TronWeb };
 
+import * as Types from './types/index.js';
+export { Types };
+
 export default {
     utils,
     BigNumber,
@@ -35,4 +38,5 @@ export default {
     Event,
     Plugin,
     TronWeb,
+    Types,
 };
