@@ -1,4 +1,4 @@
-import { AbiCoder } from '../utils/ethersUtils';
+import { AbiCoder } from './ethersUtils.js';
 import { TronWeb } from '../tronweb.js';
 import { ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX } from './address.js';
 import { FunctionFragment, AbiParamsCommon, AbiInputsType } from '../types/ABI.js';
