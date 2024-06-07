@@ -20,7 +20,8 @@ export interface BlockWithoutDetail {
 
 export interface Block {
     blockID: string;
-    transactions: Transaction[];
+    /** If a block has 0 transaction, this prop will be undefined */
+    transactions?: Transaction[];
     block_header: BlockHeader;
 }
 
