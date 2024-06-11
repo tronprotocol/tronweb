@@ -1,6 +1,13 @@
 Change Log
 =========
 
+__6.0.0-beta.4__
+- Remove `ethers@v5/abi`, using abiCoder of `ethers@v6`.
+- Bump ethers from v6.11.1 to v6.13.0.
+- Export all Types and enum object.
+- Move `typescript` into depDependencies.
+- Change headers type in TronWeb constructor.
+
 __6.0.0-beta.3__
 - Support recovering transaction signer address by `trx.ecRecover`.
 - Support both base58 format and hex format address field in keys of `updateAccountPermissions` params.
