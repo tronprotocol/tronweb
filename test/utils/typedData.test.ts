@@ -1,8 +1,7 @@
-import chai from 'chai';
+import { assert } from 'chai';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
 import diskUtils from '../testcases/src/disk-utils.js';
 const { loadTests } = diskUtils;
-const assert = chai.assert;
 const { utils } = tronWebBuilder;
 
 describe('TronWeb.utils.typedData', function () {

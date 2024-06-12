@@ -1,8 +1,6 @@
-import chai from 'chai';
+import { assert } from 'chai';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
 import BigNumber from 'bignumber.js';
-
-const assert = chai.assert;
 
 describe('TronWeb.utils', function () {
     describe('#isValidURL()', function () {

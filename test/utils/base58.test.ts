@@ -1,7 +1,6 @@
-import chai from 'chai';
+import { assert } from 'chai';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
 
-const assert = chai.assert;
 
 describe('TronWeb.utils.base58', function () {
     describe('#encode58()', function () {

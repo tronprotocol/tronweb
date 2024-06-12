@@ -1,8 +1,6 @@
-import chai from 'chai';
+import { assert } from 'chai';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
 const utils = tronWebBuilder.utils;
-
-const assert = chai.assert;
 
 import messageCases from '../testcases/src/sign-message.js';
 const tests = messageCases.tests;

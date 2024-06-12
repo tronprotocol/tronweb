@@ -1,8 +1,6 @@
-import chai from 'chai';
+import { assert } from 'chai';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
 import assertThrow from '../helpers/assertThrow.js';
-
-const assert = chai.assert;
 
 describe('TronWeb.utils.accounts', function () {
     describe('#generateAccount()', function () {

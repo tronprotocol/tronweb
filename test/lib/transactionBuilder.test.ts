@@ -12,8 +12,7 @@ import {
 } from '../../src/types/TransactionBuilder';
 import { ContractParamterWrapper, CreateSmartContractTransaction, SignedTransaction } from '../../src/types/Transaction';
 
-import chai from 'chai';
-const assert = chai.assert;
+import { assert } from 'chai';
 import txPars from '../helpers/txPars.js';
 // const jlog = require('../helpers/jlog');
 import assertThrow from '../helpers/assertThrow.js';
