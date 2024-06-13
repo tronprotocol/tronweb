@@ -1,5 +1,5 @@
 import { AxiosRequestHeaders } from 'axios';
-import type { HeadersType } from '../lib/providers/HttpProvider.js';
+import type { HeadersType } from './Providers.js';
 import HttpProvider from '../lib/providers/HttpProvider.js';
 
 export interface TronWebOptions {
