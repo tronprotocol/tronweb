@@ -12,7 +12,7 @@ import { Plugin } from './lib/plugin.js';
 import { Event } from './lib/event.js';
 import { keccak256 } from './utils/ethersUtils.js';
 import { fromHex, fromPrivateKey, isAddress, toHex } from './utils/address.js';
-import { HeadersType } from './lib/providers/HttpProvider.js';
+import { HeadersType } from './types/Providers.js';
 import { isString } from './utils/validations.js';
 import { DefaultAddress, NodeProvider, TronWebOptions } from './types/TronWeb.js';
 import { ContractAbiInterface } from './types/ABI.js';
