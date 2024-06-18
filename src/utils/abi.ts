@@ -202,7 +202,7 @@ export function decodeParamsV2ByABI(funABI: FunctionFragment | AbiInputsType, da
             outputs.forEach((output, i) => {
                 const { type, name } = output;
 
-                if (result[i])
+                if (result[i]) {
                     if (type === 'address') {
                         result[i] = TronWeb.address.toHex(result[i]);
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -227,6 +227,11 @@ export function decodeParamsV2ByABI(funABI: FunctionFragment | AbiInputsType, da
                         //@ts-ignore
                         if (name) result[name] = result[i];
                     }
+                } else {
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    //@ts-ignore
+                    if (name) result[name] = result[i];
+                }
             });
     };
 
