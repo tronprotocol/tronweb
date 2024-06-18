@@ -207,18 +207,22 @@ export function decodeParamsV2ByABI(funABI: FunctionFragment | AbiInputsType, da
                         result[i] = TronWeb.address.toHex(result[i]);
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         //@ts-ignore
-                        if (name) result[name] = TronWeb.address.toHex(result[name]);
+                        if (name) result[name] = TronWeb.address.toHex(result[i]);
                     } else if (type.match(/^([^\x5b]*)(\x5b|$)/)![0] === 'address[') {
                         convertAddresses(result[i]);
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         //@ts-ignore
-                        if (name) convertAddresses(result[name]);
+                        if (name) convertAddresses(result[i]);
                     } else if (type.indexOf('tuple') === 0) {
                         if (extractSize(type)) {
                             const dimension = extractArrayDim(type);
                             mapTuple(output.components!, result[i], dimension);
                         } else decodeResult(output.components!, result[i]);
 
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        //@ts-ignore
+                        if (name) result[name] = result[i];
+                    } else {
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         //@ts-ignore
                         if (name) result[name] = result[i];
