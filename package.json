@@ -13,7 +13,23 @@
         "build:dev": "NODE_ENV=development npm run build",
         "clean": "rimraf dist",
         "newaccount": "node scripts/test-node.js && node test/helpers/newAccounts 100",
-        "test": "npm run-script newaccount && npx mocha 'test/**/*.test.js' --timeout 120000",
+        "test": "npm run-script newaccconst fetch = require('node-fetch');
+
+        const url = 'https://api.shasta.trongrid.io/wallet/createaccount';
+        const options = {
+          method: 'POST',
+            headers: {accept: 'application/json', 'content-type': 'application/json'},
+              body: JSON.stringify({
+                  owner_address: 'TMmYPFkWfN1ArDZqrFcf1jeNeqLLivTAQn',
+                      account_address: 'TDKm2zR9LBoQbpm6E65Vb8L1pFT6q3fand',
+                          visible: true
+                            })
+                            };
+
+                            fetch(url, options)
+                              .then(res => res.json())
+                                .then(json => console.log(json))
+                                  .catch(err => console.error('error:' + err));ount && npx mocha 'test/**/*.test.js' --timeout 120000",
         "testAbi": "node scripts/test-node.js && node test/helpers/newAccounts 1 && npx mocha 'test/**/abi.test.js' --timeout 120000",
         "testTx": "node scripts/test-node.js && node test/helpers/newAccounts 100 && npx mocha 'test/**/transaction.test.js' --timeout 120000",
         "test-no-accounts": "node scripts/test-node.js && npx mocha 'test/**/*.test.js'",
