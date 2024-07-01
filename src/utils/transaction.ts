@@ -76,6 +76,11 @@ const stringToUint8Array = (hexString: string) => {
     );
 };
 
+const tokenIdToUint8Array = (tokenId: string, visible: boolean) => {
+    if (!visible) return stringToUint8Array(tokenId.replace(/^0x/, ''));
+    return stringToUint8Array(TronWeb.fromUtf8(tokenId).replace(/^0x/, ''));
+};
+
 const sha3 = (string: string, prefix = true) => {
     return (prefix ? '0x' : '') + keccak256(Buffer.from(string, 'utf-8')).toString().substring(2);
 };
@@ -117,7 +122,7 @@ const buildTransferAssetContract = (value, options) => {
     const transferContract = new TransferAssetContract();
     transferContract.setToAddress(fromHexString(to_address));
     transferContract.setOwnerAddress(fromHexString(owner_address));
-    transferContract.setAssetName(stringToUint8Array(asset_name.replace(/^0x/, '')));
+    transferContract.setAssetName(tokenIdToUint8Array(asset_name, options.visible));
     transferContract.setAmount(amount);
     return buildCommonTransaction(
         transferContract,
@@ -132,7 +137,7 @@ const buildParticipateAssetIssueContract = (value, options) => {
     const pbObj = new ParticipateAssetIssueContract();
     pbObj.setToAddress(fromHexString(value.to_address));
     pbObj.setOwnerAddress(fromHexString(value.owner_address));
-    pbObj.setAssetName(stringToUint8Array(value.asset_name.replace(/^0x/, '')));
+    pbObj.setAssetName(tokenIdToUint8Array(value.asset_name, options.visible));
     pbObj.setAmount(value.amount);
 
     return buildCommonTransaction(
@@ -652,9 +657,9 @@ const buildExchangeCreateContract = (value, options) => {
     const exchangeCreateContract = new ExchangeCreateContract();
     const { owner_address, first_token_id, first_token_balance, second_token_id, second_token_balance } = value;
     exchangeCreateContract.setOwnerAddress(fromHexString(owner_address));
-    exchangeCreateContract.setFirstTokenId(stringToUint8Array(first_token_id.replace(/^0x/, '')));
+    exchangeCreateContract.setFirstTokenId(tokenIdToUint8Array(first_token_id, options.visible));
     exchangeCreateContract.setFirstTokenBalance(first_token_balance);
-    exchangeCreateContract.setSecondTokenId(stringToUint8Array(second_token_id.replace(/^0x/, '')));
+    exchangeCreateContract.setSecondTokenId(tokenIdToUint8Array(second_token_id, options.visible));
     exchangeCreateContract.setSecondTokenBalance(second_token_balance);
     return buildCommonTransaction(
         exchangeCreateContract,
@@ -669,7 +674,7 @@ const buildExchangeInjectContract = (value, options) => {
     const { owner_address, exchange_id, token_id, quant } = value;
     exchangeInjectContract.setOwnerAddress(fromHexString(owner_address));
     exchangeInjectContract.setExchangeId(exchange_id);
-    exchangeInjectContract.setTokenId(stringToUint8Array(token_id.replace(/^0x/, '')));
+    exchangeInjectContract.setTokenId(tokenIdToUint8Array(token_id, options.visible));
     exchangeInjectContract.setQuant(quant);
     return buildCommonTransaction(
         exchangeInjectContract,
@@ -684,7 +689,7 @@ const buildExchangeWithdrawContract = (value, options) => {
     const { owner_address, exchange_id, token_id, quant } = value;
     exchangeWithdrawContract.setOwnerAddress(fromHexString(owner_address));
     exchangeWithdrawContract.setExchangeId(exchange_id);
-    exchangeWithdrawContract.setTokenId(stringToUint8Array(token_id.replace(/^0x/, '')));
+    exchangeWithdrawContract.setTokenId(tokenIdToUint8Array(token_id, options.visible));
     exchangeWithdrawContract.setQuant(quant);
     return buildCommonTransaction(
         exchangeWithdrawContract,
@@ -699,7 +704,7 @@ const buildExchangeTransactionContract = (value, options) => {
     const { owner_address, exchange_id, token_id, quant, expected } = value;
     exchangeTransactionContract.setOwnerAddress(fromHexString(owner_address));
     exchangeTransactionContract.setExchangeId(exchange_id);
-    exchangeTransactionContract.setTokenId(stringToUint8Array(token_id.replace(/^0x/, '')));
+    exchangeTransactionContract.setTokenId(tokenIdToUint8Array(token_id, options.visible));
     exchangeTransactionContract.setQuant(quant);
     exchangeTransactionContract.setExpected(expected);
     return buildCommonTransaction(
@@ -893,7 +898,7 @@ const txJsonToPb = (transaction) => {
     const rawData = transaction['raw_data'];
     const contractJson = rawData.contract[0];
     const data = contractJson.parameter.value;
-    const options = { Permission_id: contractJson.Permission_id };
+    const options = { Permission_id: contractJson.Permission_id, visible: transaction.visible };
     const transactionObj = contractJsonToProtobuf(contractJson, data, options) as any;
 
     const rawDataObj = transactionObj.getRawData();
