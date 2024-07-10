@@ -12,7 +12,7 @@ import { Plugin } from './lib/plugin.js';
 import { Event } from './lib/event.js';
 import { keccak256 } from './utils/ethersUtils.js';
 import { fromHex, fromPrivateKey, isAddress, toHex } from './utils/address.js';
-import { HeadersType } from './lib/providers/HttpProvider.js';
+import { HeadersType } from './types/Providers.js';
 import { isString } from './utils/validations.js';
 import { DefaultAddress, NodeProvider, TronWebOptions } from './types/TronWeb.js';
 import { ContractAbiInterface } from './types/ABI.js';
@@ -22,7 +22,7 @@ const DEFAULT_VERSION = '4.7.1';
 
 const FEE_LIMIT = 150000000;
 
-const version = '6.0.0-beta.3';
+const version = '6.0.0-beta.4';
 
 function isValidOptions(options: unknown): options is TronWebOptions {
     return (

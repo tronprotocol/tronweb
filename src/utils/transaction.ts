@@ -54,6 +54,7 @@ const { ExchangeCreateContract, ExchangeInjectContract, ExchangeWithdrawContract
 import { byteArray2hexStr } from './bytes.js';
 import { sha256, keccak256 } from './ethersUtils.js';
 import TronWeb from '../tronweb.js';
+import { isHex } from './validations.js';
 
 const fromHexString = (hexString: string) => {
     if (!hexString || hexString.length === 0) return new Uint8Array([]);
@@ -63,6 +64,21 @@ const fromHexString = (hexString: string) => {
             .match(/.{1,2}/g)
             .map((byte: string) => parseInt(byte, 16))
     );
+};
+
+const stringToUint8Array = (hexString: string) => {
+    if (!hexString || hexString.length === 0) return new Uint8Array([]);
+    return new Uint8Array(
+        (isHex(hexString) ? hexString : TronWeb.toHex(hexString))
+            .replace(/^0x/, '')
+            .match(/.{1,2}/g)
+            .map((byte: string) => parseInt(byte, 16))
+    );
+};
+
+const flexToUint8Array = (str: string, visible: boolean) => {
+    if (!visible) return stringToUint8Array(str.replace(/^0x/, ''));
+    return stringToUint8Array(TronWeb.fromUtf8(str).replace(/^0x/, ''));
 };
 
 const sha3 = (string: string, prefix = true) => {
@@ -106,7 +122,7 @@ const buildTransferAssetContract = (value, options) => {
     const transferContract = new TransferAssetContract();
     transferContract.setToAddress(fromHexString(to_address));
     transferContract.setOwnerAddress(fromHexString(owner_address));
-    transferContract.setAssetName(fromHexString(asset_name.replace(/^0x/, '')));
+    transferContract.setAssetName(flexToUint8Array(asset_name, options.visible));
     transferContract.setAmount(amount);
     return buildCommonTransaction(
         transferContract,
@@ -121,7 +137,7 @@ const buildParticipateAssetIssueContract = (value, options) => {
     const pbObj = new ParticipateAssetIssueContract();
     pbObj.setToAddress(fromHexString(value.to_address));
     pbObj.setOwnerAddress(fromHexString(value.owner_address));
-    pbObj.setAssetName(fromHexString(value.asset_name.replace(/^0x/, '')));
+    pbObj.setAssetName(flexToUint8Array(value.asset_name, options.visible));
     pbObj.setAmount(value.amount);
 
     return buildCommonTransaction(
@@ -148,10 +164,10 @@ const buildTriggerSmartContract = (value, options) => {
     triggerSmartContract.setContractAddress(fromHexString(contract_address));
     triggerSmartContract.setCallValue(call_value);
     if (data) {
-        triggerSmartContract.setData(fromHexString(data));
+        triggerSmartContract.setData(stringToUint8Array(data));
     } else if (function_selector) {
         const contractData = sha3(function_selector).substring(2, 10) + parameter;
-        triggerSmartContract.setData(fromHexString(contractData));
+        triggerSmartContract.setData(stringToUint8Array(contractData));
     }
 
     if (token_id) {
@@ -317,7 +333,7 @@ const buildCreateWitness = (value, options) => {
     const createWitnessContract = new WitnessCreateContract();
     const { owner_address, url } = value;
     createWitnessContract.setOwnerAddress(fromHexString(owner_address));
-    createWitnessContract.setUrl(fromHexString(url.replace(/^0x/, '')));
+    createWitnessContract.setUrl(stringToUint8Array(url.replace(/^0x/, '')));
     return buildCommonTransaction(
         createWitnessContract,
         Transaction.Contract.ContractType.WITNESSCREATECONTRACT,
@@ -444,7 +460,7 @@ const buildCreateSmartContract = (value, options) => {
 
     if (bytecode) {
         const bytecodeParameter = bytecode.replace(/^0x/, '') + parameter.replace(/^0x/, '');
-        smartContractBuilder.setBytecode(fromHexString(bytecodeParameter));
+        smartContractBuilder.setBytecode(stringToUint8Array(bytecodeParameter));
     }
 
     smartContractBuilder.setName(contracName);
@@ -512,10 +528,10 @@ const buildAssetIssueContract = (value, options) => {
     const assetIssueContract = new AssetIssueContract();
     assetIssueContract.setOwnerAddress(fromHexString(owner_address));
     if (name) {
-        assetIssueContract.setName(fromHexString(name.replace(/^0x/, '')));
+        assetIssueContract.setName(stringToUint8Array(name.replace(/^0x/, '')));
     }
     if (abbr) {
-        assetIssueContract.setAbbr(fromHexString(abbr.replace(/^0x/, '')));
+        assetIssueContract.setAbbr(stringToUint8Array(abbr.replace(/^0x/, '')));
     }
     assetIssueContract.setTotalSupply(total_supply);
     assetIssueContract.setNum(num);
@@ -530,10 +546,10 @@ const buildAssetIssueContract = (value, options) => {
         assetIssueContract.setPublicLatestFreeNetTime(public_latest_free_net_time);
     }
     if (description) {
-        assetIssueContract.setDescription(fromHexString(description.replace(/^0x/, '')));
+        assetIssueContract.setDescription(stringToUint8Array(description.replace(/^0x/, '')));
     }
     if (url) {
-        assetIssueContract.setUrl(fromHexString(url.replace(/^0x/, '')));
+        assetIssueContract.setUrl(stringToUint8Array(url.replace(/^0x/, '')));
     }
 
     assetIssueContract.setPublicFreeAssetNetUsage(public_free_asset_net_usage);
@@ -572,7 +588,7 @@ const buildAccountUpdateContract = (value, options) => {
     const accountUpdateContract = new AccountUpdateContract();
     const { account_name, owner_address } = value;
     accountUpdateContract.setOwnerAddress(fromHexString(owner_address));
-    accountUpdateContract.setAccountName(fromHexString(account_name.replace(/^0x/, '')));
+    accountUpdateContract.setAccountName(stringToUint8Array(account_name.replace(/^0x/, '')));
     return buildCommonTransaction(
         accountUpdateContract,
         Transaction.Contract.ContractType.ACCOUNTUPDATECONTRACT,
@@ -586,7 +602,7 @@ const buildSetAccountIdContract = (value, options) => {
     const setAccountIdContract = new SetAccountIdContract();
     const { account_id, owner_address } = value;
     setAccountIdContract.setOwnerAddress(fromHexString(owner_address));
-    setAccountIdContract.setAccountId(fromHexString(account_id.replace(/^0x/, '')));
+    setAccountIdContract.setAccountId(stringToUint8Array(account_id.replace(/^0x/, '')));
     return buildCommonTransaction(
         setAccountIdContract,
         Transaction.Contract.ContractType.SETACCOUNTIDCONTRACT,
@@ -641,9 +657,9 @@ const buildExchangeCreateContract = (value, options) => {
     const exchangeCreateContract = new ExchangeCreateContract();
     const { owner_address, first_token_id, first_token_balance, second_token_id, second_token_balance } = value;
     exchangeCreateContract.setOwnerAddress(fromHexString(owner_address));
-    exchangeCreateContract.setFirstTokenId(fromHexString(first_token_id.replace(/^0x/, '')));
+    exchangeCreateContract.setFirstTokenId(flexToUint8Array(first_token_id, options.visible));
     exchangeCreateContract.setFirstTokenBalance(first_token_balance);
-    exchangeCreateContract.setSecondTokenId(fromHexString(second_token_id.replace(/^0x/, '')));
+    exchangeCreateContract.setSecondTokenId(flexToUint8Array(second_token_id, options.visible));
     exchangeCreateContract.setSecondTokenBalance(second_token_balance);
     return buildCommonTransaction(
         exchangeCreateContract,
@@ -658,7 +674,7 @@ const buildExchangeInjectContract = (value, options) => {
     const { owner_address, exchange_id, token_id, quant } = value;
     exchangeInjectContract.setOwnerAddress(fromHexString(owner_address));
     exchangeInjectContract.setExchangeId(exchange_id);
-    exchangeInjectContract.setTokenId(fromHexString(token_id.replace(/^0x/, '')));
+    exchangeInjectContract.setTokenId(flexToUint8Array(token_id, options.visible));
     exchangeInjectContract.setQuant(quant);
     return buildCommonTransaction(
         exchangeInjectContract,
@@ -673,7 +689,7 @@ const buildExchangeWithdrawContract = (value, options) => {
     const { owner_address, exchange_id, token_id, quant } = value;
     exchangeWithdrawContract.setOwnerAddress(fromHexString(owner_address));
     exchangeWithdrawContract.setExchangeId(exchange_id);
-    exchangeWithdrawContract.setTokenId(fromHexString(token_id.replace(/^0x/, '')));
+    exchangeWithdrawContract.setTokenId(flexToUint8Array(token_id, options.visible));
     exchangeWithdrawContract.setQuant(quant);
     return buildCommonTransaction(
         exchangeWithdrawContract,
@@ -688,7 +704,7 @@ const buildExchangeTransactionContract = (value, options) => {
     const { owner_address, exchange_id, token_id, quant, expected } = value;
     exchangeTransactionContract.setOwnerAddress(fromHexString(owner_address));
     exchangeTransactionContract.setExchangeId(exchange_id);
-    exchangeTransactionContract.setTokenId(fromHexString(token_id.replace(/^0x/, '')));
+    exchangeTransactionContract.setTokenId(flexToUint8Array(token_id, options.visible));
     exchangeTransactionContract.setQuant(quant);
     exchangeTransactionContract.setExpected(expected);
     return buildCommonTransaction(
@@ -748,7 +764,7 @@ const buildAccountPermissionUpdateContract = (value, options) => {
             permission.setParentId(parentId);
         }
         if (operations) {
-            permission.setOperations(fromHexString(operations));
+            permission.setOperations(stringToUint8Array(operations));
         }
         if (keys) {
             permission.setKeysList(
@@ -788,10 +804,10 @@ const buildUpdateAssetContract = (value, options) => {
     const { owner_address, description, url, new_limit, new_public_limit } = value;
     updateAssetContract.setOwnerAddress(fromHexString(owner_address));
     if (description) {
-        updateAssetContract.setDescription(fromHexString(description.replace(/^0x/, '')));
+        updateAssetContract.setDescription(stringToUint8Array(description.replace(/^0x/, '')));
     }
     if (url) {
-        updateAssetContract.setUrl(fromHexString(url.replace(/^0x/, '')));
+        updateAssetContract.setUrl(stringToUint8Array(url.replace(/^0x/, '')));
     }
     if (new_limit) {
         updateAssetContract.setNewLimit(new_limit);
@@ -882,14 +898,14 @@ const txJsonToPb = (transaction) => {
     const rawData = transaction['raw_data'];
     const contractJson = rawData.contract[0];
     const data = contractJson.parameter.value;
-    const options = { Permission_id: contractJson.Permission_id };
+    const options = { Permission_id: contractJson.Permission_id, visible: transaction.visible };
     const transactionObj = contractJsonToProtobuf(contractJson, data, options) as any;
 
     const rawDataObj = transactionObj.getRawData();
-    rawDataObj.setRefBlockBytes(fromHexString(rawData.ref_block_bytes));
-    rawDataObj.setRefBlockHash(fromHexString(rawData.ref_block_hash));
+    rawDataObj.setRefBlockBytes(stringToUint8Array(rawData.ref_block_bytes));
+    rawDataObj.setRefBlockHash(stringToUint8Array(rawData.ref_block_hash));
     if (rawData.data) {
-        rawDataObj.setData(fromHexString(rawData.data));
+        rawDataObj.setData(stringToUint8Array(rawData.data));
     }
 
     if (rawData.fee_limit) {
@@ -918,11 +934,11 @@ const txJsonToPbWithArgs = (transaction, args: any = {}, options: any = {}) => {
     }) as any;
 
     const rawDataObj = transactionObj.getRawData();
-    rawDataObj.setRefBlockBytes(fromHexString(rawData.ref_block_bytes));
-    rawDataObj.setRefBlockHash(fromHexString(rawData.ref_block_hash));
+    rawDataObj.setRefBlockBytes(stringToUint8Array(rawData.ref_block_bytes));
+    rawDataObj.setRefBlockHash(stringToUint8Array(rawData.ref_block_hash));
     // for memo
     if (options.data) {
-        rawDataObj.setData(fromHexString(options.data.replace(/^0x/, '')));
+        rawDataObj.setData(stringToUint8Array(options.data.replace(/^0x/, '')));
     }
 
     if (options.fee_limit || args.fee_limit) {

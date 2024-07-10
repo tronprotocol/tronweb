@@ -12,8 +12,7 @@ import {
 } from '../../src/types/TransactionBuilder';
 import { ContractParamterWrapper, CreateSmartContractTransaction, SignedTransaction } from '../../src/types/Transaction';
 
-import chai from 'chai';
-const assert = chai.assert;
+import { assert } from 'chai';
 import txPars from '../helpers/txPars.js';
 // const jlog = require('../helpers/jlog');
 import assertThrow from '../helpers/assertThrow.js';
@@ -2074,7 +2073,6 @@ describe('TronWeb.transactionBuilder', function () {
             const deployed: any = await tronWeb.contract().at(transaction.contract_address);
             for (let j = 25; j <= 28; j++) {
                 let bal = await deployed.balances(accounts.hex[j]).call();
-                bal = bal.toNumber();
                 assert.equal(bal, bals[j - 25]);
             }
         });
@@ -3182,7 +3180,7 @@ describe('TronWeb.transactionBuilder', function () {
 
             const deployed: any = await tronWeb.contract().at(transaction.contract_address);
             let check = await deployed.check().call();
-            assert.ok(check.eq(1));
+            assert.equal(check, 1);
 
             /* test send method */
             const sendTxId = await deployed.setCheck(8).send({}, issuerPk);
@@ -3196,7 +3194,7 @@ describe('TronWeb.transactionBuilder', function () {
                 }
             }
             const check1 = await deployed.check().call();
-            assert.ok(check1.eq(8));
+            assert.equal(check1, 8);
 
             /* test triggersmartcontract */
             const setTransaction = await tronWeb.transactionBuilder.triggerSmartContract(
@@ -3212,7 +3210,7 @@ describe('TronWeb.transactionBuilder', function () {
             await broadcaster(null, issuerPk, setTransaction.transaction);
 
             check = await deployed.check().call();
-            assert.ok(check.eq(16));
+            assert.equal(check, 16);
 
             const setTransaction2 = await tronWeb.transactionBuilder.triggerSmartContract(
                 transaction.contract_address,
@@ -3228,7 +3226,7 @@ describe('TronWeb.transactionBuilder', function () {
             await broadcaster(null, issuerPk, setTransaction2.transaction);
 
             check = await deployed.check().call();
-            assert.ok(check.eq(15));
+            assert.equal(check, 15);
         });
     });
 

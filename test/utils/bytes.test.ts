@@ -1,7 +1,5 @@
-import chai from 'chai';
+import { assert } from 'chai';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
-
-const assert = chai.assert;
 
 describe('TronWeb.utils.bytes', function () {
     describe('#byte2hexStr()', function () {

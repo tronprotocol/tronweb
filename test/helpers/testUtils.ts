@@ -1,9 +1,8 @@
 // @ts-ignore
 import { TronWeb, utils } from '../setup/TronWeb.js';
 import { isHexString } from 'ethers';
-import { BigNumber } from '@ethersproject/bignumber';
 
-const bnify = BigNumber.from;
+const bnify = (n: string | number) => BigInt(n);
 
 const getValues = (object: any, named?: string[]) => {
     if (Array.isArray(object)) {

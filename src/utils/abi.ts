@@ -1,35 +1,12 @@
-import { AbiCoder } from '@ethersproject/abi';
+import { AbiCoder } from './ethersUtils.js';
 import { TronWeb } from '../tronweb.js';
 import { ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX } from './address.js';
 import { FunctionFragment, AbiParamsCommon, AbiInputsType } from '../types/ABI.js';
 
 const abiCoder = new AbiCoder();
 
-function _isArray(_array: any) {
-    return Array.isArray(_array);
-}
-
 function _addressToHex(value: string) {
     return TronWeb.address.toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
-}
-
-function deepCopy(target: any) {
-    if (
-        Object.prototype.toString.call(target) !== '[object Object]' &&
-        Object.prototype.toString.call(target) !== '[object Array]'
-    ) {
-        return target;
-    }
-    const newTarget = _isArray(target) ? [] : {};
-
-    Object.keys(target).forEach(
-        (key) =>
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            //@ts-ignore
-            (newTarget[key] = target[key] instanceof Object && !target[key]._isBigNumber ? deepCopy(target[key]) : target[key])
-    );
-
-    return newTarget;
 }
 
 export function decodeParams(names: string[], types: string[], output: string, ignoreMethodHash = false) {
@@ -225,17 +202,17 @@ export function decodeParamsV2ByABI(funABI: FunctionFragment | AbiInputsType, da
             outputs.forEach((output, i) => {
                 const { type, name } = output;
 
-                if (result[i])
+                if (result[i]) {
                     if (type === 'address') {
                         result[i] = TronWeb.address.toHex(result[i]);
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         //@ts-ignore
-                        if (name) result[name] = TronWeb.address.toHex(result[name]);
+                        if (name) result[name] = TronWeb.address.toHex(result[i]);
                     } else if (type.match(/^([^\x5b]*)(\x5b|$)/)![0] === 'address[') {
                         convertAddresses(result[i]);
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         //@ts-ignore
-                        if (name) convertAddresses(result[name]);
+                        if (name) convertAddresses(result[i]);
                     } else if (type.indexOf('tuple') === 0) {
                         if (extractSize(type)) {
                             const dimension = extractArrayDim(type);
@@ -245,7 +222,16 @@ export function decodeParamsV2ByABI(funABI: FunctionFragment | AbiInputsType, da
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         //@ts-ignore
                         if (name) result[name] = result[i];
+                    } else {
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        //@ts-ignore
+                        if (name) result[name] = result[i];
                     }
+                } else {
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    //@ts-ignore
+                    if (name) result[name] = result[i];
+                }
             });
     };
 
@@ -262,7 +248,7 @@ export function decodeParamsV2ByABI(funABI: FunctionFragment | AbiInputsType, da
         if (!data || !data.length) data = new Uint8Array(32 * funABI.outputs.length); // ensuring the data is at least filled by 0 cause `AbiCoder` throws if there's not engouh data
         // decode data
         const decodeRes = abiCoder.decode(outputTypes, data);
-        const decodeResCopy = deepCopy(decodeRes);
+        const decodeResCopy = decodeRes.toArray(true);
         decodeResult(funABI.outputs, decodeResCopy);
 
         return decodeResCopy;
