@@ -1388,7 +1388,7 @@ export class TransactionBuilder {
         if (isNotNullOrUndefined(precision) && (!isInteger(precision) || precision < 0 || precision > 6))
             throw new Error('precision must be a positive integer >= 0 and <= 6');
 
-        const data: Optional<AssetIssueContract> = {
+        const data: Partial<AssetIssueContract> = {
             owner_address: toHex(issuerAddress),
             name: fromUtf8(name as string),
             abbr: fromUtf8(abbreviation as string),
@@ -2108,7 +2108,7 @@ export class TransactionBuilder {
             owner_address: toHex(ownerAddress as string),
         };
         if (ownerPermission) {
-            const _ownerPermissions = deepCopyJson<Optional<Permission>>(ownerPermission);
+            const _ownerPermissions = deepCopyJson<Partial<Permission>>(ownerPermission);
             // for compatible with old way of building transaction from chain which type prop is omitted
             if ('type' in _ownerPermissions) {
                 delete _ownerPermissions.type;

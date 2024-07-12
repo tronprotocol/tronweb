@@ -1,4 +1,5 @@
 import { AxiosRequestHeaders } from 'axios';
+import type { HeadersType } from './Providers.js';
 import HttpProvider from '../lib/providers/HttpProvider.js';
 
 export interface TronWebOptions {
@@ -6,7 +7,7 @@ export interface TronWebOptions {
     solidityNode?: NodeProvider;
     fullHost?: NodeProvider;
     eventServer?: NodeProvider;
-    headers?: AxiosRequestHeaders;
+    headers?: HeadersType;
     eventHeaders?: AxiosRequestHeaders;
     privateKey?: string;
     disablePlugins?: boolean;
