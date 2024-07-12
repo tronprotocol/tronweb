@@ -212,7 +212,7 @@ export function decodeParamsV2ByABI(funABI: FunctionFragment | AbiInputsType, da
                         convertAddresses(result[i]);
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         //@ts-ignore
-                        if (name) convertAddresses(result[i]);
+                        if (name) result[name] = convertAddresses(result[i]);
                     } else if (type.indexOf('tuple') === 0) {
                         if (extractSize(type)) {
                             const dimension = extractArrayDim(type);
