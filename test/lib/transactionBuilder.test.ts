@@ -2278,6 +2278,7 @@ describe('TronWeb.transactionBuilder', function () {
                     accounts.hex[7]
                 )
             );
+            await wait(3);
             transactions.push(
                 await tronWeb.transactionBuilder.createSmartContract(
                     {
@@ -2287,6 +2288,7 @@ describe('TronWeb.transactionBuilder', function () {
                     accounts.hex[7]
                 )
             );
+            await wait(3);
             transactions.push(
                 await tronWeb.transactionBuilder.createSmartContract(
                     {

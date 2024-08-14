@@ -1,4 +1,4 @@
-import { ContractParamter, ContractType, CreateSmartContract } from './Contract.js';
+import { ContractParamter, ContractType, CreateSmartContract, TriggerSmartContract } from './Contract.js';
 
 export interface ContractParamterWrapper<T = ContractParamter> {
     value: T;
@@ -44,7 +44,7 @@ export interface TransactionWrapper {
     /**
      * The transaction object created by calling contract function.
      */
-    transaction: Transaction;
+    transaction: Transaction<TriggerSmartContract>;
     /**
      * Energy required for successfully deploying new contract or trigger contract.
      * This is returned in `transactionBuilder.estimateEnergy()` and `transactionBuilder.deployConstantContract()`
@@ -64,7 +64,7 @@ export interface TransactionWrapper {
     constant_result?: any;
 }
 
-export interface SignedTransaction extends Transaction {
+export interface SignedTransaction<T extends ContractParamter = ContractParamter> extends Transaction<T> {
     signature: string[];
     contract_address?: string;
 }

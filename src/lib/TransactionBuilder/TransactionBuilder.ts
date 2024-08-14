@@ -7,19 +7,43 @@ import { Validator } from '../../paramValidator/index.js';
 import { GetSignWeightResponse } from '../../types/APIResponse.js';
 import { isArray, isInteger, isNotNullOrUndefined, isObject, isString } from '../../utils/validations.js';
 import {
+    AccountCreateContract,
     AccountPermissionUpdateContract,
+    AccountUpdateContract,
     AssetIssueContract,
+    CancelFreezeBalanceV2Contract,
+    ClearABIContract,
+    ContractParamter,
     ContractType,
     CreateSmartContract,
     DelegateResourceContract,
     DeployConstantContract,
+    ExchangeCreateContract,
+    ExchangeInjectContract,
+    ExchangeTransactionContract,
+    ExchangeWithdrawContract,
     FreezeBalanceContract,
     FreezeBalanceV2Contract,
+    ParticipateAssetIssueContract,
     Permission,
+    ProposalCreateContract,
+    ProposalDeleteContract,
+    SetAccountIdContract,
+    TransferAssetContract,
+    TransferContract,
     TriggerSmartContract,
     UnDelegateResourceContract,
+    UnfreezeBalanceContract,
     UnfreezeBalanceV2Contract,
     UpdateAssetContract,
+    UpdateBrokerageContract,
+    UpdateEnergyLimitContract,
+    UpdateSettingContract,
+    VoteProposalContract,
+    VoteWitnessContract,
+    WithdrawBalanceContract,
+    WithdrawExpireUnfreezeContract,
+    WitnessCreateContract,
 } from '../../types/Contract.js';
 import {
     createTransaction,
@@ -63,7 +87,7 @@ export class TransactionBuilder {
         amount = 0,
         from: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
-    ): Promise<Transaction> {
+    ): Promise<Transaction<TransferContract>> {
         // accept amounts passed as strings
         amount = parseInt(amount);
 
@@ -91,14 +115,14 @@ export class TransactionBuilder {
             },
         ]);
 
-        const data = {
+        const data: TransferContract = {
             to_address: toHex(to),
             owner_address: toHex(from as string),
             amount: amount,
         };
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.TransferContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<TransferContract>(this.tronWeb, ContractType.TransferContract, data, options?.permissionId, transactionOptions);
     }
 
     async sendToken(
@@ -107,7 +131,7 @@ export class TransactionBuilder {
         tokenId: string,
         from: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
-    ): Promise<Transaction> {
+    ): Promise<Transaction<TransferAssetContract>> {
         amount = parseInt(amount);
         this.validator.notValid([
             {
@@ -138,7 +162,7 @@ export class TransactionBuilder {
             },
         ]);
 
-        const data = {
+        const data: TransferAssetContract = {
             to_address: toHex(to),
             owner_address: toHex(from as string),
             asset_name: fromUtf8(tokenId as string),
@@ -146,7 +170,7 @@ export class TransactionBuilder {
         };
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.TransferAssetContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<TransferAssetContract>(this.tronWeb, ContractType.TransferAssetContract, data, options?.permissionId, transactionOptions);
     }
 
     async purchaseToken(
@@ -155,7 +179,7 @@ export class TransactionBuilder {
         amount = 0,
         buyer: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<ParticipateAssetIssueContract>> {
         this.validator.notValid([
             {
                 name: 'buyer',
@@ -185,7 +209,7 @@ export class TransactionBuilder {
             },
         ]);
 
-        const data = {
+        const data: ParticipateAssetIssueContract = {
             to_address: toHex(issuerAddress),
             owner_address: toHex(buyer as string),
             asset_name: fromUtf8(tokenId as string),
@@ -193,7 +217,7 @@ export class TransactionBuilder {
         };
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.ParticipateAssetIssueContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<ParticipateAssetIssueContract>(this.tronWeb, ContractType.ParticipateAssetIssueContract, data, options?.permissionId, transactionOptions);
     }
 
     async freezeBalance(
@@ -203,7 +227,7 @@ export class TransactionBuilder {
         ownerAddress: string = this.tronWeb.defaultAddress.hex as string,
         receiverAddress?: string,
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<FreezeBalanceContract>> {
         this.validator.notValid([
             {
                 name: 'origin',
@@ -249,7 +273,7 @@ export class TransactionBuilder {
         }
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.FreezeBalanceContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<FreezeBalanceContract>(this.tronWeb, ContractType.FreezeBalanceContract, data, options?.permissionId, transactionOptions);
     }
 
     async unfreezeBalance(
@@ -257,7 +281,7 @@ export class TransactionBuilder {
         address: string = this.tronWeb.defaultAddress.hex as string,
         receiverAddress?: string,
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<UnfreezeBalanceContract>> {
         this.validator.notValid([
             {
                 name: 'origin',
@@ -277,7 +301,7 @@ export class TransactionBuilder {
                 msg: 'Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"',
             },
         ]);
-        const data: { owner_address: string; resource?: Resource; receiver_address?: string } = {
+        const data: Partial<UnfreezeBalanceContract> = {
             owner_address: toHex(address as string),
         };
         if (resource !== 'BANDWIDTH') {
@@ -289,7 +313,7 @@ export class TransactionBuilder {
         }
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.UnfreezeBalanceContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<UnfreezeBalanceContract>(this.tronWeb, ContractType.UnfreezeBalanceContract, data as UnfreezeBalanceContract, options?.permissionId, transactionOptions);
     }
 
     async freezeBalanceV2(
@@ -297,7 +321,7 @@ export class TransactionBuilder {
         resource: Resource = 'BANDWIDTH',
         address: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<FreezeBalanceV2Contract>> {
         this.validator.notValid([
             {
                 name: 'origin',
@@ -326,7 +350,7 @@ export class TransactionBuilder {
         }
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.FreezeBalanceV2Contract, data, options?.permissionId, transactionOptions);
+        return createTransaction<FreezeBalanceV2Contract>(this.tronWeb, ContractType.FreezeBalanceV2Contract, data, options?.permissionId, transactionOptions);
     }
 
     async unfreezeBalanceV2(
@@ -334,7 +358,7 @@ export class TransactionBuilder {
         resource: Resource = 'BANDWIDTH',
         address: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<UnfreezeBalanceV2Contract>> {
         this.validator.notValid([
             {
                 name: 'origin',
@@ -363,10 +387,13 @@ export class TransactionBuilder {
         }
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.UnfreezeBalanceV2Contract, data, options?.permissionId, transactionOptions);
+        return createTransaction<UnfreezeBalanceV2Contract>(this.tronWeb, ContractType.UnfreezeBalanceV2Contract, data, options?.permissionId, transactionOptions);
     }
 
-    async cancelUnfreezeBalanceV2(address: string = this.tronWeb.defaultAddress.hex as string, options: TransactionCommonOptions = {}) {
+    async cancelUnfreezeBalanceV2(
+        address: string = this.tronWeb.defaultAddress.hex as string,
+        options: TransactionCommonOptions = {}
+    ): Promise<Transaction<CancelFreezeBalanceV2Contract>> {
         this.validator.notValid([
             {
                 name: 'origin',
@@ -374,12 +401,12 @@ export class TransactionBuilder {
                 value: address as string,
             },
         ]);
-        const data = {
+        const data: CancelFreezeBalanceV2Contract = {
             owner_address: toHex(address as string),
         };
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.CancelAllUnfreezeV2Contract, data, options?.permissionId, transactionOptions);
+        return createTransaction<CancelFreezeBalanceV2Contract>(this.tronWeb, ContractType.CancelAllUnfreezeV2Contract, data, options?.permissionId, transactionOptions);
     }
 
     async delegateResource(
@@ -390,7 +417,7 @@ export class TransactionBuilder {
         lock = false,
         lockPeriod?: number,
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<DelegateResourceContract>> {
         this.validator.notValid([
             {
                 name: 'amount',
@@ -447,7 +474,7 @@ export class TransactionBuilder {
         }
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.DelegateResourceContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<DelegateResourceContract>(this.tronWeb, ContractType.DelegateResourceContract, data, options?.permissionId, transactionOptions);
     }
 
     async undelegateResource(
@@ -456,7 +483,7 @@ export class TransactionBuilder {
         resource: Resource = 'BANDWIDTH',
         address: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<UnDelegateResourceContract>> {
         this.validator.notValid([
             {
                 name: 'origin',
@@ -496,10 +523,13 @@ export class TransactionBuilder {
         }
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.UnDelegateResourceContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<UnDelegateResourceContract>(this.tronWeb, ContractType.UnDelegateResourceContract, data, options?.permissionId, transactionOptions);
     }
 
-    async withdrawExpireUnfreeze(address: string = this.tronWeb.defaultAddress.hex as string, options: TransactionCommonOptions = {}) {
+    async withdrawExpireUnfreeze(
+        address: string = this.tronWeb.defaultAddress.hex as string,
+        options: TransactionCommonOptions = {}
+    ): Promise<Transaction<WithdrawExpireUnfreezeContract>> {
         this.validator.notValid([
             {
                 name: 'origin',
@@ -508,15 +538,18 @@ export class TransactionBuilder {
             },
         ]);
 
-        const data = {
+        const data: WithdrawExpireUnfreezeContract = {
             owner_address: toHex(address),
         };
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.WithdrawExpireUnfreezeContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<WithdrawExpireUnfreezeContract>(this.tronWeb, ContractType.WithdrawExpireUnfreezeContract, data, options?.permissionId, transactionOptions);
     }
 
-    async withdrawBlockRewards(address: string = this.tronWeb.defaultAddress.hex as string, options: TransactionCommonOptions = {}) {
+    async withdrawBlockRewards(
+        address: string = this.tronWeb.defaultAddress.hex as string,
+        options: TransactionCommonOptions = {}
+    ): Promise<Transaction<WithdrawBalanceContract>> {
         this.validator.notValid([
             {
                 name: 'origin',
@@ -525,15 +558,19 @@ export class TransactionBuilder {
             },
         ]);
 
-        const data = {
+        const data: WithdrawBalanceContract = {
             owner_address: toHex(address as string),
         };
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.WithdrawBalanceContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<WithdrawBalanceContract>(this.tronWeb, ContractType.WithdrawBalanceContract, data, options?.permissionId, transactionOptions);
     }
 
-    async applyForSR(address: string = this.tronWeb.defaultAddress.hex as string, url = '', options: TransactionCommonOptions = {}) {
+    async applyForSR(
+        address: string = this.tronWeb.defaultAddress.hex as string,
+        url = '',
+        options: TransactionCommonOptions = {}
+    ): Promise<Transaction<WitnessCreateContract>> {
         this.validator.notValid([
             {
                 name: 'origin',
@@ -555,20 +592,20 @@ export class TransactionBuilder {
             },
         ]);
 
-        const data = {
+        const data: WitnessCreateContract = {
             owner_address: toHex(address as string),
             url: fromUtf8(url as string),
         };
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.WitnessCreateContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<WitnessCreateContract>(this.tronWeb, ContractType.WitnessCreateContract, data, options?.permissionId, transactionOptions);
     }
 
     async vote(
         votes: VoteInfo = {},
         voterAddress: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<VoteWitnessContract>> {
         this.validator.notValid([
             {
                 name: 'voter',
@@ -606,13 +643,13 @@ export class TransactionBuilder {
             };
         });
 
-        const data = {
+        const data: VoteWitnessContract = {
             owner_address: toHex(voterAddress as string),
             votes: voteList,
         };
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.VoteWitnessContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<VoteWitnessContract>(this.tronWeb, ContractType.VoteWitnessContract, data, options?.permissionId, transactionOptions);
     }
 
     async createSmartContract(
@@ -961,7 +998,13 @@ export class TransactionBuilder {
         callValue?: number,
         feeLimit?: number
     ) {
-        const args: TriggerSmartContract = {
+        interface IArgs extends TriggerSmartContract {
+            function_selector?: string;
+            parameter?: string;
+            fee_limit?: number;
+            Permission_id?: number;
+        }
+        const args: IArgs = {
             contract_address: toHex(contractAddress),
             owner_address: toHex(issuerAddress),
         };
@@ -1135,7 +1178,7 @@ export class TransactionBuilder {
             value.token_id = args.token_id;
         }
         const transactionOptions = getTransactionOptions(options);
-        const transaction = await createTransaction(
+        const transaction = await createTransaction<TriggerSmartContract>(
             this.tronWeb,
             ContractType.TriggerSmartContract,
             value,
@@ -1243,10 +1286,10 @@ export class TransactionBuilder {
         contractAddress: string,
         ownerAddress: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<ClearABIContract>> {
         if (!TronWeb.isAddress(contractAddress)) throw new Error('Invalid contract address provided');
         if (!TronWeb.isAddress(ownerAddress)) throw new Error('Invalid owner address provided');
-        const data = {
+        const data: ClearABIContract = {
             contract_address: toHex(contractAddress),
             owner_address: toHex(ownerAddress as string),
         };
@@ -1260,13 +1303,13 @@ export class TransactionBuilder {
         }
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.ClearABIContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<ClearABIContract>(this.tronWeb, ContractType.ClearABIContract, data, options?.permissionId, transactionOptions);
     }
     async updateBrokerage(
         brokerage: number,
         ownerAddress: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<UpdateBrokerageContract>> {
         if (!isNotNullOrUndefined(brokerage)) throw new Error('Invalid brokerage provided');
 
         if (!isInteger(brokerage) || brokerage < 0 || brokerage > 100)
@@ -1274,19 +1317,19 @@ export class TransactionBuilder {
 
         if (!TronWeb.isAddress(ownerAddress)) throw new Error('Invalid owner address provided');
 
-        const data = {
+        const data: UpdateBrokerageContract = {
             brokerage: parseInt(brokerage),
             owner_address: toHex(ownerAddress as string),
         };
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.UpdateBrokerageContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<UpdateBrokerageContract>(this.tronWeb, ContractType.UpdateBrokerageContract, data, options?.permissionId, transactionOptions);
     }
 
     async createToken(
         options: CreateTokenOptions = {} as CreateTokenOptions,
         issuerAddress: string = this.tronWeb.defaultAddress.hex as string
-    ) {
+    ): Promise<Transaction<AssetIssueContract>> {
         const {
             name = false,
             abbreviation = false,
@@ -1427,7 +1470,7 @@ export class TransactionBuilder {
             data.vote_score = parseInt(voteScore);
         }
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(
+        return createTransaction<AssetIssueContract>(
             this.tronWeb,
             ContractType.AssetIssueContract,
             data as AssetIssueContract,
@@ -1440,7 +1483,7 @@ export class TransactionBuilder {
         accountAddress: string,
         address: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<AccountCreateContract>> {
         this.validator.notValid([
             {
                 name: 'account',
@@ -1453,20 +1496,20 @@ export class TransactionBuilder {
                 value: address as string,
             },
         ]);
-        const data = {
+        const data: AccountCreateContract = {
             owner_address: toHex(address as string),
             account_address: toHex(accountAddress),
         };
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.AccountCreateContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<AccountCreateContract>(this.tronWeb, ContractType.AccountCreateContract, data, options?.permissionId, transactionOptions);
     }
 
     async updateAccount(
         accountName: string,
         address: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<AccountUpdateContract>> {
         this.validator.notValid([
             {
                 name: 'Name',
@@ -1483,20 +1526,20 @@ export class TransactionBuilder {
             },
         ]);
 
-        const data = {
+        const data: AccountUpdateContract = {
             account_name: fromUtf8(accountName as string),
             owner_address: toHex(address as string),
         };
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.AccountUpdateContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<AccountUpdateContract>(this.tronWeb, ContractType.AccountUpdateContract, data, options?.permissionId, transactionOptions);
     }
 
     async setAccountId(
         accountId: string,
         address: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<SetAccountIdContract>> {
         if (accountId && isString(accountId) && accountId.startsWith('0x')) {
             accountId = accountId.slice(2);
         }
@@ -1521,19 +1564,19 @@ export class TransactionBuilder {
             },
         ]);
 
-        const data = {
+        const data: SetAccountIdContract = {
             account_id: accountId,
             owner_address: toHex(address as string),
         };
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.SetAccountIdContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<SetAccountIdContract>(this.tronWeb, ContractType.SetAccountIdContract, data, options?.permissionId, transactionOptions);
     }
 
     async updateToken(
         options: UpdateTokenOptions = {} as UpdateTokenOptions,
         issuerAddress: string = this.tronWeb.defaultAddress.hex as string
-    ) {
+    ): Promise<Transaction<UpdateAssetContract>> {
         const {
             description = '',
             url = false,
@@ -1580,7 +1623,7 @@ export class TransactionBuilder {
         }
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.UpdateAssetContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<UpdateAssetContract>(this.tronWeb, ContractType.UpdateAssetContract, data, options?.permissionId, transactionOptions);
     }
 
     async sendAsset(
@@ -1622,7 +1665,7 @@ export class TransactionBuilder {
         parameters: Record<string, string | number> | Record<string, string | number>[],
         issuerAddress: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<ProposalCreateContract>> {
         this.validator.notValid([
             {
                 name: 'issuer',
@@ -1639,13 +1682,13 @@ export class TransactionBuilder {
             if (!isObject(parameter)) throw new Error(invalid);
         }
 
-        const data = {
+        const data: ProposalCreateContract = {
             owner_address: toHex(issuerAddress as string),
             parameters: newParams,
         };
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.ProposalCreateContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<ProposalCreateContract>(this.tronWeb, ContractType.ProposalCreateContract, data, options?.permissionId, transactionOptions);
     }
 
     /**
@@ -1656,7 +1699,7 @@ export class TransactionBuilder {
         proposalID: number,
         issuerAddress: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<ProposalDeleteContract>> {
         this.validator.notValid([
             {
                 name: 'issuer',
@@ -1671,13 +1714,13 @@ export class TransactionBuilder {
             },
         ]);
 
-        const data = {
+        const data: ProposalDeleteContract = {
             owner_address: toHex(issuerAddress as string),
             proposal_id: parseInt(proposalID as number),
         };
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.ProposalDeleteContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<ProposalDeleteContract>(this.tronWeb, ContractType.ProposalDeleteContract, data, options?.permissionId, transactionOptions);
     }
 
     /**
@@ -1689,7 +1732,7 @@ export class TransactionBuilder {
         isApproval = false,
         voterAddress: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<VoteProposalContract>> {
         this.validator.notValid([
             {
                 name: 'voter',
@@ -1709,7 +1752,7 @@ export class TransactionBuilder {
             },
         ]);
 
-        const data = {
+        const data: VoteProposalContract = {
             owner_address: toHex(voterAddress as string),
             proposal_id: parseInt(proposalID),
             is_add_approval: isApproval,
@@ -1730,7 +1773,7 @@ export class TransactionBuilder {
         trxBalance: number,
         ownerAddress: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<ExchangeCreateContract>> {
         this.validator.notValid([
             {
                 name: 'owner',
@@ -1754,7 +1797,7 @@ export class TransactionBuilder {
             },
         ]);
 
-        const data = {
+        const data: ExchangeCreateContract = {
             owner_address: toHex(ownerAddress as string),
             first_token_id: fromUtf8(tokenName),
             first_token_balance: tokenBalance,
@@ -1779,7 +1822,7 @@ export class TransactionBuilder {
         secondTokenBalance: number,
         ownerAddress: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<ExchangeCreateContract>> {
         this.validator.notValid([
             {
                 name: 'owner',
@@ -1808,7 +1851,7 @@ export class TransactionBuilder {
             },
         ]);
 
-        const data = {
+        const data: ExchangeCreateContract = {
             owner_address: toHex(ownerAddress as string),
             first_token_id: fromUtf8(firstTokenName),
             first_token_balance: firstTokenBalance,
@@ -1817,7 +1860,7 @@ export class TransactionBuilder {
         };
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.ExchangeCreateContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<ExchangeCreateContract>(this.tronWeb, ContractType.ExchangeCreateContract, data, options?.permissionId, transactionOptions);
     }
 
     /**
@@ -1831,7 +1874,7 @@ export class TransactionBuilder {
         tokenAmount: number,
         ownerAddress: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<ExchangeInjectContract>> {
         this.validator.notValid([
             {
                 name: 'owner',
@@ -1857,7 +1900,7 @@ export class TransactionBuilder {
             },
         ]);
 
-        const data = {
+        const data: ExchangeInjectContract = {
             owner_address: toHex(ownerAddress as string),
             exchange_id: parseInt(exchangeID),
             token_id: fromUtf8(tokenName),
@@ -1879,7 +1922,7 @@ export class TransactionBuilder {
         tokenAmount: number,
         ownerAddress: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<ExchangeWithdrawContract>> {
         this.validator.notValid([
             {
                 name: 'owner',
@@ -1905,7 +1948,7 @@ export class TransactionBuilder {
             },
         ]);
 
-        const data = {
+        const data: ExchangeWithdrawContract = {
             owner_address: toHex(ownerAddress as string),
             exchange_id: parseInt(exchangeID),
             token_id: fromUtf8(tokenName),
@@ -1913,7 +1956,7 @@ export class TransactionBuilder {
         };
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.ExchangeWithdrawContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<ExchangeWithdrawContract>(this.tronWeb, ContractType.ExchangeWithdrawContract, data, options?.permissionId, transactionOptions);
     }
 
     /**
@@ -1928,7 +1971,7 @@ export class TransactionBuilder {
         tokenAmountExpected: number,
         ownerAddress: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<ExchangeTransactionContract>> {
         this.validator.notValid([
             {
                 name: 'owner',
@@ -1960,7 +2003,7 @@ export class TransactionBuilder {
             },
         ]);
 
-        const data = {
+        const data: ExchangeTransactionContract = {
             owner_address: toHex(ownerAddress as string),
             exchange_id: parseInt(exchangeID),
             token_id: TronWeb.fromAscii(tokenName).replace(/^0x/, ''),
@@ -1969,7 +2012,7 @@ export class TransactionBuilder {
         };
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.ExchangeTransactionContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<ExchangeTransactionContract>(this.tronWeb, ContractType.ExchangeTransactionContract, data, options?.permissionId, transactionOptions);
     }
 
     /**
@@ -1980,7 +2023,7 @@ export class TransactionBuilder {
         userFeePercentage: number,
         ownerAddress: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<UpdateSettingContract>> {
         this.validator.notValid([
             {
                 name: 'owner',
@@ -2001,14 +2044,14 @@ export class TransactionBuilder {
             },
         ]);
 
-        const data = {
+        const data: UpdateSettingContract = {
             owner_address: toHex(ownerAddress as string),
             contract_address: toHex(contractAddress),
             consume_user_resource_percent: userFeePercentage,
         };
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.UpdateSettingContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<UpdateSettingContract>(this.tronWeb, ContractType.UpdateSettingContract, data, options?.permissionId, transactionOptions);
     }
 
     /**
@@ -2019,7 +2062,7 @@ export class TransactionBuilder {
         originEnergyLimit = 0,
         ownerAddress: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<UpdateEnergyLimitContract>> {
         this.validator.notValid([
             {
                 name: 'owner',
@@ -2040,14 +2083,14 @@ export class TransactionBuilder {
             },
         ]);
 
-        const data = {
+        const data: UpdateEnergyLimitContract = {
             owner_address: toHex(ownerAddress as string),
             contract_address: toHex(contractAddress),
             origin_energy_limit: originEnergyLimit,
         };
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.UpdateEnergyLimitContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<UpdateEnergyLimitContract>(this.tronWeb, ContractType.UpdateEnergyLimitContract, data, options?.permissionId, transactionOptions);
     }
 
     private checkPermissions(permissions: Permission, type: number) {
@@ -2083,7 +2126,7 @@ export class TransactionBuilder {
         witnessPermission?: Permission,
         activesPermissions?: Permission | Permission[],
         options: TransactionCommonOptions = {}
-    ) {
+    ): Promise<Transaction<AccountPermissionUpdateContract>> {
         if (!TronWeb.isAddress(ownerAddress as Address)) throw new Error('Invalid ownerAddress provided');
 
         if (!this.checkPermissions(ownerPermission, 0)) {
@@ -2149,14 +2192,14 @@ export class TransactionBuilder {
         }
 
         const transactionOptions = getTransactionOptions(options);
-        return createTransaction(this.tronWeb, ContractType.AccountPermissionUpdateContract, data, options?.permissionId, transactionOptions);
+        return createTransaction<AccountPermissionUpdateContract>(this.tronWeb, ContractType.AccountPermissionUpdateContract, data, options?.permissionId, transactionOptions);
     }
 
-    async newTxID(transaction: SignedTransaction, options: { txLocal?: boolean } = {}) {
+    async newTxID<T extends ContractParamter, U extends (SignedTransaction<T> | Transaction<T>)>(transaction: U, options: { txLocal?: boolean } = {}): Promise<U> {
         if (options?.txLocal) {
             const contract = transaction.raw_data.contract[0];
             try {
-                const tx = await createTransaction(
+                const tx = await createTransaction<T>(
                     this.tronWeb,
                     contract.type,
                     contract.parameter.value,
@@ -2170,9 +2213,9 @@ export class TransactionBuilder {
                         timestamp: transaction.raw_data.timestamp,
                     }
                 );
-                (tx as SignedTransaction).signature = transaction.signature;
+                (tx as SignedTransaction<T>).signature = (transaction as SignedTransaction<T>).signature;
                 tx.visible = transaction.visible;
-                return tx;
+                return tx as U;
             } catch (e) {
                 throw new Error('Error generating a new transaction id.');
             }
@@ -2191,7 +2234,7 @@ export class TransactionBuilder {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 /* @ts-ignore */
                 { data: transaction.raw_data.data, fee_limit: transaction.raw_data.fee_limit }
-            );
+            ) as unknown as U;
         } catch (e) {
             throw new Error('Error generating a new transaction id.');
         }
@@ -2214,10 +2257,10 @@ export class TransactionBuilder {
             transaction.raw_data.expiration += options.extension;
         }
 
-        return await this.newTxID(transaction as SignedTransaction, { txLocal: options.txLocal });
+        return await this.newTxID(transaction, { txLocal: options.txLocal });
     }
 
-    async extendExpiration(transaction: SignedTransaction, extension: number, options: TxLocal = {}) {
+    async extendExpiration(transaction: Transaction, extension: number, options: TxLocal = {}) {
         return await this.alterTransaction(transaction, { extension, txLocal: options?.txLocal });
     }
 
