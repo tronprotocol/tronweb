@@ -24,7 +24,7 @@ import {
 } from '../types/Trx.js';
 import { SignedTransaction, Transaction } from '../types/Transaction.js';
 import { TypedDataDomain, TypedDataField } from '../utils/typedData.js';
-import { Resource } from '../types/TransactionBuilder';
+import { Resource } from '../types/TransactionBuilder.js';
 
 const TRX_MESSAGE_HEADER = '\x19TRON Signed Message:\n32';
 // it should be: '\x15TRON Signed Message:\n32';

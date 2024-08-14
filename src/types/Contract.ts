@@ -1,5 +1,5 @@
-import { Resource } from '../types/TransactionBuilder';
-import { ContractAbiInterface } from './ABI';
+import { Resource } from '../types/TransactionBuilder.js';
+import { ContractAbiInterface } from './ABI.js';
 export enum ContractType {
     AccountCreateContract = 'AccountCreateContract',
     TransferContract = 'TransferContract',

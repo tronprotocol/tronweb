@@ -38,7 +38,7 @@ import type {
     EventFragment,
     AbiInputsType,
     AbiOutputsType,
-} from '../../types/ABI';
+} from '../../types/ABI.js';
 
 export type AbiFragmentNoErrConstructor = FunctionFragment | EventFragment | FallbackFragment | ReceiveFragment;
 

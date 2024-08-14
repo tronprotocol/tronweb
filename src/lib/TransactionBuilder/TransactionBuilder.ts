@@ -71,6 +71,12 @@ import {
 import { Address } from '../../types/Trx.js';
 import { ConstructorFragment, ContractAbiInterface, FunctionFragment } from '../../types/ABI.js';
 
+interface IArgs extends TriggerSmartContract {
+    function_selector?: string;
+    parameter?: string;
+    fee_limit?: number;
+    Permission_id?: number;
+}
 export class TransactionBuilder {
     private tronWeb: TronWeb;
     private validator: Validator;
@@ -998,12 +1004,6 @@ export class TransactionBuilder {
         callValue?: number,
         feeLimit?: number
     ) {
-        interface IArgs extends TriggerSmartContract {
-            function_selector?: string;
-            parameter?: string;
-            fee_limit?: number;
-            Permission_id?: number;
-        }
         const args: IArgs = {
             contract_address: toHex(contractAddress),
             owner_address: toHex(issuerAddress),
