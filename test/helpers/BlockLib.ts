@@ -15,7 +15,7 @@ export default class BlockLib {
 
     pluginInterface() {
         return {
-            requires: '^6.0.0-beta.0',
+            requires: '^6.0.0',
             fullClass: true,
         };
     }
