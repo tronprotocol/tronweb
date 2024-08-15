@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 import validator from 'validator';
 import { ADDRESS_PREFIX } from './address.js';
 import { AbiParamsCommon } from '../types/ABI.js';
+import { IBigNumber } from '../types/TronWeb.js';
 
 export function isValidURL(url: string): boolean {
     if (typeof url !== 'string') return false;
@@ -31,7 +32,7 @@ export function isBoolean(bool: unknown): bool is boolean {
     return typeof bool === 'boolean';
 }
 
-export function isBigNumber(number: unknown) {
+export function isBigNumber(number: unknown): number is IBigNumber {
     return !!number && (number instanceof BigNumber || (number.constructor && number.constructor.name === 'BigNumber'));
 }
 

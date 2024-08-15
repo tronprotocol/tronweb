@@ -291,7 +291,7 @@ export class TronWeb extends EventEmitter {
     static toHex(val: string | number | boolean | Record<string | number | symbol, unknown> | unknown[] | IBigNumber) {
         if (utils.isBoolean(val)) return TronWeb.fromDecimal(+val);
 
-        if (utils.isBigNumber(val)) return TronWeb.fromDecimal(val as IBigNumber);
+        if (utils.isBigNumber(val)) return TronWeb.fromDecimal(val);
 
         if (typeof val === 'object') return TronWeb.fromUtf8(JSON.stringify(val));
 
@@ -383,7 +383,7 @@ export class TronWeb extends EventEmitter {
 
     toBigNumber: typeof TronWeb.toBigNumber;
     static toBigNumber(amount: string | number | IBigNumber = 0): IBigNumber {
-        if (utils.isBigNumber(amount)) return amount as IBigNumber;
+        if (utils.isBigNumber(amount)) return amount;
 
         if (utils.isString(amount) && /^(-|)0x/.test(amount)) return new BigNumber(amount.replace('0x', ''), 16);
 
