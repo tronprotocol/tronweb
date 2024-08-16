@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import Config from './helpers/config.js';
 import { Contract, TronWeb, providers, Types } from './setup/TronWeb.js';
 import tronWebBuilder from './helpers/tronWebBuilder.js';
-import BigNumber from 'bignumber.js';
+import { BigNumber } from 'bignumber.js';
 import broadcaster from './helpers/broadcaster.js';
 import wait from './helpers/wait.js';
 

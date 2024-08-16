@@ -1,7 +1,7 @@
 import utils from './utils/index.js';
 export { utils };
 
-import BigNumber from 'bignumber.js';
+import { BigNumber } from 'bignumber.js';
 export { BigNumber };
 
 import { providers } from './lib/providers/index.js';

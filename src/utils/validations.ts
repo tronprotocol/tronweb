@@ -1,4 +1,4 @@
-import BigNumber from 'bignumber.js';
+import { BigNumber } from 'bignumber.js';
 import validator from 'validator';
 import { ADDRESS_PREFIX } from './address.js';
 import { AbiParamsCommon } from '../types/ABI.js';

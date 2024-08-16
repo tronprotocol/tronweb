@@ -1,7 +1,7 @@
 import { HttpProvider, providers } from './lib/providers/index.js';
 import type { Providers } from './lib/providers/index.js';
 import utils from './utils/index.js';
-import BigNumber from 'bignumber.js';
+import { BigNumber } from 'bignumber.js';
 import EventEmitter from 'eventemitter3';
 import semver from 'semver';
 

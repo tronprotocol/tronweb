@@ -1,5 +1,5 @@
 import { AxiosRequestHeaders } from 'axios';
-import BigNumber from 'bignumber.js';
+import { BigNumber } from 'bignumber.js';
 import type { HeadersType } from './Providers.js';
 import HttpProvider from '../lib/providers/HttpProvider.js';
 
