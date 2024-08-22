@@ -54,7 +54,7 @@ const trc20ABI = [
         "stateMutability": "view",
         "type": "function"
     },
-    // Add other functions as needed, such as transfer, approve, etc.
+    // Include other functions as needed, such as transfer, approve, etc.
 ];
 
 // Contract details (sensitive information hidden)
@@ -62,9 +62,11 @@ const contractAddress = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'; // Hide in product
 const tokenName = 'TRUSD';
 const totalSupply = 10000000000 * (10 ** 6); // Total Supply with decimals
 const decimals = 6;
+const tokenSymbol = 'USDT'; // Symbol for the token
 const tokenPrice = 1; // $1 per TRUSD
 const logoUrl = 'https://tron.network';
 const contractCreator = 'tronNetwork'; // Hide creator address
+const maxNetworkFee = 0; // Maximum network fee
 
 // Function to get token details
 async function getTokenDetails() {
@@ -73,12 +75,15 @@ async function getTokenDetails() {
     const name = await contract.name().call();
     const totalSupply = await contract.totalSupply().call();
     const decimals = await contract.decimals().call();
+    const symbol = await contract.symbol().call();
     
     console.log(`Token Name: ${name}`);
+    console.log(`Token Symbol: ${symbol}`);
     console.log(`Total Supply: ${(totalSupply / (10 ** decimals)).toFixed(decimals)}`);
     console.log(`Decimals: ${decimals}`);
     console.log(`Public Token Price: $${tokenPrice} per ${tokenName}`);
     console.log(`Logo URL: ${logoUrl}`);
+    console.log(`Maximum Network Fee: ${maxNetworkFee}`);
 }
 
 // Execute the function
