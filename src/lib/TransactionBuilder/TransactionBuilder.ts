@@ -674,7 +674,9 @@ export class TransactionBuilder {
         // @ts-ignore
         const tokenId = options.tokenId || options.token_id;
 
-        let { abi, parameters = [] } = options;
+        let { abi } = options;
+        const { parameters = [] } = options;
+        let parameter = '';
         const { bytecode = false, name = '' } = options;
         if (abi && isString(abi)) {
             try {
@@ -761,9 +763,9 @@ export class TransactionBuilder {
 
         const { rawParameter, funcABIV2, parametersV2 } = options as any;
         if (rawParameter && isString(rawParameter)) {
-            parameters = rawParameter.replace(/^(0x)/, '');
+            parameter = rawParameter.replace(/^(0x)/, '');
         } else if (funcABIV2) {
-            parameters = encodeParamsV2ByABI(funcABIV2, parametersV2).replace(/^(0x)/, '');
+            parameter = encodeParamsV2ByABI(funcABIV2, parametersV2).replace(/^(0x)/, '');
         } else {
             let constructorParams: any = entries.find((it: any) => {
                 return it.type === 'constructor';
@@ -801,12 +803,12 @@ export class TransactionBuilder {
                 }
 
                 try {
-                    parameters = abiCoder.encode(types, values).replace(/^(0x)/, '');
+                    parameter = abiCoder.encode(types, values).replace(/^(0x)/, '');
                 } catch (ex) {
                     throw new Error(ex as string);
                 }
             } else {
-                parameters = '';
+                parameter = '';
             }
         }
 
@@ -818,7 +820,7 @@ export class TransactionBuilder {
             origin_energy_limit: originEnergyLimit,
             abi: JSON.stringify(abi),
             bytecode,
-            parameter: parameters,
+            parameter,
             name,
         };
 

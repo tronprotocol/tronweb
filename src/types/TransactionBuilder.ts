@@ -57,7 +57,7 @@ export interface CreateSmartContractOptions extends TransactionCommonOptions {
      * It should be converted hexString after encoded according to ABI encoder.
      * If constructor has no parameter, this can be optional
      */
-    parameters?: string;
+    parameters?: unknown[];
     /**
      * Contract name string.
      */
