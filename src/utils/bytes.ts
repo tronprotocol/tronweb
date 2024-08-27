@@ -1,6 +1,5 @@
 import { Base64 } from './base64.js';
-
-export type BytesLike = number[] | Uint8Array;
+import { BytesLike } from '../types/UtilsTypes.js';
 
 export function byte2hexStr(byte: number) {
     if (byte < 0 || byte > 255) throw new Error('Input must be a byte');
