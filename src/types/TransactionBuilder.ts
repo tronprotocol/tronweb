@@ -12,7 +12,7 @@ export interface TransactionCommonOptions {
 
 export type NumberLike = string | number;
 
-export type Resource = 'BANDWIDTH' | 'ENERGY' | 'TRON_POWER';
+export type Resource = 'BANDWIDTH' | 'ENERGY';
 
 export interface VoteInfo {
     [srAddress: string]: number;
