@@ -105,7 +105,7 @@ export class Contract {
         };
     }
 
-    async new(options: CreateSmartContractOptions, privateKey = this.tronWeb.defaultPrivateKey, callback = false) {
+    async new(options: CreateSmartContractOptions, privateKey = this.tronWeb.defaultPrivateKey) {
         const address = this.tronWeb.address.fromPrivateKey(privateKey as string);
         const transaction = await this.tronWeb.transactionBuilder.createSmartContract(options, address as Address);
         const signedTransaction = await this.tronWeb.trx.sign(transaction, privateKey);

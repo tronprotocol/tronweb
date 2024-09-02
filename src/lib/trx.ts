@@ -655,7 +655,6 @@ export class Trx {
      * @param {message to be signed, should be Bytes or string} message
      * @param {privateKey for signature} privateKey
      * @param {reserved} options
-     * @param {callback function} callback
      */
     signMessageV2(message: string | Uint8Array | Array<number>, privateKey = this.tronWeb.defaultPrivateKey) {
         return Trx.signMessageV2(message, privateKey as string);
@@ -872,7 +871,6 @@ export class Trx {
      * @param duration - is the duration in days to be frozen
      * @param resource - is the type, must be either "ENERGY" or "BANDWIDTH"
      * @param options
-     * @param callback
      */
     async freezeBalance(
         amount = 0,
@@ -924,7 +922,6 @@ export class Trx {
      *
      * @param resource - is the type, must be either "ENERGY" or "BANDWIDTH"
      * @param options
-     * @param callback
      */
     async unfreezeBalance(
         resource: Resource = 'BANDWIDTH',
@@ -964,7 +961,6 @@ export class Trx {
      *
      * @param privateKey - Account private Key
      * @param accountName - name of the account
-     * @param callback
      *
      * @return modified Transaction Object
      */

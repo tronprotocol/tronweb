@@ -420,7 +420,7 @@ export class TronWeb extends EventEmitter {
         return account;
     }
 
-    async isConnected(callback = false) {
+    async isConnected() {
         return {
             fullNode: await this.fullNode.isConnected(),
             solidityNode: await this.solidityNode.isConnected(),
