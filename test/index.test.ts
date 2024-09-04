@@ -5,6 +5,7 @@ import tronWebBuilder from './helpers/tronWebBuilder.js';
 import { BigNumber } from 'bignumber.js';
 import broadcaster from './helpers/broadcaster.js';
 import wait from './helpers/wait.js';
+import assertThrow from './helpers/assertThrow.js';
 
 type Address = Types.Address;
 type RequestHeaders = Types.RequestHeaders;
@@ -416,6 +417,13 @@ describe('TronWeb Instance', function () {
         it('should return the checksum address', function () {
             const tronWeb = tronWebBuilder.createInstance();
             assert.equal(tronWeb.address.toChecksumAddress('TMVQGm1qAQYVdetCeGRRkTWYYrLXuHK2HC'), '417E5F4552091A69125d5DfCb7b8C2659029395Bdf')
+        });
+
+        it('should throw error', async function () {
+            const tronWeb = tronWebBuilder.createInstance();
+            await assertThrow(() => {
+                tronWeb.address.toChecksumAddress('not a valid address');
+            }, "'not a valid address' is not a valid address string");
         });
     });
 

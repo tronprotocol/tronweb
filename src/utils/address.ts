@@ -48,6 +48,7 @@ function getChecksumAddress(address: string): string {
 }
 
 export function toChecksumAddress(address: string) {
+    if (!isAddress(address)) throw new Error(`'${address}' is not a valid address string`);
     return getChecksumAddress(toHex(address));
 }
 
