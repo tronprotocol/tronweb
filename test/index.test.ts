@@ -412,6 +412,21 @@ describe('TronWeb Instance', function () {
         });
     });
 
+    describe('#address.toChecksumAddress', function () {
+        it('should return the checksum address', function () {
+            const tronWeb = tronWebBuilder.createInstance();
+            assert.equal(tronWeb.address.toChecksumAddress('TMVQGm1qAQYVdetCeGRRkTWYYrLXuHK2HC'), '417E5F4552091A69125d5DfCb7b8C2659029395Bdf')
+        });
+    });
+
+    describe('#address.isChecksumAddress', function () {
+        it('should return the checksum address', function () {
+            const tronWeb = tronWebBuilder.createInstance();
+            assert.isTrue(tronWeb.address.isChecksumAddress('417E5F4552091A69125d5DfCb7b8C2659029395Bdf'));
+            assert.isFalse(tronWeb.address.isChecksumAddress('417e5f4552091a69125d5dfcb7b8c2659029395bdf'));
+        });
+    });
+
     describe('#sha3()', function () {
         it('should match web3 sha function', function () {
             const input = 'casa';

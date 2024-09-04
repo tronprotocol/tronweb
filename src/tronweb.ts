@@ -11,7 +11,7 @@ import { Contract } from './lib/contract/index.js';
 import { Plugin } from './lib/plugin.js';
 import { Event } from './lib/event.js';
 import { keccak256 } from './utils/ethersUtils.js';
-import { fromHex, fromPrivateKey, isAddress, toHex } from './utils/address.js';
+import { fromHex, fromPrivateKey, isAddress, toHex, toChecksumAddress, isChecksumAddress } from './utils/address.js';
 import { HeadersType } from './types/Providers.js';
 import { isString } from './utils/validations.js';
 import { DefaultAddress, NodeProvider, TronWebOptions, IBigNumber } from './types/TronWeb.js';
@@ -275,6 +275,12 @@ export class TronWeb extends EventEmitter {
             },
             toHex(address: string) {
                 return toHex(address);
+            },
+            toChecksumAddress(address: string) {
+                return toChecksumAddress(address);
+            },
+            isChecksumAddress(address: string) {
+                return isChecksumAddress(address);
             },
             fromPrivateKey(privateKey: string, strict = false) {
                 return fromPrivateKey(privateKey, strict);
