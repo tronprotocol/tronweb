@@ -421,9 +421,9 @@ describe('TronWeb Instance', function () {
 
         it('should throw error', async function () {
             const tronWeb = tronWebBuilder.createInstance();
-            await assertThrow(() => {
+            await assertThrow((async () => {
                 tronWeb.address.toChecksumAddress('not a valid address');
-            }, "'not a valid address' is not a valid address string");
+            })(), "'not a valid address' is not a valid address string");
         });
     });
 
