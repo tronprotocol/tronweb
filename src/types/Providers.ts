@@ -3,5 +3,5 @@ export type HeadersType = RawAxiosRequestHeaders | InstanceType<typeof AxiosHead
 export type RequestHeaders = RawAxiosRequestHeaders;
 
 export interface HttpProviderInstance {
-    request<R = any>(config: any): Promise<R>;
+    request<R = unknown>(config: any): Promise<{ data: R }>;
 }

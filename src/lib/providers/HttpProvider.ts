@@ -1,6 +1,6 @@
-import axios, { Method, AxiosInstance } from 'axios';
+import axios, { Method } from 'axios';
 import { hasProperties, isObject, isValidURL } from '../../utils/validations.js';
-import { HeadersType } from '../../types/Providers.js';
+import { HeadersType, HttpProviderInstance } from '../../types/Providers.js';
 
 export default class HttpProvider {
     host: string;
@@ -9,7 +9,7 @@ export default class HttpProvider {
     password: string;
     headers: HeadersType;
     statusPage: string;
-    instance: AxiosInstance;
+    instance: HttpProviderInstance;
     constructor(host: string, timeout = 30000, user = '', password = '', headers: HeadersType = {}, statusPage = '/') {
         if (!isValidURL(host)) throw new Error('Invalid URL provided to HttpProvider');
 
@@ -55,7 +55,7 @@ export default class HttpProvider {
         method = method.toLowerCase() as Method;
 
         return this.instance
-            .request({
+            .request<T>({
                 data: method == 'post' && Object.keys(payload).length ? payload : null,
                 params: method == 'get' && payload,
                 url,
