@@ -107,7 +107,9 @@ export class Method {
     }
 
     decodeInput(data: string) {
-        return decodeOutput(this.abi, '0x' + data);
+        const abi = JSON.parse(JSON.stringify(this.abi));
+        abi.outputs = abi.inputs;
+        return decodeOutput(abi, '0x' + data);
     }
 
     onMethod(...args: any[]) {
