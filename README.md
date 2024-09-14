@@ -170,6 +170,15 @@ const tronWeb = new TronWeb({
 )
 ```
 
+## Integrity Check
+
+The package files will be signed using a GPG key pair, and the correctness of the signature will be verified using the following public key:
+
+```
+pub: 4371 AB85 E5A5 8FAA 88AD 7FDF 9945 DBCA 8C4B B810
+uid: dev@tronweb.network
+```
+
 ## Contributions
 
 In order to contribute you can

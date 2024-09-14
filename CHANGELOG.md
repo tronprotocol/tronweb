@@ -7,6 +7,7 @@ __6.0.0__
 - Fix known type errors.
 - Bump axios from 1.6.8 to 1.7.4 and webpack from 5.78.0 to 5.94.0 to address security problems.
 - Add TronWeb.address.toChecksumAddress and TronWeb.address.isChecksumAddress APIs.
+- Fix the wrong action of `deocdeInput` API in Contract module. [#557](https://github.com/tronprotocol/tronweb/issues/557)
 
 __6.0.0-beta.4__
 - Replace `ethers@v5/abi` with abiCoder of `ethers@v6`.
