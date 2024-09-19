@@ -1,4 +1,4 @@
-import { BytesLike } from './bytes.js';
+import type { BytesLike } from '../types/UtilsTypes.js';
 
 const _keyStr = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
 

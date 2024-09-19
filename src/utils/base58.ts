@@ -1,4 +1,4 @@
-import type { BytesLike } from './bytes.js';
+import type { BytesLike } from '../types/UtilsTypes.js';
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const ALPHABET_MAP = {} as Record<string, number>;
 

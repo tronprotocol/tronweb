@@ -55,7 +55,7 @@ export default class HttpProvider {
         method = method.toLowerCase() as Method;
 
         return this.instance
-            .request<{ data: T }>({
+            .request<T>({
                 data: method == 'post' && Object.keys(payload).length ? payload : null,
                 params: method == 'get' && payload,
                 url,
