@@ -5,7 +5,7 @@ __6.0.0__
 - Fix [issue543](https://github.com/tronprotocol/tronweb/issues/543), replace type AxiosHeaders with InstanceType<typeof AxiosHeaders>.
 - Add type for value field in the return of the creation by TransactionBuilder methods.
 - Fix known type errors.
-- Bump axios from 1.6.8 to 1.7.4 and webpack from 5.78.0 to 5.94.0 to address security problems.
+- Bump axios from 1.6.8 to 1.7.4 and webpack from 5.78.0 to 5.94.0.
 - Add TronWeb.address.toChecksumAddress and TronWeb.address.isChecksumAddress APIs.
 - Fix the wrong action of `deocdeInput` API in Contract module. [#557](https://github.com/tronprotocol/tronweb/issues/557)
 
