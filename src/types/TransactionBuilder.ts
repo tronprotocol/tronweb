@@ -1,5 +1,5 @@
-import { AbiFragment, ContractAbiInterface } from './ABI';
-import { Transaction } from './Transaction';
+import { AbiFragment, ContractAbiInterface } from './ABI.js';
+import { Transaction } from './Transaction.js';
 
 export interface TransactionCommonOptions {
     /**
@@ -57,7 +57,7 @@ export interface CreateSmartContractOptions extends TransactionCommonOptions {
      * It should be converted hexString after encoded according to ABI encoder.
      * If constructor has no parameter, this can be optional
      */
-    parameters?: string;
+    parameters?: unknown[];
     /**
      * Contract name string.
      */

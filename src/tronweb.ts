@@ -1,7 +1,7 @@
 import { HttpProvider, providers } from './lib/providers/index.js';
 import type { Providers } from './lib/providers/index.js';
 import utils from './utils/index.js';
-import BigNumber from 'bignumber.js';
+import { BigNumber } from 'bignumber.js';
 import EventEmitter from 'eventemitter3';
 import semver from 'semver';
 
@@ -11,10 +11,10 @@ import { Contract } from './lib/contract/index.js';
 import { Plugin } from './lib/plugin.js';
 import { Event } from './lib/event.js';
 import { keccak256 } from './utils/ethersUtils.js';
-import { fromHex, fromPrivateKey, isAddress, toHex } from './utils/address.js';
+import { fromHex, fromPrivateKey, isAddress, toHex, toChecksumAddress, isChecksumAddress } from './utils/address.js';
 import { HeadersType } from './types/Providers.js';
 import { isString } from './utils/validations.js';
-import { DefaultAddress, NodeProvider, TronWebOptions } from './types/TronWeb.js';
+import { DefaultAddress, NodeProvider, TronWebOptions, IBigNumber } from './types/TronWeb.js';
 import { ContractAbiInterface } from './types/ABI.js';
 import { Address } from './types/Trx.js';
 
@@ -22,7 +22,7 @@ const DEFAULT_VERSION = '4.7.1';
 
 const FEE_LIMIT = 150000000;
 
-const version = '6.0.0-beta.4';
+const version = '6.0.0';
 
 function isValidOptions(options: unknown): options is TronWebOptions {
     return (
@@ -276,6 +276,12 @@ export class TronWeb extends EventEmitter {
             toHex(address: string) {
                 return toHex(address);
             },
+            toChecksumAddress(address: string) {
+                return toChecksumAddress(address);
+            },
+            isChecksumAddress(address: string) {
+                return isChecksumAddress(address);
+            },
             fromPrivateKey(privateKey: string, strict = false) {
                 return fromPrivateKey(privateKey, strict);
             },
@@ -288,7 +294,7 @@ export class TronWeb extends EventEmitter {
     }
 
     toHex: typeof TronWeb.toHex;
-    static toHex(val: string | number | boolean | Record<string | number | symbol, unknown> | unknown[] | BigNumber) {
+    static toHex(val: string | number | boolean | Record<string | number | symbol, unknown> | unknown[] | IBigNumber) {
         if (utils.isBoolean(val)) return TronWeb.fromDecimal(+val);
 
         if (utils.isBigNumber(val)) return TronWeb.fromDecimal(val);
@@ -357,12 +363,12 @@ export class TronWeb extends EventEmitter {
     }
 
     toDecimal: typeof TronWeb.toDecimal;
-    static toDecimal(value: string | number | BigNumber) {
+    static toDecimal(value: string | number | IBigNumber) {
         return TronWeb.toBigNumber(value).toNumber();
     }
 
     fromDecimal: typeof TronWeb.fromDecimal;
-    static fromDecimal(value: number | BigNumber) {
+    static fromDecimal(value: number | IBigNumber) {
         const number = TronWeb.toBigNumber(value);
         const result = number.toString(16);
 
@@ -370,19 +376,19 @@ export class TronWeb extends EventEmitter {
     }
 
     fromSun: typeof TronWeb.fromSun;
-    static fromSun(sun: number) {
+    static fromSun(sun: number): string | IBigNumber {
         const trx = TronWeb.toBigNumber(sun).div(1_000_000);
         return utils.isBigNumber(sun) ? trx : trx.toString(10);
     }
 
     toSun: typeof TronWeb.toSun;
-    static toSun(trx: number) {
+    static toSun(trx: number): string | IBigNumber {
         const sun = TronWeb.toBigNumber(trx).times(1_000_000);
         return utils.isBigNumber(trx) ? sun : sun.toString(10);
     }
 
     toBigNumber: typeof TronWeb.toBigNumber;
-    static toBigNumber(amount: string | number | BigNumber = 0) {
+    static toBigNumber(amount: string | number | IBigNumber = 0): IBigNumber {
         if (utils.isBigNumber(amount)) return amount;
 
         if (utils.isString(amount) && /^(-|)0x/.test(amount)) return new BigNumber(amount.replace('0x', ''), 16);
@@ -420,7 +426,7 @@ export class TronWeb extends EventEmitter {
         return account;
     }
 
-    async isConnected(callback = false) {
+    async isConnected() {
         return {
             fullNode: await this.fullNode.isConnected(),
             solidityNode: await this.solidityNode.isConnected(),

@@ -1,5 +1,6 @@
 import { AccountType, Permission } from './Contract.js';
 import { SignedTransaction, Transaction } from './Transaction.js';
+import { Resource } from './TransactionBuilder.js';
 
 type HTTPMap<T extends string | number | symbol, U> = Record<T, U>[];
 
@@ -62,11 +63,11 @@ export enum ResourceCode {
 }
 
 export interface FreezeV2 {
-    type: ResourceCode;
+    type: Resource;
     amount: number;
 }
 export interface UnFreezeV2 {
-    type: ResourceCode;
+    type: Resource;
     unfreeze_amount: number;
     unfreeze_expire_time: number;
 }

@@ -1,5 +1,5 @@
-import { Permission } from './Contract';
-import { Transaction, TransactionWrapper } from './Transaction';
+import { Permission } from './Contract.js';
+import { Transaction, TransactionWrapper } from './Transaction.js';
 
 export interface BlockHeaderRawData {
     number: number;

@@ -6,3 +6,4 @@ export * from './Transaction.js';
 export * from './TransactionBuilder.js';
 export * from './TronWeb.js';
 export * from './Trx.js';
+export * from './UtilsTypes.js';

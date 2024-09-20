@@ -1,7 +1,10 @@
-import BigNumber from 'bignumber.js';
+import { BigNumber } from 'bignumber.js';
 import validator from 'validator';
 import { ADDRESS_PREFIX } from './address.js';
 import { AbiParamsCommon } from '../types/ABI.js';
+import { IBigNumber } from '../types/TronWeb.js';
+
+import type { EventQueryDataType, MapEventQueryDataType } from '../types/UtilsTypes.js';
 
 export function isValidURL(url: string): boolean {
     if (typeof url !== 'string') return false;
@@ -31,7 +34,7 @@ export function isBoolean(bool: unknown): bool is boolean {
     return typeof bool === 'boolean';
 }
 
-export function isBigNumber(number: unknown): number is BigNumber {
+export function isBigNumber(number: unknown): number is IBigNumber {
     return !!number && (number instanceof BigNumber || (number.constructor && number.constructor.name === 'BigNumber'));
 }
 
@@ -66,30 +69,6 @@ export function hasProperties(obj: object, ...properties: (string | number | sym
             .includes(false)
     );
 }
-
-export type EventQueryDataType = {
-    block_number: number;
-    block_timestamp: number;
-    contract_address: string;
-    event_name: string;
-    transaction_id: string;
-    result: unknown;
-    resource_Node: string;
-    _unconfirmed?: boolean;
-    _fingerprint?: string | undefined;
-};
-
-export type MapEventQueryDataType = {
-    block: number;
-    timestamp: number;
-    contract: string;
-    name: string;
-    transaction: string;
-    result: unknown;
-    resourceNode: string;
-    unconfirmed?: boolean;
-    fingerprint?: string | undefined;
-};
 
 export function mapEvent(event: EventQueryDataType) {
     const data: MapEventQueryDataType = {

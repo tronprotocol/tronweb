@@ -1,5 +1,5 @@
-import { Resource } from '../types/TransactionBuilder';
-import { ContractAbiInterface } from './ABI';
+import { Resource } from '../types/TransactionBuilder.js';
+import { ContractAbiInterface } from './ABI.js';
 export enum ContractType {
     AccountCreateContract = 'AccountCreateContract',
     TransferContract = 'TransferContract',
@@ -86,7 +86,7 @@ export interface TransferContract {
 export interface TransferAssetContract {
     to_address: string;
     owner_address: string;
-    amount: string;
+    amount: number;
     asset_name: string;
 }
 
@@ -100,15 +100,10 @@ export interface ParticipateAssetIssueContract {
 export interface TriggerSmartContract {
     owner_address: string;
     contract_address: string;
-    parameter?: string;
-    function_selector?: string;
     call_value?: number;
     call_token_value?: number;
     token_id?: number;
     data?: string;
-
-    fee_limit?: number;
-    Permission_id?: number;
 }
 
 export interface FreezeBalanceContract {
@@ -245,55 +240,55 @@ export interface ProposalCreateContract {
 
 export interface ProposalDeleteContract {
     owner_address: string;
-    proposal_id: string;
+    proposal_id: number;
 }
 
 export interface VoteProposalContract {
     owner_address: string;
-    proposal_id: string;
-    is_add_approval: string;
+    proposal_id: number;
+    is_add_approval: boolean;
 }
 
 export interface ExchangeCreateContract {
     owner_address: string;
     first_token_id: string;
-    first_token_balance: string;
+    first_token_balance: number;
     second_token_id: string;
-    second_token_balance: string;
+    second_token_balance: number;
 }
 
 export interface ExchangeInjectContract {
     owner_address: string;
-    exchange_id: string;
+    exchange_id: number;
     token_id: string;
-    quant: string;
+    quant: number;
 }
 
 export interface ExchangeWithdrawContract {
     owner_address: string;
-    exchange_id: string;
+    exchange_id: number;
     token_id: string;
-    quant: string;
+    quant: number;
 }
 
 export interface ExchangeTransactionContract {
     owner_address: string;
-    exchange_id: string;
+    exchange_id: number;
     token_id: string;
-    quant: string;
-    expected: string;
+    quant: number;
+    expected: number;
 }
 
 export interface UpdateSettingContract {
     owner_address: string;
     contract_address: string;
-    consume_user_resource_percent: string;
+    consume_user_resource_percent: number;
 }
 
 export interface UpdateEnergyLimitContract {
     owner_address: string;
     contract_address: string;
-    origin_energy_limit: string;
+    origin_energy_limit: number;
 }
 
 export interface AccountPermissionUpdateContract {

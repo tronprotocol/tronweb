@@ -6,7 +6,8 @@ import {
     base64DecodeFromString,
     base64EncodeToString,
 } from './bytes.js';
-import type { BytesLike } from './bytes.js';
+
+import type { BytesLike } from '../types/UtilsTypes.js';
 
 export function bin2String(array: BytesLike) {
     return bytesToString(array);

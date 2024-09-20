@@ -93,14 +93,14 @@ function checkBlockHeader(options = {} as Partial<Transaction['raw_data']>): boo
     return true;
 }
 
-export async function createTransaction(
+export async function createTransaction<T extends ContractParamter>(
     tronWeb: TronWeb,
     type: ContractType,
-    value: ContractParamter,
+    value: T,
     Permission_id?: number,
     options = {} as Partial<Omit<Transaction['raw_data'], 'contract'>>
-): Promise<Transaction> {
-    const tx: Transaction = {
+): Promise<Transaction<T>> {
+    const tx: Transaction<T> = {
         visible: false,
         txID: '',
         raw_data_hex: '',
