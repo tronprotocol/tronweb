@@ -52,6 +52,7 @@ const { ExchangeCreateContract, ExchangeInjectContract, ExchangeWithdrawContract
     globalThis.TronWebProto;
 
 import { byteArray2hexStr } from './bytes.js';
+import { hexStr2byteArray } from './code.js';
 import { sha256, keccak256 } from './ethersUtils.js';
 import TronWeb from '../tronweb.js';
 import { isHex } from './validations.js';
@@ -988,4 +989,22 @@ const txPbToTxID = (transactionPb) => {
     return txID;
 };
 
-export { txJsonToPb, txPbToTxID, txPbToRawDataHex, txJsonToPbWithArgs, txCheckWithArgs, txCheck };
+const getValueFromRawDataHex = (rawDataHex: string): Uint8Array => {
+    const pb = Transaction.raw.deserializeBinary(hexStr2byteArray(rawDataHex));
+    return pb.getContractList()[0].getParameter().getValue();
+};
+
+const DTriggerSmartContract = (rawDataHex: string) => {
+    const value = getValueFromRawDataHex(rawDataHex);
+    const triggerSmartContract = TriggerSmartContract.deserializeBinary(value);
+    return {
+        owner_address: byteArray2hexStr(triggerSmartContract.getOwnerAddress_asU8()),
+        contract_address: byteArray2hexStr(triggerSmartContract.getContractAddress_asU8()),
+        call_value: triggerSmartContract.getCallValue(),
+        data: byteArray2hexStr(triggerSmartContract.getData_asU8()),
+        call_token_value: triggerSmartContract.getCallTokenValue(),
+        token_id: triggerSmartContract.getTokenId(),
+    };
+};
+
+export { txJsonToPb, txPbToTxID, txPbToRawDataHex, txJsonToPbWithArgs, txCheckWithArgs, txCheck, DTriggerSmartContract };
