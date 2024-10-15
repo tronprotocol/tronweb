@@ -989,15 +989,39 @@ const txPbToTxID = (transactionPb) => {
     return txID;
 };
 
-const getValueFromRawDataHex = (rawDataHex: string): Uint8Array => {
+
+
+const DCommonData = (rawDataHex: string) => {
     const pb = Transaction.raw.deserializeBinary(hexStr2byteArray(rawDataHex));
-    return pb.getContractList()[0].getParameter().getValue();
+    const contract = pb.getContractList()[0];
+    const valuePb = contract.getParameter().getValue();
+    return [
+        {
+            contract: [
+                {
+                    parameter: {
+                        value: {},
+                        type_url: contract.getParameter().getTypeUrl(),
+                    },
+                    type: contract.getType(),
+                    Permission_id: contract.getPermissionId(),
+                },
+            ],
+            data: pb.getData(),
+            fee_limit: pb.getFeeLimit(),
+            ref_block_bytes: byteArray2hexStr(pb.getRefBlockBytes_asU8()),
+            ref_block_hash: byteArray2hexStr(pb.getRefBlockHash_asU8()),
+            expiration: pb.getExpiration(),
+            timestamp: pb.getTimestamp(),
+        },
+        valuePb,
+    ];
 };
 
 const DTriggerSmartContract = (rawDataHex: string) => {
-    const value = getValueFromRawDataHex(rawDataHex);
-    const triggerSmartContract = TriggerSmartContract.deserializeBinary(value);
-    return {
+    const [commonData, valuePb] = DCommonData(rawDataHex);
+    const triggerSmartContract = TriggerSmartContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
         owner_address: byteArray2hexStr(triggerSmartContract.getOwnerAddress_asU8()),
         contract_address: byteArray2hexStr(triggerSmartContract.getContractAddress_asU8()),
         call_value: triggerSmartContract.getCallValue(),
@@ -1005,6 +1029,7 @@ const DTriggerSmartContract = (rawDataHex: string) => {
         call_token_value: triggerSmartContract.getCallTokenValue(),
         token_id: triggerSmartContract.getTokenId(),
     };
+    return commonData;
 };
 
 export { txJsonToPb, txPbToTxID, txPbToRawDataHex, txJsonToPbWithArgs, txCheckWithArgs, txCheck, DTriggerSmartContract };
