@@ -1007,7 +1007,7 @@ const DCommonData = (rawDataHex: string) => {
                     Permission_id: contract.getPermissionId(),
                 },
             ],
-            data: pb.getData(),
+            data: byteArray2hexStr(pb.getData()),
             fee_limit: pb.getFeeLimit(),
             ref_block_bytes: byteArray2hexStr(pb.getRefBlockBytes_asU8()),
             ref_block_hash: byteArray2hexStr(pb.getRefBlockHash_asU8()),
