@@ -118,7 +118,7 @@ First of all, in your typescript file, define TronWeb:
 import { TronWeb, utils as TronWebUtils, Trx, TransactionBuilder, Contract, Event, Plugin } from 'tronweb';
 ```
 
-Please note that this is not the same as v5.x. If you want to dive into more differences, check out [migration guide](https://tronweb.network/docu/docs/6.0.0/Migrating%20from%20v5)
+Please note that this is not the same as v5.x. If you want to dive into more differences, check out [migration guide](https://tronweb.network/docu/docs/Migrating%20from%20v5)
 
 When you instantiate TronWeb you can define
 
