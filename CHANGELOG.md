@@ -1,6 +1,9 @@
 Change Log
 =========
 
+__6.0.1__
+- Support deserialize TriggerSmartContract transaction by raw_data_hex.
+
 __6.0.0__
 - Fix [issue543](https://github.com/tronprotocol/tronweb/issues/543), replace type AxiosHeaders with InstanceType<typeof AxiosHeaders>.
 - Add type for value field in the return of the creation by TransactionBuilder methods.
