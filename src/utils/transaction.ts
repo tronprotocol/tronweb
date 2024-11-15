@@ -52,6 +52,7 @@ const { ExchangeCreateContract, ExchangeInjectContract, ExchangeWithdrawContract
     globalThis.TronWebProto;
 
 import { byteArray2hexStr } from './bytes.js';
+import { hexStr2byteArray } from './code.js';
 import { sha256, keccak256 } from './ethersUtils.js';
 import TronWeb from '../tronweb.js';
 import { isHex } from './validations.js';
@@ -988,4 +989,47 @@ const txPbToTxID = (transactionPb) => {
     return txID;
 };
 
-export { txJsonToPb, txPbToTxID, txPbToRawDataHex, txJsonToPbWithArgs, txCheckWithArgs, txCheck };
+
+
+const DCommonData = (rawDataHex: string) => {
+    const pb = Transaction.raw.deserializeBinary(hexStr2byteArray(rawDataHex));
+    const contract = pb.getContractList()[0];
+    const valuePb = contract.getParameter().getValue();
+    return [
+        {
+            contract: [
+                {
+                    parameter: {
+                        value: {},
+                        type_url: contract.getParameter().getTypeUrl(),
+                    },
+                    type: contract.getType(),
+                    Permission_id: contract.getPermissionId(),
+                },
+            ],
+            data: byteArray2hexStr(pb.getData()),
+            fee_limit: pb.getFeeLimit(),
+            ref_block_bytes: byteArray2hexStr(pb.getRefBlockBytes_asU8()),
+            ref_block_hash: byteArray2hexStr(pb.getRefBlockHash_asU8()),
+            expiration: pb.getExpiration(),
+            timestamp: pb.getTimestamp(),
+        },
+        valuePb,
+    ];
+};
+
+const DTriggerSmartContract = (rawDataHex: string) => {
+    const [commonData, valuePb] = DCommonData(rawDataHex);
+    const triggerSmartContract = TriggerSmartContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(triggerSmartContract.getOwnerAddress_asU8()),
+        contract_address: byteArray2hexStr(triggerSmartContract.getContractAddress_asU8()),
+        call_value: triggerSmartContract.getCallValue(),
+        data: byteArray2hexStr(triggerSmartContract.getData_asU8()),
+        call_token_value: triggerSmartContract.getCallTokenValue(),
+        token_id: triggerSmartContract.getTokenId(),
+    };
+    return commonData;
+};
+
+export { txJsonToPb, txPbToTxID, txPbToRawDataHex, txJsonToPbWithArgs, txCheckWithArgs, txCheck, DTriggerSmartContract };
