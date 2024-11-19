@@ -170,6 +170,20 @@ const tronWeb = new TronWeb({
 )
 ```
 
+## FAQ
+
+1. Cannot destructure property 'Transaction' of 'globalThis.TronWebProto' as it is undefined.
+
+This is a problem caused by webpack as it doesn't load cjs file correctly. To solve this problem, you need to add a new rule like below:
+```
+{
+      test: /\.cjs$/,
+      type: 'javascript/auto'
+}
+```
+
+For more questions, please refer to [TronWeb Doc](https://tronweb.network/docu/docs/Migrating%20from%20v5#faq).
+
 ## Integrity Check
 
 The package files will be signed using a GPG key pair, and the correctness of the signature will be verified using the following public key:
