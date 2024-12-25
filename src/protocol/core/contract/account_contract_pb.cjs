@@ -11,7 +11,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-var jspb = require('@tronweb3/google-protobuf');
+var jspb = require('google-protobuf');
 var goog = jspb;
 var global =
     (typeof globalThis !== 'undefined' && globalThis) ||

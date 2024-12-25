@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
-import google_protobuf_any_pb from '@tronweb3/google-protobuf/google/protobuf/any_pb.js';
+import google_protobuf_any_pb from 'google-protobuf/google/protobuf/any_pb.js';
 
 import '../protocol/core/Tron_pb.cjs';
 const { Transaction, Permission, Key } = globalThis.TronWebProto;
