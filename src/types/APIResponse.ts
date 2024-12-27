@@ -1,5 +1,5 @@
 import { Permission } from './Contract.js';
-import { Transaction, TransactionWrapper } from './Transaction.js';
+import { SignedTransaction, TransactionWrapper } from './Transaction.js';
 
 export interface BlockHeaderRawData {
     number: number;
@@ -21,7 +21,7 @@ export interface BlockWithoutDetail {
 export interface Block {
     blockID: string;
     /** If a block has 0 transaction, this prop will be undefined */
-    transactions?: Transaction[];
+    transactions?: SignedTransaction[];
     block_header: BlockHeader;
 }
 

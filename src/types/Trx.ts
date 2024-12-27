@@ -181,6 +181,7 @@ enum BroadcastReturn_response_code {
 
 export interface BroadcastReturn<T extends SignedTransaction> {
     result: boolean;
+    txid: string;
     code: BroadcastReturn_response_code;
     message: string;
     transaction: T;
