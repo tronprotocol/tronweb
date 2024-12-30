@@ -145,7 +145,7 @@ export class Trx {
     async getTransactionFromBlock(
         block: 'earliest' | 'latest' | number | string | false = this.tronWeb.defaultBlock,
         index: number
-    ): Promise<Transaction> {
+    ): Promise<SignedTransaction> {
         const { transactions } = await this.getBlock(block);
         if (!transactions) {
             throw new Error('Transaction not found in block');
@@ -156,7 +156,7 @@ export class Trx {
 
     async getTransactionsFromBlock(
         block: 'earliest' | 'latest' | number | string | false = this.tronWeb.defaultBlock
-    ): Promise<Transaction[]> {
+    ): Promise<SignedTransaction[]> {
         const { transactions } = await this.getBlock(block);
         if (!transactions) {
             throw new Error('Transaction not found in block');
@@ -164,8 +164,8 @@ export class Trx {
         return transactions;
     }
 
-    async getTransaction(transactionID: string): Promise<Transaction> {
-        const transaction = await this.tronWeb.fullNode.request<Transaction>(
+    async getTransaction(transactionID: string): Promise<SignedTransaction> {
+        const transaction = await this.tronWeb.fullNode.request<SignedTransaction>(
             'wallet/gettransactionbyid',
             {
                 value: transactionID,
@@ -178,8 +178,8 @@ export class Trx {
         return transaction;
     }
 
-    async getConfirmedTransaction(transactionID: string): Promise<Transaction> {
-        const transaction = await this.tronWeb.solidityNode.request<Transaction>(
+    async getConfirmedTransaction(transactionID: string): Promise<SignedTransaction> {
+        const transaction = await this.tronWeb.solidityNode.request<SignedTransaction>(
             'walletsolidity/gettransactionbyid',
             {
                 value: transactionID,
@@ -200,11 +200,11 @@ export class Trx {
         return this.tronWeb.solidityNode.request('walletsolidity/gettransactioninfobyid', { value: transactionID }, 'post');
     }
 
-    getTransactionsToAddress(address = this.tronWeb.defaultAddress.hex, limit = 30, offset = 0): Promise<Transaction[]> {
+    getTransactionsToAddress(address = this.tronWeb.defaultAddress.hex, limit = 30, offset = 0): Promise<SignedTransaction[]> {
         return this.getTransactionsRelated(this.tronWeb.address.toHex(address as string), 'to', limit, offset);
     }
 
-    getTransactionsFromAddress(address = this.tronWeb.defaultAddress.hex, limit = 30, offset = 0): Promise<Transaction[]> {
+    getTransactionsFromAddress(address = this.tronWeb.defaultAddress.hex, limit = 30, offset = 0): Promise<SignedTransaction[]> {
         return this.getTransactionsRelated(this.tronWeb.address.toHex(address as string), 'from', limit, offset);
     }
 
@@ -213,7 +213,7 @@ export class Trx {
         direction = 'all',
         limit = 30,
         offset = 0
-    ): Promise<Transaction[]> {
+    ): Promise<SignedTransaction[]> {
         if (!['to', 'from', 'all'].includes(direction)) {
             throw new Error('Invalid direction provided: Expected "to", "from" or "all"');
         }
@@ -247,7 +247,7 @@ export class Trx {
         address = this.tronWeb.address.toHex(address as string);
 
         return this.tronWeb.solidityNode
-            .request<{ transaction: Transaction[] }>(
+            .request<{ transaction: SignedTransaction[] }>(
                 `walletextension/gettransactions${direction}this`,
                 {
                     account: {
