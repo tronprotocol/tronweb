@@ -18,10 +18,19 @@ export interface BlockWithoutDetail {
     block_header: BlockHeader;
 }
 
+export interface GetTransactionResponse extends Omit<SignedTransaction, 'visible'> {
+    visible?: boolean;
+    ret: [
+        {
+            contractRet: string;
+        }
+    ];
+}
+
 export interface Block {
     blockID: string;
     /** If a block has 0 transaction, this prop will be undefined */
-    transactions?: SignedTransaction[];
+    transactions?: GetTransactionResponse[];
     block_header: BlockHeader;
 }
 
