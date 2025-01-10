@@ -1,6 +1,9 @@
 import { Permission } from './Contract.js';
 import { SignedTransaction, TransactionWrapper } from './Transaction.js';
 
+export interface APIReturnedPermission extends Omit<Permission, 'type'> {
+    type: string;
+}
 export interface BlockHeaderRawData {
     number: number;
     txTrieRoot: string;
@@ -35,7 +38,7 @@ export interface Block {
 }
 
 export interface GetSignWeightResponse {
-    permission: Permission;
+    permission: APIReturnedPermission;
     result: {
         code: string;
     };

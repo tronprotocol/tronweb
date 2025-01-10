@@ -1,6 +1,7 @@
-import { AccountType, Permission } from './Contract.js';
+import { AccountType } from './Contract.js';
 import { SignedTransaction, Transaction } from './Transaction.js';
 import { Resource } from './TransactionBuilder.js';
+import { APIReturnedPermission } from './APIResponse.js';
 
 type HTTPMap<T extends string | number | symbol, U> = Record<T, U>[];
 
@@ -109,9 +110,9 @@ export interface Account {
     net_window_optimized: number;
     account_resource: AccountResource;
     codeHash: string;
-    owner_permission: Permission;
-    witness_permission: Permission;
-    active_permission: Permission[];
+    owner_permission: APIReturnedPermission;
+    witness_permission: APIReturnedPermission;
+    active_permission: APIReturnedPermission[];
     frozenV2: FreezeV2[];
     unfrozenV2: UnFreezeV2[];
     delegated_frozenV2_balance_for_bandwidth: number;
@@ -156,7 +157,7 @@ interface TransactionSignWeightResult {
 }
 
 export interface TransactionSignWeight {
-    permission: Permission;
+    permission: APIReturnedPermission;
     approved_list: string[];
     current_weight: number;
     result: TransactionSignWeightResult;
