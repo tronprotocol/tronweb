@@ -2,7 +2,7 @@ import { Permission } from './Contract.js';
 import { SignedTransaction, TransactionWrapper } from './Transaction.js';
 
 export interface APIReturnedPermission extends Omit<Permission, 'type'> {
-    type: string;
+    type?: string;
 }
 export interface BlockHeaderRawData {
     number: number;
