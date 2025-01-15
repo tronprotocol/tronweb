@@ -107,7 +107,7 @@ export interface Account {
     latest_consume_free_time: number;
     account_id: string;
     net_window_size: number;
-    net_window_optimized: number;
+    net_window_optimized: boolean;
     account_resource: AccountResource;
     codeHash: string;
     owner_permission: APIReturnedPermission;
