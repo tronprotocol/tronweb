@@ -11,7 +11,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-var jspb = require('@tronweb3/google-protobuf');
+var jspb = require('google-protobuf');
 var goog = jspb;
 var global =
   (typeof globalThis !== 'undefined' && globalThis) ||
@@ -21,7 +21,7 @@ var global =
   (function () { return this; }).call(null) ||
   Function('return this')();
 
-var google_protobuf_any_pb = require('@tronweb3/google-protobuf/google/protobuf/any_pb.js');
+var google_protobuf_any_pb = require('google-protobuf/google/protobuf/any_pb.js');
 goog.object.extend(proto, google_protobuf_any_pb);
 goog.exportSymbol('TronWebProto.Account', null, global);
 goog.exportSymbol('TronWebProto.Account.AccountResource', null, global);
