@@ -4,7 +4,7 @@ Change Log
 __6.0.1__
 - Support deserialize TriggerSmartContract transaction by raw_data_hex.
 - Replace `@tronweb3/google-protobuf` with `google-protobuf`.
-- Fix transaction return type in `Block` and some get transaction api.
+- Fix some type errors and API return type compatibility issues.
 
 __6.0.0__
 - Fix [issue543](https://github.com/tronprotocol/tronweb/issues/543), replace type AxiosHeaders with InstanceType<typeof AxiosHeaders>.
