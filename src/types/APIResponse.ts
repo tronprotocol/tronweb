@@ -1,6 +1,9 @@
 import { Permission } from './Contract.js';
-import { Transaction, TransactionWrapper } from './Transaction.js';
+import { SignedTransaction, TransactionWrapper } from './Transaction.js';
 
+export interface APIReturnedPermission extends Omit<Permission, 'type'> {
+    type?: string;
+}
 export interface BlockHeaderRawData {
     number: number;
     txTrieRoot: string;
@@ -18,15 +21,24 @@ export interface BlockWithoutDetail {
     block_header: BlockHeader;
 }
 
+export interface GetTransactionResponse extends Omit<SignedTransaction, 'visible'> {
+    visible?: boolean;
+    ret: [
+        {
+            contractRet: string;
+        }
+    ];
+}
+
 export interface Block {
     blockID: string;
     /** If a block has 0 transaction, this prop will be undefined */
-    transactions?: Transaction[];
+    transactions?: GetTransactionResponse[];
     block_header: BlockHeader;
 }
 
 export interface GetSignWeightResponse {
-    permission: Permission;
+    permission: APIReturnedPermission;
     result: {
         code: string;
     };
