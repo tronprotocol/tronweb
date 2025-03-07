@@ -1035,9 +1035,9 @@ const DTriggerSmartContract = (rawDataHex: string) => {
 
 const getResourceName = (type) => {
     switch (type) {
-        case 0x01:
+        case 0:
             return 'BANDWIDTH';
-        case 0x02:
+        case 1:
             return 'ENERGY';
         default:
             return 'BANDWIDTH';
@@ -1047,9 +1047,11 @@ const getResourceName = (type) => {
 const DFreezeBalanceV2Contract = (rawDataHex: string) => {
     const [commonData, valuePb] = DCommonData(rawDataHex);
     const freezeBalanceV2Contract = FreezeBalanceV2Contract.deserializeBinary(valuePb);
+    console.log(freezeBalanceV2Contract.getResource());
     commonData.contract[0].parameter.value = {
         owner_address: byteArray2hexStr(freezeBalanceV2Contract.getOwnerAddress_asU8()),
         frozen_balance: freezeBalanceV2Contract.getFrozenBalance(),
+        resource: getResourceName(freezeBalanceV2Contract.getResource()),
     };
     
     return commonData;
