@@ -818,7 +818,7 @@ export class TransactionBuilder {
             call_value: parseInt(callValue),
             consume_user_resource_percent: userFeePercentage,
             origin_energy_limit: originEnergyLimit,
-            abi: JSON.stringify(abi),
+            abi: JSON.stringify(entries),
             bytecode,
             parameter,
             name,

@@ -13,6 +13,7 @@ const {
     WithdrawBalanceContract,
     FreezeBalanceV2Contract,
     UnfreezeBalanceV2Contract,
+    CancelAllUnfreezeV2Contract,
     WithdrawExpireUnfreezeContract,
     DelegateResourceContract,
     UnDelegateResourceContract,
@@ -255,12 +256,12 @@ const buildFreezeBalanceV2Contract = (value, options) => {
 };
 
 const buildCancelFreezeBalanceV2Contract = (value, options) => {
-    const withdrawExpireUnfreeze = new WithdrawExpireUnfreezeContract();
+    const cancelAllUnfreezeV2Contract = new CancelAllUnfreezeV2Contract();
     const { owner_address } = value;
-    withdrawExpireUnfreeze.setOwnerAddress(fromHexString(owner_address));
+    cancelAllUnfreezeV2Contract.setOwnerAddress(fromHexString(owner_address));
 
     return buildCommonTransaction(
-        withdrawExpireUnfreeze,
+        cancelAllUnfreezeV2Contract,
         Transaction.Contract.ContractType.CANCELALLUNFREEZEV2CONTRACT,
         'CancelAllUnfreezeV2Contract',
         options.Permission_id
@@ -1032,4 +1033,83 @@ const DTriggerSmartContract = (rawDataHex: string) => {
     return commonData;
 };
 
-export { txJsonToPb, txPbToTxID, txPbToRawDataHex, txJsonToPbWithArgs, txCheckWithArgs, txCheck, DTriggerSmartContract };
+const getResourceName = (type) => {
+    switch (type) {
+        case 0x01:
+            return 'BANDWIDTH';
+        case 0x02:
+            return 'ENERGY';
+        default:
+            return 'BANDWIDTH';
+    }
+};
+
+const DFreezeBalanceV2Contract = (rawDataHex: string) => {
+    const [commonData, valuePb] = DCommonData(rawDataHex);
+    const freezeBalanceV2Contract = FreezeBalanceV2Contract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(freezeBalanceV2Contract.getOwnerAddress_asU8()),
+        frozen_balance: freezeBalanceV2Contract.getFrozenBalance(),
+    };
+    
+    return commonData;
+};
+
+const DUnfreezeBalanceV2Contract = (rawDataHex: string) => {
+    const [commonData, valuePb] = DCommonData(rawDataHex);
+    const unfreezeBalanceV2Contract = UnfreezeBalanceV2Contract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(unfreezeBalanceV2Contract.getOwnerAddress_asU8()),
+        frozen_balance: unfreezeBalanceV2Contract.getUnfreezeBalance(),
+        resource: getResourceName(unfreezeBalanceV2Contract.getResource()),
+    };
+    return commonData;
+};
+
+const DCancelAllUnfreezeV2Contract = (rawDataHex: string) => {
+    const [commonData, valuePb] = DCommonData(rawDataHex);
+    const cancelAllUnfreezeV2Contract = CancelAllUnfreezeV2Contract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(cancelAllUnfreezeV2Contract.getOwnerAddress_asU8()),
+    };
+    return commonData;
+};
+
+const DDelegateResourceContract = (rawDataHex: string) => {
+    const [commonData, valuePb] = DCommonData(rawDataHex);
+    const delegateResourceContract = DelegateResourceContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(delegateResourceContract.getOwnerAddress_asU8()),
+        balance: delegateResourceContract.getBalance(),
+        lock: delegateResourceContract.getLock(),
+        lock_period: delegateResourceContract.getLockPeriod(),
+        receiver_address: byteArray2hexStr(delegateResourceContract.getReceiverAddress_asU8()),
+        resource: getResourceName(delegateResourceContract.getResource())
+    };
+    return commonData;
+};
+
+const DUnDelegateResourceContract = (rawDataHex: string) => {
+    const [commonData, valuePb] = DCommonData(rawDataHex);
+    const undelegateResourceContract = UnDelegateResourceContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(undelegateResourceContract.getOwnerAddress_asU8()),
+        balance: undelegateResourceContract.getBalance(),
+        receiver_address: byteArray2hexStr(undelegateResourceContract.getReceiverAddress_asU8()),
+        resource: getResourceName(undelegateResourceContract.getResource()),
+    };
+    return commonData;
+};
+
+const DWithdrawExpireUnfreezeContract = (rawDataHex: string) => {
+    const [commonData, valuePb] = DCommonData(rawDataHex);
+    const withdrawExpireUnfreezeContract = WithdrawExpireUnfreezeContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(withdrawExpireUnfreezeContract.getOwnerAddress_asU8()),
+    };
+    return commonData;
+};
+
+export { txJsonToPb, txPbToTxID, txPbToRawDataHex, txJsonToPbWithArgs, txCheckWithArgs, txCheck,
+    DTriggerSmartContract, DFreezeBalanceV2Contract, DUnfreezeBalanceV2Contract, DCancelAllUnfreezeV2Contract,
+    DDelegateResourceContract, DUnDelegateResourceContract, DWithdrawExpireUnfreezeContract };
