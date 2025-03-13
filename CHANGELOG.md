@@ -1,6 +1,10 @@
 Change Log
 =========
 
+__6.0.2__
+- Bump axios from 1.7.4 to 1.8.3.
+- Fix npm audit problems.
+
 __6.0.1__
 - Support deserialize TriggerSmartContract transaction by raw_data_hex.
 - Replace `@tronweb3/google-protobuf` with `google-protobuf`.
