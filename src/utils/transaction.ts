@@ -1047,7 +1047,6 @@ const getResourceName = (type) => {
 const DFreezeBalanceV2Contract = (rawDataHex: string) => {
     const [commonData, valuePb] = DCommonData(rawDataHex);
     const freezeBalanceV2Contract = FreezeBalanceV2Contract.deserializeBinary(valuePb);
-    console.log(freezeBalanceV2Contract.getResource());
     commonData.contract[0].parameter.value = {
         owner_address: byteArray2hexStr(freezeBalanceV2Contract.getOwnerAddress_asU8()),
         frozen_balance: freezeBalanceV2Contract.getFrozenBalance(),
