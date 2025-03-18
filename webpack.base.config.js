@@ -16,7 +16,7 @@ const baseConfig = {
     resolve: {
         extensions: ['.ts', '.js', '.cjs'],
         extensionAlias: {
-            '.js': ['.ts', '.js', 'cjs'],
+            '.js': ['.ts', '.js', '.cjs'],
         },
         modules: ['node_modules', path.resolve(__dirname, 'src')],
         fallback: {

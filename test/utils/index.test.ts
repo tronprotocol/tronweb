@@ -55,7 +55,7 @@ describe('TronWeb.utils', function () {
         it('should verify that a value is a JSON string', function () {
             const tronWeb = tronWebBuilder.createInstance();
 
-            const bigNumber = BigNumber('1234565432123456778765434456777');
+            const bigNumber = new BigNumber('1234565432123456778765434456777');
 
             assert.isTrue(tronWeb.utils.isBigNumber(bigNumber));
 
