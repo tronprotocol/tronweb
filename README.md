@@ -183,6 +183,9 @@ Contact the team at https://cn.developers.tron.network/docs/online-technical-sup
 
 ## Recent History
 
+__5.3.3__
+- Update dependencies to address audit problems.
+
 __5.3.2__
 - Support build transactions locally with block header argument.
 - Support [Tip586](https://github.com/tronprotocol/tips/blob/master/tip-586.md) by `trx.getBandwidthPrices` and `trx.getEnergyPrices`.

@@ -1,6 +1,6 @@
 {
     "name": "tronweb",
-    "version": "5.3.2",
+    "version": "5.3.3",
     "description": "JavaScript SDK that encapsulates the TRON HTTP API",
     "main": "dist/TronWeb.node.js",
     "keywords": [
@@ -30,7 +30,7 @@
         "@babel/runtime": "^7.0.0",
         "@ethersproject/abi": "^5.7.0",
         "@tronweb3/google-protobuf": "^3.21.2",
-        "axios": "^1.6.2",
+        "axios": "^1.8.4",
         "bignumber.js": "^9.0.1",
         "ethereum-cryptography": "^2.0.0",
         "ethers": "^6.6.0",
@@ -67,9 +67,8 @@
         "karma-sourcemap-loader": "^0.3.7",
         "karma-spec-reporter": "^0.0.32",
         "karma-webpack": "^5.0.0",
-        "matchdep": "^2.0.0",
         "mocha": "^10.2.0",
-        "puppeteer": "^13.5.1",
+        "puppeteer": "^24.4.0",
         "rimraf": "^3.0.2",
         "source-map-support": "^0.5.19",
         "webpack": "^5.75.0",
