@@ -59,7 +59,7 @@
     "dependencies": {
         "@babel/runtime": "7.26.10",
         "axios": "1.8.3",
-        "bignumber.js": "9.0.1",
+        "bignumber.js": "9.1.2",
         "ethereum-cryptography": "2.2.1",
         "ethers": "6.13.5",
         "eventemitter3": "5.0.1",
