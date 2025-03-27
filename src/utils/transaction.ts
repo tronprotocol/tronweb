@@ -1146,6 +1146,26 @@ const DWithdrawExpireUnfreezeContract = (rawDataHex: string) => {
     return commonData;
 };
 
+const DeserializeTransaction = (type: string, rawDataHex: string) => {
+    switch (type) {
+        case 'TriggerSmartContract':
+            return DTriggerSmartContract(rawDataHex);
+        case 'FreezeBalanceV2Contract':
+            return DFreezeBalanceV2Contract(rawDataHex);
+        case 'UnfreezeBalanceV2Contract':
+            return DUnfreezeBalanceV2Contract(rawDataHex);
+        case 'CancelAllUnfreezeV2Contract':
+            return DCancelAllUnfreezeV2Contract(rawDataHex);
+        case 'DelegateResourceContract':
+            return DDelegateResourceContract(rawDataHex);
+        case 'UnDelegateResourceContract':
+            return DUnDelegateResourceContract(rawDataHex);
+        case 'WithdrawExpireUnfreezeContract':
+            return DWithdrawExpireUnfreezeContract(rawDataHex);
+        default:
+            throw new Error(`trasaction ${type} not supported`);
+    }
+}
+
 export { txJsonToPb, txPbToTxID, txPbToRawDataHex, txJsonToPbWithArgs, txCheckWithArgs, txCheck,
-    DTriggerSmartContract, DFreezeBalanceV2Contract, DUnfreezeBalanceV2Contract, DCancelAllUnfreezeV2Contract,
-    DDelegateResourceContract, DUnDelegateResourceContract, DWithdrawExpireUnfreezeContract, ContractTypeMap };
+    DTriggerSmartContract, DeserializeTransaction };
