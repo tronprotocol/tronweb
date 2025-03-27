@@ -991,6 +991,41 @@ const txPbToTxID = (transactionPb) => {
 };
 
 
+const ContractTypeMap = {
+    '0': 'AccountCreateContract',
+    '1': 'TransferContract',
+    '2': 'TransferAssetContract',
+    '4': 'VoteWitnessContract',
+    '5': 'WitnessCreateContract',
+    '6': 'AssetIssueContract',
+    '9': 'ParticipateAssetIssueContract',
+    '10': 'AccountUpdateContract',
+    '11': 'FreezeBalanceContract',
+    '12': 'UnfreezeBalanceContract',
+    '13': 'WithdrawBalanceContract',
+    '15': 'UpdateAssetContract',
+    '16': 'ProposalCreateContract',
+    '17': 'ProposalApproveContract',
+    '18': 'ProposalDeleteContract',
+    '19': 'SetAccountIdContract',
+    '30': 'CreateSmartContract',
+    '31': 'TriggerSmartContract',
+    '33': 'UpdateSettingContract',
+    '41': 'ExchangeCreateContract',
+    '42': 'ExchangeInjectContract',
+    '43': 'ExchangeWithdrawContract',
+    '44': 'ExchangeTransactionContract',
+    '45': 'UpdateEnergyLimitContract',
+    '46': 'AccountPermissionUpdateContract',
+    '48': 'ClearABIContract',
+    '49': 'UpdateBrokerageContract',
+    '54': 'FreezeBalanceV2Contract',
+    '55': 'UnfreezeBalanceV2Contract',
+    '56': 'WithdrawExpireUnfreezeContract',
+    '57': 'DelegateResourceContract',
+    '58': 'UnDelegateResourceContract',
+    '59': 'CancelAllUnfreezeV2Contract',
+};
 
 const DCommonData = (rawDataHex: string) => {
     const pb = Transaction.raw.deserializeBinary(hexStr2byteArray(rawDataHex));
@@ -1004,7 +1039,7 @@ const DCommonData = (rawDataHex: string) => {
                         value: {},
                         type_url: contract.getParameter().getTypeUrl(),
                     },
-                    type: contract.getType(),
+                    type: ContractTypeMap[contract.getType()],
                     Permission_id: contract.getPermissionId(),
                 },
             ],
@@ -1113,4 +1148,4 @@ const DWithdrawExpireUnfreezeContract = (rawDataHex: string) => {
 
 export { txJsonToPb, txPbToTxID, txPbToRawDataHex, txJsonToPbWithArgs, txCheckWithArgs, txCheck,
     DTriggerSmartContract, DFreezeBalanceV2Contract, DUnfreezeBalanceV2Contract, DCancelAllUnfreezeV2Contract,
-    DDelegateResourceContract, DUnDelegateResourceContract, DWithdrawExpireUnfreezeContract };
+    DDelegateResourceContract, DUnDelegateResourceContract, DWithdrawExpireUnfreezeContract, ContractTypeMap };

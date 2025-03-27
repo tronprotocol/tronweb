@@ -1,8 +1,6 @@
 import { assert } from 'chai';
 import { TronWeb, utils, TransactionBuilder } from '../setup/TronWeb.js';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
-// @ts-ignore
-import { decodeRlp } from 'ethers/utils';
 
 describe('#TronWeb.utils.transaction', function() {
     let tronWeb: TronWeb;
@@ -97,9 +95,7 @@ describe('#TronWeb.utils.transaction', function() {
 
             assert.equal(dResult.contract[0].Permission_id, 0);
             assert.equal(dResult.contract[0].parameter.type_url, tx.raw_data.contract[0].parameter.type_url);
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            assert.equal(dResult.contract[0].type, TronWebProto.Transaction.Contract.ContractType.TRIGGERSMARTCONTRACT);
+            assert.equal(dResult.contract[0].type, 'TriggerSmartContract');
             assert.equal(dResult.expiration, tx.raw_data.expiration);
             assert.equal(dResult.timestamp, tx.raw_data.timestamp);
             assert.equal(dResult.ref_block_bytes.toLowerCase(), tx.raw_data.ref_block_bytes);
