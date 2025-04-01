@@ -140,7 +140,7 @@ describe.only('#TronWeb.utils.transaction', function() {
             const value = dResult.contract[0].parameter.value;
 
             assert.equal(value.owner_address, account.address.hex);
-            assert.equal(value.frozen_balance, unfreezeBalance);
+            assert.equal(value.unfreeze_balance, unfreezeBalance);
             assert.equal(value.resource, 'ENERGY');
         });
     });

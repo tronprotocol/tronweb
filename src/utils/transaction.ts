@@ -1096,7 +1096,7 @@ const DUnfreezeBalanceV2Contract = (rawDataHex: string) => {
     const unfreezeBalanceV2Contract = UnfreezeBalanceV2Contract.deserializeBinary(valuePb);
     commonData.contract[0].parameter.value = {
         owner_address: byteArray2hexStr(unfreezeBalanceV2Contract.getOwnerAddress_asU8()),
-        frozen_balance: unfreezeBalanceV2Contract.getUnfreezeBalance(),
+        unfreeze_balance: unfreezeBalanceV2Contract.getUnfreezeBalance(),
         resource: getResourceName(unfreezeBalanceV2Contract.getResource()),
     };
     return commonData;
