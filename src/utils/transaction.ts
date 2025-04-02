@@ -1027,10 +1027,14 @@ const ContractTypeMap = {
     '59': 'CancelAllUnfreezeV2Contract',
 };
 
-const DCommonData = (rawDataHex: string) => {
+const DCommonData = (type: string, rawDataHex: string) => {
     const pb = Transaction.raw.deserializeBinary(hexStr2byteArray(rawDataHex));
     const contract = pb.getContractList()[0];
     const valuePb = contract.getParameter().getValue();
+    const contractType = ContractTypeMap[contract.getType()];
+    if (type !== contractType) {
+        throw new Error(`type ${type} dismatches with rawDataHex type ${contractType}`);
+    }
     return [
         {
             contract: [
@@ -1039,7 +1043,7 @@ const DCommonData = (rawDataHex: string) => {
                         value: {},
                         type_url: contract.getParameter().getTypeUrl(),
                     },
-                    type: ContractTypeMap[contract.getType()],
+                    type,
                     Permission_id: contract.getPermissionId(),
                 },
             ],
@@ -1049,13 +1053,14 @@ const DCommonData = (rawDataHex: string) => {
             ref_block_hash: byteArray2hexStr(pb.getRefBlockHash_asU8()),
             expiration: pb.getExpiration(),
             timestamp: pb.getTimestamp(),
+            scripts: byteArray2hexStr(pb.getScripts_asU8()),
         },
         valuePb,
     ];
 };
 
-const DTriggerSmartContract = (rawDataHex: string) => {
-    const [commonData, valuePb] = DCommonData(rawDataHex);
+const DTriggerSmartContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
     const triggerSmartContract = TriggerSmartContract.deserializeBinary(valuePb);
     commonData.contract[0].parameter.value = {
         owner_address: byteArray2hexStr(triggerSmartContract.getOwnerAddress_asU8()),
@@ -1079,8 +1084,8 @@ const getResourceName = (type) => {
     }
 };
 
-const DFreezeBalanceV2Contract = (rawDataHex: string) => {
-    const [commonData, valuePb] = DCommonData(rawDataHex);
+const DFreezeBalanceV2Contract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
     const freezeBalanceV2Contract = FreezeBalanceV2Contract.deserializeBinary(valuePb);
     commonData.contract[0].parameter.value = {
         owner_address: byteArray2hexStr(freezeBalanceV2Contract.getOwnerAddress_asU8()),
@@ -1091,8 +1096,8 @@ const DFreezeBalanceV2Contract = (rawDataHex: string) => {
     return commonData;
 };
 
-const DUnfreezeBalanceV2Contract = (rawDataHex: string) => {
-    const [commonData, valuePb] = DCommonData(rawDataHex);
+const DUnfreezeBalanceV2Contract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
     const unfreezeBalanceV2Contract = UnfreezeBalanceV2Contract.deserializeBinary(valuePb);
     commonData.contract[0].parameter.value = {
         owner_address: byteArray2hexStr(unfreezeBalanceV2Contract.getOwnerAddress_asU8()),
@@ -1102,8 +1107,8 @@ const DUnfreezeBalanceV2Contract = (rawDataHex: string) => {
     return commonData;
 };
 
-const DCancelAllUnfreezeV2Contract = (rawDataHex: string) => {
-    const [commonData, valuePb] = DCommonData(rawDataHex);
+const DCancelAllUnfreezeV2Contract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
     const cancelAllUnfreezeV2Contract = CancelAllUnfreezeV2Contract.deserializeBinary(valuePb);
     commonData.contract[0].parameter.value = {
         owner_address: byteArray2hexStr(cancelAllUnfreezeV2Contract.getOwnerAddress_asU8()),
@@ -1111,8 +1116,8 @@ const DCancelAllUnfreezeV2Contract = (rawDataHex: string) => {
     return commonData;
 };
 
-const DDelegateResourceContract = (rawDataHex: string) => {
-    const [commonData, valuePb] = DCommonData(rawDataHex);
+const DDelegateResourceContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
     const delegateResourceContract = DelegateResourceContract.deserializeBinary(valuePb);
     commonData.contract[0].parameter.value = {
         owner_address: byteArray2hexStr(delegateResourceContract.getOwnerAddress_asU8()),
@@ -1125,8 +1130,8 @@ const DDelegateResourceContract = (rawDataHex: string) => {
     return commonData;
 };
 
-const DUnDelegateResourceContract = (rawDataHex: string) => {
-    const [commonData, valuePb] = DCommonData(rawDataHex);
+const DUnDelegateResourceContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
     const undelegateResourceContract = UnDelegateResourceContract.deserializeBinary(valuePb);
     commonData.contract[0].parameter.value = {
         owner_address: byteArray2hexStr(undelegateResourceContract.getOwnerAddress_asU8()),
@@ -1137,8 +1142,8 @@ const DUnDelegateResourceContract = (rawDataHex: string) => {
     return commonData;
 };
 
-const DWithdrawExpireUnfreezeContract = (rawDataHex: string) => {
-    const [commonData, valuePb] = DCommonData(rawDataHex);
+const DWithdrawExpireUnfreezeContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
     const withdrawExpireUnfreezeContract = WithdrawExpireUnfreezeContract.deserializeBinary(valuePb);
     commonData.contract[0].parameter.value = {
         owner_address: byteArray2hexStr(withdrawExpireUnfreezeContract.getOwnerAddress_asU8()),
@@ -1147,25 +1152,31 @@ const DWithdrawExpireUnfreezeContract = (rawDataHex: string) => {
 };
 
 const DeserializeTransaction = (type: string, rawDataHex: string) => {
+    if (!rawDataHex) {
+        throw new Error('rawDataHex cannot be empty');
+    }
+    if (!isHex(rawDataHex)) {
+        throw new Error('rawDataHex is not a valid hex string');
+    }
     switch (type) {
         case 'TriggerSmartContract':
-            return DTriggerSmartContract(rawDataHex);
+            return DTriggerSmartContract(type, rawDataHex);
         case 'FreezeBalanceV2Contract':
-            return DFreezeBalanceV2Contract(rawDataHex);
+            return DFreezeBalanceV2Contract(type, rawDataHex);
         case 'UnfreezeBalanceV2Contract':
-            return DUnfreezeBalanceV2Contract(rawDataHex);
+            return DUnfreezeBalanceV2Contract(type, rawDataHex);
         case 'CancelAllUnfreezeV2Contract':
-            return DCancelAllUnfreezeV2Contract(rawDataHex);
+            return DCancelAllUnfreezeV2Contract(type, rawDataHex);
         case 'DelegateResourceContract':
-            return DDelegateResourceContract(rawDataHex);
+            return DDelegateResourceContract(type, rawDataHex);
         case 'UnDelegateResourceContract':
-            return DUnDelegateResourceContract(rawDataHex);
+            return DUnDelegateResourceContract(type, rawDataHex);
         case 'WithdrawExpireUnfreezeContract':
-            return DWithdrawExpireUnfreezeContract(rawDataHex);
+            return DWithdrawExpireUnfreezeContract(type, rawDataHex);
         default:
             throw new Error(`trasaction ${type} not supported`);
     }
 }
 
 export { txJsonToPb, txPbToTxID, txPbToRawDataHex, txJsonToPbWithArgs, txCheckWithArgs, txCheck,
-    DTriggerSmartContract, DeserializeTransaction };
+    DeserializeTransaction };

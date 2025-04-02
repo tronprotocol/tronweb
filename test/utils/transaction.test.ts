@@ -31,7 +31,7 @@ describe.only('#TronWeb.utils.transaction', function() {
             )).transaction;
         });
         it('should deserialize the right result', async () => {
-            const dResult = utils.transaction.DTriggerSmartContract(tx.raw_data_hex);
+            const dResult = utils.transaction.DeserializeTransaction('TriggerSmartContract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
             assert.equal(value.owner_address, account.address.hex);
             assert.equal(value.contract_address, utils.address.toHex(contractAddress).toUpperCase());
@@ -136,7 +136,7 @@ describe.only('#TronWeb.utils.transaction', function() {
         });
 
         it('should deserialize the right result', async () => {
-            const dResult = utils.transaction.DeserializeTransaction('FreezeBalanceV2Contract', tx.raw_data_hex);
+            const dResult = utils.transaction.DeserializeTransaction('UnfreezeBalanceV2Contract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
 
             assert.equal(value.owner_address, account.address.hex);
