@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import { TronWeb, utils, TransactionBuilder } from '../setup/TronWeb.js';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
 
-describe.only('#TronWeb.utils.transaction', function() {
+describe('#TronWeb.utils.transaction', function() {
     let tronWeb: TronWeb;
 
     describe('DTriggerSmartContract', async () => {
