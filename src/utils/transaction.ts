@@ -1027,6 +1027,22 @@ const ContractTypeMap = {
     '59': 'CancelAllUnfreezeV2Contract',
 };
 
+const getAuthsList = (pb) => {
+    const authsList = pb.getAuthsList();
+    return authsList.map((authPb) => {
+        const permission_name = byteArray2hexStr(authPb.getPermissionName_asU8());
+        const accountPb = authPb.getAccount();
+        const account = {
+            name: byteArray2hexStr(accountPb.getName_asU8()),
+            address: byteArray2hexStr(accountPb.getAddress_asU8()),
+        };
+        return {
+            permission_name,
+            account,
+        };
+    });
+}
+
 const DCommonData = (type: string, rawDataHex: string) => {
     const pb = Transaction.raw.deserializeBinary(hexStr2byteArray(rawDataHex));
     const contract = pb.getContractList()[0];
@@ -1054,6 +1070,7 @@ const DCommonData = (type: string, rawDataHex: string) => {
             expiration: pb.getExpiration(),
             timestamp: pb.getTimestamp(),
             scripts: byteArray2hexStr(pb.getScripts_asU8()),
+            auths: getAuthsList(pb),
         },
         valuePb,
     ];
