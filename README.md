@@ -183,6 +183,9 @@ Contact the team at https://cn.developers.tron.network/docs/online-technical-sup
 
 ## Recent History
 
+__5.3.4__
+- Fix CSP problem in the TransactionBuilder.vote function.
+
 __5.3.3__
 - Update dependencies to address audit problems.
 
