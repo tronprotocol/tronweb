@@ -21,7 +21,7 @@ export default class Validator {
         return param.msg || `${param.names[0]} can not be equal to ${param.names[1]}`;
     }
 
-    notValid(params = [], callback = new Function) {
+    notValid(params = [], callback = () => {}) {
 
         let normalized = {};
         let no = false;
