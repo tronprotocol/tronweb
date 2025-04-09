@@ -299,6 +299,7 @@ export interface TransactionInfo {
     exchange_withdraw_another_amount: number;
     shielded_transaction_fee: number;
     withdraw_expire_amount: number;
+    cancel_unfreezeV2_amount: HTTPMap<string, number>;
     exchange_id: string;
     orderId: string;
     orderDetails: {
