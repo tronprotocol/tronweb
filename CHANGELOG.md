@@ -1,6 +1,13 @@
 Change Log
 =========
 
+__6.0.3__
+- Support 6 more deserializations of transaction.
+- Fix npm audit problems.
+- Fix bug in abi in `transactionBuilder.createSmartContract`.
+- Export Method class.
+- Add missing fields in internal_transactions.
+
 __6.0.2__
 - Bump axios from 1.7.4 to 1.8.3.
 - Fix npm audit problems.
