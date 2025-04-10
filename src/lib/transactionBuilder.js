@@ -1003,7 +1003,7 @@ export default class TransactionBuilder {
                     value: voteCount,
                     msg: 'Invalid vote count provided for SR: ' + srAddress
                 }
-            ]))
+            ], callback))
                 return invalid = true;
 
             return {

@@ -1,6 +1,6 @@
 {
     "name": "tronweb",
-    "version": "5.3.3",
+    "version": "5.3.4",
     "description": "JavaScript SDK that encapsulates the TRON HTTP API",
     "main": "dist/TronWeb.node.js",
     "keywords": [
