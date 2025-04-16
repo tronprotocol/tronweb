@@ -2,9 +2,9 @@ Change Log
 =========
 
 __6.0.3__
-- Support 6 more deserializations of transaction.
-- Fix npm audit problems.
-- Fix bug in abi in `transactionBuilder.createSmartContract`.
+- Add support for deserializing 6 more transactions.
+- Fix npm audit issues.
+- Fix the error in the abi variable within `transactionBuilder.createSmartContract`.
 - Export Method class.
 - Add missing fields in internal_transactions.
 
