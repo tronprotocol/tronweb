@@ -13,8 +13,8 @@ export { TransactionBuilder };
 import { Trx } from './lib/trx.js';
 export { Trx };
 
-import { Contract } from './lib/contract/index.js';
-export { Contract };
+import { Contract, Method } from './lib/contract/index.js';
+export { Contract, Method };
 
 import { Event } from './lib/event.js';
 export { Event };
@@ -35,6 +35,7 @@ export default {
     TransactionBuilder,
     Trx,
     Contract,
+    Method,
     Event,
     Plugin,
     TronWeb,
