@@ -1,8 +1,6 @@
 import { assert } from 'chai';
 import { TronWeb, utils, TransactionBuilder } from '../setup/TronWeb.js';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
-// @ts-ignore
-import { decodeRlp } from 'ethers/utils';
 
 describe('#TronWeb.utils.transaction', function() {
     let tronWeb: TronWeb;
@@ -33,7 +31,7 @@ describe('#TronWeb.utils.transaction', function() {
             )).transaction;
         });
         it('should deserialize the right result', async () => {
-            const dResult = utils.transaction.DTriggerSmartContract(tx.raw_data_hex);
+            const dResult = utils.transaction.DeserializeTransaction('TriggerSmartContract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
             assert.equal(value.owner_address, account.address.hex);
             assert.equal(value.contract_address, utils.address.toHex(contractAddress).toUpperCase());
@@ -97,15 +95,137 @@ describe('#TronWeb.utils.transaction', function() {
 
             assert.equal(dResult.contract[0].Permission_id, 0);
             assert.equal(dResult.contract[0].parameter.type_url, tx.raw_data.contract[0].parameter.type_url);
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            assert.equal(dResult.contract[0].type, TronWebProto.Transaction.Contract.ContractType.TRIGGERSMARTCONTRACT);
+            assert.equal(dResult.contract[0].type, 'TriggerSmartContract');
             assert.equal(dResult.expiration, tx.raw_data.expiration);
             assert.equal(dResult.timestamp, tx.raw_data.timestamp);
             assert.equal(dResult.ref_block_bytes.toLowerCase(), tx.raw_data.ref_block_bytes);
             assert.equal(dResult.ref_block_hash.toLowerCase(), tx.raw_data.ref_block_hash);
             assert.equal(dResult.data, tx.raw_data.data || '');
             assert.equal(dResult.fee_limit, tx.raw_data.fee_limit);
+        });
+    });
+
+    describe('DFreezeBalanceV2Contract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['freezeBalanceV2']>>;
+        let account: Awaited<ReturnType<TronWeb['createAccount']>>;
+        const freezeBalance = 1e6;
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            account = await tronWeb.createAccount();
+            tx = await tronWeb.transactionBuilder.freezeBalanceV2(freezeBalance, 'ENERGY', account.address.base58);
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.transaction.DeserializeTransaction('FreezeBalanceV2Contract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address, account.address.hex);
+            assert.equal(value.frozen_balance, freezeBalance);
+            assert.equal(value.resource, 'ENERGY');
+        });
+    });
+
+    describe('DUnfreezeBalanceV2Contract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['unfreezeBalanceV2']>>;
+        let account: Awaited<ReturnType<TronWeb['createAccount']>>;
+        const unfreezeBalance = 1e6;
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            account = await tronWeb.createAccount();
+            tx = await tronWeb.transactionBuilder.unfreezeBalanceV2(unfreezeBalance, 'ENERGY', account.address.base58);
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.transaction.DeserializeTransaction('UnfreezeBalanceV2Contract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address, account.address.hex);
+            assert.equal(value.unfreeze_balance, unfreezeBalance);
+            assert.equal(value.resource, 'ENERGY');
+        });
+    });
+
+    describe('DCancelAllUnfreezeV2Contract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['cancelUnfreezeBalanceV2']>>;
+        let account: Awaited<ReturnType<TronWeb['createAccount']>>;
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            account = await tronWeb.createAccount();
+            tx = await tronWeb.transactionBuilder.cancelUnfreezeBalanceV2(account.address.base58);
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.transaction.DeserializeTransaction('CancelAllUnfreezeV2Contract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address, account.address.hex);
+        });
+    });
+
+    describe('DDelegateResourceContract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['delegateResource']>>;
+        let account: Awaited<ReturnType<TronWeb['createAccount']>>;
+        let account2: Awaited<ReturnType<TronWeb['createAccount']>>;
+        const delegateAmount = 1e6;
+        const lock = true;
+        const lockPeriod = 3;
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            account = await tronWeb.createAccount();
+            account2 = await tronWeb.createAccount();
+            tx = await tronWeb.transactionBuilder.delegateResource(delegateAmount, account.address.base58, 'ENERGY', account2.address.base58, lock, lockPeriod);
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.transaction.DeserializeTransaction('DelegateResourceContract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address, account2.address.hex);
+            assert.equal(value.balance, delegateAmount);
+            assert.equal(value.lock, lock);
+            assert.equal(value.lock_period, lockPeriod);
+            assert.equal(value.receiver_address, account.address.hex);
+            assert.equal(value.resource, 'ENERGY');
+        });
+    });
+
+    describe('DUnDelegateResourceContract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['undelegateResource']>>;
+        let account: Awaited<ReturnType<TronWeb['createAccount']>>;
+        let account2: Awaited<ReturnType<TronWeb['createAccount']>>;
+        const delegateAmount = 1e6;
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            account = await tronWeb.createAccount();
+            account2 = await tronWeb.createAccount();
+            tx = await tronWeb.transactionBuilder.undelegateResource(delegateAmount, account.address.base58, 'ENERGY', account2.address.base58);
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.transaction.DeserializeTransaction('UnDelegateResourceContract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address, account2.address.hex);
+            assert.equal(value.balance, delegateAmount);
+            assert.equal(value.receiver_address, account.address.hex);
+            assert.equal(value.resource, 'ENERGY');
+        });
+    });
+
+    describe('DWithdrawExpireUnfreezeContract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['withdrawExpireUnfreeze']>>;
+        let account: Awaited<ReturnType<TronWeb['createAccount']>>;
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            account = await tronWeb.createAccount();
+            tx = await tronWeb.transactionBuilder.withdrawExpireUnfreeze(account.address.base58);
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.transaction.DeserializeTransaction('WithdrawExpireUnfreezeContract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address, account.address.hex);
         });
     });
 })

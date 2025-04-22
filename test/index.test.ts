@@ -456,7 +456,7 @@ describe('TronWeb Instance', function () {
         });
 
         it('should convert a BigNumber to hex', function () {
-            let input = BigNumber('123456.7e-3');
+            let input = new BigNumber('123456.7e-3');
             let expected = '0x7b.74ea4a8c154c985f06f7';
             assert.equal(TronWeb.toHex(input), expected);
 
@@ -464,7 +464,7 @@ describe('TronWeb Instance', function () {
             expected = '0x14c9202ba0';
             assert.equal(TronWeb.toHex(input), expected);
 
-            input = BigNumber('23e89');
+            input = new BigNumber('23e89');
             expected = '0x1210c23ede2d38fed455e938516db71cfaf3ec4a1c8f3fa92f98a60000000000000000000000';
             assert.equal(TronWeb.toHex(input), expected);
         });

@@ -279,9 +279,34 @@ export interface TransactionInfo {
     }[];
     result?: 'FAILED';
     resMessage: string;
+    assetIssueID: string;
     withdraw_amount: number;
     unfreeze_amount: number;
+    internal_transactions: {
+        hash: string;
+        caller_address: string;
+        transferTo_address: string;
+        callValueInfo: {
+            callValue: number;
+            tokenId: string;
+        }[];
+        note: string;
+        rejected: boolean;
+        extra: string;
+    }[];
+    exchange_received_amount: number;
+    exchange_inject_another_amount: number;
+    exchange_withdraw_another_amount: number;
+    shielded_transaction_fee: number;
     withdraw_expire_amount: number;
     cancel_unfreezeV2_amount: HTTPMap<string, number>;
     exchange_id: string;
+    orderId: string;
+    orderDetails: {
+        makerOrderId: string;
+        takerOrderId: string;
+        fillSellQuantity: number;
+        fillBuyQuantity: number;
+    }[];
+    packingFee: number;
 }

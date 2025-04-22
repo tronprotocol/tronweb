@@ -214,6 +214,10 @@ export class Trx {
         limit = 30,
         offset = 0
     ): Promise<GetTransactionResponse[]> {
+        if (this.tronWeb.fullnodeSatisfies('>=4.1.1')) {
+            throw new Error('This api is not supported any more');
+        }
+
         if (!['to', 'from', 'all'].includes(direction)) {
             throw new Error('Invalid direction provided: Expected "to", "from" or "all"');
         }
