@@ -57,6 +57,7 @@ export class Contract {
         this.props.forEach((prop: string) => delete (this as any)[prop]);
 
         abi.forEach((func) => {
+
             // Don't build a method for constructor function. That's handled through contract create.
             // Don't build a method for error function.
             if (!func.type || /constructor|error/i.test(func.type)) return;
@@ -134,7 +135,7 @@ export class Contract {
             this.bytecode = contract.bytecode;
             this.deployed = true;
 
-            this.loadAbi(contract.abi ? (contract.abi.entrys ? contract.abi.entrys : []) : []);
+            this.loadAbi(this.abi || contract.abi.entrys || []);
 
             return this;
         } catch (ex: any) {
