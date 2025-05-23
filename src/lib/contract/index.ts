@@ -6,20 +6,36 @@ import { Address } from '../../types/Trx.js';
 import { CreateSmartContractOptions } from '../../types/TransactionBuilder.js';
 
 
-export class Contract {
+export type GetMethodsTypeFromAbi<Abi extends ContractAbiInterface> = Abi extends readonly [infer T, ...infer P]
+    ? T extends { type: 'function', name: string } 
+        ? {
+            [key in T['name']]: Method<T>;
+        } & (P extends ContractAbiInterface ? GetMethodsTypeFromAbi<P> : never )
+        : (P extends ContractAbiInterface ? GetMethodsTypeFromAbi<P> : never )
+    : { [key: string]: Method<any>; };
+
+export type GetOnMethodTypeFromAbi<Abi extends ContractAbiInterface> = {
+    [key in keyof GetMethodsTypeFromAbi<Abi>]: GetMethodsTypeFromAbi<Abi>[key]['onMethod'];
+};
+
+export type AnyOnMethodType = {
+    [key: string]: Method<any>['onMethod'];
+};
+
+export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
     tronWeb: TronWeb;
-    abi: ContractAbiInterface;
+    abi: Abi;
     address: false | string;
     eventListener: any;
     bytecode?: false | string;
     deployed?: boolean;
     lastBlock?: false | number;
-    methods: Record<string | number | symbol, (...args: any) => ReturnType<Method['onMethod']>>;
-    methodInstances: Record<string | number | symbol, Method>;
+    methods: GetOnMethodTypeFromAbi<Abi> & AnyOnMethodType;
+    methodInstances: GetMethodsTypeFromAbi<Abi>;
     props: any[];
     [key: string | number | symbol]: any;
 
-    constructor(tronWeb: TronWeb, abi: ContractAbiInterface = [], address: Address) {
+    constructor(tronWeb: TronWeb, abi: Abi = [] as any, address: Address) {
         if (!tronWeb || !(tronWeb instanceof TronWeb)) throw new Error('Expected instance of TronWeb');
 
         this.tronWeb = tronWeb;
@@ -32,8 +48,8 @@ export class Contract {
         this.deployed = false;
         this.lastBlock = false;
 
-        this.methods = {};
-        this.methodInstances = {};
+        this.methods = {} as GetOnMethodTypeFromAbi<Abi> & AnyOnMethodType;
+        this.methodInstances = {} as GetMethodsTypeFromAbi<Abi>;
         this.props = [];
 
         if (utils.address.isAddress(address)) {
@@ -50,29 +66,31 @@ export class Contract {
         return this.hasOwnProperty(property) || (this as any).__proto__.hasOwnProperty(property);
     }
 
-    loadAbi(abi: ContractAbiInterface) {
+    loadAbi(abi: Abi) {
         this.abi = abi;
-        this.methods = {};
+        this.methods = {} as GetOnMethodTypeFromAbi<Abi> & AnyOnMethodType;
 
         this.props.forEach((prop: string) => delete (this as any)[prop]);
 
         abi.forEach((func) => {
             // Don't build a method for constructor function. That's handled through contract create.
             // Don't build a method for error function.
-            if (!func.type || /constructor|error/i.test(func.type)) return;
-
-            const method = new Method(this, func as AbiFragmentNoErrConstructor);
+            if (!func.type || ['constructor', 'event'].includes(func.type)) return;
+            const method = new Method<any>(this, func as AbiFragmentNoErrConstructor) as GetMethodsTypeFromAbi<Abi>[keyof GetMethodsTypeFromAbi<Abi>];
             const methodCall = method.onMethod.bind(method);
 
             const { name, functionSelector, signature } = method;
+            const internalName = name as keyof GetMethodsTypeFromAbi<Abi>;
+            const internalFunctionSelector = functionSelector as keyof GetMethodsTypeFromAbi<Abi>;
+            const internalSignature = signature as keyof GetMethodsTypeFromAbi<Abi>;
 
-            this.methods[name] = methodCall;
-            this.methods[functionSelector!] = methodCall;
-            this.methods[signature] = methodCall;
+            (this.methods as AnyOnMethodType)[name] = methodCall;
+            (this.methods as AnyOnMethodType)[functionSelector!] = methodCall;
+            (this.methods as AnyOnMethodType)[signature] = methodCall;
 
-            this.methodInstances[name] = method;
-            this.methodInstances[functionSelector!] = method;
-            this.methodInstances[signature] = method;
+            this.methodInstances[internalName] = method;
+            this.methodInstances[internalFunctionSelector!] = method;
+            this.methodInstances[internalSignature] = method;
 
             if (!this.hasProperty(name)) {
                 (this as any)[name] = methodCall;

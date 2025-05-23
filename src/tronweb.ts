@@ -263,8 +263,8 @@ export class TronWeb extends EventEmitter {
         return this.event.getEventsByTransactionID(...params);
     }
 
-    contract(abi: ContractAbiInterface = [], address?: Address) {
-        return new Contract(this, abi, address!);
+    contract<Abi extends ContractAbiInterface>(abi: Abi = [] as any, address?: Address) {
+        return new Contract<Abi>(this, abi, address!);
     }
 
     address: typeof TronWeb.address;

@@ -38,11 +38,16 @@ import type {
     EventFragment,
     AbiInputsType,
     AbiOutputsType,
+    GetParamsType,
+    GetOutputsType,
 } from '../../types/ABI.js';
+import { TransactionInfo } from '../../types/Trx.js';
 
 export type AbiFragmentNoErrConstructor = FunctionFragment | EventFragment | FallbackFragment | ReceiveFragment;
 
-const getFunctionSelector = (abi: AbiFragmentNoErrConstructor) => {
+type OutputType<T extends Readonly<AbiFragmentNoErrConstructor>> = T extends FunctionFragment ? GetOutputsType<T['outputs']> : GetOutputsType<[]>;
+
+const getFunctionSelector = (abi: Readonly<AbiFragmentNoErrConstructor>) => {
     if ('stateMutability' in abi) {
         (abi.stateMutability as StateMutabilityTypes) = abi.stateMutability ? abi.stateMutability.toLowerCase() : 'nonpayable';
     }
@@ -61,14 +66,14 @@ const getFunctionSelector = (abi: AbiFragmentNoErrConstructor) => {
     throw new Error('unknown function');
 };
 
-const decodeOutput = (abi: AbiFragmentNoErrConstructor, output: string) => {
-    return decodeParamsV2ByABI(abi, output);
+const decodeOutput = <T extends Readonly<AbiFragmentNoErrConstructor>>(abi: T, output: string) => {
+    return decodeParamsV2ByABI(abi, output) as OutputType<T>;
 };
 
-export class Method {
+export class Method<Abi extends Readonly<AbiFragmentNoErrConstructor>> {
     tronWeb: TronWeb;
     contract: Contract;
-    abi: AbiFragmentNoErrConstructor;
+    abi: Abi;
     name: string;
     inputs: AbiInputsType;
     outputs: AbiOutputsType;
@@ -81,7 +86,7 @@ export class Method {
         shouldPollResponse: boolean;
     };
 
-    constructor(contract: Contract, abi: AbiFragmentNoErrConstructor) {
+    constructor(contract: Contract, abi: Abi) {
         this.tronWeb = contract.tronWeb;
         this.contract = contract;
 
@@ -112,7 +117,7 @@ export class Method {
         return decodeOutput(abi, '0x' + data);
     }
 
-    onMethod(...args: any[]) {
+    onMethod(...args: GetParamsType<Abi['inputs']>) {
         let rawParameter = '';
         if (this.abi && !/event/i.test(this.abi.type)) {
             rawParameter = encodeParamsV2ByABI(this.abi, args);
@@ -126,7 +131,15 @@ export class Method {
 
                 return await this._call([], [], options);
             },
-            send: async (options: SendOptions = {}, privateKey = this.tronWeb.defaultPrivateKey) => {
+            send: async <_SendOptions extends Readonly<SendOptions>>(options: _SendOptions = {} as _SendOptions, privateKey = this.tronWeb.defaultPrivateKey): Promise<
+                _SendOptions['shouldPollResponse'] extends true 
+                    ? _SendOptions['rawResponse'] extends true
+                        ? TransactionInfo
+                        : _SendOptions['keepTxID'] extends true
+                            ? [string, OutputType<Abi>]
+                            : OutputType<Abi>
+                    : string
+            > => {
                 options = {
                     ...options,
                     rawParameter,
@@ -137,7 +150,7 @@ export class Method {
         };
     }
 
-    async _call(types: [], args: [], options: CallOptions = {}) {
+    async _call(types: [], args: [], options: CallOptions = {}): Promise<OutputType<Abi>> {
         if (types.length !== args.length) {
             throw new Error('Invalid argument count provided');
         }
@@ -199,12 +212,7 @@ export class Method {
             throw new Error(msg);
         }
 
-        let output = decodeOutput(this.abi, '0x' + transaction.constant_result![0]);
-
-        if (output.length === 1 && Object.keys(output).length === 1) {
-            output = output[0];
-        }
-        return output;
+        return decodeOutput(this.abi, '0x' + transaction.constant_result![0]);
     }
 
     async _send(types: [], args: [], options: SendOptions = {}, privateKey = this.tronWeb.defaultPrivateKey) {
@@ -325,10 +333,10 @@ export class Method {
             }
 
             if (options.keepTxID) {
-                return [signedTransaction.txID, decoded];
+                return [signedTransaction.txID, decoded] as [string, OutputType<Abi>];
             }
 
-            return decoded;
+            return decoded as OutputType<Abi>;
         };
 
         return checkResult(0);
