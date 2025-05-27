@@ -1,7 +1,7 @@
 import { AbiCoder } from './ethersUtils.js';
 import { TronWeb } from '../tronweb.js';
 import { ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX } from './address.js';
-import { FunctionFragment, AbiParamsCommon, AbiInputsType, GetOutputsType } from '../types/ABI.js';
+import { FunctionFragment, AbiParamsCommon, GetOutputsType } from '../types/ABI.js';
 
 const abiCoder = new AbiCoder();
 

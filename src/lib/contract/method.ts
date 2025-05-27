@@ -45,7 +45,7 @@ import { TransactionInfo } from '../../types/Trx.js';
 
 export type AbiFragmentNoErrConstructor = FunctionFragment | EventFragment | FallbackFragment | ReceiveFragment;
 
-type OutputType<T extends Readonly<AbiFragmentNoErrConstructor>> = T extends FunctionFragment ? GetOutputsType<T['outputs']> : GetOutputsType<[]>;
+type OutputType<T extends Readonly<AbiFragmentNoErrConstructor>> = T extends FunctionFragment ? GetOutputsType<T['outputs']> : any;
 
 const getFunctionSelector = (abi: Readonly<AbiFragmentNoErrConstructor>) => {
     if ('stateMutability' in abi) {
@@ -326,11 +326,7 @@ export class Method<Abi extends Readonly<AbiFragmentNoErrConstructor>> {
                 return output;
             }
 
-            let decoded = decodeOutput(this.abi, '0x' + output.contractResult[0]);
-
-            if (decoded.length === 1 && Object.keys(decoded).length === 1) {
-                decoded = decoded[0];
-            }
+            const decoded = decodeOutput(this.abi, '0x' + output.contractResult[0]);
 
             if (options.keepTxID) {
                 return [signedTransaction.txID, decoded] as [string, OutputType<Abi>];

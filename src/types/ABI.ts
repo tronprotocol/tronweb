@@ -154,22 +154,10 @@ type SolidityTupleType<
     TypeComponents extends ReadonlyArray<AbiParamsCommon> | undefined,
 > = TypeComponents extends ReadonlyArray<AbiParamsCommon>
     ? Type extends 'tuple'
-        ? {
-            [Param in TypeComponents[number] as Param['name']]: SolidityValueType<
-                Param['type'],
-                Param['components']
-            >;
-        }
+        ? GetParamsType<TypeComponents>
         : Type extends `tuple[${infer Length}]${infer Loop}`
             ? Loop extends ''
-                ? SolidityTypedArray<
-                    {
-                        [Param in TypeComponents[number] as Param['name']]: SolidityValueType<
-                            Param['type'],
-                            Param['components']
-                        >;
-                    },
-                    Length>
+                ? SolidityTypedArray<GetParamsType<TypeComponents>, Length>
                 : SolidityTypedArray<SolidityTupleType<`tuple${Loop}`, TypeComponents>, Length>
             : never
     : never;
@@ -185,7 +173,7 @@ type SolidityValueType<T extends string, C extends ReadonlyArray<AbiParamsCommon
     | SolidityTupleType<T, C>;
 
 export type GetParamsType<ParamsType extends ReadonlyArray<AbiParamsCommon> | undefined> = ParamsType extends readonly [infer T, ...infer P] 
-    ? T extends { type: string, components?: ReadonlyArray<AbiParamsCommon> }
+    ? T extends AbiParamsCommon
         ? P extends readonly []
             ? [SolidityValueType<T['type'], T['components']>]
             : P extends ReadonlyArray<AbiParamsCommon>
@@ -194,9 +182,32 @@ export type GetParamsType<ParamsType extends ReadonlyArray<AbiParamsCommon> | un
         : []
     : any[];
 
-export type GetOutputsType<Outputs extends ReadonlyArray<AbiParamsCommon> | undefined> =
-    Outputs extends ReadonlyArray<AbiParamsCommon>
-        ? GetParamsType<Outputs> & {
-            [Item in Outputs[number] as Item['name']]: SolidityValueType<Item['type'], Item['components']>
+type GetTupleOutputType<T extends `tuple${string}`, Shape extends ReadonlyArray<AbiParamsCommon> | undefined> = T extends 'tuple'
+    ? Shape extends ReadonlyArray<AbiParamsCommon>
+        ? _GetOutputsType<Shape> & {
+            [Item in Shape[number] as Item['name']]: Item['type'] extends `tuple${string}` 
+                ? GetTupleOutputType<Item['type'], Item['components']>
+                : SolidityValueType<Item['type'], undefined>
         }
-        : [];
+        : never
+    : T extends `tuple[${infer Length}]${infer Loop}`
+        ? Loop extends ''
+            ? SolidityTypedArray<GetTupleOutputType<`tuple`, Shape>, Length>
+            : SolidityTypedArray<GetTupleOutputType<`tuple${Loop}`, Shape>, Length>
+        : never;
+
+type _GetOutputsType<Outputs extends ReadonlyArray<AbiParamsCommon> | undefined> = Outputs extends readonly [infer T,...infer P]
+    ? T extends AbiParamsCommon
+        ? P extends readonly []
+            ? T['type'] extends `tuple${string}`
+                ? [GetTupleOutputType<T['type'], T['components']>]
+                : [SolidityValueType<T['type'], undefined>]
+            : P extends ReadonlyArray<AbiParamsCommon>
+                ? T['type'] extends `tuple${string}`
+                    ? [GetTupleOutputType<T['type'], T['components']>, ..._GetOutputsType<P>]
+                    : [SolidityValueType<T['type'], undefined>, ..._GetOutputsType<P>] 
+                : []
+        : []
+    : [];
+
+export type GetOutputsType<Outputs extends ReadonlyArray<AbiParamsCommon> | undefined> = GetTupleOutputType<'tuple', Outputs>;
