@@ -119,7 +119,8 @@ export class Contract {
         }
 
         await utils.sleep(3000);
-        return this.at(signedTransaction.contract_address);
+        const abi = signedTransaction.raw_data.contract[0].parameter.value.new_contract.abi.entrys || [];
+        return this.tronWeb.contract(abi, signedTransaction.contract_address);
     }
 
     async at(contractAddress: Address) {
