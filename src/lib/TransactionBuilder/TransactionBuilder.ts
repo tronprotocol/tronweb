@@ -2159,7 +2159,7 @@ export class TransactionBuilder {
                 delete _ownerPermissions.type;
             }
             _ownerPermissions.keys = _ownerPermissions.keys?.map(({ address, weight }) => ({
-                address: this.tronWeb.address.toHex(address),
+                address: toHex(address),
                 weight,
             }));
             data.owner = _ownerPermissions as Permission;
@@ -2171,7 +2171,7 @@ export class TransactionBuilder {
             // @ts-ignore
             _witnessPermissions.type = 'Witness';
             _witnessPermissions.keys = _witnessPermissions.keys.map(({ address, weight }) => ({
-                address: this.tronWeb.address.toHex(address),
+                address: toHex(address),
                 weight,
             }));
             data.witness = _witnessPermissions;
@@ -2186,7 +2186,7 @@ export class TransactionBuilder {
             });
             _activesPermissions.forEach((_activesPermission) => {
                 _activesPermission.keys = _activesPermission.keys.map(({ address, weight }) => ({
-                    address: this.tronWeb.address.toHex(address),
+                    address: toHex(address),
                     weight,
                 }));
             });

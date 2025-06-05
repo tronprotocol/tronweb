@@ -1,12 +1,11 @@
 import { AbiCoder } from './ethersUtils.js';
-import { TronWeb } from '../tronweb.js';
-import { ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX } from './address.js';
+import { ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX, toHex } from './address.js';
 import { FunctionFragment, AbiParamsCommon, AbiInputsType } from '../types/ABI.js';
 
 const abiCoder = new AbiCoder();
 
 function _addressToHex(value: string) {
-    return TronWeb.address.toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
+    return toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
 }
 
 export function decodeParams(names: string[], types: string[], output: string, ignoreMethodHash = false) {
@@ -45,7 +44,7 @@ export function decodeParams(names: string[], types: string[], output: string, i
 export function encodeParams(types: string[], values: any[]) {
     for (let i = 0; i < types.length; i++) {
         if (types[i] === 'address') {
-            values[i] = TronWeb.address.toHex(values[i]).replace(ADDRESS_PREFIX_REGEX, '0x');
+            values[i] = _addressToHex(values[i]);
         }
     }
 
@@ -164,7 +163,7 @@ export function decodeParamsV2ByABI(funABI: FunctionFragment | AbiInputsType, da
             });
             return addrArr;
         } else {
-            return TronWeb.address.toHex(addrArr);
+            return toHex(addrArr);
         }
     };
 
@@ -204,10 +203,10 @@ export function decodeParamsV2ByABI(funABI: FunctionFragment | AbiInputsType, da
 
                 if (result[i]) {
                     if (type === 'address') {
-                        result[i] = TronWeb.address.toHex(result[i]);
+                        result[i] = toHex(result[i]);
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         //@ts-ignore
-                        if (name) result[name] = TronWeb.address.toHex(result[i]);
+                        if (name) result[name] = toHex(result[i]);
                     } else if (type.match(/^([^\x5b]*)(\x5b|$)/)![0] === 'address[') {
                         convertAddresses(result[i]);
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
