@@ -1,6 +1,6 @@
 import { AbiCoder } from './ethersUtils.js';
 import { ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX, toHex } from './address.js';
-import { FunctionFragment, AbiParamsCommon, AbiInputsType } from '../types/ABI.js';
+import { FunctionFragment, AbiParamsCommon, GetOutputsType } from '../types/ABI.js';
 
 const abiCoder = new AbiCoder();
 
@@ -148,7 +148,7 @@ export function encodeParamsV2ByABI(funABI: FunctionFragment, args: any[]) {
     return abiCoder.encode(types, args);
 }
 
-export function decodeParamsV2ByABI(funABI: FunctionFragment | AbiInputsType, data: string | Uint8Array) {
+export function decodeParamsV2ByABI<T extends FunctionFragment>(funABI: T, data: string | Uint8Array)  {
     const convertTypeNames = (types: string[]) => {
         for (let i = 0; i < types.length; i++) {
             const type = types[i];
@@ -250,7 +250,7 @@ export function decodeParamsV2ByABI(funABI: FunctionFragment | AbiInputsType, da
         const decodeResCopy = decodeRes.toArray(true);
         decodeResult(funABI.outputs, decodeResCopy);
 
-        return decodeResCopy;
+        return decodeResCopy as GetOutputsType<T['outputs']>;
     }
-    return [];
+    return [] as GetOutputsType<T['outputs']>;
 }
