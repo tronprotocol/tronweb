@@ -75,7 +75,7 @@ export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
         abi.forEach((func) => {
             // Don't build a method for constructor function. That's handled through contract create.
             // Don't build a method for error function.
-            if (!func.type || ['constructor', 'event'].includes(func.type)) return;
+            if (!func.type || ['constructor', 'error'].includes(func.type.toLowerCase())) return;
             const method = new Method<any>(this, func as AbiFragmentNoErrConstructor) as GetMethodsTypeFromAbi<Abi>[keyof GetMethodsTypeFromAbi<Abi>];
             const methodCall = method.onMethod.bind(method);
 
