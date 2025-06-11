@@ -70,10 +70,10 @@ const decodeOutput = <T extends Readonly<AbiFragmentNoErrConstructor>>(abi: T, o
     return decodeParamsV2ByABI(abi, output) as OutputType<T>;
 };
 
-export class Method<Abi extends Readonly<AbiFragmentNoErrConstructor>> {
+export class Method<AbiFrag extends Readonly<AbiFragmentNoErrConstructor>> {
     tronWeb: TronWeb;
     contract: Contract;
-    abi: Abi;
+    abi: AbiFrag;
     name: string;
     inputs: AbiInputsType;
     outputs: AbiOutputsType;
@@ -86,7 +86,7 @@ export class Method<Abi extends Readonly<AbiFragmentNoErrConstructor>> {
         shouldPollResponse: boolean;
     };
 
-    constructor(contract: Contract, abi: Abi) {
+    constructor(contract: Contract, abi: AbiFrag) {
         this.tronWeb = contract.tronWeb;
         this.contract = contract;
 
@@ -117,7 +117,7 @@ export class Method<Abi extends Readonly<AbiFragmentNoErrConstructor>> {
         return decodeOutput(abi, '0x' + data);
     }
 
-    onMethod(...args: GetParamsType<Abi['inputs']>) {
+    onMethod(...args: GetParamsType<AbiFrag['inputs']>) {
         let rawParameter = '';
         if (this.abi && !/event/i.test(this.abi.type)) {
             rawParameter = encodeParamsV2ByABI(this.abi, args);
@@ -136,8 +136,8 @@ export class Method<Abi extends Readonly<AbiFragmentNoErrConstructor>> {
                     ? _SendOptions['rawResponse'] extends true
                         ? TransactionInfo
                         : _SendOptions['keepTxID'] extends true
-                            ? [string, OutputType<Abi>]
-                            : OutputType<Abi>
+                            ? [string, OutputType<AbiFrag>]
+                            : OutputType<AbiFrag>
                     : string
             > => {
                 options = {
@@ -150,7 +150,7 @@ export class Method<Abi extends Readonly<AbiFragmentNoErrConstructor>> {
         };
     }
 
-    async _call(types: [], args: [], options: CallOptions = {}): Promise<OutputType<Abi>> {
+    async _call(types: [], args: [], options: CallOptions = {}): Promise<OutputType<AbiFrag>> {
         if (types.length !== args.length) {
             throw new Error('Invalid argument count provided');
         }
@@ -334,18 +334,18 @@ export class Method<Abi extends Readonly<AbiFragmentNoErrConstructor>> {
                 decoded = decoded[0];
 
                 if (options.keepTxID) {
-                    return [signedTransaction.txID, decoded] as [string, OutputType<Abi>[0]];
+                    return [signedTransaction.txID, decoded] as [string, OutputType<AbiFrag>[0]];
                 }
 
-                return decoded as OutputType<Abi>[0];
+                return decoded as OutputType<AbiFrag>[0];
             }
 
 
             if (options.keepTxID) {
-                return [signedTransaction.txID, decoded] as [string, OutputType<Abi>];
+                return [signedTransaction.txID, decoded] as [string, OutputType<AbiFrag>];
             }
 
-            return decoded as OutputType<Abi>;
+            return decoded as OutputType<AbiFrag>;
         };
 
         return checkResult(0);
