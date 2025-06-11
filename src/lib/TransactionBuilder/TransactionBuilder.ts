@@ -2246,8 +2246,8 @@ export class TransactionBuilder {
         if (Reflect.has(transaction, 'signature')) throw new Error('You can not extend the expiration of a signed transaction.');
 
         if (options.data) {
-            if (options.dataFormat !== 'hex') options.data = TronWeb.toHex(options.data);
-            options.data = options.data!.replace(/^0x/, '');
+            if (options.dataFormat !== 'hex' && !/^(-|)0x/.test(options.data)) options.data = TronWeb.fromUtf8(options.data);
+            options.data = options.data.replace(/^0x/, '').padStart(Math.ceil(options.data.length/2)*2, '0');
             if (options.data.length === 0) throw new Error('Invalid data provided');
             transaction.raw_data.data = options.data;
         }
