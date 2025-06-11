@@ -326,7 +326,20 @@ export class Method<Abi extends Readonly<AbiFragmentNoErrConstructor>> {
                 return output;
             }
 
-            const decoded = decodeOutput(this.abi, '0x' + output.contractResult[0]);
+            let decoded = decodeOutput(this.abi, '0x' + output.contractResult[0]);
+
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            if (decoded.length === 1 && Object.keys(decoded).length === 1) {
+                decoded = decoded[0];
+
+                if (options.keepTxID) {
+                    return [signedTransaction.txID, decoded] as [string, OutputType<Abi>[0]];
+                }
+
+                return decoded as OutputType<Abi>[0];
+            }
+
 
             if (options.keepTxID) {
                 return [signedTransaction.txID, decoded] as [string, OutputType<Abi>];
