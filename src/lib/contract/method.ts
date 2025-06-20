@@ -8,20 +8,19 @@ import { sha3 } from '../../utils/crypto.js';
 export interface CallOptions {
     feeLimit?: number;
     callValue?: number;
-    callTokenValue?: number;
-    callTokenId?: number;
+    tokenValue?: number;
+    tokenId?: number;
     userFeePercentage?: number;
     shouldPollResponse?: boolean;
     from?: string | false;
-    rawParameter?: string;
-    _isConstant?: true;
 }
 
 export interface SendOptions {
     from?: string | false;
     feeLimit?: number;
     callValue?: number;
-    rawParameter?: string;
+    tokenValue?: number;
+    tokenId?: number;
     userFeePercentage?: number;
     shouldPollResponse?: boolean;
     pollTimes?: number;
