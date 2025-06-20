@@ -9,10 +9,15 @@ export interface CallOptions {
     feeLimit?: number;
     callValue?: number;
     tokenValue?: number;
-    tokenId?: number;
+    tokenId?: string;
     userFeePercentage?: number;
     shouldPollResponse?: boolean;
     from?: string | false;
+}
+
+interface _CallOptions extends CallOptions {
+    rawParameter?: string;
+    _isConstant?: boolean;
 }
 
 export interface SendOptions {
@@ -20,12 +25,16 @@ export interface SendOptions {
     feeLimit?: number;
     callValue?: number;
     tokenValue?: number;
-    tokenId?: number;
+    tokenId?: string;
     userFeePercentage?: number;
     shouldPollResponse?: boolean;
     pollTimes?: number;
     rawResponse?: boolean;
     keepTxID?: boolean;
+}
+
+interface _SendOptions extends SendOptions {
+    rawParameter?: string;
 }
 
 import type {
@@ -126,15 +135,15 @@ export class Method<AbiFrag extends Readonly<AbiFragmentNoErrConstructor>> {
                 options = {
                     ...options,
                     rawParameter,
-                };
+                } as _CallOptions;
 
                 return await this._call([], [], options);
             },
-            send: async <_SendOptions extends Readonly<SendOptions>>(options: _SendOptions = {} as _SendOptions, privateKey = this.tronWeb.defaultPrivateKey): Promise<
-                _SendOptions['shouldPollResponse'] extends true 
-                    ? _SendOptions['rawResponse'] extends true
+            send: async <__SendOptions extends Readonly<SendOptions>>(options: __SendOptions = {} as __SendOptions, privateKey = this.tronWeb.defaultPrivateKey): Promise<
+                __SendOptions['shouldPollResponse'] extends true 
+                    ? __SendOptions['rawResponse'] extends true
                         ? TransactionInfo
-                        : _SendOptions['keepTxID'] extends true
+                        : __SendOptions['keepTxID'] extends true
                             ? [string, OutputType<AbiFrag>]
                             : OutputType<AbiFrag>
                     : string
@@ -149,7 +158,7 @@ export class Method<AbiFrag extends Readonly<AbiFragmentNoErrConstructor>> {
         };
     }
 
-    async _call(types: [], args: [], options: CallOptions = {}): Promise<OutputType<AbiFrag>> {
+    async _call(types: [], args: [], options: _CallOptions = {}): Promise<OutputType<AbiFrag>> {
         if (types.length !== args.length) {
             throw new Error('Invalid argument count provided');
         }
@@ -214,7 +223,7 @@ export class Method<AbiFrag extends Readonly<AbiFragmentNoErrConstructor>> {
         return decodeOutput(this.abi, '0x' + transaction.constant_result![0]);
     }
 
-    async _send(types: [], args: [], options: SendOptions = {}, privateKey = this.tronWeb.defaultPrivateKey) {
+    async _send(types: [], args: [], options: _SendOptions = {}, privateKey = this.tronWeb.defaultPrivateKey) {
         if (types.length !== args.length) {
             throw new Error('Invalid argument count provided');
         }
