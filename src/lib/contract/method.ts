@@ -53,6 +53,16 @@ export type AbiFragmentNoErrConstructor = FunctionFragment | EventFragment | Fal
 
 type OutputType<T extends Readonly<AbiFragmentNoErrConstructor>> = T extends FunctionFragment ? GetOutputsType<T['outputs']> : any;
 
+type _CallAndSendReturn<AbiFrag> = AbiFrag extends FunctionFragment
+    ? AbiFrag['outputs'] extends ReadonlyArray<AbiParamsCommon>
+        ? AbiFrag['outputs']['length'] extends 1
+            ? AbiFrag['outputs'][0]['name'] extends ''
+                ? OutputType<AbiFrag>[0]
+                : OutputType<AbiFrag>
+            : OutputType<AbiFrag>
+        : []
+    : any;
+
 const getFunctionSelector = (abi: Readonly<AbiFragmentNoErrConstructor>) => {
     if ('stateMutability' in abi) {
         (abi.stateMutability as StateMutabilityTypes) = abi.stateMutability ? abi.stateMutability.toLowerCase() : 'nonpayable';
@@ -127,17 +137,7 @@ export class Method<AbiFrag extends Readonly<AbiFragmentNoErrConstructor>> {
             rawParameter = encodeParamsV2ByABI(this.abi, args);
         }
         return {
-            call: async (options: CallOptions = {}): Promise<
-                AbiFrag extends FunctionFragment
-                    ? AbiFrag['outputs'] extends ReadonlyArray<AbiParamsCommon>
-                        ? AbiFrag['outputs']['length'] extends 1
-                            ? AbiFrag['outputs'][0]['name'] extends ''
-                                ? OutputType<AbiFrag>[0]
-                                : OutputType<AbiFrag>
-                            : OutputType<AbiFrag>
-                        : OutputType<AbiFrag>
-                    : []
-            > => {
+            call: async (options: CallOptions = {}): Promise<_CallAndSendReturn<AbiFrag>> => {
                 options = {
                     ...options,
                     rawParameter,
@@ -150,24 +150,8 @@ export class Method<AbiFrag extends Readonly<AbiFragmentNoErrConstructor>> {
                     ? __SendOptions['rawResponse'] extends true
                         ? TransactionInfo
                         : __SendOptions['keepTxID'] extends true
-                            ? AbiFrag extends FunctionFragment
-                                ? AbiFrag['outputs'] extends ReadonlyArray<AbiParamsCommon>
-                                    ? AbiFrag['outputs']['length'] extends 1
-                                        ? AbiFrag['outputs'][0]['name'] extends ''
-                                            ? [string, OutputType<AbiFrag>[0]]
-                                            : [string, OutputType<AbiFrag>]
-                                        : [string, OutputType<AbiFrag>]
-                                    : [string, OutputType<AbiFrag>]
-                                : []
-                            : AbiFrag extends FunctionFragment
-                                ? AbiFrag['outputs'] extends ReadonlyArray<AbiParamsCommon>
-                                    ? AbiFrag['outputs']['length'] extends 1
-                                        ? AbiFrag['outputs'][0]['name'] extends ''
-                                            ? OutputType<AbiFrag>[0]
-                                            : OutputType<AbiFrag>
-                                        : OutputType<AbiFrag>
-                                    : OutputType<AbiFrag>
-                                : []
+                            ? [string, _CallAndSendReturn<AbiFrag>]
+                            : _CallAndSendReturn<AbiFrag>
                     : string
             > => {
                 options = {
