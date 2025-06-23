@@ -144,8 +144,8 @@ export class Method<AbiFrag extends Readonly<AbiFragmentNoErrConstructor>> {
                     ? __SendOptions['rawResponse'] extends true
                         ? TransactionInfo
                         : __SendOptions['keepTxID'] extends true
-                            ? [string, OutputType<AbiFrag>]
-                            : OutputType<AbiFrag>
+                            ? [string, OutputType<AbiFrag> | OutputType<AbiFrag>[0]]
+                            : (OutputType<AbiFrag> | OutputType<AbiFrag>[0])
                     : string
             > => {
                 options = {
@@ -158,7 +158,7 @@ export class Method<AbiFrag extends Readonly<AbiFragmentNoErrConstructor>> {
         };
     }
 
-    async _call(types: [], args: [], options: _CallOptions = {}): Promise<OutputType<AbiFrag>> {
+    async _call(types: [], args: [], options: _CallOptions = {}): Promise<OutputType<AbiFrag> | OutputType<AbiFrag>[0]> {
         if (types.length !== args.length) {
             throw new Error('Invalid argument count provided');
         }
@@ -220,7 +220,15 @@ export class Method<AbiFrag extends Readonly<AbiFragmentNoErrConstructor>> {
             throw new Error(msg);
         }
 
-        return decodeOutput(this.abi, '0x' + transaction.constant_result![0]);
+        const output = decodeOutput(this.abi, '0x' + transaction.constant_result![0]);
+
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        if (output.length === 1 && Object.keys(output).length === 1) {
+            return output[0] as OutputType<AbiFrag>[0];
+        }
+
+        return output as OutputType<AbiFrag>;
     }
 
     async _send(types: [], args: [], options: _SendOptions = {}, privateKey = this.tronWeb.defaultPrivateKey) {
