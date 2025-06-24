@@ -2247,7 +2247,8 @@ export class TransactionBuilder {
 
         if (options.data) {
             if (options.dataFormat !== 'hex' && !/^(-|)0x/.test(options.data)) options.data = TronWeb.fromUtf8(options.data);
-            options.data = options.data.replace(/^0x/, '').padStart(Math.ceil(options.data.length/2)*2, '0');
+            options.data = options.data.replace(/^0x/, '');
+            options.data = options.data.padStart(Math.ceil(options.data.length/2)*2, '0');
             if (options.data.length === 0) throw new Error('Invalid data provided');
             transaction.raw_data.data = options.data;
         }
