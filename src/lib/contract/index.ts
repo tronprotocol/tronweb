@@ -1,26 +1,9 @@
 import { TronWeb } from '../../tronweb.js';
 import utils from '../../utils/index.js';
 import { Method, AbiFragmentNoErrConstructor } from './method.js';
-import type { ContractAbiInterface } from '../../types/ABI.js';
-import { Address } from '../../types/Trx.js';
-import { CreateSmartContractOptions } from '../../types/TransactionBuilder.js';
-
-
-export type GetMethodsTypeFromAbi<Abi extends ContractAbiInterface> = Abi extends readonly [infer T, ...infer P]
-    ? T extends { type: 'function', name: string } 
-        ? {
-            [key in T['name']]: Method<T>;
-        } & (P extends ContractAbiInterface ? GetMethodsTypeFromAbi<P> : never )
-        : (P extends ContractAbiInterface ? GetMethodsTypeFromAbi<P> : never )
-    : { [key: string]: Method<any>; };
-
-export type GetOnMethodTypeFromAbi<Abi extends ContractAbiInterface> = {
-    [key in keyof GetMethodsTypeFromAbi<Abi>]: GetMethodsTypeFromAbi<Abi>[key]['onMethod'];
-};
-
-export type AnyOnMethodType = {
-    [key: string]: Method<any>['onMethod'];
-};
+import type { ContractAbiInterface, GetMethodsTypeFromAbi, GetOnMethodTypeFromAbi, AnyOnMethodType } from '../../types/ABI.js';
+import type { Address } from '../../types/Trx.js';
+import type { CreateSmartContractOptions } from '../../types/TransactionBuilder.js';
 
 export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
     tronWeb: TronWeb;

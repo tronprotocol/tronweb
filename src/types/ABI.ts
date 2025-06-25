@@ -1,4 +1,5 @@
 import type { Address } from "./Trx";
+import type { Method } from "../lib/contract/method";
 export type AbiParamsCommon = {
     readonly name: string;
     readonly type: string;
@@ -211,3 +212,20 @@ type _GetOutputsType<Outputs extends ReadonlyArray<AbiParamsCommon> | undefined>
     : [];
 
 export type GetOutputsType<Outputs extends ReadonlyArray<AbiParamsCommon> | undefined> = GetTupleOutputType<'tuple', Outputs>;
+
+
+export type GetMethodsTypeFromAbi<Abi extends ContractAbiInterface> = Abi extends readonly [infer T, ...infer P]
+    ? T extends { type: 'function', name: string } 
+        ? {
+            [key in T['name']]: Method<T>;
+        } & (P extends ContractAbiInterface ? GetMethodsTypeFromAbi<P> : never )
+        : (P extends ContractAbiInterface ? GetMethodsTypeFromAbi<P> : never )
+    : { [key: string]: Method<any>; };
+
+export type GetOnMethodTypeFromAbi<Abi extends ContractAbiInterface> = {
+    [key in keyof GetMethodsTypeFromAbi<Abi>]: GetMethodsTypeFromAbi<Abi>[key]['onMethod'];
+};
+
+export type AnyOnMethodType = {
+    [key: string]: Method<any>['onMethod'];
+};
