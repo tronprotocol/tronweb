@@ -15,7 +15,7 @@ import { fromHex, fromPrivateKey, isAddress, toHex, toChecksumAddress, isChecksu
 import { HeadersType } from './types/Providers.js';
 import { isString } from './utils/validations.js';
 import { DefaultAddress, NodeProvider, TronWebOptions, IBigNumber } from './types/TronWeb.js';
-import { ContractAbiInterface } from './types/ABI.js';
+import { ContractAbiInterface, ContractInstance } from './types/ABI.js';
 import { Address } from './types/Trx.js';
 
 const DEFAULT_VERSION = '4.7.1';
@@ -263,8 +263,8 @@ export class TronWeb extends EventEmitter {
         return this.event.getEventsByTransactionID(...params);
     }
 
-    contract<Abi extends ContractAbiInterface>(abi: Abi = [] as any, address?: Address) {
-        return new Contract<Abi>(this, abi, address!);
+    contract<Abi extends ContractAbiInterface>(abi: Abi = [] as any, address?: Address): ContractInstance<Abi> {
+        return new Contract<Abi>(this, abi, address!) as ContractInstance<Abi>;
     }
 
     address: typeof TronWeb.address;

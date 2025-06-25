@@ -1,5 +1,6 @@
 import type { Address } from "./Trx";
 import type { Method } from "../lib/contract/method";
+import type { Contract } from "../lib/contract/index";
 export type AbiParamsCommon = {
     readonly name: string;
     readonly type: string;
@@ -229,3 +230,5 @@ export type GetOnMethodTypeFromAbi<Abi extends ContractAbiInterface> = {
 export type AnyOnMethodType = {
     [key: string]: Method<any>['onMethod'];
 };
+
+export type ContractInstance<Abi extends ContractAbiInterface> = Contract<Abi> & GetOnMethodTypeFromAbi<Abi>;
