@@ -6,6 +6,7 @@ __6.0.4__
 - Fix the issue where `addUpdateData` treats numeric strings as numbers. Starting from TronWeb v6.0.4, `addUpdateData` will use `TronWeb.fromUtf8` to convert the provided data string—unless it starts with '0x'. If the resulting data string has an odd length, a '0' will be prepended to ensure even length.
 - Improve type inference in `Contract` module when using typescript. The `Contract` now infers method signatures based on the provided ABI. To enable accurate inference, the ABI should be defined using the `as const` assertion or passed directly into tronWeb.contract().
 - Change the return behavior of the `contract.new()` method. Previously, this method mutated the current instance and used the ABI stored on the Tron blockchain, which proved to be unreliable. From now on, it will return a new instance that uses the ABI provided in the options parameter.
+- Export GetEventResultOptions and EventResponse.
 - Fix npm audit issues.
 
 __6.0.3__
