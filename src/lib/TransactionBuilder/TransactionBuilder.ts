@@ -5,7 +5,7 @@ import { encodeParamsV2ByABI } from '../../utils/abi.js';
 import { CreateSmartContractTransaction, SignedTransaction, Transaction, TransactionWrapper } from '../../types/Transaction.js';
 import { Validator } from '../../paramValidator/index.js';
 import { GetSignWeightResponse } from '../../types/APIResponse.js';
-import { isArray, isInteger, isNotNullOrUndefined, isObject, isString } from '../../utils/validations.js';
+import { isArray, isHex, isInteger, isNotNullOrUndefined, isObject, isString } from '../../utils/validations.js';
 import {
     AccountCreateContract,
     AccountPermissionUpdateContract,
@@ -2246,7 +2246,8 @@ export class TransactionBuilder {
         if (Reflect.has(transaction, 'signature')) throw new Error('You can not extend the expiration of a signed transaction.');
 
         if (options.data) {
-            if (options.dataFormat !== 'hex' && !/^(-|)0x/.test(options.data)) options.data = TronWeb.fromUtf8(options.data);
+            if (options.dataFormat !== 'hex' && !/^0x/.test(options.data)) options.data = TronWeb.fromUtf8(options.data);
+            if (!isHex(options.data)) throw new Error('Invalid data provided');
             options.data = options.data.replace(/^0x/, '');
             options.data = options.data.padStart(Math.ceil(options.data.length/2)*2, '0');
             if (options.data.length === 0) throw new Error('Invalid data provided');
