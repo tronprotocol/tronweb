@@ -134,7 +134,7 @@ export type SolidityUIntegerType<Type extends string> = Type extends `uint${infe
         : never;
 
 export type SolidityIntegerType<Type extends string> = Type extends `int${infer Bits extends BitsRange | ''}[${infer Length}]${infer Loop}`
-    ? SolidityTypedArray<SolidityUIntegerType<`int${Bits}${Loop}`>, Length>
+    ? SolidityTypedArray<SolidityIntegerType<`int${Bits}${Loop}`>, Length>
     : Type extends `int${BitsRange | ''}`
         ? Numbers
         : never;
