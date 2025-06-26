@@ -109,43 +109,43 @@ type SolidityTypedArray<T, Length extends string> = Length extends ''
     ? T[]
     : FixedSizeArray<T, ConvertToNumber<Length>>;
 
-export type SolidityAddressType<Type> = Type extends `address[${infer Length}]${infer Loop}`
+export type SolidityAddressType<Type> = Type extends `address${infer Loop}[${infer Length}]`
     ? SolidityTypedArray<SolidityAddressType<`address${Loop}`>, Length>
     : Type extends 'address'
         ? Address
         : never;
 
-export type SolidityStringType<Type extends string> = Type extends `string${infer Size extends number | ''}[${infer Length}]${infer Loop}`
+export type SolidityStringType<Type extends string> = Type extends `string${infer Size extends number | ''}${infer Loop}[${infer Length}]`
     ? SolidityTypedArray<SolidityStringType<`string${Size}${Loop}`>, Length>
     : Type extends `string${number | ''}`
         ? string
         : never;
 
-export type SolidityBooleanType<Type extends string> = Type extends `bool[${infer Length}]${infer Loop}`
+export type SolidityBooleanType<Type extends string> = Type extends `bool${infer Loop}[${infer Length}]`
     ? SolidityTypedArray<SolidityBooleanType<`bool${Loop}`>, Length>
     : Type extends 'bool'
         ? boolean
         : never;
 
-export type SolidityUIntegerType<Type extends string> = Type extends `uint${infer Bits extends BitsRange | ''}[${infer Length}]${infer Loop}`
+export type SolidityUIntegerType<Type extends string> = Type extends `uint${infer Bits extends BitsRange | ''}${infer Loop}[${infer Length}]`
     ? SolidityTypedArray<SolidityUIntegerType<`uint${Bits}${Loop}`>, Length>
     : Type extends `uint${BitsRange | ''}`
         ? Numbers
         : never;
 
-export type SolidityIntegerType<Type extends string> = Type extends `int${infer Bits extends BitsRange | ''}[${infer Length}]${infer Loop}`
+export type SolidityIntegerType<Type extends string> = Type extends `int${infer Bits extends BitsRange | ''}${infer Loop}[${infer Length}]`
     ? SolidityTypedArray<SolidityIntegerType<`int${Bits}${Loop}`>, Length>
     : Type extends `int${BitsRange | ''}`
         ? Numbers
         : never;
 
-export type SolidityTrcTokenType<Type extends string> = Type extends `trcToken[${infer Length}]${infer Loop}`
+export type SolidityTrcTokenType<Type extends string> = Type extends `trcToken${infer Loop}[${infer Length}]`
     ? SolidityTypedArray<SolidityTrcTokenType<`trcToken${Loop}`>, Length>
     : Type extends 'trcToken'
         ? Numbers
         : never;
 
-export type SolidityBytesType<Type extends string> = Type extends `bytes${infer Size extends BytesRange | ''}[${infer Length}]${infer Loop}`
+export type SolidityBytesType<Type extends string> = Type extends `bytes${infer Size extends BytesRange | ''}${infer Loop}[${infer Length}]`
     ? SolidityTypedArray<SolidityBytesType<`bytes${Size}${Loop}`>, Length>
     : Type extends `bytes${BytesRange | ''}`
         ? string | Uint8Array<ArrayBuffer>
@@ -157,7 +157,7 @@ export type SolidityTupleType<
 > = TypeComponents extends ReadonlyArray<AbiParamsCommon>
     ? Type extends 'tuple'
         ? GetParamsType<TypeComponents>
-        : Type extends `tuple[${infer Length}]${infer Loop}`
+        : Type extends `tuple${infer Loop}[${infer Length}]`
             ? Loop extends ''
                 ? SolidityTypedArray<GetParamsType<TypeComponents>, Length>
                 : SolidityTypedArray<SolidityTupleType<`tuple${Loop}`, TypeComponents>, Length>
