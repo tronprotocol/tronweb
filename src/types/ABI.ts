@@ -86,7 +86,7 @@ export type ContractAbiInterface = ReadonlyArray<AbiFragment>;
 
 
 type _GrowArr<Length extends number, T = any, Arr extends T[] = []> = Arr['length'] extends Length
-    ? Arr
+    ? Readonly<Arr>
     : _GrowArr<Length, T, [...Arr, T]>;
 
 type _RangeFrom0ToN<N extends number, Step extends number, Arr extends any[] = []> = Arr['length'] extends N
@@ -106,7 +106,7 @@ type ConvertToNumber<T extends string> = T extends `${infer Num extends number}`
 type FixedSizeArray<T, Length extends number> = _GrowArr<Length, T>;
 
 type SolidityTypedArray<T, Length extends string> = Length extends ''
-    ? T[]
+    ? ReadonlyArray<T>
     : FixedSizeArray<T, ConvertToNumber<Length>>;
 
 type ReverseArray<T extends string> = T extends `[${infer P}]${infer L}` ? `${ReverseArray<L>}[${P}]` : '';
