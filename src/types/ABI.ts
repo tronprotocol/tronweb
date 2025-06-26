@@ -99,7 +99,7 @@ export type BytesRange = Range<1, 32>;
 
 export type BitsRange = Range<8, 256, 8>;
 
-type Numbers = bigint | number;
+export type Numbers = bigint | number;
 
 type ConvertToNumber<T extends string> = T extends `${infer Num extends number}` ? Num : never;
 
@@ -174,13 +174,15 @@ export type SolidityValueType<T extends string, C extends ReadonlyArray<AbiParam
     | SolidityBytesType<T>
     | SolidityTupleType<T, C>;
 
+type SimplifySolidityType<T> = T extends infer U ? U : never;
+
 export type GetParamsType<ParamsType extends ReadonlyArray<AbiParamsCommon> | undefined> = ParamsType extends readonly [infer T, ...infer P] 
     ? T extends AbiParamsCommon
         ? P extends readonly []
-            ? [SolidityValueType<T['type'], T['components']>]
+            ? [SimplifySolidityType<SolidityValueType<T['type'], T['components']>>]
             : P extends ReadonlyArray<AbiParamsCommon>
-                ? [SolidityValueType<T['type'], T['components']>, ...GetParamsType<P>]
-                : [SolidityValueType<T['type'], T['components']>]
+                ? [SimplifySolidityType<SolidityValueType<T['type'], T['components']>>, ...GetParamsType<P>]
+                : [SimplifySolidityType<SolidityValueType<T['type'], T['components']>>]
         : []
     : any[];
 
@@ -189,7 +191,7 @@ type GetTupleOutputType<T extends `tuple${string}`, Shape extends ReadonlyArray<
         ? _GetOutputsType<Shape> & {
             [Item in Shape[number] as Item['name']]: Item['type'] extends `tuple${string}` 
                 ? GetTupleOutputType<Item['type'], Item['components']>
-                : SolidityValueType<Item['type'], undefined>
+                : SimplifySolidityType<SolidityValueType<Item['type'], undefined>>
         }
         : never
     : T extends `tuple[${infer Length}]${infer Loop}`
@@ -203,11 +205,11 @@ type _GetOutputsType<Outputs extends ReadonlyArray<AbiParamsCommon> | undefined>
         ? P extends readonly []
             ? T['type'] extends `tuple${string}`
                 ? [GetTupleOutputType<T['type'], T['components']>]
-                : [SolidityValueType<T['type'], undefined>]
+                : [SimplifySolidityType<SolidityValueType<T['type'], undefined>>]
             : P extends ReadonlyArray<AbiParamsCommon>
                 ? T['type'] extends `tuple${string}`
                     ? [GetTupleOutputType<T['type'], T['components']>, ..._GetOutputsType<P>]
-                    : [SolidityValueType<T['type'], undefined>, ..._GetOutputsType<P>] 
+                    : [SimplifySolidityType<SolidityValueType<T['type'], undefined>>, ..._GetOutputsType<P>]
                 : []
         : []
     : [];
