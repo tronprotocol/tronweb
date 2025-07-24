@@ -196,6 +196,14 @@ export function decodeParamsV2ByABI<T extends FunctionFragment>(funABI: T, data:
         return typeDef.type + name;
     };
 
+    const setResultProp = (result: any[], name?: string, value?: any) => {
+        if (name && !['length'].includes(name)) {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            result[name] = value;
+        }
+    };
+
     const decodeResult = (outputs: ReadonlyArray<AbiParamsCommon>, result: any[]) => {
         if (outputs.length)
             outputs.forEach((output, i) => {
@@ -204,32 +212,22 @@ export function decodeParamsV2ByABI<T extends FunctionFragment>(funABI: T, data:
                 if (result[i]) {
                     if (type === 'address') {
                         result[i] = toHex(result[i]);
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        //@ts-ignore
-                        if (name) result[name] = toHex(result[i]);
+                        setResultProp(result, name, toHex(result[i]));
                     } else if (type.match(/^([^\x5b]*)(\x5b|$)/)![0] === 'address[') {
                         convertAddresses(result[i]);
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        //@ts-ignore
-                        if (name) result[name] = convertAddresses(result[i]);
+                        setResultProp(result, name, convertAddresses(result[i]));
                     } else if (type.indexOf('tuple') === 0) {
                         if (extractSize(type)) {
                             const dimension = extractArrayDim(type);
                             mapTuple(output.components!, result[i], dimension);
                         } else decodeResult(output.components!, result[i]);
 
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        //@ts-ignore
-                        if (name) result[name] = result[i];
+                        setResultProp(result, name, result[i]);
                     } else {
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        //@ts-ignore
-                        if (name) result[name] = result[i];
+                        setResultProp(result, name, result[i]);
                     }
                 } else {
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    //@ts-ignore
-                    if (name) result[name] = result[i];
+                    setResultProp(result, name, result[i]);
                 }
             });
     };
