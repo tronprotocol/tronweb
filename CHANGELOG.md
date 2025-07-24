@@ -7,7 +7,7 @@ __6.0.4__
 - Improve type inference in `Contract` module when using typescript. The `Contract` now infers method signatures based on the provided ABI. To enable accurate inference, the ABI should be defined using the `as const` assertion or passed directly into tronWeb.contract().
 - Change the return behavior of the `contract.new()` method. Previously, this method mutated the current instance and used the ABI stored on the Tron blockchain, which proved to be unreliable. From now on, it will return a new instance that uses the ABI provided in the options parameter.
 - Export GetEventResultOptions and EventResponse.
-- Support using length as the value of the name field in the ABI.
+- Allow using length as the value of the name field in the ABI, but you cannot use result['length'] to read its value.
 - Fix npm audit issues.
 
 __6.0.3__

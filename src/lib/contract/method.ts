@@ -58,7 +58,9 @@ type _CallAndSendReturn<AbiFrag> = AbiFrag extends FunctionFragment
         ? AbiFrag['outputs']['length'] extends 1
             ? AbiFrag['outputs'][0]['name'] extends ''
                 ? OutputType<AbiFrag>[0]
-                : OutputType<AbiFrag>
+                : AbiFrag['outputs'][0]['name'] extends 'length'
+                    ? OutputType<AbiFrag>[0]
+                    : OutputType<AbiFrag>
             : OutputType<AbiFrag>
         : []
     : any;
