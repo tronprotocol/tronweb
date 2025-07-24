@@ -218,6 +218,9 @@ export type SolidityValueType<T extends string, C extends ReadonlyArray<AbiParam
     | SolidityTupleType<T, C>;
 
 type SimplifySolidityType<T> = T extends infer U ? U : never;
+type Prettify<T> = {
+  [K in keyof T]: T[K];
+} & {};
 
 export type GetParamsType<ParamsType extends ReadonlyArray<AbiParamsCommon> | undefined> = ParamsType extends readonly [infer T, ...infer P] 
     ? T extends AbiParamsCommon
@@ -231,11 +234,11 @@ export type GetParamsType<ParamsType extends ReadonlyArray<AbiParamsCommon> | un
 
 type GetTupleOutputType<T extends `tuple${string}`, Shape extends ReadonlyArray<AbiParamsCommon> | undefined> = T extends 'tuple'
     ? Shape extends ReadonlyArray<AbiParamsCommon>
-        ? _GetOutputsType<Shape> & {
+        ? _GetOutputsType<Shape> & Prettify<Omit<{
             [Item in Shape[number] as Item['name']]: Item['type'] extends `tuple${string}` 
                 ? GetTupleOutputType<Item['type'], Item['components']>
                 : SimplifySolidityType<SolidityValueType<Item['type'], undefined>>
-        }
+        }, 'length'>>
         : never
     : T extends `tuple[${infer Length}]${infer Loop}`
         ? Loop extends ''
