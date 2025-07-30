@@ -102,7 +102,6 @@
         "globals": "16.0.0",
         "globby": "14.1.0",
         "husky": "9.1.7",
-        "istanbul": "0.4.5",
         "json-schema": "0.4.0",
         "jsonwebtoken": "9.0.2",
         "karma": "6.4.4",
