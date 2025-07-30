@@ -1,6 +1,20 @@
 Change Log
 =========
 
+__6.0.4__
+- Fix the circular dependency between the `TypedDataEncoder` module and the `TronWeb` module, which causes issues with enabling Turbopack in the Next.js framework.
+- Fix the issue where `addUpdateData` treats numeric strings as numbers.
+    - Starting from TronWeb v6.0.4, `addUpdateData` will use `TronWeb.fromUtf8` to convert the provided data string—unless it starts with '0x'.
+    - If the resulting data string has an odd length, a '0' will be prepended to ensure even length.
+- Improve type inference in `Contract` module when using typescript.
+    - The `Contract` now infers method signatures based on the provided ABI.
+    - To enable accurate inference, the ABI should be defined using the `as const` assertion or passed directly into tronWeb.contract().
+- Change the return behavior of the `contract.new()` method.
+    - Previously, this method mutated the current instance and used the ABI stored on the Tron blockchain, which proved to be unreliable. It now returns a new instance that uses the ABI provided in the options parameter.
+- Export `GetEventResultOptions` and `EventResponse`.
+- Allow using length as the value of the name field in the ABI, but you cannot use `result['length']` to read its value.
+- Bump `axios` from 1.8.3 to 1.11.0, bump `eslint` from 9.22.0 to 9.31.0.
+
 __6.0.3__
 - Add support for deserializing 6 more transactions.
 - Fix npm audit issues.

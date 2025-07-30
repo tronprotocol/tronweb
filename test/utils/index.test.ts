@@ -207,5 +207,26 @@ describe('TronWeb.utils', function () {
 
             assert.equal(hash, '0x61d034473102d7dac305902770471fd50f4c5b26f6831a56dd90b5184b3c30fc');
         });
+
+        it('should import sha512 from ethers and has a string', function () {
+            const tronWeb = tronWebBuilder.createInstance();
+
+            const string = '0x' + Buffer.from('some string').toString('hex');
+            const hash = tronWeb.utils.ethersUtils.sha512(string);
+
+            assert.equal(hash, '0x14925e01a7a0cf0801aa95fe52d542b578af58ae7997ada66db3a6eae68a329d50600a5b7b442eabf4ea77ea8ef5fe40acf2ab31d47311b2a232c4f64009aac1');
+        });
+
+        it('should import pbkdf2 from ethers and has a string', function () {
+            const tronWeb = tronWebBuilder.createInstance();
+
+            const password = tronWeb.fromUtf8('123456');
+            const salt = tronWeb.fromUtf8('test pbkdf2');
+            const iterations = 10;
+            const keylen = 10;
+            const hash = tronWeb.utils.ethersUtils.pbkdf2(password, salt, iterations, keylen, 'sha512');
+
+            assert.equal(hash, '0xac05a525426c7ae8385f');
+        });
     });
 });

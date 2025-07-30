@@ -5,7 +5,7 @@ import { encodeParamsV2ByABI } from '../../utils/abi.js';
 import { CreateSmartContractTransaction, SignedTransaction, Transaction, TransactionWrapper } from '../../types/Transaction.js';
 import { Validator } from '../../paramValidator/index.js';
 import { GetSignWeightResponse } from '../../types/APIResponse.js';
-import { isArray, isInteger, isNotNullOrUndefined, isObject, isString } from '../../utils/validations.js';
+import { isArray, isHex, isInteger, isNotNullOrUndefined, isObject, isString } from '../../utils/validations.js';
 import {
     AccountCreateContract,
     AccountPermissionUpdateContract,
@@ -2159,7 +2159,7 @@ export class TransactionBuilder {
                 delete _ownerPermissions.type;
             }
             _ownerPermissions.keys = _ownerPermissions.keys?.map(({ address, weight }) => ({
-                address: this.tronWeb.address.toHex(address),
+                address: toHex(address),
                 weight,
             }));
             data.owner = _ownerPermissions as Permission;
@@ -2171,7 +2171,7 @@ export class TransactionBuilder {
             // @ts-ignore
             _witnessPermissions.type = 'Witness';
             _witnessPermissions.keys = _witnessPermissions.keys.map(({ address, weight }) => ({
-                address: this.tronWeb.address.toHex(address),
+                address: toHex(address),
                 weight,
             }));
             data.witness = _witnessPermissions;
@@ -2186,7 +2186,7 @@ export class TransactionBuilder {
             });
             _activesPermissions.forEach((_activesPermission) => {
                 _activesPermission.keys = _activesPermission.keys.map(({ address, weight }) => ({
-                    address: this.tronWeb.address.toHex(address),
+                    address: toHex(address),
                     weight,
                 }));
             });
@@ -2246,8 +2246,10 @@ export class TransactionBuilder {
         if (Reflect.has(transaction, 'signature')) throw new Error('You can not extend the expiration of a signed transaction.');
 
         if (options.data) {
-            if (options.dataFormat !== 'hex') options.data = TronWeb.toHex(options.data);
-            options.data = options.data!.replace(/^0x/, '');
+            if (options.dataFormat !== 'hex' && !/^0x/.test(options.data)) options.data = TronWeb.fromUtf8(options.data);
+            if (!isHex(options.data)) throw new Error('Invalid data provided');
+            options.data = options.data.replace(/^0x/, '');
+            options.data = options.data.padStart(Math.ceil(options.data.length/2)*2, '0');
             if (options.data.length === 0) throw new Error('Invalid data provided');
             transaction.raw_data.data = options.data;
         }

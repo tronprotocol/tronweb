@@ -1,6 +1,8 @@
 import {
     keccak256,
     sha256,
+    sha512,
+    pbkdf2,
     toUtf8Bytes,
     toUtf8String,
     recoverAddress,
@@ -39,6 +41,8 @@ computeHmac.register((algorithm, key, data) => {
 export {
     keccak256,
     sha256,
+    sha512,
+    pbkdf2,
     toUtf8Bytes,
     toUtf8String,
     recoverAddress,

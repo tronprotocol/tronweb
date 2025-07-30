@@ -1,7 +1,7 @@
 import { TronWeb } from '../tronweb.js';
 import utils from '../utils/index.js';
 import { keccak256, toUtf8Bytes, recoverAddress, SigningKey, Signature } from '../utils/ethersUtils.js';
-import { ADDRESS_PREFIX } from '../utils/address.js';
+import { ADDRESS_PREFIX, toHex } from '../utils/address.js';
 import { Validator } from '../paramValidator/index.js';
 import { txCheck } from '../utils/transaction.js';
 import { ecRecover } from '../utils/crypto.js';
@@ -29,10 +29,6 @@ import { Resource } from '../types/TransactionBuilder.js';
 const TRX_MESSAGE_HEADER = '\x19TRON Signed Message:\n32';
 // it should be: '\x15TRON Signed Message:\n32';
 const ETH_MESSAGE_HEADER = '\x19Ethereum Signed Message:\n32';
-
-function toHex(value: string) {
-    return TronWeb.address.toHex(value);
-}
 
 type SignedStringOrSignedTransaction<T extends string | Transaction | SignedTransaction> = T extends string
     ? string
@@ -201,11 +197,11 @@ export class Trx {
     }
 
     getTransactionsToAddress(address = this.tronWeb.defaultAddress.hex, limit = 30, offset = 0): Promise<GetTransactionResponse[]> {
-        return this.getTransactionsRelated(this.tronWeb.address.toHex(address as string), 'to', limit, offset);
+        return this.getTransactionsRelated(toHex(address as string), 'to', limit, offset);
     }
 
     getTransactionsFromAddress(address = this.tronWeb.defaultAddress.hex, limit = 30, offset = 0): Promise<GetTransactionResponse[]> {
-        return this.getTransactionsRelated(this.tronWeb.address.toHex(address as string), 'from', limit, offset);
+        return this.getTransactionsRelated(toHex(address as string), 'from', limit, offset);
     }
 
     async getTransactionsRelated(
@@ -248,7 +244,7 @@ export class Trx {
             throw new Error('Invalid offset provided');
         }
 
-        address = this.tronWeb.address.toHex(address as string);
+        address = toHex(address as string);
 
         return this.tronWeb.solidityNode
             .request<{ transaction: GetTransactionResponse[] }>(
@@ -272,7 +268,7 @@ export class Trx {
             throw new Error('Invalid address provided');
         }
 
-        address = this.tronWeb.address.toHex(address as string);
+        address = toHex(address as string);
 
         return this.tronWeb.solidityNode.request(
             'walletsolidity/getaccount',
@@ -326,7 +322,7 @@ export class Trx {
             throw new Error('Invalid address provided');
         }
 
-        address = this.tronWeb.address.toHex(address as string);
+        address = toHex(address as string);
 
         return this.tronWeb.fullNode.request(
             'wallet/getaccount',
@@ -351,7 +347,7 @@ export class Trx {
             throw new Error('Invalid address provided');
         }
 
-        address = this.tronWeb.address.toHex(address as string);
+        address = toHex(address as string);
 
         return this.tronWeb.fullNode
             .request<AccountNetMessage>(
@@ -371,7 +367,7 @@ export class Trx {
             throw new Error('Invalid address provided');
         }
 
-        address = this.tronWeb.address.toHex(address as string);
+        address = toHex(address as string);
 
         return this.tronWeb.fullNode
             .request<{ assetIssue: Token[] }>(
@@ -501,7 +497,7 @@ export class Trx {
             return this.cache.contracts[contractAddress];
         }
 
-        contractAddress = this.tronWeb.address.toHex(contractAddress);
+        contractAddress = toHex(contractAddress);
 
         const contract = await this.tronWeb.fullNode.request<any>('wallet/getcontract', {
             value: contractAddress,
@@ -622,11 +618,9 @@ export class Trx {
         }
 
         if (!multisig) {
-            const address = this.tronWeb.address
-                .toHex(this.tronWeb.address.fromPrivateKey(privateKey as string) as string)
-                .toLowerCase();
+            const address = toHex(this.tronWeb.address.fromPrivateKey(privateKey as string) as string).toLowerCase();
 
-            if (address !== this.tronWeb.address.toHex(transaction.raw_data.contract[0].parameter.value.owner_address)) {
+            if (address !== toHex(transaction.raw_data.contract[0].parameter.value.owner_address)) {
                 throw new Error('Private key does not match address in transaction');
             }
 
@@ -698,9 +692,7 @@ export class Trx {
             transaction.raw_data.contract[0].Permission_id = permissionId;
 
             // check if private key insides permission list
-            const address = this.tronWeb.address
-                .toHex(this.tronWeb.address.fromPrivateKey(privateKey as string) as string)
-                .toLowerCase();
+            const address = toHex(this.tronWeb.address.fromPrivateKey(privateKey as string) as string).toLowerCase();
             const signWeight = await this.getSignWeight(transaction, permissionId);
 
             if (signWeight.result.code === 'PERMISSION_ERROR') {
@@ -1042,7 +1034,7 @@ export class Trx {
         return this.tronWeb.fullNode.request(
             'wallet/getaccountresource',
             {
-                address: this.tronWeb.address.toHex(address as string),
+                address: toHex(address as string),
             },
             'post'
         );
