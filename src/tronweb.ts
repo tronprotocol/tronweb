@@ -15,14 +15,14 @@ import { fromHex, fromPrivateKey, isAddress, toHex, toChecksumAddress, isChecksu
 import { HeadersType } from './types/Providers.js';
 import { isString } from './utils/validations.js';
 import { DefaultAddress, NodeProvider, TronWebOptions, IBigNumber } from './types/TronWeb.js';
-import { ContractAbiInterface } from './types/ABI.js';
+import { ContractAbiInterface, ContractInstance } from './types/ABI.js';
 import { Address } from './types/Trx.js';
 
 const DEFAULT_VERSION = '4.7.1';
 
 const FEE_LIMIT = 150000000;
 
-const version = '6.0.3';
+const version = '6.0.4';
 
 function isValidOptions(options: unknown): options is TronWebOptions {
     return (
@@ -263,8 +263,8 @@ export class TronWeb extends EventEmitter {
         return this.event.getEventsByTransactionID(...params);
     }
 
-    contract(abi: ContractAbiInterface = [], address?: Address) {
-        return new Contract(this, abi, address!);
+    contract<Abi extends ContractAbiInterface>(abi: Abi = [] as any, address?: Address): ContractInstance<Abi> {
+        return new Contract<Abi>(this, abi, address!) as ContractInstance<Abi>;
     }
 
     address: typeof TronWeb.address;

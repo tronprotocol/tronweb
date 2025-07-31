@@ -8,25 +8,30 @@ import { sha3 } from '../../utils/crypto.js';
 export interface CallOptions {
     feeLimit?: number;
     callValue?: number;
-    callTokenValue?: number;
-    callTokenId?: number;
-    userFeePercentage?: number;
-    shouldPollResponse?: boolean;
+    tokenValue?: number;
+    tokenId?: string;
     from?: string | false;
+}
+
+interface _CallOptions extends CallOptions {
     rawParameter?: string;
-    _isConstant?: true;
+    _isConstant?: boolean;
 }
 
 export interface SendOptions {
     from?: string | false;
     feeLimit?: number;
     callValue?: number;
-    rawParameter?: string;
-    userFeePercentage?: number;
+    tokenValue?: number;
+    tokenId?: string;
     shouldPollResponse?: boolean;
     pollTimes?: number;
     rawResponse?: boolean;
     keepTxID?: boolean;
+}
+
+interface _SendOptions extends SendOptions {
+    rawParameter?: string;
 }
 
 import type {
@@ -38,11 +43,29 @@ import type {
     EventFragment,
     AbiInputsType,
     AbiOutputsType,
+    GetParamsType,
+    GetOutputsType,
+    AbiParamsCommon,
 } from '../../types/ABI.js';
+import { TransactionInfo } from '../../types/Trx.js';
 
 export type AbiFragmentNoErrConstructor = FunctionFragment | EventFragment | FallbackFragment | ReceiveFragment;
 
-const getFunctionSelector = (abi: AbiFragmentNoErrConstructor) => {
+type OutputType<T extends Readonly<AbiFragmentNoErrConstructor>> = T extends FunctionFragment ? GetOutputsType<T['outputs']> : any;
+
+type _CallAndSendReturn<AbiFrag> = AbiFrag extends FunctionFragment
+    ? AbiFrag['outputs'] extends ReadonlyArray<AbiParamsCommon>
+        ? AbiFrag['outputs']['length'] extends 1
+            ? AbiFrag['outputs'][0]['name'] extends ''
+                ? OutputType<AbiFrag>[0]
+                : AbiFrag['outputs'][0]['name'] extends 'length'
+                    ? OutputType<AbiFrag>[0]
+                    : OutputType<AbiFrag>
+            : OutputType<AbiFrag>
+        : []
+    : any;
+
+const getFunctionSelector = (abi: Readonly<AbiFragmentNoErrConstructor>) => {
     if ('stateMutability' in abi) {
         (abi.stateMutability as StateMutabilityTypes) = abi.stateMutability ? abi.stateMutability.toLowerCase() : 'nonpayable';
     }
@@ -61,14 +84,14 @@ const getFunctionSelector = (abi: AbiFragmentNoErrConstructor) => {
     throw new Error('unknown function');
 };
 
-const decodeOutput = (abi: AbiFragmentNoErrConstructor, output: string) => {
-    return decodeParamsV2ByABI(abi, output);
+const decodeOutput = <T extends Readonly<AbiFragmentNoErrConstructor>>(abi: T, output: string) => {
+    return decodeParamsV2ByABI(abi, output) as OutputType<T>;
 };
 
-export class Method {
+export class Method<AbiFrag extends Readonly<AbiFragmentNoErrConstructor>> {
     tronWeb: TronWeb;
     contract: Contract;
-    abi: AbiFragmentNoErrConstructor;
+    abi: AbiFrag;
     name: string;
     inputs: AbiInputsType;
     outputs: AbiOutputsType;
@@ -77,11 +100,10 @@ export class Method {
     defaultOptions: {
         feeLimit: number;
         callValue: number;
-        userFeePercentage: number;
         shouldPollResponse: boolean;
     };
 
-    constructor(contract: Contract, abi: AbiFragmentNoErrConstructor) {
+    constructor(contract: Contract, abi: AbiFrag) {
         this.tronWeb = contract.tronWeb;
         this.contract = contract;
 
@@ -101,7 +123,6 @@ export class Method {
         this.defaultOptions = {
             feeLimit: this.tronWeb.feeLimit,
             callValue: 0,
-            userFeePercentage: 100,
             shouldPollResponse: false, // Only used for sign()
         };
     }
@@ -112,21 +133,29 @@ export class Method {
         return decodeOutput(abi, '0x' + data);
     }
 
-    onMethod(...args: any[]) {
+    onMethod(...args: GetParamsType<AbiFrag['inputs']>) {
         let rawParameter = '';
         if (this.abi && !/event/i.test(this.abi.type)) {
             rawParameter = encodeParamsV2ByABI(this.abi, args);
         }
         return {
-            call: async (options: CallOptions = {}) => {
+            call: async (options: CallOptions = {}): Promise<_CallAndSendReturn<AbiFrag>> => {
                 options = {
                     ...options,
                     rawParameter,
-                };
+                } as _CallOptions;
 
-                return await this._call([], [], options);
+                return await this._call([], [], options) as any;
             },
-            send: async (options: SendOptions = {}, privateKey = this.tronWeb.defaultPrivateKey) => {
+            send: async <__SendOptions extends Readonly<SendOptions>>(options: __SendOptions = {} as __SendOptions, privateKey = this.tronWeb.defaultPrivateKey): Promise<
+                __SendOptions['shouldPollResponse'] extends true 
+                    ? __SendOptions['rawResponse'] extends true
+                        ? TransactionInfo
+                        : __SendOptions['keepTxID'] extends true
+                            ? [string, _CallAndSendReturn<AbiFrag>]
+                            : _CallAndSendReturn<AbiFrag>
+                    : string
+            > => {
                 options = {
                     ...options,
                     rawParameter,
@@ -137,7 +166,7 @@ export class Method {
         };
     }
 
-    async _call(types: [], args: [], options: CallOptions = {}) {
+    async _call(types: [], args: [], options: _CallOptions = {}) {
         if (types.length !== args.length) {
             throw new Error('Invalid argument count provided');
         }
@@ -199,15 +228,18 @@ export class Method {
             throw new Error(msg);
         }
 
-        let output = decodeOutput(this.abi, '0x' + transaction.constant_result![0]);
+        const output = decodeOutput(this.abi, '0x' + transaction.constant_result![0]);
 
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         if (output.length === 1 && Object.keys(output).length === 1) {
-            output = output[0];
+            return output[0];
         }
+
         return output;
     }
 
-    async _send(types: [], args: [], options: SendOptions = {}, privateKey = this.tronWeb.defaultPrivateKey) {
+    async _send(types: [], args: [], options: _SendOptions = {}, privateKey = this.tronWeb.defaultPrivateKey) {
         if (types.length !== args.length) {
             throw new Error('Invalid argument count provided');
         }
@@ -320,15 +352,24 @@ export class Method {
 
             let decoded = decodeOutput(this.abi, '0x' + output.contractResult[0]);
 
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             if (decoded.length === 1 && Object.keys(decoded).length === 1) {
                 decoded = decoded[0];
+
+                if (options.keepTxID) {
+                    return [signedTransaction.txID, decoded] as [string, OutputType<AbiFrag>[0]];
+                }
+
+                return decoded as OutputType<AbiFrag>[0];
             }
+
 
             if (options.keepTxID) {
-                return [signedTransaction.txID, decoded];
+                return [signedTransaction.txID, decoded] as [string, OutputType<AbiFrag>];
             }
 
-            return decoded;
+            return decoded as OutputType<AbiFrag>;
         };
 
         return checkResult(0);

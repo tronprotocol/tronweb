@@ -1,12 +1,11 @@
 import { AbiCoder } from './ethersUtils.js';
-import { TronWeb } from '../tronweb.js';
-import { ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX } from './address.js';
-import { FunctionFragment, AbiParamsCommon, AbiInputsType } from '../types/ABI.js';
+import { ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX, toHex } from './address.js';
+import { FunctionFragment, AbiParamsCommon, GetOutputsType } from '../types/ABI.js';
 
 const abiCoder = new AbiCoder();
 
 function _addressToHex(value: string) {
-    return TronWeb.address.toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
+    return toHex(value).replace(ADDRESS_PREFIX_REGEX, '0x');
 }
 
 export function decodeParams(names: string[], types: string[], output: string, ignoreMethodHash = false) {
@@ -45,7 +44,7 @@ export function decodeParams(names: string[], types: string[], output: string, i
 export function encodeParams(types: string[], values: any[]) {
     for (let i = 0; i < types.length; i++) {
         if (types[i] === 'address') {
-            values[i] = TronWeb.address.toHex(values[i]).replace(ADDRESS_PREFIX_REGEX, '0x');
+            values[i] = _addressToHex(values[i]);
         }
     }
 
@@ -149,7 +148,7 @@ export function encodeParamsV2ByABI(funABI: FunctionFragment, args: any[]) {
     return abiCoder.encode(types, args);
 }
 
-export function decodeParamsV2ByABI(funABI: FunctionFragment | AbiInputsType, data: string | Uint8Array) {
+export function decodeParamsV2ByABI<T extends FunctionFragment>(funABI: T, data: string | Uint8Array)  {
     const convertTypeNames = (types: string[]) => {
         for (let i = 0; i < types.length; i++) {
             const type = types[i];
@@ -164,7 +163,7 @@ export function decodeParamsV2ByABI(funABI: FunctionFragment | AbiInputsType, da
             });
             return addrArr;
         } else {
-            return TronWeb.address.toHex(addrArr);
+            return toHex(addrArr);
         }
     };
 
@@ -197,6 +196,14 @@ export function decodeParamsV2ByABI(funABI: FunctionFragment | AbiInputsType, da
         return typeDef.type + name;
     };
 
+    const setResultProp = (result: any[], name?: string, value?: any) => {
+        if (name && !['length'].includes(name)) {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            result[name] = value;
+        }
+    };
+
     const decodeResult = (outputs: ReadonlyArray<AbiParamsCommon>, result: any[]) => {
         if (outputs.length)
             outputs.forEach((output, i) => {
@@ -204,33 +211,23 @@ export function decodeParamsV2ByABI(funABI: FunctionFragment | AbiInputsType, da
 
                 if (result[i]) {
                     if (type === 'address') {
-                        result[i] = TronWeb.address.toHex(result[i]);
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        //@ts-ignore
-                        if (name) result[name] = TronWeb.address.toHex(result[i]);
+                        result[i] = toHex(result[i]);
+                        setResultProp(result, name, toHex(result[i]));
                     } else if (type.match(/^([^\x5b]*)(\x5b|$)/)![0] === 'address[') {
                         convertAddresses(result[i]);
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        //@ts-ignore
-                        if (name) result[name] = convertAddresses(result[i]);
+                        setResultProp(result, name, convertAddresses(result[i]));
                     } else if (type.indexOf('tuple') === 0) {
                         if (extractSize(type)) {
                             const dimension = extractArrayDim(type);
                             mapTuple(output.components!, result[i], dimension);
                         } else decodeResult(output.components!, result[i]);
 
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        //@ts-ignore
-                        if (name) result[name] = result[i];
+                        setResultProp(result, name, result[i]);
                     } else {
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                        //@ts-ignore
-                        if (name) result[name] = result[i];
+                        setResultProp(result, name, result[i]);
                     }
                 } else {
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    //@ts-ignore
-                    if (name) result[name] = result[i];
+                    setResultProp(result, name, result[i]);
                 }
             });
     };
@@ -251,7 +248,7 @@ export function decodeParamsV2ByABI(funABI: FunctionFragment | AbiInputsType, da
         const decodeResCopy = decodeRes.toArray(true);
         decodeResult(funABI.outputs, decodeResCopy);
 
-        return decodeResCopy;
+        return decodeResCopy as GetOutputsType<T['outputs']>;
     }
-    return [];
+    return [] as GetOutputsType<T['outputs']>;
 }
