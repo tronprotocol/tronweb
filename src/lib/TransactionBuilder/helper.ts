@@ -100,6 +100,11 @@ export async function createTransaction<T extends ContractParamter>(
     Permission_id?: number,
     options = {} as Partial<Omit<Transaction['raw_data'], 'contract'>>
 ): Promise<Transaction<T>> {
+    const blockHeader = {
+        ...(checkBlockHeader(options) ? ({} as Transaction['raw_data']) : await getHeaderInfo(tronWeb.fullNode)),
+        timestamp: Date.now(),
+    };
+
     const tx: Transaction<T> = {
         visible: false,
         txID: '',
@@ -114,7 +119,7 @@ export async function createTransaction<T extends ContractParamter>(
                     type,
                 },
             ],
-            ...(checkBlockHeader(options) ? ({} as Transaction['raw_data']) : await getHeaderInfo(tronWeb.fullNode)),
+            ...blockHeader,
             ...options,
         },
     };
