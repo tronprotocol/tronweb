@@ -1,7 +1,8 @@
 import { TronWeb } from '../tronweb.js';
 import utils from '../utils/index.js';
 import { keccak256, toUtf8Bytes, recoverAddress, SigningKey, Signature } from '../utils/ethersUtils.js';
-import { ADDRESS_PREFIX, toHex } from '../utils/address.js';
+import { ADDRESS_PREFIX } from '../utils/constants.js';
+import { toHex } from '../utils/address.js';
 import { Validator } from '../paramValidator/index.js';
 import { txCheck } from '../utils/transaction.js';
 import { ecRecover } from '../utils/crypto.js';
@@ -585,7 +586,7 @@ export class Trx {
         signature: string,
         address: string
     ) {
-        const messageDigest = utils._TypedDataEncoder.hash(domain, types, value);
+        const messageDigest = utils.typedData.TypedDataEncoder.hash(domain, types, value);
         const recovered = recoverAddress(messageDigest, Signature.from(`0x${signature.replace(/^0x/, '')}`));
 
         const tronAddress = ADDRESS_PREFIX + recovered.substr(2);
@@ -677,7 +678,20 @@ export class Trx {
         value: Record<string, any>,
         privateKey: string
     ) {
-        return utils.crypto._signTypedData(domain, types, value, privateKey);
+        return utils.typedData.signTypedData(domain, types, value, privateKey);
+    }
+
+    signTypedData(...params: Parameters<typeof Trx.signTypedData>)  {
+        return Trx.signTypedData(...params);
+    }
+
+    static signTypedData(
+        domain: TypedDataDomain,
+        types: Record<string, TypedDataField[]>,
+        value: Record<string, any>,
+        privateKey: string
+    ) {
+        return utils.typedData.signTypedData(domain, types, value, privateKey);
     }
 
     async multiSign(transaction: Transaction, privateKey = this.tronWeb.defaultPrivateKey, permissionId = 0) {

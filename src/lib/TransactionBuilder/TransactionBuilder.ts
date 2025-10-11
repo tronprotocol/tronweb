@@ -1,6 +1,7 @@
 import { TronWeb } from '../../tronweb.js';
 import { AbiCoder, keccak256 } from '../../utils/ethersUtils.js';
-import { ADDRESS_PREFIX_REGEX, toHex } from '../../utils/address.js';
+import { toHex } from '../../utils/address.js';
+import { ADDRESS_PREFIX_REGEX } from '../../utils/constants.js';
 import { encodeParamsV2ByABI } from '../../utils/abi.js';
 import { CreateSmartContractTransaction, SignedTransaction, Transaction, TransactionWrapper } from '../../types/Transaction.js';
 import { Validator } from '../../paramValidator/index.js';

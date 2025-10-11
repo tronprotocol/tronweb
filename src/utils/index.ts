@@ -7,13 +7,15 @@ import * as code from './code.js';
 import * as abi from './abi.js';
 import * as message from './message.js';
 import * as ethersUtils from './ethersUtils.js';
-import { TypedDataEncoder as _TypedDataEncoder } from './typedData.js';
+import * as typedData from './typedData.js';
 import * as transaction from './transaction.js';
+import * as constants from './constants.js';
 
 import * as validations from './validations.js';
 
 const utils = {
     ...validations,
+    constants,
     address,
     code,
     accounts,
@@ -22,7 +24,8 @@ const utils = {
     crypto,
     abi,
     message,
-    _TypedDataEncoder,
+    _TypedDataEncoder: typedData.TypedDataEncoder,
+    typedData,
     transaction,
     ethersUtils,
 };
@@ -38,5 +41,5 @@ export * from './message.js';
 export * from './ethersUtils.js';
 export * from './typedData.js';
 export * from './transaction.js';
-
+export * from './constants.js';
 export * from './validations.js';

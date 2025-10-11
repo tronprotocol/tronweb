@@ -14,10 +14,12 @@ import {
     zeroPadValue,
     assertArgument,
     id,
+    SigningKey,
 } from 'ethers';
 import type { BigNumberish, BytesLike, SignatureLike } from 'ethers';
 
-import { ADDRESS_PREFIX_REGEX, toHex } from './address.js';
+import { toHex } from './address.js';
+import { ADDRESS_PREFIX_REGEX } from './constants.js';
 
 function getAddress(address: string) {
     return toHex(address).replace(ADDRESS_PREFIX_REGEX, '0x');
@@ -672,6 +674,21 @@ export class TypedDataEncoder {
             }),
         };
     }
+}
+
+export function signTypedData(
+    domain: TypedDataDomain,
+    types: Record<string, Array<TypedDataField>>,
+    value: Record<string, any>,
+    privateKey: string
+) {
+    const key = `0x${privateKey.replace(/^0x/, '')}`;
+    const signingKey = new SigningKey(key);
+
+    const messageDigest = TypedDataEncoder.hash(domain, types, value);
+    const signature = signingKey.sign(messageDigest);
+    const signatureHex = ['0x', signature.r.substring(2), signature.s.substring(2), Number(signature.v).toString(16)].join('');
+    return signatureHex;
 }
 
 /**
