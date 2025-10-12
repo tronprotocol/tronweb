@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import { TronWeb, utils, TransactionBuilder } from '../setup/TronWeb.js';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
 
-describe('#TronWeb.utils.transaction', function() {
+describe('#TronWeb.utils.deserializeTx', function() {
     let tronWeb: TronWeb;
 
     describe('DTriggerSmartContract', async () => {
@@ -31,7 +31,7 @@ describe('#TronWeb.utils.transaction', function() {
             )).transaction;
         });
         it('should deserialize the right result', async () => {
-            const dResult = utils.transaction.DeserializeTransaction('TriggerSmartContract', tx.raw_data_hex);
+            const dResult = utils.deserializeTx.deserializeTransaction('TriggerSmartContract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
             assert.equal(value.owner_address, account.address.hex);
             assert.equal(value.contract_address, utils.address.toHex(contractAddress).toUpperCase());
@@ -116,7 +116,7 @@ describe('#TronWeb.utils.transaction', function() {
         });
 
         it('should deserialize the right result', async () => {
-            const dResult = utils.transaction.DeserializeTransaction('FreezeBalanceV2Contract', tx.raw_data_hex);
+            const dResult = utils.deserializeTx.deserializeTransaction('FreezeBalanceV2Contract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
 
             assert.equal(value.owner_address, account.address.hex);
@@ -136,7 +136,7 @@ describe('#TronWeb.utils.transaction', function() {
         });
 
         it('should deserialize the right result', async () => {
-            const dResult = utils.transaction.DeserializeTransaction('UnfreezeBalanceV2Contract', tx.raw_data_hex);
+            const dResult = utils.deserializeTx.deserializeTransaction('UnfreezeBalanceV2Contract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
 
             assert.equal(value.owner_address, account.address.hex);
@@ -155,7 +155,7 @@ describe('#TronWeb.utils.transaction', function() {
         });
 
         it('should deserialize the right result', async () => {
-            const dResult = utils.transaction.DeserializeTransaction('CancelAllUnfreezeV2Contract', tx.raw_data_hex);
+            const dResult = utils.deserializeTx.deserializeTransaction('CancelAllUnfreezeV2Contract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
 
             assert.equal(value.owner_address, account.address.hex);
@@ -177,7 +177,7 @@ describe('#TronWeb.utils.transaction', function() {
         });
 
         it('should deserialize the right result', async () => {
-            const dResult = utils.transaction.DeserializeTransaction('DelegateResourceContract', tx.raw_data_hex);
+            const dResult = utils.deserializeTx.deserializeTransaction('DelegateResourceContract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
 
             assert.equal(value.owner_address, account2.address.hex);
@@ -202,7 +202,7 @@ describe('#TronWeb.utils.transaction', function() {
         });
 
         it('should deserialize the right result', async () => {
-            const dResult = utils.transaction.DeserializeTransaction('UnDelegateResourceContract', tx.raw_data_hex);
+            const dResult = utils.deserializeTx.deserializeTransaction('UnDelegateResourceContract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
 
             assert.equal(value.owner_address, account2.address.hex);
@@ -222,7 +222,7 @@ describe('#TronWeb.utils.transaction', function() {
         });
 
         it('should deserialize the right result', async () => {
-            const dResult = utils.transaction.DeserializeTransaction('WithdrawExpireUnfreezeContract', tx.raw_data_hex);
+            const dResult = utils.deserializeTx.deserializeTransaction('WithdrawExpireUnfreezeContract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
 
             assert.equal(value.owner_address, account.address.hex);

@@ -10,6 +10,7 @@ import * as ethersUtils from './ethersUtils.js';
 import * as typedData from './typedData.js';
 import * as transaction from './transaction.js';
 import * as constants from './constants.js';
+import * as deserializeTx from './deserializeTx.js';
 
 import * as validations from './validations.js';
 
@@ -28,6 +29,7 @@ const utils = {
     typedData,
     transaction,
     ethersUtils,
+    deserializeTx,
 };
 export default utils;
 export * from './accounts.js';
@@ -43,3 +45,4 @@ export * from './typedData.js';
 export * from './transaction.js';
 export * from './constants.js';
 export * from './validations.js';
+export * from './/deserializeTx.js';
