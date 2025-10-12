@@ -2126,8 +2126,8 @@ export class TransactionBuilder {
     async updateAccountPermissions(
         ownerAddress: string = this.tronWeb.defaultAddress.hex as string,
         ownerPermission: Permission,
-        witnessPermission?: Permission,
-        activesPermissions?: Permission | Permission[],
+        witnessPermission: Permission | undefined | null,
+        activesPermissions: Permission | Permission[],
         options: TransactionCommonOptions = {}
     ): Promise<Transaction<AccountPermissionUpdateContract>> {
         if (!TronWeb.isAddress(ownerAddress as Address)) throw new Error('Invalid ownerAddress provided');
@@ -2141,7 +2141,7 @@ export class TransactionBuilder {
         }
 
         if (!Array.isArray(activesPermissions)) {
-            activesPermissions = [activesPermissions!];
+            activesPermissions = [activesPermissions];
         }
 
         for (const activesPermission of activesPermissions) {

@@ -2946,6 +2946,64 @@ describe('TronWeb.transactionBuilder', function () {
                 await tronWeb.trx.sign(transaction, accounts.pks[6]);
             }
         });
+        it('should accept Permission type of activePermissions', async function () {
+            const permissionData = {
+                owner: {
+                    type: 0,
+                    keys: [
+                        {
+                            address: accounts.hex[6],
+                            weight: 1,
+                        },
+                        {
+                            address: accounts.hex[7],
+                            weight: 1,
+                        },
+                    ],
+                    threshold: 1,
+                    permission_name: 'owner',
+                },
+                witness: {
+                    keys: [
+                        {
+                            address: accounts.hex[6],
+                            weight: 1,
+                        },
+                    ],
+                    threshold: 1,
+                    id: 1,
+                    type: 1,
+                    permission_name: 'witness',
+                },
+                owner_address: accounts.hex[6],
+                actives: {
+                    operations: '7fff1fc0033e0000000000000000000000000000000000000000000000000000',
+                    keys: [
+                        {
+                            address: accounts.hex[6],
+                            weight: 1,
+                        },
+                    ],
+                    threshold: 1,
+                    id: 2,
+                    type: 2,
+                    permission_name: 'active',
+                },
+            };
+            const tx = await tronWeb.transactionBuilder.updateAccountPermissions(
+                permissionData.owner_address,
+                permissionData.owner,
+                permissionData.witness,
+                permissionData.actives,
+            );
+            assert.isObject(tx);
+            const { receipt } = await broadcaster(null, accounts.pks[6], tx);
+            assert.isTrue(receipt.result);
+            const sendTx = await tronWeb.transactionBuilder.sendTrx(accounts.hex[7], 1e6, accounts.hex[6]);
+            const signedSendTx = await tronWeb.trx.multiSign(sendTx, accounts.pks[7]);
+            const receipt2 = await tronWeb.trx.sendRawTransaction(signedSendTx);
+            assert.isTrue(receipt2.result);
+        });
     });
 
     describe('Alter existent transactions', async function () {
