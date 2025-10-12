@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable no-constant-condition */
+
 import {
     CreateSmartContractOptions,
     CreateTokenOptions,
@@ -200,7 +200,7 @@ describe('TronWeb.transactionBuilder', function () {
                     accounts.b58[2],
                 ],
             ];
-            for (let param of params) {
+            for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.createToken(...param);
                 const parameter = txPars(transaction) as ContractParamterWrapper<AssetIssueContract>;
                 assert.equal(transaction.txID.length, 64);
@@ -520,7 +520,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it(`should update accounts[3] and broadcast`, async function () {
-            const newName = 'New name2';
+            const newName = ('New name2' + Math.random()).slice(0, 15);
             const param: [string, string] = [newName, accounts.b58[3]];
 
             const transaction = await tronWeb.transactionBuilder.updateAccount(...param);
@@ -557,7 +557,10 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it(`should set account id accounts[4] and broadcast`, async function () {
-            const param: Parameters<TransactionBuilder['setAccountId']> = [TronWeb.toHex('testtest2'), accounts.b58[4]];
+            const param: Parameters<TransactionBuilder['setAccountId']> = [
+                TronWeb.toHex(`testtest${Math.random()}`.slice(0, 15)),
+                accounts.b58[4],
+            ];
 
             const transaction = await tronWeb.transactionBuilder.setAccountId(...param);
             const res = await broadcaster(transaction, accounts.pks[4]);
@@ -619,7 +622,7 @@ describe('TronWeb.transactionBuilder', function () {
                     accounts.b58[2],
                 ],
             ];
-            for (let param of params) {
+            for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.updateToken(...param);
                 const parameter = txPars(transaction) as ContractParamterWrapper<UpdateAssetContract>;
                 assert.equal(transaction.txID.length, 64);
@@ -783,7 +786,6 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it(`should allow accounts[2] to purchase a token created by accounts[5] and broadcast`, async function () {
-            await wait(50); // 60 will failed because broadcast error
             const param: Parameters<TransactionBuilder['purchaseToken']> = [accounts.b58[5], tokenID, 10, accounts.b58[2]];
             const transaction = await tronWeb.transactionBuilder.purchaseToken(...param);
 
@@ -1108,7 +1110,7 @@ describe('TronWeb.transactionBuilder', function () {
                 [accounts.b58[20], url],
                 [accounts.b58[20], url, { blockHeader: await getHeaderInfo(tronWeb.fullNode) }],
             ];
-            for (let param of params) {
+            for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.applyForSR(...param);
                 const parameter = txPars(transaction) as ContractParamterWrapper<WitnessCreateContract>;
 
@@ -1162,7 +1164,7 @@ describe('TronWeb.transactionBuilder', function () {
         async function freezeBandWith() {
             const transaction = await tronWeb.transactionBuilder.freezeBalance(100e6, 3, 'BANDWIDTH', accounts.b58[1]);
             await broadcaster(transaction, accounts.pks[1]);
-            // eslint-disable-next-line no-constant-condition
+
             while (true) {
                 const tx = await tronWeb.trx.getTransactionInfo(transaction.txID);
                 if (Object.keys(tx).length === 0) {
@@ -2004,7 +2006,7 @@ describe('TronWeb.transactionBuilder', function () {
                 [votes, accounts.b58[1]],
                 [votes, accounts.b58[1], { blockHeader: await getHeaderInfo(tronWeb.fullNode) }],
             ];
-            for (let param of params) {
+            for (const param of params) {
                 const transaction = await tronWeb.transactionBuilder.vote(...param);
                 const parameter = txPars(transaction) as ContractParamterWrapper<VoteWitnessContract>;
 
@@ -2038,7 +2040,7 @@ describe('TronWeb.transactionBuilder', function () {
                     },
                 ],
             ];
-            for (let param of params) {
+            for (const param of params) {
                 const tx = await tronWeb.transactionBuilder.createSmartContract(...param);
                 assert.equal(tx.raw_data.contract[0].parameter.value.new_contract.consume_user_resource_percent, 100);
                 assert.equal(tx.raw_data.contract[0].parameter.value.new_contract.origin_energy_limit, 1e7);
@@ -2072,7 +2074,7 @@ describe('TronWeb.transactionBuilder', function () {
             }
             const deployed: any = await tronWeb.contract().at(transaction.contract_address);
             for (let j = 25; j <= 28; j++) {
-                let bal = await deployed.balances(accounts.hex[j]).call();
+                const bal = await deployed.balances(accounts.hex[j]).call();
                 assert.equal(bal, bals[j - 25]);
             }
         });
@@ -2156,7 +2158,7 @@ describe('TronWeb.transactionBuilder', function () {
                 ],
             ];
 
-            for (let param of params) {
+            for (const param of params) {
                 transaction = await tronWeb.transactionBuilder.triggerConstantContract(...param);
                 assert.isTrue(
                     transaction.result.result &&
@@ -2254,7 +2256,7 @@ describe('TronWeb.transactionBuilder', function () {
                             'type.googleapis.com/protocol.TriggerSmartContract'
                 );
                 assert.equal(transaction.constant_result, '0000000000000000000000000000000000000000000000000000000000000004');
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
                 // @ts-ignore
                 transaction = await broadcaster(null, accounts.pks[6], transaction.transaction);
                 assert.isTrue(transaction.receipt.result);
@@ -2477,7 +2479,7 @@ describe('TronWeb.transactionBuilder', function () {
                             'type.googleapis.com/protocol.TriggerSmartContract'
                 );
                 assert.equal(transaction.constant_result, '0000000000000000000000000000000000000000000000000000000000000004');
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
                 // @ts-ignore
                 transaction = await broadcaster(null, accounts.pks[6], transaction.transaction);
                 assert.isTrue(transaction.receipt.result);
@@ -2543,9 +2545,9 @@ describe('TronWeb.transactionBuilder', function () {
                     { blockHeader: await getHeaderInfo(tronWeb.fullNode) },
                 ],
             ];
-            for (let param of params) {
-                let transaction = await tronWeb.transactionBuilder.createTokenExchange(...param);
-                let parameter = txPars(transaction) as ContractParamterWrapper<ExchangeCreateContract>;
+            for (const param of params) {
+                const transaction = await tronWeb.transactionBuilder.createTokenExchange(...param);
+                const parameter = txPars(transaction) as ContractParamterWrapper<ExchangeCreateContract>;
 
                 assert.equal(transaction.txID.length, 64);
                 assert.equal(TronWeb.toUtf8(parameter.value.first_token_id), tokenNames[0]);
@@ -2879,45 +2881,45 @@ describe('TronWeb.transactionBuilder', function () {
                 ],
             };
             const permissionData2 = {
-                "owner": {
-                    "type": 0,
-                    "keys": [
-                    {
-                        "address": accounts.b58[6],
-                        "weight": 1
-                    }
-                    ],
-                    "threshold": 1,
-                    "permission_name": "owner"
-                },
-                "witness": {
-                    "keys": [
-                    {
-                        "address": accounts.b58[6],
-                        "weight": 1
-                    }
-                    ],
-                    "threshold": 1,
-                    "id": 1,
-                    "type": 1,
-                    "permission_name": "witness"
-                },
-                "owner_address": accounts.b58[6],
-                "actives": [
-                    {
-                    "operations": "7fff1fc0033e0000000000000000000000000000000000000000000000000000",
-                    "keys": [
+                owner: {
+                    type: 0,
+                    keys: [
                         {
-                        "address": accounts.b58[6],
-                        "weight": 1
-                        }
+                            address: accounts.b58[6],
+                            weight: 1,
+                        },
                     ],
-                    "threshold": 1,
-                    "id": 2,
-                    "type": 2,
-                    "permission_name": "active"
-                    }
-                ]
+                    threshold: 1,
+                    permission_name: 'owner',
+                },
+                witness: {
+                    keys: [
+                        {
+                            address: accounts.b58[6],
+                            weight: 1,
+                        },
+                    ],
+                    threshold: 1,
+                    id: 1,
+                    type: 1,
+                    permission_name: 'witness',
+                },
+                owner_address: accounts.b58[6],
+                actives: [
+                    {
+                        operations: '7fff1fc0033e0000000000000000000000000000000000000000000000000000',
+                        keys: [
+                            {
+                                address: accounts.b58[6],
+                                weight: 1,
+                            },
+                        ],
+                        threshold: 1,
+                        id: 2,
+                        type: 2,
+                        permission_name: 'active',
+                    },
+                ],
             };
             const params: Parameters<TransactionBuilder['updateAccountPermissions']>[] = [
                 [accounts.hex[6], permissionData.owner, permissionData.witness, permissionData.actives, { permissionId: 2 }],
@@ -3149,7 +3151,7 @@ describe('TronWeb.transactionBuilder', function () {
                 issuerAddress
             );
             await broadcaster(null, issuerPk, setTransaction.transaction);
-
+            await wait(3);
             const check = await deployed.check().call();
             assert.equal(check, 3);
         });

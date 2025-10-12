@@ -48,7 +48,7 @@ describe('TronWeb.utils.abi', function () {
             };
 
             const result = tronWeb.utils.abi.decodeParams(names, types, output);
-            for (let i in expected) {
+            for (const i in expected) {
                 assert.equal(result[i], expected[i]);
             }
         });
@@ -125,7 +125,7 @@ describe('TronWeb.utils.abi', function () {
             const values = ['Onwer', ADDRESS_HEX, ADDRESS_BASE58];
 
             const expected =
-                '0x0000000000000000000000000000000000000000000000000000000000000060000000000000000000000000928c9af0651632157ef27a2cf17ca72c575a4d21000000000000000000000000928c9af0651632157ef27a2cf17ca72c575a4d2100000000000000000000000000000000000000000000000000000000000000054f6e776572000000000000000000000000000000000000000000000000000000';
+                '0x00000000000000000000000000000000000000000000000000000000000000600000000000000000000000007e5f4552091a69125d5dfcb7b8c2659029395bdf0000000000000000000000007e5f4552091a69125d5dfcb7b8c2659029395bdf00000000000000000000000000000000000000000000000000000000000000054f6e776572000000000000000000000000000000000000000000000000000000';
             const result = tronWeb.utils.abi.encodeParams(types, values);
 
             for (let i = 0; i < expected.length; i++) {
@@ -136,15 +136,15 @@ describe('TronWeb.utils.abi', function () {
 
     describe('#encodeParamsV2ByABI()-(v1 input)', function () {
         const tronWeb = tronWebBuilder.createInstance();
-        let coder = tronWeb.utils.abi;
+        const coder = tronWeb.utils.abi;
 
-        let tests = loadTests('contract-interface');
+        const tests = loadTests('contract-interface');
         tests.forEach((test: any) => {
-            let { normalizedValues, result, interface: abi } = test;
+            const { normalizedValues, result, interface: abi } = test;
             const funcABI = JSON.parse(abi);
             const inputValues = getValues(JSON.parse(normalizedValues));
             funcABI[0].inputs = funcABI[0].outputs;
-            let title = test.name + ' => (' + test.types + ') = (' + test.normalizedValues + ')';
+            const title = test.name + ' => (' + test.types + ') = (' + test.normalizedValues + ')';
             it('encodes parameters - ' + test.name + ' - ' + test.types, function () {
                 this.timeout(120000);
                 const encoded = coder.encodeParamsV2ByABI(funcABI[0], inputValues);
@@ -155,15 +155,15 @@ describe('TronWeb.utils.abi', function () {
 
     describe('#encodeParamsV2ByABI()-(v2 input)', function () {
         const tronWeb = tronWebBuilder.createInstance();
-        let coder = tronWeb.utils.abi;
+        const coder = tronWeb.utils.abi;
 
-        let tests = loadTests('contract-interface-abi2');
+        const tests = loadTests('contract-interface-abi2');
         tests.forEach((test: any) => {
-            let { values, result, interface: abi } = test;
+            const { values, result, interface: abi } = test;
             const funcABI = JSON.parse(abi);
             const inputValues = getValues(JSON.parse(values));
             funcABI[0].inputs = funcABI[0].outputs;
-            let title = test.name + ' => (' + test.types + ') = (' + test.normalizedValues + ')';
+            const title = test.name + ' => (' + test.types + ') = (' + test.normalizedValues + ')';
             it('encodes parameters - ' + test.name + ' - ' + test.types, function () {
                 this.timeout(120000);
                 const encoded = coder.encodeParamsV2ByABI(funcABI[0], inputValues);
@@ -174,14 +174,14 @@ describe('TronWeb.utils.abi', function () {
 
     describe('#decodeParamsV2ByABI()-(v1 output)', function () {
         const tronWeb = tronWebBuilder.createInstance();
-        let coder = tronWeb.utils.abi;
+        const coder = tronWeb.utils.abi;
 
-        let tests = loadTests('contract-interface');
+        const tests = loadTests('contract-interface');
         tests.forEach((test: any) => {
-            let { normalizedValues, result, interface: abi } = test;
+            const { normalizedValues, result, interface: abi } = test;
             const funcABI = JSON.parse(abi);
             const outputValues = getValues(JSON.parse(normalizedValues));
-            let title = test.name + ' => (' + test.types + ') = (' + test.normalizedValues + ')';
+            const title = test.name + ' => (' + test.types + ') = (' + test.normalizedValues + ')';
             it('decodes parameters - ' + test.name + ' - ' + test.types, function () {
                 this.timeout(120000);
                 const decoded = coder.decodeParamsV2ByABI(funcABI[0], result);
@@ -192,14 +192,14 @@ describe('TronWeb.utils.abi', function () {
 
     describe('#decodeParamsV2ByABI()-(v2 output)', function () {
         const tronWeb = tronWebBuilder.createInstance();
-        let coder = tronWeb.utils.abi;
+        const coder = tronWeb.utils.abi;
 
-        let tests = loadTests('contract-interface-abi2');
+        const tests = loadTests('contract-interface-abi2');
         tests.forEach((test: any) => {
-            let { values, result, interface: abi } = test;
+            const { values, result, interface: abi } = test;
             const funcABI = JSON.parse(abi);
             const outputValues = getValues(JSON.parse(values));
-            let title = test.name + ' => (' + test.types + ') = (' + test.normalizedValues + ')';
+            const title = test.name + ' => (' + test.types + ') = (' + test.normalizedValues + ')';
             it('decodes parameters - ' + test.name + ' - ' + test.types, function () {
                 this.timeout(120000);
                 const decoded = coder.decodeParamsV2ByABI(funcABI[0], result);

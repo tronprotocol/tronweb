@@ -243,11 +243,13 @@ describe('TronWeb Instance', function () {
 
             assert.equal(tronWeb.defaultPrivateKey, PRIVATE_KEY);
 
-            tronWeb.setAddress(ADDRESS_HEX.substr(0, ADDRESS_HEX.length - 1) + '8');
+            const fakeAddress = ADDRESS_HEX.substring(0, ADDRESS_HEX.length - 1) + '8';
+
+            tronWeb.setAddress(fakeAddress);
 
             assert.equal(tronWeb.defaultPrivateKey, false);
-            assert.equal(tronWeb.defaultAddress.hex, '41928c9af0651632157ef27a2cf17ca72c575a4d28');
-            assert.equal(tronWeb.defaultAddress.base58, 'TPL66VK2gCXNCD7EJg9pgJRfqcRbnn4zcp');
+            assert.equal(tronWeb.defaultAddress.hex, fakeAddress);
+            assert.equal(tronWeb.defaultAddress.base58, tronWeb.address.fromHex(fakeAddress));
         });
 
         it('should not reset the private key if the address matches', function () {
