@@ -6,6 +6,9 @@ const { Transaction } = globalThis.TronWebProto;
 
 import '../protocol/core/contract/balance_contract_pb.cjs';
 const {
+    TransferContract,
+    WithdrawBalanceContract,
+    WitnessCreateContract,
     FreezeBalanceV2Contract,
     UnfreezeBalanceV2Contract,
     CancelAllUnfreezeV2Contract,
