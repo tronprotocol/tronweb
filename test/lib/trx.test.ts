@@ -2134,4 +2134,25 @@ describe('TronWeb.trx', function () {
             });
         });
     });
+
+    describe('#getCurrentRefBlockParams', async function () {
+        it('should fetch current ref block params', async () => {
+            const result = await tronWeb.trx.getCurrentRefBlockParams();
+
+            assert.equal(result.ref_block_bytes.length, 4, 'ref_block_bytes should be 4 hex characters');
+            assert.isNotEmpty(result.ref_block_hash, 'ref_block_hash should not be empty');
+            assert.isNumber(result.expiration, 'expiration should be number');
+            assert.isNumber(result.timestamp, 'timestamp should be number');
+        });
+
+        it('should throw error when block data is missing required fields', async () => {
+            const tronWebInstance = new TronWeb({ fullHost: 'https://tron.network' });
+
+            try {
+                await tronWebInstance.trx.getCurrentRefBlockParams();
+            } catch (error: any) {
+                assert.match(error.message, /Unable to get params:/, 'should throw unable to get params error');
+            }
+        });
+    });
 });

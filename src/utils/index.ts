@@ -45,4 +45,4 @@ export * from './typedData.js';
 export * from './transaction.js';
 export * from './constants.js';
 export * from './validations.js';
-export * from './/deserializeTx.js';
+export * from './deserializeTx.js';

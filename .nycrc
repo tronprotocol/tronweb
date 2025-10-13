@@ -1,0 +1,3 @@
+{
+    "exclude": ["src/protocol", "src/types", "lib/commonjs/protocol", "lib/commonjs/src/protocol", "test", "scripts"]
+}

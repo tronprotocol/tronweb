@@ -26,7 +26,7 @@ export interface GetTransactionResponse extends Omit<SignedTransaction, 'visible
     ret: [
         {
             contractRet: string;
-        }
+        },
     ];
 }
 
@@ -43,4 +43,11 @@ export interface GetSignWeightResponse {
         code: string;
     };
     transaction: TransactionWrapper;
+}
+
+export interface BlockHeaderRef {
+    ref_block_bytes: string;
+    ref_block_hash: string;
+    expiration: number;
+    timestamp: number;
 }
