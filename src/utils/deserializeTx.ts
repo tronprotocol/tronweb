@@ -2,9 +2,7 @@
 // @ts-nocheck
 
 import '../protocol/core/Tron_pb.cjs';
-const {
-    Transaction,
-} = globalThis.TronWebProto;
+const { Transaction } = globalThis.TronWebProto;
 
 import '../protocol/core/contract/balance_contract_pb.cjs';
 const {
@@ -17,9 +15,7 @@ const {
 } = globalThis.TronWebProto;
 
 import '../protocol/core/contract/smart_contract_pb.cjs';
-const {
-    TriggerSmartContract,
-} = globalThis.TronWebProto;
+const { TriggerSmartContract } = globalThis.TronWebProto;
 
 import { byteArray2hexStr } from './bytes.js';
 import { hexStr2byteArray } from './code.js';
@@ -75,7 +71,7 @@ const getAuthsList = (pb) => {
             account,
         };
     });
-}
+};
 
 const DCommonData = (type: string, rawDataHex: string) => {
     const pb = Transaction.raw.deserializeBinary(hexStr2byteArray(rawDataHex));
@@ -143,7 +139,7 @@ const DFreezeBalanceV2Contract = (type, rawDataHex) => {
         frozen_balance: freezeBalanceV2Contract.getFrozenBalance(),
         resource: getResourceName(freezeBalanceV2Contract.getResource()),
     };
-    
+
     return commonData;
 };
 
@@ -176,7 +172,7 @@ const DDelegateResourceContract = (type, rawDataHex) => {
         lock: delegateResourceContract.getLock(),
         lock_period: delegateResourceContract.getLockPeriod(),
         receiver_address: byteArray2hexStr(delegateResourceContract.getReceiverAddress_asU8()),
-        resource: getResourceName(delegateResourceContract.getResource())
+        resource: getResourceName(delegateResourceContract.getResource()),
     };
     return commonData;
 };
@@ -198,6 +194,36 @@ const DWithdrawExpireUnfreezeContract = (type, rawDataHex) => {
     const withdrawExpireUnfreezeContract = WithdrawExpireUnfreezeContract.deserializeBinary(valuePb);
     commonData.contract[0].parameter.value = {
         owner_address: byteArray2hexStr(withdrawExpireUnfreezeContract.getOwnerAddress_asU8()),
+    };
+    return commonData;
+};
+
+const DTransferContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const transferContract = TransferContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(transferContract.getOwnerAddress_asU8()),
+        to_address: byteArray2hexStr(transferContract.getToAddress_asU8()),
+        amount: transferContract.getAmount(),
+    };
+    return commonData;
+};
+
+const DWithdrawBalanceContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const withdrawBalanceContract = WithdrawBalanceContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(withdrawBalanceContract.getOwnerAddress_asU8()),
+    };
+    return commonData;
+};
+
+const DWitnessCreateContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const witnessCreateContract = WitnessCreateContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(witnessCreateContract.getOwnerAddress_asU8()),
+        url: witnessCreateContract.getUrl(),
     };
     return commonData;
 };
@@ -224,9 +250,15 @@ const deserializeTransaction = (type: string, rawDataHex: string) => {
             return DUnDelegateResourceContract(type, rawDataHex);
         case 'WithdrawExpireUnfreezeContract':
             return DWithdrawExpireUnfreezeContract(type, rawDataHex);
+        case 'TransferContract':
+            return DTransferContract(type, rawDataHex);
+        case 'WithdrawBalanceContract':
+            return DWithdrawBalanceContract(type, rawDataHex);
+        case 'WitnessCreateContract':
+            return DWitnessCreateContract(type, rawDataHex);
         default:
             throw new Error(`trasaction ${type} not supported`);
     }
-}
+};
 
 export { deserializeTransaction };
