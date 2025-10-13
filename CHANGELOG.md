@@ -1,6 +1,33 @@
 Change Log
 =========
 
+__6.1.0__
+
+## New Features
+
+- **New deserialization support**  
+  Added support for deserializing the following transaction types from `raw_data_hex`:
+
+    - `TransferContract`
+    - `WithdrawBalanceContract`
+    - `WitnessCreateContract`
+
+- **`trx.getCurrentRefBlockParams`**  
+  Provides a method to retrieve the parameters required for transaction building. Users can pass these parameters to transaction constructors and customize the header information, making transaction creation more convenient.
+
+- **`trx.signTypedData` alias**  
+  Added `trx.signTypedData` as an alias pointing to the legacy `trx._signTypedData` method.
+
+## Changes
+
+- Removed `getHeaderInfo` from the `transactionBuilder` helper library. Use `trx.getCurrentRefBlockParams` instead.
+
+- Moved the `deserializeTransaction` function from `utils/transaction` to `utils/deserializeTx` for better scalability and maintainability of future modules.
+
+- Dependency updates:
+    - `axios` upgraded from 1.11.0 to 1.12.2
+    - `eslint` upgraded from 24.4.0 to 24.23.0
+
 __6.0.4__
 
 ## New Features
