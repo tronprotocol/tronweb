@@ -26,7 +26,7 @@ __6.1.0__
 
 - Dependency updates:
     - `axios` upgraded from 1.11.0 to 1.12.2
-    - `eslint` upgraded from 24.4.0 to 24.23.0
+    - `puppeteer` upgraded from 24.4.0 to 24.23.0
 
 __6.0.4__
 
