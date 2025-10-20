@@ -692,8 +692,13 @@ export class Trx {
         return utils.typedData.signTypedData(domain, types, value, privateKey);
     }
 
-    signTypedData(...params: Parameters<typeof Trx.signTypedData>) {
-        return Trx.signTypedData(...params);
+    signTypedData(
+        domain: TypedDataDomain,
+        types: Record<string, TypedDataField[]>,
+        value: Record<string, any>,
+        privateKey = this.tronWeb.defaultPrivateKey
+    ) {
+        return Trx.signTypedData(domain, types, value, privateKey as string);
     }
 
     static signTypedData(
