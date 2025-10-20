@@ -1,11 +1,12 @@
 import { TronWeb } from '../tronweb.js';
 import utils from '../utils/index.js';
 import { keccak256, toUtf8Bytes, recoverAddress, SigningKey, Signature } from '../utils/ethersUtils.js';
-import { ADDRESS_PREFIX, toHex } from '../utils/address.js';
+import { ADDRESS_PREFIX } from '../utils/constants.js';
+import { toHex } from '../utils/address.js';
 import { Validator } from '../paramValidator/index.js';
 import { txCheck } from '../utils/transaction.js';
 import { ecRecover } from '../utils/crypto.js';
-import { Block, GetTransactionResponse } from '../types/APIResponse.js';
+import { Block, GetTransactionResponse, BlockWithoutDetail, BlockHeaderRef } from '../types/APIResponse.js';
 import {
     Token,
     Account,
@@ -196,11 +197,19 @@ export class Trx {
         return this.tronWeb.solidityNode.request('walletsolidity/gettransactioninfobyid', { value: transactionID }, 'post');
     }
 
-    getTransactionsToAddress(address = this.tronWeb.defaultAddress.hex, limit = 30, offset = 0): Promise<GetTransactionResponse[]> {
+    getTransactionsToAddress(
+        address = this.tronWeb.defaultAddress.hex,
+        limit = 30,
+        offset = 0
+    ): Promise<GetTransactionResponse[]> {
         return this.getTransactionsRelated(toHex(address as string), 'to', limit, offset);
     }
 
-    getTransactionsFromAddress(address = this.tronWeb.defaultAddress.hex, limit = 30, offset = 0): Promise<GetTransactionResponse[]> {
+    getTransactionsFromAddress(
+        address = this.tronWeb.defaultAddress.hex,
+        limit = 30,
+        offset = 0
+    ): Promise<GetTransactionResponse[]> {
         return this.getTransactionsRelated(toHex(address as string), 'from', limit, offset);
     }
 
@@ -384,9 +393,12 @@ export class Trx {
                     .map((token) => {
                         return this._parseToken(token);
                     })
-                    .reduce((tokens, token) => {
-                        return (tokens[token.name] = token), tokens;
-                    }, {} as Record<string, Token>);
+                    .reduce(
+                        (tokens, token) => {
+                            return (tokens[token.name] = token), tokens;
+                        },
+                        {} as Record<string, Token>
+                    );
 
                 return tokens;
             });
@@ -585,7 +597,7 @@ export class Trx {
         signature: string,
         address: string
     ) {
-        const messageDigest = utils._TypedDataEncoder.hash(domain, types, value);
+        const messageDigest = utils.typedData.TypedDataEncoder.hash(domain, types, value);
         const recovered = recoverAddress(messageDigest, Signature.from(`0x${signature.replace(/^0x/, '')}`));
 
         const tronAddress = ADDRESS_PREFIX + recovered.substr(2);
@@ -677,7 +689,20 @@ export class Trx {
         value: Record<string, any>,
         privateKey: string
     ) {
-        return utils.crypto._signTypedData(domain, types, value, privateKey);
+        return utils.typedData.signTypedData(domain, types, value, privateKey);
+    }
+
+    signTypedData(...params: Parameters<typeof Trx.signTypedData>) {
+        return Trx.signTypedData(...params);
+    }
+
+    static signTypedData(
+        domain: TypedDataDomain,
+        types: Record<string, TypedDataField[]>,
+        value: Record<string, any>,
+        privateKey: string
+    ) {
+        return utils.typedData.signTypedData(domain, types, value, privateKey);
     }
 
     async multiSign(transaction: Transaction, privateKey = this.tronWeb.defaultPrivateKey, permissionId = 0) {
@@ -1436,24 +1461,41 @@ export class Trx {
     }
 
     async getBandwidthPrices(): Promise<string> {
-        return this.tronWeb.fullNode.request<{ prices?: string }>('wallet/getbandwidthprices', {}, 'post')
-            .then((result = {}) => {
-                if (typeof result.prices === 'undefined') {
-                    throw new Error('Not found.');
-                }
+        return this.tronWeb.fullNode.request<{ prices?: string }>('wallet/getbandwidthprices', {}, 'post').then((result = {}) => {
+            if (typeof result.prices === 'undefined') {
+                throw new Error('Not found.');
+            }
 
-                return result.prices;
-            });
+            return result.prices;
+        });
     }
 
     async getEnergyPrices(): Promise<string> {
-        return this.tronWeb.fullNode.request<{ prices?: string }>('wallet/getenergyprices', {}, 'post')
-            .then((result = {}) => {
-                if (typeof result.prices === 'undefined') {
-                    throw new Error('Not found.');
-                }
+        return this.tronWeb.fullNode.request<{ prices?: string }>('wallet/getenergyprices', {}, 'post').then((result = {}) => {
+            if (typeof result.prices === 'undefined') {
+                throw new Error('Not found.');
+            }
 
-                return result.prices;
-            });
+            return result.prices;
+        });
+    }
+
+    async getCurrentRefBlockParams(): Promise<BlockHeaderRef> {
+        try {
+            const { block_header, blockID } = await this.tronWeb.fullNode.request<BlockWithoutDetail>(
+                'wallet/getblock',
+                { detail: false },
+                'post'
+            );
+            const { number, timestamp } = block_header.raw_data;
+            return {
+                ref_block_bytes: number.toString(16).slice(-4).padStart(4, '0'),
+                ref_block_hash: blockID.slice(16, 32),
+                expiration: timestamp + 60 * 1000,
+                timestamp,
+            };
+        } catch (e) {
+            throw new Error(`Unable to get params: ${(e as Error).message || e}`);
+        }
     }
 }

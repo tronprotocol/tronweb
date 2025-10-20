@@ -1,8 +1,9 @@
 import { assert } from 'chai';
 import { TronWeb, utils, TransactionBuilder } from '../setup/TronWeb.js';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
+import { arrayToBase64String } from '../../src/utils/crypto.js';
 
-describe('#TronWeb.utils.transaction', function() {
+describe('#TronWeb.utils.deserializeTx', function () {
     let tronWeb: TronWeb;
 
     describe('DTriggerSmartContract', async () => {
@@ -14,24 +15,26 @@ describe('#TronWeb.utils.transaction', function() {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             account2 = await tronWeb.createAccount();
-            tx = (await tronWeb.transactionBuilder.triggerSmartContract(
-                contractAddress,
-                'transfer(address,uint256)',
-                {
-                    txLocal: true,
-                    tokenId: '1000008',
-                    tokenValue: 100,
-                    feeLimit: 100 * (10 ** 6),
-                },
-                [
-                    { type: "address", value: account2.address.base58 },
-                    { type: "uint256", value: 100000000 }
-                ],
-                account.address.base58,
-            )).transaction;
+            tx = (
+                await tronWeb.transactionBuilder.triggerSmartContract(
+                    contractAddress,
+                    'transfer(address,uint256)',
+                    {
+                        txLocal: true,
+                        tokenId: '1000008',
+                        tokenValue: 100,
+                        feeLimit: 100 * 10 ** 6,
+                    },
+                    [
+                        { type: 'address', value: account2.address.base58 },
+                        { type: 'uint256', value: 100000000 },
+                    ],
+                    account.address.base58
+                )
+            ).transaction;
         });
         it('should deserialize the right result', async () => {
-            const dResult = utils.transaction.DeserializeTransaction('TriggerSmartContract', tx.raw_data_hex);
+            const dResult = utils.deserializeTx.deserializeTransaction('TriggerSmartContract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
             assert.equal(value.owner_address, account.address.hex);
             assert.equal(value.contract_address, utils.address.toHex(contractAddress).toUpperCase());
@@ -77,13 +80,13 @@ describe('#TronWeb.utils.transaction', function() {
             const getData = (functionSelector: string, parameters: { type: string; value: unknown }[]) => {
                 return getFunctionSelectorHex(functionSelector) + encodeParameters(parameters);
             };
-            assert.equal(value.data, getData(
-                'transfer(address,uint256)',
-                [
-                    { type: "address", value: account2.address.base58 },
-                    { type: "uint256", value: 100000000 }
-                ]
-            ).toUpperCase());
+            assert.equal(
+                value.data,
+                getData('transfer(address,uint256)', [
+                    { type: 'address', value: account2.address.base58 },
+                    { type: 'uint256', value: 100000000 },
+                ]).toUpperCase()
+            );
             const abiCoder = new utils.ethersUtils.AbiCoder();
             const functionSelector = getFunctionSelectorHex('transfer(address,uint256)');
             const data = abiCoder.decode(['address', 'uint256'], '0x' + value.data.slice(8));
@@ -116,7 +119,7 @@ describe('#TronWeb.utils.transaction', function() {
         });
 
         it('should deserialize the right result', async () => {
-            const dResult = utils.transaction.DeserializeTransaction('FreezeBalanceV2Contract', tx.raw_data_hex);
+            const dResult = utils.deserializeTx.deserializeTransaction('FreezeBalanceV2Contract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
 
             assert.equal(value.owner_address, account.address.hex);
@@ -136,7 +139,7 @@ describe('#TronWeb.utils.transaction', function() {
         });
 
         it('should deserialize the right result', async () => {
-            const dResult = utils.transaction.DeserializeTransaction('UnfreezeBalanceV2Contract', tx.raw_data_hex);
+            const dResult = utils.deserializeTx.deserializeTransaction('UnfreezeBalanceV2Contract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
 
             assert.equal(value.owner_address, account.address.hex);
@@ -155,7 +158,7 @@ describe('#TronWeb.utils.transaction', function() {
         });
 
         it('should deserialize the right result', async () => {
-            const dResult = utils.transaction.DeserializeTransaction('CancelAllUnfreezeV2Contract', tx.raw_data_hex);
+            const dResult = utils.deserializeTx.deserializeTransaction('CancelAllUnfreezeV2Contract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
 
             assert.equal(value.owner_address, account.address.hex);
@@ -173,11 +176,18 @@ describe('#TronWeb.utils.transaction', function() {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             account2 = await tronWeb.createAccount();
-            tx = await tronWeb.transactionBuilder.delegateResource(delegateAmount, account.address.base58, 'ENERGY', account2.address.base58, lock, lockPeriod);
+            tx = await tronWeb.transactionBuilder.delegateResource(
+                delegateAmount,
+                account.address.base58,
+                'ENERGY',
+                account2.address.base58,
+                lock,
+                lockPeriod
+            );
         });
 
         it('should deserialize the right result', async () => {
-            const dResult = utils.transaction.DeserializeTransaction('DelegateResourceContract', tx.raw_data_hex);
+            const dResult = utils.deserializeTx.deserializeTransaction('DelegateResourceContract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
 
             assert.equal(value.owner_address, account2.address.hex);
@@ -198,11 +208,16 @@ describe('#TronWeb.utils.transaction', function() {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             account2 = await tronWeb.createAccount();
-            tx = await tronWeb.transactionBuilder.undelegateResource(delegateAmount, account.address.base58, 'ENERGY', account2.address.base58);
+            tx = await tronWeb.transactionBuilder.undelegateResource(
+                delegateAmount,
+                account.address.base58,
+                'ENERGY',
+                account2.address.base58
+            );
         });
 
         it('should deserialize the right result', async () => {
-            const dResult = utils.transaction.DeserializeTransaction('UnDelegateResourceContract', tx.raw_data_hex);
+            const dResult = utils.deserializeTx.deserializeTransaction('UnDelegateResourceContract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
 
             assert.equal(value.owner_address, account2.address.hex);
@@ -222,10 +237,118 @@ describe('#TronWeb.utils.transaction', function() {
         });
 
         it('should deserialize the right result', async () => {
-            const dResult = utils.transaction.DeserializeTransaction('WithdrawExpireUnfreezeContract', tx.raw_data_hex);
+            const dResult = utils.deserializeTx.deserializeTransaction('WithdrawExpireUnfreezeContract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
 
             assert.equal(value.owner_address, account.address.hex);
         });
     });
-})
+
+    describe('DTransferContract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['sendTrx']>>;
+        let account: Awaited<ReturnType<TronWeb['createAccount']>>;
+        let account2: Awaited<ReturnType<TronWeb['createAccount']>>;
+        const sendAmount = 1e6;
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            account = await tronWeb.createAccount();
+            account2 = await tronWeb.createAccount();
+            tx = await tronWeb.transactionBuilder.sendTrx(account2.address.base58, sendAmount, account.address.base58);
+        });
+        it('should deserialize the right result', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('TransferContract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(dResult.contract[0].type, 'TransferContract');
+            assert.equal(dResult.contract[0].Permission_id, 0);
+            assert.equal(dResult.contract[0].parameter.type_url, tx.raw_data.contract[0].parameter.type_url);
+            assert.equal(dResult.expiration, tx.raw_data.expiration);
+            assert.equal(dResult.timestamp, tx.raw_data.timestamp);
+            assert.equal(dResult.ref_block_bytes.toLowerCase(), tx.raw_data.ref_block_bytes);
+            assert.equal(dResult.ref_block_hash.toLowerCase(), tx.raw_data.ref_block_hash);
+            assert.equal(dResult.data, tx.raw_data.data || '');
+            assert.equal(dResult.fee_limit, tx.raw_data.fee_limit || 0);
+            assert.equal(value.owner_address, account.address.hex);
+            assert.equal(value.to_address, account2.address.hex);
+            assert.equal(value.amount, sendAmount);
+        });
+
+        it('should throw error if raw_data_hex is empty', async () => {
+            assert.throws(() => {
+                utils.deserializeTx.deserializeTransaction('TransferContract', undefined as unknown as string);
+            }, 'rawDataHex cannot be empty');
+        });
+
+        it('should throw error if raw_data_hex is invalid', async () => {
+            assert.throws(() => {
+                utils.deserializeTx.deserializeTransaction('TransferContract', 'invalidRawDataHex');
+            }, 'rawDataHex is not a valid hex string');
+        });
+    });
+
+    describe('DWithdrawBalanceContract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['withdrawBlockRewards']>>;
+        let account: Awaited<ReturnType<TronWeb['createAccount']>>;
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            account = await tronWeb.createAccount();
+            tx = await tronWeb.transactionBuilder.withdrawBlockRewards(account.address.base58);
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('WithdrawBalanceContract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address, account.address.hex);
+        });
+
+        it('should throw error if raw_data_hex is empty', async () => {
+            assert.throws(() => {
+                utils.deserializeTx.deserializeTransaction('WithdrawBalanceContract', undefined as unknown as string);
+            }, 'rawDataHex cannot be empty');
+        });
+
+        it('should throw error if raw_data_hex is invalid', async () => {
+            assert.throws(() => {
+                utils.deserializeTx.deserializeTransaction('WithdrawBalanceContract', 'invalidRawDataHex');
+            }, 'rawDataHex is not a valid hex string');
+        });
+    });
+
+    describe('WitnessCreateContract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['applyForSR']>>;
+        let account: Awaited<ReturnType<TronWeb['createAccount']>>;
+        const url = 'https://example.com';
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            account = await tronWeb.createAccount();
+            tx = await tronWeb.transactionBuilder.applyForSR(account.address.base58, url);
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('WitnessCreateContract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address, account.address.hex);
+            assert.equal(Buffer.from(arrayToBase64String(value.url), 'base64').toString('utf8'), url);
+        });
+
+        it('should throw error if raw_data_hex is empty', async () => {
+            assert.throws(() => {
+                utils.deserializeTx.deserializeTransaction('WitnessCreateContract', undefined as unknown as string);
+            }, 'rawDataHex cannot be empty');
+        });
+
+        it('should throw error if raw_data_hex is invalid', async () => {
+            assert.throws(() => {
+                utils.deserializeTx.deserializeTransaction('WitnessCreateContract', 'invalidRawDataHex');
+            }, 'rawDataHex is not a valid hex string');
+        });
+
+        it('should throw error if type is invalid', async () => {
+            assert.throws(() => {
+                utils.deserializeTx.deserializeTransaction('InvalidType' as any, '0a020801120212034101');
+            }, `trasaction InvalidType not supported`);
+        });
+    });
+});

@@ -1,5 +1,5 @@
 import { hexStr2byteArray } from './code.js';
-import { ADDRESS_PREFIX } from './address.js';
+import { ADDRESS_PREFIX } from './constants.js';
 import { getBase58CheckAddress, decodeBase58Address } from './crypto.js';
 import { byteArray2hexStr } from './bytes.js';
 

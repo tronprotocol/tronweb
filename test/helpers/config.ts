@@ -54,7 +54,7 @@ Djyb5403LJztsxdExbyQkm++Gg631CZus4xA77wMafGw37IhCE6sTBo=
 -----END RSA PRIVATE KEY-----`,
 
     getTokenOptions: () => {
-        const rnd = Math.random().toString(36).substr(2);
+        const rnd = Math.random().toString(36).substring(2);
         return {
             name: `Token${rnd}`,
             abbreviation: `T${rnd.substring(2).toUpperCase()}`,
