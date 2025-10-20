@@ -1,7 +1,6 @@
 import { assert } from 'chai';
 import { TronWeb, utils, TransactionBuilder } from '../setup/TronWeb.js';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
-import { arrayToBase64String } from '../../src/utils/crypto.js';
 
 describe('#TronWeb.utils.deserializeTx', function () {
     let tronWeb: TronWeb;
@@ -330,7 +329,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
             const value = dResult.contract[0].parameter.value;
 
             assert.equal(value.owner_address, account.address.hex);
-            assert.equal(Buffer.from(arrayToBase64String(value.url), 'base64').toString('utf8'), url);
+            assert.equal(value.url, url);
         });
 
         it('should throw error if raw_data_hex is empty', async () => {

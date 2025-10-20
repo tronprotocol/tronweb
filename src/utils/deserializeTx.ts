@@ -226,7 +226,7 @@ const DWitnessCreateContract = (type, rawDataHex) => {
     const witnessCreateContract = WitnessCreateContract.deserializeBinary(valuePb);
     commonData.contract[0].parameter.value = {
         owner_address: byteArray2hexStr(witnessCreateContract.getOwnerAddress_asU8()),
-        url: witnessCreateContract.getUrl(),
+        url: String.fromCharCode(...witnessCreateContract.getUrl_asU8()),
     };
     return commonData;
 };

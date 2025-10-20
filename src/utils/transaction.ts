@@ -53,7 +53,6 @@ const { ExchangeCreateContract, ExchangeInjectContract, ExchangeWithdrawContract
     globalThis.TronWebProto;
 
 import { byteArray2hexStr } from './bytes.js';
-import { hexStr2byteArray } from './code.js';
 import { sha256, keccak256 } from './ethersUtils.js';
 import TronWeb from '../tronweb.js';
 import { isHex } from './validations.js';
