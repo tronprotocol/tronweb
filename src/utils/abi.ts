@@ -1,5 +1,6 @@
 import { AbiCoder } from './ethersUtils.js';
-import { ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX, toHex } from './address.js';
+import { ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX } from './constants.js';
+import { toHex } from './address.js';
 import { FunctionFragment, AbiParamsCommon, GetOutputsType } from '../types/ABI.js';
 
 const abiCoder = new AbiCoder();

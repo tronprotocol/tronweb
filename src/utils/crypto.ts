@@ -1,11 +1,9 @@
-import { ADDRESS_PREFIX, ADDRESS_PREFIX_BYTE, ADDRESS_SIZE } from './address.js';
+import { ADDRESS_PREFIX, ADDRESS_PREFIX_BYTE, ADDRESS_SIZE } from './constants.js';
 import { base64EncodeToString, base64DecodeFromString, hexStr2byteArray } from './code.js';
 import { encode58, decode58 } from './base58.js';
 import { byte2hexStr, byteArray2hexStr } from './bytes.js';
-import { keccak256, sha256, SigningKey, recoverAddress, arrayify, Signature } from './ethersUtils.js';
-import { TypedDataEncoder } from './typedData.js';
+import { keccak256, sha256, recoverAddress, arrayify, Signature } from './ethersUtils.js';
 import { secp256k1 as secp } from 'ethereum-cryptography/secp256k1';
-import type { TypedDataDomain, TypedDataField } from 'ethers';
 import { SignedTransaction } from '../types/Transaction.js';
 
 import type { BytesLike } from '../types/UtilsTypes.js';
@@ -88,21 +86,6 @@ export function signBytes(privateKey: string | BytesLike, contents: BytesLike) {
     const signBytes = ECKeySign(hashBytes, privateKey);
 
     return signBytes;
-}
-
-export function _signTypedData(
-    domain: TypedDataDomain,
-    types: Record<string, Array<TypedDataField>>,
-    value: Record<string, any>,
-    privateKey: string
-) {
-    const key = `0x${privateKey.replace(/^0x/, '')}`;
-    const signingKey = new SigningKey(key);
-
-    const messageDigest = TypedDataEncoder.hash(domain, types, value);
-    const signature = signingKey.sign(messageDigest);
-    const signatureHex = ['0x', signature.r.substring(2), signature.s.substring(2), Number(signature.v).toString(16)].join('');
-    return signatureHex;
 }
 
 export function getRowBytesFromTransactionBase64(base64Data: string): Uint8Array {

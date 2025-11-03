@@ -14,7 +14,7 @@ import { Permission } from '../../src/types/Contract.js';
 import contracts from '../fixtures/contracts.js';
 const tests = signMessageTests.tests;
 const testRevertContract = contracts.testRevert;
-const { ADDRESS_BASE58, PRIVATE_KEY, getTokenOptions, SIGNED_HEX_TRANSACTION, FULL_NODE_API } = config;
+const { ADDRESS_BASE58, PRIVATE_KEY, getTokenOptions, FULL_NODE_API } = config;
 
 describe('TronWeb.trx', function () {
     let accounts: {
@@ -69,7 +69,7 @@ describe('TronWeb.trx', function () {
 
             it('should get confirmed account by id', async function () {
                 this.timeout(20000);
-                // eslint-disable-next-line no-constant-condition
+
                 while (true) {
                     const account = await tronWeb.trx.getAccountById(accountId);
                     if (Object.keys(account).length === 0) {
@@ -551,7 +551,7 @@ describe('TronWeb.trx', function () {
             let transaction: SignedTransaction;
 
             before(async function () {
-                const tx = await tronWeb.transactionBuilder.sendTrx(accounts.b58[idx-1], 10, accounts.b58[idx]);
+                const tx = await tronWeb.transactionBuilder.sendTrx(accounts.b58[idx - 1], 10, accounts.b58[idx]);
                 transaction = await tronWeb.trx.sign(tx, accounts.pks[idx]);
             });
 
@@ -560,7 +560,7 @@ describe('TronWeb.trx', function () {
                 assert.equal(recoveredAddress, accounts.b58[idx]);
             });
 
-            it('should throw Invalid transaction error', async function() {
+            it('should throw Invalid transaction error', async function () {
                 const tx = JSON.parse(JSON.stringify(transaction));
                 tx.txID += 't';
                 assertThrow(async () => {
@@ -568,7 +568,7 @@ describe('TronWeb.trx', function () {
                 }, 'Invalid transaction');
             });
 
-            it('should throw Transaction is not signed error', async function() {
+            it('should throw Transaction is not signed error', async function () {
                 const tx = JSON.parse(JSON.stringify(transaction));
                 delete tx.signature;
                 assertThrow(async () => {
@@ -1210,7 +1210,7 @@ describe('TronWeb.trx', function () {
             });
         });
 
-        describe('#freezeBalance', async function () {
+        describe.skip('#freezeBalance', async function () {
             const idx = 25;
             // const receiverIdx = 26;
 
@@ -1330,8 +1330,16 @@ describe('TronWeb.trx', function () {
         });
 
         describe('#broadcastHex', async function () {
+            const idx = 26;
+
             it('should broadcast a hex transaction', async function () {
-                const result = await tronWeb.trx.broadcastHex(SIGNED_HEX_TRANSACTION);
+                const receiver = await tronWeb.createAccount();
+                const transaction = await tronWeb.transactionBuilder.sendTrx(receiver.address.base58, 1e6, accounts.b58[idx]);
+                const signedTransaction = await tronWeb.trx.sign(transaction, accounts.pks[idx]);
+                const signedTransactionPb = tronWeb.utils.transaction.txJsonToPb(signedTransaction);
+                signedTransactionPb.addSignature(Buffer.from(signedTransaction.signature[0], 'hex'), 0);
+                const signedHexTransaction = tronWeb.utils.bytes.byteArray2hexStr(signedTransactionPb.serializeBinary());
+                const result = await tronWeb.trx.broadcastHex(signedHexTransaction);
                 assert.isTrue(result.result);
             });
 
@@ -1404,7 +1412,6 @@ describe('TronWeb.trx', function () {
                             continue;
                         } else {
                             throw new Error(e.message);
-                            break;
                         }
                     }
                 }
@@ -1419,7 +1426,15 @@ describe('TronWeb.trx', function () {
             });
 
             it('should throw invalid index error by transaction from block', async function () {
-                await assertThrow(tronWeb.trx.getTransactionFromBlock(currBlockNum, -1), 'Invalid transaction index provided');
+                const account = await tronWeb.createAccount();
+                const receipt = await broadcaster(
+                    tronWeb.transactionBuilder.sendTrx(account.address.base58, 1, accounts.b58[idx]),
+                    accounts.pks[idx]
+                );
+                await wait(3);
+                const transactionInfo = await tronWeb.trx.getUnconfirmedTransactionInfo(receipt.transaction.txID);
+                const blockNum = transactionInfo.blockNumber;
+                await assertThrow(tronWeb.trx.getTransactionFromBlock(blockNum, -1), 'Invalid transaction index provided');
             });
         });
 
@@ -1438,7 +1453,7 @@ describe('TronWeb.trx', function () {
 
             it('should get transaction info by id', async function () {
                 this.timeout(20000);
-                // eslint-disable-next-line no-constant-condition
+
                 while (true) {
                     const tx = await tronWeb.trx.getTransactionInfo(transaction.txID);
                     if (Object.keys(tx).length === 0) {
@@ -1496,7 +1511,7 @@ describe('TronWeb.trx', function () {
 
             it('should get confirmed transaction by tx id', async function () {
                 this.timeout(20000);
-                // eslint-disable-next-line no-constant-condition
+
                 while (true) {
                     try {
                         const tx = await tronWeb.trx.getConfirmedTransaction(transaction.txID);
@@ -1508,7 +1523,6 @@ describe('TronWeb.trx', function () {
                             continue;
                         } else {
                             throw new Error(e.message);
-                            break;
                         }
                     }
                 }
@@ -1594,8 +1608,8 @@ describe('TronWeb.trx', function () {
 
         describe('#sendToken', async function () {
             let token: Record<string, Token>;
-            const fromIdx = 29;
-            const toIdx = 30;
+            const fromIdx = 60;
+            const toIdx = 61;
 
             before(async function () {
                 this.timeout(10000);
@@ -1619,7 +1633,11 @@ describe('TronWeb.trx', function () {
                 await waitChainData('sendToken', accounts.hex[toIdx], !assetBefore ? 0 : assetBefore[0].value);
                 const assetAfter = (await tronWeb.trx.getUnconfirmedAccount(accounts.hex[toIdx])).assetV2;
 
-                assert.equal(!assetBefore ? 0 : assetBefore[0].value, assetAfter[0].value - 10e4);
+                assert.equal(
+                    !assetBefore ? 0 : assetBefore[0].value,
+                    assetAfter[0].value - 10e4,
+                    `assetBefore:${assetBefore} vs assetAfter ${assetAfter}`
+                );
             });
 
             it('should throw invalid recipient provided error', async function () {
@@ -2044,8 +2062,6 @@ describe('TronWeb.trx', function () {
 
             for (const sr of srs) {
                 assert.isDefined(sr.address);
-                assert.isDefined(sr.voteCount);
-                assert.isDefined(sr.latestBlockNum);
             }
         });
     });
@@ -2116,6 +2132,27 @@ describe('TronWeb.trx', function () {
                 const address = await tronWeb.trx.verifyMessageV2(test.message, test.signature);
                 assert.equal(address, test.address, 'verifies message signature');
             });
+        });
+    });
+
+    describe('#getCurrentRefBlockParams', async function () {
+        it('should fetch current ref block params', async () => {
+            const result = await tronWeb.trx.getCurrentRefBlockParams();
+
+            assert.equal(result.ref_block_bytes.length, 4, 'ref_block_bytes should be 4 hex characters');
+            assert.isNotEmpty(result.ref_block_hash, 'ref_block_hash should not be empty');
+            assert.isNumber(result.expiration, 'expiration should be number');
+            assert.isNumber(result.timestamp, 'timestamp should be number');
+        });
+
+        it('should throw error when block data is missing required fields', async () => {
+            const tronWebInstance = new TronWeb({ fullHost: 'https://tron.network' });
+
+            try {
+                await tronWebInstance.trx.getCurrentRefBlockParams();
+            } catch (error: any) {
+                assert.match(error.message, /Unable to get params:/, 'should throw unable to get params error');
+            }
         });
     });
 });

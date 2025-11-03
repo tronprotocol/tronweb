@@ -10,7 +10,7 @@ describe('TronWeb.utils', function () {
             assert.isTrue(tronWeb.utils.isValidURL('https://some.example.com:9090/casa?qe=3'));
             assert.isTrue(tronWeb.utils.isValidURL('www.example.com/welcome'));
 
-            assert.isTrue(tronWeb.utils.isValidURL('http:/some.example.com'));
+            assert.isTrue(tronWeb.utils.isValidURL('http://some.example.com'));
         });
     });
 
@@ -177,7 +177,7 @@ describe('TronWeb.utils', function () {
 
             // @ts-ignore
             const mapped = tronWeb.utils.mapEvent(event);
-            for (let key in mapped) {
+            for (const key in mapped) {
                 // @ts-ignore
                 assert.equal(mapped[key], expected[key]);
             }
@@ -214,7 +214,10 @@ describe('TronWeb.utils', function () {
             const string = '0x' + Buffer.from('some string').toString('hex');
             const hash = tronWeb.utils.ethersUtils.sha512(string);
 
-            assert.equal(hash, '0x14925e01a7a0cf0801aa95fe52d542b578af58ae7997ada66db3a6eae68a329d50600a5b7b442eabf4ea77ea8ef5fe40acf2ab31d47311b2a232c4f64009aac1');
+            assert.equal(
+                hash,
+                '0x14925e01a7a0cf0801aa95fe52d542b578af58ae7997ada66db3a6eae68a329d50600a5b7b442eabf4ea77ea8ef5fe40acf2ab31d47311b2a232c4f64009aac1'
+            );
         });
 
         it('should import pbkdf2 from ethers and has a string', function () {
