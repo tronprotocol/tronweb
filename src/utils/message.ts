@@ -1,5 +1,5 @@
 import { keccak256, toUtf8Bytes, concat, recoverAddress, SigningKey, joinSignature } from './ethersUtils.js';
-import { ADDRESS_PREFIX } from './address.js';
+import { ADDRESS_PREFIX } from './constants.js';
 import { getBase58CheckAddress } from './crypto.js';
 import { hexStr2byteArray } from './code.js';
 
