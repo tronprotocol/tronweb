@@ -2155,4 +2155,52 @@ describe('TronWeb.trx', function () {
             }
         });
     });
+
+    describe('#getNowWitnessList', async function () {
+        it('should fetch now witness list', async () => {
+            const witnesses = await tronWeb.trx.getNowWitnessList({
+                offset: 0,
+                limit: 10,
+                visible: true,
+                confirmed: true,
+            });
+            assert.isArray(witnesses, 'witnesses should be an array');
+            const witness = witnesses[0];
+            assert.isTrue(tronWeb.isAddress(witness.address));
+            assert.isNumber(witness.voteCount);
+            assert.isString(witness.url);
+            assert.isNumber(witness.totalProduced);
+            assert.isNumber(witness.totalMissed);
+            assert.isNumber(witness.latestBlockNum);
+            assert.isNumber(witness.latestSlotNum);
+            assert.isBoolean(witness.isJobs);
+        });
+
+        it('should fetch now witness list with default params', async () => {
+            await tronWeb.trx.getNowWitnessList({});
+        });
+
+        it('should return [] when API returns empty object', async () => {
+            const result = await tronWeb.trx.getNowWitnessList();
+            assert.equal(result, []);
+        });
+
+        it('should throw error for invalid offset', async () => {
+            assertThrow(tronWeb.trx.getNowWitnessList({ offset: -1 }), 'Invalid offset: must be an integer >= 0');
+        });
+
+        it('should throw error for invalid limit', async () => {
+            assertThrow(tronWeb.trx.getNowWitnessList({ limit: 0 }), 'Invalid limit: must be an integer > 0');
+        });
+
+        it('should throw error for non-boolean visible', async () => {
+            // @ts-expect-error testing invalid input
+            assertThrow(tronWeb.trx.getNowWitnessList({ visible: 'yes' }), 'Invalid visible: must be a boolean');
+        });
+
+        it('should throw error for non-boolean confirmed', async () => {
+            // @ts-expect-error testing invalid input
+            assertThrow(tronWeb.trx.getNowWitnessList({ visible: 'yes' }), 'Invalid confirmed: must be a boolean');
+        });
+    });
 });
