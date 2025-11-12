@@ -551,8 +551,8 @@ describe('#TronWeb.utils.deserializeTx', function () {
         const totalSupply = 1e9;
         const trxRatio = 1000;
         const tokenRatio = 10;
-        const saleStart = Date.now() + 60 * 1000;
-        const saleEnd = Date.now() + 30 * 24 * 60 * 60 * 1000;
+        let saleStart = Date.now() + 60 * 1000;
+        let saleEnd = saleStart + 30 * 24 * 60 * 60 * 1000;
         const description = 'This is a test token';
         const url = 'https://example.com';
         const freeBandwidth = 1e9;
@@ -564,6 +564,8 @@ describe('#TronWeb.utils.deserializeTx', function () {
         before(async () => {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
+            saleStart = Date.now() + 60 * 1000;
+            saleEnd = saleStart + 30 * 24 * 60 * 60 * 1000;
             tx = await tronWeb.transactionBuilder.createToken({
                 name,
                 abbreviation,

@@ -5,7 +5,7 @@ import GetNowBlock from '../helpers/GetNowBlock.js';
 import BlockLib from '../helpers/BlockLib.js';
 import { Block } from '../../src/types/APIResponse';
 
-declare namespace globalThis {
+declare global {
     interface MyTronWeb1 extends TronWeb {
         trx: {
             getCurrentBlock(): Promise<Block & { fromPlugin: true }>;
@@ -38,7 +38,7 @@ describe('TronWeb.lib.plugin', async function () {
         it('should register the plugin GetNowBlock', async function () {
             const someParameter = 'someValue';
 
-            let result = tronWeb.plugin.register(GetNowBlock, {
+            const result = tronWeb.plugin.register(GetNowBlock, {
                 someParameter,
             });
             assert.isTrue(result.skipped.includes('_parseToken'));
@@ -66,8 +66,8 @@ describe('TronWeb.lib.plugin', async function () {
         });
 
         it('should not register if tronWeb is instantiated with the disablePlugins option', async function () {
-            let tronWeb2 = tronWebBuilder.createInstance({ disablePlugins: true });
-            let result = tronWeb2.plugin.register(BlockLib);
+            const tronWeb2 = tronWebBuilder.createInstance({ disablePlugins: true });
+            const result = tronWeb2.plugin.register(BlockLib);
             assert.isTrue(typeof result.error === 'string');
         });
     });
