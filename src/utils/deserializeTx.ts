@@ -17,6 +17,14 @@ const {
     UnDelegateResourceContract,
 } = globalThis.TronWebProto;
 
+import '../protocol/core/contract/asset_issue_contract_pb.cjs';
+const {
+    TransferAssetContract,
+    ParticipateAssetIssueContract,
+    AssetIssueContract,
+    UpdateAssetContract
+} = globalThis.TronWebProto;
+
 import '../protocol/core/contract/smart_contract_pb.cjs';
 const { TriggerSmartContract } = globalThis.TronWebProto;
 
@@ -226,7 +234,70 @@ const DWitnessCreateContract = (type, rawDataHex) => {
     const witnessCreateContract = WitnessCreateContract.deserializeBinary(valuePb);
     commonData.contract[0].parameter.value = {
         owner_address: byteArray2hexStr(witnessCreateContract.getOwnerAddress_asU8()),
-        url: String.fromCharCode(...witnessCreateContract.getUrl_asU8()),
+        url: byteArray2hexStr(witnessCreateContract.getUrl_asU8()),
+    };
+    return commonData;
+};
+
+const DTransferAssetContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const transferAssetContract = TransferAssetContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(transferAssetContract.getOwnerAddress_asU8()),
+        to_address: byteArray2hexStr(transferAssetContract.getToAddress_asU8()),
+        asset_name: byteArray2hexStr(transferAssetContract.getAssetName_asU8()),
+        amount: transferAssetContract.getAmount(),
+    };
+    return commonData;
+};
+
+const DParticipateAssetIssueContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const participateAssetIssueContract = ParticipateAssetIssueContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(participateAssetIssueContract.getOwnerAddress_asU8()),
+        to_address: byteArray2hexStr(participateAssetIssueContract.getToAddress_asU8()),
+        asset_name: byteArray2hexStr(participateAssetIssueContract.getAssetName_asU8()),
+        amount: participateAssetIssueContract.getAmount(),
+    };
+    return commonData;
+};
+
+const DAssetIssueContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const assetIssueContract = AssetIssueContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(assetIssueContract.getOwnerAddress_asU8()),
+        name: byteArray2hexStr(assetIssueContract.getName_asU8()),
+        abbr: byteArray2hexStr(assetIssueContract.getAbbr_asU8()),
+        description: byteArray2hexStr(assetIssueContract.getDescription_asU8()),
+        url: byteArray2hexStr(assetIssueContract.getUrl_asU8()),
+        total_supply: assetIssueContract.getTotalSupply(),
+        trx_num: assetIssueContract.getTrxNum(),
+        num: assetIssueContract.getNum(),
+        start_time: assetIssueContract.getStartTime(),
+        end_time: assetIssueContract.getEndTime(),
+        frozen_supply: assetIssueContract.getFrozenSupplyList().map((frozenPb) => ({
+            frozen_amount: frozenPb.getFrozenAmount(),
+            frozen_days: frozenPb.getFrozenDays(),
+        })),
+        free_asset_net_limit: assetIssueContract.getFreeAssetNetLimit(),
+        public_free_asset_net_limit: assetIssueContract.getPublicFreeAssetNetLimit(),
+        precision: assetIssueContract.getPrecision(),
+        vote_score: assetIssueContract.getVoteScore(),
+    };
+    return commonData;
+};
+
+const DUpdateAssetContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const updateAssetContract = UpdateAssetContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(updateAssetContract.getOwnerAddress_asU8()),
+        description: byteArray2hexStr(updateAssetContract.getDescription_asU8()),
+        url: byteArray2hexStr(updateAssetContract.getUrl_asU8()),
+        new_limit: updateAssetContract.getNewLimit(),
+        new_public_limit: updateAssetContract.getNewPublicLimit(),
     };
     return commonData;
 };
@@ -259,6 +330,14 @@ const deserializeTransaction = (type: string, rawDataHex: string) => {
             return DWithdrawBalanceContract(type, rawDataHex);
         case 'WitnessCreateContract':
             return DWitnessCreateContract(type, rawDataHex);
+        case 'TransferAssetContract':
+            return DTransferAssetContract(type, rawDataHex);
+        case 'ParticipateAssetIssueContract':
+            return DParticipateAssetIssueContract(type, rawDataHex);
+        case 'AssetIssueContract':
+            return DAssetIssueContract(type, rawDataHex);
+        case 'UpdateAssetContract':
+            return DUpdateAssetContract(type, rawDataHex);
         default:
             throw new Error(`trasaction ${type} not supported`);
     }
