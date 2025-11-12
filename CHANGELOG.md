@@ -1,6 +1,21 @@
 Change Log
 =========
 
+__6.2.0__
+
+## New Features
+
+- **`trx.getNowWitnessList`**
+  Added a new method to retrieve the witness list with real-time vote counts. This feature is available for JAVA-TRON v4.8.1 and above.
+
+- **New deserialization support**  
+  Added support for deserializing the following transaction types from `raw_data_hex`:
+
+    - `TransferAssetContract`
+    - `ParticipateAssetIssueContract`
+    - `AssetIssueContract`
+    - `UpdateAssetContract`
+
 __6.1.0__
 
 ## New Features
