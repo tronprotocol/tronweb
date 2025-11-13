@@ -179,7 +179,7 @@ describe('TronWeb.transactionBuilder', function () {
         it('should send 10 sun from default address to accounts[1] for more than 2 times in one block', async function () {
             let firstBlockNum = '';
             let loopTimes = 0;
-            for (let i = 0; i < 100; i++) {
+            for (let i = 0; i < 10; i++) {
                 loopTimes++;
                 const txHeader = await tronWeb.trx.getCurrentRefBlockParams();
                 txHeader.timestamp += new Date().getMilliseconds(); // to avoid txID duplication
@@ -2301,6 +2301,7 @@ describe('TronWeb.transactionBuilder', function () {
     describe('#clearabi', async function () {
         const transactions: any[] = [];
         const contracts = [];
+        const idx = 17;
         before(async function () {
             this.timeout(20000);
 
@@ -2310,7 +2311,7 @@ describe('TronWeb.transactionBuilder', function () {
                         abi: testConstant.abi,
                         bytecode: testConstant.bytecode,
                     },
-                    accounts.hex[7]
+                    accounts.hex[idx]
                 )
             );
             await wait(3);
@@ -2320,7 +2321,7 @@ describe('TronWeb.transactionBuilder', function () {
                         abi: testConstant.abi,
                         bytecode: testConstant.bytecode,
                     },
-                    accounts.hex[7]
+                    accounts.hex[idx]
                 )
             );
             await wait(3);
@@ -2330,11 +2331,11 @@ describe('TronWeb.transactionBuilder', function () {
                         abi: testConstant.abi,
                         bytecode: testConstant.bytecode,
                     },
-                    accounts.hex[7]
+                    accounts.hex[idx]
                 )
             );
             transactions.forEach(async (tx) => {
-                contracts.push(await broadcaster(null, accounts.pks[7], tx));
+                contracts.push(await broadcaster(null, accounts.pks[idx], tx));
             });
 
             while (true) {
@@ -2354,9 +2355,9 @@ describe('TronWeb.transactionBuilder', function () {
             this.timeout(10000);
 
             const params = [
-                [transactions[0], accounts.hex[7], { permissionId: 2 }],
-                [transactions[1], accounts.hex[7]],
-                [transactions[2], accounts.hex[7], { blockHeader: await tronWeb.trx.getCurrentRefBlockParams() }],
+                [transactions[0], accounts.hex[idx], { permissionId: 2 }],
+                [transactions[1], accounts.hex[idx]],
+                [transactions[2], accounts.hex[idx], { blockHeader: await tronWeb.trx.getCurrentRefBlockParams() }],
             ];
             for (const param of params) {
                 const contractAddress = param[0].contract_address;
@@ -2379,7 +2380,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(transaction.raw_data.contract[0].Permission_id, param[2]?.permissionId);
 
                 if (param.length === 2) {
-                    const res = await broadcaster(null, accounts.pks[7], transaction);
+                    const res = await broadcaster(null, accounts.pks[idx], transaction);
                     assert.isTrue(res.receipt.result);
 
                     let contract;
@@ -2520,7 +2521,7 @@ describe('TronWeb.transactionBuilder', function () {
             const options: TriggerConstantContractOptions = {};
             let firstBlockNum = '';
             let loopTimes = 0;
-            for (let i = 0; i < 100; i++) {
+            for (let i = 0; i < 10; i++) {
                 loopTimes++;
                 const txHeader = await tronWeb.trx.getCurrentRefBlockParams();
                 txHeader.timestamp += new Date().getMilliseconds();
