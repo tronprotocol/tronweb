@@ -8,7 +8,6 @@
         "test",
         "scripts",
         "src/utils/fragments.ts",
-        "src/utils/interface.ts",
-        "src/utils/typedData.ts"
+        "src/utils/interface.ts"
     ]
 }
