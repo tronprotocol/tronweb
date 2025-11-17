@@ -1546,6 +1546,10 @@ export class Trx {
 
         const result = await node.request<WitnessList | Record<string, any>>(endpoint, data, 'post');
 
+        if ((result as Record<string, any>)?.Error) {
+            throw new Error((result as Record<string, any>).Error);
+        }
+
         return Array.isArray(result?.witnesses) ? result.witnesses : [];
     }
 }
