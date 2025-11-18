@@ -2289,22 +2289,31 @@ describe('TronWeb.trx', function () {
             assert.equal(result, []);
         });
 
+        it('should throw error for server returned error', async () => {
+            class MockNode extends tronWebBuilder.providers.HttpProvider {
+                async request<T>(_url: string, _data?: any, _method?: 'get' | 'post'): Promise<T> {
+                    return {
+                        Error: 'Some server error',
+                    } as unknown as T;
+                }
+            }
+            const tronWeb = new TronWeb({
+                fullHost: new MockNode('https://mock.tron.network'),
+            });
+            await assertThrow(tronWeb.trx.getNowWitnessList({}), 'Some server error');
+        });
+
         it('should throw error for invalid offset', async () => {
-            assertThrow(tronWeb.trx.getNowWitnessList({ offset: -1 }), 'Invalid offset: must be an integer >= 0');
+            await assertThrow(tronWeb.trx.getNowWitnessList({ offset: -1 }), 'Invalid offset: must be an integer >= 0');
         });
 
         it('should throw error for invalid limit', async () => {
-            assertThrow(tronWeb.trx.getNowWitnessList({ limit: 0 }), 'Invalid limit: must be an integer > 0');
+            await assertThrow(tronWeb.trx.getNowWitnessList({ limit: 0 }), 'Invalid limit: must be an integer > 0');
         });
 
         it('should throw error for non-boolean visible', async () => {
             // @ts-expect-error testing invalid input
-            assertThrow(tronWeb.trx.getNowWitnessList({ visible: 'yes' }), 'Invalid visible: must be a boolean');
-        });
-
-        it('should throw error for non-boolean confirmed', async () => {
-            // @ts-expect-error testing invalid input
-            assertThrow(tronWeb.trx.getNowWitnessList({ visible: 'yes' }), 'Invalid confirmed: must be a boolean');
+            await assertThrow(tronWeb.trx.getNowWitnessList({ visible: 'yes' }), 'Invalid visible: must be a boolean');
         });
     });
 });
