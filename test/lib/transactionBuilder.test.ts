@@ -3071,6 +3071,49 @@ describe('TronWeb.transactionBuilder', function () {
             const receipt2 = await tronWeb.trx.sendRawTransaction(signedSendTx);
             assert.isTrue(receipt2.result);
         });
+        it('should not throw error when permission keys include weight bigger than threshold', async function () {
+            const permissionData = {
+                owner: {
+                    type: 0,
+                    keys: [
+                        {
+                            address: accounts.hex[6],
+                            weight: 5,
+                        },
+                        {
+                            address: accounts.hex[7],
+                            weight: 5,
+                        },
+                    ],
+                    threshold: 3,
+                    permission_name: 'owner',
+                },
+                witness: null,
+                owner_address: accounts.hex[6],
+                actives: [
+                    {
+                        operations: '7fff1fc0033e0000000000000000000000000000000000000000000000000000',
+                        keys: [
+                            {
+                                address: accounts.hex[6],
+                                weight: 2,
+                            },
+                        ],
+                        threshold: 1,
+                        id: 2,
+                        type: 2,
+                        permission_name: 'active',
+                    }
+                ],
+            };
+            const tx = await tronWeb.transactionBuilder.updateAccountPermissions(
+                permissionData.owner_address,
+                permissionData.owner,
+                permissionData.witness,
+                permissionData.actives
+            );
+            assert.isObject(tx);
+        });
     });
 
     describe('Alter existent transactions', async function () {

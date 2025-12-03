@@ -2293,7 +2293,6 @@ export class TransactionBuilder {
                 if (
                     !TronWeb.isAddress(key.address) ||
                     !isInteger(key.weight) ||
-                    key.weight > permissions.threshold ||
                     key.weight < 1 ||
                     (type === 2 && !permissions.operations)
                 ) {
