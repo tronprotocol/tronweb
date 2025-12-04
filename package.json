@@ -20,6 +20,13 @@
             "require": "./lib/commonjs/utils/index.js"
         }
     },
+    "typesVersions": {
+        "*": {
+            "utils": [
+                "lib/esm/utils/index.d.ts"
+            ]
+        }
+    },
     "keywords": [
         "TRON",
         "tronweb"
