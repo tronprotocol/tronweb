@@ -1431,9 +1431,12 @@ describe('TronWeb.trx', function () {
                     tronWeb.transactionBuilder.sendTrx(account.address.base58, 1, accounts.b58[idx]),
                     accounts.pks[idx]
                 );
-                await wait(3);
-                const transactionInfo = await tronWeb.trx.getUnconfirmedTransactionInfo(receipt.transaction.txID);
-                const blockNum = transactionInfo.blockNumber;
+                let blockNum;
+                do {
+                    await wait(3);
+                    const transactionInfo = await tronWeb.trx.getUnconfirmedTransactionInfo(receipt.transaction.txID);
+                    blockNum = transactionInfo.blockNumber;
+                } while (!blockNum);
                 await assertThrow(tronWeb.trx.getTransactionFromBlock(blockNum, -1), 'Invalid transaction index provided');
             });
         });
