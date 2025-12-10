@@ -2348,8 +2348,8 @@ describe('TronWeb.transactionBuilder', function () {
 
             const params = [
                 [transactions[0], accounts.hex[7], { permissionId: 2 }],
-                [transactions[1], accounts.hex[7]],
                 [transactions[2], accounts.hex[7], { blockHeader: await tronWeb.trx.getCurrentRefBlockParams() }],
+                [transactions[1], accounts.hex[7]],
             ];
             for (const param of params) {
                 const contractAddress = param[0].contract_address;
