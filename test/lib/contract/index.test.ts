@@ -42,8 +42,16 @@ describe('#contract.index', function () {
 
         it('should revert with custom error', async () => {
             const txid = await customError.test(111).send();
-            await wait(10);
-            const data = await tronWeb.trx.getTransactionInfo(txid);
+            let data;
+            while (true) {
+                data = await tronWeb.trx.getTransactionInfo(txid);
+                if (Object.keys(data).length === 0) {
+                    await wait(3);
+                    continue;
+                } else {
+                    break;
+                }
+            }
             const errorData = data.contractResult;
             const expectedErrorData =
                 TronWeb.sha3('CustomError(uint256,uint256)', false).slice(0, 8) +

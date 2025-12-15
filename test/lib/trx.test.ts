@@ -1380,32 +1380,32 @@ describe('TronWeb.trx', function () {
 
         describe('#getTransactionFromBlock', async function () {
             const idx = 26;
-            let transaction;
+            let transaction: Transaction;
             let currBlockNum: number;
 
             before(async function () {
                 this.timeout(10000);
-                // await wait(5); // wait for new clear block generated
-                transaction = await tronWeb.trx.freezeBalance(10e5, 3, 'BANDWIDTH', {
-                    privateKey: accounts.pks[idx],
-                    address: accounts.hex[idx],
-                });
-                transaction = transaction.transaction;
-                const currBlock = await tronWeb.trx.getBlock('latest');
-                currBlockNum = currBlock.block_header.raw_data.number;
+                await wait(5); // wait for new clear block generated in tre
+                const receipt = await broadcaster(
+                    tronWeb.transactionBuilder.sendTrx(accounts.hex[idx], 1),
+                );
+                transaction = receipt.transaction;
+                await wait(3);
+                const transactionInfo = await tronWeb.trx.getUnconfirmedTransactionInfo(transaction.txID);
+                currBlockNum = transactionInfo.blockNumber;
             });
 
             it('should get transaction from block', async function () {
                 this.timeout(10000);
-                for (let i = currBlockNum; i < currBlockNum + 3; ) {
+                while (true) {
                     try {
-                        const tx = await tronWeb.trx.getTransactionFromBlock(i, 0);
-                        // assert.equal(tx.txID, transaction.txID);
-                        assert.isDefined(tx.txID);
+                        const tx = await tronWeb.trx.getTransactionFromBlock(currBlockNum, 0);
+                        assert.equal(tx.txID, transaction.txID);
                         break;
                     } catch (e: any) {
+                        console.log(e.message);
                         if (e.message === 'Transaction not found in block') {
-                            i++;
+                            await wait(3);
                             continue;
                         } else if (e.message === 'Block not found') {
                             await wait(3);
@@ -1431,9 +1431,12 @@ describe('TronWeb.trx', function () {
                     tronWeb.transactionBuilder.sendTrx(account.address.base58, 1, accounts.b58[idx]),
                     accounts.pks[idx]
                 );
-                await wait(3);
-                const transactionInfo = await tronWeb.trx.getUnconfirmedTransactionInfo(receipt.transaction.txID);
-                const blockNum = transactionInfo.blockNumber;
+                let blockNum;
+                do {
+                    await wait(3);
+                    const transactionInfo = await tronWeb.trx.getUnconfirmedTransactionInfo(receipt.transaction.txID);
+                    blockNum = transactionInfo.blockNumber;
+                } while (!blockNum);
                 await assertThrow(tronWeb.trx.getTransactionFromBlock(blockNum, -1), 'Invalid transaction index provided');
             });
         });
