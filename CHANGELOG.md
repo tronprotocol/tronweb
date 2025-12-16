@@ -1,6 +1,14 @@
 Change Log
 =========
 
+__6.1.1__
+
+## Changes
+
+- Remove dependency `jsonwebtoken`.
+- Bump `validator` from v13.15.20 to v13.15.23.
+- Address other audit issues.
+
 __6.1.0__
 
 ## New Features
