@@ -2348,9 +2348,9 @@ describe('TronWeb.transactionBuilder', function () {
             this.timeout(10000);
 
             const params = [
-                [transactions[0], accounts.hex[7], { permissionId: 2 }],
-                [transactions[2], accounts.hex[7], { blockHeader: await tronWeb.trx.getCurrentRefBlockParams() }],
-                [transactions[1], accounts.hex[7]],
+                [transactions[0], accounts.hex[idx], { permissionId: 2 }],
+                [transactions[2], accounts.hex[idx], { blockHeader: await tronWeb.trx.getCurrentRefBlockParams() }],
+                [transactions[1], accounts.hex[idx]],
             ];
             for (const param of params) {
                 const contractAddress = param[0].contract_address;
