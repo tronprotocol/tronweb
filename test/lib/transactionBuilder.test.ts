@@ -176,25 +176,18 @@ describe('TronWeb.transactionBuilder', function () {
             );
         });
 
-        it('should send 10 sun from default address to accounts[1] for more than 2 times in one block', async function () {
-            let firstBlockNum = '';
-            let loopTimes = 0;
+        it('should send 10 sun from default address to accounts[1] for 10 times in one block', async function () {
+            const curTime = Date.now();
+            const txHeader = await tronWeb.trx.getCurrentRefBlockParams();
+            const originTimestamp = txHeader.timestamp;
             for (let i = 0; i < 10; i++) {
-                loopTimes++;
-                const txHeader = await tronWeb.trx.getCurrentRefBlockParams();
-                txHeader.timestamp += new Date().getMilliseconds(); // to avoid txID duplication
+                // to avoid txID duplication
+                txHeader.timestamp = originTimestamp + Date.now() - curTime;
                 const res = await broadcaster(
                     tronWeb.transactionBuilder.sendTrx(accounts.b58[1], 10, undefined, { blockHeader: txHeader })
                 );
-                if (firstBlockNum === '') {
-                    firstBlockNum = res.transaction.raw_data.ref_block_bytes;
-                } else {
-                    if (firstBlockNum !== res.transaction.raw_data.ref_block_bytes) break;
-                }
-
                 assert.isTrue(res.receipt.result);
             }
-            assert.isAtLeast(loopTimes, 2, 'loopTimes is less than 2 times, should rerun');
         });
     });
 
@@ -2355,9 +2348,9 @@ describe('TronWeb.transactionBuilder', function () {
             this.timeout(10000);
 
             const params = [
-                [transactions[0], accounts.hex[idx], { permissionId: 2 }],
-                [transactions[1], accounts.hex[idx]],
-                [transactions[2], accounts.hex[idx], { blockHeader: await tronWeb.trx.getCurrentRefBlockParams() }],
+                [transactions[0], accounts.hex[7], { permissionId: 2 }],
+                [transactions[2], accounts.hex[7], { blockHeader: await tronWeb.trx.getCurrentRefBlockParams() }],
+                [transactions[1], accounts.hex[7]],
             ];
             for (const param of params) {
                 const contractAddress = param[0].contract_address;
@@ -2519,12 +2512,11 @@ describe('TronWeb.transactionBuilder', function () {
             const functionSelector = 'store(uint256)';
             const parameter = [{ type: 'uint256', value: 1 }];
             const options: TriggerConstantContractOptions = {};
-            let firstBlockNum = '';
-            let loopTimes = 0;
+            const curTime = Date.now();
+            const txHeader = await tronWeb.trx.getCurrentRefBlockParams();
+            const originTimestamp = txHeader.timestamp;
             for (let i = 0; i < 10; i++) {
-                loopTimes++;
-                const txHeader = await tronWeb.trx.getCurrentRefBlockParams();
-                txHeader.timestamp += new Date().getMilliseconds();
+                txHeader.timestamp = originTimestamp + Date.now() - curTime; // ensure unique timestamp
                 options.blockHeader = txHeader;
                 const tx = await tronWeb.transactionBuilder.triggerSmartContract(
                     contractAddress,
@@ -2533,15 +2525,9 @@ describe('TronWeb.transactionBuilder', function () {
                     parameter,
                     issuerAddress
                 );
-                if (firstBlockNum === '') {
-                    firstBlockNum = tx.transaction.raw_data.ref_block_bytes;
-                } else {
-                    if (firstBlockNum !== tx.transaction.raw_data.ref_block_bytes) break;
-                }
                 const { receipt } = await broadcaster(null, accounts.pks[6], tx.transaction);
                 assert.isTrue(receipt.result);
             }
-            assert.isAtLeast(loopTimes, 2, 'loopTimes is less than 2 times, should rerun');
         });
     });
 
