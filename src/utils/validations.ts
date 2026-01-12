@@ -1,5 +1,5 @@
 import { BigNumber } from 'bignumber.js';
-import { isURL } from 'validator';
+import validator from 'validator';
 import { ADDRESS_PREFIX } from './constants.js';
 import { AbiParamsCommon } from '../types/ABI.js';
 import { IBigNumber } from '../types/TronWeb.js';
@@ -8,7 +8,7 @@ import type { EventQueryDataType, MapEventQueryDataType } from '../types/UtilsTy
 
 export function isValidURL(url: string): boolean {
     if (typeof url !== 'string') return false;
-    return isURL(url.toString(), {
+    return validator.isURL(url.toString(), {
         protocols: ['http', 'https'],
         require_tld: false,
     });
