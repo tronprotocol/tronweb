@@ -12,6 +12,7 @@ import { Address, Exchange, Proposal, Token } from '../../src/types/Trx.js';
 import { CreateSmartContractTransaction, SignedTransaction, Transaction } from '../../src/types/Transaction.js';
 import { Permission } from '../../src/types/Contract.js';
 import contracts from '../fixtures/contracts.js';
+import { BlockWithoutDetail } from '../../src/types/APIResponse.js';
 const tests = signMessageTests.tests;
 const testRevertContract = contracts.testRevert;
 const { ADDRESS_BASE58, PRIVATE_KEY, getTokenOptions, FULL_NODE_API } = config;
@@ -1461,18 +1462,19 @@ describe('TronWeb.trx', function () {
 
         describe('#getTransactionsFromBlock', async function () {
             const idx = 26;
-            let transaction;
             let currBlockNum: number;
 
             before(async function () {
                 this.timeout(10000);
-                transaction = await tronWeb.trx.freezeBalance(10e5, 3, 'BANDWIDTH', {
-                    privateKey: accounts.pks[idx],
-                    address: accounts.hex[idx],
-                });
-                transaction = transaction.transaction;
-                const currBlock = await tronWeb.trx.getBlock('latest');
-                currBlockNum = currBlock.block_header.raw_data.number;
+                await tronWeb.fullNode.request<BlockWithoutDetail>(
+                    'wallet/getblock',
+                    { detail: false },
+                    'post'
+                );
+                const receipt = await tronWeb.trx.sendTrx(accounts.hex[idx], 1e6);
+                await wait(3);
+                const transaction = await tronWeb.trx.getUnconfirmedTransactionInfo(receipt.txid);
+                currBlockNum = transaction.blockNumber;
             });
 
             it('should get transactions from block', async function () {
