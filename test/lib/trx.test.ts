@@ -1459,7 +1459,7 @@ describe('TronWeb.trx', function () {
             });
         });
 
-        describe.only('#getTransactionsFromBlock', async function () {
+        describe('#getTransactionsFromBlock', async function () {
             const idx = 26;
             let currBlockNum: number;
 
