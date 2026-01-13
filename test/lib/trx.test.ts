@@ -2284,8 +2284,16 @@ describe('TronWeb.trx', function () {
         });
 
         it('should return [] when API returns empty object', async () => {
+            class MockNode extends tronWebBuilder.providers.HttpProvider {
+                async request<T>(_url: string, _data?: any, _method?: 'get' | 'post'): Promise<T> {
+                    return {} as unknown as T;
+                }
+            }
+            const tronWeb = new TronWeb({
+                fullHost: new MockNode('https://mock.tron.network'),
+            });
             const result = await tronWeb.trx.getNowWitnessList();
-            assert.equal(result, []);
+            assert.deepEqual(result, []);
         });
 
         it('should throw error for server returned error', async () => {
