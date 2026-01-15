@@ -3169,7 +3169,7 @@ describe('TronWeb.transactionBuilder', function () {
 
                 let transaction = await tronWeb.transactionBuilder.sendTrx(receiver, 10, sender);
                 const data = 'Sending money to Bill.';
-                transaction = (await tronWeb.transactionBuilder.addUpdateData(transaction, data)) as any;
+                transaction = await tronWeb.transactionBuilder.addUpdateData(transaction, data);
                 const id = transaction.txID;
                 await broadcaster(null, privateKey, transaction);
                 await waitChainData('tx', id);
@@ -3188,9 +3188,9 @@ describe('TronWeb.transactionBuilder', function () {
 
                 let transaction = await tronWeb.transactionBuilder.sendTrx(receiver, 10, sender);
                 const data = 'Sending money to Bill.';
-                transaction = (await tronWeb.transactionBuilder.addUpdateData(transaction, data, 'utf8', {
+                transaction = await tronWeb.transactionBuilder.addUpdateData(transaction, data, 'utf8', {
                     txLocal: true,
-                })) as any;
+                });
                 const id = transaction.txID;
                 await broadcaster(null, privateKey, transaction);
                 await waitChainData('tx', id);

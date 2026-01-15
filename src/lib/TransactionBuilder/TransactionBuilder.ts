@@ -2432,7 +2432,7 @@ export class TransactionBuilder {
         }
     }
 
-    async alterTransaction(transaction: Transaction, options: AlterTransactionOptions = {}) {
+    async alterTransaction<T extends Transaction>(transaction: T, options: AlterTransactionOptions = {}) {
         if (Reflect.has(transaction, 'signature')) throw new Error('You can not extend the expiration of a signed transaction.');
 
         if (options.data) {
@@ -2454,11 +2454,11 @@ export class TransactionBuilder {
         return await this.newTxID(transaction, { txLocal: options.txLocal });
     }
 
-    async extendExpiration(transaction: Transaction, extension: number, options: TxLocal = {}) {
+    async extendExpiration<T extends Transaction>(transaction: T, extension: number, options: TxLocal = {}) {
         return await this.alterTransaction(transaction, { extension, txLocal: options?.txLocal });
     }
 
-    async addUpdateData(transaction: Transaction, data: string, dataFormat: 'utf8' | 'hex' = 'utf8', options: TxLocal = {}) {
+    async addUpdateData<T extends Transaction>(transaction: T, data: string, dataFormat: 'utf8' | 'hex' = 'utf8', options: TxLocal = {}) {
         return this.alterTransaction(transaction, { data, dataFormat: dataFormat as string, txLocal: options?.txLocal });
     }
 }
