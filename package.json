@@ -1,6 +1,6 @@
 {
     "name": "tronweb",
-    "version": "6.1.1",
+    "version": "6.2.0",
     "description": "JavaScript SDK that encapsulates the TRON HTTP API",
     "main": "./lib/commonjs/index.js",
     "module": "./lib/esm/index.js",
@@ -18,6 +18,13 @@
         "./utils": {
             "import": "./lib/esm/utils/index.js",
             "require": "./lib/commonjs/utils/index.js"
+        }
+    },
+    "typesVersions": {
+        "*": {
+            "utils": [
+                "lib/esm/utils/index.d.ts"
+            ]
         }
     },
     "keywords": [

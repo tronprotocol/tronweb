@@ -2294,6 +2294,7 @@ describe('TronWeb.transactionBuilder', function () {
     describe('#clearabi', async function () {
         const transactions: any[] = [];
         const contracts = [];
+        const idx = 17;
         before(async function () {
             this.timeout(20000);
 
@@ -2303,7 +2304,7 @@ describe('TronWeb.transactionBuilder', function () {
                         abi: testConstant.abi,
                         bytecode: testConstant.bytecode,
                     },
-                    accounts.hex[7]
+                    accounts.hex[idx]
                 )
             );
             await wait(3);
@@ -2313,7 +2314,7 @@ describe('TronWeb.transactionBuilder', function () {
                         abi: testConstant.abi,
                         bytecode: testConstant.bytecode,
                     },
-                    accounts.hex[7]
+                    accounts.hex[idx]
                 )
             );
             await wait(3);
@@ -2323,11 +2324,11 @@ describe('TronWeb.transactionBuilder', function () {
                         abi: testConstant.abi,
                         bytecode: testConstant.bytecode,
                     },
-                    accounts.hex[7]
+                    accounts.hex[idx]
                 )
             );
             transactions.forEach(async (tx) => {
-                contracts.push(await broadcaster(null, accounts.pks[7], tx));
+                contracts.push(await broadcaster(null, accounts.pks[idx], tx));
             });
 
             while (true) {
@@ -2347,9 +2348,9 @@ describe('TronWeb.transactionBuilder', function () {
             this.timeout(10000);
 
             const params = [
-                [transactions[0], accounts.hex[7], { permissionId: 2 }],
-                [transactions[2], accounts.hex[7], { blockHeader: await tronWeb.trx.getCurrentRefBlockParams() }],
-                [transactions[1], accounts.hex[7]],
+                [transactions[0], accounts.hex[idx], { permissionId: 2 }],
+                [transactions[2], accounts.hex[idx], { blockHeader: await tronWeb.trx.getCurrentRefBlockParams() }],
+                [transactions[1], accounts.hex[idx]],
             ];
             for (const param of params) {
                 const contractAddress = param[0].contract_address;
@@ -2372,7 +2373,7 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(transaction.raw_data.contract[0].Permission_id, param[2]?.permissionId);
 
                 if (param.length === 2) {
-                    const res = await broadcaster(null, accounts.pks[7], transaction);
+                    const res = await broadcaster(null, accounts.pks[idx], transaction);
                     assert.isTrue(res.receipt.result);
 
                     let contract;
@@ -3056,6 +3057,49 @@ describe('TronWeb.transactionBuilder', function () {
             const receipt2 = await tronWeb.trx.sendRawTransaction(signedSendTx);
             assert.isTrue(receipt2.result);
         });
+        it('should not throw error when permission keys include weight bigger than threshold', async function () {
+            const permissionData = {
+                owner: {
+                    type: 0,
+                    keys: [
+                        {
+                            address: accounts.hex[6],
+                            weight: 5,
+                        },
+                        {
+                            address: accounts.hex[7],
+                            weight: 5,
+                        },
+                    ],
+                    threshold: 3,
+                    permission_name: 'owner',
+                },
+                witness: null,
+                owner_address: accounts.hex[6],
+                actives: [
+                    {
+                        operations: '7fff1fc0033e0000000000000000000000000000000000000000000000000000',
+                        keys: [
+                            {
+                                address: accounts.hex[6],
+                                weight: 2,
+                            },
+                        ],
+                        threshold: 1,
+                        id: 2,
+                        type: 2,
+                        permission_name: 'active',
+                    }
+                ],
+            };
+            const tx = await tronWeb.transactionBuilder.updateAccountPermissions(
+                permissionData.owner_address,
+                permissionData.owner,
+                permissionData.witness,
+                permissionData.actives
+            );
+            assert.isObject(tx);
+        });
     });
 
     describe('Alter existent transactions', async function () {
@@ -3125,7 +3169,7 @@ describe('TronWeb.transactionBuilder', function () {
 
                 let transaction = await tronWeb.transactionBuilder.sendTrx(receiver, 10, sender);
                 const data = 'Sending money to Bill.';
-                transaction = (await tronWeb.transactionBuilder.addUpdateData(transaction, data)) as any;
+                transaction = await tronWeb.transactionBuilder.addUpdateData(transaction, data);
                 const id = transaction.txID;
                 await broadcaster(null, privateKey, transaction);
                 await waitChainData('tx', id);
@@ -3144,9 +3188,9 @@ describe('TronWeb.transactionBuilder', function () {
 
                 let transaction = await tronWeb.transactionBuilder.sendTrx(receiver, 10, sender);
                 const data = 'Sending money to Bill.';
-                transaction = (await tronWeb.transactionBuilder.addUpdateData(transaction, data, 'utf8', {
+                transaction = await tronWeb.transactionBuilder.addUpdateData(transaction, data, 'utf8', {
                     txLocal: true,
-                })) as any;
+                });
                 const id = transaction.txID;
                 await broadcaster(null, privateKey, transaction);
                 await waitChainData('tx', id);

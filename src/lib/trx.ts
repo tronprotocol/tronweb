@@ -22,6 +22,8 @@ import {
     Address,
     Exchange,
     TransactionInfo,
+    BaseWitness,
+    WitnessList,
 } from '../types/Trx.js';
 import { SignedTransaction, Transaction } from '../types/Transaction.js';
 import { TypedDataDomain, TypedDataField } from '../utils/typedData.js';
@@ -1502,5 +1504,52 @@ export class Trx {
         } catch (e) {
             throw new Error(`Unable to get params: ${(e as Error).message || e}`);
         }
+    }
+
+    async getNowWitnessList(
+        options: {
+            offset?: number;
+            limit?: number;
+            visible?: boolean;
+            confirmed?: boolean;
+        } = {}
+    ): Promise<BaseWitness[]> {
+        const { offset = 0, limit = 10, visible = false, confirmed = true } = options;
+
+        this.validator.notValid([
+            {
+                name: 'offset',
+                type: 'integer',
+                gte: 0,
+                value: offset,
+                msg: 'Invalid offset: must be an integer >= 0',
+            },
+            {
+                name: 'limit',
+                type: 'integer',
+                gt: 0,
+                value: limit,
+                msg: 'Invalid limit: must be an integer > 0',
+            },
+            {
+                name: 'visible',
+                type: 'boolean',
+                value: visible,
+                msg: 'Invalid visible: must be a boolean',
+            },
+        ]);
+
+        const data = { offset: Number(offset), limit: Number(limit), visible };
+
+        const node = confirmed ? this.tronWeb.solidityNode : this.tronWeb.fullNode;
+        const endpoint = `wallet${confirmed ? 'solidity' : ''}/getpaginatednowwitnesslist`;
+
+        const result = await node.request<WitnessList | Record<string, any>>(endpoint, data, 'post');
+
+        if ((result as Record<string, any>)?.Error) {
+            throw new Error((result as Record<string, any>).Error);
+        }
+
+        return Array.isArray(result?.witnesses) ? result.witnesses : [];
     }
 }
