@@ -130,16 +130,19 @@ export interface AccountNetMessage {
     TotalNetWeight: number;
 }
 
-export interface Witness {
+export interface BaseWitness {
     address: string;
     voteCount: number;
-    pubKey: string;
     url: string;
     totalProduced: number;
     totalMissed: number;
     latestBlockNum: number;
     latestSlotNum: number;
     isJobs: boolean;
+}
+
+export interface Witness extends BaseWitness {
+    pubKey: string;
 }
 
 enum TransactionSignWeight_response_code {
@@ -309,4 +312,8 @@ export interface TransactionInfo {
         fillBuyQuantity: number;
     }[];
     packingFee: number;
+}
+
+export interface WitnessList {
+    witnesses: BaseWitness[];
 }

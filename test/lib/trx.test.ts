@@ -556,24 +556,36 @@ describe('TronWeb.trx', function () {
             });
 
             it('should verify signature of signed transaction', async function () {
-                const recoveredAddress = await tronWeb.trx.ecRecover(transaction);
+                const recoveredAddress = tronWeb.trx.ecRecover(transaction);
                 assert.equal(recoveredAddress, accounts.b58[idx]);
+            });
+
+            it('should verify signatures of signed transaction', async function () {
+                transaction = await tronWeb.trx.multiSign(transaction, accounts.pks[idx + 1]);
+                const recoveredAddresses = tronWeb.trx.ecRecover(transaction);
+                for (let i = 0; i < recoveredAddresses.length; i++) {
+                    assert.equal(recoveredAddresses[i], accounts.b58[idx+i]);
+                }
             });
 
             it('should throw Invalid transaction error', async function () {
                 const tx = JSON.parse(JSON.stringify(transaction));
                 tx.txID += 't';
-                assertThrow(async () => {
-                    await tronWeb.trx.ecRecover(tx);
-                }, 'Invalid transaction');
+                try {
+                    tronWeb.trx.ecRecover(tx);
+                } catch (e: any) {
+                    assert.equal(e.message, 'Invalid transaction');
+                }
             });
 
             it('should throw Transaction is not signed error', async function () {
                 const tx = JSON.parse(JSON.stringify(transaction));
                 delete tx.signature;
-                assertThrow(async () => {
-                    await tronWeb.trx.ecRecover(tx);
-                }, 'Transaction is not signed');
+                try {
+                    tronWeb.trx.ecRecover(tx);
+                } catch (e: any) {
+                    assert.equal(e.message, 'Transaction is not signed');
+                }
             });
         });
 
@@ -683,13 +695,13 @@ describe('TronWeb.trx', function () {
             };
 
             it('should sign typed data', async function () {
-                const signature = await tronWeb.trx._signTypedData(domain, types, value);
-                const result = await tronWeb.trx.verifyTypedData(domain, types, value, signature);
+                const signature = tronWeb.trx.signTypedData(domain, types, value);
+                const result = tronWeb.trx.verifyTypedData(domain, types, value, signature);
 
                 // assert.equal(signature, '0xb98a61f301a383be6b078fa602ebdd76294302e6bab51cd4bcb3e4f241e7cae662ac21b2e95d8db637fa5db9dd38f2e7d1236e8f2ed3ee1d0e80bac641578f191c');
                 assert.isTrue(result);
 
-                const signature2 = tronWeb.trx._signTypedData(domain, types, value);
+                const signature2 = tronWeb.trx.signTypedData(domain, types, value);
                 const result2 = tronWeb.trx.verifyTypedData(domain, types, value, signature);
                 assert.isTrue(signature2.startsWith('0x'));
                 assert.isTrue(result2);
@@ -698,7 +710,7 @@ describe('TronWeb.trx', function () {
             it('should sign typed data with private key', function () {
                 const idx = 14;
 
-                const signature = Trx._signTypedData(domain, types, value, accounts.pks[idx]);
+                const signature = Trx.signTypedData(domain, types, value, accounts.pks[idx]);
 
                 const tDomain = {
                     ...domain,
@@ -716,7 +728,7 @@ describe('TronWeb.trx', function () {
                     },
                     tAddr: ['TT5rFsXYCrnzdE2q1WdR9F2SuVY59A4hoM', 'TT5rFsXYCrnzdE2q1WdR9F2SuVY59A4hoM'],
                 };
-                const tSignature = Trx._signTypedData(tDomain, types, tValue, accounts.pks[idx]);
+                const tSignature = Trx.signTypedData(tDomain, types, tValue, accounts.pks[idx]);
 
                 const result = Trx.verifyTypedData(domain, types, value, signature, accounts.b58[idx]);
 
@@ -729,11 +741,10 @@ describe('TronWeb.trx', function () {
                 const idx = 14;
 
                 try {
-                    const signature = Trx._signTypedData(domain, types, value, accounts.pks[idx - 1]);
-                    Trx.verifyTypedData(domain, types, value, signature, accounts.b58[idx]);
-                } catch (error) {
-                    assert.equal(error, 'Signature does not match');
-                    console.log(error);
+                    const signature = Trx.signTypedData(domain, types, value, accounts.pks[idx - 1]);
+                    tronWeb.trx.verifyTypedData(domain, types, value, signature, accounts.b58[idx]);
+                } catch (error: any) {
+                    assert.equal(error.message, 'Signature does not match');
                 }
             });
         });
@@ -1113,6 +1124,13 @@ describe('TronWeb.trx', function () {
                 assert.isNumber(block.block_header.raw_data.number);
             });
         });
+
+        describe('#getConfirmedCurrentBlock', async function () {
+            it('should get confirmed current block', async function () {
+                const block = await tronWeb.trx.getConfirmedCurrentBlock();
+                assert.isNumber(block.block_header.raw_data.number);
+            });
+        });
     });
 
     // Transaction Test
@@ -1441,6 +1459,46 @@ describe('TronWeb.trx', function () {
             });
         });
 
+        describe('#getTransactionsFromBlock', async function () {
+            const idx = 26;
+            let currBlockNum: number;
+
+            before(async function () {
+                this.timeout(10000);
+                const receipt = await tronWeb.trx.sendTrx(accounts.hex[idx], 1e6);
+                await wait(3);
+                const transaction = await tronWeb.trx.getUnconfirmedTransactionInfo(receipt.txid);
+                currBlockNum = transaction.blockNumber;
+            });
+
+            it('should get transactions from block', async function () {
+                this.timeout(10000);
+                for (let i = currBlockNum; i < currBlockNum + 3; ) {
+                    try {
+                        const txs = await tronWeb.trx.getTransactionsFromBlock(i);
+                        assert.isArray(txs);
+                        if (txs.length > 0) {
+                            break;
+                        } else {
+                            i++;
+                            continue;
+                        }
+                    } catch (e: any) {
+                        if (e.message === 'Block not found') {
+                            await wait(3);
+                            continue;
+                        } else {
+                            throw new Error(e.message);
+                        }
+                    }
+                }
+            });
+
+            it('should throw block not found error by transactions from block', async function () {
+                await assertThrow(tronWeb.trx.getTransactionsFromBlock(currBlockNum + 50), 'Block not found');
+            });
+        });
+
         describe('#getTransactionInfo (Confirmed)', async function () {
             const idx = 26;
             let transaction: Transaction;
@@ -1714,6 +1772,41 @@ describe('TronWeb.trx', function () {
 
             it('should throw token does not exist error', async function () {
                 await assertThrow(tronWeb.trx.getTokenFromID(1234565), 'Token does not exist');
+            });
+        });
+
+        describe('#getTokenByID', async function () {
+            const idx = 48;
+            let options: any;
+
+            before(async function () {
+                this.timeout(10000);
+
+                options = getTokenOptions();
+                const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.hex[idx]);
+                await broadcaster(null, accounts.pks[idx], transaction);
+                await waitChainData('token', accounts.hex[idx]);
+            });
+
+            it('should get token by name', async function () {
+                const tokens = ([] as any[]).concat(await tronWeb.trx.getTokenListByName(options.name));
+                for (const token of tokens) {
+                    const tk = await tronWeb.trx.getTokenByID(token.id);
+                    assert.equal(tk.id, token.id);
+                }
+            });
+
+            it('should throw invalid token ID provided error', async function () {
+                try {
+                    // @ts-ignore
+                    tronWeb.trx.getTokenByID({})
+                } catch (e: any) {
+                    assert.equal(e.message, 'Invalid token ID provided');
+                }
+            });
+
+            it('should throw token does not exist error', async function () {
+                await assertThrow(tronWeb.trx.getTokenByID(1234565), 'Token does not exist');
             });
         });
 
@@ -2057,6 +2150,13 @@ describe('TronWeb.trx', function () {
         });
     });
 
+    describe('#getNodeInfo', async function () {
+        it('should get node info', async function () {
+            const nodeInfo = await tronWeb.trx.getNodeInfo();
+            assert.isDefined(nodeInfo);
+        });
+    });
+
     // SR Test
     describe('#listSuperRepresentatives', async function () {
         it('should list super representatives', async function () {
@@ -2156,6 +2256,71 @@ describe('TronWeb.trx', function () {
             } catch (error: any) {
                 assert.match(error.message, /Unable to get params:/, 'should throw unable to get params error');
             }
+        });
+    });
+
+    describe('#getNowWitnessList', async function () {
+        it('should fetch now witness list', async () => {
+            const witnesses = await tronWeb.trx.getNowWitnessList({
+                offset: 0,
+                limit: 10,
+                visible: true,
+                confirmed: true,
+            });
+            assert.isArray(witnesses, 'witnesses should be an array');
+            const witness = witnesses[0];
+            assert.isTrue(tronWeb.isAddress(witness.address));
+            assert.isNumber(witness.voteCount);
+            assert.isString(witness.url);
+            assert.isNumber(witness.totalProduced);
+            assert.isNumber(witness.totalMissed);
+            assert.isNumber(witness.latestBlockNum);
+            assert.isNumber(witness.latestSlotNum);
+            assert.isBoolean(witness.isJobs);
+        });
+
+        it('should fetch now witness list with default params', async () => {
+            await tronWeb.trx.getNowWitnessList({});
+        });
+
+        it('should return [] when API returns empty object', async () => {
+            class MockNode extends tronWebBuilder.providers.HttpProvider {
+                async request<T>(_url: string, _data?: any, _method?: 'get' | 'post'): Promise<T> {
+                    return {} as unknown as T;
+                }
+            }
+            const tronWeb = new TronWeb({
+                fullHost: new MockNode('https://mock.tron.network'),
+            });
+            const result = await tronWeb.trx.getNowWitnessList();
+            assert.deepEqual(result, []);
+        });
+
+        it('should throw error for server returned error', async () => {
+            class MockNode extends tronWebBuilder.providers.HttpProvider {
+                async request<T>(_url: string, _data?: any, _method?: 'get' | 'post'): Promise<T> {
+                    return {
+                        Error: 'Some server error',
+                    } as unknown as T;
+                }
+            }
+            const tronWeb = new TronWeb({
+                fullHost: new MockNode('https://mock.tron.network'),
+            });
+            await assertThrow(tronWeb.trx.getNowWitnessList({}), 'Some server error');
+        });
+
+        it('should throw error for invalid offset', async () => {
+            await assertThrow(tronWeb.trx.getNowWitnessList({ offset: -1 }), 'Invalid offset: must be an integer >= 0');
+        });
+
+        it('should throw error for invalid limit', async () => {
+            await assertThrow(tronWeb.trx.getNowWitnessList({ limit: 0 }), 'Invalid limit: must be an integer > 0');
+        });
+
+        it('should throw error for non-boolean visible', async () => {
+            // @ts-expect-error testing invalid input
+            await assertThrow(tronWeb.trx.getNowWitnessList({ visible: 'yes' }), 'Invalid visible: must be a boolean');
         });
     });
 });
