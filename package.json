@@ -65,7 +65,7 @@
     },
     "dependencies": {
         "@babel/runtime": "7.26.10",
-        "axios": "1.12.2",
+        "axios": "1.13.5",
         "bignumber.js": "9.1.2",
         "ethereum-cryptography": "2.2.1",
         "ethers": "6.13.5",
@@ -129,7 +129,7 @@
         "source-map-support": "0.5.21",
         "ts-loader": "9.5.2",
         "typescript": "5.8.2",
-        "webpack": "5.98.0",
+        "webpack": "5.105.2",
         "webpack-cli": "6.0.1",
         "webpack-node-externals": "3.0.0"
     },
