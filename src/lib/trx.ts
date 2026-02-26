@@ -2,7 +2,7 @@ import { TronWeb } from '../tronweb.js';
 import utils from '../utils/index.js';
 import { keccak256, toUtf8Bytes, recoverAddress, SigningKey, Signature } from '../utils/ethersUtils.js';
 import { ADDRESS_PREFIX } from '../utils/constants.js';
-import { toHex } from '../utils/address.js';
+import { fromHex, toHex } from '../utils/address.js';
 import { Validator } from '../paramValidator/index.js';
 import { txCheck } from '../utils/transaction.js';
 import { ecRecover } from '../utils/crypto.js';
@@ -737,11 +737,11 @@ export class Trx {
             });
 
             if (!foundKey) {
-                throw new Error(privateKey + ' has no permission to sign');
+                throw new Error('Address ' + fromHex(address) + ' has no permission to sign');
             }
 
             if (signWeight.approved_list && signWeight.approved_list.indexOf(address) != -1) {
-                throw new Error(privateKey + ' already sign transaction');
+                throw new Error('Address ' + fromHex(address) + ' already sign transaction');
             }
 
             // reset transaction
