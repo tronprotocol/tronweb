@@ -1,6 +1,13 @@
 Change Log
 =========
 
+__6.2.1__
+
+## Changes
+
+- Bump `axios` from v1.12.2 to v1.13.5
+- Bump `webpack` from v5.98.0 to v5.105.2
+
 __6.2.0__
 
 ## New Features

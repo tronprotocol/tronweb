@@ -22,14 +22,14 @@ export function getBase58CheckAddress(addressBytes: number[]) {
     return encode58(checkSum);
 }
 
-export function decodeBase58Address(base58Sting: string) {
-    if (typeof base58Sting != 'string') return false;
+export function decodeBase58Address(base58Str: string) {
+    if (typeof base58Str != 'string') return false;
 
-    if (base58Sting.length <= 4) return false;
+    if (base58Str.length <= 4) return false;
 
-    let address = decode58(base58Sting);
+    let address = decode58(base58Str);
 
-    if (base58Sting.length <= 4) return false;
+    if (address.length <= 4) return false;
 
     const len = address.length;
     const offset = len - 4;

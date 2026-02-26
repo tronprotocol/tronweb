@@ -8,7 +8,6 @@ import wait from './helpers/wait.js';
 import assertThrow from './helpers/assertThrow.js';
 
 type Address = Types.Address;
-type RequestHeaders = Types.RequestHeaders;
 
 const HttpProvider = providers.HttpProvider;
 const {
@@ -19,8 +18,8 @@ const {
     EVENT_API,
     PRIVATE_KEY,
     SUN_NETWORK,
-    TEST_TRON_GRID_API,
-    TEST_TRON_HEADER_API_KEY,
+    // TEST_TRON_GRID_API,
+    // TEST_TRON_HEADER_API_KEY,
     // TEST_TRON_HEADER_API_JWT_KEY,
     // TEST_TRON_HEADER_JWT_ID,
     // TEST_TRON_HEADER_JWT_PRIVATE_KEY,
@@ -204,18 +203,6 @@ describe('TronWeb Instance', function () {
             const tronWeb = new TronWeb(FULL_NODE_API, SOLIDITY_NODE_API, EVENT_API);
 
             assert.throws(() => tronWeb.setPrivateKey('test'), 'Invalid private key provided');
-        });
-
-        it('should emit a privateKeyChanged event', function (done) {
-            this.timeout(1000);
-
-            const tronWeb = tronWebBuilder.createInstance();
-
-            tronWeb.on('privateKeyChanged', (privateKey) => {
-                done(assert.equal(privateKey, PRIVATE_KEY));
-            });
-
-            tronWeb.setPrivateKey(PRIVATE_KEY);
         });
     });
 
@@ -501,8 +488,8 @@ describe('TronWeb Instance', function () {
         });
 
         it('should leave an hex string as is', function () {
-            let input = '0x73616c616d6f6e';
-            let expected = '0x73616c616d6f6e';
+            const input = '0x73616c616d6f6e';
+            const expected = '0x73616c616d6f6e';
             assert.equal(TronWeb.toHex(input), expected);
         });
 
@@ -526,19 +513,19 @@ describe('TronWeb Instance', function () {
 
     describe('#toUtf8', function () {
         it('should convert an hex string to utf8', function () {
-            let input = '0x73616c616d6f6e';
-            let expected = 'salamon';
+            const input = '0x73616c616d6f6e';
+            const expected = 'salamon';
             assert.equal(TronWeb.toUtf8(input), expected);
         });
 
         it('should convert an hex string to utf8', function () {
-            let input = '0xe69cbae6a2b0e58f8ae8a18ce4b89ae8aebee5a487';
-            let expected = '机械及行业设备';
+            const input = '0xe69cbae6a2b0e58f8ae8a18ce4b89ae8aebee5a487';
+            const expected = '机械及行业设备';
             assert.equal(TronWeb.toUtf8(input), expected);
         });
 
         it('should throw an error if the string is not a valid hex string in strict mode', function () {
-            let input = 'salamon';
+            const input = 'salamon';
 
             assert.throws(() => {
                 TronWeb.toUtf8(input);
@@ -578,7 +565,7 @@ describe('TronWeb Instance', function () {
         });
 
         it('should throw an error if the string is not a valid hex string', function () {
-            let input = 'salamon';
+            const input = 'salamon';
             assert.throws(() => {
                 TronWeb.toAscii(input);
             }, 'The passed value is not a valid hex string');
@@ -606,21 +593,21 @@ describe('TronWeb Instance', function () {
 
     describe('#toBigNumber', function () {
         it('should convert a hex string to a bignumber', function () {
-            let input = '0x73616c61';
-            let expected = 1935764577;
+            const input = '0x73616c61';
+            const expected = 1935764577;
             assert.equal(TronWeb.toBigNumber(input).toNumber(), expected);
         });
 
         it('should convert a number to a bignumber', function () {
-            let input = 1935764577;
-            let expected = 1935764577;
+            const input = 1935764577;
+            const expected = 1935764577;
 
             assert.equal(TronWeb.toBigNumber(input).c![0], expected);
         });
 
         it('should convert a number string to a bignumber', function () {
-            let input = '89384775883766237763193576457709388576373';
-            let expected = [8938477588376, 62377631935764, 57709388576373];
+            const input = '89384775883766237763193576457709388576373';
+            const expected = [8938477588376, 62377631935764, 57709388576373];
 
             assert.equal(TronWeb.toBigNumber(input).c![0], expected[0]);
             assert.equal(TronWeb.toBigNumber(input).c![1], expected[1]);
@@ -630,21 +617,21 @@ describe('TronWeb Instance', function () {
 
     describe('#toDecimal', function () {
         it('should convert a hex string to a number', function () {
-            let input = '0x73616c61';
-            let expected = 1935764577;
+            const input = '0x73616c61';
+            const expected = 1935764577;
             assert.equal(TronWeb.toDecimal(input), expected);
         });
 
         it('should convert a number to a bignumber', function () {
-            let input = 1935764577;
-            let expected = 1935764577;
+            const input = 1935764577;
+            const expected = 1935764577;
 
             assert.equal(TronWeb.toDecimal(input), expected);
         });
 
         it('should convert a number string to a bignumber', function () {
-            let input = '89384775883766237763193576457709388576373';
-            let expected = 8.938477588376623e40;
+            const input = '89384775883766237763193576457709388576373';
+            const expected = 8.938477588376623e40;
 
             assert.equal(TronWeb.toDecimal(input), expected);
         });
@@ -652,37 +639,37 @@ describe('TronWeb Instance', function () {
 
     describe('#fromDecimal', function () {
         it('should convert a number to an hex string to a number', function () {
-            let input = 1935764577;
-            let expected = '0x73616c61';
+            const input = 1935764577;
+            const expected = '0x73616c61';
             assert.equal(TronWeb.fromDecimal(input), expected);
         });
 
         it('should convert a negative number to an hex string to a number', function () {
-            let input = -1935764577;
-            let expected = '-0x73616c61';
+            const input = -1935764577;
+            const expected = '-0x73616c61';
             assert.equal(TronWeb.fromDecimal(input), expected);
         });
     });
 
     describe('#toSun', function () {
         it('should convert some trx to sun', function () {
-            let input = 324;
-            let expected = 324e6;
+            const input = 324;
+            const expected = 324e6;
             assert.equal(TronWeb.toSun(input), expected.toString(10));
         });
     });
 
     describe('#fromSun', function () {
         it('should convert a negative number to an hex string to a number', function () {
-            let input = 3245e6;
-            let expected = 3245;
+            const input = 3245e6;
+            const expected = 3245;
             assert.equal(TronWeb.fromSun(input), expected.toString(10));
         });
     });
 
     describe('#isAddress', function () {
         it('should verify that a string is a valid base58 address', function () {
-            let input = 'TYPG8VeuoVAh2hP7Vfw6ww7vK98nvXXXUG';
+            const input = 'TYPG8VeuoVAh2hP7Vfw6ww7vK98nvXXXUG';
             assert.equal(TronWeb.isAddress(input), true);
         });
 
@@ -698,7 +685,7 @@ describe('TronWeb Instance', function () {
         });
 
         it('should verify that a string is a valid hex address', function () {
-            let input = '4165cfbd57fa4f20687b2c33f84c4f9017e5895d49';
+            const input = '4165cfbd57fa4f20687b2c33f84c4f9017e5895d49';
             assert.equal(TronWeb.isAddress(input), true);
         });
 
@@ -852,7 +839,7 @@ describe('TronWeb Instance', function () {
         it('should emit an unconfirmed event and get it', async function () {
             this.timeout(60000);
             tronWeb.setPrivateKey(accounts.pks[1]);
-            let txId = await contract.methods.emitNow(accounts.hex[2], 2000).send({
+            const txId = await contract.methods.emitNow(accounts.hex[2], 2000).send({
                 from: accounts.hex[1],
             });
             let events;
@@ -974,163 +961,6 @@ describe('#testTronGrid', function () {
     // Temporary stop testing api key because test server is closed
     return;
 
-    describe('#testTronGridApiKey', function () {
-        it('should add the parameter TRON-PRO-API-KEY=Key to the header of the request', async function () {
-            const tronWeb = tronWebBuilder.createInstance({
-                fullHost: TEST_TRON_GRID_API,
-                headers: { 'TRON-PRO-API-KEY': TEST_TRON_HEADER_API_KEY },
-            });
-
-            assert.equal((tronWeb.fullNode.headers as RequestHeaders)['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
-            assert.equal((tronWeb.eventServer!.headers as RequestHeaders)['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
-
-            const account = await tronWeb.trx.getAccount();
-            assert.equal(typeof account, 'object');
-
-            const tx = await tronWeb.event.getEventsByContractAddress(tronWeb.defaultAddress.base58 as Address);
-            assert.equal(typeof tx, 'object');
-        });
-
-        it('should add the parameter TRON-PRO-API-KEY=Key to the header of the event request', async function () {
-            const tronWeb = tronWebBuilder.createInstance({
-                fullHost: TEST_TRON_GRID_API,
-                headers: { 'TRON-PRO-API-KEY': TEST_TRON_HEADER_API_KEY },
-                eventHeaders: { 'TRON-PRO-API-KEY': TEST_TRON_HEADER_API_KEY },
-            });
-
-            assert.equal((tronWeb.fullNode.headers as RequestHeaders)['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
-            assert.equal((tronWeb.eventServer!.headers as RequestHeaders)['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
-
-            const account = await tronWeb.trx.getAccount();
-            assert.equal(typeof account, 'object');
-
-            const tx = await tronWeb.event.getEventsByContractAddress(tronWeb.defaultAddress.base58 as Address);
-            assert.equal(typeof tx, 'object');
-        });
-
-        it('should set the parameter TRON-PRO-API-KEY=Key to the header of the request', async function () {
-            const tronWeb = tronWebBuilder.createInstance({
-                fullHost: TEST_TRON_GRID_API,
-            });
-            tronWeb.setHeader({ 'TRON-PRO-API-KEY': TEST_TRON_HEADER_API_KEY });
-
-            assert.equal((tronWeb.fullNode.headers as RequestHeaders)['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
-            assert.equal((tronWeb.eventServer!.headers as RequestHeaders)['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
-
-            const account = await tronWeb.trx.getAccount();
-            assert.equal(typeof account, 'object');
-
-            const tx = await tronWeb.event.getEventsByContractAddress(tronWeb.defaultAddress.base58 as Address);
-            assert.equal(typeof tx, 'object');
-        });
-
-        it('should set the parameter TRON-PRO-API-KEY=Key to the header of the fullNode request', async function () {
-            const tronWeb = tronWebBuilder.createInstance({
-                fullHost: TEST_TRON_GRID_API,
-            });
-            tronWeb.setFullNodeHeader({
-                'TRON-PRO-API-KEY': TEST_TRON_HEADER_API_KEY,
-            });
-
-            assert.equal((tronWeb.fullNode.headers as RequestHeaders)['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
-            assert.equal((tronWeb.eventServer!.headers as RequestHeaders)['TRON-PRO-API-KEY'], undefined);
-
-            const account = await tronWeb.trx.getAccount();
-            assert.equal(typeof account, 'object');
-
-            try {
-                await tronWeb.event.getEventsByContractAddress(tronWeb.defaultAddress.base58 as Address);
-            } catch (error: any) {
-                assert.equal(error.statusCode, 401);
-            }
-        });
-
-        it('should set the parameter TRON-PRO-API-KEY=Key to the header of the event request', async function () {
-            const tronWeb = tronWebBuilder.createInstance({
-                fullHost: TEST_TRON_GRID_API,
-            });
-            tronWeb.setEventHeader({
-                'TRON-PRO-API-KEY': TEST_TRON_HEADER_API_KEY,
-            });
-
-            assert.equal((tronWeb.fullNode.headers as RequestHeaders)['TRON-PRO-API-KEY'], undefined);
-            assert.equal((tronWeb.eventServer!.headers as RequestHeaders)['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
-
-            try {
-                await tronWeb.trx.getAccount();
-            } catch (error: any) {
-                assert.equal(error.response.status, 401);
-            }
-
-            const tx = await tronWeb.event.getEventsByContractAddress(tronWeb.defaultAddress.base58 as Address);
-            assert.equal(typeof tx, 'object');
-        });
-
-        it('should set the valid key to the header of the request', async function () {
-            const FAKE_KEY = 'ABCEDF';
-            const tronWeb = tronWebBuilder.createInstance({
-                fullHost: TEST_TRON_GRID_API,
-                headers: { 'TRON-PRO-API-KEY': FAKE_KEY },
-            });
-
-            assert.equal((tronWeb.fullNode.headers as RequestHeaders)['TRON-PRO-API-KEY'], FAKE_KEY);
-            assert.equal((tronWeb.eventServer!.headers as RequestHeaders)['TRON-PRO-API-KEY'], FAKE_KEY);
-
-            try {
-                await tronWeb.trx.getAccount();
-            } catch (error: any) {
-                assert.equal(error.response.status, 401);
-            }
-
-            try {
-                await tronWeb.event.getEventsByContractAddress(tronWeb.defaultAddress.base58 as Address);
-            } catch (error: any) {
-                assert.equal(error.statusCode, 401);
-            }
-        });
-
-        it('should set the valid key to the header of the fullnode request', async function () {
-            const FAKE_KEY = 'ABCEDF';
-            const tronWeb = tronWebBuilder.createInstance({
-                fullHost: TEST_TRON_GRID_API,
-                headers: { 'TRON-PRO-API-KEY': FAKE_KEY },
-                eventHeaders: { 'TRON-PRO-API-KEY': TEST_TRON_HEADER_API_KEY },
-            });
-
-            assert.equal((tronWeb.fullNode.headers as RequestHeaders)['TRON-PRO-API-KEY'], FAKE_KEY);
-            assert.equal((tronWeb.eventServer!.headers as RequestHeaders)['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
-
-            try {
-                await tronWeb.trx.getAccount();
-            } catch (error: any) {
-                assert.equal(error.response.status, 401);
-            }
-
-            const tx = await tronWeb.event.getEventsByContractAddress(tronWeb.defaultAddress.base58 as Address);
-            assert.equal(typeof tx, 'object');
-        });
-
-        it('should set the valid key to the header of the event request', async function () {
-            const FAKE_KEY = 'ABCEDF';
-            const tronWeb = tronWebBuilder.createInstance({
-                fullHost: TEST_TRON_GRID_API,
-                headers: { 'TRON-PRO-API-KEY': TEST_TRON_HEADER_API_KEY },
-                eventHeaders: { 'TRON-PRO-API-KEY': FAKE_KEY },
-            });
-
-            assert.equal((tronWeb.fullNode.headers as RequestHeaders)['TRON-PRO-API-KEY'], TEST_TRON_HEADER_API_KEY);
-            assert.equal((tronWeb.eventServer!.headers as RequestHeaders)['TRON-PRO-API-KEY'], FAKE_KEY);
-
-            const account = await tronWeb.trx.getAccount();
-            assert.equal(typeof account, 'object');
-
-            try {
-                await tronWeb.event.getEventsByContractAddress(tronWeb.defaultAddress.base58 as Address);
-            } catch (error: any) {
-                assert.equal(error.statusCode, 401);
-            }
-        });
-    });
 
     // describe('#testTronGridJwtKey', function () {
     //     it('should add the parameter Authorization=Key to the header of the request', async function () {

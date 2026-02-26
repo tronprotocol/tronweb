@@ -737,11 +737,11 @@ export class Trx {
             });
 
             if (!foundKey) {
-                throw new Error(privateKey + ' has no permission to sign');
+                throw new Error('Address' + address + ' has no permission to sign');
             }
 
             if (signWeight.approved_list && signWeight.approved_list.indexOf(address) != -1) {
-                throw new Error(privateKey + ' already sign transaction');
+                throw new Error('Address' + address + ' already sign transaction');
             }
 
             // reset transaction
