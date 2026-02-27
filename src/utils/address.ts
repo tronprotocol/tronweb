@@ -81,6 +81,14 @@ export function isAddress(address: unknown): boolean {
     }
 }
 
+function hexToUint8Array(hex: string) {
+    return new Uint8Array(hexStr2byteArray(hex.replace(/^0x/, '')));
+}
+
+function convertToUint8Array(value: string | Uint8Array): Uint8Array {
+    return typeof value === 'string' ? hexToUint8Array(value) : value;
+}
+
 export function getCreate2Address({
     from,
     salt,
@@ -92,28 +100,14 @@ export function getCreate2Address({
     initCode: string | Uint8Array;
     addressFormat?: 'base58' | 'hex';
 }) {
-    const _from = new Uint8Array(hexStr2byteArray(toHex(from)));
+    const _from = hexToUint8Array(toHex(from));
+    const _salt = convertToUint8Array(salt);
+    const _initCode = convertToUint8Array(initCode);
 
-    let _salt: Uint8Array;
-    if (typeof salt === 'string') {
-        _salt = new Uint8Array(hexStr2byteArray(salt.replace(/^0x/, '')));
-    } else {
-        _salt = salt;
-    }
-
-    let _initCode: Uint8Array;
-    if (typeof initCode === 'string') {
-        _initCode = new Uint8Array(hexStr2byteArray(initCode.replace(/^0x/, '')));
-    } else {
-        _initCode = initCode;
-    }
-
-    const _initCodeHash = new Uint8Array(hexStr2byteArray(keccak256(_initCode).replace(/^0x/, '')));
+    const _initCodeHash = hexToUint8Array(keccak256(_initCode));
 
     const merged = concat([_from, _salt, _initCodeHash]);
+
     const addressHex = `41${keccak256(merged).slice(-40)}`;
-    if (addressFormat === 'base58') {
-        return fromHex(addressHex);
-    }
-    return addressHex;
+    return addressFormat === 'base58' ? fromHex(addressHex) : addressHex;
 }
