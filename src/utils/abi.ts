@@ -38,7 +38,7 @@ export function decodeParams(names: string[], types: string[], output: string, i
 
             return obj;
         },
-        names.length ? {} : []
+        names.length ? Object.create(null) : []
     );
 }
 
@@ -117,7 +117,7 @@ export function encodeParamsV2ByABI(funABI: FunctionFragment, args: any[]) {
             inputs.forEach((input: AbiParamsCommon, i: number) => {
                 const type = input.type;
 
-                if (args[i])
+                if (args[i] !== undefined && args[i] !== null)
                     if (type === 'address') args[i] = _addressToHex(args[i]);
                     else if (type.match(/^([^\x5b]*)(\x5b|$)/)![0] === 'address[') convertAddresses(args[i]);
                     else if (type.indexOf('tuple') === 0)
@@ -149,7 +149,7 @@ export function encodeParamsV2ByABI(funABI: FunctionFragment, args: any[]) {
     return abiCoder.encode(types, args);
 }
 
-export function decodeParamsV2ByABI<T extends FunctionFragment>(funABI: T, data: string | Uint8Array)  {
+export function decodeParamsV2ByABI<T extends FunctionFragment>(funABI: T, data: string | Uint8Array) {
     const convertTypeNames = (types: string[]) => {
         for (let i = 0; i < types.length; i++) {
             const type = types[i];

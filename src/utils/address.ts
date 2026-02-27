@@ -1,7 +1,7 @@
 import { hexStr2byteArray, byteArray2hexStr } from './code.js';
 import { decodeBase58Address, getBase58CheckAddress, isAddressValid, pkToAddress } from './crypto.js';
 import { isHex, isString } from './validations.js';
-import { keccak256 } from './ethersUtils.js';
+import { concat, keccak256 } from './ethersUtils.js';
 import { ADDRESS_PREFIX } from './constants.js';
 
 export function fromHex(address: string) {
@@ -79,4 +79,41 @@ export function isAddress(address: unknown): boolean {
     } catch (err) {
         return false;
     }
+}
+
+export function getCreate2Address({
+    from,
+    salt,
+    initCode,
+    addressFormat = 'base58',
+}: {
+    from: string;
+    salt: string | Uint8Array;
+    initCode: string | Uint8Array;
+    addressFormat?: 'base58' | 'hex';
+}) {
+    const _from = new Uint8Array(hexStr2byteArray(toHex(from)));
+
+    let _salt: Uint8Array;
+    if (typeof salt === 'string') {
+        _salt = new Uint8Array(hexStr2byteArray(salt.replace(/^0x/, '')));
+    } else {
+        _salt = salt;
+    }
+
+    let _initCode: Uint8Array;
+    if (typeof initCode === 'string') {
+        _initCode = new Uint8Array(hexStr2byteArray(initCode.replace(/^0x/, '')));
+    } else {
+        _initCode = initCode;
+    }
+
+    const _initCodeHash = new Uint8Array(hexStr2byteArray(keccak256(_initCode).replace(/^0x/, '')));
+
+    const merged = concat([_from, _salt, _initCodeHash]);
+    const addressHex = `41${keccak256(merged).slice(-40)}`;
+    if (addressFormat === 'base58') {
+        return fromHex(addressHex);
+    }
+    return addressHex;
 }
