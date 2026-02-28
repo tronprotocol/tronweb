@@ -1,6 +1,40 @@
 Change Log
 =========
 
+__6.2.2__
+
+## New Features
+
+- Added `getCreate2Address`
+
+  - Added support for `utils.address.getCreate2Address` utility method.
+
+  - Enables deterministic contract address computation using CREATE2.
+
+  - Useful for advanced contract deployment workflows and meta-deployment scenarios.
+
+## Improvements
+
+- Improvement in `decodeParams`
+
+    - Replaced {} with Object.create(null) in decodeParams.
+
+    - Prevents prototype pollution.
+
+- Robust argument encoding in `encodeArgs`
+
+  - Prevents valid falsy values from being incorrectly ignored.
+
+  - Improves reliability of contract parameter encoding.
+
+- Strict contract type validation in `contractJsonToProtobuf`
+
+    - Now throws an explicit error when encountering unsupported contract.type.
+
+    - Prevents silent failures during contract conversion.
+
+    - Improves developer debugging experience.
+
 __6.2.1__
 
 ## Changes

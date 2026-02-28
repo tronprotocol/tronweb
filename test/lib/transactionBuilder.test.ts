@@ -3591,4 +3591,16 @@ describe('TronWeb.transactionBuilder', function () {
             assert.isNumber(receipt.energy_required);
         });
     });
+
+    describe('#contractJsonToProtobuf', function () {
+        it('should throw error when contract.type is not supported', async function () {
+            const tx = await tronWeb.transactionBuilder.sendTrx(accounts.b58[0], 1);
+            const unsupportedType = 'notSupportedType';
+            // @ts-expect-error
+            tx.raw_data.contract[0].type = unsupportedType;
+            assertThrow((async () => {
+                utils.transaction.txJsonToPb(tx);
+            })(), `Unsupported transaction type: ${unsupportedType}`);
+        })
+    })
 });
