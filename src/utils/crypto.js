@@ -21,16 +21,16 @@ export function getBase58CheckAddress(addressBytes) {
     return encode58(checkSum);
 }
 
-export function decodeBase58Address(base58Sting) {
-    if (typeof (base58Sting) != 'string')
+export function decodeBase58Address(base58Str) {
+    if (typeof (base58Str) != 'string')
         return false;
 
-    if (base58Sting.length <= 4)
+    if (base58Str.length <= 4)
         return false;
 
-    let address = decode58(base58Sting);
+    let address = decode58(base58Str);
 
-    if (base58Sting.length <= 4)
+    if (address.length <= 4)
         return false;
 
     const len = address.length;

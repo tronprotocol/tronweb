@@ -121,7 +121,7 @@ const utils = {
                 obj[name] = result;
 
                 return obj;
-            }, {});
+            }, Object.create(null));
         }
 
         return event;
