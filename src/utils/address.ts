@@ -100,9 +100,17 @@ export function getCreate2Address({
     initCode: string | Uint8Array;
     addressFormat?: 'base58' | 'hex';
 }) {
+    if (!isAddress(from)) {
+        throw new Error(`from(${from}) is not a valid address string`);
+    }
+
     const _from = hexToUint8Array(toHex(from));
     const _salt = convertToUint8Array(salt);
     const _initCode = convertToUint8Array(initCode);
+
+    if (_salt.length !== 32) {
+        throw new Error(`salt(${salt}) must be 32 bytes`);
+    }
 
     const _initCodeHash = hexToUint8Array(keccak256(_initCode));
 
