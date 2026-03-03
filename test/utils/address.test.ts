@@ -46,7 +46,7 @@ describe('#TronWeb.utils.address', () => {
             const address = tests[0].sender;
             const initCode = tests[0].creates[0].initCode;
 
-            assertThrow((async () => {
+            await assertThrow((async () => {
                 utils.address.getCreate2Address({
                     from: address.replace(/^0x/, '41'),
                     salt,
@@ -61,7 +61,7 @@ describe('#TronWeb.utils.address', () => {
             const address = tests[0].sender;
             const initCode = tests[0].creates[0].initCode;
 
-            assertThrow((async () => {
+            await assertThrow((async () => {
                 utils.address.getCreate2Address({
                     from: address,
                     salt,
