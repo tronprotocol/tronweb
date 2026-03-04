@@ -10,7 +10,7 @@ describe('TronWeb.utils.accounts', function () {
             const newAccount = await tronWeb.utils.accounts.generateAccount();
             assert.equal(newAccount.privateKey.length, 64);
             assert.equal(newAccount.publicKey.length, 130);
-            let address = tronWeb.address.fromPrivateKey(newAccount.privateKey);
+            const address = tronWeb.address.fromPrivateKey(newAccount.privateKey);
             assert.equal(address, newAccount.address.base58);
             assert.equal(tronWeb.address.toHex(address as string), newAccount.address.hex.toLowerCase());
         });
@@ -25,51 +25,18 @@ describe('TronWeb.utils.accounts', function () {
                 assert.equal(newAccount.privateKey.substring(2).length, 64);
                 assert.equal(newAccount.publicKey.substring(2).length, 130);
                 assert.isTrue(tronWeb.utils.ethersUtils.isValidMnemonic(newAccount.mnemonic!.phrase));
-                let address = tronWeb.address.fromPrivateKey(newAccount.privateKey.replace(/^0x/, ''));
-                assert.equal(address, newAccount.address);
-                assert.equal(tronWeb.address.toHex(address as string), tronWeb.address.toHex(newAccount.address));
-            });
-
-            it('should generate an account when options param is zero', async function () {
-                const tronWeb = tronWebBuilder.createInstance();
-                const newAccount = await tronWeb.utils.accounts.generateRandom();
-                assert.equal(newAccount.privateKey.substring(2).length, 64);
-                assert.equal(newAccount.publicKey.substring(2).length, 130);
-                assert.isTrue(tronWeb.utils.ethersUtils.isValidMnemonic(newAccount.mnemonic!.phrase));
-                let address = tronWeb.address.fromPrivateKey(newAccount.privateKey.replace(/^0x/, ''));
-                assert.equal(address, newAccount.address);
-                assert.equal(tronWeb.address.toHex(address as string), tronWeb.address.toHex(newAccount.address));
-            });
-
-            it('should generate an account when options param is a positive interger', async function () {
-                const tronWeb = tronWebBuilder.createInstance();
-                const newAccount = await tronWeb.utils.accounts.generateRandom();
-                assert.equal(newAccount.privateKey.substring(2).length, 64);
-                assert.equal(newAccount.publicKey.substring(2).length, 130);
-                assert.isTrue(tronWeb.utils.ethersUtils.isValidMnemonic(newAccount.mnemonic!.phrase));
-                let address = tronWeb.address.fromPrivateKey(newAccount.privateKey.replace(/^0x/, ''));
-                assert.equal(address, newAccount.address);
-                assert.equal(tronWeb.address.toHex(address as string), tronWeb.address.toHex(newAccount.address));
-            });
-
-            it('should generate an account when options param is an empty object', async function () {
-                const tronWeb = tronWebBuilder.createInstance();
-                const newAccount = await tronWeb.utils.accounts.generateRandom();
-                assert.equal(newAccount.privateKey.substring(2).length, 64);
-                assert.equal(newAccount.publicKey.substring(2).length, 130);
-                assert.isTrue(tronWeb.utils.ethersUtils.isValidMnemonic(newAccount.mnemonic!.phrase));
-                let address = tronWeb.address.fromPrivateKey(newAccount.privateKey.replace(/^0x/, ''));
+                const address = tronWeb.address.fromPrivateKey(newAccount.privateKey.replace(/^0x/, ''));
                 assert.equal(address, newAccount.address);
                 assert.equal(tronWeb.address.toHex(address as string), tronWeb.address.toHex(newAccount.address));
             });
 
             it('should generate an account of the given path when options param has a valid bip39 tron path', async function () {
                 const tronWeb = tronWebBuilder.createInstance();
-                const newAccount = await tronWeb.utils.accounts.generateRandom();
+                const newAccount = await tronWeb.utils.accounts.generateRandom('', "m/44'/195'/0'/0/1");
                 assert.equal(newAccount.privateKey.substring(2).length, 64);
                 assert.equal(newAccount.publicKey.substring(2).length, 130);
                 assert.isTrue(tronWeb.utils.ethersUtils.isValidMnemonic(newAccount.mnemonic!.phrase));
-                let address = tronWeb.address.fromPrivateKey(newAccount.privateKey.replace(/^0x/, ''));
+                const address = tronWeb.address.fromPrivateKey(newAccount.privateKey.replace(/^0x/, ''));
                 assert.equal(address, newAccount.address);
                 assert.equal(tronWeb.address.toHex(address as string), tronWeb.address.toHex(newAccount.address));
             });
@@ -86,7 +53,7 @@ describe('TronWeb.utils.accounts', function () {
                 const newAccount = await tronWeb.utils.accounts.generateAccountWithMnemonic(accountCreated.mnemonic!.phrase);
                 assert.equal(newAccount.privateKey.substring(2).length, 64);
                 assert.equal(newAccount.publicKey.substring(2).length, 130);
-                let address = tronWeb.address.fromPrivateKey(newAccount.privateKey.replace(/^0x/, ''));
+                const address = tronWeb.address.fromPrivateKey(newAccount.privateKey.replace(/^0x/, ''));
                 assert.equal(address, newAccount.address);
                 assert.equal(tronWeb.address.toHex(address as string), tronWeb.address.toHex(newAccount.address));
             });
@@ -104,7 +71,7 @@ describe('TronWeb.utils.accounts', function () {
                 );
                 assert.equal(newAccount.privateKey.substring(2).length, 64);
                 assert.equal(newAccount.publicKey.substring(2).length, 130);
-                let address = tronWeb.address.fromPrivateKey(newAccount.privateKey.replace(/^0x/, ''));
+                const address = tronWeb.address.fromPrivateKey(newAccount.privateKey.replace(/^0x/, ''));
                 assert.equal(address, newAccount.address);
                 assert.equal(tronWeb.address.toHex(address as string), tronWeb.address.toHex(newAccount.address));
             });
@@ -122,7 +89,7 @@ describe('TronWeb.utils.accounts', function () {
                 );
             });
 
-            it('should generate an account when path is an invalid bip39 tron path', async function () {
+            it('should throw when path is an invalid bip39 tron path', async function () {
                 const tronWeb = tronWebBuilder.createInstance();
 
                 const accountCreated = await tronWeb.utils.accounts.generateRandom();
