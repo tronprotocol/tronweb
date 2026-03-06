@@ -892,6 +892,8 @@ const contractJsonToProtobuf = (contract, value, options) => {
             return buildAccountPermissionUpdateContract(value, options);
         case 'UpdateAssetContract':
             return buildUpdateAssetContract(value, options);
+        default:
+            throw new Error('Unsupported transaction type: ' + contract.type);
     }
 };
 
