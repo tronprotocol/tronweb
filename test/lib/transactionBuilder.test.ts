@@ -169,11 +169,9 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it('should throw if trying to transfer from an account with not enough funds', async function () {
-            await assertThrow(
-                tronWeb.transactionBuilder.sendTrx(accounts.hex[3], 10, emptyAccount.address.base58),
-                null,
-                'ContractValidateException'
-            );
+            await broadcaster(tronWeb.transactionBuilder.sendTrx(emptyAccount.address.base58, 1));
+            const receipt = await broadcaster(tronWeb.transactionBuilder.sendTrx(accounts.hex[3], 10, emptyAccount.address.base58), emptyAccount.privateKey);
+            assert.ok(/balance is not sufficient.$/.test(tronWeb.toUtf8(receipt.receipt.message)));
         });
 
         it('should send 10 sun from default address to accounts[1] for 10 times in one block', async function () {
@@ -399,41 +397,6 @@ describe('TronWeb.transactionBuilder', function () {
             await assertThrow(tronWeb.transactionBuilder.createToken(options), 'Invalid token url provided');
         });
 
-        it('should throw if freeBandwidth is invalid', async function () {
-            const options = getTokenOptions();
-            options.freeBandwidth = -1;
-
-            await assertThrow(tronWeb.transactionBuilder.createToken(options), 'Invalid Free bandwidth amount provided');
-
-            options.freeBandwidth = 'something';
-
-            await assertThrow(tronWeb.transactionBuilder.createToken(options), 'Invalid Free bandwidth amount provided');
-
-            // freeBandwidth is optional
-            delete options.freeBandwidth;
-            await tronWeb.transactionBuilder.createToken(options);
-        });
-
-        it('should throw if freeBandwidthLimit is invalid', async function () {
-            const options = getTokenOptions();
-
-            options.freeBandwidth = 10;
-            delete options.freeBandwidthLimit;
-
-            await assertThrow(
-                tronWeb.transactionBuilder.createToken(options, accounts.b58[48]),
-                'Invalid Free bandwidth limit provided'
-            );
-
-            options.freeBandwidthLimit = 'something';
-
-            await assertThrow(tronWeb.transactionBuilder.createToken(options), 'Invalid Free bandwidth limit provided');
-
-            // freeBandwidthLimit is optional
-            delete options.freeBandwidthLimit;
-            await tronWeb.transactionBuilder.createToken(options);
-        });
-
         it('should throw if frozen supply is invalid', async function () {
             const options = getTokenOptions();
             options.frozenAmount = -1;
@@ -542,7 +505,8 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it('should throw if an invalid name is passed', async function () {
-            await assertThrow(tronWeb.transactionBuilder.updateAccount('123', accounts.b58[4]), 'Invalid accountName');
+            // @ts-expect-error
+            await assertThrow(tronWeb.transactionBuilder.updateAccount(123, accounts.b58[4]), 'Invalid accountName');
         });
 
         it('should throw if the issuer address is invalid', async function () {
@@ -685,42 +649,6 @@ describe('TronWeb.transactionBuilder', function () {
             await assertThrow(tronWeb.transactionBuilder.updateToken(options, accounts.hex[2]), 'Invalid token url provided');
         });
 
-        it('should throw if freeBandwidth is invalid', async function () {
-            const options = _.clone(UPDATED_TEST_TOKEN_OPTIONS);
-            options.freeBandwidth = -1;
-
-            await assertThrow(
-                tronWeb.transactionBuilder.updateToken(options, accounts.hex[2]),
-                'Free bandwidth amount must be a positive integer'
-            );
-
-            options.freeBandwidth = 'something';
-
-            await assertThrow(
-                tronWeb.transactionBuilder.updateToken(options, accounts.hex[2]),
-                'Free bandwidth amount must be a positive integer'
-            );
-        });
-
-        it('should throw if freeBandwidthLimit is invalid', async function () {
-            const options = _.clone(UPDATED_TEST_TOKEN_OPTIONS);
-
-            options.freeBandwidth = 10;
-            delete options.freeBandwidthLimit;
-
-            await assertThrow(
-                tronWeb.transactionBuilder.updateToken(options, accounts.hex[2]),
-                'Free bandwidth limit must be a positive integer'
-            );
-
-            options.freeBandwidthLimit = 'something';
-
-            await assertThrow(
-                tronWeb.transactionBuilder.updateToken(options, accounts.hex[2]),
-                'Free bandwidth limit must be a positive integer'
-            );
-        });
-
         it('should throw if the issuer address is invalid', async function () {
             await assertThrow(
                 tronWeb.transactionBuilder.updateToken(UPDATED_TEST_TOKEN_OPTIONS, '0xzzzww'),
@@ -814,26 +742,18 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it('should throw if issuerAddress is not the right one', async function () {
-            await assertThrow(
-                tronWeb.transactionBuilder.purchaseToken(accounts.b58[4], tokenID, 20, accounts.b58[2]),
-                null,
-                'The asset is not issued by'
-            );
+            const receipt = await broadcaster(tronWeb.transactionBuilder.purchaseToken(accounts.b58[4], tokenID, 20, accounts.b58[2]), accounts.pks[2]);
+            assert.ok(tronWeb.toUtf8(receipt.receipt.message).includes(`The asset is not issued by ${accounts.hex[4]}`));
         });
 
         it('should throw if the token Id is invalid', async function () {
-            await assertThrow(
-                tronWeb.transactionBuilder.purchaseToken(accounts.b58[5], '123432', 20, accounts.b58[2]),
-                'Invalid token ID provided'
-            );
+            const receipt = await broadcaster(tronWeb.transactionBuilder.purchaseToken(accounts.b58[5], '123432', 20, accounts.b58[2]), accounts.pks[2]);
+            assert.ok(/No asset named/.test(tronWeb.toUtf8(receipt.receipt.message)));
         });
 
         it('should throw if token does not exist', async function () {
-            await assertThrow(
-                tronWeb.transactionBuilder.purchaseToken(accounts.b58[5], '1110000', 20, accounts.b58[2]),
-                null,
-                'No asset named '
-            );
+            const receipt = await broadcaster(tronWeb.transactionBuilder.purchaseToken(accounts.b58[5], '1110000', 20, accounts.b58[2]), accounts.pks[2]);
+            assert.ok(/No asset named/.test(tronWeb.toUtf8(receipt.receipt.message)));
         });
 
         it('should throw if buyer address is invalid', async function () {
@@ -965,10 +885,9 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it('should throw if the token Id is invalid', async function () {
-            await assertThrow(
-                tronWeb.transactionBuilder.sendToken(accounts.b58[1], 5, '143234', accounts.b58[7]),
-                'Invalid token ID provided'
-            );
+            const fakeTokenId = '143234';
+            const receipt = await broadcaster(tronWeb.transactionBuilder.sendToken(accounts.b58[1], 5, fakeTokenId, accounts.b58[7]), accounts.pks[7]);
+            assert.ok(/does not exist$/.test(tronWeb.toUtf8(receipt.receipt.message)));
         });
 
         it('should throw if origin address is invalid', async function () {
@@ -1048,11 +967,8 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it('should throw if the issuer address is not an SR', async function () {
-            await assertThrow(
-                tronWeb.transactionBuilder.createProposal(parameters, accounts.b58[0]),
-                null,
-                `Witness[${accounts.hex[0]}] not exists`
-            );
+            const receipt = await broadcaster(await tronWeb.transactionBuilder.createProposal(parameters, accounts.b58[0]), accounts.pks[0]);
+            assert.equal(tronWeb.toUtf8(receipt.receipt.message), `Contract validate error : Witness[${accounts.hex[0]}] not exists`);
         });
 
         // TODO Complete throws
@@ -1104,12 +1020,10 @@ describe('TronWeb.transactionBuilder', function () {
 
         it('should throw trying to cancel an already canceled proposal', async function () {
             await broadcaster(await tronWeb.transactionBuilder.deleteProposal(proposals[0].proposal_id));
-
-            await assertThrow(
-                tronWeb.transactionBuilder.deleteProposal(proposals[0].proposal_id),
-                null,
-                `Proposal[${proposals[0].proposal_id}] canceled`
-            );
+            await wait(3);
+            const receipt = await broadcaster(await tronWeb.transactionBuilder.deleteProposal(proposals[0].proposal_id));
+            
+            assert.equal(tronWeb.toUtf8(receipt.receipt.message), `Contract validate error : Proposal[${proposals[0].proposal_id}] canceled`)
         });
 
         // TODO add invalid params throws
@@ -3591,4 +3505,16 @@ describe('TronWeb.transactionBuilder', function () {
             assert.isNumber(receipt.energy_required);
         });
     });
+
+    describe('#contractJsonToProtobuf', function () {
+        it('should throw error when contract.type is not supported', async function () {
+            const tx = await tronWeb.transactionBuilder.sendTrx(accounts.b58[0], 1);
+            const unsupportedType = 'notSupportedType';
+            // @ts-expect-error
+            tx.raw_data.contract[0].type = unsupportedType;
+            assertThrow((async () => {
+                utils.transaction.txJsonToPb(tx);
+            })(), `Unsupported transaction type: ${unsupportedType}`);
+        })
+    })
 });

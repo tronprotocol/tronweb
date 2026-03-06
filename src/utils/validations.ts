@@ -107,7 +107,7 @@ export function parseEvent(event: EventQueryDataType, { inputs: abi }: { inputs:
             obj[name] = result;
 
             return obj;
-        }, {});
+        }, Object.create(null));
     }
 
     return event;

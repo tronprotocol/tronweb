@@ -1,6 +1,6 @@
 {
     "name": "tronweb",
-    "version": "6.2.1",
+    "version": "6.2.2",
     "description": "JavaScript SDK that encapsulates the TRON HTTP API",
     "main": "./lib/commonjs/index.js",
     "module": "./lib/esm/index.js",
@@ -139,5 +139,8 @@
     },
     "homepage": "https://tronweb.network",
     "license": "MIT",
-    "repository": "https://github.com/tronprotocol/tronweb.git"
+    "repository": "https://github.com/tronprotocol/tronweb.git",
+    "overrides": {
+        "serialize-javascript": "7.0.3"
+    }
 }

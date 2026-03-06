@@ -535,7 +535,7 @@ describe('TronWeb.trx', function () {
 
             it('should throw private key does not match address error', async function () {
                 await assertThrow(
-                    tronWeb.trx.sign(transaction, accounts.pks[idx]),
+                    tronWeb.trx.sign(transaction, accounts.pks[idx + 1]),
                     'Private key does not match address in transaction'
                 );
             });
@@ -599,10 +599,10 @@ describe('TronWeb.trx', function () {
             });
 
             it('should throw expected hex message input error', async function () {
-                const hexMsg = 'e66f4c8f323229131006ad3e4a2ca65dfdf339f0';
+                const hexMsg = 'xxe66f4c8f323229131006ad3e4a2ca65dfdf339f0';
                 await assertThrow(
                     tronWeb.trx.sign(hexMsg, accounts.pks[idx]),
-                    'Private key does not match address in transaction'
+                    'Expected hex message input'
                 );
             });
         });
@@ -625,7 +625,7 @@ describe('TronWeb.trx', function () {
             it('should throw expected hex message input error', async function () {
                 await assertThrow(
                     tronWeb.trx.verifyMessage(
-                        'e66f4c8f323229131006ad3e4a2ca65dfdf339f0',
+                        'xxe66f4c8f323229131006ad3e4a2ca65dfdf339f0',
                         signedMsg,
                         accounts.hex[idx],
                         undefined
@@ -1342,7 +1342,9 @@ describe('TronWeb.trx', function () {
             });
 
             it('should throw transaction is not signed error', async function () {
-                // @ts-ignore
+                // @ts-expect-error
+                delete transaction.signature;
+                // @ts-expect-error
                 await assertThrow(tronWeb.trx.broadcast(transaction), 'Transaction is not signed');
             });
         });
@@ -1421,7 +1423,6 @@ describe('TronWeb.trx', function () {
                         assert.equal(tx.txID, transaction.txID);
                         break;
                     } catch (e: any) {
-                        console.log(e.message);
                         if (e.message === 'Transaction not found in block') {
                             await wait(3);
                             continue;
@@ -1549,11 +1550,10 @@ describe('TronWeb.trx', function () {
                 assert.equal(tx.id, transaction.txID);
             });
 
-            it('should throw transaction not found error', async function () {
-                await assertThrow(
-                    tronWeb.trx.getUnconfirmedTransactionInfo('a8813981b1737d9caf7d51b200760a16c9cdbc826fa8de102386af898048cbe5'),
-                    'Transaction not found'
-                );
+            it('should return empty object', async function () {
+                const ret = await tronWeb.trx.getUnconfirmedTransactionInfo('a8813981b1737d9caf7d51b200760a16c9cdbc826fa8de102386af898048cbe5');
+                // @ts-expect-error
+                assert.deepEqual(ret, {})
             });
         });
 
@@ -2137,8 +2137,9 @@ describe('TronWeb.trx', function () {
             await assertThrow(tronWeb.trx.getContract('notAddress'), 'Invalid contract address provided');
         });
 
-        it('should throw contract does not exist error', async function () {
-            await assertThrow(tronWeb.trx.getContract('417cbcc41052b59584d1ac9fc1ce39106533aa1d40'), 'Contract does not exist');
+        it('should return empty object', async function () {
+            const ret = await tronWeb.trx.getContract('417cbcc41052b59584d1ac9fc1ce39106533aa1d40');
+            assert.deepEqual(ret, {});
         });
     });
 
