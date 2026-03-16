@@ -1378,7 +1378,7 @@ export default class TransactionBuilder {
 
 
         if (functionSelector && utils.isString(functionSelector)) {
-            functionSelector = functionSelector.replace('/\s*/g', '');
+            functionSelector = functionSelector.replace(/\s*/g, '');
             if (parameters.length) {
                 const abiCoder = new AbiCoder();
                 let types = [];

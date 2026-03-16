@@ -39,7 +39,7 @@ Any new TRON feature will be incorporated into TronWeb. Changes to the API to im
 __[tronweb.network](https://tronweb.network)__
 
 ## Compatibility
-- Version built for Node.js v6 and above
+- Version built for Node.js v16 and above
 - Version built for browsers with more than 0.25% market share
 
 You can access either version specifically from the dist folder.
@@ -182,6 +182,22 @@ In order to contribute you can
 Contact the team at https://cn.developers.tron.network/docs/online-technical-support
 
 ## Recent History
+
+__5.3.5__
+### Improvements
+- Improved the robustness of ABI data processing to enhance compatibility with complex contract interactions and edge cases.
+- Optimized internal handling of contract ABI encoding and decoding to reduce potential parsing inconsistencies.
+- Incorporated audit feedback and improved the overall stability of several internal sub-packages.
+
+### Dependency Updates
+- Upgraded @ethersproject/abi from 5.7.0 to 5.8.0.
+- Upgraded axios from 1.8.4 to 1.13.6.
+- Upgraded ethers from 6.6.0 to 6.16.0.
+- Upgraded mocha from 10.2.0 to 10.8.2.
+- Upgraded webpack from 5.75.0 to 5.105.4.
+
+### Notes
+- This release focuses on improving internal stability and keeping dependencies up to date. No breaking changes are introduced.
 
 __5.3.4__
 - Fix CSP problem in the TransactionBuilder.vote function.

@@ -59,7 +59,7 @@ export function decodeParams(names, types, output, ignoreMethodHash) {
         else obj.push(arg);
 
         return obj;
-    }, names.length ? {} : []);
+    }, names.length ? Object.create(null) : []);
 }
 
 export function encodeParams(types, values) {
@@ -138,7 +138,7 @@ export function encodeParamsV2ByABI(funABI, args) {
         inputs.forEach((input, i) => {
           const type = input.type;
 
-          if (args[i])
+          if (args[i] !== undefined && args[i] !== null)
             if (type === 'address') args[i] = _addressToHex(args[i]);
             else if (type.match(/^([^\x5b]*)(\x5b|$)/)[0] === 'address[')
               convertAddresses(args[i])
