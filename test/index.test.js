@@ -391,19 +391,6 @@ describe('TronWeb Instance', function () {
             assert.throws(() => tronWeb.setPrivateKey('test'), 'Invalid private key provided');
         });
 
-        it('should emit a privateKeyChanged event', function (done) {
-            this.timeout(1000);
-
-            const tronWeb = tronWebBuilder.createInstance();
-
-            tronWeb.on('privateKeyChanged', privateKey => {
-                done(
-                    assert.equal(privateKey, PRIVATE_KEY)
-                );
-            });
-
-            tronWeb.setPrivateKey(PRIVATE_KEY);
-        });
     });
 
     describe('#setAddress()', function () {

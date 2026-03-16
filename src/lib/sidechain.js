@@ -4,7 +4,8 @@ import Validator from 'paramValidator';
 export default class SideChain {
     constructor(sideOptions, TronWeb = false, mainchain = false, privateKey = false) {
         this.mainchain = mainchain;
-        const { fullHost, fullNode, solidityNode, eventServer, mainGatewayAddress, sideGatewayAddress, sideChainId } = sideOptions;
+        const { fullHost, fullNode, solidityNode, eventServer, mainGatewayAddress, sideGatewayAddress, sideChainId } =
+            sideOptions;
         this.sidechain = new TronWeb(fullHost || fullNode, fullHost || solidityNode, fullHost || eventServer, privateKey);
         this.isAddress = this.mainchain.isAddress;
         this.utils = this.mainchain.utils;
@@ -22,23 +23,22 @@ export default class SideChain {
             return self.multiSign(...args);
         };
 
-        console.warn("TronWeb: 'tronWeb.sidechain' is deprecated and may be removed in the future. Please use the 'sunweb' sdk instead. For more information, see: https://github.com/tronprotocol/sun-network/tree/develop/js-sdk");
+        console.warn(
+            "TronWeb: 'tronWeb.sidechain' is deprecated and may be removed in the future. Please use the 'sunweb' sdk instead. For more information, see: https://github.com/tronprotocol/sun-network/tree/develop/js-sdk"
+        );
     }
     setMainGatewayAddress(mainGatewayAddress) {
-        if (!this.isAddress(mainGatewayAddress))
-            throw new Error('Invalid main gateway address provided');
+        if (!this.isAddress(mainGatewayAddress)) throw new Error('Invalid main gateway address provided');
         this.mainGatewayAddress = mainGatewayAddress;
     }
 
     setSideGatewayAddress(sideGatewayAddress) {
-        if (!this.isAddress(sideGatewayAddress))
-            throw new Error('Invalid side gateway address provided');
+        if (!this.isAddress(sideGatewayAddress)) throw new Error('Invalid side gateway address provided');
         this.sideGatewayAddress = sideGatewayAddress;
     }
 
     setChainId(sideChainId) {
-        if (!this.utils.isString(sideChainId) || !sideChainId)
-            throw new Error('Invalid side chainId provided');
+        if (!this.utils.isString(sideChainId) || !sideChainId) throw new Error('Invalid side chainId provided');
         this.chainId = sideChainId;
     }
 
@@ -51,13 +51,14 @@ export default class SideChain {
         let byteArr = this.utils.code.hexStr2byteArray(transaction.txID).concat(chainIdByteArr);
         let byteArrHash = this.sidechain.utils.ethersUtils.sha256(byteArr);
 
-        const signature = this.utils.crypto.ECKeySign(this.utils.code.hexStr2byteArray(byteArrHash.replace(/^0x/, '')), priKeyBytes);
+        const signature = this.utils.crypto.ECKeySign(
+            this.utils.code.hexStr2byteArray(byteArrHash.replace(/^0x/, '')),
+            priKeyBytes
+        );
 
         if (Array.isArray(transaction.signature)) {
-            if (!transaction.signature.includes(signature))
-                transaction.signature.push(signature);
-        } else
-            transaction.signature = [signature];
+            if (!transaction.signature.includes(signature)) transaction.signature.push(signature);
+        } else transaction.signature = [signature];
         return transaction;
     }
 
@@ -75,7 +76,8 @@ export default class SideChain {
 
         if (!callback) return this.injectPromise(this.multiSign, transaction, privateKey, permissionId);
 
-        if (!this.utils.isObject(transaction) || !transaction.raw_data || !transaction.raw_data.contract) return callback('Invalid transaction provided');
+        if (!this.utils.isObject(transaction) || !transaction.raw_data || !transaction.raw_data.contract)
+            return callback('Invalid transaction provided');
 
         if (!transaction.raw_data.contract[0].Permission_id && permissionId > 0) {
             // set permission id
@@ -90,14 +92,14 @@ export default class SideChain {
             }
 
             let foundKey = false;
-            signWeight.permission.keys.map(key => {
+            signWeight.permission.keys.map((key) => {
                 if (key.address === address) foundKey = true;
             });
 
-            if (!foundKey) return callback(privateKey + ' has no permission to sign');
+            if (!foundKey) return callback('Address ' + this.sidechain.address.fromHex(address) + ' has no permission to sign');
 
             if (signWeight.approved_list && signWeight.approved_list.indexOf(address) != -1) {
-                return callback(privateKey + ' already sign transaction');
+                return callback('Address ' + this.sidechain.address.fromHex(address) + ' already sign transaction');
             }
 
             // reset transaction
@@ -116,7 +118,13 @@ export default class SideChain {
         }
     }
 
-    async sign(transaction = false, privateKey = this.sidechain.defaultPrivateKey, useTronHeader = true, multisig = false, callback = false) {
+    async sign(
+        transaction = false,
+        privateKey = this.sidechain.defaultPrivateKey,
+        useTronHeader = true,
+        multisig = false,
+        callback = false
+    ) {
         if (this.utils.isFunction(multisig)) {
             callback = multisig;
             multisig = false;
@@ -135,14 +143,11 @@ export default class SideChain {
             multisig = false;
         }
 
-        if (!callback)
-            return this.injectPromise(this.sign, transaction, privateKey, useTronHeader, multisig);
+        if (!callback) return this.injectPromise(this.sign, transaction, privateKey, useTronHeader, multisig);
 
         // Message signing
         if (this.utils.isString(transaction)) {
-
-            if (!this.utils.isHex(transaction))
-                return callback('Expected hex message input');
+            if (!this.utils.isHex(transaction)) return callback('Expected hex message input');
 
             try {
                 const signatureHex = this.sidechain.trx.signString(transaction, privateKey, useTronHeader);
@@ -152,31 +157,28 @@ export default class SideChain {
             }
         }
 
-        if (!this.utils.isObject(transaction))
-            return callback('Invalid transaction provided');
+        if (!this.utils.isObject(transaction)) return callback('Invalid transaction provided');
 
-        if (!multisig && transaction.signature)
-            return callback('Transaction is already signed');
+        if (!multisig && transaction.signature) return callback('Transaction is already signed');
 
         try {
             if (!multisig) {
-                const address = this.sidechain.address.toHex(
-                    this.sidechain.address.fromPrivateKey(privateKey)
-                ).toLowerCase();
+                const address = this.sidechain.address.toHex(this.sidechain.address.fromPrivateKey(privateKey)).toLowerCase();
                 if (address !== this.sidechain.address.toHex(transaction.raw_data.contract[0].parameter.value.owner_address))
                     return callback('Private key does not match address in transaction');
+                if (!txCheck(transaction)) {
+                    return callback('Invalid transaction');
+                }
             }
-            return callback(null,
-                this.signTransaction(privateKey, transaction)
-            );
+            return callback(null, this.signTransaction(privateKey, transaction));
         } catch (ex) {
             callback(ex);
         }
     }
 
     /**
-    * deposit asset to sidechain
-    */
+     * deposit asset to sidechain
+     */
     async depositTrx(
         callValue,
         depositFee,
@@ -196,32 +198,37 @@ export default class SideChain {
         if (!callback) {
             return this.injectPromise(this.depositTrx, callValue, depositFee, feeLimit, options, privateKey);
         }
-        if (this.validator.notValid([
-            {
-                name: 'callValue',
-                type: 'integer',
-                value: callValue,
-                gte: 0
-            },
-            {
-                name: 'depositFee',
-                type: 'integer',
-                value: depositFee,
-                gte: 0
-            },
-            {
-                name: 'feeLimit',
-                type: 'integer',
-                value: feeLimit,
-                gte: 0
-            }
-        ], callback)) {
+        if (
+            this.validator.notValid(
+                [
+                    {
+                        name: 'callValue',
+                        type: 'integer',
+                        value: callValue,
+                        gte: 0,
+                    },
+                    {
+                        name: 'depositFee',
+                        type: 'integer',
+                        value: depositFee,
+                        gte: 0,
+                    },
+                    {
+                        name: 'feeLimit',
+                        type: 'integer',
+                        value: feeLimit,
+                        gte: 0,
+                    },
+                ],
+                callback
+            )
+        ) {
             return;
         }
         options = {
             callValue: Number(callValue) + Number(depositFee),
             feeLimit,
-            ...options
+            ...options,
         };
         try {
             const contractInstance = await this.mainchain.contract().at(this.mainGatewayAddress);
@@ -239,7 +246,8 @@ export default class SideChain {
         feeLimit,
         options = {},
         privateKey = this.mainchain.defaultPrivateKey,
-        callback = false) {
+        callback = false
+    ) {
         if (this.utils.isFunction(privateKey)) {
             callback = privateKey;
             privateKey = this.mainchain.defaultPrivateKey;
@@ -251,32 +259,37 @@ export default class SideChain {
         if (!callback) {
             return this.injectPromise(this.depositTrc10, tokenId, tokenValue, depositFee, feeLimit, options, privateKey);
         }
-        if (this.validator.notValid([
-            {
-                name: 'tokenValue',
-                type: 'integer',
-                value: tokenValue,
-                gte: 0
-            },
-            {
-                name: 'depositFee',
-                type: 'integer',
-                value: depositFee,
-                gte: 0
-            },
-            {
-                name: 'feeLimit',
-                type: 'integer',
-                value: feeLimit,
-                gte: 0
-            },
-            {
-                name: 'tokenId',
-                type: 'integer',
-                value: tokenId,
-                gte: 0
-            }
-        ], callback)) {
+        if (
+            this.validator.notValid(
+                [
+                    {
+                        name: 'tokenValue',
+                        type: 'integer',
+                        value: tokenValue,
+                        gte: 0,
+                    },
+                    {
+                        name: 'depositFee',
+                        type: 'integer',
+                        value: depositFee,
+                        gte: 0,
+                    },
+                    {
+                        name: 'feeLimit',
+                        type: 'integer',
+                        value: feeLimit,
+                        gte: 0,
+                    },
+                    {
+                        name: 'tokenId',
+                        type: 'integer',
+                        value: tokenId,
+                        gte: 0,
+                    },
+                ],
+                callback
+            )
+        ) {
             return;
         }
         options = {
@@ -284,7 +297,7 @@ export default class SideChain {
             tokenValue,
             feeLimit,
             ...options,
-            callValue: depositFee
+            callValue: depositFee,
         };
         try {
             const contractInstance = await this.mainchain.contract().at(this.mainGatewayAddress);
@@ -314,38 +327,52 @@ export default class SideChain {
             options = {};
         }
         if (!callback) {
-            return this.injectPromise(this.depositTrc, functionSelector, num, fee, feeLimit, contractAddress, options, privateKey);
+            return this.injectPromise(
+                this.depositTrc,
+                functionSelector,
+                num,
+                fee,
+                feeLimit,
+                contractAddress,
+                options,
+                privateKey
+            );
         }
-        if (this.validator.notValid([
-            {
-                name: 'functionSelector',
-                type: 'not-empty-string',
-                value: functionSelector
-            },
-            {
-                name: 'num',
-                type: 'integer',
-                value: num,
-                gte: 0
-            },
-            {
-                name: 'fee',
-                type: 'integer',
-                value: fee,
-                gte: 0
-            },
-            {
-                name: 'feeLimit',
-                type: 'integer',
-                value: feeLimit,
-                gte: 0
-            },
-            {
-                name: 'contractAddress',
-                type: 'address',
-                value: contractAddress
-            }
-        ], callback)) {
+        if (
+            this.validator.notValid(
+                [
+                    {
+                        name: 'functionSelector',
+                        type: 'not-empty-string',
+                        value: functionSelector,
+                    },
+                    {
+                        name: 'num',
+                        type: 'integer',
+                        value: num,
+                        gte: 0,
+                    },
+                    {
+                        name: 'fee',
+                        type: 'integer',
+                        value: fee,
+                        gte: 0,
+                    },
+                    {
+                        name: 'feeLimit',
+                        type: 'integer',
+                        value: feeLimit,
+                        gte: 0,
+                    },
+                    {
+                        name: 'contractAddress',
+                        type: 'address',
+                        value: contractAddress,
+                    },
+                ],
+                callback
+            )
+        ) {
             return;
         }
         options = {
@@ -353,7 +380,7 @@ export default class SideChain {
             ...options,
             callValue: fee,
             tokenId: '',
-            tokenValue: 0
+            tokenValue: 0,
         };
         try {
             let result = null;
@@ -394,16 +421,7 @@ export default class SideChain {
         callback = false
     ) {
         const functionSelector = 'approve';
-        return this.depositTrc(
-            functionSelector,
-            num,
-            0,
-            feeLimit,
-            contractAddress,
-            options,
-            privateKey,
-            callback
-        );
+        return this.depositTrc(functionSelector, num, 0, feeLimit, contractAddress, options, privateKey, callback);
     }
 
     async approveTrc721(
@@ -415,16 +433,7 @@ export default class SideChain {
         callback = false
     ) {
         const functionSelector = 'approve';
-        return this.depositTrc(
-            functionSelector,
-            id,
-            0,
-            feeLimit,
-            contractAddress,
-            options,
-            privateKey,
-            callback
-        );
+        return this.depositTrc(functionSelector, id, 0, feeLimit, contractAddress, options, privateKey, callback);
     }
 
     async depositTrc20(
@@ -437,16 +446,7 @@ export default class SideChain {
         callback = false
     ) {
         const functionSelector = 'depositTRC20';
-        return this.depositTrc(
-            functionSelector,
-            num,
-            depositFee,
-            feeLimit,
-            contractAddress,
-            options,
-            privateKey,
-            callback
-        );
+        return this.depositTrc(functionSelector, num, depositFee, feeLimit, contractAddress, options, privateKey, callback);
     }
 
     async depositTrc721(
@@ -459,16 +459,7 @@ export default class SideChain {
         callback = false
     ) {
         const functionSelector = 'depositTRC721';
-        return this.depositTrc(
-            functionSelector,
-            id,
-            depositFee,
-            feeLimit,
-            contractAddress,
-            options,
-            privateKey,
-            callback
-        );
+        return this.depositTrc(functionSelector, id, depositFee, feeLimit, contractAddress, options, privateKey, callback);
     }
 
     /**
@@ -494,32 +485,37 @@ export default class SideChain {
         if (!callback) {
             return this.injectPromise(this.mappingTrc, trxHash, mappingFee, feeLimit, functionSelector, options, privateKey);
         }
-        if (this.validator.notValid([
-            {
-                name: 'trxHash',
-                type: 'not-empty-string',
-                value: trxHash
-            },
-            {
-                name: 'mappingFee',
-                type: 'integer',
-                value: mappingFee,
-                gte: 0
-            },
-            {
-                name: 'feeLimit',
-                type: 'integer',
-                value: feeLimit,
-                gte: 0
-            }
-        ], callback)) {
+        if (
+            this.validator.notValid(
+                [
+                    {
+                        name: 'trxHash',
+                        type: 'not-empty-string',
+                        value: trxHash,
+                    },
+                    {
+                        name: 'mappingFee',
+                        type: 'integer',
+                        value: mappingFee,
+                        gte: 0,
+                    },
+                    {
+                        name: 'feeLimit',
+                        type: 'integer',
+                        value: feeLimit,
+                        gte: 0,
+                    },
+                ],
+                callback
+            )
+        ) {
             return;
         }
-        trxHash = trxHash.startsWith('0x') ? trxHash : ('0x' + trxHash);
+        trxHash = trxHash.startsWith('0x') ? trxHash : '0x' + trxHash;
         options = {
             feeLimit,
             ...options,
-            callValue: mappingFee
+            callValue: mappingFee,
         };
         try {
             const contractInstance = await this.mainchain.contract().at(this.mainGatewayAddress);
@@ -546,14 +542,7 @@ export default class SideChain {
         callback = false
     ) {
         const functionSelector = 'mappingTRC20';
-        return this.mappingTrc(
-            trxHash,
-            mappingFee,
-            feeLimit,
-            functionSelector,
-            options,
-            privateKey,
-            callback);
+        return this.mappingTrc(trxHash, mappingFee, feeLimit, functionSelector, options, privateKey, callback);
     }
 
     async mappingTrc721(
@@ -565,14 +554,7 @@ export default class SideChain {
         callback = false
     ) {
         const functionSelector = 'mappingTRC721';
-        return this.mappingTrc(
-            trxHash,
-            mappingFee,
-            feeLimit,
-            functionSelector,
-            options,
-            privateKey,
-            callback);
+        return this.mappingTrc(trxHash, mappingFee, feeLimit, functionSelector, options, privateKey, callback);
     }
 
     /**
@@ -597,32 +579,37 @@ export default class SideChain {
         if (!callback) {
             return this.injectPromise(this.withdrawTrx, callValue, withdrawFee, feeLimit, options, privateKey);
         }
-        if (this.validator.notValid([
-            {
-                name: 'callValue',
-                type: 'integer',
-                value: callValue,
-                gte: 0
-            },
-            {
-                name: 'withdrawFee',
-                type: 'integer',
-                value: withdrawFee,
-                gte: 0
-            },
-            {
-                name: 'feeLimit',
-                type: 'integer',
-                value: feeLimit,
-                gte: 0
-            }
-        ], callback)) {
+        if (
+            this.validator.notValid(
+                [
+                    {
+                        name: 'callValue',
+                        type: 'integer',
+                        value: callValue,
+                        gte: 0,
+                    },
+                    {
+                        name: 'withdrawFee',
+                        type: 'integer',
+                        value: withdrawFee,
+                        gte: 0,
+                    },
+                    {
+                        name: 'feeLimit',
+                        type: 'integer',
+                        value: feeLimit,
+                        gte: 0,
+                    },
+                ],
+                callback
+            )
+        ) {
             return;
         }
         options = {
             callValue: Number(callValue) + Number(withdrawFee),
             feeLimit,
-            ...options
+            ...options,
         };
         try {
             const contractInstance = await this.sidechain.contract().at(this.sideGatewayAddress);
@@ -653,32 +640,37 @@ export default class SideChain {
         if (!callback) {
             return this.injectPromise(this.withdrawTrc10, tokenId, tokenValue, withdrawFee, feeLimit, options, privateKey);
         }
-        if (this.validator.notValid([
-            {
-                name: 'tokenId',
-                type: 'integer',
-                value: tokenId,
-                gte: 0
-            },
-            {
-                name: 'tokenValue',
-                type: 'integer',
-                value: tokenValue,
-                gte: 0
-            },
-            {
-                name: 'withdrawFee',
-                type: 'integer',
-                value: withdrawFee,
-                gte: 0
-            },
-            {
-                name: 'feeLimit',
-                type: 'integer',
-                value: feeLimit,
-                gte: 0
-            }
-        ], callback)) {
+        if (
+            this.validator.notValid(
+                [
+                    {
+                        name: 'tokenId',
+                        type: 'integer',
+                        value: tokenId,
+                        gte: 0,
+                    },
+                    {
+                        name: 'tokenValue',
+                        type: 'integer',
+                        value: tokenValue,
+                        gte: 0,
+                    },
+                    {
+                        name: 'withdrawFee',
+                        type: 'integer',
+                        value: withdrawFee,
+                        gte: 0,
+                    },
+                    {
+                        name: 'feeLimit',
+                        type: 'integer',
+                        value: feeLimit,
+                        gte: 0,
+                    },
+                ],
+                callback
+            )
+        ) {
             return;
         }
         options = {
@@ -686,7 +678,7 @@ export default class SideChain {
             tokenId,
             callValue: withdrawFee,
             feeLimit,
-            ...options
+            ...options,
         };
         try {
             const contractInstance = await this.sidechain.contract().at(this.sideGatewayAddress);
@@ -716,50 +708,64 @@ export default class SideChain {
             options = {};
         }
         if (!callback) {
-            return this.injectPromise(this.withdrawTrc, functionSelector, numOrId, withdrawFee, feeLimit, contractAddress, options, privateKey);
+            return this.injectPromise(
+                this.withdrawTrc,
+                functionSelector,
+                numOrId,
+                withdrawFee,
+                feeLimit,
+                contractAddress,
+                options,
+                privateKey
+            );
         }
-        if (this.validator.notValid([
-            {
-                name: 'functionSelector',
-                type: 'not-empty-string',
-                value: functionSelector
-            },
-            {
-                name: 'numOrId',
-                type: 'integer',
-                value: numOrId,
-                gte: 0
-            },
-            {
-                name: 'withdrawFee',
-                type: 'integer',
-                value: withdrawFee,
-                gte: 0
-            },
-            {
-                name: 'feeLimit',
-                type: 'integer',
-                value: feeLimit,
-                gte: 0
-            },
-            {
-                name: 'contractAddress',
-                type: 'address',
-                value: contractAddress
-            }
-        ], callback)) {
+        if (
+            this.validator.notValid(
+                [
+                    {
+                        name: 'functionSelector',
+                        type: 'not-empty-string',
+                        value: functionSelector,
+                    },
+                    {
+                        name: 'numOrId',
+                        type: 'integer',
+                        value: numOrId,
+                        gte: 0,
+                    },
+                    {
+                        name: 'withdrawFee',
+                        type: 'integer',
+                        value: withdrawFee,
+                        gte: 0,
+                    },
+                    {
+                        name: 'feeLimit',
+                        type: 'integer',
+                        value: feeLimit,
+                        gte: 0,
+                    },
+                    {
+                        name: 'contractAddress',
+                        type: 'address',
+                        value: contractAddress,
+                    },
+                ],
+                callback
+            )
+        ) {
             return;
         }
         options = {
             feeLimit,
             ...options,
-            callValue: withdrawFee
+            callValue: withdrawFee,
         };
         const parameters = [
             {
                 type: 'uint256',
-                value: numOrId
-            }
+                value: numOrId,
+            },
         ];
 
         try {
@@ -778,8 +784,7 @@ export default class SideChain {
             const signedTransaction = await this.sidechain.trx.sign(transaction.transaction, privateKey);
 
             if (!signedTransaction.signature) {
-                if (!privateKey)
-                    return callback('Transaction was not signed properly');
+                if (!privateKey) return callback('Transaction was not signed properly');
 
                 return callback('Invalid private key provided');
             }
@@ -788,21 +793,19 @@ export default class SideChain {
             if (broadcast.code) {
                 const err = {
                     error: broadcast.code,
-                    message: broadcast.code
+                    message: broadcast.code,
                 };
-                if (broadcast.message)
-                    err.message = this.sidechain.toUtf8(broadcast.message);
-                return callback(err)
+                if (broadcast.message) err.message = this.sidechain.toUtf8(broadcast.message);
+                return callback(err);
             }
 
-            if (!options.shouldPollResponse)
-                return callback(null, signedTransaction.txID);
+            if (!options.shouldPollResponse) return callback(null, signedTransaction.txID);
 
             const checkResult = async (index = 0) => {
                 if (index == 20) {
                     return callback({
                         error: 'Cannot find result in solidity node',
-                        transaction: signedTransaction
+                        transaction: signedTransaction,
                     });
                 }
 
@@ -818,7 +821,7 @@ export default class SideChain {
                     return callback({
                         error: this.sidechain.toUtf8(output.resMessage),
                         transaction: signedTransaction,
-                        output
+                        output,
                     });
                 }
 
@@ -826,20 +829,18 @@ export default class SideChain {
                     return callback({
                         error: 'Failed to execute: ' + JSON.stringify(output, null, 2),
                         transaction: signedTransaction,
-                        output
+                        output,
                     });
                 }
 
-                if (options.rawResponse)
-                    return callback(null, output);
+                if (options.rawResponse) return callback(null, output);
 
                 let decoded = decodeOutput(this.outputs, '0x' + output.contractResult[0]);
 
-                if (decoded.length === 1)
-                    decoded = decoded[0];
+                if (decoded.length === 1) decoded = decoded[0];
 
                 return callback(null, decoded);
-            }
+            };
 
             checkResult();
         } catch (ex) {
@@ -857,15 +858,7 @@ export default class SideChain {
         callback = false
     ) {
         const functionSelector = 'withdrawal(uint256)';
-        return this.withdrawTrc(
-            functionSelector,
-            num,
-            withdrawFee,
-            feeLimit,
-            contractAddress,
-            options,
-            privateKey,
-            callback);
+        return this.withdrawTrc(functionSelector, num, withdrawFee, feeLimit, contractAddress, options, privateKey, callback);
     }
 
     async withdrawTrc721(
@@ -878,25 +871,10 @@ export default class SideChain {
         callback = false
     ) {
         const functionSelector = 'withdrawal(uint256)';
-        return this.withdrawTrc(
-            functionSelector,
-            id,
-            withdrawFee,
-            feeLimit,
-            contractAddress,
-            options,
-            privateKey,
-            callback);
+        return this.withdrawTrc(functionSelector, id, withdrawFee, feeLimit, contractAddress, options, privateKey, callback);
     }
 
-
-    async injectFund(
-        num,
-        feeLimit,
-        options,
-        privateKey = this.mainchain.defaultPrivateKey,
-        callback = false
-    ) {
+    async injectFund(num, feeLimit, options, privateKey = this.mainchain.defaultPrivateKey, callback = false) {
         if (this.utils.isFunction(privateKey)) {
             callback = privateKey;
             privateKey = this.mainchain.defaultPrivateKey;
@@ -909,36 +887,44 @@ export default class SideChain {
         if (!callback) {
             return this.injectPromise(this.injectFund, num, feeLimit, options, privateKey);
         }
-        if (this.validator.notValid([
-            {
-                name: 'num',
-                type: 'integer',
-                value: num,
-                gte: 0
-            },
-            {
-                name: 'feeLimit',
-                type: 'integer',
-                value: feeLimit,
-                gte: 0
-            }
-        ], callback)) {
+        if (
+            this.validator.notValid(
+                [
+                    {
+                        name: 'num',
+                        type: 'integer',
+                        value: num,
+                        gte: 0,
+                    },
+                    {
+                        name: 'feeLimit',
+                        type: 'integer',
+                        value: feeLimit,
+                        gte: 0,
+                    },
+                ],
+                callback
+            )
+        ) {
             return;
         }
 
         try {
             const address = this.sidechain.address.fromPrivateKey(privateKey);
             const hexAddress = this.sidechain.address.toHex(address);
-            const transaction = await this.sidechain.fullNode.request('/wallet/fundinject', {
-                owner_address: hexAddress,
-                amount: num
-            }, 'post');
+            const transaction = await this.sidechain.fullNode.request(
+                '/wallet/fundinject',
+                {
+                    owner_address: hexAddress,
+                    amount: num,
+                },
+                'post'
+            );
 
             const signedTransaction = await this.sidechain.trx.sign(transaction, privateKey);
 
             if (!signedTransaction.signature) {
-                if (!privateKey)
-                    return callback('Transaction was not signed properly');
+                if (!privateKey) return callback('Transaction was not signed properly');
 
                 return callback('Invalid private key provided');
             }
@@ -947,11 +933,10 @@ export default class SideChain {
             if (broadcast.code) {
                 const err = {
                     error: broadcast.code,
-                    message: broadcast.code
+                    message: broadcast.code,
                 };
-                if (broadcast.message)
-                    err.message = this.mainchain.toUtf8(broadcast.message);
-                return callback(err)
+                if (broadcast.message) err.message = this.mainchain.toUtf8(broadcast.message);
+                return callback(err);
             }
             return callback(null, signedTransaction.txID);
         } catch (ex) {
@@ -1022,4 +1007,3 @@ export default class SideChain {
         );
     }
 }
-

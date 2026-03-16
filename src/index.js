@@ -144,7 +144,6 @@ export default class TronWeb extends EventEmitter {
         }
 
         this.defaultPrivateKey = privateKey;
-        this.emit('privateKeyChanged', privateKey);
     }
 
     setAddress(address) {
