@@ -2,7 +2,7 @@
 // @ts-nocheck
 
 import '../protocol/core/Tron_pb.cjs';
-const { Transaction } = globalThis.TronWebProto;
+const { Transaction, Permission, Key } = globalThis.TronWebProto;
 
 import '../protocol/core/contract/balance_contract_pb.cjs';
 const {
@@ -15,6 +15,8 @@ const {
     WithdrawExpireUnfreezeContract,
     DelegateResourceContract,
     UnDelegateResourceContract,
+    FreezeBalanceContract,
+    UnfreezeBalanceContract,
 } = globalThis.TronWebProto;
 
 import '../protocol/core/contract/asset_issue_contract_pb.cjs';
@@ -26,7 +28,42 @@ const {
 } = globalThis.TronWebProto;
 
 import '../protocol/core/contract/smart_contract_pb.cjs';
-const { TriggerSmartContract } = globalThis.TronWebProto;
+const {
+    TriggerSmartContract,
+    CreateSmartContract,
+    UpdateSettingContract,
+    UpdateEnergyLimitContract,
+    ClearABIContract,
+} = globalThis.TronWebProto;
+
+import '../protocol/core/contract/account_contract_pb.cjs';
+const {
+    AccountCreateContract,
+    AccountUpdateContract,
+    SetAccountIdContract,
+    AccountPermissionUpdateContract,
+} = globalThis.TronWebProto;
+
+import '../protocol/core/contract/witness_contract_pb.cjs';
+const { VoteWitnessContract } = globalThis.TronWebProto;
+
+import '../protocol/core/contract/proposal_contract_pb.cjs';
+const {
+    ProposalCreateContract,
+    ProposalApproveContract,
+    ProposalDeleteContract,
+} = globalThis.TronWebProto;
+
+import '../protocol/core/contract/exchange_contract_pb.cjs';
+const {
+    ExchangeCreateContract,
+    ExchangeInjectContract,
+    ExchangeWithdrawContract,
+    ExchangeTransactionContract,
+} = globalThis.TronWebProto;
+
+import '../protocol/core/contract/storage_contract_pb.cjs';
+const { UpdateBrokerageContract } = globalThis.TronWebProto;
 
 import { byteArray2hexStr } from './bytes.js';
 import { hexStr2byteArray } from './code.js';
@@ -302,6 +339,262 @@ const DUpdateAssetContract = (type, rawDataHex) => {
     return commonData;
 };
 
+// ============== Account contracts ==============
+
+const deserializePermission = (permPb) => {
+    if (!permPb) return null;
+    return {
+        type: permPb.getType(),
+        id: permPb.getId(),
+        permission_name: permPb.getPermissionName(),
+        threshold: permPb.getThreshold(),
+        operations: byteArray2hexStr(permPb.getOperations_asU8()),
+        keys: permPb.getKeysList().map((keyPb) => ({
+            address: byteArray2hexStr(keyPb.getAddress_asU8()),
+            weight: keyPb.getWeight(),
+        })),
+    };
+};
+
+const DAccountCreateContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const accountCreateContract = AccountCreateContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(accountCreateContract.getOwnerAddress_asU8()),
+        account_address: byteArray2hexStr(accountCreateContract.getAccountAddress_asU8()),
+        type: accountCreateContract.getType(),
+    };
+    return commonData;
+};
+
+const DAccountUpdateContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const accountUpdateContract = AccountUpdateContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(accountUpdateContract.getOwnerAddress_asU8()),
+        account_name: byteArray2hexStr(accountUpdateContract.getAccountName_asU8()),
+    };
+    return commonData;
+};
+
+const DSetAccountIdContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const setAccountIdContract = SetAccountIdContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(setAccountIdContract.getOwnerAddress_asU8()),
+        account_id: byteArray2hexStr(setAccountIdContract.getAccountId_asU8()),
+    };
+    return commonData;
+};
+
+const DAccountPermissionUpdateContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const accountPermissionUpdateContract = AccountPermissionUpdateContract.deserializeBinary(valuePb);
+    const witnessPb = accountPermissionUpdateContract.getWitness();
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(accountPermissionUpdateContract.getOwnerAddress_asU8()),
+        owner: deserializePermission(accountPermissionUpdateContract.getOwner()),
+        witness: witnessPb ? deserializePermission(witnessPb) : null,
+        actives: accountPermissionUpdateContract.getActivesList().map(deserializePermission),
+    };
+    return commonData;
+};
+
+// ============== Stake 1.0 + Vote contracts ==============
+
+const DFreezeBalanceContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const freezeBalanceContract = FreezeBalanceContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(freezeBalanceContract.getOwnerAddress_asU8()),
+        frozen_balance: freezeBalanceContract.getFrozenBalance(),
+        frozen_duration: freezeBalanceContract.getFrozenDuration(),
+        resource: getResourceName(freezeBalanceContract.getResource()),
+        receiver_address: byteArray2hexStr(freezeBalanceContract.getReceiverAddress_asU8()),
+    };
+    return commonData;
+};
+
+const DUnfreezeBalanceContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const unfreezeBalanceContract = UnfreezeBalanceContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(unfreezeBalanceContract.getOwnerAddress_asU8()),
+        resource: getResourceName(unfreezeBalanceContract.getResource()),
+        receiver_address: byteArray2hexStr(unfreezeBalanceContract.getReceiverAddress_asU8()),
+    };
+    return commonData;
+};
+
+const DVoteWitnessContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const voteWitnessContract = VoteWitnessContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(voteWitnessContract.getOwnerAddress_asU8()),
+        votes: voteWitnessContract.getVotesList().map((votePb) => ({
+            vote_address: byteArray2hexStr(votePb.getVoteAddress_asU8()),
+            vote_count: votePb.getVoteCount(),
+        })),
+    };
+    return commonData;
+};
+
+// ============== Proposal contracts ==============
+
+const DProposalCreateContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const proposalCreateContract = ProposalCreateContract.deserializeBinary(valuePb);
+    const parametersMap = proposalCreateContract.getParametersMap();
+    const parameters: Record<string, number> = {};
+    parametersMap.forEach((value, key) => {
+        parameters[key] = value;
+    });
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(proposalCreateContract.getOwnerAddress_asU8()),
+        parameters,
+    };
+    return commonData;
+};
+
+const DProposalApproveContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const proposalApproveContract = ProposalApproveContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(proposalApproveContract.getOwnerAddress_asU8()),
+        proposal_id: proposalApproveContract.getProposalId(),
+        is_add_approval: proposalApproveContract.getIsAddApproval(),
+    };
+    return commonData;
+};
+
+const DProposalDeleteContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const proposalDeleteContract = ProposalDeleteContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(proposalDeleteContract.getOwnerAddress_asU8()),
+        proposal_id: proposalDeleteContract.getProposalId(),
+    };
+    return commonData;
+};
+
+// ============== Smart contract management ==============
+
+const DCreateSmartContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const createSmartContract = CreateSmartContract.deserializeBinary(valuePb);
+    const newContractPb = createSmartContract.getNewContract();
+    const new_contract = newContractPb ? {
+        origin_address: byteArray2hexStr(newContractPb.getOriginAddress_asU8()),
+        contract_address: byteArray2hexStr(newContractPb.getContractAddress_asU8()),
+        bytecode: byteArray2hexStr(newContractPb.getBytecode_asU8()),
+        call_value: newContractPb.getCallValue(),
+        consume_user_resource_percent: newContractPb.getConsumeUserResourcePercent(),
+        name: newContractPb.getName(),
+        origin_energy_limit: newContractPb.getOriginEnergyLimit(),
+    } : null;
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(createSmartContract.getOwnerAddress_asU8()),
+        call_token_value: createSmartContract.getCallTokenValue(),
+        token_id: createSmartContract.getTokenId(),
+        new_contract,
+    };
+    return commonData;
+};
+
+const DUpdateSettingContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const updateSettingContract = UpdateSettingContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(updateSettingContract.getOwnerAddress_asU8()),
+        contract_address: byteArray2hexStr(updateSettingContract.getContractAddress_asU8()),
+        consume_user_resource_percent: updateSettingContract.getConsumeUserResourcePercent(),
+    };
+    return commonData;
+};
+
+const DUpdateEnergyLimitContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const updateEnergyLimitContract = UpdateEnergyLimitContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(updateEnergyLimitContract.getOwnerAddress_asU8()),
+        contract_address: byteArray2hexStr(updateEnergyLimitContract.getContractAddress_asU8()),
+        origin_energy_limit: updateEnergyLimitContract.getOriginEnergyLimit(),
+    };
+    return commonData;
+};
+
+const DClearABIContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const clearABIContract = ClearABIContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(clearABIContract.getOwnerAddress_asU8()),
+        contract_address: byteArray2hexStr(clearABIContract.getContractAddress_asU8()),
+    };
+    return commonData;
+};
+
+// ============== Exchange + Brokerage contracts ==============
+
+const DExchangeCreateContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const exchangeCreateContract = ExchangeCreateContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(exchangeCreateContract.getOwnerAddress_asU8()),
+        first_token_id: byteArray2hexStr(exchangeCreateContract.getFirstTokenId_asU8()),
+        first_token_balance: exchangeCreateContract.getFirstTokenBalance(),
+        second_token_id: byteArray2hexStr(exchangeCreateContract.getSecondTokenId_asU8()),
+        second_token_balance: exchangeCreateContract.getSecondTokenBalance(),
+    };
+    return commonData;
+};
+
+const DExchangeInjectContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const exchangeInjectContract = ExchangeInjectContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(exchangeInjectContract.getOwnerAddress_asU8()),
+        exchange_id: exchangeInjectContract.getExchangeId(),
+        token_id: byteArray2hexStr(exchangeInjectContract.getTokenId_asU8()),
+        quant: exchangeInjectContract.getQuant(),
+    };
+    return commonData;
+};
+
+const DExchangeWithdrawContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const exchangeWithdrawContract = ExchangeWithdrawContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(exchangeWithdrawContract.getOwnerAddress_asU8()),
+        exchange_id: exchangeWithdrawContract.getExchangeId(),
+        token_id: byteArray2hexStr(exchangeWithdrawContract.getTokenId_asU8()),
+        quant: exchangeWithdrawContract.getQuant(),
+    };
+    return commonData;
+};
+
+const DExchangeTransactionContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const exchangeTransactionContract = ExchangeTransactionContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(exchangeTransactionContract.getOwnerAddress_asU8()),
+        exchange_id: exchangeTransactionContract.getExchangeId(),
+        token_id: byteArray2hexStr(exchangeTransactionContract.getTokenId_asU8()),
+        quant: exchangeTransactionContract.getQuant(),
+        expected: exchangeTransactionContract.getExpected(),
+    };
+    return commonData;
+};
+
+const DUpdateBrokerageContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const updateBrokerageContract = UpdateBrokerageContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(updateBrokerageContract.getOwnerAddress_asU8()),
+        brokerage: updateBrokerageContract.getBrokerage(),
+    };
+    return commonData;
+};
+
 const deserializeTransaction = (type: string, rawDataHex: string) => {
     if (!rawDataHex) {
         throw new Error('rawDataHex cannot be empty');
@@ -338,6 +631,44 @@ const deserializeTransaction = (type: string, rawDataHex: string) => {
             return DAssetIssueContract(type, rawDataHex);
         case 'UpdateAssetContract':
             return DUpdateAssetContract(type, rawDataHex);
+        case 'AccountCreateContract':
+            return DAccountCreateContract(type, rawDataHex);
+        case 'AccountUpdateContract':
+            return DAccountUpdateContract(type, rawDataHex);
+        case 'SetAccountIdContract':
+            return DSetAccountIdContract(type, rawDataHex);
+        case 'AccountPermissionUpdateContract':
+            return DAccountPermissionUpdateContract(type, rawDataHex);
+        case 'FreezeBalanceContract':
+            return DFreezeBalanceContract(type, rawDataHex);
+        case 'UnfreezeBalanceContract':
+            return DUnfreezeBalanceContract(type, rawDataHex);
+        case 'VoteWitnessContract':
+            return DVoteWitnessContract(type, rawDataHex);
+        case 'ProposalCreateContract':
+            return DProposalCreateContract(type, rawDataHex);
+        case 'ProposalApproveContract':
+            return DProposalApproveContract(type, rawDataHex);
+        case 'ProposalDeleteContract':
+            return DProposalDeleteContract(type, rawDataHex);
+        case 'CreateSmartContract':
+            return DCreateSmartContract(type, rawDataHex);
+        case 'UpdateSettingContract':
+            return DUpdateSettingContract(type, rawDataHex);
+        case 'UpdateEnergyLimitContract':
+            return DUpdateEnergyLimitContract(type, rawDataHex);
+        case 'ClearABIContract':
+            return DClearABIContract(type, rawDataHex);
+        case 'ExchangeCreateContract':
+            return DExchangeCreateContract(type, rawDataHex);
+        case 'ExchangeInjectContract':
+            return DExchangeInjectContract(type, rawDataHex);
+        case 'ExchangeWithdrawContract':
+            return DExchangeWithdrawContract(type, rawDataHex);
+        case 'ExchangeTransactionContract':
+            return DExchangeTransactionContract(type, rawDataHex);
+        case 'UpdateBrokerageContract':
+            return DUpdateBrokerageContract(type, rawDataHex);
         default:
             throw new Error(`trasaction ${type} not supported`);
     }
