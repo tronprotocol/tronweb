@@ -21,7 +21,7 @@ import {
 
 import type { BytesLike, SignatureLike } from 'ethers';
 
-import { Interface } from './interface.js';
+import { Interface, LogDescription, TransactionDescription, ErrorDescription } from './interface.js';
 
 const splitSignature = (sigBytes: SignatureLike) => Signature.from(sigBytes);
 const joinSignature = (splitSig: SignatureLike) => Signature.from(splitSig).serialized;
@@ -50,6 +50,9 @@ export {
     SigningKey,
     AbiCoder,
     Interface,
+    LogDescription,
+    TransactionDescription,
+    ErrorDescription,
     FormatTypes,
     splitSignature,
     joinSignature,

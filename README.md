@@ -60,6 +60,82 @@ For recent history, see the [CHANGELOG](https://github.com/tronprotocol/tronweb/
 - Dependencies update
 - Bug fix
 
+## Transaction Decoder
+
+TronWeb includes a built-in transaction decoder that lets you parse smart contract calldata and event logs into human-readable format — similar to `ethers.js`'s `Interface.parseTransaction()` and `Interface.parseLog()`, but with automatic TRON address conversion (hex → base58).
+
+### Parse a smart contract transaction
+
+```js
+// By transaction ID (auto-fetches tx data and contract ABI)
+const parsed = await tronWeb.trx.parseTransaction('a]1b2c3d4e5f...');
+console.log(parsed.name);       // "swapExactTokensForTokens"
+console.log(parsed.signature);  // "swapExactTokensForTokens(uint256,uint256,address[],address,uint256)"
+console.log(parsed.selector);   // "0x38ed1739"
+console.log(parsed.args.path);  // ["TRX_BASE58_ADDR", "USDT_BASE58_ADDR"]
+console.log(parsed.value);      // 0n (TRX sent with the call)
+
+// With raw calldata and a known ABI
+const abi = [{ type: 'function', name: 'transfer', inputs: [...], outputs: [...] }];
+const parsed = await tronWeb.trx.parseTransaction({ data: '0xa9059cbb...' }, abi);
+console.log(parsed.name);       // "transfer"
+console.log(parsed.args.to);    // "TLa2f6VPqDg..." (base58, not hex!)
+```
+
+### Parse event logs from a transaction
+
+```js
+const logs = await tronWeb.trx.parseTransactionLogs('a1b2c3d4e5f...');
+for (const log of logs) {
+    console.log(log.name);          // "Transfer"
+    console.log(log.args.from);     // "TLa2f6VPqDg..."  (base58)
+    console.log(log.args.to);       // "TQn9Y2khEsL..."  (base58)
+    console.log(log.args.value);    // 1000000n
+    console.log(log.address);       // "TXLAQ63Xg1N..." (emitting contract)
+}
+```
+
+### Low-level: Use the Interface class directly
+
+For advanced use cases, the `Interface` class is also available:
+
+```js
+const iface = new tronWeb.utils.ethersUtils.Interface(abi);
+
+// Parse calldata
+const parsed = iface.parseTransaction({ data: '0x...' });
+
+// Parse an event log
+const log = iface.parseLog({ topics: [...], data: '0x...' });
+
+// Parse a revert error
+const error = iface.parseError('0x...');
+```
+
+### Before vs After
+
+**Before** (manual decoding):
+```js
+const tx = await tronWeb.trx.getTransaction(txId);
+const data = tx.raw_data.contract[0].parameter.value.data;
+const selector = data.slice(0, 8);
+// Manually look up which function this selector maps to...
+// Manually specify the parameter types...
+const decoded = tronWeb.utils.abi.decodeParams(
+    ['address', 'uint256'],
+    ['to', 'value'],
+    '0x' + data.slice(8)
+);
+// Manually convert addresses from hex to base58...
+const toAddress = tronWeb.address.fromHex('41' + decoded.to.slice(2));
+```
+
+**After** (one line):
+```js
+const parsed = await tronWeb.trx.parseTransaction(txId);
+// parsed.args.to is already in base58 format
+```
+
 ## Installation
 
 ### Node.js

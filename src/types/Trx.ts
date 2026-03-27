@@ -321,3 +321,35 @@ export interface TransactionInfo {
 export interface WitnessList {
     witnesses: BaseWitness[];
 }
+
+/**
+ * Result of parsing a smart contract transaction's input data.
+ * Returned by `tronWeb.trx.parseTransaction()`.
+ */
+export interface ParsedTransaction {
+    /** The function name (e.g. "transfer", "swapExactTokensForTokens") */
+    name: string;
+    /** The full function signature (e.g. "transfer(address,uint256)") */
+    signature: string;
+    /** The 4-byte function selector (e.g. "0xa9059cbb") */
+    selector: string;
+    /** Decoded arguments with named keys and TRON base58 addresses */
+    args: Record<string, any>;
+    /** The call_value (TRX sent with the transaction), in SUN */
+    value: bigint;
+}
+
+/**
+ * Result of parsing an event log entry from a transaction.
+ * Returned by `tronWeb.trx.parseTransactionLogs()`.
+ */
+export interface ParsedLog {
+    /** The event name (e.g. "Transfer", "Swap", "Approval") */
+    name: string;
+    /** The full event signature (e.g. "Transfer(address,address,uint256)") */
+    signature: string;
+    /** Decoded event parameters with named keys and TRON base58 addresses */
+    args: Record<string, any>;
+    /** The contract address that emitted this event (TRON base58 format) */
+    address: string;
+}

@@ -1,6 +1,30 @@
 Change Log
 =========
 
+__6.3.0__
+
+## New Features
+
+- Added `trx.parseTransaction()` and `trx.parseTransactionLogs()`
+
+  - Parse smart contract transaction calldata into human-readable format with function name, signature, selector, and decoded arguments.
+
+  - Parse event logs from transaction receipts with decoded event parameters.
+
+  - Automatic TRON address conversion (hex → base58) in all decoded results.
+
+  - Auto-fetches contract ABI when not provided.
+
+  - Equivalent to ethers.js `Interface.parseTransaction()` / `Interface.parseLog()` with TRON-specific handling.
+
+- Exported `Interface`, `LogDescription`, `TransactionDescription`, and `ErrorDescription` classes
+
+  - The `Interface` class (adapted from ethers.js) is now publicly available via `tronWeb.utils.ethersUtils.Interface`.
+
+  - Enables low-level ABI encoding/decoding, function selector lookup, event topic matching, and error parsing.
+
+  - Previously only used internally for function selector generation.
+
 __6.2.2__
 
 ## New Features
