@@ -24,7 +24,11 @@ import {
     TransactionInfo,
     BaseWitness,
     WitnessList,
+    ParsedTransaction,
+    ParsedLog,
 } from '../types/Trx.js';
+import { Interface } from '../utils/interface.js';
+import { ContractAbiInterface } from '../types/ABI.js';
 import { SignedTransaction, Transaction } from '../types/Transaction.js';
 import { TypedDataDomain, TypedDataField } from '../utils/typedData.js';
 import { Resource } from '../types/TransactionBuilder.js';
@@ -1551,5 +1555,238 @@ export class Trx {
         }
 
         return Array.isArray(result?.witnesses) ? result.witnesses : [];
+    }
+
+    /**
+     * Convert hex addresses to TRON base58 format within decoded ABI results.
+     * Recursively handles arrays and tuples.
+     */
+    private _convertArgsAddresses(args: any, inputs: ReadonlyArray<{ type: string; name?: string; components?: ReadonlyArray<any> | null }>): Record<string, any> {
+        const result: Record<string, any> = {};
+        for (let i = 0; i < inputs.length; i++) {
+            const input = inputs[i];
+            const key = input.name || `${i}`;
+            const value = args[key] !== undefined ? args[key] : args[i];
+            result[key] = this._convertValueAddresses(value, input.type, input.components);
+        }
+        return result;
+    }
+
+    private _convertValueAddresses(value: any, type: string, components?: ReadonlyArray<any> | null): any {
+        if (value === undefined || value === null) return value;
+
+        if (type === 'address') {
+            if (typeof value === 'string' && value.startsWith('0x')) {
+                return fromHex(ADDRESS_PREFIX + value.slice(2));
+            }
+            return value;
+        }
+
+        // Handle address arrays: address[], address[3], etc.
+        if (type.match(/^address(\[.*\])/) && Array.isArray(value)) {
+            return value.map((v: any) => this._convertValueAddresses(v, 'address'));
+        }
+
+        // Handle tuples
+        if (type.startsWith('tuple') && components) {
+            if (Array.isArray(value) && !type.match(/^tuple(\[.*\])/)) {
+                // Single tuple
+                const tupleResult: Record<string, any> = {};
+                for (let i = 0; i < components.length; i++) {
+                    const comp = components[i];
+                    const k = comp.name || `${i}`;
+                    const v = value[k] !== undefined ? value[k] : value[i];
+                    tupleResult[k] = this._convertValueAddresses(v, comp.type, comp.components);
+                }
+                return tupleResult;
+            }
+            if (Array.isArray(value) && type.match(/^tuple(\[.*\])/)) {
+                // Tuple array
+                return value.map((item: any) => this._convertValueAddresses(item, 'tuple', components));
+            }
+        }
+
+        return value;
+    }
+
+    /**
+     * Parse a smart contract transaction's input data into a human-readable format.
+     *
+     * Accepts either a transaction ID (will fetch the transaction automatically) or
+     * raw transaction data. When no ABI is provided, the contract ABI is fetched
+     * automatically via `getContract()`.
+     *
+     * All addresses in the decoded result are converted to TRON base58 format.
+     *
+     * @param txIdOrData - A transaction ID string, or an object with `data` (hex-encoded
+     *   calldata) and optional `contractAddress` for auto ABI fetching.
+     * @param abi - Optional contract ABI. If omitted, fetched automatically.
+     * @returns Decoded transaction with function name, signature, selector, and args,
+     *   or null if the function cannot be matched.
+     *
+     * @example
+     * // Parse by transaction ID (auto-fetches tx and ABI)
+     * const parsed = await tronWeb.trx.parseTransaction('abc123...');
+     * console.log(parsed.name);      // "transfer"
+     * console.log(parsed.args.to);   // "TLa2f6VPqDg..."  (base58)
+     * console.log(parsed.args.value); // 1000000n
+     *
+     * @example
+     * // Parse raw calldata with a known ABI
+     * const abi = [{ type: 'function', name: 'transfer', inputs: [...], outputs: [...] }];
+     * const parsed = await tronWeb.trx.parseTransaction({ data: '0xa9059cbb...' }, abi);
+     */
+    async parseTransaction(
+        txIdOrData: string | { data: string; contractAddress?: string },
+        abi?: ContractAbiInterface
+    ): Promise<ParsedTransaction | null> {
+        let data: string;
+        let contractAddress: string | undefined;
+        let callValue: number | undefined;
+
+        if (typeof txIdOrData === 'string') {
+            if (txIdOrData.startsWith('0x') || (txIdOrData.length >= 8 && !/^[0-9a-fA-F]{64}$/.test(txIdOrData))) {
+                // Treat as raw calldata
+                data = txIdOrData;
+            } else {
+                // Treat as transaction ID
+                const tx = await this.getTransaction(txIdOrData);
+                const contract = tx.raw_data?.contract?.[0];
+                if (!contract || contract.type !== 'TriggerSmartContract') {
+                    throw new Error('Transaction is not a smart contract call');
+                }
+                const param = contract.parameter.value as {
+                    data?: string;
+                    contract_address?: string;
+                    call_value?: number;
+                };
+                if (!param.data) {
+                    throw new Error('Transaction has no calldata');
+                }
+                data = '0x' + param.data;
+                contractAddress = param.contract_address;
+                callValue = param.call_value;
+            }
+        } else {
+            data = txIdOrData.data.startsWith('0x') ? txIdOrData.data : '0x' + txIdOrData.data;
+            contractAddress = txIdOrData.contractAddress;
+        }
+
+        if (!abi) {
+            if (!contractAddress) {
+                throw new Error('Contract address is required when ABI is not provided. Pass an ABI or use a transaction ID.');
+            }
+            const contractInfo = await this.getContract(contractAddress);
+            if (!contractInfo?.abi?.entrys) {
+                throw new Error('Contract ABI not found. The contract may not be verified.');
+            }
+            abi = contractInfo.abi.entrys;
+        }
+
+        // Normalize ABI type fields to lowercase — on-chain ABIs from getContract()
+        // use capitalized types ("Function", "Event", "Constructor") but the Interface
+        // class expects lowercase ("function", "event", "constructor").
+        const normalizedAbi = (abi as any[]).map((entry: any) => {
+            if (entry.type && typeof entry.type === 'string') {
+                return { ...entry, type: entry.type.toLowerCase() };
+            }
+            return entry;
+        });
+
+        const iface = new Interface(normalizedAbi as any);
+        const parsed = iface.parseTransaction({ data, value: BigInt(callValue || 0) });
+        if (!parsed) {
+            return null;
+        }
+
+        const args = this._convertArgsAddresses(parsed.args, parsed.fragment.inputs);
+
+        return {
+            name: parsed.name,
+            signature: parsed.signature,
+            selector: parsed.selector,
+            args,
+            value: parsed.value,
+        };
+    }
+
+    /**
+     * Parse event logs from a transaction into human-readable format.
+     *
+     * Fetches the transaction info and decodes each log entry using the contract ABI.
+     * All addresses in the decoded results are converted to TRON base58 format.
+     *
+     * @param txId - The transaction ID to parse logs for.
+     * @param abi - Optional contract ABI. If omitted, fetched automatically per log entry.
+     * @returns Array of decoded logs with event name, signature, and decoded args.
+     *
+     * @example
+     * const logs = await tronWeb.trx.parseTransactionLogs('abc123...');
+     * for (const log of logs) {
+     *     console.log(log.name);          // "Transfer"
+     *     console.log(log.args.from);     // "TLa2f6VPqDg..."
+     *     console.log(log.args.to);       // "TQn9Y2khEsL..."
+     *     console.log(log.args.value);    // 1000000n
+     * }
+     */
+    async parseTransactionLogs(
+        txId: string,
+        abi?: ContractAbiInterface
+    ): Promise<ParsedLog[]> {
+        const txInfo = await this.getTransactionInfo(txId);
+        if (!txInfo?.log?.length) {
+            return [];
+        }
+
+        const results: ParsedLog[] = [];
+        const abiCache: Record<string, ContractAbiInterface | null> = {};
+
+        for (const logEntry of txInfo.log) {
+            let logAbi = abi;
+
+            if (!logAbi) {
+                const logAddress = ADDRESS_PREFIX + logEntry.address;
+                if (abiCache[logAddress] === undefined) {
+                    try {
+                        const contractInfo = await this.getContract(logAddress);
+                        abiCache[logAddress] = contractInfo?.abi?.entrys || null;
+                    } catch {
+                        abiCache[logAddress] = null;
+                    }
+                }
+                logAbi = abiCache[logAddress] || undefined;
+            }
+
+            if (!logAbi) continue;
+
+            try {
+                const normalizedLogAbi = (logAbi as any[]).map((entry: any) => {
+                    if (entry.type && typeof entry.type === 'string') {
+                        return { ...entry, type: entry.type.toLowerCase() };
+                    }
+                    return entry;
+                });
+                const iface = new Interface(normalizedLogAbi as any);
+                const topics = logEntry.topics.map((t: string) => t.startsWith('0x') ? t : '0x' + t);
+                const logData = logEntry.data.startsWith('0x') ? logEntry.data : '0x' + logEntry.data;
+
+                const parsed = iface.parseLog({ topics, data: logData });
+                if (!parsed) continue;
+
+                const args = this._convertArgsAddresses(parsed.args, parsed.fragment.inputs);
+
+                results.push({
+                    name: parsed.name,
+                    signature: parsed.signature,
+                    args,
+                    address: fromHex(ADDRESS_PREFIX + logEntry.address),
+                });
+            } catch {
+                // Skip logs that can't be decoded (unverified contracts, etc.)
+                continue;
+            }
+        }
+
+        return results;
     }
 }
