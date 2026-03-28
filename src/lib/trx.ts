@@ -1683,7 +1683,17 @@ export class Trx {
             abi = contractInfo.abi.entrys;
         }
 
-        const iface = new Interface(abi as any);
+        // Normalize ABI type fields to lowercase — on-chain ABIs from getContract()
+        // use capitalized types ("Function", "Event", "Constructor") but the Interface
+        // class expects lowercase ("function", "event", "constructor").
+        const normalizedAbi = (abi as any[]).map((entry: any) => {
+            if (entry.type && typeof entry.type === 'string') {
+                return { ...entry, type: entry.type.toLowerCase() };
+            }
+            return entry;
+        });
+
+        const iface = new Interface(normalizedAbi as any);
         const parsed = iface.parseTransaction({ data, value: BigInt(callValue || 0) });
         if (!parsed) {
             return null;
@@ -1750,7 +1760,13 @@ export class Trx {
             if (!logAbi) continue;
 
             try {
-                const iface = new Interface(logAbi as any);
+                const normalizedLogAbi = (logAbi as any[]).map((entry: any) => {
+                    if (entry.type && typeof entry.type === 'string') {
+                        return { ...entry, type: entry.type.toLowerCase() };
+                    }
+                    return entry;
+                });
+                const iface = new Interface(normalizedLogAbi as any);
                 const topics = logEntry.topics.map((t: string) => t.startsWith('0x') ? t : '0x' + t);
                 const logData = logEntry.data.startsWith('0x') ? logEntry.data : '0x' + logEntry.data;
 
