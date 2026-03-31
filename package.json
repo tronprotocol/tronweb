@@ -140,6 +140,6 @@
     "license": "MIT",
     "repository": "https://github.com/tronprotocol/tronweb.git",
     "overrides": {
-        "serialize-javascript": "7.0.3"
+        "serialize-javascript": "7.0.5"
     }
 }
