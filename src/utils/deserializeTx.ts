@@ -370,7 +370,6 @@ const DAccountCreateContract = (type, rawDataHex) => {
     commonData.contract[0].parameter.value = {
         owner_address: byteArray2hexStr(accountCreateContract.getOwnerAddress_asU8()),
         account_address: byteArray2hexStr(accountCreateContract.getAccountAddress_asU8()),
-        type: accountCreateContract.getType(),
     };
     return commonData;
 };
