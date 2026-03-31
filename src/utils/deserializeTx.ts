@@ -452,9 +452,9 @@ const DProposalCreateContract = (type, rawDataHex) => {
     const [commonData, valuePb] = DCommonData(type, rawDataHex);
     const proposalCreateContract = ProposalCreateContract.deserializeBinary(valuePb);
     const parametersMap = proposalCreateContract.getParametersMap();
-    const parameters: Record<string, number> = {};
-    parametersMap.forEach((value, key) => {
-        parameters[key] = value;
+    const parameters: { key: number; value: number }[] = [];
+    [...parametersMap.entries()].forEach(([key, value]) => {
+        parameters.push({ key, value });
     });
     commonData.contract[0].parameter.value = {
         owner_address: byteArray2hexStr(proposalCreateContract.getOwnerAddress_asU8()),
