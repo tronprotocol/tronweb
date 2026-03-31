@@ -486,13 +486,34 @@ const DProposalDeleteContract = (type, rawDataHex) => {
 
 // ============== Smart contract management ==============
 
+const ENTRY_TYPE_MAP = ['', 'constructor', 'function', 'event', 'fallback', 'receive', 'error'];
+const STATE_MUTABILITY_MAP = ['', 'pure', 'view', 'nonpayable', 'payable'];
+
 const DCreateSmartContract = (type, rawDataHex) => {
     const [commonData, valuePb] = DCommonData(type, rawDataHex);
     const createSmartContract = CreateSmartContract.deserializeBinary(valuePb);
     const newContractPb = createSmartContract.getNewContract();
+    const abiPb = newContractPb.getAbi();
+    const abi = abiPb ? abiPb.getEntrysList().map(entry => {
+        const mapParam = (p) => ({
+            name: p.getName(),
+            type: p.getType(),
+            ...(p.getIndexed() ? { indexed: true } : {}),
+        });
+        return {
+            type: ENTRY_TYPE_MAP[entry.getType()] || '',
+            name: entry.getName(),
+            inputs: entry.getInputsList().map(mapParam),
+            outputs: entry.getOutputsList().map(mapParam),
+            payable: entry.getPayable(),
+            stateMutability: STATE_MUTABILITY_MAP[entry.getStatemutability()] || '',
+            ...(entry.getConstant() ? { constant: true } : {}),
+            ...(entry.getAnonymous() ? { anonymous: true } : {}),
+        };
+    }) : [];
     const new_contract = newContractPb ? {
         origin_address: byteArray2hexStr(newContractPb.getOriginAddress_asU8()),
-        contract_address: byteArray2hexStr(newContractPb.getContractAddress_asU8()),
+        abi: { entrys: abi },
         bytecode: byteArray2hexStr(newContractPb.getBytecode_asU8()),
         call_value: newContractPb.getCallValue(),
         consume_user_resource_percent: newContractPb.getConsumeUserResourcePercent(),
