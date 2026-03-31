@@ -2,6 +2,7 @@ import { assert } from 'chai';
 import { TronWeb, utils, TransactionBuilder } from '../setup/TronWeb.js';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
 import config from '../helpers/config.js';
+import wait from '../helpers/wait.js';
 
 const { ADDRESS_HEX, ADDRESS_BASE58, PRIVATE_KEY } = config;
 
@@ -893,9 +894,9 @@ describe('#TronWeb.utils.deserializeTx', function () {
             const dResult = utils.deserializeTx.deserializeTransaction('VoteWitnessContract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
 
-            assert.equal(value.owner_address, account.address.hex);
+            assert.equal(value.owner_address.toLowerCase(), account.address.hex.toLowerCase());
             assert.equal(value.votes.length, 1);
-            assert.equal(value.votes[0].vote_address, ADDRESS_HEX);
+            assert.equal(value.votes[0].vote_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
             assert.equal(value.votes[0].vote_count, voteCount);
         });
 
@@ -911,7 +912,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
 
     describe('DProposalCreateContract', async () => {
         let tx: Awaited<ReturnType<TransactionBuilder['createProposal']>>;
-        const proposalParams = [{ key: 0, value: 100000 }];
+        const proposalParams = [{ key: 2, value: 100000 }];
 
         before(async () => {
             tronWeb = tronWebBuilder.createInstance();
@@ -922,9 +923,10 @@ describe('#TronWeb.utils.deserializeTx', function () {
             const dResult = utils.deserializeTx.deserializeTransaction('ProposalCreateContract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
 
-            assert.equal(value.owner_address, ADDRESS_HEX);
-            assert.isObject(value.parameters);
-            assert.equal(value.parameters[0], 100000);
+            assert.equal(value.owner_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
+            assert.isArray(value.parameters);
+            assert.equal(value.parameters[0].key, 2);
+            assert.equal(value.parameters[0].value, 100000);
         });
 
         it('should sign the transaction correctly after deserialization', async () => {
@@ -944,7 +946,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
             const createTx = await tronWeb.transactionBuilder.createProposal([{ key: 0, value: 100000 }], ADDRESS_BASE58);
             const signedTx = await tronWeb.trx.sign(createTx, PRIVATE_KEY);
             await tronWeb.trx.sendRawTransaction(signedTx);
-            await new Promise(r => setTimeout(r, 3000));
+            await wait(3);
             const proposals = await tronWeb.trx.listProposals();
             proposalId = proposals[proposals.length - 1]?.proposal_id ?? 1;
             tx = await tronWeb.transactionBuilder.voteProposal(proposalId, true, ADDRESS_BASE58);
@@ -954,7 +956,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
             const dResult = utils.deserializeTx.deserializeTransaction('ProposalApproveContract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
 
-            assert.equal(value.owner_address, ADDRESS_HEX);
+            assert.equal(value.owner_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
             assert.equal(value.proposal_id, proposalId);
             assert.equal(value.is_add_approval, true);
         });
@@ -976,7 +978,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
             const createTx = await tronWeb.transactionBuilder.createProposal([{ key: 0, value: 100000 }], ADDRESS_BASE58);
             const signedTx = await tronWeb.trx.sign(createTx, PRIVATE_KEY);
             await tronWeb.trx.sendRawTransaction(signedTx);
-            await new Promise(r => setTimeout(r, 3000));
+            await wait(3);
             const proposals = await tronWeb.trx.listProposals();
             proposalId = proposals[proposals.length - 1]?.proposal_id ?? 1;
             tx = await tronWeb.transactionBuilder.deleteProposal(proposalId, ADDRESS_BASE58);
@@ -986,7 +988,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
             const dResult = utils.deserializeTx.deserializeTransaction('ProposalDeleteContract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
 
-            assert.equal(value.owner_address, ADDRESS_HEX);
+            assert.equal(value.owner_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
             assert.equal(value.proposal_id, proposalId);
         });
 
@@ -1025,7 +1027,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
             const dResult = utils.deserializeTx.deserializeTransaction('CreateSmartContract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
 
-            assert.equal(value.owner_address, ADDRESS_HEX);
+            assert.equal(value.owner_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
             assert.isObject(value.new_contract);
             assert.isNotEmpty(value.new_contract.bytecode);
             assert.equal(value.new_contract.consume_user_resource_percent, userFeePercentage);
@@ -1053,7 +1055,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
             const dResult = utils.deserializeTx.deserializeTransaction('UpdateSettingContract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
 
-            assert.equal(value.owner_address, ADDRESS_HEX);
+            assert.equal(value.owner_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
             assert.equal(value.contract_address, TronWeb.address.toHex(CONTRACT_ADDRESS).toUpperCase());
             assert.equal(value.consume_user_resource_percent, userFeePercentage);
         });
@@ -1079,7 +1081,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
             const dResult = utils.deserializeTx.deserializeTransaction('UpdateEnergyLimitContract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
 
-            assert.equal(value.owner_address, ADDRESS_HEX);
+            assert.equal(value.owner_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
             assert.equal(value.contract_address, TronWeb.address.toHex(CONTRACT_ADDRESS).toUpperCase());
             assert.equal(value.origin_energy_limit, originEnergyLimit);
         });
@@ -1104,7 +1106,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
             const dResult = utils.deserializeTx.deserializeTransaction('ClearABIContract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
 
-            assert.equal(value.owner_address, ADDRESS_HEX);
+            assert.equal(value.owner_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
             assert.equal(value.contract_address, TronWeb.address.toHex(CONTRACT_ADDRESS).toUpperCase());
         });
 
@@ -1133,7 +1135,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
             const dResult = utils.deserializeTx.deserializeTransaction('ExchangeCreateContract', tx.raw_data_hex);
             const value = dResult.contract[0].parameter.value;
 
-            assert.equal(value.owner_address, ADDRESS_HEX);
+            assert.equal(value.owner_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
             assert.equal(value.first_token_id, fromUtf8(tokenName));
             assert.equal(value.first_token_balance, tokenBalance);
             assert.equal(value.second_token_balance, trxBalance);
@@ -1159,7 +1161,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
             const createTx = await tronWeb.transactionBuilder.createTRXExchange(tokenName, tokenBalance, trxBalance, ADDRESS_BASE58);
             const signedTx = await tronWeb.trx.sign(createTx, PRIVATE_KEY);
             await tronWeb.trx.sendRawTransaction(signedTx);
-            await new Promise(r => setTimeout(r, 3000));
+            await wait(3);
             const exchanges = await tronWeb.trx.listExchanges();
             exchangeId = exchanges[exchanges.length - 1]?.exchange_id ?? 1;
         });
@@ -1176,7 +1178,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
                 const dResult = utils.deserializeTx.deserializeTransaction('ExchangeInjectContract', tx.raw_data_hex);
                 const value = dResult.contract[0].parameter.value;
 
-                assert.equal(value.owner_address, ADDRESS_HEX);
+                assert.equal(value.owner_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
                 assert.equal(value.exchange_id, exchangeId);
                 assert.equal(value.quant, injectAmount);
             });
@@ -1201,7 +1203,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
                 const dResult = utils.deserializeTx.deserializeTransaction('ExchangeWithdrawContract', tx.raw_data_hex);
                 const value = dResult.contract[0].parameter.value;
 
-                assert.equal(value.owner_address, ADDRESS_HEX);
+                assert.equal(value.owner_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
                 assert.equal(value.exchange_id, exchangeId);
                 assert.equal(value.quant, withdrawAmount);
             });
@@ -1227,7 +1229,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
                 const dResult = utils.deserializeTx.deserializeTransaction('ExchangeTransactionContract', tx.raw_data_hex);
                 const value = dResult.contract[0].parameter.value;
 
-                assert.equal(value.owner_address, ADDRESS_HEX);
+                assert.equal(value.owner_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
                 assert.equal(value.exchange_id, exchangeId);
                 assert.equal(value.quant, amountSold);
                 assert.equal(value.expected, amountExpected);
