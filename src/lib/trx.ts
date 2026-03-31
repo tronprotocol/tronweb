@@ -1087,7 +1087,7 @@ export class Trx {
             frozen_balance_for_energy: number;
             expire_time_for_bandwidth: number;
             expire_time_for_energy: number;
-        };
+        }[];
     }> {
         if (!this.tronWeb.isAddress(fromAddress as Address)) {
             throw new Error('Invalid address provided');
