@@ -341,11 +341,15 @@ const DUpdateAssetContract = (type, rawDataHex) => {
 
 // ============== Account contracts ==============
 
+const PermissionType = {
+    1: 'Witness',
+    2: 'Active',
+};
+
 const deserializePermission = (permPb) => {
     if (!permPb) return null;
+    const type = permPb.getType();
     return {
-        type: permPb.getType(),
-        id: permPb.getId(),
         permission_name: permPb.getPermissionName(),
         threshold: permPb.getThreshold(),
         operations: byteArray2hexStr(permPb.getOperations_asU8()),
@@ -353,6 +357,10 @@ const deserializePermission = (permPb) => {
             address: byteArray2hexStr(keyPb.getAddress_asU8()),
             weight: keyPb.getWeight(),
         })),
+        ...(type === 0 ? {} : {
+            type: PermissionType[type],
+            id: permPb.getId(),
+        }),
     };
 };
 

@@ -795,6 +795,8 @@ describe('#TronWeb.utils.deserializeTx', function () {
             const dResult = utils.deserializeTx.deserializeTransaction('AccountPermissionUpdateContract', tx.raw_data_hex);
             const dResultTx = { ...tx, raw_data: dResult };
             const signedTx = await tronWeb.trx.sign(dResultTx, account.privateKey);
+            assert.equal(dResult.contract[0].parameter.value.owner.type, undefined)
+            assert.equal(dResult.contract[0].parameter.value.actives[0].type, 'Active')
             assert.equal(signedTx.signature[0].length, 130);
         });
     });
