@@ -20,18 +20,6 @@ import { Address } from './types/Trx.js';
 
 const DEFAULT_VERSION = '4.7.1';
 
-const DEPRECATED_EMITTER_METHODS_WARNED = new Set<string>();
-
-function warnDeprecatedEmitter(method: string) {
-    if (!DEPRECATED_EMITTER_METHODS_WARNED.has(method)) {
-        DEPRECATED_EMITTER_METHODS_WARNED.add(method);
-        console.warn(
-            `[TronWeb] EventEmitter.${method}() is deprecated and will be removed in a future version. ` +
-            `TronWeb will no longer extend EventEmitter. Please migrate away from using TronWeb as an EventEmitter.`
-        );
-    }
-}
-
 const FEE_LIMIT = 150000000;
 
 const version = '6.3.0';
@@ -150,36 +138,6 @@ export class TronWeb extends EventEmitter {
         }
     }
 
-    on(event: string | symbol, listener: (...args: any[]) => void, context?: any): this {
-        warnDeprecatedEmitter('on');
-        return super.on(event, listener, context);
-    }
-
-    once(event: string | symbol, listener: (...args: any[]) => void, context?: any): this {
-        warnDeprecatedEmitter('once');
-        return super.once(event, listener, context);
-    }
-
-    off(event: string | symbol, listener: (...args: any[]) => void, context?: any): this {
-        warnDeprecatedEmitter('off');
-        return super.off(event, listener, context);
-    }
-
-    addListener(event: string | symbol, listener: (...args: any[]) => void, context?: any): this {
-        warnDeprecatedEmitter('addListener');
-        return super.addListener(event, listener, context);
-    }
-
-    removeListener(event: string | symbol, listener: (...args: any[]) => void, context?: any): this {
-        warnDeprecatedEmitter('removeListener');
-        return super.removeListener(event, listener, context);
-    }
-
-    removeAllListeners(event?: string | symbol): this {
-        warnDeprecatedEmitter('removeAllListeners');
-        return super.removeAllListeners(event);
-    }
-
     async getFullnodeVersion() {
         try {
             const nodeInfo = await this.trx.getNodeInfo();
@@ -226,6 +184,8 @@ export class TronWeb extends EventEmitter {
             base58,
         };
 
+        // @deprecated - this emit will be removed in a future version
+        console.warn('Deprecation warning: TronWeb will no longer emit events in a future version. Please avoid relying on EventEmitter behavior.');
         this.emit('addressChanged', { hex, base58 });
     }
 
