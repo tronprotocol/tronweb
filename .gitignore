@@ -16,3 +16,4 @@ test/lib/dist/
 .nyc_output/
 .claude/
 requires/
+.test-report/
