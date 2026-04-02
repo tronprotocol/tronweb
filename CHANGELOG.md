@@ -1,6 +1,43 @@
 Change Log
 =========
 
+__6.3.0__
+
+## New Features
+
+- **Extended `deserializeTx` with full contract type coverage**
+
+  Added deserialization support for all remaining `TransactionBuilder` contract types via `raw_data_hex`:
+
+  - Account: `AccountCreateContract`, `AccountUpdateContract`, `SetAccountIdContract`, `AccountPermissionUpdateContract`
+  - Stake / Vote: `FreezeBalanceContract`, `UnfreezeBalanceContract`, `VoteWitnessContract`
+  - Proposal: `ProposalCreateContract`, `ProposalApproveContract`, `ProposalDeleteContract`
+  - Smart contract: `CreateSmartContract`, `UpdateSettingContract`, `UpdateEnergyLimitContract`, `ClearABIContract`
+  - DEX: `ExchangeCreateContract`, `ExchangeInjectContract`, `ExchangeWithdrawContract`, `ExchangeTransactionContract`
+  - `UpdateBrokerageContract`
+
+
+## Improvements
+
+- **EventEmitter deprecation warnings**  
+
+  Methods inherited from EventEmitter (e.g. `on`, `off`, `emit`) now show deprecation warnings when called directly on the `TronWeb` instance, guiding developers to use the dedicated event API.
+
+- **Plugin restrictions**  
+
+  - Added `PROTECTED_MODULES` to prevent plugins from overriding core modules: `trx`, `transactionBuilder`, `event`, `plugin`.  
+  - Added `PROTECTED_METHODS` to block plugins from overriding critical signing/key methods: `sign`, `signMessage`, `signMessageV2`, `signTransaction`, `signTypedData`, `multiSign`, `setPrivateKey`, `ecRecover`.  
+  - ⚠️ Note: Plugin support will be removed in the next major version.
+
+- **Bug fix**  
+
+  - Corrected the return type of the frozen balance field in `trx.ts` to consistently return an array.
+
+## Changes
+
+- Remove dev dependency @eslint/eslintrc.
+- Bump serialize-javascript from 7.0.3 to 7.0.5.
+
 __6.2.2__
 
 ## New Features
