@@ -2147,6 +2147,43 @@ describe('TronWeb.trx', function () {
         });
     });
 
+    describe('#getContractInfo', async function () {
+        const idx = 58;
+        let transaction: CreateSmartContractTransaction;
+
+        before(async function () {
+            this.timeout(10000);
+
+            transaction = await tronWeb.transactionBuilder.createSmartContract(
+                {
+                    abi: testRevertContract.abi,
+                    bytecode: testRevertContract.bytecode,
+                },
+                accounts.hex[idx]
+            );
+            await broadcaster(null, accounts.pks[idx], transaction);
+            await waitChainData('contract', transaction.contract_address);
+        });
+
+        it('should get contract info by contract address', async function () {
+            const contractInfo = await tronWeb.trx.getContractInfo(transaction.contract_address);
+            assert.isDefined(contractInfo.runtimecode);
+            assert.isDefined(contractInfo.contract_state);
+            assert.isDefined(contractInfo.smart_contract);
+        });
+
+        it('should throw invalid contract address provided error', async function () {
+            await assertThrow(tronWeb.trx.getContractInfo('notAddress'), 'Invalid contract address provided');
+        });
+
+        it('should return empty object', async function () {
+            const ret = await tronWeb.trx.getContractInfo('417cbcc41052b59584d1ac9fc1ce39106533aa1d40');
+            assert.deepEqual(ret, {});
+        });
+    });
+
+    
+
     // Node Test
     describe('#listNodes', async function () {
         it('should list seeds node', async function () {

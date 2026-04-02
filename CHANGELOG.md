@@ -5,6 +5,10 @@ __6.3.0__
 
 ## New Features
 
+- **Added `trx.getContractInfo`**
+
+  Added `trx.getContractInfo(contractAddress)` method that retrieves detailed contract information via the `wallet/getcontractinfo` node API endpoint.
+
 - **Extended `deserializeTx` with full contract type coverage**
 
   Added deserialization support for all remaining `TransactionBuilder` contract types via `raw_data_hex`:

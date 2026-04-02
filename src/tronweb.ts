@@ -185,7 +185,10 @@ export class TronWeb extends EventEmitter {
         };
 
         // @deprecated - this emit will be removed in a future version
-        console.warn('Deprecation warning: TronWeb will no longer emit events in a future version. Please avoid relying on EventEmitter behavior.');
+        if (!(globalThis as any).__TronWeb_deprecation_EventEmitter_warned__) {
+            console.warn('Deprecation warning: TronWeb will no longer emit events in a future version. Please avoid relying on EventEmitter behavior.');
+            (globalThis as any).__TronWeb_deprecation_EventEmitter_warned__ = true;
+        }
         this.emit('addressChanged', { hex, base58 });
     }
 

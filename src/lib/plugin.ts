@@ -21,7 +21,7 @@ interface PluginInterfaceReturn {
 type PluginOptions = any;
 
 // TODO: Plugin support will be removed in the next major version.
-const PROTECTED_MODULES = ['trx', 'transactionBuilder', 'event', 'plugin'];
+const PROTECTED_MODULES = ['transactionBuilder', 'plugin'];
 
 // Signing and key management methods are always protected regardless of component.
 const PROTECTED_METHODS = ['sign', 'signMessage', 'signMessageV2', 'signTransaction', 'signTypedData', 'multiSign', 'setPrivateKey', 'ecRecover'];

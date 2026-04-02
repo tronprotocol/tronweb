@@ -523,6 +523,22 @@ export class Trx {
         return contract;
     }
 
+    async getContractInfo(contractAddress: string): Promise<any> {
+        if (!this.tronWeb.isAddress(contractAddress)) {
+            throw new Error('Invalid contract address provided');
+        }
+
+        contractAddress = toHex(contractAddress);
+
+        const contractInfo = await this.tronWeb.fullNode.request<any>('wallet/getcontractinfo', {
+            value: contractAddress,
+        });
+        if (contractInfo.Error) {
+            throw new Error('Contract does not exist');
+        }
+        return contractInfo;
+    }
+
     ecRecover(transaction: SignedTransaction) {
         return Trx.ecRecover(transaction);
     }
