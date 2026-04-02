@@ -62,6 +62,7 @@ const {
 } = Contracts;
 import Config from '../helpers/config';
 import { deepCopyJson } from '../../src/lib/TransactionBuilder/helper';
+import { createEmptyBlock } from '../helpers/createEmptyBlock';
 const { ADDRESS_HEX, ADDRESS_BASE58, UPDATED_TEST_TOKEN_OPTIONS, PRIVATE_KEY, getTokenOptions, isProposalApproved } = Config;
 
 /**
@@ -1019,7 +1020,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it('should throw trying to cancel an already canceled proposal', async function () {
-            await broadcaster(await tronWeb.transactionBuilder.deleteProposal(proposals[0].proposal_id));
+            await createEmptyBlock(tronWeb);
             await wait(3);
             const receipt = await broadcaster(await tronWeb.transactionBuilder.deleteProposal(proposals[0].proposal_id));
             

@@ -12,6 +12,7 @@ import { Address, Exchange, Proposal, Token } from '../../src/types/Trx.js';
 import { CreateSmartContractTransaction, SignedTransaction, Transaction } from '../../src/types/Transaction.js';
 import { Permission } from '../../src/types/Contract.js';
 import contracts from '../fixtures/contracts.js';
+import { createEmptyBlock } from '../helpers/createEmptyBlock.js';
 const tests = signMessageTests.tests;
 const testRevertContract = contracts.testRevert;
 const { ADDRESS_BASE58, PRIVATE_KEY, getTokenOptions, FULL_NODE_API } = config;
@@ -1437,7 +1438,10 @@ describe('TronWeb.trx', function () {
             });
 
             it('should throw transaction not found error by transaction from block', async function () {
-                await assertThrow(tronWeb.trx.getTransactionFromBlock(currBlockNum - 1, 0), 'Transaction not found in block');
+                await createEmptyBlock(tronWeb);
+                await wait(3);
+                const nowBlock = await tronWeb.trx.getCurrentBlock();
+                await assertThrow(tronWeb.trx.getTransactionFromBlock(nowBlock.block_header.raw_data.number - 1, 0), 'Transaction not found in block');
             });
 
             it('should throw block not found error by transaction from block', async function () {
