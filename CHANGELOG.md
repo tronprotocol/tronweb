@@ -25,11 +25,11 @@ __6.3.0__
 
 - **EventEmitter deprecation warnings**  
 
-  Methods inherited from EventEmitter (e.g. `on`, `off`, `emit`) now show deprecation warnings when called directly on the `TronWeb` instance, guiding developers to use the dedicated event API.
+  A one-time deprecation warning is now shown before emitting the `addressChanged` event on the `TronWeb` instance, notifying developers that EventEmitter behavior will be removed in a future version.
 
 - **Plugin restrictions**  
 
-  - Added `PROTECTED_MODULES` to prevent plugins from overriding core modules: `trx`, `transactionBuilder`, `event`, `plugin`.  
+  - Added `PROTECTED_MODULES` to prevent plugins from overriding 2 modules: `transactionBuilder`, `plugin`.  
   - Added `PROTECTED_METHODS` to block plugins from overriding critical signing/key methods: `sign`, `signMessage`, `signMessageV2`, `signTransaction`, `signTypedData`, `multiSign`, `setPrivateKey`, `ecRecover`.  
   - ⚠️ Note: Plugin support will be removed in the next major version.
 
