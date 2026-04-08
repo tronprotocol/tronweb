@@ -40,7 +40,7 @@
         "build:all": "npm run clean:all && npm run build:esm && npm run build:cjs && npm run build:dist",
         "copy-protocol:cjs": "cp -R ./src/protocol ./lib/commonjs/",
         "copy-protocol:esm": "cp -R ./src/protocol ./lib/esm/",
-        "prepare": "husky install && npm run build",
+        "prepare": "npm run build",
         "build": "npm run clean && webpack --config webpack.config.js --progress --color",
         "build:dev": "NODE_ENV=development npm run build",
         "clean:all": "rimraf dist lib",
@@ -57,11 +57,6 @@
         "format-all": "prettier --write ./src",
         "lint": "eslint src",
         "lint:fix": "eslint src --fix"
-    },
-    "husky": {
-        "hooks": {
-            "pre-commit": "node ./scripts/pre-commit.js"
-        }
     },
     "dependencies": {
         "@babel/runtime": "7.26.10",
@@ -106,7 +101,6 @@
         "events": "3.3.0",
         "globals": "16.0.0",
         "globby": "14.1.0",
-        "husky": "9.1.7",
         "json-schema": "0.4.0",
         "karma": "6.4.4",
         "karma-chrome-launcher": "3.2.0",
