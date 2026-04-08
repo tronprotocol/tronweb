@@ -1438,6 +1438,7 @@ describe('TronWeb.trx', function () {
             });
 
             it('should throw transaction not found error by transaction from block', async function () {
+                await createEmptyBlock(tronWeb);
                 await wait(3);
                 await createEmptyBlock(tronWeb);
                 const nowBlock = await tronWeb.trx.getCurrentBlock();

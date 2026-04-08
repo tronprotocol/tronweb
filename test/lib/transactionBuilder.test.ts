@@ -678,6 +678,7 @@ describe('TronWeb.transactionBuilder', function () {
             this.timeout(10000);
 
             tokenOptions = getTokenOptions();
+            tokenOptions.saleStart -= 80;
 
             await broadcaster(tronWeb.transactionBuilder.createToken(tokenOptions, accounts.b58[5]), accounts.pks[5]);
 
