@@ -653,11 +653,12 @@ export class Trx {
             if (address !== toHex(transaction.raw_data.contract[0].parameter.value.owner_address)) {
                 throw new Error('Private key does not match address in transaction');
             }
-
-            if (!txCheck(transaction)) {
-                throw new Error('Invalid transaction');
-            }
         }
+
+        if (!txCheck(transaction)) {
+            throw new Error('Invalid transaction');
+        }
+        
         return utils.crypto.signTransaction(privateKey as string, transaction) as SignedStringOrSignedTransaction<T>;
     }
 

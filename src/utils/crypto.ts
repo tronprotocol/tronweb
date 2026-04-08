@@ -228,8 +228,8 @@ export function SHA256(msgBytes: BytesLike) {
     return hexStr2byteArray(hashHex);
 }
 
-export function passwordToAddress(password: string) {
-    const com_priKeyBytes = base64DecodeFromString(password);
+export function passwordToAddress(priKeyBase64: string) {
+    const com_priKeyBytes = base64DecodeFromString(priKeyBase64);
     const com_addressBytes = getAddressFromPriKey(com_priKeyBytes);
 
     return getBase58CheckAddress(com_addressBytes);
