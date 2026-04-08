@@ -23,10 +23,6 @@ __6.3.0__
 
 ## Improvements
 
-- **EventEmitter deprecation warnings**  
-
-  A one-time deprecation warning is now shown before emitting the `addressChanged` event on the `TronWeb` instance, notifying developers that EventEmitter behavior will be removed in a future version.
-
 - **Plugin restrictions**  
 
   - Added `PROTECTED_MODULES` to prevent plugins from overriding 2 modules: `transactionBuilder`, `plugin`.  
