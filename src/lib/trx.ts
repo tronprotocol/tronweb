@@ -763,11 +763,6 @@ export class Trx {
 
             // reset transaction
             if (signWeight.transaction && signWeight.transaction.transaction) {
-                const originalTxID = transaction.txID.toLowerCase();
-                const newTxID = signWeight.transaction.transaction.txID.toLowerCase();
-                if (originalTxID !== newTxID) {
-                    throw new Error('Transaction ID does not match');
-                }
                 transaction = signWeight.transaction.transaction;
                 if (permissionId > 0) {
                     transaction.raw_data.contract[0].Permission_id = permissionId;
