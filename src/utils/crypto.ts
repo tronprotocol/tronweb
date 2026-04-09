@@ -42,10 +42,10 @@ export function decodeBase58Address(base58Str: string) {
     const checkSum1 = hash1.slice(0, 4);
 
     if (
-        checkSum[0] == checkSum1[0] &&
-        checkSum[1] == checkSum1[1] &&
-        checkSum[2] == checkSum1[2] &&
-        checkSum[3] == checkSum1[3]
+        checkSum[0] === checkSum1[0] &&
+        checkSum[1] === checkSum1[1] &&
+        checkSum[2] === checkSum1[2] &&
+        checkSum[3] === checkSum1[3]
     ) {
         return address;
     }
