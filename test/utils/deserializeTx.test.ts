@@ -1,10 +1,16 @@
 import { assert } from 'chai';
 import { TronWeb, utils, TransactionBuilder } from '../setup/TronWeb.js';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
+import config from '../helpers/config.js';
+import wait from '../helpers/wait.js';
+
+const { ADDRESS_HEX, ADDRESS_BASE58, PRIVATE_KEY } = config;
 
 const fromUtf8 = (str: string) => {
     return TronWeb.fromUtf8(str).replace(/^0x/, '').toUpperCase();
 };
+
+const CONTRACT_ADDRESS = 'TQq3EYEiaYr95r6ePRQwycukCEAE4qWkE7';
 
 describe('#TronWeb.utils.deserializeTx', function () {
     let tronWeb: TronWeb;
@@ -655,6 +661,613 @@ describe('#TronWeb.utils.deserializeTx', function () {
             const signedReconstructedTx = await tronWeb.trx.sign(dResultTx, account.privateKey);
 
             assert.equal(signedReconstructedTx.signature[0].length, 130);
+        });
+    });
+
+    // ============== Account contracts ==============
+
+    describe('DAccountCreateContract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['createAccount']>>;
+        let owner: Awaited<ReturnType<TronWeb['createAccount']>>;
+        let newAccount: Awaited<ReturnType<TronWeb['createAccount']>>;
+
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            owner = await tronWeb.createAccount();
+            newAccount = await tronWeb.createAccount();
+            tx = await tronWeb.transactionBuilder.createAccount(newAccount.address.base58, owner.address.base58);
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('AccountCreateContract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address, owner.address.hex);
+            assert.equal(value.account_address, newAccount.address.hex);
+        });
+
+        it('should sign the transaction correctly after deserialization', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('AccountCreateContract', tx.raw_data_hex);
+            const dResultTx = { ...tx, raw_data: dResult };
+            const signedTx = await tronWeb.trx.sign(dResultTx, owner.privateKey);
+            assert.equal(signedTx.signature[0].length, 130);
+        });
+    });
+
+    describe('DAccountUpdateContract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['updateAccount']>>;
+        let account: Awaited<ReturnType<TronWeb['createAccount']>>;
+        const accountName = 'MyTestAccount';
+
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            account = await tronWeb.createAccount();
+            tx = await tronWeb.transactionBuilder.updateAccount(accountName, account.address.base58);
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('AccountUpdateContract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address, account.address.hex);
+            assert.equal(value.account_name, fromUtf8(accountName));
+        });
+
+        it('should sign the transaction correctly after deserialization', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('AccountUpdateContract', tx.raw_data_hex);
+            const dResultTx = { ...tx, raw_data: dResult };
+            const signedTx = await tronWeb.trx.sign(dResultTx, account.privateKey);
+            assert.equal(signedTx.signature[0].length, 130);
+        });
+    });
+
+    describe('DSetAccountIdContract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['setAccountId']>>;
+        let account: Awaited<ReturnType<TronWeb['createAccount']>>;
+        const accountId = TronWeb.toHex('testacct01').replace(/^0x/, '');
+
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            account = await tronWeb.createAccount();
+            tx = await tronWeb.transactionBuilder.setAccountId(accountId, account.address.base58);
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('SetAccountIdContract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address, account.address.hex);
+            assert.equal(value.account_id.toUpperCase(), accountId.toUpperCase());
+        });
+
+        it('should sign the transaction correctly after deserialization', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('SetAccountIdContract', tx.raw_data_hex);
+            const dResultTx = { ...tx, raw_data: dResult };
+            const signedTx = await tronWeb.trx.sign(dResultTx, account.privateKey);
+            assert.equal(signedTx.signature[0].length, 130);
+        });
+    });
+
+    describe('DAccountPermissionUpdateContract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['updateAccountPermissions']>>;
+        let account: Awaited<ReturnType<TronWeb['createAccount']>>;
+        const operations = '7fff1fc0033e0000000000000000000000000000000000000000000000000000';
+
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            account = await tronWeb.createAccount();
+            const ownerPermission = {
+                type: 0,
+                keys: [{ address: account.address.base58, weight: 1 }],
+                threshold: 1,
+                permission_name: 'owner',
+            };
+            const activePermission = {
+                operations,
+                keys: [{ address: account.address.base58, weight: 1 }],
+                threshold: 1,
+                id: 2,
+                type: 2,
+                permission_name: 'active',
+            };
+            tx = await tronWeb.transactionBuilder.updateAccountPermissions(
+                account.address.base58,
+                ownerPermission,
+                null,
+                activePermission
+            );
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('AccountPermissionUpdateContract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address, account.address.hex);
+            assert.isObject(value.owner);
+            assert.equal(value.owner.keys[0].address, account.address.hex);
+            assert.equal(value.owner.threshold, 1);
+            assert.isNull(value.witness);
+            assert.isArray(value.actives);
+            assert.equal(value.actives[0].keys[0].address, account.address.hex);
+            assert.equal(value.actives[0].operations.toLowerCase(), operations);
+        });
+
+        it('should sign the transaction correctly after deserialization', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('AccountPermissionUpdateContract', tx.raw_data_hex);
+            const dResultTx = { ...tx, raw_data: dResult };
+            const signedTx = await tronWeb.trx.sign(dResultTx, account.privateKey);
+            assert.equal(dResult.contract[0].parameter.value.owner.type, undefined)
+            assert.equal(dResult.contract[0].parameter.value.actives[0].type, 'Active')
+            assert.equal(signedTx.signature[0].length, 130);
+        });
+    });
+
+    // ============== Stake 1.0 + Vote ==============
+
+    describe('DFreezeBalanceContract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['freezeBalance']>>;
+        let account: Awaited<ReturnType<TronWeb['createAccount']>>;
+        let receiver: Awaited<ReturnType<TronWeb['createAccount']>>;
+        const frozenBalance = 1e6;
+        const frozenDuration = 3;
+
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            account = await tronWeb.createAccount();
+            receiver = await tronWeb.createAccount();
+            tx = await tronWeb.transactionBuilder.freezeBalance(
+                frozenBalance,
+                frozenDuration,
+                'ENERGY',
+                account.address.base58,
+                receiver.address.base58
+            );
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('FreezeBalanceContract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address, account.address.hex);
+            assert.equal(value.frozen_balance, frozenBalance);
+            assert.equal(value.frozen_duration, frozenDuration);
+            assert.equal(value.resource, 'ENERGY');
+            assert.equal(value.receiver_address, receiver.address.hex);
+        });
+
+        it('should sign the transaction correctly after deserialization', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('FreezeBalanceContract', tx.raw_data_hex);
+            const dResultTx = { ...tx, raw_data: dResult };
+            const signedTx = await tronWeb.trx.sign(dResultTx, account.privateKey);
+            assert.equal(signedTx.signature[0].length, 130);
+        });
+    });
+
+    describe('DUnfreezeBalanceContract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['unfreezeBalance']>>;
+        let account: Awaited<ReturnType<TronWeb['createAccount']>>;
+        let receiver: Awaited<ReturnType<TronWeb['createAccount']>>;
+
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            account = await tronWeb.createAccount();
+            receiver = await tronWeb.createAccount();
+            tx = await tronWeb.transactionBuilder.unfreezeBalance(
+                'ENERGY',
+                account.address.base58,
+                receiver.address.base58
+            );
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('UnfreezeBalanceContract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address, account.address.hex);
+            assert.equal(value.resource, 'ENERGY');
+            assert.equal(value.receiver_address, receiver.address.hex);
+        });
+
+        it('should sign the transaction correctly after deserialization', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('UnfreezeBalanceContract', tx.raw_data_hex);
+            const dResultTx = { ...tx, raw_data: dResult };
+            const signedTx = await tronWeb.trx.sign(dResultTx, account.privateKey);
+            assert.equal(signedTx.signature[0].length, 130);
+        });
+    });
+
+    describe('DVoteWitnessContract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['vote']>>;
+        let account: Awaited<ReturnType<TronWeb['createAccount']>>;
+        const voteCount = 5;
+
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            account = await tronWeb.createAccount();
+            tx = await tronWeb.transactionBuilder.vote(
+                { [ADDRESS_BASE58]: voteCount },
+                account.address.base58
+            );
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('VoteWitnessContract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address.toLowerCase(), account.address.hex.toLowerCase());
+            assert.equal(value.votes.length, 1);
+            assert.equal(value.votes[0].vote_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
+            assert.equal(value.votes[0].vote_count, voteCount);
+        });
+
+        it('should sign the transaction correctly after deserialization', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('VoteWitnessContract', tx.raw_data_hex);
+            const dResultTx = { ...tx, raw_data: dResult };
+            const signedTx = await tronWeb.trx.sign(dResultTx, account.privateKey);
+            assert.equal(signedTx.signature[0].length, 130);
+        });
+    });
+
+    // ============== Proposal contracts ==============
+
+    describe('DProposalCreateContract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['createProposal']>>;
+        const proposalParams = [{ key: 2, value: 100000 }];
+
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            tx = await tronWeb.transactionBuilder.createProposal(proposalParams, ADDRESS_BASE58);
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('ProposalCreateContract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
+            assert.isArray(value.parameters);
+            assert.equal(value.parameters[0].key, 2);
+            assert.equal(value.parameters[0].value, 100000);
+        });
+
+        it('should sign the transaction correctly after deserialization', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('ProposalCreateContract', tx.raw_data_hex);
+            const dResultTx = { ...tx, raw_data: dResult };
+            const signedTx = await tronWeb.trx.sign(dResultTx, PRIVATE_KEY);
+            assert.equal(signedTx.signature[0].length, 130);
+        });
+    });
+
+    describe('DProposalApproveContract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['voteProposal']>>;
+        let proposalId: number;
+
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            const createTx = await tronWeb.transactionBuilder.createProposal([{ key: 0, value: 100000 }], ADDRESS_BASE58);
+            const signedTx = await tronWeb.trx.sign(createTx, PRIVATE_KEY);
+            await tronWeb.trx.sendRawTransaction(signedTx);
+            await wait(3);
+            const proposals = await tronWeb.trx.listProposals();
+            proposalId = proposals[proposals.length - 1]?.proposal_id ?? 1;
+            tx = await tronWeb.transactionBuilder.voteProposal(proposalId, true, ADDRESS_BASE58);
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('ProposalApproveContract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
+            assert.equal(value.proposal_id, proposalId);
+            assert.equal(value.is_add_approval, true);
+        });
+
+        it('should sign the transaction correctly after deserialization', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('ProposalApproveContract', tx.raw_data_hex);
+            const dResultTx = { ...tx, raw_data: dResult };
+            const signedTx = await tronWeb.trx.sign(dResultTx, PRIVATE_KEY);
+            assert.equal(signedTx.signature[0].length, 130);
+        });
+    });
+
+    describe('DProposalDeleteContract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['deleteProposal']>>;
+        let proposalId: number;
+
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            const createTx = await tronWeb.transactionBuilder.createProposal([{ key: 0, value: 100000 }], ADDRESS_BASE58);
+            const signedTx = await tronWeb.trx.sign(createTx, PRIVATE_KEY);
+            await tronWeb.trx.sendRawTransaction(signedTx);
+            await wait(3);
+            const proposals = await tronWeb.trx.listProposals();
+            proposalId = proposals[proposals.length - 1]?.proposal_id ?? 1;
+            tx = await tronWeb.transactionBuilder.deleteProposal(proposalId, ADDRESS_BASE58);
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('ProposalDeleteContract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
+            assert.equal(value.proposal_id, proposalId);
+        });
+
+        it('should sign the transaction correctly after deserialization', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('ProposalDeleteContract', tx.raw_data_hex);
+            const dResultTx = { ...tx, raw_data: dResult };
+            const signedTx = await tronWeb.trx.sign(dResultTx, PRIVATE_KEY);
+            assert.equal(signedTx.signature[0].length, 130);
+        });
+    });
+
+    // ============== Smart contract management ==============
+
+    describe('DCreateSmartContract', async () => {
+        let tx: any;
+        const feeLimit = 1e8;
+        const userFeePercentage = 30;
+        const originEnergyLimit = 9e6;
+        const bytecode = '608060405260358060116000396000f3006080604052600080fd00a165627a7a723058204ef44b54a88f5e78c4d5aa9aa8a20b3f' +
+                         '4d59a43069af0c50a3c1c0fb0e43a6070029';
+        const abi = [{ inputs: [], payable: false, stateMutability: 'nonpayable', type: 'constructor' }];
+
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            tx = await tronWeb.transactionBuilder.createSmartContract({
+                abi,
+                bytecode,
+                feeLimit,
+                userFeePercentage,
+                originEnergyLimit,
+                name: 'TestContract',
+            }, ADDRESS_BASE58);
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('CreateSmartContract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
+            assert.isObject(value.new_contract);
+            assert.isNotEmpty(value.new_contract.bytecode);
+            assert.equal(value.new_contract.consume_user_resource_percent, userFeePercentage);
+            assert.equal(value.new_contract.origin_energy_limit, originEnergyLimit);
+        });
+
+        it('should sign the transaction correctly after deserialization', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('CreateSmartContract', tx.raw_data_hex);
+            const dResultTx = { ...tx, raw_data: dResult };
+            const signedTx = await tronWeb.trx.sign(dResultTx, PRIVATE_KEY);
+            assert.equal(signedTx.signature[0].length, 130);
+        });
+    });
+
+    describe('DUpdateSettingContract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['updateSetting']>>;
+        const userFeePercentage = 50;
+
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            tx = await tronWeb.transactionBuilder.updateSetting(CONTRACT_ADDRESS, userFeePercentage, ADDRESS_BASE58);
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('UpdateSettingContract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
+            assert.equal(value.contract_address, TronWeb.address.toHex(CONTRACT_ADDRESS).toUpperCase());
+            assert.equal(value.consume_user_resource_percent, userFeePercentage);
+        });
+
+        it('should sign the transaction correctly after deserialization', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('UpdateSettingContract', tx.raw_data_hex);
+            const dResultTx = { ...tx, raw_data: dResult };
+            const signedTx = await tronWeb.trx.sign(dResultTx, PRIVATE_KEY);
+            assert.equal(signedTx.signature[0].length, 130);
+        });
+    });
+
+    describe('DUpdateEnergyLimitContract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['updateEnergyLimit']>>;
+        const originEnergyLimit = 5000000;
+
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            tx = await tronWeb.transactionBuilder.updateEnergyLimit(CONTRACT_ADDRESS, originEnergyLimit, ADDRESS_BASE58);
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('UpdateEnergyLimitContract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
+            assert.equal(value.contract_address, TronWeb.address.toHex(CONTRACT_ADDRESS).toUpperCase());
+            assert.equal(value.origin_energy_limit, originEnergyLimit);
+        });
+
+        it('should sign the transaction correctly after deserialization', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('UpdateEnergyLimitContract', tx.raw_data_hex);
+            const dResultTx = { ...tx, raw_data: dResult };
+            const signedTx = await tronWeb.trx.sign(dResultTx, PRIVATE_KEY);
+            assert.equal(signedTx.signature[0].length, 130);
+        });
+    });
+
+    describe('DClearABIContract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['clearABI']>>;
+
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            tx = await tronWeb.transactionBuilder.clearABI(CONTRACT_ADDRESS, ADDRESS_BASE58);
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('ClearABIContract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
+            assert.equal(value.contract_address, TronWeb.address.toHex(CONTRACT_ADDRESS).toUpperCase());
+        });
+
+        it('should sign the transaction correctly after deserialization', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('ClearABIContract', tx.raw_data_hex);
+            const dResultTx = { ...tx, raw_data: dResult };
+            const signedTx = await tronWeb.trx.sign(dResultTx, PRIVATE_KEY);
+            assert.equal(signedTx.signature[0].length, 130);
+        });
+    });
+
+    // ============== Exchange + Brokerage ==============
+
+    describe('DExchangeCreateContract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['createTRXExchange']>>;
+        const tokenName = 'tokenABC';
+        const tokenBalance = 1000;
+        const trxBalance = 2000;
+
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            tx = await tronWeb.transactionBuilder.createTRXExchange(tokenName, tokenBalance, trxBalance, ADDRESS_BASE58);
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('ExchangeCreateContract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
+            assert.equal(value.first_token_id, fromUtf8(tokenName));
+            assert.equal(value.first_token_balance, tokenBalance);
+            assert.equal(value.second_token_balance, trxBalance);
+        });
+
+        it('should sign the transaction correctly after deserialization', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('ExchangeCreateContract', tx.raw_data_hex);
+            const dResultTx = { ...tx, raw_data: dResult };
+            const signedTx = await tronWeb.trx.sign(dResultTx, PRIVATE_KEY);
+            assert.equal(signedTx.signature[0].length, 130);
+        });
+    });
+
+    describe('DExchangeInjectContract + DExchangeWithdrawContract + DExchangeTransactionContract', async () => {
+        let exchangeId: number;
+        const tokenName = 'tokenXYZ';
+        const tokenBalance = 5000;
+        const trxBalance = 5000;
+
+        before(async function () {
+            this.timeout(15000);
+            tronWeb = tronWebBuilder.createInstance();
+            const createTx = await tronWeb.transactionBuilder.createTRXExchange(tokenName, tokenBalance, trxBalance, ADDRESS_BASE58);
+            const signedTx = await tronWeb.trx.sign(createTx, PRIVATE_KEY);
+            await tronWeb.trx.sendRawTransaction(signedTx);
+            await wait(3);
+            const exchanges = await tronWeb.trx.listExchanges();
+            exchangeId = exchanges[exchanges.length - 1]?.exchange_id ?? 1;
+        });
+
+        describe('DExchangeInjectContract', async () => {
+            let tx: Awaited<ReturnType<TransactionBuilder['injectExchangeTokens']>>;
+            const injectAmount = 100;
+
+            before(async () => {
+                tx = await tronWeb.transactionBuilder.injectExchangeTokens(exchangeId, tokenName, injectAmount, ADDRESS_BASE58);
+            });
+
+            it('should deserialize the right result', async () => {
+                const dResult = utils.deserializeTx.deserializeTransaction('ExchangeInjectContract', tx.raw_data_hex);
+                const value = dResult.contract[0].parameter.value;
+
+                assert.equal(value.owner_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
+                assert.equal(value.exchange_id, exchangeId);
+                assert.equal(value.quant, injectAmount);
+            });
+
+            it('should sign the transaction correctly after deserialization', async () => {
+                const dResult = utils.deserializeTx.deserializeTransaction('ExchangeInjectContract', tx.raw_data_hex);
+                const dResultTx = { ...tx, raw_data: dResult };
+                const signedTx = await tronWeb.trx.sign(dResultTx, PRIVATE_KEY);
+                assert.equal(signedTx.signature[0].length, 130);
+            });
+        });
+
+        describe('DExchangeWithdrawContract', async () => {
+            let tx: Awaited<ReturnType<TransactionBuilder['withdrawExchangeTokens']>>;
+            const withdrawAmount = 50;
+
+            before(async () => {
+                tx = await tronWeb.transactionBuilder.withdrawExchangeTokens(exchangeId, tokenName, withdrawAmount, ADDRESS_BASE58);
+            });
+
+            it('should deserialize the right result', async () => {
+                const dResult = utils.deserializeTx.deserializeTransaction('ExchangeWithdrawContract', tx.raw_data_hex);
+                const value = dResult.contract[0].parameter.value;
+
+                assert.equal(value.owner_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
+                assert.equal(value.exchange_id, exchangeId);
+                assert.equal(value.quant, withdrawAmount);
+            });
+
+            it('should sign the transaction correctly after deserialization', async () => {
+                const dResult = utils.deserializeTx.deserializeTransaction('ExchangeWithdrawContract', tx.raw_data_hex);
+                const dResultTx = { ...tx, raw_data: dResult };
+                const signedTx = await tronWeb.trx.sign(dResultTx, PRIVATE_KEY);
+                assert.equal(signedTx.signature[0].length, 130);
+            });
+        });
+
+        describe('DExchangeTransactionContract', async () => {
+            let tx: Awaited<ReturnType<TransactionBuilder['tradeExchangeTokens']>>;
+            const amountSold = 10;
+            const amountExpected = 5;
+
+            before(async () => {
+                tx = await tronWeb.transactionBuilder.tradeExchangeTokens(exchangeId, tokenName, amountSold, amountExpected, ADDRESS_BASE58);
+            });
+
+            it('should deserialize the right result', async () => {
+                const dResult = utils.deserializeTx.deserializeTransaction('ExchangeTransactionContract', tx.raw_data_hex);
+                const value = dResult.contract[0].parameter.value;
+
+                assert.equal(value.owner_address.toLowerCase(), ADDRESS_HEX.toLowerCase());
+                assert.equal(value.exchange_id, exchangeId);
+                assert.equal(value.quant, amountSold);
+                assert.equal(value.expected, amountExpected);
+            });
+
+            it('should sign the transaction correctly after deserialization', async () => {
+                const dResult = utils.deserializeTx.deserializeTransaction('ExchangeTransactionContract', tx.raw_data_hex);
+                const dResultTx = { ...tx, raw_data: dResult };
+                const signedTx = await tronWeb.trx.sign(dResultTx, PRIVATE_KEY);
+                assert.equal(signedTx.signature[0].length, 130);
+            });
+        });
+    });
+
+    describe('DUpdateBrokerageContract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['updateBrokerage']>>;
+        let account: Awaited<ReturnType<TronWeb['createAccount']>>;
+        const brokerage = 20;
+
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            account = await tronWeb.createAccount();
+            tx = await tronWeb.transactionBuilder.updateBrokerage(brokerage, account.address.base58);
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('UpdateBrokerageContract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address, account.address.hex);
+            assert.equal(value.brokerage, brokerage);
+        });
+
+        it('should sign the transaction correctly after deserialization', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('UpdateBrokerageContract', tx.raw_data_hex);
+            const dResultTx = { ...tx, raw_data: dResult };
+            const signedTx = await tronWeb.trx.sign(dResultTx, account.privateKey);
+            assert.equal(signedTx.signature[0].length, 130);
         });
     });
 });

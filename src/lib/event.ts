@@ -99,6 +99,10 @@ export class Event {
             throw new Error('No event server configured');
         }
 
+        if (!/^[0-9a-fA-F]{64}$/.test(transactionID)) {
+            throw new Error('Invalid transactionID provided');
+        }
+
         const qs = {} as any;
 
         if (typeof options.only_unconfirmed === 'boolean') {
@@ -146,7 +150,7 @@ export class Event {
         }
 
         return this.tronWeb.eventServer
-            .request<EventResponse>(`v1/blocks/${blockNumber}/events?${new URLSearchParams(qs).toString()}`)
+            .request<EventResponse>(`v1/blocks/${encodeURIComponent(String(blockNumber))}/events?${new URLSearchParams(qs).toString()}`)
             .then((res) => {
                 if (res.success) {
                     return res;

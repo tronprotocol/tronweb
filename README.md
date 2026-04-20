@@ -95,20 +95,17 @@ Anything you do should be explorable on https://shasta.tronscan.org
 
 ## Your local private network for heavy testing
 
-You can set up your own private network, running Tron Quickstart. To do it you must [install Docker](https://docs.docker.com/install/) and, when ready, run a command like
+You can set up a local private TRON network using the **TRON Runtime Environment (TRE)**. This is a Docker-based local blockchain runtime that provides a full TRON network for development, testing, and automation.
+
+To do it you must [install Docker](https://docs.docker.com/install/) and, when ready, run a command like
 
 ```bash
-docker run -it --rm \
-  -p 9090:9090 \
-  -e "defaultBalance=100000" \
-  -e "showQueryString=true" \
-  -e "showBody=true" \
-  -e "formatJson=true" \
-  --name tron \
-  trontools/quickstart
+docker run -it -p 9090:9090 --rm --name tron tronbox/tre:dev
 ```
 
-[More details about Tron Quickstart on GitHub](https://github.com/tron-us/docker-tron-quickstart)
+Once running, the local node will be available at: http://localhost:9090
+
+[More details about TRE](https://hub.docker.com/r/tronbox/tre)
 
 ## Creating an Instance
 
