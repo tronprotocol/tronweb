@@ -678,7 +678,6 @@ describe('TronWeb.transactionBuilder', function () {
             this.timeout(10000);
 
             tokenOptions = getTokenOptions();
-            tokenOptions.saleStart -= 80;
 
             await broadcaster(tronWeb.transactionBuilder.createToken(tokenOptions, accounts.b58[5]), accounts.pks[5]);
 
@@ -732,6 +731,7 @@ describe('TronWeb.transactionBuilder', function () {
             const param: Parameters<TransactionBuilder['purchaseToken']> = [accounts.b58[5], tokenID, 10, accounts.b58[2]];
             const transaction = await tronWeb.transactionBuilder.purchaseToken(...param);
 
+            await createEmptyBlock(tronWeb);
             const res = await broadcaster(transaction, accounts.pks[2]);
             assert.isTrue(res.receipt.result);
         });
