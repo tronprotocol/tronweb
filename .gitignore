@@ -17,4 +17,3 @@ test/lib/dist/
 .claude/
 requires/
 .test-report/
-.githooks/

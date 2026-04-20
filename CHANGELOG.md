@@ -31,7 +31,7 @@ __6.3.0__
 
 - **Bug fix**  
 
-  - Corrected the return type of the frozen balance field in `trx.ts` to consistently return an array.
+  - Corrected the return type of the `getDelegatedResourceV2` in `trx.ts` to consistently return an array.
 
 ## Changes
 
