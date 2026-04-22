@@ -42,10 +42,10 @@ export function decodeBase58Address(base58Str: string) {
     const checkSum1 = hash1.slice(0, 4);
 
     if (
-        checkSum[0] == checkSum1[0] &&
-        checkSum[1] == checkSum1[1] &&
-        checkSum[2] == checkSum1[2] &&
-        checkSum[3] == checkSum1[3]
+        checkSum[0] === checkSum1[0] &&
+        checkSum[1] === checkSum1[1] &&
+        checkSum[2] === checkSum1[2] &&
+        checkSum[3] === checkSum1[3]
     ) {
         return address;
     }
@@ -90,9 +90,8 @@ export function signBytes(privateKey: string | BytesLike, contents: BytesLike) {
 
 export function getRowBytesFromTransactionBase64(base64Data: string): Uint8Array {
     const bytesDecode = base64DecodeFromString(base64Data);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const transaction = globalThis.proto.protocol.Transaction.deserializeBinary(bytesDecode);
+    const { Transaction } = (globalThis as any).TronWebProto;
+    const transaction = Transaction.deserializeBinary(bytesDecode);
     const raw = transaction.getRawData();
 
     return raw.serializeBinary();
@@ -228,8 +227,8 @@ export function SHA256(msgBytes: BytesLike) {
     return hexStr2byteArray(hashHex);
 }
 
-export function passwordToAddress(password: string) {
-    const com_priKeyBytes = base64DecodeFromString(password);
+export function passwordToAddress(priKeyBase64: string) {
+    const com_priKeyBytes = base64DecodeFromString(priKeyBase64);
     const com_addressBytes = getAddressFromPriKey(com_priKeyBytes);
 
     return getBase58CheckAddress(com_addressBytes);

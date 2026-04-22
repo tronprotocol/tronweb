@@ -198,7 +198,7 @@ export function decodeParamsV2ByABI<T extends FunctionFragment>(funABI: T, data:
     };
 
     const setResultProp = (result: any[], name?: string, value?: any) => {
-        if (name && !['length'].includes(name)) {
+        if (name && name !== 'length' && !(name in Object.prototype) && !(name in Array.prototype)) {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             result[name] = value;

@@ -66,7 +66,7 @@ Djyb5403LJztsxdExbyQkm++Gg631CZus4xA77wMafGw37IhCE6sTBo=
             frozenDuration: 1,
             trxRatio: 10,
             tokenRatio: 2,
-            saleStart: Date.now() + 500,
+            saleStart: Date.now() + 100,
             freeBandwidth: 100,
             freeBandwidthLimit: 1000,
         } as any;

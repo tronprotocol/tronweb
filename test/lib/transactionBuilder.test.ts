@@ -19,7 +19,6 @@ import assertThrow from '../helpers/assertThrow.js';
 import wait from '../helpers/wait.js';
 import broadcaster from '../helpers/broadcaster.js';
 // const pollAccountFor = require('../helpers/pollAccountFor');
-import _ from 'lodash';
 import tronWebBuilder from '../helpers/tronWebBuilder';
 import assertEqualHex from '../helpers/assertEqualHex';
 import {
@@ -62,6 +61,8 @@ const {
     testPayable,
 } = Contracts;
 import Config from '../helpers/config';
+import { deepCopyJson } from '../../src/lib/TransactionBuilder/helper';
+import { createEmptyBlock } from '../helpers/createEmptyBlock';
 const { ADDRESS_HEX, ADDRESS_BASE58, UPDATED_TEST_TOKEN_OPTIONS, PRIVATE_KEY, getTokenOptions, isProposalApproved } = Config;
 
 /**
@@ -618,7 +619,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it('should throw if an invalid description is passed', async function () {
-            const options = _.clone(UPDATED_TEST_TOKEN_OPTIONS);
+            const options = deepCopyJson(UPDATED_TEST_TOKEN_OPTIONS) as any;
             options.description = 123;
 
             await assertThrow(
@@ -632,7 +633,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it('should throw if an invalid url is passed', async function () {
-            const options = _.clone(UPDATED_TEST_TOKEN_OPTIONS);
+            const options = deepCopyJson(UPDATED_TEST_TOKEN_OPTIONS) as any;
             options.url = 123;
 
             await assertThrow(tronWeb.transactionBuilder.updateToken(options, accounts.hex[2]), 'Invalid token url provided');
@@ -730,6 +731,7 @@ describe('TronWeb.transactionBuilder', function () {
             const param: Parameters<TransactionBuilder['purchaseToken']> = [accounts.b58[5], tokenID, 10, accounts.b58[2]];
             const transaction = await tronWeb.transactionBuilder.purchaseToken(...param);
 
+            await createEmptyBlock(tronWeb);
             const res = await broadcaster(transaction, accounts.pks[2]);
             assert.isTrue(res.receipt.result);
         });
@@ -1019,7 +1021,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it('should throw trying to cancel an already canceled proposal', async function () {
-            await broadcaster(await tronWeb.transactionBuilder.deleteProposal(proposals[0].proposal_id));
+            await createEmptyBlock(tronWeb);
             await wait(3);
             const receipt = await broadcaster(await tronWeb.transactionBuilder.deleteProposal(proposals[0].proposal_id));
             

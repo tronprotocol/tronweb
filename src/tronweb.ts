@@ -22,7 +22,7 @@ const DEFAULT_VERSION = '4.7.1';
 
 const FEE_LIMIT = 150000000;
 
-const version = '6.2.2';
+const version = '6.3.0';
 
 function isValidOptions(options: unknown): options is TronWebOptions {
     return (
@@ -184,6 +184,7 @@ export class TronWeb extends EventEmitter {
             base58,
         };
 
+        // @deprecated - this emit will be removed in a future version
         this.emit('addressChanged', { hex, base58 });
     }
 
