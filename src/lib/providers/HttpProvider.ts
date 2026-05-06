@@ -56,7 +56,7 @@ export default class HttpProvider {
 
         return this.instance
             .request<T>({
-                data: method == 'post' && Object.keys(payload).length ? payload : null,
+                data: method == 'post' ? payload : undefined,
                 params: method == 'get' && payload,
                 url,
                 method,
