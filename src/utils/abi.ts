@@ -1,4 +1,5 @@
-import { AbiCoder, Interface } from './ethersUtils.js';
+import { AbiCoder } from './ethersUtils.js';
+import { FunctionFragment as EthersFunctionFragment } from './fragments.js';
 import { ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX } from './constants.js';
 import { toHex } from './address.js';
 import { FunctionFragment, AbiParamsCommon, GetOutputsType } from '../types/ABI.js';
@@ -258,11 +259,13 @@ export function encodeFunctionData(funcABI: FunctionFragment, args: any[] = []):
     if (!funcABI || String(funcABI.type).toLowerCase() !== 'function' || !funcABI.name) {
         throw new Error('Invalid function ABI fragment provided: only "function" type fragments with a name are supported');
     }
-    const fragment = new Interface([funcABI as any]).getFunction(funcABI.name);
-    if (!fragment) {
-        throw new Error('unknown function: ' + funcABI.name);
+    const inputsLength = funcABI.inputs ? funcABI.inputs.length : 0;
+    if (args.length !== inputsLength) {
+        throw new Error(`Invalid arguments provided: expected ${inputsLength} arguments, got ${args.length}`);
     }
-    // fragment.selector 基于 format('sighash') 计算,签名中保留 trcToken(与 TVM 一致),
-    // 而参数编码时 trcToken 按 uint256 处理(encodeParamsV2ByABI 内部替换)
-    return fragment.selector.replace(/^0x/, '') + encodeParamsV2ByABI(funcABI, args).replace(/^0x/, '');
+    // The selector keeps trcToken in the signature (TVM convention), while parameter
+    // encoding treats trcToken as uint256 and converts addresses inside args in place
+    // (same behavior as encodeParamsV2ByABI)
+    const selector = EthersFunctionFragment.from(funcABI).selector.replace(/^0x/, '');
+    return selector + encodeParamsV2ByABI(funcABI, args).replace(/^0x/, '');
 }

@@ -287,6 +287,36 @@ describe('TronWeb.utils.abi', function () {
             );
         });
 
+        it('should throw a clear error when the argument count mismatches the inputs', function () {
+            const funcABI = {
+                name: 'transfer',
+                type: 'function',
+                inputs: [
+                    { name: 'to', type: 'address' },
+                    { name: 'amount', type: 'uint256' },
+                ],
+                outputs: [],
+            };
+            assert.throws(() => {
+                coder.encodeFunctionData(funcABI, [ADDRESS_BASE58]);
+            }, /expected 2 arguments, got 1/);
+            assert.throws(() => {
+                coder.encodeFunctionData({ name: 'totalSupply', type: 'function', inputs: [], outputs: [] }, [1]);
+            }, /expected 0 arguments, got 1/);
+        });
+
+        it('should propagate the underlying error for invalid parameter types', function () {
+            const funcABI = {
+                name: 'foo',
+                type: 'function',
+                inputs: [{ name: 'a', type: 'uint257' }],
+                outputs: [],
+            };
+            assert.throws(() => {
+                coder.encodeFunctionData(funcABI, [1]);
+            }, /invalid numeric width/);
+        });
+
         it('should throw for non-function fragments', function () {
             assert.throws(() => {
                 coder.encodeFunctionData({ type: 'constructor', stateMutability: 'nonpayable', inputs: [] } as any, []);
