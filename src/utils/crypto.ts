@@ -235,6 +235,7 @@ export function passwordToAddress(priKeyBase64: string) {
 }
 
 export function pkToAddress(privateKey: string, strict = false) {
+    privateKey = privateKey.replace(/^0x/, '');
     const com_priKeyBytes = hexStr2byteArray(privateKey, strict);
     const com_addressBytes = getAddressFromPriKey(com_priKeyBytes);
 
