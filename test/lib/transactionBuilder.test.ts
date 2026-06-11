@@ -1058,7 +1058,7 @@ describe('TronWeb.transactionBuilder', function () {
 
         // TODO add invalid params throws
         it('should throw Invalid url provided error', async function () {
-            assertThrow(
+            await assertThrow(
                 tronWeb.transactionBuilder.applyForSR(accounts.b58[20], url + '#' + 'abc'.repeat(Math.ceil(256 / 3))),
                 'Invalid url provided'
             );
@@ -1095,7 +1095,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it('should throw Invalid url provided error', async function () {
-            assertThrow(
+            await assertThrow(
                 tronWeb.transactionBuilder.updateWitness(accounts.b58[21], updatedUrl + '#' + 'abc'.repeat(Math.ceil(256 / 3))),
                 'Invalid url provided'
             );
@@ -3552,7 +3552,7 @@ describe('TronWeb.transactionBuilder', function () {
             const unsupportedType = 'notSupportedType';
             // @ts-expect-error
             tx.raw_data.contract[0].type = unsupportedType;
-            assertThrow((async () => {
+            await assertThrow((async () => {
                 utils.transaction.txJsonToPb(tx);
             })(), `Unsupported transaction type: ${unsupportedType}`);
         })
