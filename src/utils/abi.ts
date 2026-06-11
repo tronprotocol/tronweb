@@ -1,4 +1,4 @@
-import { AbiCoder } from './ethersUtils.js';
+import { AbiCoder, Interface } from './ethersUtils.js';
 import { ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX } from './constants.js';
 import { toHex } from './address.js';
 import { FunctionFragment, AbiParamsCommon, GetOutputsType } from '../types/ABI.js';
@@ -252,4 +252,17 @@ export function decodeParamsV2ByABI<T extends FunctionFragment>(funABI: T, data:
         return decodeResCopy as GetOutputsType<T['outputs']>;
     }
     return [] as GetOutputsType<T['outputs']>;
+}
+
+export function encodeFunctionData(funcABI: FunctionFragment, args: any[] = []): string {
+    if (!funcABI || String(funcABI.type).toLowerCase() !== 'function' || !funcABI.name) {
+        throw new Error('Invalid function ABI fragment provided: only "function" type fragments with a name are supported');
+    }
+    const fragment = new Interface([funcABI as any]).getFunction(funcABI.name);
+    if (!fragment) {
+        throw new Error('unknown function: ' + funcABI.name);
+    }
+    // fragment.selector 基于 format('sighash') 计算,签名中保留 trcToken(与 TVM 一致),
+    // 而参数编码时 trcToken 按 uint256 处理(encodeParamsV2ByABI 内部替换)
+    return fragment.selector.replace(/^0x/, '') + encodeParamsV2ByABI(funcABI, args).replace(/^0x/, '');
 }

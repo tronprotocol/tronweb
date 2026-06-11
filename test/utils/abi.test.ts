@@ -207,4 +207,93 @@ describe('TronWeb.utils.abi', function () {
             });
         });
     });
+
+    describe('#encodeFunctionData()', function () {
+        const tronWeb = tronWebBuilder.createInstance();
+        const coder = tronWeb.utils.abi;
+
+        it('should encode a function call with base58 address and uint256 params', function () {
+            const funcABI = {
+                name: 'transfer',
+                type: 'function',
+                inputs: [
+                    { name: 'to', type: 'address' },
+                    { name: 'amount', type: 'uint256' },
+                ],
+                outputs: [],
+            };
+            const encoded = coder.encodeFunctionData(funcABI, [ADDRESS_BASE58, 100]);
+            assert.equal(
+                encoded,
+                'a9059cbb0000000000000000000000007e5f4552091a69125d5dfcb7b8c2659029395bdf' +
+                    '0000000000000000000000000000000000000000000000000000000000000064'
+            );
+        });
+
+        it('should return only the selector for a function without params', function () {
+            const funcABI = { name: 'totalSupply', type: 'function', inputs: [], outputs: [] };
+            assert.equal(coder.encodeFunctionData(funcABI), '18160ddd');
+        });
+
+        it('should keep trcToken in selector computation and encode the value as uint256', function () {
+            const funcABI = {
+                name: 'transfer',
+                type: 'function',
+                inputs: [{ name: 'id', type: 'trcToken' }],
+                outputs: [],
+            };
+            const encoded = coder.encodeFunctionData(funcABI, [1000100]);
+            assert.equal(encoded, 'e7bf839c00000000000000000000000000000000000000000000000000000000000f42a4');
+        });
+
+        it('should support trcToken arrays', function () {
+            const funcABI = {
+                name: 'tokenArray',
+                type: 'function',
+                inputs: [{ name: 'ids', type: 'trcToken[]' }],
+                outputs: [],
+            };
+            const encoded = coder.encodeFunctionData(funcABI, [[1000100, 1000200]]);
+            assert.equal(
+                encoded,
+                '259191d40000000000000000000000000000000000000000000000000000000000000020' +
+                    '0000000000000000000000000000000000000000000000000000000000000002' +
+                    '00000000000000000000000000000000000000000000000000000000000f42a4' +
+                    '00000000000000000000000000000000000000000000000000000000000f4308'
+            );
+        });
+
+        it('should support tuple params with nested trcToken and address', function () {
+            const funcABI = {
+                name: 'tokenTuple',
+                type: 'function',
+                inputs: [
+                    {
+                        name: 's',
+                        type: 'tuple',
+                        components: [
+                            { name: 'id', type: 'trcToken' },
+                            { name: 'owner', type: 'address' },
+                        ],
+                    },
+                ],
+                outputs: [],
+            };
+            const encoded = coder.encodeFunctionData(funcABI, [[1000100, ADDRESS_BASE58]]);
+            assert.equal(
+                encoded,
+                '9cae886500000000000000000000000000000000000000000000000000000000000f42a4' +
+                    '0000000000000000000000007e5f4552091a69125d5dfcb7b8c2659029395bdf'
+            );
+        });
+
+        it('should throw for non-function fragments', function () {
+            assert.throws(() => {
+                coder.encodeFunctionData({ type: 'constructor', stateMutability: 'nonpayable', inputs: [] } as any, []);
+            }, /only "function" type fragments/);
+            assert.throws(() => {
+                coder.encodeFunctionData({ name: 'Transfer', type: 'event', inputs: [] } as any, []);
+            }, /only "function" type fragments/);
+        });
+    });
 });
