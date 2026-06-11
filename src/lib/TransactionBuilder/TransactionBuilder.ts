@@ -45,6 +45,7 @@ import {
     WithdrawBalanceContract,
     WithdrawExpireUnfreezeContract,
     WitnessCreateContract,
+    WitnessUpdateContract,
 } from '../../types/Contract.js';
 import {
     createTransaction,
@@ -680,6 +681,47 @@ export class TransactionBuilder {
         return createTransaction<WitnessCreateContract>(
             this.tronWeb,
             ContractType.WitnessCreateContract,
+            data,
+            options?.permissionId,
+            transactionOptions
+        );
+    }
+
+    async updateWitness(
+        address: string = this.tronWeb.defaultAddress.hex as string,
+        url = '',
+        options: TransactionCommonOptions = {}
+    ): Promise<Transaction<WitnessUpdateContract>> {
+        this.validator.notValid([
+            {
+                name: 'origin',
+                type: 'address',
+                value: address,
+            },
+            {
+                name: 'url',
+                type: 'url',
+                value: url as string,
+                msg: 'Invalid url provided',
+            },
+            {
+                name: 'url',
+                type: 'string',
+                value: url as string,
+                lte: 256,
+                msg: 'Invalid url provided',
+            },
+        ]);
+
+        const data: WitnessUpdateContract = {
+            owner_address: toHex(address as string),
+            update_url: fromUtf8(url as string),
+        };
+
+        const transactionOptions = getTransactionOptions(options);
+        return createTransaction<WitnessUpdateContract>(
+            this.tronWeb,
+            ContractType.WitnessUpdateContract,
             data,
             options?.permissionId,
             transactionOptions

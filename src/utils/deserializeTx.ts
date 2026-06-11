@@ -45,7 +45,7 @@ const {
 } = globalThis.TronWebProto;
 
 import '../protocol/core/contract/witness_contract_pb.cjs';
-const { VoteWitnessContract } = globalThis.TronWebProto;
+const { VoteWitnessContract, WitnessUpdateContract } = globalThis.TronWebProto;
 
 import '../protocol/core/contract/proposal_contract_pb.cjs';
 const {
@@ -76,6 +76,7 @@ const ContractTypeMap = {
     '4': 'VoteWitnessContract',
     '5': 'WitnessCreateContract',
     '6': 'AssetIssueContract',
+    '8': 'WitnessUpdateContract',
     '9': 'ParticipateAssetIssueContract',
     '10': 'AccountUpdateContract',
     '11': 'FreezeBalanceContract',
@@ -272,6 +273,16 @@ const DWitnessCreateContract = (type, rawDataHex) => {
     commonData.contract[0].parameter.value = {
         owner_address: byteArray2hexStr(witnessCreateContract.getOwnerAddress_asU8()),
         url: byteArray2hexStr(witnessCreateContract.getUrl_asU8()),
+    };
+    return commonData;
+};
+
+const DWitnessUpdateContract = (type, rawDataHex) => {
+    const [commonData, valuePb] = DCommonData(type, rawDataHex);
+    const witnessUpdateContract = WitnessUpdateContract.deserializeBinary(valuePb);
+    commonData.contract[0].parameter.value = {
+        owner_address: byteArray2hexStr(witnessUpdateContract.getOwnerAddress_asU8()),
+        update_url: byteArray2hexStr(witnessUpdateContract.getUpdateUrl_asU8()),
     };
     return commonData;
 };
@@ -651,6 +662,8 @@ const deserializeTransaction = (type: string, rawDataHex: string) => {
             return DWithdrawBalanceContract(type, rawDataHex);
         case 'WitnessCreateContract':
             return DWitnessCreateContract(type, rawDataHex);
+        case 'WitnessUpdateContract':
+            return DWitnessUpdateContract(type, rawDataHex);
         case 'TransferAssetContract':
             return DTransferAssetContract(type, rawDataHex);
         case 'ParticipateAssetIssueContract':
