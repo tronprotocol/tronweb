@@ -7,6 +7,20 @@ import type { ContractAbiInterface, GetMethodsTypeFromAbi, GetOnMethodTypeFromAb
 import type { Address } from '../../types/Trx.js';
 import type { CreateSmartContractOptions } from '../../types/TransactionBuilder.js';
 
+// When the ABI itself defines a function named `read`/`write`, the legacy flat
+// call surface must stay reachable as `contract.read(...)`/`contract.write(...)`.
+// Wrap the legacy call in a Proxy whose property access and enumeration are
+// served entirely by the namespace, so both surfaces share the one getter.
+function wrapReservedNamespace<T extends object>(namespace: T, legacyCall: unknown): T {
+    if (typeof legacyCall !== 'function') return namespace;
+    return new Proxy(legacyCall, {
+        get: (_target, prop) => namespace[prop as keyof T],
+        has: (_target, prop) => prop in namespace,
+        ownKeys: () => Reflect.ownKeys(namespace),
+        getOwnPropertyDescriptor: (_target, prop) => Object.getOwnPropertyDescriptor(namespace, prop),
+    }) as T;
+}
+
 export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
     tronWeb: TronWeb;
     abi: Abi;
@@ -56,7 +70,13 @@ export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
      */
     get read(): ContractReadNamespace<Abi> {
         if (!this._readNamespace || this._readNamespace.abi !== this.abi) {
-            this._readNamespace = { abi: this.abi, namespace: buildReadNamespace(this) };
+            this._readNamespace = {
+                abi: this.abi,
+                namespace: wrapReservedNamespace(
+                    buildReadNamespace(this) as object,
+                    this.methods['read']
+                ) as ContractReadNamespace<Abi>,
+            };
         }
         return this._readNamespace.namespace;
     }
@@ -70,7 +90,13 @@ export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
      */
     get write(): ContractWriteNamespace<Abi> {
         if (!this._writeNamespace || this._writeNamespace.abi !== this.abi) {
-            this._writeNamespace = { abi: this.abi, namespace: buildWriteNamespace(this) };
+            this._writeNamespace = {
+                abi: this.abi,
+                namespace: wrapReservedNamespace(
+                    buildWriteNamespace(this) as object,
+                    this.methods['write']
+                ) as ContractWriteNamespace<Abi>,
+            };
         }
         return this._writeNamespace.namespace;
     }

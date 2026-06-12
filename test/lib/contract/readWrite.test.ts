@@ -1,7 +1,12 @@
 import { Address, TransactionInfo } from '../../../src/types/Trx';
 import { ContractAbiInterface } from '../../../src/types/ABI';
+import { ContractReadNamespace, ContractWriteNamespace } from '../../../src/lib/contract/readWrite';
 import { TransactionWrapper } from '../../../src/types/Transaction';
-import { ContractFunctionParameter, TriggerConstantContractOptions } from '../../../src/types/TransactionBuilder';
+import {
+    ContractFunctionParameter,
+    TriggerConstantContractOptions,
+    TriggerSmartContractOptions,
+} from '../../../src/types/TransactionBuilder';
 import { assert } from 'chai';
 import assertThrow from '../../helpers/assertThrow.js';
 import wait from '../../helpers/wait.js';
@@ -21,6 +26,14 @@ interface CapturedConstantCall {
     issuerAddress: string;
 }
 
+interface CapturedSmartCall {
+    address: string;
+    functionSelector: string;
+    options: TriggerSmartContractOptions;
+    parameters: ContractFunctionParameter[];
+    issuerAddress: string;
+}
+
 // Minimal triggerConstantContract stub result: only the fields the read path consumes.
 function constantCallResult(resultHex: string): TransactionWrapper {
     const wrapper: Partial<TransactionWrapper> = {
@@ -29,6 +42,22 @@ function constantCallResult(resultHex: string): TransactionWrapper {
     };
     return wrapper as TransactionWrapper;
 }
+
+// Minimal triggerSmartContract stub result: only the fields the write path consumes.
+function smartCallResult(txID: string): TransactionWrapper {
+    const wrapper: Partial<TransactionWrapper> = {
+        result: { result: true },
+        transaction: { txID } as TransactionWrapper['transaction'],
+    };
+    return wrapper as TransactionWrapper;
+}
+
+// Compile-time assertions: tsc fails the test build if the asserted type regresses.
+type IsCallable<T> = T extends (...args: any[]) => any ? true : false;
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+function expectTrue<T extends true>(): void {}
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+function expectFalse<T extends false>(): void {}
 
 describe('#contract.readWrite', function () {
     let accounts: {
@@ -72,6 +101,24 @@ describe('#contract.readWrite', function () {
             stateMutability: 'nonpayable',
             inputs: [{ name: 'count', type: 'uint256' }],
             outputs: [],
+        },
+    ] as const;
+    // `read` as a state-changing function: the flat call must survive, but the
+    // function itself belongs to the write namespace.
+    const writableReadAbi = [
+        {
+            type: 'function',
+            name: 'read',
+            stateMutability: 'nonpayable',
+            inputs: [{ name: 'count', type: 'uint256' }],
+            outputs: [],
+        },
+        {
+            type: 'function',
+            name: 'peek',
+            stateMutability: 'view',
+            inputs: [],
+            outputs: [{ name: 'count', type: 'uint256' }],
         },
     ] as const;
 
@@ -130,19 +177,26 @@ describe('#contract.readWrite', function () {
             );
         });
 
-        it('keeps ABI functions named read/write callable through the namespaces', async function () {
+        it('keeps an ABI function named read callable as the flat method and as a namespace entry', async function () {
             const tw = tronWebBuilder.createInstance();
             const contract = tw.contract(reservedAbi, contractAddress);
 
-            // the namespaces win over flat assignment for the reserved names
-            assert.isObject(contract.read);
-            assert.isObject(contract.write);
+            // contract.read is the legacy flat call and still serves the namespace
+            assert.isFunction(contract.read);
             assert.isFunction(contract.read.read);
-            assert.isFunction(contract.write.write);
-            // both stay reachable through the legacy methods surface
             assert.isFunction(contract.methods.read);
-            assert.isFunction(contract.methods.write);
 
+            // legacy surface: contract.read().call() goes through triggerSmartContract
+            let legacySelector: string | undefined;
+            tw.transactionBuilder.triggerSmartContract = async (_address, functionSelector) => {
+                legacySelector = functionSelector;
+                return constantCallResult(`${'0'.repeat(62)}2a`);
+            };
+            const legacyResult = await contract.read().call();
+            assert.equal(legacyResult[0], 42n);
+            assert.equal(legacySelector, 'read()');
+
+            // namespace surface: contract.read.read() goes through triggerConstantContract
             let captured: CapturedConstantCall | undefined;
             tw.transactionBuilder.triggerConstantContract = async (
                 address,
@@ -154,10 +208,132 @@ describe('#contract.readWrite', function () {
                 captured = { address, functionSelector, options, parameters, issuerAddress };
                 return constantCallResult(`${'0'.repeat(63)}1`);
             };
-
             assert.equal(await contract.read.read(), 1n);
             assert.equal(captured?.functionSelector, 'read()');
             assert.equal(captured?.address, contractAddress);
+        });
+
+        it('keeps an ABI function named write callable as the flat method and as a namespace entry', async function () {
+            const tw = tronWebBuilder.createInstance();
+            const contract = tw.contract(reservedAbi, contractAddress);
+
+            assert.isFunction(contract.write);
+            assert.isFunction(contract.write.write);
+            assert.isFunction(contract.methods.write);
+
+            let captured: CapturedSmartCall | undefined;
+            tw.transactionBuilder.triggerSmartContract = async (
+                address,
+                functionSelector,
+                options = {},
+                parameters = [],
+                issuerAddress = ''
+            ) => {
+                captured = { address, functionSelector, options, parameters, issuerAddress };
+                return smartCallResult('cafe');
+            };
+            tw.trx.sign = async (transaction: any) => ({ ...transaction, signature: ['00'] });
+            tw.trx.sendRawTransaction = (async (signedTransaction: any) => ({
+                result: true,
+                transaction: signedTransaction,
+            })) as typeof tw.trx.sendRawTransaction;
+
+            // legacy surface: contract.write(...).send() resolves to the txID
+            assert.equal(await contract.write(5).send(), 'cafe');
+            assert.equal(captured?.functionSelector, 'write(uint256)');
+
+            // namespace surface: contract.write.write([args], options) resolves to the txID
+            assert.equal(await contract.write.write([7], { feeLimit: 90_000_000 }), 'cafe');
+            assert.equal(captured?.functionSelector, 'write(uint256)');
+            assert.deepEqual(captured?.options.parametersV2, [7]);
+            assert.equal(captured?.options.feeLimit, 90_000_000);
+
+            // validation errors still surface as rejections through the proxy
+            const widened = tw.contract<ContractAbiInterface>(reservedAbi, contractAddress);
+            await assertThrow(
+                widened.write.write([1, 2]),
+                'Contract function "write" expects 1 argument(s) but received 2.'
+            );
+        });
+
+        it('isolates the namespaces from each other for the reserved names', function () {
+            const contract = tronWeb.contract(reservedAbi, contractAddress);
+
+            assert.isUndefined((contract.read as any).write);
+            assert.isUndefined((contract.write as any).read);
+        });
+
+        it('enumerates namespace entries when the ABI defines functions named read/write', function () {
+            const contract = tronWeb.contract(reservedAbi, contractAddress);
+
+            assert.isTrue('read' in contract.read);
+            assert.isTrue('write' in contract.write);
+            assert.isFalse('write' in contract.read);
+            assert.isFalse('read' in contract.write);
+            assert.deepEqual(Object.keys(contract.read), ['read']);
+            assert.deepEqual(Object.keys(contract.write), ['write']);
+        });
+
+        it('returns the same namespace object on repeated accesses', function () {
+            const plain = tronWeb.contract(contractAbi, contractAddress);
+            const reserved = tronWeb.contract(reservedAbi, contractAddress);
+
+            assert.strictEqual(plain.read, plain.read);
+            assert.strictEqual(plain.write, plain.write);
+            assert.strictEqual(reserved.read, reserved.read);
+            assert.strictEqual(reserved.write, reserved.write);
+        });
+
+        it('types reserved names as callable regardless of mutability (compile-time)', function () {
+            // enforced by tsc when the test build compiles: a regression in
+            // ContractRead/WriteNamespace breaks the build rather than an assertion
+            expectTrue<IsCallable<ContractReadNamespace<typeof reservedAbi>>>();
+            expectTrue<IsCallable<ContractWriteNamespace<typeof reservedAbi>>>();
+            // a non-view function named read still gets the flat-call signature
+            expectTrue<IsCallable<ContractReadNamespace<typeof writableReadAbi>>>();
+            // namespaces without a matching function name stay plain objects
+            expectFalse<IsCallable<ContractWriteNamespace<typeof writableReadAbi>>>();
+            expectFalse<IsCallable<ContractReadNamespace<typeof contractAbi>>>();
+            expectFalse<IsCallable<ContractWriteNamespace<typeof contractAbi>>>();
+        });
+
+        it('treats a non-view ABI function named read as a flat call and a write-namespace entry', async function () {
+            const tw = tronWebBuilder.createInstance();
+            const contract = tw.contract(writableReadAbi, contractAddress);
+
+            // the flat call survives even though `read` is not read-only…
+            assert.isFunction(contract.read);
+            // …but the function itself lives in the write namespace only
+            assert.isFunction(contract.write.read);
+            assert.isUndefined((contract.read as any).read);
+            // the read namespace still serves its own entries through the proxy
+            assert.isFunction(contract.read.peek);
+
+            let captured: CapturedSmartCall | undefined;
+            tw.transactionBuilder.triggerSmartContract = async (
+                address,
+                functionSelector,
+                options = {},
+                parameters = [],
+                issuerAddress = ''
+            ) => {
+                captured = { address, functionSelector, options, parameters, issuerAddress };
+                return smartCallResult('cafe');
+            };
+            tw.trx.sign = async (transaction: any) => ({ ...transaction, signature: ['00'] });
+            tw.trx.sendRawTransaction = (async (signedTransaction: any) => ({
+                result: true,
+                transaction: signedTransaction,
+            })) as typeof tw.trx.sendRawTransaction;
+
+            // legacy flat send through the proxy
+            assert.equal(await contract.read(9).send(), 'cafe');
+            assert.equal(captured?.functionSelector, 'read(uint256)');
+
+            // write-namespace invocation of the function named read
+            assert.equal(await contract.write.read([9]), 'cafe');
+            assert.equal(captured?.functionSelector, 'read(uint256)');
+            assert.deepEqual(captured?.options.parametersV2, [9]);
         });
 
         it('passes account and value options through to the constant call', async function () {

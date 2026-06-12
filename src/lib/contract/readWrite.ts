@@ -1,6 +1,6 @@
 import type { TronWeb } from '../../tronweb.js';
 import type { Contract } from './index.js';
-import type { ContractAbiInterface, FunctionFragment, GetOutputsType, GetParamsType, IsConstAbi } from '../../types/ABI.js';
+import type { ContractAbiInterface, FunctionFragment, GetMethodsTypeFromAbi, GetOutputsType, GetParamsType, IsConstAbi } from '../../types/ABI.js';
 import type { TransactionWrapper } from '../../types/Transaction.js';
 import {
     buildFunctionSelector,
@@ -131,23 +131,31 @@ export type WriteOptions<
 
 type ContractCallInterface = (...args: any[]) => Promise<any>;
 
+type ExtractReadNamespace<Abi extends ContractAbiInterface> = {
+    [K in ReadContractFunctionName<Abi>]: (
+        argsOrOptions?: ReadContractParameters<Abi, K>['args'] | ReadOptions<Abi, K>,
+        options?: ReadOptions<Abi, K>
+    ) => Promise<ReadContractReturnType<Abi, K>>;
+};
+
 export type ContractReadNamespace<Abi extends ContractAbiInterface> = IsConstAbi<Abi> extends true
-    ? {
-        [K in ReadContractFunctionName<Abi>]: (
-            argsOrOptions?: ReadContractParameters<Abi, K>['args'] | ReadOptions<Abi, K>,
-            options?: ReadOptions<Abi, K>
-        ) => Promise<ReadContractReturnType<Abi, K>>;
-    }
-    : Record<string, ContractCallInterface>;
+    ? 'read' extends ReadContractFunctionName<Abi> | WriteContractFunctionName<Abi>
+        ? GetMethodsTypeFromAbi<Abi>['read']['onMethod'] & ExtractReadNamespace<Abi>
+        : ExtractReadNamespace<Abi>
+    : any;
+
+type ExtractWriteNamespace<Abi extends ContractAbiInterface> = {
+    [K in WriteContractFunctionName<Abi>]: (
+        argsOrOptions?: WriteContractParameters<Abi, K>['args'] | WriteOptions<Abi, K>,
+        options?: WriteOptions<Abi, K>
+    ) => Promise<WriteContractReturnType>;
+};
 
 export type ContractWriteNamespace<Abi extends ContractAbiInterface> = IsConstAbi<Abi> extends true
-    ? {
-        [K in WriteContractFunctionName<Abi>]: (
-            argsOrOptions?: WriteContractParameters<Abi, K>['args'] | WriteOptions<Abi, K>,
-            options?: WriteOptions<Abi, K>
-        ) => Promise<WriteContractReturnType>;
-    }
-    : Record<string, ContractCallInterface>;
+    ? 'write' extends ReadContractFunctionName<Abi> | WriteContractFunctionName<Abi>
+        ? GetMethodsTypeFromAbi<Abi>['write']['onMethod'] & ExtractWriteNamespace<Abi>
+        : ExtractWriteNamespace<Abi>
+    : any;
 
 // ─── Runtime ─────────────────────────────────────────────────────────────────
 
