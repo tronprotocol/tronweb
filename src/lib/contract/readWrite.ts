@@ -331,7 +331,9 @@ function assertContractAddress(contract: Contract<any>): string {
     return contract.address;
 }
 
-function invokeRead(
+// async so every failure — including argument-count and signer validation —
+// surfaces as a rejection rather than a synchronous throw.
+async function invokeRead(
     contract: Contract<any>,
     functionName: string,
     args: readonly unknown[],
@@ -339,30 +341,30 @@ function invokeRead(
 ): Promise<any> {
     assertArgCount(contract.abi, functionName, args);
 
-    return (async () => {
-        const address = assertContractAddress(contract);
-        const tronWeb = contract.tronWeb;
-        const fragment = getReadContractFragment(contract.abi, functionName, args);
-        const { account, value } = options;
+    const address = assertContractAddress(contract);
+    const tronWeb = contract.tronWeb;
+    const fragment = getReadContractFragment(contract.abi, functionName, args);
+    const { account, value } = options;
 
-        const transaction = await tronWeb.transactionBuilder.triggerConstantContract(
-            address,
-            buildFunctionSelector(fragment),
-            {
-                feeLimit: tronWeb.feeLimit,
-                ...(value !== undefined ? { callValue: resolveCallValue(value) } : {}),
-                funcABIV2: fragment,
-                parametersV2: [...args],
-            },
-            [],
-            resolveCallerAddress(account, tronWeb.defaultAddress.base58 || undefined)
-        );
+    const transaction = await tronWeb.transactionBuilder.triggerConstantContract(
+        address,
+        buildFunctionSelector(fragment),
+        {
+            feeLimit: tronWeb.feeLimit,
+            ...(value !== undefined ? { callValue: resolveCallValue(value) } : {}),
+            funcABIV2: fragment,
+            parametersV2: [...args],
+        },
+        [],
+        resolveCallerAddress(account, tronWeb.defaultAddress.base58 || undefined)
+    );
 
-        return normalizeReadContractOutput(fragment, extractConstantResultData(tronWeb, transaction));
-    })();
+    return normalizeReadContractOutput(fragment, extractConstantResultData(tronWeb, transaction));
 }
 
-function invokeWrite(
+// async so every failure — including argument-count and signer validation —
+// surfaces as a rejection rather than a synchronous throw.
+async function invokeWrite(
     contract: Contract<any>,
     functionName: string,
     args: readonly unknown[],
@@ -371,43 +373,41 @@ function invokeWrite(
     const signerAddress = resolveSignerAddress(contract.tronWeb, functionName, options.account);
     assertArgCount(contract.abi, functionName, args);
 
-    return (async () => {
-        const address = assertContractAddress(contract);
-        const tronWeb = contract.tronWeb;
-        const fragment = getWriteContractFragment(contract.abi, functionName, args);
-        const { value, feeLimit, tokenId, tokenValue, permissionId } = options;
-        const callValue = resolveCallValue(value);
+    const address = assertContractAddress(contract);
+    const tronWeb = contract.tronWeb;
+    const fragment = getWriteContractFragment(contract.abi, functionName, args);
+    const { value, feeLimit, tokenId, tokenValue, permissionId } = options;
+    const callValue = resolveCallValue(value);
 
-        const txWrapper = await tronWeb.transactionBuilder.triggerSmartContract(
-            address,
-            buildFunctionSelector(fragment),
-            {
-                feeLimit: feeLimit ?? tronWeb.feeLimit,
-                ...(callValue !== undefined ? { callValue } : {}),
-                ...(tokenId !== undefined ? { tokenId } : {}),
-                ...(tokenValue !== undefined ? { tokenValue } : {}),
-                ...(permissionId !== undefined ? { permissionId } : {}),
-                funcABIV2: fragment,
-                parametersV2: [...args],
-            },
-            [],
-            signerAddress
-        );
+    const txWrapper = await tronWeb.transactionBuilder.triggerSmartContract(
+        address,
+        buildFunctionSelector(fragment),
+        {
+            feeLimit: feeLimit ?? tronWeb.feeLimit,
+            ...(callValue !== undefined ? { callValue } : {}),
+            ...(tokenId !== undefined ? { tokenId } : {}),
+            ...(tokenValue !== undefined ? { tokenValue } : {}),
+            ...(permissionId !== undefined ? { permissionId } : {}),
+            funcABIV2: fragment,
+            parametersV2: [...args],
+        },
+        [],
+        signerAddress
+    );
 
-        if (!txWrapper.result?.result) {
-            throw new Error('Failed to build transaction: ' + (txWrapper.result?.message ?? JSON.stringify(txWrapper)));
-        }
+    if (!txWrapper.result?.result) {
+        throw new Error('Failed to build transaction: ' + (txWrapper.result?.message ?? JSON.stringify(txWrapper)));
+    }
 
-        if (!txWrapper.transaction || !txWrapper.transaction.txID) {
-            throw new Error('triggerSmartContract did not return a valid transaction object');
-        }
+    if (!txWrapper.transaction || !txWrapper.transaction.txID) {
+        throw new Error('triggerSmartContract did not return a valid transaction object');
+    }
 
-        const signed = await tronWeb.trx.sign(txWrapper.transaction);
-        const broadcast = await tronWeb.trx.sendRawTransaction(signed);
-        assertBroadcastOk(tronWeb, broadcast);
+    const signed = await tronWeb.trx.sign(txWrapper.transaction);
+    const broadcast = await tronWeb.trx.sendRawTransaction(signed);
+    assertBroadcastOk(tronWeb, broadcast);
 
-        return signed.txID;
-    })();
+    return signed.txID;
 }
 
 /**

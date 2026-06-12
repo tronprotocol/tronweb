@@ -3,6 +3,7 @@ import { ContractAbiInterface } from '../../../src/types/ABI';
 import { TransactionWrapper } from '../../../src/types/Transaction';
 import { ContractFunctionParameter, TriggerConstantContractOptions } from '../../../src/types/TransactionBuilder';
 import { assert } from 'chai';
+import assertThrow from '../../helpers/assertThrow.js';
 import wait from '../../helpers/wait.js';
 import broadcaster from '../../helpers/broadcaster.js';
 import tronWebBuilder from '../../helpers/tronWebBuilder.js';
@@ -111,20 +112,20 @@ describe('#contract.readWrite', function () {
             assert.isFunction(contract.methods.balanceOf);
         });
 
-        it('rejects read calls with the wrong number of arguments', function () {
+        it('rejects read calls with the wrong number of arguments', async function () {
             // widen to an untyped ABI so the invalid calls reach the runtime check
             const contract = tronWeb.contract<ContractAbiInterface>(contractAbi, contractAddress);
 
-            assert.throws(
-                () => contract.read.balanceOf([accounts.b58[0], accounts.b58[0]]),
+            await assertThrow(
+                contract.read.balanceOf([accounts.b58[0], accounts.b58[0]]),
                 'Contract function "balanceOf" expects 1 argument(s) but received 2.'
             );
-            assert.throws(
-                () => contract.read.balanceOf(),
+            await assertThrow(
+                contract.read.balanceOf(),
                 'Contract function "balanceOf" expects 1 argument(s) but received 0.'
             );
-            assert.throws(
-                () => contract.write.transfer([accounts.b58[0]]),
+            await assertThrow(
+                contract.write.transfer([accounts.b58[0]]),
                 'Contract function "transfer" expects 2 argument(s) but received 1.'
             );
         });
@@ -186,21 +187,21 @@ describe('#contract.readWrite', function () {
             assert.equal(captured?.issuerAddress, accounts.b58[1]);
         });
 
-        it('refuses writes when the TronWeb instance has no signer', function () {
+        it('refuses writes when the TronWeb instance has no signer', async function () {
             const tw = new TronWeb({ fullHost: FULL_NODE_API });
             const contract = tw.contract(contractAbi, contractAddress);
 
-            assert.throws(
-                () => contract.write.transfer([accounts.b58[0], 1]),
+            await assertThrow(
+                contract.write.transfer([accounts.b58[0], 1]),
                 'Method "transfer" modifies state and requires a signer. Set a private key or default address on the TronWeb instance.'
             );
         });
 
-        it('refuses write account overrides that differ from the default address', function () {
+        it('refuses write account overrides that differ from the default address', async function () {
             const contract = tronWeb.contract(contractAbi, contractAddress);
 
-            assert.throws(
-                () => contract.write.transfer([accounts.b58[0], 1], { account: accounts.b58[1] }),
+            await assertThrow(
+                contract.write.transfer([accounts.b58[0], 1], { account: accounts.b58[1] }),
                 'Write account override must match the TronWeb default address.'
             );
         });
@@ -255,16 +256,16 @@ describe('#contract.readWrite', function () {
             assert.equal(addrBody(tuple[2]), addrBody(struct[2]));
         });
 
-        it('rejects calls with the wrong number of arguments', function () {
+        it('rejects calls with the wrong number of arguments', async function () {
             const contract = tronWeb.contract(fixture.abi, deployedAddress);
 
             // s(uint256) takes exactly one argument
-            assert.throws(
-                () => contract.read.s([1, 2]),
+            await assertThrow(
+                contract.read.s([1, 2]),
                 'Contract function "s" expects 1 argument(s) but received 2.'
             );
-            assert.throws(
-                () => contract.read.s(),
+            await assertThrow(
+                contract.read.s(),
                 'Contract function "s" expects 1 argument(s) but received 0.'
             );
         });
