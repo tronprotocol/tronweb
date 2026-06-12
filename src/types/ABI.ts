@@ -84,6 +84,20 @@ export type AbiFragment =
 
 export type ContractAbiInterface = ReadonlyArray<AbiFragment>;
 
+export type IsAny<T> = 0 extends 1 & T ? true : false;
+
+/**
+ * True when the ABI is a fixed-length tuple (declared with `as const`).
+ * Without `as const` the ABI widens to `AbiFragment[]` — `length` becomes
+ * `number` and fragment names/stateMutability lose their literal types, so
+ * no method names can be derived from it. `any` also fails this check.
+ */
+export type IsConstAbi<Abi extends ContractAbiInterface> = IsAny<Abi> extends true
+    ? false
+    : number extends Abi['length']
+      ? false
+      : true;
+
 
 type _GrowArr<Length extends number, T = any, Arr extends T[] = []> = Arr['length'] extends Length
     ? Readonly<Arr>

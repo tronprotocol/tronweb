@@ -1,6 +1,8 @@
 import { TronWeb } from '../../tronweb.js';
 import utils from '../../utils/index.js';
 import { Method, AbiFragmentNoErrConstructor } from './method.js';
+import { buildReadNamespace, buildWriteNamespace } from './readWrite.js';
+import type { ContractReadNamespace, ContractWriteNamespace } from './readWrite.js';
 import type { ContractAbiInterface, GetMethodsTypeFromAbi, GetOnMethodTypeFromAbi, AnyOnMethodType } from '../../types/ABI.js';
 import type { Address } from '../../types/Trx.js';
 import type { CreateSmartContractOptions } from '../../types/TransactionBuilder.js';
@@ -16,6 +18,8 @@ export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
     methods: GetOnMethodTypeFromAbi<Abi> & AnyOnMethodType;
     methodInstances: GetMethodsTypeFromAbi<Abi>;
     props: any[];
+    private _readNamespace?: { abi: Abi; namespace: ContractReadNamespace<Abi> };
+    private _writeNamespace?: { abi: Abi; namespace: ContractWriteNamespace<Abi> };
     [key: string | number | symbol]: any;
 
     constructor(tronWeb: TronWeb, abi: Abi = [] as any, address: Address) {
@@ -42,6 +46,33 @@ export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
         }
 
         this.loadAbi(abi);
+    }
+
+    /**
+     * Type-safe read namespace (ported from the clients `createContract` surface):
+     * every `view`/`pure` ABI function is callable as
+     * `contract.read.fn([args], { account, value })` and resolves to the decoded
+     * result directly. Rebuilt lazily whenever the contract ABI is replaced.
+     */
+    get read(): ContractReadNamespace<Abi> {
+        if (!this._readNamespace || this._readNamespace.abi !== this.abi) {
+            this._readNamespace = { abi: this.abi, namespace: buildReadNamespace(this) };
+        }
+        return this._readNamespace.namespace;
+    }
+
+    /**
+     * Type-safe write namespace (ported from the clients `createContract` surface):
+     * every state-changing ABI function is callable as
+     * `contract.write.fn([args], { account, value, feeLimit, tokenId, tokenValue, permissionId })`,
+     * signed with the instance's default private key, broadcast, and resolved to
+     * the transaction ID. Rebuilt lazily whenever the contract ABI is replaced.
+     */
+    get write(): ContractWriteNamespace<Abi> {
+        if (!this._writeNamespace || this._writeNamespace.abi !== this.abi) {
+            this._writeNamespace = { abi: this.abi, namespace: buildWriteNamespace(this) };
+        }
+        return this._writeNamespace.namespace;
     }
 
     hasProperty(property: number | string | symbol) {
@@ -151,3 +182,17 @@ export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
 
 export type { CallOptions, SendOptions, AbiFragmentNoErrConstructor } from './method.js';
 export { Method } from './method.js';
+export type {
+    ContractReadNamespace,
+    ContractWriteNamespace,
+    ReadContractFunctionName,
+    WriteContractFunctionName,
+    ReadContractParameters,
+    ReadContractReturnType,
+    WriteContractParameters,
+    WriteContractReturnType,
+    ReadOptions,
+    WriteOptions,
+    CollapseSingleItemTuple,
+} from './readWrite.js';
+export { buildReadNamespace, buildWriteNamespace } from './readWrite.js';
