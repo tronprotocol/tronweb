@@ -239,6 +239,7 @@ describe('TronWeb.transactionBuilder', function () {
                 options.precision = 4;
 
                 for (let i = 0; i < 2; i++) {
+                    options.saleStart = Date.now() + 100;
                     if (i === 1) options.permissionId = 2;
                     const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.b58[8 + i]);
 
