@@ -60,7 +60,7 @@
     },
     "dependencies": {
         "@babel/runtime": "7.26.10",
-        "axios": "1.15.0",
+        "axios": "1.18.0",
         "bignumber.js": "9.1.2",
         "ethereum-cryptography": "2.2.1",
         "ethers": "6.13.5",
@@ -112,7 +112,7 @@
         "karma-spec-reporter": "0.0.36",
         "karma-webpack": "5.0.1",
         "mocha": "11.1.0",
-        "nyc": "17.1.0",
+        "nyc": "18.0.0",
         "prettier": "3.5.3",
         "puppeteer": "24.23.0",
         "querystring-es3": "0.2.1",
@@ -132,6 +132,7 @@
     "license": "MIT",
     "repository": "https://github.com/tronprotocol/tronweb.git",
     "overrides": {
+        "ws": "8.21.0",
         "serialize-javascript": "7.0.5"
     }
 }
