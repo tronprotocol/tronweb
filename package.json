@@ -41,7 +41,7 @@
         "copy-protocol:cjs": "cp -R ./src/protocol ./lib/commonjs/",
         "copy-protocol:esm": "cp -R ./src/protocol ./lib/esm/",
         "prepare": "npm run build",
-        "build": "npm run clean && webpack --config webpack.config.js --progress --color",
+        "build": "npm run build:all",
         "build:dev": "NODE_ENV=development npm run build",
         "clean:all": "rimraf dist lib",
         "clean": "rimraf dist",
