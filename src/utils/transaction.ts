@@ -83,7 +83,7 @@ const flexToUint8Array = (str: string, visible: boolean) => {
 };
 
 const sha3 = (string: string, prefix = true) => {
-    return (prefix ? '0x' : '') + keccak256(Buffer.from(string, 'utf-8')).toString().substring(2);
+    return (prefix ? '0x' : '') + keccak256(new TextEncoder().encode(string)).toString().substring(2);
 };
 
 const buildCommonTransaction = (message, contractType, typeName, permissionId) => {

@@ -1290,7 +1290,7 @@ export class TransactionBuilder {
         );
 
         if (args.function_selector) {
-            args.data = keccak256(Buffer.from(args.function_selector, 'utf-8')).toString().substring(2, 10) + args.parameter;
+            args.data = keccak256(new TextEncoder().encode(args.function_selector)).toString().substring(2, 10) + args.parameter;
         }
         const value: TriggerSmartContract = {
             data: args.data,

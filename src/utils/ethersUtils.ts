@@ -35,7 +35,7 @@ const FormatTypes = {
 const isValidMnemonic = Mnemonic.isValidMnemonic;
 
 computeHmac.register((algorithm, key, data) => {
-    return computeHmac._(algorithm, Buffer.from(key), Buffer.from(data));
+    return computeHmac._(algorithm, getBytes(key), getBytes(data));
 });
 
 export {
