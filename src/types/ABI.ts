@@ -274,7 +274,7 @@ type _GetOutputsType<Outputs extends ReadonlyArray<AbiParamsCommon> | undefined>
         : []
     : [];
 
-export type GetOutputsType<Outputs extends ReadonlyArray<AbiParamsCommon> | undefined> = GetTupleOutputType<'tuple', Outputs>;
+export type GetOutputsType<Outputs extends ReadonlyArray<AbiParamsCommon> | undefined> = IsAny<Outputs> extends true ? any : GetTupleOutputType<'tuple', Outputs>;
 
 
 export type GetMethodsTypeFromAbi<Abi extends ContractAbiInterface> = Abi extends readonly [infer T, ...infer P]
