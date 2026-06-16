@@ -242,7 +242,9 @@ export type GetParamsType<ParamsType extends ReadonlyArray<AbiParamsCommon> | un
                 ? [SimplifySolidityType<SolidityValueType<T['type'], T['components']>>, ...GetParamsType<P>]
                 : [SimplifySolidityType<SolidityValueType<T['type'], T['components']>>]
         : []
-    : any[];
+    : ParamsType extends readonly []
+        ? []
+        : any[];
 
 type GetTupleOutputType<T extends `tuple${string}`, Shape extends ReadonlyArray<AbiParamsCommon> | undefined> = T extends 'tuple'
     ? Shape extends ReadonlyArray<AbiParamsCommon>
