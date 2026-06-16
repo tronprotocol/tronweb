@@ -23,3 +23,7 @@ export type MapEventQueryDataType = {
     unconfirmed?: boolean;
     fingerprint?: string | undefined;
 };
+
+export type Prettify<T> = {
+  [K in keyof T]: T[K];
+} & {};

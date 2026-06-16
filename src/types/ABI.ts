@@ -1,6 +1,7 @@
 import type { Address } from "./Trx";
 import type { Method } from "../lib/contract/method";
 import type { Contract } from "../lib/contract/index";
+import type { Prettify } from "./UtilsTypes";
 export type AbiParamsCommon = {
     readonly name: string;
     readonly type: string;
@@ -232,9 +233,6 @@ export type SolidityValueType<T extends string, C extends ReadonlyArray<AbiParam
     | SolidityTupleType<T, C>;
 
 type SimplifySolidityType<T> = T extends infer U ? U : never;
-type Prettify<T> = {
-  [K in keyof T]: T[K];
-} & {};
 
 export type GetParamsType<ParamsType extends ReadonlyArray<AbiParamsCommon> | undefined> = ParamsType extends readonly [infer T, ...infer P] 
     ? T extends AbiParamsCommon

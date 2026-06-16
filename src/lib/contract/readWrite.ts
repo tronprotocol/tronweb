@@ -10,6 +10,7 @@ import {
     resolveFunctionFragment,
 } from '../../utils/abi.js';
 import { ADDRESS_PREFIX } from '../../utils/constants.js';
+import { Prettify } from '../../types/UtilsTypes.js';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -122,12 +123,12 @@ export type WriteContractReturnType = string;
 export type ReadOptions<
     Abi extends ContractAbiInterface,
     FunctionName extends ReadContractFunctionName<Abi>,
-> = Omit<ReadContractParameters<Abi, FunctionName>, 'functionName' | 'args'>;
+> = Prettify<Omit<ReadContractParameters<Abi, FunctionName>, 'functionName' | 'args'>>;
 
 export type WriteOptions<
     Abi extends ContractAbiInterface,
     FunctionName extends WriteContractFunctionName<Abi>,
-> = Omit<WriteContractParameters<Abi, FunctionName>, 'functionName' | 'args'>;
+> = Prettify<Omit<WriteContractParameters<Abi, FunctionName>, 'functionName' | 'args'>>;
 
 type ContractCallInterface = (...args: any[]) => Promise<any>;
 
