@@ -1,6 +1,6 @@
 import type { TronWeb } from '../../tronweb.js';
 import type { Contract } from './index.js';
-import type { ContractAbiInterface, FunctionFragment, GetMethodsTypeFromAbi, GetOutputsType, GetParamsType, IsConstAbi } from '../../types/ABI.js';
+import type { AbiParamsCommon, ContractAbiInterface, FunctionFragment, GetMethodsTypeFromAbi, GetOutputsType, GetParamsType, IsConstAbi } from '../../types/ABI.js';
 import type { TransactionWrapper } from '../../types/Transaction.js';
 import {
     buildFunctionSelector,
@@ -108,8 +108,41 @@ type ReadSignaturesForName<Abi extends ContractAbiInterface, Name extends ReadCo
         ? F extends FunctionFragment ? ReadFragmentSignature<F> : never
         : never;
 
+// Type-level mirror of `buildFullTypeDefinition`: the canonical Solidity type
+// string for one ABI parameter, expanding tuples into their component list.
+type ParamTypeSignature<Param extends AbiParamsCommon> =
+    Param['type'] extends `tuple${infer Suffix}`
+        ? Param extends { components: infer Components }
+            ? Components extends ReadonlyArray<AbiParamsCommon>
+                ? `(${JoinParamTypeSignatures<Components>})${Suffix}`
+                : Param['type']
+            : Param['type']
+        : Param['type'];
+
+// Comma-joined canonical types for a parameter list.
+type JoinParamTypeSignatures<Params extends ReadonlyArray<AbiParamsCommon>> =
+    Params extends readonly [infer Head, ...infer Rest]
+        ? Head extends AbiParamsCommon
+            ? Rest extends ReadonlyArray<AbiParamsCommon>
+                ? Rest extends readonly []
+                    ? ParamTypeSignature<Head>
+                    : `${ParamTypeSignature<Head>},${JoinParamTypeSignatures<Rest>}`
+                : ParamTypeSignature<Head>
+            : ''
+        : '';
+
+// Type-level mirror of `buildFunctionSelector`: a fragment's full signature,
+// e.g. `"transfer(address,uint256)"`.
+type FunctionSelector<Fragment extends FunctionFragment> =
+    `${Fragment['name']}(${JoinParamTypeSignatures<NonNullable<Fragment['inputs']>>})`;
+
+// Names map to the merged overload signatures; full selectors map to their one
+// fragment's signature so overloads stay addressable unambiguously — mirrors the
+// dual keys (`read[name]` and `read[selector]`) registered at runtime.
 type ExtractReadNamespace<Abi extends ContractAbiInterface> = {
     [K in ReadContractFragments<Abi> as K['name']]: UnionToIntersection<ReadSignaturesForName<Abi, K['name']>>;
+} & {
+    [K in ReadContractFragments<Abi> as FunctionSelector<K>]: ReadFragmentSignature<K>;
 };
 
 export type ContractReadNamespace<Abi extends ContractAbiInterface> = IsConstAbi<Abi> extends true
@@ -136,8 +169,13 @@ type WriteSignaturesForName<Abi extends ContractAbiInterface, Name extends Write
         ? F extends FunctionFragment ? WriteFragmentSignature<F> : never
         : never;
 
+// Names map to the merged overload signatures; full selectors map to their one
+// fragment's signature so overloads stay addressable unambiguously — mirrors the
+// dual keys (`write[name]` and `write[selector]`) registered at runtime.
 type ExtractWriteNamespace<Abi extends ContractAbiInterface> = {
     [K in WriteContractFragments<Abi> as K['name']]: UnionToIntersection<WriteSignaturesForName<Abi, K['name']>>;
+} & {
+    [K in WriteContractFragments<Abi> as FunctionSelector<K>]: WriteFragmentSignature<K>;
 };
 
 export type ContractWriteNamespace<Abi extends ContractAbiInterface> = IsConstAbi<Abi> extends true
@@ -417,16 +455,27 @@ async function invokeWrite(
 export function buildReadNamespace<Abi extends ContractAbiInterface>(contract: Contract<Abi>): ContractReadNamespace<Abi> {
     const read: Record<string, ContractCallInterface> = Object.create(null);
 
+    // `resolveName` is the function reference forwarded to `invokeRead`: the bare
+    // name (overload, if any, resolved from the call's args) for the name key, or
+    // the full signature for the selector key (pinning that exact overload).
+    const makeReadMethod = (resolveName: string): ContractCallInterface =>
+        (argsOrOptions?: readonly unknown[] | object, options?: object) => {
+            const parameters = getFunctionParameters([argsOrOptions, options]);
+            return invokeRead(contract, resolveName, parameters.args, parameters.options as AnyReadOptions);
+        };
+
     for (const fragment of contract.abi) {
         if (fragment.type !== 'function' || !('name' in fragment)) continue;
         const functionFragment = fragment as FunctionFragment;
         if (!isReadOnlyFunctionFragment(functionFragment)) continue;
 
         const name = functionFragment.name;
-        read[name] = (argsOrOptions?: readonly unknown[] | object, options?: object) => {
-            const parameters = getFunctionParameters([argsOrOptions, options]);
-            return invokeRead(contract, name, parameters.args, parameters.options as AnyReadOptions);
-        };
+        const selector = buildFunctionSelector(functionFragment);
+        read[name] = makeReadMethod(name);
+        // Full selector (e.g. "balanceOf(address)") routes through
+        // resolveFunctionFragment's explicit-signature branch, pinning this exact
+        // fragment — so same-arity overloads are addressable unambiguously.
+        read[selector] = makeReadMethod(selector);
     }
 
     return read as ContractReadNamespace<Abi>;
@@ -441,16 +490,27 @@ export function buildReadNamespace<Abi extends ContractAbiInterface>(contract: C
 export function buildWriteNamespace<Abi extends ContractAbiInterface>(contract: Contract<Abi>): ContractWriteNamespace<Abi> {
     const write: Record<string, ContractCallInterface> = Object.create(null);
 
+    // `resolveName` is the function reference forwarded to `invokeWrite`: the bare
+    // name (overload, if any, resolved from the call's args) for the name key, or
+    // the full signature for the selector key (pinning that exact overload).
+    const makeWriteMethod = (resolveName: string): ContractCallInterface =>
+        (argsOrOptions?: readonly unknown[] | object, options?: object) => {
+            const parameters = getFunctionParameters([argsOrOptions, options]);
+            return invokeWrite(contract, resolveName, parameters.args, parameters.options as AnyWriteOptions);
+        };
+
     for (const fragment of contract.abi) {
         if (fragment.type !== 'function' || !('name' in fragment)) continue;
         const functionFragment = fragment as FunctionFragment;
         if (isReadOnlyFunctionFragment(functionFragment)) continue;
 
         const name = functionFragment.name;
-        write[name] = (argsOrOptions?: readonly unknown[] | object, options?: object) => {
-            const parameters = getFunctionParameters([argsOrOptions, options]);
-            return invokeWrite(contract, name, parameters.args, parameters.options as AnyWriteOptions);
-        };
+        const selector = buildFunctionSelector(functionFragment);
+        write[name] = makeWriteMethod(name);
+        // Full selector (e.g. "transfer(address,uint256)") routes through
+        // resolveFunctionFragment's explicit-signature branch, pinning this exact
+        // fragment — so same-arity overloads are addressable unambiguously.
+        write[selector] = makeWriteMethod(selector);
     }
 
     return write as ContractWriteNamespace<Abi>;

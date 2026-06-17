@@ -12,6 +12,7 @@ __6.4.0__
   - Call as contract.read.methodName([arg0, arg1, ...], options) / contract.write.methodName([arg0, arg1, ...], options).
   - Validation errors (argument count, signer, call value, account) are surfaced as promise rejections.
   - ABI functions literally named read or write remain callable via the legacy flat surface (handled through a proxy).
+  - Each function is additionally exposed under its full selector, e.g. contract.read['balanceOf(address)'] / contract.write['transfer(address,uint256)']. The selector form pins that exact overload, so same-arity overloads can be addressed unambiguously. Note: namespaces now enumerate each method under both its bare name and its selector, so Object.keys / for…in over contract.read / contract.write return two entries per function.
 
 - Added `utils.abi.encodeFunctionData`
 

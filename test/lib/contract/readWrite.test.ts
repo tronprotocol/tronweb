@@ -270,8 +270,9 @@ describe('#contract.readWrite', function () {
             assert.isTrue('write' in contract.write);
             assert.isFalse('write' in contract.read);
             assert.isFalse('read' in contract.write);
-            assert.deepEqual(Object.keys(contract.read), ['read']);
-            assert.deepEqual(Object.keys(contract.write), ['write']);
+            // each entry is enumerated under both its bare name and its selector
+            assert.deepEqual(Object.keys(contract.read), ['read', 'read()']);
+            assert.deepEqual(Object.keys(contract.write), ['write', 'write(uint256)']);
         });
 
         it('returns the same namespace object on repeated accesses', function () {
@@ -380,6 +381,146 @@ describe('#contract.readWrite', function () {
                 contract.write.transfer([accounts.b58[0], 1], { account: accounts.b58[1] }),
                 'Write account override must match the TronWeb default address.'
             );
+        });
+    });
+
+    describe('#selector keys', function () {
+        it('exposes each read function under its full selector', async function () {
+            const tw = tronWebBuilder.createInstance();
+            const contract = tw.contract(contractAbi, contractAddress);
+
+            // the selector key exists alongside the bare name
+            assert.isFunction(contract.read['balanceOf(address)']);
+            // write-only functions never appear in the read namespace, under any key
+            assert.notProperty(contract.read, 'transfer(address,uint256)');
+
+            let captured: CapturedConstantCall | undefined;
+            tw.transactionBuilder.triggerConstantContract = async (
+                address,
+                functionSelector,
+                options = {},
+                parameters = [],
+                issuerAddress = ''
+            ) => {
+                captured = { address, functionSelector, options, parameters, issuerAddress };
+                return constantCallResult(`${'0'.repeat(62)}2a`);
+            };
+
+            // invoking through the selector key resolves this fragment
+            const balance = await contract.read['balanceOf(address)']([accounts.b58[0]]);
+            assert.equal(balance, 42n);
+            assert.equal(captured?.functionSelector, 'balanceOf(address)');
+            assert.deepEqual(captured?.options.parametersV2, [accounts.b58[0]]);
+        });
+
+        it('exposes each write function under its full selector', async function () {
+            const tw = tronWebBuilder.createInstance();
+            const contract = tw.contract(contractAbi, contractAddress);
+
+            assert.isFunction(contract.write['transfer(address,uint256)']);
+            assert.notProperty(contract.write, 'balanceOf(address)');
+
+            let captured: CapturedSmartCall | undefined;
+            tw.transactionBuilder.triggerSmartContract = async (
+                address,
+                functionSelector,
+                options = {},
+                parameters = [],
+                issuerAddress = ''
+            ) => {
+                captured = { address, functionSelector, options, parameters, issuerAddress };
+                return smartCallResult('cafe');
+            };
+            tw.trx.sign = async (transaction: any) => ({ ...transaction, signature: ['00'] });
+            tw.trx.sendRawTransaction = (async (signedTransaction: any) => ({
+                result: true,
+                transaction: signedTransaction,
+            })) as typeof tw.trx.sendRawTransaction;
+
+            const txId = await contract.write['transfer(address,uint256)']([accounts.b58[0], 1], {
+                feeLimit: 90_000_000,
+            });
+            assert.equal(txId, 'cafe');
+            assert.equal(captured?.functionSelector, 'transfer(address,uint256)');
+            assert.deepEqual(captured?.options.parametersV2, [accounts.b58[0], 1]);
+        });
+
+        it('expands tuple parameters in the selector key', function () {
+            // funcABIV2_3 exposes setStruct((address,address,address)); the runtime
+            // selector key must match the tuple-expanded signature, scoped to write.
+            const contract = tronWeb.contract(contracts.funcABIV2_3.abi, contractAddress);
+
+            assert.isFunction((contract.write as any)['setStruct((address,address,address))']);
+            // the tuple read functions are keyed by their (empty/scalar) selectors too
+            assert.isFunction((contract.read as any)['get1()']);
+            assert.isFunction((contract.read as any)['s(uint256)']);
+        });
+
+        it('disambiguates same-arity overloads via the selector key', async function () {
+            // two arity-1 overloads of getValue: by uint256 and by address. A bare
+            // numeric-string arg matches BOTH (address accepts any string), so the
+            // arg-based path is ambiguous — only the selector can pin the overload.
+            const overloadedAbi = [
+                {
+                    type: 'function',
+                    name: 'getValue',
+                    stateMutability: 'view',
+                    inputs: [{ name: 'id', type: 'uint256' }],
+                    outputs: [{ name: '', type: 'uint256' }],
+                },
+                {
+                    type: 'function',
+                    name: 'getValue',
+                    stateMutability: 'view',
+                    inputs: [{ name: 'key', type: 'address' }],
+                    outputs: [{ name: '', type: 'uint256' }],
+                },
+            ] as const;
+
+            const tw = tronWebBuilder.createInstance();
+            // widened to the untyped ABI so the ambiguous '5' arg reaches the runtime
+            // resolver on every surface (the typed selector key would reject a string).
+            const contract = tw.contract<ContractAbiInterface>(overloadedAbi, contractAddress);
+
+            let captured: CapturedConstantCall | undefined;
+            tw.transactionBuilder.triggerConstantContract = async (
+                address,
+                functionSelector,
+                options = {},
+                parameters = [],
+                issuerAddress = ''
+            ) => {
+                captured = { address, functionSelector, options, parameters, issuerAddress };
+                return constantCallResult(`${'0'.repeat(63)}1`);
+            };
+
+            // the bare name with the ambiguous '5' arg cannot pick an overload
+            await assertThrow(contract.read.getValue(['5']), undefined, 'Ambiguous overloaded function "getValue"');
+
+            // each selector key pins its own fragment regardless of the arg heuristic
+            await contract.read['getValue(uint256)'](['5']);
+            assert.equal(captured?.functionSelector, 'getValue(uint256)');
+            assert.equal((captured?.options.funcABIV2 as any)?.inputs?.[0]?.type, 'uint256');
+
+            await contract.read['getValue(address)'](['5']);
+            assert.equal(captured?.functionSelector, 'getValue(address)');
+            assert.equal((captured?.options.funcABIV2 as any)?.inputs?.[0]?.type, 'address');
+        });
+
+        it('keys reserved-name functions by selector, scoped to their namespace', function () {
+            const contract = tronWeb.contract(reservedAbi, contractAddress);
+
+            assert.isFunction((contract.read as any)['read()']);
+            assert.isFunction((contract.write as any)['write(uint256)']);
+            // selectors stay isolated to the namespace that owns the function
+            assert.isUndefined((contract.read as any)['write(uint256)']);
+            assert.isUndefined((contract.write as any)['read()']);
+        });
+
+        it('types selector keys as callable (compile-time)', function () {
+            // a regression in the selector-key mapped types breaks the test build
+            expectTrue<IsCallable<ContractReadNamespace<typeof contractAbi>['balanceOf(address)']>>();
+            expectTrue<IsCallable<ContractWriteNamespace<typeof contractAbi>['transfer(address,uint256)']>>();
         });
     });
 
