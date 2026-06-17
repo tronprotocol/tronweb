@@ -108,6 +108,15 @@ type ReadSignaturesForName<Abi extends ContractAbiInterface, Name extends ReadCo
         ? F extends FunctionFragment ? ReadFragmentSignature<F> : never
         : never;
 
+// Type-level mirror of `canonicalizeIntType`: bare `uint`/`int` (and their array
+// forms) canonicalize to `uint256`/`int256`; width-qualified types are untouched.
+type CanonicalizeIntType<T extends string> =
+    T extends `uint[${infer Rest}` ? `uint256[${Rest}`
+        : T extends `int[${infer Rest}` ? `int256[${Rest}`
+            : T extends 'uint' ? 'uint256'
+                : T extends 'int' ? 'int256'
+                    : T;
+
 // Type-level mirror of `buildFullTypeDefinition`: the canonical Solidity type
 // string for one ABI parameter, expanding tuples into their component list.
 type ParamTypeSignature<Param extends AbiParamsCommon> =
@@ -117,7 +126,7 @@ type ParamTypeSignature<Param extends AbiParamsCommon> =
                 ? `(${JoinParamTypeSignatures<Components>})${Suffix}`
                 : Param['type']
             : Param['type']
-        : Param['type'];
+        : CanonicalizeIntType<Param['type']>;
 
 // Comma-joined canonical types for a parameter list.
 type JoinParamTypeSignatures<Params extends ReadonlyArray<AbiParamsCommon>> =

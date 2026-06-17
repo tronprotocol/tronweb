@@ -270,6 +270,14 @@ export function encodeFunctionData(funcABI: FunctionFragment, args: any[] = []):
     return selector + encodeParamsV2ByABI(funcABI, args).replace(/^0x/, '');
 }
 
+// Canonicalize the implicit-width integer aliases: bare `uint`/`int` mean
+// `uint256`/`int256` (including their array forms, e.g. `uint[]` -> `uint256[]`).
+// Width-qualified types (`uint8`, `int128`, …) are left untouched. This matches
+// ethers' `format('sighash')` so the signature hashes to the same 4-byte selector.
+function canonicalizeIntType(type: string): string {
+    return type.replace(/^(u?int)(\[|$)/, '$1256$2');
+}
+
 export function buildFullTypeDefinition(typeDef: AbiParamsCommon): string {
     if (typeDef && typeDef.type.indexOf('tuple') === 0 && typeDef.components) {
         const innerTypes = typeDef.components.map((innerType: AbiParamsCommon) => {
@@ -278,7 +286,7 @@ export function buildFullTypeDefinition(typeDef: AbiParamsCommon): string {
         return `(${innerTypes.join(',')})${extractSize(typeDef.type)}`;
     }
 
-    return typeDef.type;
+    return canonicalizeIntType(typeDef.type);
 }
 
 export function buildFunctionSelector(fragment: FunctionFragment): string {
