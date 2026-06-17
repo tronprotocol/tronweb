@@ -63,7 +63,7 @@ export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
     }
 
     /**
-     * Type-safe read namespace (ported from the clients `createContract` surface):
+     * Type-safe read namespace:
      * every `view`/`pure` ABI function is callable as
      * `contract.read.fn([args], { account, value })` and resolves to the decoded
      * result directly. Rebuilt lazily whenever the contract ABI is replaced.
@@ -82,7 +82,7 @@ export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
     }
 
     /**
-     * Type-safe write namespace (ported from the clients `createContract` surface):
+     * Type-safe write namespace:
      * every state-changing ABI function is callable as
      * `contract.write.fn([args], { account, value, feeLimit, tokenId, tokenValue, permissionId })`,
      * signed with the instance's default private key, broadcast, and resolved to
