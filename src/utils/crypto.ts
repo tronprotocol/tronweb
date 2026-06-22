@@ -1,6 +1,7 @@
 import { ADDRESS_PREFIX, ADDRESS_PREFIX_BYTE, ADDRESS_SIZE } from './constants.js';
 import { base64EncodeToString, base64DecodeFromString, hexStr2byteArray } from './code.js';
 import { encode58, decode58 } from './base58.js';
+import { Base64 } from './base64.js';
 import { byte2hexStr, byteArray2hexStr } from './bytes.js';
 import { keccak256, sha256, recoverAddress, arrayify, Signature } from './ethersUtils.js';
 import { secp256k1 as secp } from 'ethereum-cryptography/secp256k1';
@@ -76,7 +77,7 @@ export function ecRecover(signedData: string, signature: string) {
 }
 
 export function arrayToBase64String(a: number[]) {
-    return btoa(String.fromCharCode(...a));
+    return new Base64().encodeIgnoreUtf8(a);
 }
 
 export function signBytes(privateKey: string | BytesLike, contents: BytesLike) {
