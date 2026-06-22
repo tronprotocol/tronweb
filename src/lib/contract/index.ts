@@ -49,8 +49,8 @@ export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
         this.deployed = false;
         this.lastBlock = false;
 
-        this.methods = {} as GetOnMethodTypeFromAbi<Abi> & AnyOnMethodType;
-        this.methodInstances = {} as GetMethodsTypeFromAbi<Abi>;
+        this.methods = Object.create(null) as GetOnMethodTypeFromAbi<Abi> & AnyOnMethodType;
+        this.methodInstances = Object.create(null) as GetMethodsTypeFromAbi<Abi>;
         this.props = [];
 
         if (utils.address.isAddress(address)) {
@@ -108,7 +108,8 @@ export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
 
     loadAbi(abi: Abi) {
         this.abi = abi;
-        this.methods = {} as GetOnMethodTypeFromAbi<Abi> & AnyOnMethodType;
+        this.methods = Object.create(null) as GetOnMethodTypeFromAbi<Abi> & AnyOnMethodType;
+        this.methodInstances = Object.create(null) as GetMethodsTypeFromAbi<Abi>;
 
         this.props.forEach((prop: string) => delete (this as any)[prop]);
 
