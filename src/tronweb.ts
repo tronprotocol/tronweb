@@ -167,7 +167,7 @@ export class TronWeb extends EventEmitter {
             throw new Error('Invalid private key provided');
         }
 
-        this.defaultPrivateKey = privateKey;
+        this.defaultPrivateKey = privateKey.replace(/^0x/, '');
     }
 
     setAddress(address: string) {
