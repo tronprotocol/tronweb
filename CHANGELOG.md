@@ -31,7 +31,7 @@ __6.4.0__
 
 - `address.fromPrivateKey` accepts `0x`-prefixed private keys
 
-  TronWeb.address.fromPrivateKey (and the underlying utils.crypto.pkToAddress) now strips a leading 0x from the private key before deriving the address, so a private key works whether or not it carries the 0x prefix.
+  TronWeb.address.fromPrivateKey now strips a leading 0x from the private key before deriving the address, so a private key works whether or not it carries the 0x prefix.
 
 ## Changes
 

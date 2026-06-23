@@ -58,6 +58,7 @@ module.exports = [
                         {
                             loader: 'babel-loader',
                             options: {
+                                sourceType: 'unambiguous',
                                 presets: [
                                     [
                                         '@babel/preset-env',
