@@ -57,7 +57,10 @@ export type ReadContractParameters<
 > = {
     readonly functionName: ChangeNeverToString<AbiFrag['name']>;
     readonly args?: GetParamsType<AbiFrag['inputs']>;
+    /** Caller: a private key whose derived address issues the constant call. */
     readonly account?: string;
+    /** Caller address for the constant call. Ignored when `account` is set. */
+    readonly from?: string;
     readonly value?: number | bigint;
 };
 
@@ -70,6 +73,10 @@ export type WriteContractParameters<
 > = {
     readonly functionName: ChangeNeverToString<AbiFrag['name']>;
     readonly args?: GetParamsType<AbiFrag['inputs']>;
+    /**
+     * Signer: a private key whose derived address owns and signs the transaction,
+     * allowing a non-default signer. When omitted, the instance default key signs.
+     */
     readonly account?: string;
     readonly value?: number | bigint;
     readonly feeLimit?: number;
@@ -198,6 +205,7 @@ export type ContractWriteNamespace<Abi extends ContractAbiInterface> = IsConstAb
 // Runtime-level shapes of ReadOptions/WriteOptions, usable with any ABI.
 interface AnyReadOptions {
     readonly account?: string;
+    readonly from?: string;
     readonly value?: number | bigint;
 }
 
@@ -244,24 +252,70 @@ function resolveCallValue(value: number | bigint | undefined): number | undefine
     return value;
 }
 
-function resolveCallerAddress(account: string | undefined, defaultAddress?: string): string {
-    if (typeof account === 'string' && account.length > 0) return account;
+// The `account` option is a private key; derive its address. A TRON private key is
+// exactly 64 hex chars (32 bytes), optionally 0x-prefixed; anything else — including
+// any address form — is rejected. The format gate is also a safety check: a 42-char
+// hex address is all hex and would otherwise be silently zero-padded into a valid
+// scalar by fromPrivateKey, yielding a bogus derived address instead of an error.
+function privateKeyToAddress(tronWeb: TronWeb, account: string): string {
+    const hex = account.replace(/^0x/, '');
+    if (hex.length === 64 && /^[0-9a-fA-F]{64}$/.test(hex)) {
+        const derived = tronWeb.address.fromPrivateKey(account);
+        if (derived) return derived;
+    }
+    throw new Error('The "account" option must be a private key.');
+}
+
+// Caller (issuer) address for a constant call, in precedence order: the address
+// derived from the `account` private key, then the explicit `from` address, then the
+// instance default, then the null caller.
+function resolveCallerAddress(
+    tronWeb: TronWeb,
+    account: string | undefined,
+    from: string | undefined,
+    defaultAddress?: string
+): string {
+    if (typeof account === 'string' && account.length > 0) {
+        return privateKeyToAddress(tronWeb, account);
+    }
+    if (typeof from === 'string' && from.length > 0) {
+        if (!tronWeb.isAddress(from)) {
+            throw new Error('The "from" option must be a valid address.');
+        }
+        return from;
+    }
     if (typeof defaultAddress === 'string' && defaultAddress.length > 0) return defaultAddress;
     return NULL_CALLER_ADDRESS;
 }
 
-function resolveSignerAddress(tronWeb: TronWeb, functionName: string, accountOverride: string | undefined): string {
+interface ResolvedSigner {
+    signerAddress: string;
+    // The private key to sign with; undefined falls back to the instance default key.
+    privateKey?: string;
+}
+
+// The branches that sign with the instance default key need a usable default key,
+// not merely a default address (setAddress can set an address without a key). Reject
+// up front with the friendly diagnostic instead of letting trx.sign fail cryptically.
+function requireDefaultSigner(tronWeb: TronWeb, functionName: string): string {
     const defaultAddress = tronWeb.defaultAddress.base58;
-    if (!defaultAddress) {
+    if (!tronWeb.defaultPrivateKey || !defaultAddress) {
         throw new Error(
             `Method "${functionName}" modifies state and requires a signer. Set a private key or default address on the TronWeb instance.`
         );
     }
-    if (accountOverride === undefined) return defaultAddress;
-    if (tronWeb.address.toHex(accountOverride).toLowerCase() !== tronWeb.address.toHex(defaultAddress).toLowerCase()) {
-        throw new Error('Write account override must match the TronWeb default address.');
+    return defaultAddress;
+}
+
+function resolveSigner(tronWeb: TronWeb, functionName: string, account: string | undefined): ResolvedSigner {
+    if (typeof account === 'string' && account.length > 0) {
+        // `account` is a private key — derive its address and sign with it, so a write
+        // can be issued from an account other than the instance default (and even when
+        // the instance has no default signer at all).
+        return { signerAddress: privateKeyToAddress(tronWeb, account), privateKey: account };
     }
-    return accountOverride;
+
+    return { signerAddress: requireDefaultSigner(tronWeb, functionName) };
 }
 
 function extractConstantResultData(tronWeb: TronWeb, transaction: TransactionWrapper): string | undefined {
@@ -388,7 +442,7 @@ async function invokeRead(
     const address = assertContractAddress(contract);
     const tronWeb = contract.tronWeb;
     const fragment = getReadContractFragment(contract.abi, functionName, args);
-    const { account, value } = options;
+    const { account, from, value } = options;
 
     const transaction = await tronWeb.transactionBuilder.triggerConstantContract(
         address,
@@ -400,7 +454,7 @@ async function invokeRead(
             parametersV2: [...args],
         },
         [],
-        resolveCallerAddress(account, tronWeb.defaultAddress.base58 || undefined)
+        resolveCallerAddress(tronWeb, account, from, tronWeb.defaultAddress.base58 || undefined)
     );
 
     return normalizeReadContractOutput(fragment, extractConstantResultData(tronWeb, transaction));
@@ -414,7 +468,7 @@ async function invokeWrite(
     args: readonly unknown[],
     options: AnyWriteOptions
 ): Promise<WriteContractReturnType> {
-    const signerAddress = resolveSignerAddress(contract.tronWeb, functionName, options.account);
+    const { signerAddress, privateKey } = resolveSigner(contract.tronWeb, functionName, options.account);
     assertArgCount(contract.abi, functionName, args);
 
     const address = assertContractAddress(contract);
@@ -447,7 +501,9 @@ async function invokeWrite(
         throw new Error('triggerSmartContract did not return a valid transaction object');
     }
 
-    const signed = await tronWeb.trx.sign(txWrapper.transaction);
+    // `privateKey` is set when `account` was a private key; otherwise undefined falls
+    // back to the instance default key (trx.sign's default parameter).
+    const signed = await tronWeb.trx.sign(txWrapper.transaction, privateKey);
     const broadcast = await tronWeb.trx.sendRawTransaction(signed);
     assertBroadcastOk(tronWeb, broadcast);
 
@@ -457,7 +513,7 @@ async function invokeWrite(
 /**
  * Build the `contract.read` namespace: every `view`/`pure` (or legacy
  * `constant`) ABI function exposed as
- * `read.fn([args], { account, value })`, executed through
+ * `read.fn([args], { account, from, value })`, executed through
  * `triggerConstantContract` and resolved to the decoded result
  * (single outputs are collapsed to the bare value).
  */
@@ -493,8 +549,9 @@ export function buildReadNamespace<Abi extends ContractAbiInterface>(contract: C
 /**
  * Build the `contract.write` namespace: every state-changing ABI function
  * exposed as `write.fn([args], { account, value, feeLimit, tokenId, tokenValue, permissionId })`,
- * built with `triggerSmartContract`, signed with the instance's default
- * private key, broadcast, and resolved to the transaction ID.
+ * built with `triggerSmartContract`, signed with the private key given as `account`
+ * (or the instance's default private key when none is given), broadcast, and
+ * resolved to the transaction ID.
  */
 export function buildWriteNamespace<Abi extends ContractAbiInterface>(contract: Contract<Abi>): ContractWriteNamespace<Abi> {
     const write: Record<string, ContractCallInterface> = Object.create(null);
