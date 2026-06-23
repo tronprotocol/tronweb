@@ -337,7 +337,7 @@ describe('#contract.readWrite', function () {
             assert.deepEqual(captured?.options.parametersV2, [9]);
         });
 
-        it('passes account and value options through to the constant call', async function () {
+        it('passes from and value options through to the constant call', async function () {
             const tw = tronWebBuilder.createInstance();
             const contract = tw.contract(contractAbi, contractAddress);
 
@@ -353,9 +353,9 @@ describe('#contract.readWrite', function () {
                 return constantCallResult(`${'0'.repeat(62)}2a`);
             };
 
-            // `account` is a private key; its derived address (accounts.b58[1]) is the issuer.
+            // `from` (accounts.b58[1]) is the issuer of the constant call.
             const balance = await contract.read.balanceOf([accounts.b58[0]], {
-                account: accounts.pks[1],
+                from: accounts.b58[1],
                 value: 3n,
             });
             assert.equal(balance, 42n);
@@ -396,28 +396,6 @@ describe('#contract.readWrite', function () {
                 contract.write.transfer([accounts.b58[0], 1], { account: accounts.b58[1] }),
                 'The "account" option must be a private key.'
             );
-        });
-
-        it('derives the caller address from a private key passed as account (read)', async function () {
-            const tw = tronWebBuilder.createInstance();
-            const contract = tw.contract(contractAbi, contractAddress);
-
-            let captured: CapturedConstantCall | undefined;
-            tw.transactionBuilder.triggerConstantContract = async (
-                address,
-                functionSelector,
-                options = {},
-                parameters = [],
-                issuerAddress = ''
-            ) => {
-                captured = { address, functionSelector, options, parameters, issuerAddress };
-                return constantCallResult(`${'0'.repeat(62)}2a`);
-            };
-
-            // accounts.b58[i] is fromPrivateKey(accounts.pks[i]); passing the PK must
-            // resolve the issuer to its derived address, not the raw key string.
-            await contract.read.balanceOf([accounts.b58[0]], { account: accounts.pks[1] });
-            assert.equal(captured?.issuerAddress, accounts.b58[1]);
         });
 
         it('derives the signer from a private key and signs with that key (write)', async function () {
@@ -484,16 +462,15 @@ describe('#contract.readWrite', function () {
             assert.equal(signedWith, accounts.pks[1]);
         });
 
-        it('rejects a hex-format address account, which is not a private key (read)', async function () {
-            const tw = tronWebBuilder.createInstance();
-            const contract = tw.contract(contractAbi, contractAddress);
+        it('rejects a hex-format address account, which is not a private key (write)', async function () {
+            const contract = tronWeb.contract(contractAbi, contractAddress);
 
             // A 42-char hex address is all-hex and would be silently zero-padded into a
             // valid scalar by fromPrivateKey; the 64-hex format gate must reject it rather
             // than derive a bogus address. `account` is strictly a private key.
             const hexAddr = TronWeb.address.toHex(accounts.b58[2]);
             await assertThrow(
-                contract.read.balanceOf([accounts.b58[0]], { account: hexAddr }),
+                contract.write.transfer([accounts.b58[0], 1], { account: hexAddr }),
                 'The "account" option must be a private key.'
             );
         });
@@ -518,7 +495,18 @@ describe('#contract.readWrite', function () {
             assert.equal(captured?.issuerAddress, accounts.b58[1]);
         });
 
-        it('prefers account over from for the caller address (read)', async function () {
+        it('rejects an invalid from address (read)', async function () {
+            const tw = tronWebBuilder.createInstance();
+            const contract = tw.contract(contractAbi, contractAddress);
+            tw.transactionBuilder.triggerConstantContract = async () => constantCallResult(`${'0'.repeat(62)}2a`);
+
+            await assertThrow(
+                contract.read.balanceOf([accounts.b58[0]], { from: 'not-an-address' }),
+                'The "from" option must be a valid address.'
+            );
+        });
+
+        it('falls back to the instance default address as the caller when no from is given (read)', async function () {
             const tw = tronWebBuilder.createInstance();
             const contract = tw.contract(contractAbi, contractAddress);
 
@@ -534,19 +522,19 @@ describe('#contract.readWrite', function () {
                 return constantCallResult(`${'0'.repeat(62)}2a`);
             };
 
-            // account (private key) wins: its derived address is accounts.b58[1], not from=b58[2].
-            await contract.read.balanceOf([accounts.b58[0]], { account: accounts.pks[1], from: accounts.b58[2] });
-            assert.equal(captured?.issuerAddress, accounts.b58[1]);
+            await contract.read.balanceOf([accounts.b58[0]]);
+            assert.equal(captured?.issuerAddress, tw.defaultAddress.base58);
         });
 
-        it('rejects an invalid from address (read)', async function () {
-            const tw = tronWebBuilder.createInstance();
+        it('rejects a read when neither a from option nor a default address is available (read)', async function () {
+            const tw = new TronWeb({ fullHost: FULL_NODE_API });
             const contract = tw.contract(contractAbi, contractAddress);
+            // Should reject during caller resolution, before any constant call is issued.
             tw.transactionBuilder.triggerConstantContract = async () => constantCallResult(`${'0'.repeat(62)}2a`);
 
             await assertThrow(
-                contract.read.balanceOf([accounts.b58[0]], { from: 'not-an-address' }),
-                'The "from" option must be a valid address.'
+                contract.read.balanceOf([accounts.b58[0]]),
+                'A caller address is required. Set the "from" option or a default address on the TronWeb instance.'
             );
         });
     });

@@ -65,7 +65,7 @@ export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
     /**
      * Type-safe read namespace:
      * every `view`/`pure` ABI function is callable as
-     * `contract.read.fn([args], { account, value })` and resolves to the decoded
+     * `contract.read.fn([args], { from, value })` and resolves to the decoded
      * result directly. Rebuilt lazily whenever the contract ABI is replaced.
      */
     get read(): ContractReadNamespace<Abi> {

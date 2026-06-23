@@ -9,7 +9,6 @@ import {
     overloadArities,
     resolveFunctionFragment,
 } from '../../utils/abi.js';
-import { ADDRESS_PREFIX } from '../../utils/constants.js';
 import { IsNever, Prettify, UnionToIntersection } from '../../types/UtilsTypes.js';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -57,9 +56,7 @@ export type ReadContractParameters<
 > = {
     readonly functionName: ChangeNeverToString<AbiFrag['name']>;
     readonly args?: GetParamsType<AbiFrag['inputs']>;
-    /** Caller: a private key whose derived address issues the constant call. */
-    readonly account?: string;
-    /** Caller address for the constant call. Ignored when `account` is set. */
+    /** Caller address for the constant call. */
     readonly from?: string;
     readonly value?: number | bigint;
 };
@@ -204,19 +201,17 @@ export type ContractWriteNamespace<Abi extends ContractAbiInterface> = IsConstAb
 
 // Runtime-level shapes of ReadOptions/WriteOptions, usable with any ABI.
 interface AnyReadOptions {
-    readonly account?: string;
     readonly from?: string;
     readonly value?: number | bigint;
 }
 
 interface AnyWriteOptions extends AnyReadOptions {
+    readonly account?: string;
     readonly feeLimit?: number;
     readonly tokenId?: string;
     readonly tokenValue?: number;
     readonly permissionId?: number;
 }
-
-const NULL_CALLER_ADDRESS = `${ADDRESS_PREFIX}${'0'.repeat(40)}`;
 
 function getFunctionParameters(values: [argsOrOptions?: readonly unknown[] | object, options?: object]) {
     const hasArgs = values.length > 0 && Array.isArray(values[0]);
@@ -266,18 +261,14 @@ function privateKeyToAddress(tronWeb: TronWeb, account: string): string {
     throw new Error('The "account" option must be a private key.');
 }
 
-// Caller (issuer) address for a constant call, in precedence order: the address
-// derived from the `account` private key, then the explicit `from` address, then the
-// instance default, then the null caller.
+// Caller (issuer) address for a constant call: the explicit `from` address, else the
+// instance default. At least one must be present — reject rather than fall back to a
+// null caller, so a constant call always issues from a real address.
 function resolveCallerAddress(
     tronWeb: TronWeb,
-    account: string | undefined,
     from: string | undefined,
     defaultAddress?: string
 ): string {
-    if (typeof account === 'string' && account.length > 0) {
-        return privateKeyToAddress(tronWeb, account);
-    }
     if (typeof from === 'string' && from.length > 0) {
         if (!tronWeb.isAddress(from)) {
             throw new Error('The "from" option must be a valid address.');
@@ -285,7 +276,7 @@ function resolveCallerAddress(
         return from;
     }
     if (typeof defaultAddress === 'string' && defaultAddress.length > 0) return defaultAddress;
-    return NULL_CALLER_ADDRESS;
+    throw new Error('A caller address is required. Set the "from" option or a default address on the TronWeb instance.');
 }
 
 interface ResolvedSigner {
@@ -442,7 +433,7 @@ async function invokeRead(
     const address = assertContractAddress(contract);
     const tronWeb = contract.tronWeb;
     const fragment = getReadContractFragment(contract.abi, functionName, args);
-    const { account, from, value } = options;
+    const { from, value } = options;
 
     const transaction = await tronWeb.transactionBuilder.triggerConstantContract(
         address,
@@ -454,7 +445,7 @@ async function invokeRead(
             parametersV2: [...args],
         },
         [],
-        resolveCallerAddress(tronWeb, account, from, tronWeb.defaultAddress.base58 || undefined)
+        resolveCallerAddress(tronWeb, from, tronWeb.defaultAddress.base58 || undefined)
     );
 
     return normalizeReadContractOutput(fragment, extractConstantResultData(tronWeb, transaction));
@@ -513,7 +504,7 @@ async function invokeWrite(
 /**
  * Build the `contract.read` namespace: every `view`/`pure` (or legacy
  * `constant`) ABI function exposed as
- * `read.fn([args], { account, from, value })`, executed through
+ * `read.fn([args], { from, value })`, executed through
  * `triggerConstantContract` and resolved to the decoded result
  * (single outputs are collapsed to the bare value).
  */
