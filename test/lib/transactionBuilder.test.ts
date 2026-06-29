@@ -2395,7 +2395,8 @@ describe('TronWeb.transactionBuilder', function () {
     });
 
     describe('#withdrawBlockRewards', async function () {
-        //
+        // @ts-ignore -- mocha's ambient `it` type lacks `.todo`; vitest provides it at runtime (cleaned up in the @types/mocha removal task)
+        it.todo('should withdraw block rewards');
     });
 
     describe('#triggerSmartContract', async function () {
@@ -2544,7 +2545,8 @@ describe('TronWeb.transactionBuilder', function () {
     });
 
     describe('#createTRXExchange', async function () {
-        //
+        // @ts-ignore -- mocha's ambient `it` type lacks `.todo`; vitest provides it at runtime (cleaned up in the @types/mocha removal task)
+        it.todo('should create a TRX exchange');
     });
 
     describe('#injectExchangeTokens', async function () {

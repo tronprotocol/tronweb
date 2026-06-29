@@ -1,6 +1,16 @@
 import { defineConfig } from 'vitest/config';
+import path from 'node:path';
+
+// Always resolve the test SUT entry (`../setup/TronWeb.js`) to the TypeScript
+// source re-export, never to a stale generated `test/setup/TronWeb.js` shim
+// (which the old mocha flow pointed at the webpack `dist/` bundle). This
+// guarantees tests exercise `src`, not a prebuilt bundle.
+const sutEntry = path.resolve(import.meta.dirname, 'test/setup/TronWeb.ts');
 
 export default defineConfig({
+    resolve: {
+        alias: [{ find: /^(?:\.\.?\/)+setup\/TronWeb\.js$/, replacement: sutEntry }],
+    },
     test: {
         coverage: {
             provider: 'v8',
