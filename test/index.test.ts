@@ -242,7 +242,6 @@ describe('TronWeb Instance', function () {
         });
 
         it('should emit an addressChanged event', function (done) {
-            this.timeout(1000);
 
             const tronWeb = tronWebBuilder.createInstance();
 
@@ -746,7 +745,6 @@ describe('TronWeb Instance', function () {
 
     describe('#isConnected', function () {
         it('should verify that tronWeb is connected to nodes and event server', async function () {
-            this.timeout(10000);
 
             const tronWeb = tronWebBuilder.createInstance();
             const isConnected = await tronWeb.isConnected();
@@ -766,7 +764,7 @@ describe('TronWeb Instance', function () {
         let contractAddress;
         let contract: Contract;
 
-        before(async function () {
+        beforeAll(async function () {
             tronWeb = tronWebBuilder.createInstance();
             accounts = await tronWebBuilder.getTestAccounts(-1);
 
@@ -828,7 +826,6 @@ describe('TronWeb Instance', function () {
         });
 
         it('should emit an unconfirmed event and get it', async function () {
-            this.timeout(60000);
             tronWeb.setPrivateKey(accounts.pks[1]);
             const txId = await contract.methods.emitNow(accounts.hex[2], 2000).send({
                 from: accounts.hex[1],
@@ -858,7 +855,7 @@ describe('TronWeb Instance', function () {
         let contract: Contract;
         let eventLength = 0;
 
-        before(async function () {
+        beforeAll(async function () {
             tronWeb = tronWebBuilder.createInstance();
             accounts = await tronWebBuilder.getTestAccounts(-1);
 
@@ -921,7 +918,6 @@ describe('TronWeb Instance', function () {
 
         // available on trongrid
         it.skip('should emit an event and wait for it', async function () {
-            this.timeout(60000);
             await wait(120); // wait for abi syncing.
             tronWeb.setPrivateKey(accounts.pks[3]);
             await contract.methods.emitNow(accounts.hex[4], 4000).send({
