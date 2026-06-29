@@ -41,6 +41,7 @@ import {
     UpdateBrokerageContract,
     VoteWitnessContract,
     WitnessCreateContract,
+    WitnessUpdateContract,
 } from '../../src/types/Contract.js';
 import { TronWeb, utils } from '../setup/TronWeb.js';
 import { TransactionBuilder } from '../../src/lib/TransactionBuilder/TransactionBuilder.js';
@@ -238,6 +239,7 @@ describe('TronWeb.transactionBuilder', function () {
                 options.precision = 4;
 
                 for (let i = 0; i < 2; i++) {
+                    options.saleStart = Date.now() + 100;
                     if (i === 1) options.permissionId = 2;
                     const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.b58[8 + i]);
 
@@ -1057,8 +1059,45 @@ describe('TronWeb.transactionBuilder', function () {
 
         // TODO add invalid params throws
         it('should throw Invalid url provided error', async function () {
-            assertThrow(
+            await assertThrow(
                 tronWeb.transactionBuilder.applyForSR(accounts.b58[20], url + '#' + 'abc'.repeat(Math.ceil(256 / 3))),
+                'Invalid url provided'
+            );
+        });
+    });
+
+    describe('#updateWitness', async function () {
+        const url = 'https://xtron.network';
+        const updatedUrl = 'https://xtron-updated.network';
+
+        before(async function () {
+            await broadcaster(tronWeb.transactionBuilder.applyForSR(accounts.b58[21], url), accounts.pks[21]);
+        });
+
+        it('should allow accounts[21] to update its witness url', async function () {
+            const params = [
+                [accounts.b58[21], updatedUrl],
+                [accounts.b58[21], updatedUrl, { blockHeader: await tronWeb.trx.getCurrentRefBlockParams() }],
+            ];
+            for (const param of params) {
+                const transaction = await tronWeb.transactionBuilder.updateWitness(...param);
+                const parameter = txPars(transaction) as ContractParamterWrapper<WitnessUpdateContract>;
+
+                assert.equal(parameter.value.owner_address, accounts.hex[21]);
+                await assertEqualHex(parameter.value.update_url, updatedUrl);
+                assert.equal(parameter.type_url, 'type.googleapis.com/protocol.WitnessUpdateContract');
+            }
+        });
+
+        it('should allow accounts[21] to update its witness url and broadcast', async function () {
+            const transaction = await tronWeb.transactionBuilder.updateWitness(accounts.b58[21], updatedUrl);
+            const res = await broadcaster(transaction, accounts.pks[21]);
+            assert.isTrue(res.receipt.result);
+        });
+
+        it('should throw Invalid url provided error', async function () {
+            await assertThrow(
+                tronWeb.transactionBuilder.updateWitness(accounts.b58[21], updatedUrl + '#' + 'abc'.repeat(Math.ceil(256 / 3))),
                 'Invalid url provided'
             );
         });
@@ -3514,7 +3553,7 @@ describe('TronWeb.transactionBuilder', function () {
             const unsupportedType = 'notSupportedType';
             // @ts-expect-error
             tx.raw_data.contract[0].type = unsupportedType;
-            assertThrow((async () => {
+            await assertThrow((async () => {
                 utils.transaction.txJsonToPb(tx);
             })(), `Unsupported transaction type: ${unsupportedType}`);
         })

@@ -17,12 +17,6 @@ const {
     SOLIDITY_NODE_API,
     EVENT_API,
     PRIVATE_KEY,
-    SUN_NETWORK,
-    // TEST_TRON_GRID_API,
-    // TEST_TRON_HEADER_API_KEY,
-    // TEST_TRON_HEADER_API_JWT_KEY,
-    // TEST_TRON_HEADER_JWT_ID,
-    // TEST_TRON_HEADER_JWT_PRIVATE_KEY,
 } = Config;
 
 describe('TronWeb Instance', function () {
@@ -758,10 +752,7 @@ describe('TronWeb Instance', function () {
             const isConnected = await tronWeb.isConnected();
             assert.isTrue(isConnected.fullNode);
             assert.isTrue(isConnected.solidityNode);
-            if (!SUN_NETWORK) {
-                // As https://testhttpapi.tronex.io/healthcheck is 404
-                assert.isTrue(isConnected.eventServer);
-            }
+            assert.isTrue(isConnected.eventServer);
         });
     });
 
@@ -955,64 +946,4 @@ describe('TronWeb Instance', function () {
             assert.equal(event.result._sender.substring(2), accounts.hex[3].substring(2));
         });
     });
-});
-
-describe('#testTronGrid', function () {
-    // Temporary stop testing api key because test server is closed
-    return;
-
-
-    // describe('#testTronGridJwtKey', function () {
-    //     it('should add the parameter Authorization=Key to the header of the request', async function () {
-    //         const token = jwt.sign({ aud: 'trongrid.io' }, TEST_TRON_HEADER_JWT_PRIVATE_KEY, {
-    //             header: {
-    //                 alg: 'RS256',
-    //                 typ: 'JWT',
-    //                 kid: TEST_TRON_HEADER_JWT_ID,
-    //             },
-    //         });
-
-    //         const tronWeb = tronWebBuilder.createInstance({
-    //             fullHost: TEST_TRON_GRID_API,
-    //             headers: {
-    //                 'TRON-PRO-API-KEY': TEST_TRON_HEADER_API_JWT_KEY,
-    //                 Authorization: `Bearer ${token}`,
-    //             },
-    //         });
-
-    //         const account = await tronWeb.trx.getAccount();
-    //         assert.equal(typeof account, 'object');
-    //     });
-
-    //     it('should the valid exp to the payload of the sign', async function () {
-    //         const token = jwt.sign(
-    //             {
-    //                 exp: 0,
-    //                 aud: 'trongrid.io',
-    //             },
-    //             TEST_TRON_HEADER_JWT_PRIVATE_KEY,
-    //             {
-    //                 header: {
-    //                     alg: 'RS256',
-    //                     typ: 'JWT',
-    //                     kid: TEST_TRON_HEADER_JWT_ID,
-    //                 },
-    //             }
-    //         );
-
-    //         const tronWeb = tronWebBuilder.createInstance({
-    //             fullHost: TEST_TRON_GRID_API,
-    //             headers: {
-    //                 'TRON-PRO-API-KEY': TEST_TRON_HEADER_API_JWT_KEY,
-    //                 Authorization: `Bearer ${token}`,
-    //             },
-    //         });
-
-    //         try {
-    //             await tronWeb.trx.getAccount();
-    //         } catch (error) {
-    //             assert.equal(error.response.status, 401);
-    //         }
-    //     });
-    // });
 });
