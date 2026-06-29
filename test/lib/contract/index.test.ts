@@ -17,7 +17,7 @@ describe('#contract.index', function () {
     };
     let tronWeb: TronWeb;
 
-    before(async function () {
+    beforeAll(async function () {
         tronWeb = tronWebBuilder.createInstance();
         // ALERT this works only with Tron Quickstart:
         accounts = await tronWebBuilder.getTestAccounts(-1);
@@ -26,7 +26,7 @@ describe('#contract.index', function () {
     describe('#customError', function () {
         let customError: Contract;
 
-        before(async function () {
+        beforeAll(async function () {
             const tx = await broadcaster(
                 tronWeb.transactionBuilder.createSmartContract(
                     {

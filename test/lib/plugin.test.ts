@@ -24,7 +24,7 @@ declare global {
 describe('TronWeb.lib.plugin', async function () {
     let tronWeb: TronWeb;
 
-    before(async function () {
+    beforeAll(async function () {
         tronWeb = tronWebBuilder.createInstance();
     });
 
