@@ -185,7 +185,7 @@ describe('TronWeb.utils', function () {
     });
 
     describe('#parseEvent', function () {
-        // TODO
+        it.todo('should parse an event');
     });
 
     describe('#padLeft()', function () {

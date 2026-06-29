@@ -241,17 +241,22 @@ describe('TronWeb Instance', function () {
             assert.equal(tronWeb.defaultPrivateKey, PRIVATE_KEY);
         });
 
-        it('should emit an addressChanged event', function (done) {
+        it('should emit an addressChanged event', function () {
+            return new Promise<void>((resolve, reject) => {
+                const tronWeb = tronWebBuilder.createInstance();
 
-            const tronWeb = tronWebBuilder.createInstance();
+                tronWeb.on('addressChanged', ({ hex, base58 }) => {
+                    try {
+                        assert.equal(hex, ADDRESS_HEX);
+                        assert.equal(base58, ADDRESS_BASE58);
+                        resolve();
+                    } catch (err) {
+                        reject(err);
+                    }
+                });
 
-            tronWeb.on('addressChanged', ({ hex, base58 }) => {
-                assert.equal(hex, ADDRESS_HEX);
-                assert.equal(base58, ADDRESS_BASE58);
-                done();
+                tronWeb.setAddress(ADDRESS_BASE58);
             });
-
-            tronWeb.setAddress(ADDRESS_BASE58);
         });
     });
 
