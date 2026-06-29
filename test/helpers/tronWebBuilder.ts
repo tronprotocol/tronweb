@@ -26,7 +26,7 @@ const getInstance = () => {
 };
 
 const newTestAccounts = async (amount: number) => {
-    const tronWeb = createInstance();
+    const tronWeb = createInstance({ fullNode: new providers.HttpProvider(FULL_NODE_API, 90000) });
 
     console.log(chalk.blue(`Generating ${amount} new accounts...`));
     await tronWeb.fullNode.request('/admin/temporary-accounts-generation?accounts=' + amount);
