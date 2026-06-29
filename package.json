@@ -56,11 +56,11 @@
         "format-all": "prettier --write ./src",
         "lint": "eslint src",
         "lint:fix": "eslint src --fix",
-        "vtest": "vitest run --project node",
-        "vtest:watch": "vitest --project node",
-        "vcoverage": "vitest run --project node --coverage",
-        "vtest:browser": "vitest run --project browser",
-        "test:browser": "npm run-script newaccount && vitest run --project browser"
+        "vtest": "vitest run",
+        "vtest:watch": "vitest",
+        "vcoverage": "vitest run --coverage",
+        "vtest:browser": "vitest run -c vitest.browser.config.ts",
+        "test:browser": "vitest run -c vitest.browser.config.ts"
     },
     "dependencies": {
         "@babel/runtime": "7.26.10",
