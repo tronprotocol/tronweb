@@ -15,5 +15,6 @@ test/lib/dist/
 !test/lib
 .nyc_output/
 .claude/
+CLAUDE.md
 requires/
 .test-report/
