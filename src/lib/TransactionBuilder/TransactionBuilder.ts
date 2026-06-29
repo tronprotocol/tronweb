@@ -45,6 +45,7 @@ import {
     WithdrawBalanceContract,
     WithdrawExpireUnfreezeContract,
     WitnessCreateContract,
+    WitnessUpdateContract,
 } from '../../types/Contract.js';
 import {
     createTransaction,
@@ -686,6 +687,47 @@ export class TransactionBuilder {
         );
     }
 
+    async updateWitness(
+        address: string = this.tronWeb.defaultAddress.hex as string,
+        url = '',
+        options: TransactionCommonOptions = {}
+    ): Promise<Transaction<WitnessUpdateContract>> {
+        this.validator.notValid([
+            {
+                name: 'origin',
+                type: 'address',
+                value: address,
+            },
+            {
+                name: 'url',
+                type: 'url',
+                value: url as string,
+                msg: 'Invalid url provided',
+            },
+            {
+                name: 'url',
+                type: 'string',
+                value: url as string,
+                lte: 256,
+                msg: 'Invalid url provided',
+            },
+        ]);
+
+        const data: WitnessUpdateContract = {
+            owner_address: toHex(address as string),
+            update_url: fromUtf8(url as string),
+        };
+
+        const transactionOptions = getTransactionOptions(options);
+        return createTransaction<WitnessUpdateContract>(
+            this.tronWeb,
+            ContractType.WitnessUpdateContract,
+            data,
+            options?.permissionId,
+            transactionOptions
+        );
+    }
+
     async vote(
         votes: VoteInfo = {},
         voterAddress: string = this.tronWeb.defaultAddress.hex as string,
@@ -1248,7 +1290,7 @@ export class TransactionBuilder {
         );
 
         if (args.function_selector) {
-            args.data = keccak256(Buffer.from(args.function_selector, 'utf-8')).toString().substring(2, 10) + args.parameter;
+            args.data = keccak256(new TextEncoder().encode(args.function_selector)).toString().substring(2, 10) + args.parameter;
         }
         const value: TriggerSmartContract = {
             data: args.data,

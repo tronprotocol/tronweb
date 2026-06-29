@@ -1,6 +1,7 @@
 import type { Address } from "./Trx";
 import type { Method } from "../lib/contract/method";
 import type { Contract } from "../lib/contract/index";
+import type { Prettify } from "./UtilsTypes";
 export type AbiParamsCommon = {
     readonly name: string;
     readonly type: string;
@@ -83,6 +84,20 @@ export type AbiFragment =
     | ReceiveFragment;
 
 export type ContractAbiInterface = ReadonlyArray<AbiFragment>;
+
+export type IsAny<T> = 0 extends 1 & T ? true : false;
+
+/**
+ * True when the ABI is a fixed-length tuple (declared with `as const`).
+ * Without `as const` the ABI widens to `AbiFragment[]` — `length` becomes
+ * `number` and fragment names/stateMutability lose their literal types, so
+ * no method names can be derived from it. `any` also fails this check.
+ */
+export type IsConstAbi<Abi extends ContractAbiInterface> = IsAny<Abi> extends true
+    ? false
+    : number extends Abi['length']
+      ? false
+      : true;
 
 
 type _GrowArr<Length extends number, T = any, Arr extends T[] = []> = Arr['length'] extends Length
@@ -218,9 +233,6 @@ export type SolidityValueType<T extends string, C extends ReadonlyArray<AbiParam
     | SolidityTupleType<T, C>;
 
 type SimplifySolidityType<T> = T extends infer U ? U : never;
-type Prettify<T> = {
-  [K in keyof T]: T[K];
-} & {};
 
 export type GetParamsType<ParamsType extends ReadonlyArray<AbiParamsCommon> | undefined> = ParamsType extends readonly [infer T, ...infer P] 
     ? T extends AbiParamsCommon
@@ -230,7 +242,9 @@ export type GetParamsType<ParamsType extends ReadonlyArray<AbiParamsCommon> | un
                 ? [SimplifySolidityType<SolidityValueType<T['type'], T['components']>>, ...GetParamsType<P>]
                 : [SimplifySolidityType<SolidityValueType<T['type'], T['components']>>]
         : []
-    : any[];
+    : ParamsType extends readonly []
+        ? []
+        : any[];
 
 type GetTupleOutputType<T extends `tuple${string}`, Shape extends ReadonlyArray<AbiParamsCommon> | undefined> = T extends 'tuple'
     ? Shape extends ReadonlyArray<AbiParamsCommon>
@@ -260,7 +274,7 @@ type _GetOutputsType<Outputs extends ReadonlyArray<AbiParamsCommon> | undefined>
         : []
     : [];
 
-export type GetOutputsType<Outputs extends ReadonlyArray<AbiParamsCommon> | undefined> = GetTupleOutputType<'tuple', Outputs>;
+export type GetOutputsType<Outputs extends ReadonlyArray<AbiParamsCommon> | undefined> = IsAny<Outputs> extends true ? any : GetTupleOutputType<'tuple', Outputs>;
 
 
 export type GetMethodsTypeFromAbi<Abi extends ContractAbiInterface> = Abi extends readonly [infer T, ...infer P]

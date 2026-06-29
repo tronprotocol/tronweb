@@ -202,7 +202,7 @@ In order to contribute you can
 * run the tests — `npm run test`
 * push your changes and open a pull request
 
-Contact the team at https://cn.developers.tron.network/docs/online-technical-support
+Contact the team at [here](https://developers.tron.network/docs/online-technical-support)
 
 
 ## Licence

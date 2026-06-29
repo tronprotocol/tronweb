@@ -471,6 +471,42 @@ describe('#TronWeb.utils.deserializeTx', function () {
         });
     });
 
+    describe('DWitnessUpdateContract', async () => {
+        let tx: Awaited<ReturnType<TransactionBuilder['updateWitness']>>;
+        let account: Awaited<ReturnType<TronWeb['createAccount']>>;
+        const updateUrl = 'https://example-updated.com';
+        before(async () => {
+            tronWeb = tronWebBuilder.createInstance();
+            account = await tronWeb.createAccount();
+            tx = await tronWeb.transactionBuilder.updateWitness(account.address.base58, updateUrl);
+        });
+
+        it('should deserialize the right result', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('WitnessUpdateContract', tx.raw_data_hex);
+            const value = dResult.contract[0].parameter.value;
+
+            assert.equal(value.owner_address, account.address.hex);
+            assert.equal(value.update_url, fromUtf8(updateUrl));
+        });
+
+        it('should sign the transaction correctly after deserialization', async () => {
+            const dResult = utils.deserializeTx.deserializeTransaction('WitnessUpdateContract', tx.raw_data_hex);
+            const dResultTx = {
+                ...tx,
+                raw_data: dResult,
+            };
+            const signedReconstructedTx = await tronWeb.trx.sign(dResultTx, account.privateKey);
+
+            assert.equal(signedReconstructedTx.signature[0].length, 130);
+        });
+
+        it('should throw error if raw_data_hex is invalid', async () => {
+            assert.throws(() => {
+                utils.deserializeTx.deserializeTransaction('WitnessUpdateContract', 'invalidRawDataHex');
+            }, 'rawDataHex is not a valid hex string');
+        });
+    });
+
     describe('DTransferAssetContract', async () => {
         let tx: Awaited<ReturnType<TransactionBuilder['sendToken']>>;
         let account: Awaited<ReturnType<TronWeb['createAccount']>>;
