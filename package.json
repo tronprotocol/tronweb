@@ -56,7 +56,10 @@
         "btest": "npm run build:dev && npm run test",
         "format-all": "prettier --write ./src",
         "lint": "eslint src",
-        "lint:fix": "eslint src --fix"
+        "lint:fix": "eslint src --fix",
+        "vtest": "vitest run --project node",
+        "vtest:watch": "vitest --project node",
+        "vcoverage": "vitest run --project node --coverage"
     },
     "dependencies": {
         "@babel/runtime": "7.26.10",
