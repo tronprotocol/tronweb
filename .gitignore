@@ -1,7 +1,6 @@
 .next
 node_modules
 .DS_Store
-test/setup/TronWeb.js
 coverage
 yarn-error.log
 /dist
@@ -18,3 +17,4 @@ test/lib/dist/
 CLAUDE.md
 requires/
 .test-report/
+**/__screenshots__/
