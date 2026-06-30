@@ -4,7 +4,7 @@ import { keccak256, toUtf8Bytes, recoverAddress, SigningKey, Signature } from '.
 import { ADDRESS_PREFIX } from '../utils/constants.js';
 import { fromHex, toHex } from '../utils/address.js';
 import { Validator } from '../paramValidator/index.js';
-import { txCheck } from '../utils/transaction.js';
+import { txCheck, txCheckWithArgs } from '../utils/transaction.js';
 import { ecRecover } from '../utils/crypto.js';
 import { Block, GetTransactionResponse, BlockWithoutDetail, BlockHeaderRef } from '../types/APIResponse.js';
 import {
@@ -763,7 +763,17 @@ export class Trx {
 
             // reset transaction
             if (signWeight.transaction && signWeight.transaction.transaction) {
-                transaction = signWeight.transaction.transaction;
+                // Verify the fullNode returned the transaction we asked it to weigh before
+                // adopting it, so we never sign a transaction the node may have substituted.
+                // Permission_id was set above (which changes the txID), so it is included in
+                // the args used to re-derive and compare the returned transaction.
+                const returnedTransaction = signWeight.transaction.transaction;
+                const args = { ...transaction.raw_data.contract[0].parameter.value, Permission_id: permissionId };
+                if (!txCheckWithArgs(returnedTransaction, args, transaction.raw_data)) {
+                    throw new Error('Invalid transaction provided');
+                }
+
+                transaction = returnedTransaction;
                 if (permissionId > 0) {
                     transaction.raw_data.contract[0].Permission_id = permissionId;
                 }

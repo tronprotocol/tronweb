@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { assert } from 'vitest';
+import { assert, vi } from 'vitest';
 import assertThrow from '../helpers/assertThrow.js';
 import wait from '../helpers/wait.js';
 import broadcaster from '../helpers/broadcaster.js';
@@ -1034,6 +1034,59 @@ describe('TronWeb.trx', function () {
                         e.message.indexOf("permission isn't exit") != -1 ||
                             e.message.indexOf('Permission for this, does not exist!') != -1
                     );
+                }
+            });
+        });
+
+        describe('#multiSign (getSignWeight transaction validation)', function () {
+            const ownerIdx = 15;
+
+            it('should reject a transaction substituted by the fullNode', async function () {
+                const signerPk = accounts.pks[ownerIdx];
+                const signerAddress = tronWeb.address
+                    .toHex(tronWeb.address.fromPrivateKey(signerPk) as string)
+                    .toLowerCase();
+
+                // No Permission_id on the tx + a positive permissionId routes multiSign
+                // through getSignWeight and the adopt-returned-transaction path.
+                const original = await tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.b58[ownerIdx]);
+                // A different, internally-consistent transaction the node "returns" instead.
+                const substituted = await tronWeb.transactionBuilder.freezeBalanceV2(99e5, 'BANDWIDTH', accounts.b58[ownerIdx]);
+
+                const spy = vi.spyOn(tronWeb.trx, 'getSignWeight').mockResolvedValue({
+                    result: { code: 'NOT_ENOUGH_PERMISSION', message: '' },
+                    permission: { keys: [{ address: signerAddress, weight: 1 }] },
+                    approved_list: [],
+                    current_weight: 0,
+                    transaction: { transaction: substituted },
+                } as any);
+
+                try {
+                    await assertThrow(tronWeb.trx.multiSign(original, signerPk, 2), 'Invalid transaction provided');
+                } finally {
+                    spy.mockRestore();
+                }
+            });
+
+            it('should reject when getSignWeight returns no transaction', async function () {
+                const signerPk = accounts.pks[ownerIdx];
+                const signerAddress = tronWeb.address
+                    .toHex(tronWeb.address.fromPrivateKey(signerPk) as string)
+                    .toLowerCase();
+
+                const original = await tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.b58[ownerIdx]);
+
+                const spy = vi.spyOn(tronWeb.trx, 'getSignWeight').mockResolvedValue({
+                    result: { code: 'NOT_ENOUGH_PERMISSION', message: '' },
+                    permission: { keys: [{ address: signerAddress, weight: 1 }] },
+                    approved_list: [],
+                    current_weight: 0,
+                } as any);
+
+                try {
+                    await assertThrow(tronWeb.trx.multiSign(original, signerPk, 2), 'Invalid transaction provided');
+                } finally {
+                    spy.mockRestore();
                 }
             });
         });
