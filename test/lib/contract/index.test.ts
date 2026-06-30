@@ -1,5 +1,5 @@
 import { Address } from '../../../src/types/Trx';
-import { assert } from 'chai';
+import { assert } from 'vitest';
 import wait from '../../helpers/wait.js';
 import broadcaster from '../../helpers/broadcaster.js';
 import tronWebBuilder from '../../helpers/tronWebBuilder.js';

@@ -1,4 +1,4 @@
-import { assert } from 'chai';
+import { assert } from 'vitest';
 import Config from './helpers/config.js';
 import { Contract, TronWeb, providers, Types } from './setup/TronWeb.js';
 import tronWebBuilder from './helpers/tronWebBuilder.js';

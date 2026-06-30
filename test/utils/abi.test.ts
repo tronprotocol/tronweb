@@ -1,4 +1,4 @@
-import { assert } from 'chai';
+import { assert } from 'vitest';
 import config from '../helpers/config.js';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
 import testUtils from '../helpers/testUtils.js';

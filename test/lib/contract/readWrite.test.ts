@@ -7,7 +7,7 @@ import {
     TriggerConstantContractOptions,
     TriggerSmartContractOptions,
 } from '../../../src/types/TransactionBuilder';
-import { assert } from 'chai';
+import { assert } from 'vitest';
 import assertThrow from '../../helpers/assertThrow.js';
 import wait from '../../helpers/wait.js';
 import broadcaster from '../../helpers/broadcaster.js';

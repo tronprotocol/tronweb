@@ -1,4 +1,4 @@
-import { assert } from 'chai';
+import { assert } from 'vitest';
 import { utils } from '../setup/TronWeb.js';
 import diskUtils from '../testcases/src/disk-utils.js';
 import assertThrow from '../helpers/assertThrow.js';
