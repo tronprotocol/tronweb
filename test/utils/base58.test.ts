@@ -7,7 +7,7 @@ describe('TronWeb.utils.base58', function () {
         it('should encode a buffer in base58 string', async function () {
             const tronWeb = tronWebBuilder.createInstance();
 
-            const input = Buffer.from('0xbf7e698', 'utf-8');
+            const input = new TextEncoder().encode('0xbf7e698');
             const expected = 'cnTsZgYWJRAw';
 
             assert.equal(tronWeb.utils.base58.encode58(input), expected);
@@ -42,11 +42,11 @@ describe('TronWeb.utils.base58', function () {
             const tronWeb = tronWebBuilder.createInstance();
 
             const input = 'cnTsZgYWJRAw';
-            const expected = Buffer.from('0xbf7e698', 'utf-8');
+            const expected = new TextEncoder().encode('0xbf7e698');
 
             const decoded = tronWeb.utils.base58.decode58(input);
 
-            assert.equal(Buffer.compare(expected, Buffer.from(decoded)), 0);
+            assert.deepEqual(Array.from(decoded), Array.from(expected));
         });
 
         it("should return [] or [0] if passing something '' or '1'", async function () {

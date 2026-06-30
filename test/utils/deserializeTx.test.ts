@@ -52,7 +52,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
             assert.equal(value.token_id, '1000008');
 
             const getFunctionSelectorHex = (functionSelector: string) => {
-                return utils.ethersUtils.keccak256(Buffer.from(functionSelector, 'utf-8')).toString().substring(2, 10);
+                return utils.ethersUtils.keccak256(new TextEncoder().encode(functionSelector)).toString().substring(2, 10);
             };
 
             const encodeParameters = (parameters: { type: string; value: unknown }[]) => {

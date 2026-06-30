@@ -1347,7 +1347,7 @@ describe('TronWeb.trx', function () {
                 const transaction = await tronWeb.transactionBuilder.sendTrx(receiver.address.base58, 1e6, accounts.b58[idx]);
                 const signedTransaction = await tronWeb.trx.sign(transaction, accounts.pks[idx]);
                 const signedTransactionPb = tronWeb.utils.transaction.txJsonToPb(signedTransaction);
-                signedTransactionPb.addSignature(Buffer.from(signedTransaction.signature[0], 'hex'), 0);
+                signedTransactionPb.addSignature(Uint8Array.from(tronWeb.utils.code.hexStr2byteArray(signedTransaction.signature[0])), 0);
                 const signedHexTransaction = tronWeb.utils.bytes.byteArray2hexStr(signedTransactionPb.serializeBinary());
                 const result = await tronWeb.trx.broadcastHex(signedHexTransaction);
                 assert.isTrue(result.result);

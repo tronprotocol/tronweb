@@ -202,8 +202,8 @@ describe('TronWeb.utils', function () {
         it('should import sha256 from ethers and has a string', function () {
             const tronWeb = tronWebBuilder.createInstance();
 
-            const string = '0x' + Buffer.from('some string').toString('hex');
-            const hash = tronWeb.utils.ethersUtils.sha256(string);
+            const bytes = new TextEncoder().encode('some string');
+            const hash = tronWeb.utils.ethersUtils.sha256(bytes);
 
             assert.equal(hash, '0x61d034473102d7dac305902770471fd50f4c5b26f6831a56dd90b5184b3c30fc');
         });
@@ -211,8 +211,8 @@ describe('TronWeb.utils', function () {
         it('should import sha512 from ethers and has a string', function () {
             const tronWeb = tronWebBuilder.createInstance();
 
-            const string = '0x' + Buffer.from('some string').toString('hex');
-            const hash = tronWeb.utils.ethersUtils.sha512(string);
+            const bytes = new TextEncoder().encode('some string');
+            const hash = tronWeb.utils.ethersUtils.sha512(bytes);
 
             assert.equal(
                 hash,

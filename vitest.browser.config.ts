@@ -25,10 +25,10 @@ export default defineConfig({
         'process.env.TERM': JSON.stringify(''),
     },
     // The pre-generated google-protobuf `.cjs` files (src/protocol/) use require().
-    // Pre-bundle google-protobuf + buffer for the browser; the cjs-protocol plugin
+    // Pre-bundle google-protobuf for the browser; the cjs-protocol plugin
     // below converts the LOCAL `.cjs` files to ESM.
     optimizeDeps: {
-        include: ['google-protobuf', 'google-protobuf/google/protobuf/any_pb.js', 'buffer'],
+        include: ['google-protobuf', 'google-protobuf/google/protobuf/any_pb.js'],
     },
     plugins: [
         {
@@ -66,21 +66,6 @@ export default defineConfig({
                 ].join('\n');
 
                 return { code: esm, map: null };
-            },
-        },
-        {
-            // Inject Buffer global into every test file so tests that call `Buffer.from(...)`
-            // directly (a Node.js global) work in the browser context.
-            name: 'vitest-browser-buffer-global',
-            enforce: 'pre',
-            transform(code, id) {
-                if (!id.includes('/test/') || id.includes('node_modules') || id.endsWith('.cjs')) {
-                    return null;
-                }
-                return {
-                    code: `import { Buffer } from 'buffer';\nglobalThis.Buffer = Buffer;\n${code}`,
-                    map: null,
-                };
             },
         },
     ],
