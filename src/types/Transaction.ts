@@ -19,8 +19,8 @@ export interface Transaction<T = ContractParamter> {
         ref_block_hash: string;
         expiration: number;
         timestamp: number;
-        data?: unknown;
-        fee_limit?: unknown;
+        data?: string;
+        fee_limit?: number;
     };
     raw_data_hex: string;
 }

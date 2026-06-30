@@ -1,9 +1,25 @@
 import { TronWeb } from '../../tronweb.js';
 import utils from '../../utils/index.js';
 import { Method, AbiFragmentNoErrConstructor } from './method.js';
+import { buildReadNamespace, buildWriteNamespace } from './readWrite.js';
+import type { ContractReadNamespace, ContractWriteNamespace } from './readWrite.js';
 import type { ContractAbiInterface, GetMethodsTypeFromAbi, GetOnMethodTypeFromAbi, AnyOnMethodType } from '../../types/ABI.js';
 import type { Address } from '../../types/Trx.js';
 import type { CreateSmartContractOptions } from '../../types/TransactionBuilder.js';
+
+// When the ABI itself defines a function named `read`/`write`, the legacy flat
+// call surface must stay reachable as `contract.read(...)`/`contract.write(...)`.
+// Wrap the legacy call in a Proxy whose property access and enumeration are
+// served entirely by the namespace, so both surfaces share the one getter.
+function wrapReservedNamespace<T extends object>(namespace: T, legacyCall: unknown): T {
+    if (typeof legacyCall !== 'function') return namespace;
+    return new Proxy(legacyCall, {
+        get: (_target, prop) => namespace[prop as keyof T],
+        has: (_target, prop) => prop in namespace,
+        ownKeys: () => Reflect.ownKeys(namespace),
+        getOwnPropertyDescriptor: (_target, prop) => Object.getOwnPropertyDescriptor(namespace, prop),
+    }) as T;
+}
 
 export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
     tronWeb: TronWeb;
@@ -16,6 +32,8 @@ export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
     methods: GetOnMethodTypeFromAbi<Abi> & AnyOnMethodType;
     methodInstances: GetMethodsTypeFromAbi<Abi>;
     props: any[];
+    private _readNamespace?: { abi: Abi; namespace: ContractReadNamespace<Abi> };
+    private _writeNamespace?: { abi: Abi; namespace: ContractWriteNamespace<Abi> };
     [key: string | number | symbol]: any;
 
     constructor(tronWeb: TronWeb, abi: Abi = [] as any, address: Address) {
@@ -31,8 +49,8 @@ export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
         this.deployed = false;
         this.lastBlock = false;
 
-        this.methods = {} as GetOnMethodTypeFromAbi<Abi> & AnyOnMethodType;
-        this.methodInstances = {} as GetMethodsTypeFromAbi<Abi>;
+        this.methods = Object.create(null) as GetOnMethodTypeFromAbi<Abi> & AnyOnMethodType;
+        this.methodInstances = Object.create(null) as GetMethodsTypeFromAbi<Abi>;
         this.props = [];
 
         if (utils.address.isAddress(address)) {
@@ -44,6 +62,45 @@ export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
         this.loadAbi(abi);
     }
 
+    /**
+     * Type-safe read namespace:
+     * every `view`/`pure` ABI function is callable as
+     * `contract.read.fn([args], { from, value })` and resolves to the decoded
+     * result directly. Rebuilt lazily whenever the contract ABI is replaced.
+     */
+    get read(): ContractReadNamespace<Abi> {
+        if (!this._readNamespace || this._readNamespace.abi !== this.abi) {
+            this._readNamespace = {
+                abi: this.abi,
+                namespace: wrapReservedNamespace(
+                    buildReadNamespace(this) as object,
+                    this.methods['read']
+                ) as ContractReadNamespace<Abi>,
+            };
+        }
+        return this._readNamespace.namespace;
+    }
+
+    /**
+     * Type-safe write namespace:
+     * every state-changing ABI function is callable as
+     * `contract.write.fn([args], { account, value, feeLimit, tokenId, tokenValue, permissionId })`,
+     * signed with the instance's default private key, broadcast, and resolved to
+     * the transaction ID. Rebuilt lazily whenever the contract ABI is replaced.
+     */
+    get write(): ContractWriteNamespace<Abi> {
+        if (!this._writeNamespace || this._writeNamespace.abi !== this.abi) {
+            this._writeNamespace = {
+                abi: this.abi,
+                namespace: wrapReservedNamespace(
+                    buildWriteNamespace(this) as object,
+                    this.methods['write']
+                ) as ContractWriteNamespace<Abi>,
+            };
+        }
+        return this._writeNamespace.namespace;
+    }
+
     hasProperty(property: number | string | symbol) {
         // eslint-disable-next-line no-prototype-builtins
         return this.hasOwnProperty(property) || (this as any).__proto__.hasOwnProperty(property);
@@ -51,7 +108,8 @@ export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
 
     loadAbi(abi: Abi) {
         this.abi = abi;
-        this.methods = {} as GetOnMethodTypeFromAbi<Abi> & AnyOnMethodType;
+        this.methods = Object.create(null) as GetOnMethodTypeFromAbi<Abi> & AnyOnMethodType;
+        this.methodInstances = Object.create(null) as GetMethodsTypeFromAbi<Abi>;
 
         this.props.forEach((prop: string) => delete (this as any)[prop]);
 
@@ -151,3 +209,17 @@ export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
 
 export type { CallOptions, SendOptions, AbiFragmentNoErrConstructor } from './method.js';
 export { Method } from './method.js';
+export type {
+    ContractReadNamespace,
+    ContractWriteNamespace,
+    ReadContractFunctionName,
+    WriteContractFunctionName,
+    ReadContractParameters,
+    ReadContractReturnType,
+    WriteContractParameters,
+    WriteContractReturnType,
+    ReadOptions,
+    WriteOptions,
+    CollapseSingleItemTuple,
+} from './readWrite.js';
+export { buildReadNamespace, buildWriteNamespace } from './readWrite.js';

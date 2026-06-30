@@ -311,6 +311,11 @@ export interface WitnessCreateContract {
     url: string;
 }
 
+export interface WitnessUpdateContract {
+    owner_address: string;
+    update_url: string;
+}
+
 export interface VoteWitnessContract {
     owner_address: string;
     votes: { vote_address: string; vote_count: number }[];
@@ -349,4 +354,5 @@ export type ContractParamter =
     | AccountPermissionUpdateContract
     | UpdateAssetContract
     | WitnessCreateContract
+    | WitnessUpdateContract
     | VoteWitnessContract;

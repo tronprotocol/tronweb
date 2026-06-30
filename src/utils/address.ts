@@ -1,7 +1,7 @@
 import { hexStr2byteArray, byteArray2hexStr } from './code.js';
 import { decodeBase58Address, getBase58CheckAddress, isAddressValid, pkToAddress } from './crypto.js';
 import { isHex, isString } from './validations.js';
-import { keccak256 } from './ethersUtils.js';
+import { concat, keccak256 } from './ethersUtils.js';
 import { ADDRESS_PREFIX } from './constants.js';
 
 export function fromHex(address: string) {
@@ -79,4 +79,43 @@ export function isAddress(address: unknown): boolean {
     } catch (err) {
         return false;
     }
+}
+
+function hexToUint8Array(hex: string) {
+    return new Uint8Array(hexStr2byteArray(hex.replace(/^0x/, '')));
+}
+
+function convertToUint8Array(value: string | Uint8Array): Uint8Array {
+    return typeof value === 'string' ? hexToUint8Array(value) : value;
+}
+
+export function getCreate2Address({
+    from,
+    salt,
+    initCode,
+    addressFormat = 'base58',
+}: {
+    from: string;
+    salt: string | Uint8Array;
+    initCode: string | Uint8Array;
+    addressFormat?: 'base58' | 'hex';
+}) {
+    if (!isAddress(from)) {
+        throw new Error(`from(${from}) is not a valid address string`);
+    }
+
+    const _from = hexToUint8Array(toHex(from));
+    const _salt = convertToUint8Array(salt);
+    const _initCode = convertToUint8Array(initCode);
+
+    if (_salt.length !== 32) {
+        throw new Error(`salt(${salt}) must be 32 bytes`);
+    }
+
+    const _initCodeHash = hexToUint8Array(keccak256(_initCode));
+
+    const merged = concat([_from, _salt, _initCodeHash]);
+
+    const addressHex = `41${keccak256(merged).slice(-40)}`;
+    return addressFormat === 'base58' ? fromHex(addressHex) : addressHex;
 }

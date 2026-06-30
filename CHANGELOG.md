@@ -1,6 +1,138 @@
 Change Log
 =========
 
+__6.4.0__
+
+## New Features
+
+- Typed `read` / `write` contract namespaces
+
+  Added contract.read and contract.write namespaces for type-safe, ergonomic access to contract methods. Functions are split by state mutability: view / pure (constant call) functions are exposed under contract.read, while state-changing functions are exposed under contract.write. When an ABI is declared as const, function names and argument types are checked at compile time.
+
+  - Call as contract.read.methodName([arg0, arg1, ...], options) / contract.write.methodName([arg0, arg1, ...], options).
+  - The write `account` option is a private key: its derived address owns and signs the transaction, so a write can be issued from a non-default signer — including on an instance with no default key. A value that is not a private key is rejected. Treat this value as secret. For reads, a `from` option sets the caller address directly (validated as an address).
+  - Validation errors (argument count, signer, call value, account) are surfaced as promise rejections.
+  - ABI functions literally named read or write remain callable via the legacy flat surface (handled through a proxy).
+  - Each function is additionally exposed under its full selector, e.g. contract.read['balanceOf(address)'] / contract.write['transfer(address,uint256)']. The selector form pins that exact overload, so same-arity overloads can be addressed unambiguously. Note: namespaces now enumerate each method under both its bare name and its selector, so Object.keys / for…in over contract.read / contract.write return two entries per function.
+
+- Added `utils.abi.encodeFunctionData`
+
+  Added utils.abi.encodeFunctionData(funcABI, args) to build smart contract calldata (function selector + encoded parameters). Validates argument count and supports TRON-specific handling of trcToken (kept in the selector, encoded as `uint256`).
+
+- Added `transactionBuilder.updateWitness`
+
+  Added transactionBuilder.updateWitness(address, url, options) to create a WitnessUpdateContract transaction that updates a witness node URL. Validates the address and the URL format / length (≤ 256).
+
+## Improvements
+
+- Dropped `Buffer` in favor of `TextEncoder` / `TextDecoder`
+
+  Replaced Buffer`-based encoding in `tronweb, utils/crypto, utils/abi and utils/ethersUtils with TextEncoder / TextDecoder for better cross-environment (browser) compatibility. The conversion is byte-for-byte equivalent to the previous behavior.
+
+- `address.fromPrivateKey` accepts `0x`-prefixed private keys
+
+  TronWeb.address.fromPrivateKey now strips a leading 0x from the private key before deriving the address, so a private key works whether or not it carries the 0x prefix.
+
+## Changes
+
+- Bump axios from 1.15.0 to 1.18.0.
+- Bump dev dependency nyc to 18.
+- Add overrides for ws (8.21.0) and serialize-javascript (7.0.5) to pin security-patched versions.
+- build now runs the full build:all (esm, cjs, dist).
+
+__6.3.0__
+
+## New Features
+
+- **Added `trx.getContractInfo`**
+
+  Added `trx.getContractInfo(contractAddress)` method that retrieves detailed contract information via the `wallet/getcontractinfo` node API endpoint.
+
+- **Extended `deserializeTx` with full contract type coverage**
+
+  Added deserialization support for all remaining `TransactionBuilder` contract types via `raw_data_hex`:
+
+  - Account: `AccountCreateContract`, `AccountUpdateContract`, `SetAccountIdContract`, `AccountPermissionUpdateContract`
+  - Stake / Vote: `FreezeBalanceContract`, `UnfreezeBalanceContract`, `VoteWitnessContract`
+  - Proposal: `ProposalCreateContract`, `ProposalApproveContract`, `ProposalDeleteContract`
+  - Smart contract: `CreateSmartContract`, `UpdateSettingContract`, `UpdateEnergyLimitContract`, `ClearABIContract`
+  - DEX: `ExchangeCreateContract`, `ExchangeInjectContract`, `ExchangeWithdrawContract`, `ExchangeTransactionContract`
+  - `UpdateBrokerageContract`
+
+
+## Improvements
+
+- **Plugin restrictions**  
+
+  - Added `PROTECTED_MODULES` to prevent plugins from overriding 2 modules: `transactionBuilder`, `plugin`.  
+  - Added `PROTECTED_METHODS` to block plugins from overriding critical signing/key methods: `sign`, `signMessage`, `signMessageV2`, `signTransaction`, `signTypedData`, `multiSign`, `setPrivateKey`, `ecRecover`.  
+  - ⚠️ Note: Plugin support will be removed in the next major version.
+
+- **Bug fix**  
+
+  - Corrected the return type of the `getDelegatedResourceV2` in `trx.ts` to consistently return an array.
+
+## Changes
+
+- Remove dev dependency @eslint/eslintrc.
+- Bump serialize-javascript from 7.0.3 to 7.0.5.
+
+__6.2.2__
+
+## New Features
+
+- Added `getCreate2Address`
+
+  - Added support for `utils.address.getCreate2Address` utility method.
+
+  - Enables deterministic contract address computation using CREATE2.
+
+  - Useful for advanced contract deployment workflows and meta-deployment scenarios.
+
+## Improvements
+
+- Improvement in `decodeParams`
+
+    - Replaced {} with Object.create(null) in decodeParams.
+
+    - Prevents prototype pollution.
+
+- Robust argument encoding in `encodeArgs`
+
+  - Prevents valid falsy values from being incorrectly ignored.
+
+  - Improves reliability of contract parameter encoding.
+
+- Strict contract type validation in `contractJsonToProtobuf`
+
+    - Now throws an explicit error when encountering unsupported contract.type.
+
+    - Prevents silent failures during contract conversion.
+
+    - Improves developer debugging experience.
+
+__6.2.1__
+
+## Changes
+
+- Bump `axios` from v1.12.2 to v1.13.5
+- Bump `webpack` from v5.98.0 to v5.105.2
+
+__6.2.0__
+
+## New Features
+
+- **`trx.getNowWitnessList`**
+  Added a new method to retrieve the witness list with real-time vote counts. This feature is available for JAVA-TRON v4.8.1 and above.
+
+- **New deserialization support**  
+  Added support for deserializing the following transaction types from `raw_data_hex`:
+
+    - `TransferAssetContract`
+    - `ParticipateAssetIssueContract`
+    - `AssetIssueContract`
+    - `UpdateAssetContract`
+
 __6.1.1__
 
 ## Changes

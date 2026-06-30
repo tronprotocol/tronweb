@@ -2,6 +2,7 @@ import { TronWeb } from '../../tronweb.js';
 import { Transaction, TransactionWrapper } from '../../types/Transaction.js';
 import { txCheckWithArgs, txJsonToPb, txPbToTxID, txPbToRawDataHex } from '../../utils/transaction.js';
 import { keccak256 } from '../../utils/ethersUtils.js';
+import { hexStr2byteArray } from '../../utils/code.js';
 import { ContractParamter, ContractType } from '../../types/Contract.js';
 import { TriggerConstantContractOptions } from '../../types/TransactionBuilder.js';
 
@@ -50,7 +51,7 @@ export function resultManagerTriggerSmartContract(
 export function genContractAddress(ownerAddress: string, txID: string) {
     return (
         '41' +
-        keccak256(Buffer.from(txID + ownerAddress, 'hex'))
+        keccak256(new Uint8Array(hexStr2byteArray(txID + ownerAddress)))
             .toString()
             .substring(2)
             .slice(24)

@@ -3,7 +3,7 @@ import tronWebBuilder from '../helpers/tronWebBuilder.js';
 
 describe('TronWeb.utils.code', function () {
     describe('#bin2String()', function () {
-        it('should convert a byte to a hex string', async function () {
+        it('should convert a byte to a plain text', async function () {
             const tronWeb = tronWebBuilder.createInstance();
 
             assert.equal(tronWeb.utils.code.bin2String([78, 112, 87, 69, 99, 65]), 'NpWEcA');
@@ -78,7 +78,7 @@ describe('TronWeb.utils.code', function () {
     });
 
     describe('#hexStr2byteArray()', function () {
-        it('should verify that an hex char is a valid hex char', async function () {
+        it('should convert a hex string to bytes array', async function () {
             const tronWeb = tronWebBuilder.createInstance();
 
             assert.isTrue(
@@ -99,7 +99,7 @@ describe('TronWeb.utils.code', function () {
     });
 
     describe('#strToDate()', function () {
-        it('should verify that an hex char is a valid hex char', async function () {
+        it('should convert a date string to date', async function () {
             const tronWeb = tronWebBuilder.createInstance();
 
             let input = '2018-09-23 13-45-03';
@@ -111,7 +111,7 @@ describe('TronWeb.utils.code', function () {
             assert.isTrue(regex.test(tronWeb.utils.code.strToDate(input).toString()));
         });
 
-        it('should throw if we pass an invalid hex string', async function () {
+        it('should throw if we pass an invalid date string', async function () {
             const tronWeb = tronWebBuilder.createInstance();
 
             assert.throws(() => {
@@ -133,7 +133,7 @@ describe('TronWeb.utils.code', function () {
             const tronWeb = tronWebBuilder.createInstance();
 
             assert.equal(tronWeb.utils.code.isNumber('0'), 1);
-            assert.equal(tronWeb.utils.code.isHexChar('Z'), 0);
+            assert.equal(tronWeb.utils.code.isNumber('Z'), 0);
         });
     });
 

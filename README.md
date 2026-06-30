@@ -28,13 +28,13 @@
 
 ## What is TronWeb?
 
-[TronWeb](https://tronweb.network) aims to deliver a unified, seamless development experience influenced by Ethereum's [Web3](https://github.com/ethereum/web3.js/) implementation. We have taken the core ideas and expanded upon them to unlock the functionality of TRON's unique feature set along with offering new tools for integrating DApps in the browser, Node.js and IoT devices.
+[TronWeb](https://tronweb.network) aims to deliver a unified, seamless development experience for the TRON ecosystem. We have taken the core ideas and expanded upon them to unlock the functionality of TRON's unique feature set along with offering new tools for integrating DApps in the browser, Node.js and IoT devices.
 
 To better support its use in TypeScript projects, we have rewritten the entire library in TypeScript. And to make the TronWeb API more secure and consistent, there are some breaking changes. <font color=red>Please check out [<font color=red>6.x API documentation</font>](https://tronweb.network/docu/docs/intro/)</font> for detailed changes so you can start using the new TypeScript version of TronWeb early. Any questions or feedback are welcome [here](https://github.com/tronprotocol/tronweb/issues/new).
 
 **Project scope**
 
-Any new TRON feature will be incorporated into TronWeb. Changes to the API to improve quality-of-life are in-scope for the project. We will not necessarily maintain feature parity with Web3.js going forward as this is a separate project, not a synchronized fork.
+Any new TRON feature will be incorporated into TronWeb. Changes to the API to improve quality-of-life are in-scope for the project. We are committed to keeping TronWeb up-to-date with the latest developments in the TRON ecosystem while continuously refining the developer experience.
 
 ## HomePage
 
@@ -95,20 +95,17 @@ Anything you do should be explorable on https://shasta.tronscan.org
 
 ## Your local private network for heavy testing
 
-You can set up your own private network, running Tron Quickstart. To do it you must [install Docker](https://docs.docker.com/install/) and, when ready, run a command like
+You can set up a local private TRON network using the **TRON Runtime Environment (TRE)**. This is a Docker-based local blockchain runtime that provides a full TRON network for development, testing, and automation.
+
+To do it you must [install Docker](https://docs.docker.com/install/) and, when ready, run a command like
 
 ```bash
-docker run -it --rm \
-  -p 9090:9090 \
-  -e "defaultBalance=100000" \
-  -e "showQueryString=true" \
-  -e "showBody=true" \
-  -e "formatJson=true" \
-  --name tron \
-  trontools/quickstart
+docker run -it -p 9090:9090 --rm --name tron tronbox/tre:dev
 ```
 
-[More details about Tron Quickstart on GitHub](https://github.com/tron-us/docker-tron-quickstart)
+Once running, the local node will be available at: http://localhost:9090
+
+[More details about TRE](https://hub.docker.com/r/tronbox/tre)
 
 ## Creating an Instance
 
@@ -205,7 +202,7 @@ In order to contribute you can
 * run the tests — `npm run test`
 * push your changes and open a pull request
 
-Contact the team at https://cn.developers.tron.network/docs/online-technical-support
+Contact the team at [here](https://developers.tron.network/docs/online-technical-support)
 
 
 ## Licence

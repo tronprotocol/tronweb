@@ -7,7 +7,7 @@ interface PluginConstructorOptions {
 }
 
 interface PluginClassInterface {
-    new (tronWeb: TronWeb): {
+    new(tronWeb: TronWeb): {
         pluginInterface?: (options: PluginOptions) => PluginInterfaceReturn;
     };
 }
@@ -19,6 +19,12 @@ interface PluginInterfaceReturn {
 }
 
 type PluginOptions = any;
+
+// TODO: Plugin support will be removed in the next major version.
+const PROTECTED_MODULES = ['transactionBuilder', 'plugin'];
+
+// Signing and key management methods are always protected regardless of component.
+const PROTECTED_METHODS = ['sign', 'signMessage', 'signMessageV2', 'signTransaction', 'signTypedData', 'multiSign', 'setPrivateKey', 'ecRecover'];
 
 export class Plugin {
     tronWeb: TronWeb;
@@ -73,6 +79,13 @@ export class Plugin {
             } else {
                 // plug methods into a class, like trx
                 for (const component in pluginInterface.components) {
+                    if (PROTECTED_MODULES.includes(component)) {
+                        console.warn(
+                            `[TronWeb] Plugin attempted to override protected module "${component}", which is not allowed. Plugin support will be removed in the next major version.`
+                        );
+                        result.skipped.push(component);
+                        continue;
+                    }
                     // eslint-disable-next-line no-prototype-builtins
                     if (!this.tronWeb.hasOwnProperty(component)) {
                         continue;
@@ -82,6 +95,7 @@ export class Plugin {
                     for (const method in methods) {
                         if (
                             method === 'constructor' ||
+                            PROTECTED_METHODS.includes(method) || // globally protected methods
                             ((this.tronWeb as any)[component][method] &&
                                 (pluginNoOverride.includes(method) || // blacklisted methods
                                     /^_/.test(method))) // private methods

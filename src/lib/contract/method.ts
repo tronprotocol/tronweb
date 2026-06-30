@@ -90,7 +90,7 @@ const decodeOutput = <T extends Readonly<AbiFragmentNoErrConstructor>>(abi: T, o
 
 export class Method<AbiFrag extends Readonly<AbiFragmentNoErrConstructor>> {
     tronWeb: TronWeb;
-    contract: Contract;
+    contract: Contract<any>;
     abi: AbiFrag;
     name: string;
     inputs: AbiInputsType;
@@ -103,7 +103,7 @@ export class Method<AbiFrag extends Readonly<AbiFragmentNoErrConstructor>> {
         shouldPollResponse: boolean;
     };
 
-    constructor(contract: Contract, abi: AbiFrag) {
+    constructor(contract: Contract<any>, abi: AbiFrag) {
         this.tronWeb = contract.tronWeb;
         this.contract = contract;
 

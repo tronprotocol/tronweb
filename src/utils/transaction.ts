@@ -36,7 +36,7 @@ import '../protocol/core/contract/common_pb.cjs';
 const { ResourceCode } = globalThis.TronWebProto;
 
 import '../protocol/core/contract/witness_contract_pb.cjs';
-const { WitnessCreateContract, VoteWitnessContract } = globalThis.TronWebProto;
+const { WitnessCreateContract, WitnessUpdateContract, VoteWitnessContract } = globalThis.TronWebProto;
 
 import '../protocol/core/contract/storage_contract_pb.cjs';
 const { UpdateBrokerageContract } = globalThis.TronWebProto;
@@ -83,7 +83,7 @@ const flexToUint8Array = (str: string, visible: boolean) => {
 };
 
 const sha3 = (string: string, prefix = true) => {
-    return (prefix ? '0x' : '') + keccak256(Buffer.from(string, 'utf-8')).toString().substring(2);
+    return (prefix ? '0x' : '') + keccak256(new TextEncoder().encode(string)).toString().substring(2);
 };
 
 const buildCommonTransaction = (message, contractType, typeName, permissionId) => {
@@ -339,6 +339,20 @@ const buildCreateWitness = (value, options) => {
         createWitnessContract,
         Transaction.Contract.ContractType.WITNESSCREATECONTRACT,
         'WitnessCreateContract',
+        options.Permission_id
+    );
+};
+
+// updateWitness
+const buildUpdateWitness = (value, options) => {
+    const updateWitnessContract = new WitnessUpdateContract();
+    const { owner_address, update_url } = value;
+    updateWitnessContract.setOwnerAddress(fromHexString(owner_address));
+    updateWitnessContract.setUpdateUrl(stringToUint8Array(update_url.replace(/^0x/, '')));
+    return buildCommonTransaction(
+        updateWitnessContract,
+        Transaction.Contract.ContractType.WITNESSUPDATECONTRACT,
+        'WitnessUpdateContract',
         options.Permission_id
     );
 };
@@ -854,6 +868,8 @@ const contractJsonToProtobuf = (contract, value, options) => {
             return buildWithdrawExpireUnfreezeContract(value, options);
         case 'WitnessCreateContract':
             return buildCreateWitness(value, options);
+        case 'WitnessUpdateContract':
+            return buildUpdateWitness(value, options);
         case 'VoteWitnessContract':
             return buildVoteWitnessAccount(value, options);
         case 'CreateSmartContract':
@@ -892,6 +908,8 @@ const contractJsonToProtobuf = (contract, value, options) => {
             return buildAccountPermissionUpdateContract(value, options);
         case 'UpdateAssetContract':
             return buildUpdateAssetContract(value, options);
+        default:
+            throw new Error('Unsupported transaction type: ' + contract.type);
     }
 };
 

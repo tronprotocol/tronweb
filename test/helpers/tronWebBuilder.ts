@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { TronWeb, utils } from '../setup/TronWeb.js';
+import { TronWeb, utils, providers } from '../setup/TronWeb.js';
 import jlog from './jlog.js';
 
 import config from './config.js';
@@ -63,5 +63,6 @@ export default {
     newTestAccounts,
     getTestAccounts,
     TronWeb,
+    providers,
     utils,
 };

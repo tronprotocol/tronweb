@@ -45,6 +45,7 @@ import {
     WithdrawBalanceContract,
     WithdrawExpireUnfreezeContract,
     WitnessCreateContract,
+    WitnessUpdateContract,
 } from '../../types/Contract.js';
 import {
     createTransaction,
@@ -686,6 +687,47 @@ export class TransactionBuilder {
         );
     }
 
+    async updateWitness(
+        address: string = this.tronWeb.defaultAddress.hex as string,
+        url = '',
+        options: TransactionCommonOptions = {}
+    ): Promise<Transaction<WitnessUpdateContract>> {
+        this.validator.notValid([
+            {
+                name: 'origin',
+                type: 'address',
+                value: address,
+            },
+            {
+                name: 'url',
+                type: 'url',
+                value: url as string,
+                msg: 'Invalid url provided',
+            },
+            {
+                name: 'url',
+                type: 'string',
+                value: url as string,
+                lte: 256,
+                msg: 'Invalid url provided',
+            },
+        ]);
+
+        const data: WitnessUpdateContract = {
+            owner_address: toHex(address as string),
+            update_url: fromUtf8(url as string),
+        };
+
+        const transactionOptions = getTransactionOptions(options);
+        return createTransaction<WitnessUpdateContract>(
+            this.tronWeb,
+            ContractType.WitnessUpdateContract,
+            data,
+            options?.permissionId,
+            transactionOptions
+        );
+    }
+
     async vote(
         votes: VoteInfo = {},
         voterAddress: string = this.tronWeb.defaultAddress.hex as string,
@@ -1248,7 +1290,7 @@ export class TransactionBuilder {
         );
 
         if (args.function_selector) {
-            args.data = keccak256(Buffer.from(args.function_selector, 'utf-8')).toString().substring(2, 10) + args.parameter;
+            args.data = keccak256(new TextEncoder().encode(args.function_selector)).toString().substring(2, 10) + args.parameter;
         }
         const value: TriggerSmartContract = {
             data: args.data,
@@ -2293,7 +2335,6 @@ export class TransactionBuilder {
                 if (
                     !TronWeb.isAddress(key.address) ||
                     !isInteger(key.weight) ||
-                    key.weight > permissions.threshold ||
                     key.weight < 1 ||
                     (type === 2 && !permissions.operations)
                 ) {
@@ -2433,7 +2474,7 @@ export class TransactionBuilder {
         }
     }
 
-    async alterTransaction(transaction: Transaction, options: AlterTransactionOptions = {}) {
+    async alterTransaction<T extends Transaction>(transaction: T, options: AlterTransactionOptions = {}) {
         if (Reflect.has(transaction, 'signature')) throw new Error('You can not extend the expiration of a signed transaction.');
 
         if (options.data) {
@@ -2455,11 +2496,11 @@ export class TransactionBuilder {
         return await this.newTxID(transaction, { txLocal: options.txLocal });
     }
 
-    async extendExpiration(transaction: Transaction, extension: number, options: TxLocal = {}) {
+    async extendExpiration<T extends Transaction>(transaction: T, extension: number, options: TxLocal = {}) {
         return await this.alterTransaction(transaction, { extension, txLocal: options?.txLocal });
     }
 
-    async addUpdateData(transaction: Transaction, data: string, dataFormat: 'utf8' | 'hex' = 'utf8', options: TxLocal = {}) {
+    async addUpdateData<T extends Transaction>(transaction: T, data: string, dataFormat: 'utf8' | 'hex' = 'utf8', options: TxLocal = {}) {
         return this.alterTransaction(transaction, { data, dataFormat: dataFormat as string, txLocal: options?.txLocal });
     }
 }

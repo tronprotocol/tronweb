@@ -1,6 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
-const _ = require('lodash');
 const wait = require('./wait');
 const tronWebBuilder = require('./tronWebBuilder');
 
@@ -15,7 +14,7 @@ module.exports = async function pollAccountFor(address, property, value = false,
         wait(interval);
         const result = await tronWeb.trx.getAccount(address);
         if (typeof property === 'string') {
-            const data = _.get(result, property);
+            const data = result[property];
             if (data) {
                 if (value) {
                     if (data == value) return Promise.resolve(result);

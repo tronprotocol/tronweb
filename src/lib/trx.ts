@@ -2,7 +2,7 @@ import { TronWeb } from '../tronweb.js';
 import utils from '../utils/index.js';
 import { keccak256, toUtf8Bytes, recoverAddress, SigningKey, Signature } from '../utils/ethersUtils.js';
 import { ADDRESS_PREFIX } from '../utils/constants.js';
-import { toHex } from '../utils/address.js';
+import { fromHex, toHex } from '../utils/address.js';
 import { Validator } from '../paramValidator/index.js';
 import { txCheck } from '../utils/transaction.js';
 import { ecRecover } from '../utils/crypto.js';
@@ -22,6 +22,8 @@ import {
     Address,
     Exchange,
     TransactionInfo,
+    BaseWitness,
+    WitnessList,
 } from '../types/Trx.js';
 import { SignedTransaction, Transaction } from '../types/Transaction.js';
 import { TypedDataDomain, TypedDataField } from '../utils/typedData.js';
@@ -521,6 +523,22 @@ export class Trx {
         return contract;
     }
 
+    async getContractInfo(contractAddress: string): Promise<any> {
+        if (!this.tronWeb.isAddress(contractAddress)) {
+            throw new Error('Invalid contract address provided');
+        }
+
+        contractAddress = toHex(contractAddress);
+
+        const contractInfo = await this.tronWeb.fullNode.request<any>('wallet/getcontractinfo', {
+            value: contractAddress,
+        });
+        if (contractInfo.Error) {
+            throw new Error('Contract does not exist');
+        }
+        return contractInfo;
+    }
+
     ecRecover(transaction: SignedTransaction) {
         return Trx.ecRecover(transaction);
     }
@@ -635,11 +653,12 @@ export class Trx {
             if (address !== toHex(transaction.raw_data.contract[0].parameter.value.owner_address)) {
                 throw new Error('Private key does not match address in transaction');
             }
-
-            if (!txCheck(transaction)) {
-                throw new Error('Invalid transaction');
-            }
         }
+
+        if (!txCheck(transaction)) {
+            throw new Error('Invalid transaction');
+        }
+
         return utils.crypto.signTransaction(privateKey as string, transaction) as SignedStringOrSignedTransaction<T>;
     }
 
@@ -735,11 +754,11 @@ export class Trx {
             });
 
             if (!foundKey) {
-                throw new Error(privateKey + ' has no permission to sign');
+                throw new Error('Address ' + fromHex(address) + ' has no permission to sign');
             }
 
             if (signWeight.approved_list && signWeight.approved_list.indexOf(address) != -1) {
-                throw new Error(privateKey + ' already sign transaction');
+                throw new Error('Address ' + fromHex(address) + ' already sign transaction');
             }
 
             // reset transaction
@@ -1085,7 +1104,7 @@ export class Trx {
             frozen_balance_for_energy: number;
             expire_time_for_bandwidth: number;
             expire_time_for_energy: number;
-        };
+        }[];
     }> {
         if (!this.tronWeb.isAddress(fromAddress as Address)) {
             throw new Error('Invalid address provided');
@@ -1502,5 +1521,52 @@ export class Trx {
         } catch (e) {
             throw new Error(`Unable to get params: ${(e as Error).message || e}`);
         }
+    }
+
+    async getNowWitnessList(
+        options: {
+            offset?: number;
+            limit?: number;
+            visible?: boolean;
+            confirmed?: boolean;
+        } = {}
+    ): Promise<BaseWitness[]> {
+        const { offset = 0, limit = 10, visible = false, confirmed = true } = options;
+
+        this.validator.notValid([
+            {
+                name: 'offset',
+                type: 'integer',
+                gte: 0,
+                value: offset,
+                msg: 'Invalid offset: must be an integer >= 0',
+            },
+            {
+                name: 'limit',
+                type: 'integer',
+                gt: 0,
+                value: limit,
+                msg: 'Invalid limit: must be an integer > 0',
+            },
+            {
+                name: 'visible',
+                type: 'boolean',
+                value: visible,
+                msg: 'Invalid visible: must be a boolean',
+            },
+        ]);
+
+        const data = { offset: Number(offset), limit: Number(limit), visible };
+
+        const node = confirmed ? this.tronWeb.solidityNode : this.tronWeb.fullNode;
+        const endpoint = `wallet${confirmed ? 'solidity' : ''}/getpaginatednowwitnesslist`;
+
+        const result = await node.request<WitnessList | Record<string, any>>(endpoint, data, 'post');
+
+        if ((result as Record<string, any>)?.Error) {
+            throw new Error((result as Record<string, any>).Error);
+        }
+
+        return Array.isArray(result?.witnesses) ? result.witnesses : [];
     }
 }

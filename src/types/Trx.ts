@@ -4,6 +4,10 @@ import { Resource } from './TransactionBuilder.js';
 import { APIReturnedPermission } from './APIResponse.js';
 
 type HTTPMap<T extends string | number | symbol, U> = Record<T, U>[];
+type AssetType = {
+    key: string;
+    value: number;
+}[];
 
 export interface FrozenSupply {
     frozen_amount: number;
@@ -79,8 +83,8 @@ export interface Account {
     address: string;
     balance: number;
     votes: Vote[];
-    asset: HTTPMap<string, number>;
-    assetV2: HTTPMap<string, number>;
+    asset: AssetType;
+    assetV2: AssetType;
     frozen: Frozen[];
     net_usage: number;
     acquired_delegated_frozen_balance_for_bandwidth: number;
@@ -130,16 +134,19 @@ export interface AccountNetMessage {
     TotalNetWeight: number;
 }
 
-export interface Witness {
+export interface BaseWitness {
     address: string;
     voteCount: number;
-    pubKey: string;
     url: string;
     totalProduced: number;
     totalMissed: number;
     latestBlockNum: number;
     latestSlotNum: number;
     isJobs: boolean;
+}
+
+export interface Witness extends BaseWitness {
+    pubKey: string;
 }
 
 enum TransactionSignWeight_response_code {
@@ -309,4 +316,8 @@ export interface TransactionInfo {
         fillBuyQuantity: number;
     }[];
     packingFee: number;
+}
+
+export interface WitnessList {
+    witnesses: BaseWitness[];
 }

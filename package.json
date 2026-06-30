@@ -1,6 +1,6 @@
 {
     "name": "tronweb",
-    "version": "6.1.1",
+    "version": "6.4.0",
     "description": "JavaScript SDK that encapsulates the TRON HTTP API",
     "main": "./lib/commonjs/index.js",
     "module": "./lib/esm/index.js",
@@ -20,6 +20,13 @@
             "require": "./lib/commonjs/utils/index.js"
         }
     },
+    "typesVersions": {
+        "*": {
+            "utils": [
+                "lib/esm/utils/index.d.ts"
+            ]
+        }
+    },
     "keywords": [
         "TRON",
         "tronweb"
@@ -33,8 +40,8 @@
         "build:all": "npm run clean:all && npm run build:esm && npm run build:cjs && npm run build:dist",
         "copy-protocol:cjs": "cp -R ./src/protocol ./lib/commonjs/",
         "copy-protocol:esm": "cp -R ./src/protocol ./lib/esm/",
-        "prepare": "husky install && npm run build",
-        "build": "npm run clean && webpack --config webpack.config.js --progress --color",
+        "prepare": "npm run build",
+        "build": "npm run build:all",
         "build:dev": "NODE_ENV=development npm run build",
         "clean:all": "rimraf dist lib",
         "clean": "rimraf dist",
@@ -51,14 +58,9 @@
         "lint": "eslint src",
         "lint:fix": "eslint src --fix"
     },
-    "husky": {
-        "hooks": {
-            "pre-commit": "node ./scripts/pre-commit.js"
-        }
-    },
     "dependencies": {
         "@babel/runtime": "7.26.10",
-        "axios": "1.12.2",
+        "axios": "1.18.0",
         "bignumber.js": "9.1.2",
         "ethereum-cryptography": "2.2.1",
         "ethers": "6.13.5",
@@ -68,7 +70,7 @@
         "validator": "13.15.23"
     },
     "devDependencies": {
-        "@babel/core": "7.26.10",
+        "@babel/core": "7.29.7",
         "@babel/plugin-transform-class-properties": "7.25.9",
         "@babel/plugin-transform-numeric-separator": "7.25.9",
         "@babel/plugin-transform-object-rest-spread": "7.25.9",
@@ -77,12 +79,10 @@
         "@babel/plugin-transform-runtime": "7.26.10",
         "@babel/preset-env": "7.26.9",
         "@babel/preset-typescript": "7.26.0",
-        "@eslint/eslintrc": "3.3.0",
         "@eslint/js": "9.22.0",
         "@types/chai": "5.2.0",
         "@types/estree": "1.0.6",
         "@types/json-schema": "7.0.15",
-        "@types/lodash": "4.17.16",
         "@types/mocha": "10.0.10",
         "@types/node": "22.13.10",
         "@types/semver": "7.5.8",
@@ -92,7 +92,6 @@
         "babel-loader": "10.0.0",
         "babel-plugin-istanbul": "7.0.0",
         "babel-plugin-source-map-support": "2.2.0",
-        "buffer": "6.0.3",
         "chai": "4.5.0",
         "chalk": "2.4.2",
         "eslint": "9.31.0",
@@ -101,7 +100,6 @@
         "events": "3.3.0",
         "globals": "16.0.0",
         "globby": "14.1.0",
-        "husky": "9.1.7",
         "json-schema": "0.4.0",
         "karma": "6.4.4",
         "karma-chrome-launcher": "3.2.0",
@@ -114,7 +112,7 @@
         "karma-spec-reporter": "0.0.36",
         "karma-webpack": "5.0.1",
         "mocha": "11.1.0",
-        "nyc": "17.1.0",
+        "nyc": "18.0.0",
         "prettier": "3.5.3",
         "puppeteer": "24.23.0",
         "querystring-es3": "0.2.1",
@@ -122,7 +120,7 @@
         "source-map-support": "0.5.21",
         "ts-loader": "9.5.2",
         "typescript": "5.8.2",
-        "webpack": "5.98.0",
+        "webpack": "5.105.2",
         "webpack-cli": "6.0.1",
         "webpack-node-externals": "3.0.0"
     },
@@ -132,5 +130,10 @@
     },
     "homepage": "https://tronweb.network",
     "license": "MIT",
-    "repository": "https://github.com/tronprotocol/tronweb.git"
+    "repository": "https://github.com/tronprotocol/tronweb.git",
+    "overrides": {
+        "js-yaml": "4.2.0",
+        "ws": "8.21.0",
+        "serialize-javascript": "7.0.5"
+    }
 }
