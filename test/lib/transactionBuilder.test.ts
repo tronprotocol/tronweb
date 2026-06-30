@@ -232,7 +232,6 @@ describe('TronWeb.transactionBuilder', function () {
             assert.isTrue(res.receipt.result);
         });
 
-        // @ts-ignore – vitest ctx param; @types/mocha's `it` overloads don't accept a ctx parameter
         it(`should allow accounts[8] to create a TestToken with voteScore and precision`, async function (ctx) {
             if (isAllowSameTokenNameApproved) {
                 const options = getTokenOptions();
@@ -264,7 +263,6 @@ describe('TronWeb.transactionBuilder', function () {
                     assert.equal(token.precision, options.precision);
                 }
             } else {
-                // @ts-ignore
                 ctx.skip();
             }
         });
@@ -296,7 +294,6 @@ describe('TronWeb.transactionBuilder', function () {
             }
         });
 
-        // @ts-ignore – vitest ctx param; @types/mocha's `it` overloads don't accept a ctx parameter
         it(`should create a TestToken without freezing anything in 3.6.0`, async function (ctx) {
             if (tronWeb.fullnodeSatisfies('^3.6.0')) {
                 const options = getTokenOptions();
@@ -312,7 +309,6 @@ describe('TronWeb.transactionBuilder', function () {
                     assert.equal(transaction.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
                 }
             } else {
-                // @ts-ignore
                 ctx.skip();
             }
         });
@@ -2395,7 +2391,6 @@ describe('TronWeb.transactionBuilder', function () {
     });
 
     describe('#withdrawBlockRewards', async function () {
-        // @ts-ignore -- mocha's ambient `it` type lacks `.todo`; vitest provides it at runtime (cleaned up in the @types/mocha removal task)
         it.todo('should withdraw block rewards');
     });
 
@@ -2545,7 +2540,6 @@ describe('TronWeb.transactionBuilder', function () {
     });
 
     describe('#createTRXExchange', async function () {
-        // @ts-ignore -- mocha's ambient `it` type lacks `.todo`; vitest provides it at runtime (cleaned up in the @types/mocha removal task)
         it.todo('should create a TRX exchange');
     });
 

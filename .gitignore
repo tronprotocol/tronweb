@@ -12,7 +12,6 @@ test/lib/dist/
 /lib/
 !src/lib
 !test/lib
-.nyc_output/
 .claude/
 CLAUDE.md
 requires/
