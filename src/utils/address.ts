@@ -54,9 +54,9 @@ export function isChecksumAddress(address: string) {
     }
 }
 
-export function fromPrivateKey(privateKey: string, strict = false) {
+export function fromPrivateKey(privateKey: string) {
     try {
-        return pkToAddress(privateKey, strict);
+        return pkToAddress(privateKey);
     } catch {
         return false;
     }

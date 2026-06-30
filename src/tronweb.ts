@@ -282,8 +282,8 @@ export class TronWeb extends EventEmitter {
             isChecksumAddress(address: string) {
                 return isChecksumAddress(address);
             },
-            fromPrivateKey(privateKey: string, strict = false) {
-                return fromPrivateKey(privateKey, strict);
+            fromPrivateKey(privateKey: string) {
+                return fromPrivateKey(privateKey);
             },
         };
     }
