@@ -23,11 +23,7 @@ export default defineConfig({
         include: ['test/**/*.test.ts'],
         testTimeout: 120000,
         hookTimeout: 120000,
-        // Integration tests share TRE chain state via fixed account indices, so
-        // test files must run serially in a single process — never parallelize.
-        fileParallelism: false,
         pool: 'forks',
-        poolOptions: { forks: { singleFork: true } },
         globalSetup: ['./test/setup/globalSetup.ts'],
         coverage: {
             provider: 'v8',
