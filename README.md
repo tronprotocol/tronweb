@@ -86,12 +86,12 @@ This project is also published on NPM and you can access CDN mirrors of this rel
 
 ## Testnet
 
-Shasta is the official Tron testnet. To use it use the following endpoint:
+Nile is a Tron testnet. To use it use the following endpoint:
 ```
-https://api.shasta.trongrid.io
+https://nile.trongrid.io
 ```
-Get some Shasta TRX at https://www.trongrid.io/shasta and play with it.
-Anything you do should be explorable on https://shasta.tronscan.org
+Get some Nile TRX at https://nileex.io/join/getJoinPage and play with it.
+Anything you do should be explorable on https://nile.tronscan.org
 
 ## Your local private network for heavy testing
 
