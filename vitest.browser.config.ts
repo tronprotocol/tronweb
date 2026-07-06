@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitest/config';
+import { playwright } from '@vitest/browser-playwright';
 import path from 'node:path';
 
 // Standalone browser-mode config (chromium via playwright). Kept separate from
@@ -87,7 +88,7 @@ export default defineConfig({
         globalSetup: ['./test/setup/globalSetup.ts'],
         browser: {
             enabled: true,
-            provider: 'playwright',
+            provider: playwright(),
             headless: true,
             instances: [{ browser: 'chromium' }],
         },
