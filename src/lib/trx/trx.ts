@@ -3,8 +3,8 @@ import utils from '../../utils/index.js';
 import { keccak256, toUtf8Bytes, recoverAddress, SigningKey, Signature } from '../../utils/ethersUtils.js';
 import { ADDRESS_PREFIX } from '../../utils/constants.js';
 import { fromHex, toHex } from '../../utils/address.js';
-import { BaseTrx } from './BaseTrx.js';
-import { PreciseTrx } from './PreciseTrx.js';
+import { AbstractTrx } from './AbstractTrx.js';
+import { RawTrx } from './RawTrx.js';
 import { txCheck, txCheckWithArgs } from '../../utils/transaction.js';
 import { ecRecover } from '../../utils/crypto.js';
 import { BroadcastReturn, AddressOptions, BroadcastHexReturn, Address } from '../../types/Trx.js';
@@ -20,13 +20,13 @@ type SignedStringOrSignedTransaction<T extends string | Transaction | SignedTran
     ? string
     : SignedTransaction & T;
 
-export class Trx extends BaseTrx<false> {
+export class Trx extends AbstractTrx<false> {
     protected readonly int64AsString = false as const;
 
-    /** Precise (string-int64) variants of the chain reads, see {@link PreciseTrx}. */
-    readonly precise: PreciseTrx;
-    /** Blocks the plugin system from overriding the `precise` sub-module at runtime. */
-    pluginNoOverride = ['precise'];
+    /** Raw (string-int64) variants of the chain reads, see {@link RawTrx}. */
+    readonly raw: RawTrx;
+    /** Blocks the plugin system from overriding the `raw` sub-module at runtime. */
+    pluginNoOverride = ['raw'];
 
     signMessage;
     sendAsset;
@@ -39,7 +39,7 @@ export class Trx extends BaseTrx<false> {
     constructor(tronWeb: TronWeb) {
         super(tronWeb);
 
-        this.precise = new PreciseTrx(tronWeb);
+        this.raw = new RawTrx(tronWeb);
         this.signMessage = this.sign;
         this.sendAsset = this.sendToken;
         this.send = this.sendTransaction;

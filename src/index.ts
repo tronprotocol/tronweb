@@ -10,8 +10,8 @@ export { providers };
 import { TransactionBuilder } from './lib/TransactionBuilder/TransactionBuilder.js';
 export { TransactionBuilder };
 
-import { Trx, BaseTrx, PreciseTrx } from './lib/trx/index.js';
-export { Trx, BaseTrx, PreciseTrx };
+import { Trx, AbstractTrx, RawTrx } from './lib/trx/index.js';
+export { Trx, AbstractTrx, RawTrx };
 
 import { Contract, Method } from './lib/contract/index.js';
 export { Contract, Method };
@@ -34,8 +34,8 @@ export default {
     providers,
     TransactionBuilder,
     Trx,
-    BaseTrx,
-    PreciseTrx,
+    AbstractTrx,
+    RawTrx,
     Contract,
     Method,
     Event,

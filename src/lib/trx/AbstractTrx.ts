@@ -35,7 +35,7 @@ import { Resource } from '../../types/TransactionBuilder.js';
 type NonInt64NumberField = 'id' | 'type' | 'state' | 'Permission_id' | 'version' | 'trx_num' | 'precision' | 'num' | 'vote_score';
 
 /**
- * Response shape of `PreciseTrx` reads. With `int64_as_string=true` (java-tron#6699)
+ * Response shape of `RawTrx` reads. With `int64_as_string=true` (java-tron#6699)
  * the node serializes protobuf int64/uint64 fields as JSON strings; this type maps
  * exactly those fields to `string` and leaves everything else as declared:
  * - proto int32 and enum fields (see {@link NonInt64NumberField}) keep their type;
@@ -63,7 +63,7 @@ export type Int64AsString<T> = T extends bigint | string | boolean | null | unde
             : T;
 
 /**
- * Resolves to the precise (string-int64) response shape when `P` is true,
+ * Resolves to the raw (string-int64) response shape when `P` is true,
  * to the regular response shape otherwise.
  */
 export type Precise64<T, P extends boolean> = P extends true ? Int64AsString<T> : T;
@@ -81,12 +81,12 @@ export interface DelegatedResourceV2Response {
 
 /**
  * Chain-reading APIs shared by {@link Trx} (regular reads, numbers) and
- * {@link PreciseTrx} (GET reads with `int64_as_string=true`, java-tron#6699, strings).
+ * {@link RawTrx} (GET reads with `int64_as_string=true`, java-tron#6699, strings).
  * Only the routing of the HTTP request differs between the two; the method logic is
  * identical and lives here once.
  *
  * Reads that cannot take the flag are pinned to the regular request in both modes
- * (their int64 values stay numbers even on a `PreciseTrx`):
+ * (their int64 values stay numbers even on a `RawTrx`):
  * - `getNodeInfo` — the node does not honor the flag on getnodeinfo (and the response
  *   carries doubles that must stay numbers);
  * - `listNodes`, `getBandwidthPrices`, `getEnergyPrices`,
@@ -98,10 +98,10 @@ export interface DelegatedResourceV2Response {
  * - `getCurrentRefBlockParams` — feeds local transaction building and MUST stay on the
  *   regular number path.
  * `getCurrentBlock`/`getConfirmedCurrentBlock` (getnowblock does not honor the flag)
- * are instead rerouted in precise mode to `wallet[solidity]/getblock?detail=true`,
+ * are instead rerouted in raw mode to `wallet[solidity]/getblock?detail=true`,
  * which is flag-honoring and returns the same latest block.
  */
-export abstract class BaseTrx<P extends boolean = false> {
+export abstract class AbstractTrx<P extends boolean = false> {
     protected tronWeb: TronWeb;
     protected validator: Validator;
     protected cache: { contracts: Record<string, any> };
@@ -121,7 +121,7 @@ export abstract class BaseTrx<P extends boolean = false> {
 
     /**
      * Routes a read request: regular mode sends it exactly as the historical
-     * implementation did (`method`, POST body or GET query); precise mode re-issues it
+     * implementation did (`method`, POST body or GET query); raw mode re-issues it
      * as GET carrying the payload in the query string plus the `int64_as_string` flag
      * (the node only honors the flag on GET).
      */
@@ -390,7 +390,7 @@ export abstract class BaseTrx<P extends boolean = false> {
     }
 
     /**
-     * NOTE (precise mode): unlike the other reads here, `getaccountbyid` was not part
+     * NOTE (raw mode): unlike the other reads here, `getaccountbyid` was not part
      * of the on-chain-verified `int64_as_string` endpoint set; whether the node honors
      * the flag on it has not been verified against a live account id.
      */
@@ -456,7 +456,7 @@ export abstract class BaseTrx<P extends boolean = false> {
 
         address = toHex(address as string);
 
-        // string|number typing keeps the precise-mode wire format visible in the code
+        // string|number typing keeps the raw-mode wire format visible in the code
         const {
             freeNetUsed = 0,
             freeNetLimit = 0,
