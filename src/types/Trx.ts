@@ -321,3 +321,51 @@ export interface TransactionInfo {
 export interface WitnessList {
     witnesses: BaseWitness[];
 }
+
+/**
+ * Field names inside the mapped response types whose numeric value is NOT a proto
+ * int64/uint64, so the node does not stringify them under `int64_as_string=true`:
+ * - `id` — `Permission.id` is a proto int32 (Owner id=0, Witness id=1, Active id >= 2);
+ * - `type` — `Account.type` / `contract[].type` are proto enums;
+ * - `state` — `Proposal.state` is a proto enum (`ProposalState`);
+ * - `Permission_id` — proto int32 on `contract[]`;
+ * - `version` — `block_header.raw_data.version` is a proto int32;
+ * - `trx_num` / `precision` / `num` / `vote_score` — proto int32 fields of TRC10 tokens.
+ * Verified against Nile: with the flag on, int64 fields flip to strings while these
+ * keep their regular wire form (e.g. block `version: 37`, permission `id: 2`).
+ */
+type NonInt64NumberField = 'id' | 'type' | 'state' | 'Permission_id' | 'version' | 'trx_num' | 'precision' | 'num' | 'vote_score';
+
+/**
+ * Response shape of `RawTrx` reads. With `int64_as_string=true` (java-tron#6699)
+ * the node serializes protobuf int64/uint64 fields as JSON strings; this type maps
+ * exactly those fields to `string` and leaves everything else as declared:
+ * - proto int32 and enum fields (see {@link NonInt64NumberField}) keep their type;
+ * - strings/booleans pass through untouched.
+ *
+ * Note: proto3 omits fields holding their default value, so declared-required fields
+ * can still be absent at runtime (a fresh account is `{}`).
+ */
+export type Int64AsString<T> = T extends bigint | string | boolean | null | undefined
+    ? T
+    : T extends number
+      ? string
+      : T extends (...args: any[]) => any
+        ? T
+        : T extends Map<any, any> | Set<any> | Date
+          ? T
+          : T extends object
+            ? {
+                  [K in keyof T]: K extends NonInt64NumberField
+                      ? T[K] extends number | undefined
+                          ? T[K]
+                          : Int64AsString<T[K]>
+                      : Int64AsString<T[K]>;
+              }
+            : T;
+
+/**
+ * Resolves to the raw (string-int64) response shape when `P` is true,
+ * to the regular response shape otherwise.
+ */
+export type Precise64<T, P extends boolean> = P extends true ? Int64AsString<T> : T;
