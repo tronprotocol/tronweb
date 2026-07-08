@@ -1,12 +1,12 @@
-import { Address, TransactionInfo } from '../../../src/types/Trx';
-import { ContractAbiInterface } from '../../../src/types/ABI';
-import { ContractReadNamespace, ContractWriteNamespace } from '../../../src/lib/contract/readWrite';
-import { TransactionWrapper } from '../../../src/types/Transaction';
+import { Address, TransactionInfo } from '../../../src/types/Trx.js';
+import { ContractAbiInterface } from '../../../src/types/ABI.js';
+import { ContractReadNamespace, ContractWriteNamespace } from '../../../src/types/Contract.js';
+import { TransactionWrapper } from '../../../src/types/Transaction.js';
 import {
     ContractFunctionParameter,
     TriggerConstantContractOptions,
     TriggerSmartContractOptions,
-} from '../../../src/types/TransactionBuilder';
+} from '../../../src/types/TransactionBuilder.js';
 import { assert } from 'vitest';
 import assertThrow from '../../helpers/assertThrow.js';
 import wait from '../../helpers/wait.js';

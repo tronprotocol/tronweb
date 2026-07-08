@@ -2,7 +2,7 @@ import { TronWeb } from '../../tronweb.js';
 import utils from '../../utils/index.js';
 import { Method, AbiFragmentNoErrConstructor } from './method.js';
 import { buildReadNamespace, buildWriteNamespace } from './readWrite.js';
-import type { ContractReadNamespace, ContractWriteNamespace } from './readWrite.js';
+import type { ContractReadNamespace, ContractWriteNamespace } from '../../types/Contract.js';
 import type { ContractAbiInterface, GetMethodsTypeFromAbi, GetOnMethodTypeFromAbi, AnyOnMethodType } from '../../types/ABI.js';
 import type { Address } from '../../types/Trx.js';
 import type { CreateSmartContractOptions } from '../../types/TransactionBuilder.js';
@@ -221,5 +221,6 @@ export type {
     ReadOptions,
     WriteOptions,
     CollapseSingleItemTuple,
-} from './readWrite.js';
+    FunctionSelector,
+} from '../../types/Contract.js';
 export { buildReadNamespace, buildWriteNamespace } from './readWrite.js';
