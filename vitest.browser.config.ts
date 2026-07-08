@@ -79,6 +79,10 @@ export default defineConfig({
             'test/utils/typedData.test.ts',
             // Uses disk-utils (fs/path/zlib) to load test fixtures — Node-only APIs
             'test/utils/address.test.ts',
+            // Fixture-heavy integration suite (deploys a contract, issues tokens,
+            // creates an exchange/proposal on the local TRE) — kept node-only to
+            // avoid doubling its long on-chain setup in the browser run
+            'test/lib/rawTrx.test.ts',
         ],
         testTimeout: 120000,
         hookTimeout: 120000,
