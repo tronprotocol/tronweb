@@ -6,7 +6,7 @@ import EventEmitter from 'eventemitter3';
 import semver from 'semver';
 
 import { TransactionBuilder } from './lib/TransactionBuilder/TransactionBuilder.js';
-import { Trx } from './lib/trx/index.js';
+import { Trx } from './lib/trx/trx.js';
 import { Contract } from './lib/contract/index.js';
 import { Plugin } from './lib/plugin.js';
 import { Event } from './lib/event.js';
