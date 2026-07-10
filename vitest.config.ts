@@ -27,7 +27,10 @@ export default defineConfig({
         globalSetup: ['./test/setup/globalSetup.ts'],
         coverage: {
             provider: 'v8',
-            include: ['src/**'],
+            // Restrict to TS sources: vitest globs untested files with `dot: true`,
+            // so a bare `src/**` also picks up binary junk like `src/.DS_Store`
+            // and fails to parse it when synthesizing 0%-coverage entries.
+            include: ['src/**/*.ts'],
             exclude: [
                 'src/protocol/**',
                 'src/types/**',
