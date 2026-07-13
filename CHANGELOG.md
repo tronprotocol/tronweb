@@ -22,7 +22,6 @@ __6.5.0__
 
 ## Changes
 
-- Removed the `strict` parameter of `TronWeb.address.fromPrivateKey` / `utils.crypto.pkToAddress`. It only forwarded to the internal hex parsing and was effectively always `false`; behavior is unchanged.
 - Migrated the test stack from mocha / karma / chai / nyc to Vitest 4 (node suite plus a headless-Playwright browser suite). Vitest runs the TypeScript test sources directly and provisions test accounts in its `globalSetup`, so the `build:test` / `newaccount` npm scripts are gone; `test`, `test:watch`, `coverage` and `test:browser` are the remaining test scripts.
 
 __6.4.0__
