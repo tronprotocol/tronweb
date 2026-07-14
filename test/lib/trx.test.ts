@@ -34,14 +34,16 @@ describe('TronWeb.trx', function () {
     });
 
     // Contrstuctor Test
-    describe('#constructor()', function () {
+    describe.concurrent('#constructor()', function () {
         it('should have been set a full instance in tronWeb', function () {
             assert.instanceOf(tronWeb.trx, Trx);
         });
     });
 
-    // Account Test
-    describe('#Account Test', function () {
+    // Account Test — the nested suites broadcast only from distinct accounts (or
+    // with distinct contract types), and every test body is a read, so the whole
+    // group runs concurrently.
+    describe.concurrent('#Account Test', function () {
         describe('#getAccount', async function () {
             const idx = 10;
 
@@ -587,7 +589,7 @@ describe('TronWeb.trx', function () {
             });
         });
 
-        describe('#signMessage', async function () {
+        describe.concurrent('#signMessage', async function () {
             const idx = 14;
 
             it('should sign a hex string message', async function () {
@@ -605,7 +607,7 @@ describe('TronWeb.trx', function () {
             });
         });
 
-        describe('#verifyMessage', async function () {
+        describe.concurrent('#verifyMessage', async function () {
             const idx = 14;
             let hexMsg: string;
             let signedMsg: string;
@@ -643,7 +645,7 @@ describe('TronWeb.trx', function () {
             });
         });
 
-        describe('#signTypedData', async function () {
+        describe.concurrent('#signTypedData', async function () {
             // All properties on a domain are optional
             const domain = {
                 name: 'TrcToken Test',
@@ -1191,8 +1193,8 @@ describe('TronWeb.trx', function () {
         });
     });
 
-    // Block Test
-    describe('#Block Test', function () {
+    // Block Test — read-only queries throughout.
+    describe.concurrent('#Block Test', function () {
         describe('#getBlock', async function () {
             it('should get earliest or latest block', async function () {
                 const earliestParentHash = '957dc2d350daecc7bb6a38f3938ebde0a0c1cedafe15f0edae4256a2907449f6';
@@ -1282,7 +1284,7 @@ describe('TronWeb.trx', function () {
 
     // Transaction Test
     describe('#Transaction Test', function () {
-        describe('#send', async function () {
+        describe.concurrent('#send', async function () {
             const fromIdx = 19;
             const toIdx = 20;
 
@@ -1313,7 +1315,7 @@ describe('TronWeb.trx', function () {
             });
         });
 
-        describe('#sendTransaction', async function () {
+        describe.concurrent('#sendTransaction', async function () {
             const fromIdx = 21;
             const toIdx = 22;
 
@@ -1341,7 +1343,7 @@ describe('TronWeb.trx', function () {
             });
         });
 
-        describe('#sendTrx', async function () {
+        describe.concurrent('#sendTrx', async function () {
             const fromIdx = 23;
             const toIdx = 24;
 
@@ -1491,7 +1493,7 @@ describe('TronWeb.trx', function () {
             });
         });
 
-        describe('#broadcastHex', async function () {
+        describe.concurrent('#broadcastHex', async function () {
             const idx = 26;
 
             it('should broadcast a hex transaction', async function () {
@@ -1511,7 +1513,7 @@ describe('TronWeb.trx', function () {
             });
         });
 
-        describe('#getTransaction', async function () {
+        describe.concurrent('#getTransaction', async function () {
             const idx = 26;
             let transaction: Transaction;
 
@@ -1576,11 +1578,24 @@ describe('TronWeb.trx', function () {
             });
 
             it('should throw transaction not found error by transaction from block', async function () {
-                await createEmptyBlock(tronWeb);
-                await wait(3);
-                await createEmptyBlock(tronWeb);
-                const nowBlock = await tronWeb.trx.getCurrentBlock();
-                await assertThrow(tronWeb.trx.getTransactionFromBlock(nowBlock.block_header.raw_data.number - 1, 0), 'Transaction not found in block');
+                // find a guaranteed-empty block: mine on demand and scan what got
+                // mined — blocks are immutable, so once an empty one exists the
+                // assertion can't be raced by other suites' broadcasts
+                let emptyBlockNum: number | undefined;
+                for (let attempt = 0; attempt < 10 && emptyBlockNum === undefined; attempt++) {
+                    const before = (await tronWeb.trx.getCurrentBlock()).block_header.raw_data.number;
+                    await createEmptyBlock(tronWeb);
+                    const after = (await tronWeb.trx.getCurrentBlock()).block_header.raw_data.number;
+                    for (let n = after; n > before; n--) {
+                        const block = await tronWeb.trx.getBlockByNumber(n);
+                        if (!block.transactions || !block.transactions.length) {
+                            emptyBlockNum = n;
+                            break;
+                        }
+                    }
+                }
+                assert.isDefined(emptyBlockNum);
+                await assertThrow(tronWeb.trx.getTransactionFromBlock(emptyBlockNum as number, 0), 'Transaction not found in block');
             });
 
             it('should throw block not found error by transaction from block', async function () {
@@ -1603,7 +1618,7 @@ describe('TronWeb.trx', function () {
             });
         });
 
-        describe('#getTransactionsFromBlock', async function () {
+        describe.concurrent('#getTransactionsFromBlock', async function () {
             const idx = 26;
             let currBlockNum: number;
 
@@ -1641,7 +1656,7 @@ describe('TronWeb.trx', function () {
             });
         });
 
-        describe('#getTransactionInfo (Confirmed)', async function () {
+        describe.concurrent('#getTransactionInfo (Confirmed)', async function () {
             const idx = 26;
             let transaction: Transaction;
 
@@ -1669,7 +1684,7 @@ describe('TronWeb.trx', function () {
             });
         });
 
-        describe('#geUnconfirmedTransactionInfo', async function () {
+        describe.concurrent('#geUnconfirmedTransactionInfo', async function () {
             const idx = 25;
             let transaction: Transaction;
 
@@ -1729,8 +1744,9 @@ describe('TronWeb.trx', function () {
         });
     });
 
-    // TRC 10 Token Test
-    describe('#Token Test', function () {
+    // TRC 10 Token Test — each nested suite issues its token from its own account
+    // (an account can issue only one TRC10), so the group runs concurrently.
+    describe.concurrent('#Token Test', function () {
         describe('#sendAsset', async function () {
             let token: Record<string, Token>;
             const fromIdx = 27;
@@ -2004,8 +2020,8 @@ describe('TronWeb.trx', function () {
         });
     });
 
-    // Exchange Test
-    describe('#Exchange Test', function () {
+    // Exchange Test — the three suites use disjoint account ranges.
+    describe.concurrent('#Exchange Test', function () {
         describe('#listExchanges', async function () {
             const idxS = 33;
             const idxE = 35;
@@ -2171,8 +2187,9 @@ describe('TronWeb.trx', function () {
         });
     });
 
-    // Proposal Test
-    describe('#Proposal Test', async function () {
+    // Proposal Test — proposals are created with pairwise-distinct parameters, so
+    // the concurrent genesis broadcasts can't collide on txID.
+    describe.concurrent('#Proposal Test', async function () {
         describe('#getChainParameters', async function () {
             it('should get proposal list', async function () {
                 const params = await tronWeb.trx.getChainParameters();
@@ -2238,7 +2255,7 @@ describe('TronWeb.trx', function () {
     });
 
     // Contract Test
-    describe('#getContract', async function () {
+    describe.concurrent('#getContract', async function () {
         const idx = 42;
         let transaction: CreateSmartContractTransaction;
 
@@ -2270,7 +2287,7 @@ describe('TronWeb.trx', function () {
         });
     });
 
-    describe('#getContractInfo', async function () {
+    describe.concurrent('#getContractInfo', async function () {
         const idx = 58;
         let transaction: CreateSmartContractTransaction;
 
@@ -2307,14 +2324,14 @@ describe('TronWeb.trx', function () {
     
 
     // Node Test
-    describe('#listNodes', async function () {
+    describe.concurrent('#listNodes', async function () {
         it('should list seeds node', async function () {
             const nodes = await tronWeb.trx.listNodes();
             assert.isArray(nodes);
         });
     });
 
-    describe('#getNodeInfo', async function () {
+    describe.concurrent('#getNodeInfo', async function () {
         it('should get node info', async function () {
             const nodeInfo = await tronWeb.trx.getNodeInfo();
             assert.isDefined(nodeInfo);
@@ -2322,7 +2339,7 @@ describe('TronWeb.trx', function () {
     });
 
     // SR Test
-    describe('#listSuperRepresentatives', async function () {
+    describe.concurrent('#listSuperRepresentatives', async function () {
         it('should list super representatives', async function () {
             const srs = await tronWeb.trx.listSuperRepresentatives();
             assert.isArray(srs);
@@ -2333,56 +2350,56 @@ describe('TronWeb.trx', function () {
         });
     });
 
-    describe('#timeUntilNextVoteCycle', async function () {
+    describe.concurrent('#timeUntilNextVoteCycle', async function () {
         it('should get time util next vote cycle', async function () {
             const num = await tronWeb.trx.timeUntilNextVoteCycle();
             assert.isNumber(num);
         });
     });
 
-    describe('#getReward', async function () {
+    describe.concurrent('#getReward', async function () {
         it('should get the reward', async function () {
             const reward = await tronWeb.trx.getReward(accounts.b58[0]);
             assert.equal(reward, 0);
         });
     });
 
-    describe('#getUnconfirmedReward', async function () {
+    describe.concurrent('#getUnconfirmedReward', async function () {
         it('should get the reward', async function () {
             const reward = await tronWeb.trx.getUnconfirmedReward(accounts.b58[0]);
             assert.equal(reward, 0);
         });
     });
 
-    describe('#getBrokerage', async function () {
+    describe.concurrent('#getBrokerage', async function () {
         it('should get the brokerage', async function () {
             const brokerage = await tronWeb.trx.getBrokerage(accounts.hex[0]);
             assert.equal(brokerage, 20);
         });
     });
 
-    describe('#getUnconfirmedBrokerage', async function () {
+    describe.concurrent('#getUnconfirmedBrokerage', async function () {
         it('should get the brokerage', async function () {
             const brokerage = await tronWeb.trx.getUnconfirmedBrokerage(accounts.hex[0]);
             assert.equal(brokerage, 20);
         });
     });
 
-    describe('#getBandwidthPrices', async function () {
+    describe.concurrent('#getBandwidthPrices', async function () {
         it('should get bandwidth prices', async function () {
             const prices = await tronWeb.trx.getBandwidthPrices();
             assert.isString(prices);
         });
     });
 
-    describe('#getEnergyPrices', async function () {
+    describe.concurrent('#getEnergyPrices', async function () {
         it('should get energy prices', async function () {
             const prices = await tronWeb.trx.getEnergyPrices();
             assert.isString(prices);
         });
     });
 
-    describe('#signMessageV2', async function () {
+    describe.concurrent('#signMessageV2', async function () {
         tests.forEach(function (test) {
             it('signs a message "' + test.name + '"', async function () {
                 const tronWeb = new TronWeb({ fullHost: FULL_NODE_API, privateKey: test.privateKey });
@@ -2392,7 +2409,7 @@ describe('TronWeb.trx', function () {
         });
     });
 
-    describe('#verifyMessageV2', async function () {
+    describe.concurrent('#verifyMessageV2', async function () {
         tests.forEach(function (test) {
             it('signs a message "' + test.name + '"', async function () {
                 const tronWeb = new TronWeb({ fullHost: FULL_NODE_API, privateKey: test.privateKey });
@@ -2402,7 +2419,7 @@ describe('TronWeb.trx', function () {
         });
     });
 
-    describe('#getCurrentRefBlockParams', async function () {
+    describe.concurrent('#getCurrentRefBlockParams', async function () {
         it('should fetch current ref block params', async () => {
             const result = await tronWeb.trx.getCurrentRefBlockParams();
 
@@ -2423,7 +2440,7 @@ describe('TronWeb.trx', function () {
         });
     });
 
-    describe('#getNowWitnessList', async function () {
+    describe.concurrent('#getNowWitnessList', async function () {
         it('should fetch now witness list', async () => {
             const witnesses = await tronWeb.trx.getNowWitnessList({
                 offset: 0,

@@ -37,7 +37,9 @@ const EXCHANGER_IDX = 92;
 const DEPLOYER_IDX = 93;
 const RECEIVER_IDX = 94;
 
-describe('TronWeb.trx.raw (RawTrx) — local TRE', function () {
+// Every chain mutation happens in the top-level beforeAll; all tests below are
+// pure reads, so the whole suite runs concurrently.
+describe.concurrent('TronWeb.trx.raw (RawTrx) — local TRE', function () {
     let tronWeb: TronWeb;
     let trx: Trx;
     let raw: RawTrx;
@@ -129,15 +131,9 @@ describe('TronWeb.trx.raw (RawTrx) — local TRE', function () {
         // exchanger, which then backs the exchange fixture with the pair
         const tokenIds: string[] = [];
         for (const idx of [ISSUER_A_IDX, ISSUER_B_IDX]) {
-            // the default saleStart (Date.now() + 100ms) loses the race against
-            // head-block time once parallel suites are instamining blocks; the
-            // node rejects start_time <= headBlockTimestamp. A wide margin is
-            // safe — nothing here needs the sale to be active.
-            const tokenOptions = {
-                ...config.getTokenOptions(),
-                saleStart: Date.now() + 60_000,
-                saleEnd: Date.now() + 3_600_000,
-            };
+            // config.getTokenOptions() defaults to a far-out sale window, which is
+            // exactly what this fixture needs: nothing here purchases from the sale
+            const tokenOptions = config.getTokenOptions();
             await broadcastFixture(
                 await tronWeb.transactionBuilder.createToken(tokenOptions, accounts.hex[idx]),
                 accounts.pks[idx]
