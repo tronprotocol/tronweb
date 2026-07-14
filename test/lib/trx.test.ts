@@ -10,6 +10,8 @@ import signMessageTests from '../testcases/src/sign-message.js';
 import config from '../helpers/config.js';
 import { Address, Exchange, Proposal, Token } from '../../src/types/Trx.js';
 import { CreateSmartContractTransaction, SignedTransaction, Transaction } from '../../src/types/Transaction.js';
+import { txJsonToPb, txPbToTxID, txPbToRawDataHex } from '../../src/utils/transaction.js';
+import { deepCopyJson } from '../../src/lib/TransactionBuilder/helper.js';
 import { Permission } from '../../src/types/Contract.js';
 import contracts from '../fixtures/contracts.js';
 import { createEmptyBlock } from '../helpers/createEmptyBlock.js';
@@ -1041,6 +1043,19 @@ describe('TronWeb.trx', function () {
         describe('#multiSign (getSignWeight transaction validation)', function () {
             const ownerIdx = 15;
 
+            // A copy of `original` with Permission_id set and `tamper` applied, whose
+            // txID/raw_data_hex are recomputed so the result is internally consistent —
+            // the shape a malicious fullNode would return to pass a self-referential check.
+            function tamperedCopy<T extends Transaction>(original: T, tamper: (rawData: T['raw_data']) => void): T {
+                const tampered = deepCopyJson<T>(original);
+                tampered.raw_data.contract[0].Permission_id = 2;
+                tamper(tampered.raw_data);
+                const pb = txJsonToPb(tampered);
+                tampered.txID = txPbToTxID(pb).replace(/^0x/, '');
+                tampered.raw_data_hex = txPbToRawDataHex(pb).toLowerCase();
+                return tampered;
+            }
+
             it('should reject a transaction substituted by the fullNode', async function () {
                 const signerPk = accounts.pks[ownerIdx];
                 const signerAddress = tronWeb.address
@@ -1059,6 +1074,61 @@ describe('TronWeb.trx', function () {
                     approved_list: [],
                     current_weight: 0,
                     transaction: { transaction: substituted },
+                } as any);
+
+                try {
+                    await assertThrow(tronWeb.trx.multiSign(original, signerPk, 2), 'Invalid transaction provided');
+                } finally {
+                    spy.mockRestore();
+                }
+            });
+
+            it('should reject a returned transaction whose expiration was extended by the fullNode', async function () {
+                const signerPk = accounts.pks[ownerIdx];
+                const signerAddress = tronWeb.address
+                    .toHex(tronWeb.address.fromPrivateKey(signerPk) as string)
+                    .toLowerCase();
+
+                const original = await tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.b58[ownerIdx]);
+                // Identical contract params, but expiration stretched by an hour.
+                const tampered = tamperedCopy(original, (rawData) => {
+                    rawData.expiration += 3600 * 1000;
+                });
+
+                const spy = vi.spyOn(tronWeb.trx, 'getSignWeight').mockResolvedValue({
+                    result: { code: 'NOT_ENOUGH_PERMISSION', message: '' },
+                    permission: { keys: [{ address: signerAddress, weight: 1 }] },
+                    approved_list: [],
+                    current_weight: 0,
+                    transaction: { transaction: tampered },
+                } as any);
+
+                try {
+                    await assertThrow(tronWeb.trx.multiSign(original, signerPk, 2), 'Invalid transaction provided');
+                } finally {
+                    spy.mockRestore();
+                }
+            });
+
+            it('should reject a returned transaction whose ref block was substituted by the fullNode', async function () {
+                const signerPk = accounts.pks[ownerIdx];
+                const signerAddress = tronWeb.address
+                    .toHex(tronWeb.address.fromPrivateKey(signerPk) as string)
+                    .toLowerCase();
+
+                const original = await tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.b58[ownerIdx]);
+                // Identical contract params, but anchored to a different ref block.
+                const tampered = tamperedCopy(original, (rawData) => {
+                    rawData.ref_block_bytes = rawData.ref_block_bytes === '0001' ? '0002' : '0001';
+                    rawData.ref_block_hash = rawData.ref_block_hash === '95a2484e6b74b0e7' ? '95a2484e6b74b0e8' : '95a2484e6b74b0e7';
+                });
+
+                const spy = vi.spyOn(tronWeb.trx, 'getSignWeight').mockResolvedValue({
+                    result: { code: 'NOT_ENOUGH_PERMISSION', message: '' },
+                    permission: { keys: [{ address: signerAddress, weight: 1 }] },
+                    approved_list: [],
+                    current_weight: 0,
+                    transaction: { transaction: tampered },
                 } as any);
 
                 try {

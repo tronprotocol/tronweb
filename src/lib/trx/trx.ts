@@ -279,7 +279,22 @@ export class Trx extends AbstractTrx<false> {
                 // the args used to re-derive and compare the returned transaction.
                 const returnedTransaction = signWeight.transaction.transaction;
                 const args = { ...transaction.raw_data.contract[0].parameter.value, Permission_id: permissionId };
-                if (!txCheckWithArgs(returnedTransaction, args, transaction.raw_data)) {
+                // txCheckWithArgs rebuilds the block-header fields (ref block, expiration,
+                // timestamp) from the checked transaction itself, so a substituted header
+                // would be self-consistent — overwrite them with the submitted transaction's
+                // values, forcing the returned raw_data_hex/txID to match the header we sent.
+                const localRawData = transaction.raw_data;
+                const checkedTransaction = {
+                    ...returnedTransaction,
+                    raw_data: {
+                        ...returnedTransaction.raw_data,
+                        ref_block_bytes: localRawData.ref_block_bytes,
+                        ref_block_hash: localRawData.ref_block_hash,
+                        expiration: localRawData.expiration,
+                        timestamp: localRawData.timestamp,
+                    },
+                };
+                if (!txCheckWithArgs(checkedTransaction, args, localRawData)) {
                     throw new Error('Invalid transaction provided');
                 }
 
