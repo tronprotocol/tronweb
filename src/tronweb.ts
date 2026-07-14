@@ -18,7 +18,7 @@ import { DefaultAddress, NodeProvider, TronWebOptions, IBigNumber } from './type
 import { ContractAbiInterface, ContractInstance } from './types/ABI.js';
 import { Address } from './types/Trx.js';
 
-const DEFAULT_VERSION = '4.7.1';
+const DEFAULT_VERSION = '4.8.2';
 
 const FEE_LIMIT = 150000000;
 
