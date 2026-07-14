@@ -1138,6 +1138,35 @@ describe('TronWeb.trx', function () {
                 }
             });
 
+            it('should reject a returned transaction whose contract type was substituted by the fullNode', async function () {
+                const signerPk = accounts.pks[ownerIdx];
+                const signerAddress = tronWeb.address
+                    .toHex(tronWeb.address.fromPrivateKey(signerPk) as string)
+                    .toLowerCase();
+
+                // WithdrawBalanceContract and CancelAllUnfreezeV2Contract both carry only
+                // { owner_address }, so a node can return a self-consistent transaction of the
+                // other type reusing the same params.
+                const original = await tronWeb.transactionBuilder.withdrawBlockRewards(accounts.hex[ownerIdx]);
+                const tampered = tamperedCopy(original, (rawData) => {
+                    (rawData.contract[0] as any).type = 'CancelAllUnfreezeV2Contract';
+                });
+
+                const spy = vi.spyOn(tronWeb.trx, 'getSignWeight').mockResolvedValue({
+                    result: { code: 'NOT_ENOUGH_PERMISSION', message: '' },
+                    permission: { keys: [{ address: signerAddress, weight: 1 }] },
+                    approved_list: [],
+                    current_weight: 0,
+                    transaction: { transaction: tampered },
+                } as any);
+
+                try {
+                    await assertThrow(tronWeb.trx.multiSign(original, signerPk, 2), 'Invalid transaction provided');
+                } finally {
+                    spy.mockRestore();
+                }
+            });
+
             it('should reject when getSignWeight returns no transaction', async function () {
                 const signerPk = accounts.pks[ownerIdx];
                 const signerAddress = tronWeb.address
