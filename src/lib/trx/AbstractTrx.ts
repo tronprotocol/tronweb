@@ -342,11 +342,6 @@ export abstract class AbstractTrx<P extends boolean = false> {
         return this.getAccountInfoById(id, { confirmed: true });
     }
 
-    /**
-     * NOTE (raw mode): unlike the other reads here, `getaccountbyid` was not part
-     * of the on-chain-verified `int64_as_string` endpoint set; whether the node honors
-     * the flag on it has not been verified against a live account id.
-     */
     async getAccountInfoById(id: string, options: { confirmed: boolean }): Promise<Precise64<Account, P>> {
         this.validator.notValid([
             {
