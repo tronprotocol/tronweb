@@ -209,16 +209,16 @@ export interface AddressOptions {
 }
 
 enum ProposalState {
-    PENDING = 0,
-    DISAPPROVED = 1,
-    APPROVED = 2,
-    CANCELED = 3,
+    PENDING = 'PENDING',
+    DISAPPROVED = 'DISAPPROVED',
+    APPROVED = 'APPROVED',
+    CANCELED = 'CANCELED',
 }
 
 export interface Proposal {
     proposal_id: number;
     proposer_address: string;
-    parameters: HTTPMap<number, number>;
+    parameters: { key: number; value: number }[];
     expiration_time: number;
     create_time: number;
     approvals: string[];
@@ -327,14 +327,13 @@ export interface WitnessList {
  * int64/uint64, so the node does not stringify them under `int64_as_string=true`:
  * - `id` — `Permission.id` is a proto int32 (Owner id=0, Witness id=1, Active id >= 2);
  * - `type` — `Account.type` / `contract[].type` are proto enums;
- * - `state` — `Proposal.state` is a proto enum (`ProposalState`);
  * - `Permission_id` — proto int32 on `contract[]`;
  * - `version` — `block_header.raw_data.version` is a proto int32;
  * - `trx_num` / `precision` / `num` / `vote_score` — proto int32 fields of TRC10 tokens.
  * Verified against Nile: with the flag on, int64 fields flip to strings while these
  * keep their regular wire form (e.g. block `version: 37`, permission `id: 2`).
  */
-type NonInt64NumberField = 'id' | 'type' | 'state' | 'Permission_id' | 'version' | 'trx_num' | 'precision' | 'num' | 'vote_score';
+type NonInt64NumberField = 'id' | 'type' | 'Permission_id' | 'version' | 'trx_num' | 'precision' | 'num' | 'vote_score';
 
 /**
  * Response shape of `RawTrx` reads. With `int64_as_string=true` (java-tron#6699)
