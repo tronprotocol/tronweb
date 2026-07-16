@@ -79,7 +79,7 @@ cp node_modules/tronweb/dist/TronWeb.js ./js/tronweb.js
 ```
 so that you can call it in your HTML page as
 ```
-<script src="./js/tronweb.js"><script>
+<script src="./js/tronweb.js"></script>
 ```
 
 This project is also published on NPM and you can access CDN mirrors of this release (please use sub-resource integrity for any `<script>` includes).
