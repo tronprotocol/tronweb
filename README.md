@@ -198,7 +198,7 @@ In order to contribute you can
 * install the dependencies — `npm i`
 * do your changes to the code
 * build the TronWeb dist files — `npm run build:all`
-* run a local private network using Tron Quickstart
+* run a local [private network](#your-local-private-network-for-heavy-testing)
 * run the tests — `npm run test`
 * push your changes and open a pull request
 
