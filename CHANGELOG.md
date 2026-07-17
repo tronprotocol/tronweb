@@ -20,6 +20,10 @@ __6.5.0__
 
   When `multiSign` is called with a `permissionId` on a transaction that does not carry one yet, it refreshes the transaction through `getSignWeight` and previously adopted the fullNode's response unchecked. It now verifies that the returned transaction matches the one submitted (including the injected `Permission_id`) before signing, and throws `Invalid transaction provided` otherwise — a compromised or malicious fullNode can no longer substitute a different transaction for signing.
 
+- Corrected `Types.Proposal` to match the node's JSON wire format
+
+  `Proposal.state` is now typed as the enum-name string the node actually returns (`'PENDING' | 'DISAPPROVED' | 'APPROVED' | 'CANCELED'`) instead of a numeric enum, and `Proposal.parameters` as the `{ key, value }[]` array the node serializes instead of a key/value map. Runtime values are unchanged — the previous declarations did not match what `getProposal` / `listProposals` return; code type-checked against the old numeric `state` (e.g. `state === 2`) now fails to compile and should compare against the string form.
+
 ## Changes
 
 - Migrated the test stack from mocha / karma / chai / nyc to Vitest 4 (node suite plus a headless-Playwright browser suite). Vitest runs the TypeScript test sources directly and provisions test accounts in its `globalSetup`, so the `build:test` / `newaccount` npm scripts are gone; `test`, `test:watch`, `coverage` and `test:browser` are the remaining test scripts.
