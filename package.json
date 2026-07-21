@@ -112,7 +112,6 @@
     "license": "MIT",
     "repository": "https://github.com/tronprotocol/tronweb.git",
     "overrides": {
-        "js-yaml": "4.2.0",
         "ws": "8.21.0",
         "serialize-javascript": "7.0.5"
     }
