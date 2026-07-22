@@ -86,8 +86,8 @@ describe('TronWeb.lib.event', async function () {
 
     describe('#getEventsByTransactionID', async function () {
         it('should emit an unconfirmed event and get it', async function () {
-            tronWeb.setPrivateKey(accounts.pks[1]);
-            const txId = await contract.methods.emitNow(accounts.hex[2], 2000).send({
+            tronWeb.setPrivateKey(accounts.pks[64]);
+            const txId = await contract.methods.emitNow(accounts.hex[65], 2000).send({
                 from: accounts.hex[1],
             });
             let events;
@@ -99,15 +99,15 @@ describe('TronWeb.lib.event', async function () {
                 await wait(0.5);
             }
 
-            assert.equal(events.data![0].result._receiver.substring(2), accounts.hex[2].substring(2));
-            assert.equal(events.data![0].result._sender.substring(2), accounts.hex[1].substring(2));
+            assert.equal(events.data![0].result._receiver.substring(2), accounts.hex[65].substring(2));
+            assert.equal(events.data![0].result._sender.substring(2), accounts.hex[64].substring(2));
             // assert.equal(events.data![0].resourceNode, 'fullNode');
         });
 
         it('should emit an event, wait for confirmation and get it', async function () {
-            tronWeb.setPrivateKey(accounts.pks[1]);
+            tronWeb.setPrivateKey(accounts.pks[57]);
             const output = await contract.methods.emitNow(accounts.hex[2], 2000).send({
-                from: accounts.hex[1],
+                from: accounts.hex[57],
                 shouldPollResponse: true,
                 rawResponse: true,
             });
@@ -123,14 +123,14 @@ describe('TronWeb.lib.event', async function () {
             }
 
             assert.equal(events.data![0].result._receiver.substring(2), accounts.hex[2].substring(2));
-            assert.equal(events.data![0].result._sender.substring(2), accounts.hex[1].substring(2));
+            assert.equal(events.data![0].result._sender.substring(2), accounts.hex[57].substring(2));
             // assert.equal(events.data![0].resourceNode, 'solidityNode');
         });
     });
 
     describe('#getEventsByContractAddress', async function () {
-        const senderIdx = 3;
-        const receiverIdx = 4;
+        const senderIdx = 53;
+        const receiverIdx = 54;
 
         it('should emit an event and wait for it', async function () {
             await contract.methods.emitNow(accounts.hex[receiverIdx], 4000).send(
@@ -156,8 +156,8 @@ describe('TronWeb.lib.event', async function () {
     });
 
     describe('#getEventsByBlockNumber', async function () {
-        const senderIdx = 3;
-        const receiverIdx = 4;
+        const senderIdx = 55;
+        const receiverIdx = 56;
 
         it('should emit an event and wait for it', async function () {
             const transactionInfo = await contract.methods.emitNow(accounts.hex[receiverIdx], 4000).send(
