@@ -229,7 +229,7 @@ describe('TronWeb.transactionBuilder', function () {
             const options = getTokenOptions();
             const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.b58[2]);
             const res = await broadcaster(transaction, accounts.pks[2]);
-            assert.isTrue(res.receipt.result, `createToken failed: ${tronWeb.toUtf8(res.receipt.message)}`);
+            assert.isTrue(res.receipt.result, `createToken failed: ${res.receipt.message && tronWeb.toUtf8(res.receipt.message)}`);
         });
 
         it(`should allow accounts[8] to create a TestToken with voteScore and precision`, async function (ctx) {
@@ -253,7 +253,7 @@ describe('TronWeb.transactionBuilder', function () {
                     assert.equal(transaction.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
 
                     const res = await broadcaster(null, accounts.pks[8 + i], transaction);
-                    assert.isTrue(res.receipt.result, `createToken failed: ${tronWeb.toUtf8(res.receipt.message)}`);
+                    assert.isTrue(res.receipt.result, `createToken failed: ${res.receipt.message && tronWeb.toUtf8(res.receipt.message)}`);
 
                     const tokenList = await tronWeb.trx.getTokensIssuedByAddress(accounts.b58[8 + i]);
                     const tokenID = tokenList[options.name].id;
@@ -565,23 +565,18 @@ describe('TronWeb.transactionBuilder', function () {
 
     describe('#updateToken()', function () {
         let tokenOptions;
-        // let tokenID;
+        const idx = 29;
 
         beforeAll(async function () {
 
             tokenOptions = getTokenOptions();
-            const res = await broadcaster(tronWeb.transactionBuilder.createToken(tokenOptions, accounts.b58[2]), accounts.pks[2]);
-            assert.isTrue(res.receipt.result, `createToken failed: ${tronWeb.toUtf8(res.receipt.message)}`);
+            const res = await broadcaster(tronWeb.transactionBuilder.createToken(tokenOptions, accounts.b58[idx]), accounts.pks[idx]);
+            assert.isTrue(res.receipt.result, `createToken failed: ${res.receipt.message && tronWeb.toUtf8(res.receipt.message)}`);
 
             let tokenList;
             while (!tokenList) {
-                tokenList = await tronWeb.trx.getTokensIssuedByAddress(accounts.b58[2]);
+                tokenList = await tronWeb.trx.getTokensIssuedByAddress(accounts.b58[idx]);
             }
-            // if (isAllowSameTokenNameApproved) {
-            //     tokenID = tokenList[tokenOptions.name].id;
-            // } else {
-            //     tokenID = tokenList[tokenOptions.name].name;
-            // }
         });
 
         it(`should allow accounts[2] to update a TestToken`, async function () {
@@ -685,11 +680,11 @@ describe('TronWeb.transactionBuilder', function () {
             tokenOptions = getTokenOptions();
             // the tests purchase from this sale, so it must open right away —
             // override the far-out default from config.getTokenOptions()
-            tokenOptions.saleStart = Date.now() + 100;
+            tokenOptions.saleStart = Date.now() + 1000;
             tokenOptions.saleEnd = Date.now() + 60000;
 
             const res = await broadcaster(tronWeb.transactionBuilder.createToken(tokenOptions, accounts.b58[5]), accounts.pks[5]);
-            assert.isTrue(res.receipt.result, `createToken failed: ${tronWeb.toUtf8(res.receipt.message)}`);
+            assert.isTrue(res.receipt.result, `createToken failed: ${res.receipt.message && tronWeb.toUtf8(res.receipt.message)}`);
 
             let tokenList;
             while (!tokenList) {
@@ -737,6 +732,7 @@ describe('TronWeb.transactionBuilder', function () {
         });
 
         it(`should allow accounts[2] to purchase a token created by accounts[5] and broadcast`, async function () {
+            await wait(1);
             const param: Parameters<TransactionBuilder['purchaseToken']> = [accounts.b58[5], tokenID, 10, accounts.b58[2]];
             const transaction = await tronWeb.transactionBuilder.purchaseToken(...param);
 
@@ -801,11 +797,11 @@ describe('TronWeb.transactionBuilder', function () {
             tokenOptions = getTokenOptions();
             // the tests purchase from this sale, so it must open right away —
             // override the far-out default from config.getTokenOptions()
-            tokenOptions.saleStart = Date.now() + 100;
+            tokenOptions.saleStart = Date.now() + 1000;
             tokenOptions.saleEnd = Date.now() + 60000;
 
             const res = await broadcaster(tronWeb.transactionBuilder.createToken(tokenOptions, accounts.b58[6]), accounts.pks[6]);
-            assert.isTrue(res.receipt.result, `createToken failed: ${tronWeb.toUtf8(res.receipt.message)}`);
+            assert.isTrue(res.receipt.result, `createToken failed: ${res.receipt.message && tronWeb.toUtf8(res.receipt.message)}`);
 
             let tokenList;
             while (!tokenList) {
@@ -2503,7 +2499,7 @@ describe('TronWeb.transactionBuilder', function () {
                 const options = getTokenOptions();
                 const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.hex[i]);
                 const res = await broadcaster(null, accounts.pks[i], transaction);
-                assert.isTrue(res.receipt.result, `createToken failed: ${tronWeb.toUtf8(res.receipt.message)}`);
+                assert.isTrue(res.receipt.result, `createToken failed: ${res.receipt.message && tronWeb.toUtf8(res.receipt.message)}`);
                 await waitChainData('token', accounts.hex[i]);
                 const token = await tronWeb.trx.getTokensIssuedByAddress(accounts.hex[i]);
                 await waitChainData('tokenById', token[Object.keys(token)[0]]['id']);
@@ -2580,7 +2576,7 @@ describe('TronWeb.transactionBuilder', function () {
                 const options = getTokenOptions();
                 const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.hex[i]);
                 const res = await broadcaster(null, accounts.pks[i], transaction);
-                assert.isTrue(res.receipt.result, `createToken failed: ${tronWeb.toUtf8(res.receipt.message)}`);
+                assert.isTrue(res.receipt.result, `createToken failed: ${res.receipt.message && tronWeb.toUtf8(res.receipt.message)}`);
                 await waitChainData('token', accounts.hex[i]);
                 const token = await tronWeb.trx.getTokensIssuedByAddress(accounts.hex[i]);
                 await waitChainData('tokenById', token[Object.keys(token)[0]]['id']);
@@ -2641,7 +2637,7 @@ describe('TronWeb.transactionBuilder', function () {
                 const options = getTokenOptions();
                 const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.hex[i]);
                 const res = await broadcaster(null, accounts.pks[i], transaction);
-                assert.isTrue(res.receipt.result, `createToken failed: ${tronWeb.toUtf8(res.receipt.message)}`);
+                assert.isTrue(res.receipt.result, `createToken failed: ${res.receipt.message && tronWeb.toUtf8(res.receipt.message)}`);
                 await waitChainData('token', accounts.hex[i]);
                 const token = await tronWeb.trx.getTokensIssuedByAddress(accounts.hex[i]);
                 await waitChainData('tokenById', token[Object.keys(token)[0]]['id']);
@@ -2691,8 +2687,8 @@ describe('TronWeb.transactionBuilder', function () {
     });
 
     describe('#tradeExchangeTokens', async function () {
-        const idxS = 31;
-        const idxE = 33;
+        const idxS = 50;
+        const idxE = 52;
         const tokenNames: string[] = [];
         let exchangeId = 0;
 
@@ -2703,7 +2699,7 @@ describe('TronWeb.transactionBuilder', function () {
                 const options = getTokenOptions();
                 const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.hex[i]);
                 const res = await broadcaster(null, accounts.pks[i], transaction);
-                assert.isTrue(res.receipt.result, `createToken failed: ${tronWeb.toUtf8(res.receipt.message)}`);
+                assert.isTrue(res.receipt.result, `createToken failed: ${res.receipt.message && tronWeb.toUtf8(res.receipt.message)}`);
                 await waitChainData('token', accounts.hex[i]);
                 const token = await tronWeb.trx.getTokensIssuedByAddress(accounts.hex[i]);
                 await waitChainData('tokenById', token[Object.keys(token)[0]]['id']);
