@@ -86,9 +86,6 @@ export default defineConfig({
         ],
         testTimeout: 120000,
         hookTimeout: 120000,
-        // Run test files one at a time: the integration tests are very long and
-        // running them concurrently causes the chromium connection to time out.
-        fileParallelism: false,
         globalSetup: ['./test/setup/globalSetup.ts'],
         browser: {
             enabled: true,
