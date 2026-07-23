@@ -2047,7 +2047,8 @@ describe('TronWeb.transactionBuilder', function () {
                 ],
             } as unknown as CreateSmartContractOptions;
             const transaction = await tronWeb.transactionBuilder.createSmartContract(options, accounts.hex[10]);
-            await broadcaster(null, accounts.pks[10], transaction);
+            const res = await broadcaster(null, accounts.pks[10], transaction);
+            assert.isTrue(res.receipt.result, `createSmartContract failed: ${res.receipt.message && tronWeb.toUtf8(res.receipt.message)}`);
             while (true) {
                 const tx = await tronWeb.trx.getTransactionInfo(transaction.txID);
                 if (Object.keys(tx).length === 0) {
