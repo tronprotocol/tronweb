@@ -102,8 +102,10 @@ export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
     }
 
     hasProperty(property: number | string | symbol) {
-        // eslint-disable-next-line no-prototype-builtins
-        return this.hasOwnProperty(property) || (this as any).__proto__.hasOwnProperty(property);
+        return (
+            Object.prototype.hasOwnProperty.call(this, property) ||
+            Object.prototype.hasOwnProperty.call(Object.getPrototypeOf(this), property)
+        );
     }
 
     loadAbi(abi: Abi) {
