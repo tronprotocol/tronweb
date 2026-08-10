@@ -171,26 +171,10 @@ export interface TransactionSignWeight {
     transaction: { transaction: Transaction };
 }
 
-enum BroadcastReturn_response_code {
-    SUCCESS = 0,
-    SIGERROR = 1, // error in signature
-    CONTRACT_VALIDATE_ERROR = 2,
-    CONTRACT_EXE_ERROR = 3,
-    BANDWITH_ERROR = 4,
-    DUP_TRANSACTION_ERROR = 5,
-    TAPOS_ERROR = 6,
-    TOO_BIG_TRANSACTION_ERROR = 7,
-    TRANSACTION_EXPIRATION_ERROR = 8,
-    SERVER_BUSY = 9,
-    NO_CONNECTION = 10,
-    NOT_ENOUGH_EFFECTIVE_CONNECTION = 11,
-    OTHER_ERROR = 20,
-}
-
 export interface BroadcastReturn<T extends SignedTransaction> {
     result: boolean;
     txid: string;
-    code: BroadcastReturn_response_code;
+    code: string;
     message: string;
     transaction: T;
 }
