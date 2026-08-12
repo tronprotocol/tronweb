@@ -8,7 +8,8 @@ HOOKS=(pre-commit pre-push)
 
 for HOOK in "${HOOKS[@]}"; do
     HOOK_SOURCE="${SCRIPT_DIR}/${HOOK}"
-    HOOK_TARGET="${PROJECT_ROOT}/.git/hooks/${HOOK}"
+    HOOKS_DIR="$(git -C "${PROJECT_ROOT}" rev-parse --git-path hooks)"
+    HOOK_TARGET="${HOOKS_DIR}/${HOOK}"
 
     if [ -f "${HOOK_TARGET}" ]; then
         echo "[warn] Existing ${HOOK} hook found at ${HOOK_TARGET}"
