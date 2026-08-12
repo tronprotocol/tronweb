@@ -114,6 +114,7 @@ export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
         this.methodInstances = Object.create(null) as GetMethodsTypeFromAbi<Abi>;
 
         this.props.forEach((prop: string) => delete (this as any)[prop]);
+        this.props = [];
 
         abi.forEach((func) => {
             // Don't build a method for constructor function. That's handled through contract create.
