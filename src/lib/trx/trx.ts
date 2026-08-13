@@ -260,14 +260,14 @@ export class Trx extends AbstractTrx<false> {
 
             let foundKey = false;
             signWeight.permission.keys.map((key) => {
-                if (key.address === address) foundKey = true;
+                if (key.address.toLowerCase() === address) foundKey = true;
             });
 
             if (!foundKey) {
                 throw new Error('Address ' + fromHex(address) + ' has no permission to sign');
             }
 
-            if (signWeight.approved_list && signWeight.approved_list.indexOf(address) != -1) {
+            if (signWeight.approved_list && signWeight.approved_list.some((approved) => approved.toLowerCase() === address)) {
                 throw new Error('Address ' + fromHex(address) + ' already sign transaction');
             }
 
