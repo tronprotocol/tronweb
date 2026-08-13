@@ -62,7 +62,13 @@ export function signTransaction(priKeyBytes: string | BytesLike, transaction: an
     const signature = ECKeySign(hexStr2byteArray(txID), priKeyBytes);
 
     if (Array.isArray(transaction.signature)) {
-        if (!transaction.signature.includes(signature)) transaction.signature.push(signature);
+        // Signatures coming back from the chain may carry a 0x prefix and differ
+        // in hex casing from locally generated ones, so compare normalized values.
+        const normalizedSignature = signature.replace(/^0x/, '').toLowerCase();
+        const alreadySigned = transaction.signature.some(
+            (sig: string) => sig.replace(/^0x/, '').toLowerCase() === normalizedSignature
+        );
+        if (!alreadySigned) transaction.signature.push(signature);
     } else transaction.signature = [signature];
     return transaction;
 }
