@@ -8,7 +8,7 @@ HOOKS=(pre-commit pre-push)
 
 for HOOK in "${HOOKS[@]}"; do
     HOOK_SOURCE="${SCRIPT_DIR}/${HOOK}"
-    HOOKS_DIR="$(git -C "${PROJECT_ROOT}" rev-parse --git-path hooks)"
+    HOOKS_DIR="$(git -C "${PROJECT_ROOT}" rev-parse --path-format=absolute --git-path hooks)"
     HOOK_TARGET="${HOOKS_DIR}/${HOOK}"
 
     if [ -f "${HOOK_TARGET}" ]; then
