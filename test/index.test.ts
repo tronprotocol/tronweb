@@ -1,4 +1,4 @@
-import { assert } from 'chai';
+import { assert } from 'vitest';
 import Config from './helpers/config.js';
 import { Contract, TronWeb, providers, Types } from './setup/TronWeb.js';
 import tronWebBuilder from './helpers/tronWebBuilder.js';
@@ -241,18 +241,22 @@ describe('TronWeb Instance', function () {
             assert.equal(tronWeb.defaultPrivateKey, PRIVATE_KEY);
         });
 
-        it('should emit an addressChanged event', function (done) {
-            this.timeout(1000);
+        it('should emit an addressChanged event', function () {
+            return new Promise<void>((resolve, reject) => {
+                const tronWeb = tronWebBuilder.createInstance();
 
-            const tronWeb = tronWebBuilder.createInstance();
+                tronWeb.on('addressChanged', ({ hex, base58 }) => {
+                    try {
+                        assert.equal(hex, ADDRESS_HEX);
+                        assert.equal(base58, ADDRESS_BASE58);
+                        resolve();
+                    } catch (err) {
+                        reject(err);
+                    }
+                });
 
-            tronWeb.on('addressChanged', ({ hex, base58 }) => {
-                assert.equal(hex, ADDRESS_HEX);
-                assert.equal(base58, ADDRESS_BASE58);
-                done();
+                tronWeb.setAddress(ADDRESS_BASE58);
             });
-
-            tronWeb.setAddress(ADDRESS_BASE58);
         });
     });
 
@@ -746,7 +750,6 @@ describe('TronWeb Instance', function () {
 
     describe('#isConnected', function () {
         it('should verify that tronWeb is connected to nodes and event server', async function () {
-            this.timeout(10000);
 
             const tronWeb = tronWebBuilder.createInstance();
             const isConnected = await tronWeb.isConnected();
@@ -766,7 +769,7 @@ describe('TronWeb Instance', function () {
         let contractAddress;
         let contract: Contract;
 
-        before(async function () {
+        beforeAll(async function () {
             tronWeb = tronWebBuilder.createInstance();
             accounts = await tronWebBuilder.getTestAccounts(-1);
 
@@ -828,7 +831,6 @@ describe('TronWeb Instance', function () {
         });
 
         it('should emit an unconfirmed event and get it', async function () {
-            this.timeout(60000);
             tronWeb.setPrivateKey(accounts.pks[1]);
             const txId = await contract.methods.emitNow(accounts.hex[2], 2000).send({
                 from: accounts.hex[1],
@@ -858,7 +860,7 @@ describe('TronWeb Instance', function () {
         let contract: Contract;
         let eventLength = 0;
 
-        before(async function () {
+        beforeAll(async function () {
             tronWeb = tronWebBuilder.createInstance();
             accounts = await tronWebBuilder.getTestAccounts(-1);
 
@@ -921,7 +923,6 @@ describe('TronWeb Instance', function () {
 
         // available on trongrid
         it.skip('should emit an event and wait for it', async function () {
-            this.timeout(60000);
             await wait(120); // wait for abi syncing.
             tronWeb.setPrivateKey(accounts.pks[3]);
             await contract.methods.emitNow(accounts.hex[4], 4000).send({

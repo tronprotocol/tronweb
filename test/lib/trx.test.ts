@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { assert } from 'chai';
+import { assert, vi } from 'vitest';
 import assertThrow from '../helpers/assertThrow.js';
 import wait from '../helpers/wait.js';
 import broadcaster from '../helpers/broadcaster.js';
@@ -10,6 +10,8 @@ import signMessageTests from '../testcases/src/sign-message.js';
 import config from '../helpers/config.js';
 import { Address, Exchange, Proposal, Token } from '../../src/types/Trx.js';
 import { CreateSmartContractTransaction, SignedTransaction, Transaction } from '../../src/types/Transaction.js';
+import { txJsonToPb, txPbToTxID, txPbToRawDataHex } from '../../src/utils/transaction.js';
+import { deepCopyJson } from '../../src/lib/TransactionBuilder/helper.js';
 import { Permission } from '../../src/types/Contract.js';
 import contracts from '../fixtures/contracts.js';
 import { createEmptyBlock } from '../helpers/createEmptyBlock.js';
@@ -25,21 +27,23 @@ describe('TronWeb.trx', function () {
     };
     let tronWeb: TronWeb;
 
-    before(async function () {
+    beforeAll(async function () {
         tronWeb = tronWebBuilder.createInstance();
         // ALERT this works only with Tron Quickstart:
         accounts = await tronWebBuilder.getTestAccounts(-1);
     });
 
     // Contrstuctor Test
-    describe('#constructor()', function () {
+    describe.concurrent('#constructor()', function () {
         it('should have been set a full instance in tronWeb', function () {
             assert.instanceOf(tronWeb.trx, Trx);
         });
     });
 
-    // Account Test
-    describe('#Account Test', function () {
+    // Account Test — the nested suites broadcast only from distinct accounts (or
+    // with distinct contract types), and every test body is a read, so the whole
+    // group runs concurrently.
+    describe.concurrent('#Account Test', function () {
         describe('#getAccount', async function () {
             const idx = 10;
 
@@ -61,15 +65,13 @@ describe('TronWeb.trx', function () {
             const idx = 11;
             let accountId: string;
 
-            before(async function () {
-                this.timeout(10000);
+            beforeAll(async function () {
                 accountId = TronWeb.toHex(`testtest${Math.ceil(Math.random() * 100)}`);
                 const transaction = await tronWeb.transactionBuilder.setAccountId(accountId, accounts.hex[idx]);
                 await broadcaster(null, accounts.pks[idx], transaction);
             });
 
             it('should get confirmed account by id', async function () {
-                this.timeout(20000);
 
                 while (true) {
                     const account = await tronWeb.trx.getAccountById(accountId);
@@ -112,7 +114,7 @@ describe('TronWeb.trx', function () {
         describe('#getDelegatedResourceV2', async function () {
             const idx = 10;
 
-            before(async function () {
+            beforeAll(async function () {
                 const transaction2 = await tronWeb.transactionBuilder.freezeBalanceV2(100e6, 'BANDWIDTH', accounts.hex[idx]);
                 await broadcaster(null, accounts.pks[idx], transaction2);
                 const transaction = await tronWeb.transactionBuilder.delegateResource(
@@ -178,7 +180,7 @@ describe('TronWeb.trx', function () {
         describe('#getDelegatedResourceAccountIndexV2', async function () {
             const idx = 10;
 
-            before(async function () {
+            beforeAll(async function () {
                 const transaction2 = await tronWeb.transactionBuilder.freezeBalanceV2(100e6, 'BANDWIDTH');
                 await broadcaster(null, PRIVATE_KEY, transaction2);
                 const transaction = await tronWeb.transactionBuilder.delegateResource(
@@ -239,7 +241,7 @@ describe('TronWeb.trx', function () {
         describe('#getCanDelegatedMaxSize', async function () {
             const idx = 10;
 
-            before(async function () {
+            beforeAll(async function () {
                 const transaction2 = await tronWeb.transactionBuilder.freezeBalanceV2(10e6, 'ENERGY', accounts.hex[idx]);
                 await broadcaster(null, accounts.pks[idx], transaction2);
                 await wait(60); // wait for solidity
@@ -337,7 +339,7 @@ describe('TronWeb.trx', function () {
         describe('#getCanWithdrawUnfreezeAmount', async function () {
             const idx = 11;
 
-            before(async function () {
+            beforeAll(async function () {
                 const transaction2 = await tronWeb.transactionBuilder.freezeBalanceV2(100e6, 'ENERGY', accounts.hex[idx]);
                 await broadcaster(null, accounts.pks[idx], transaction2);
                 const transaction = await tronWeb.transactionBuilder.unfreezeBalanceV2(10e6, 'ENERGY', accounts.hex[idx]);
@@ -431,8 +433,7 @@ describe('TronWeb.trx', function () {
             const idx = 11;
             let toHex: Address;
 
-            before(async function () {
-                this.timeout(10000);
+            beforeAll(async function () {
 
                 const account = await tronWeb.createAccount();
                 toHex = account.address.hex;
@@ -456,8 +457,7 @@ describe('TronWeb.trx', function () {
 
             let accountId: string;
 
-            before(async function () {
-                this.timeout(10000);
+            beforeAll(async function () {
                 accountId = TronWeb.toHex(`testtest${Math.ceil(Math.random() * 100)}`);
                 const transaction = await tronWeb.transactionBuilder.setAccountId(accountId, accounts.hex[idx]);
                 await broadcaster(null, accounts.pks[idx], transaction);
@@ -481,8 +481,7 @@ describe('TronWeb.trx', function () {
             const idx = 12;
             let toHex: Address;
 
-            before(async function () {
-                this.timeout(10000);
+            beforeAll(async function () {
 
                 const account = await tronWeb.createAccount();
                 toHex = account.address.hex;
@@ -551,7 +550,7 @@ describe('TronWeb.trx', function () {
             const idx = 14;
             let transaction: SignedTransaction;
 
-            before(async function () {
+            beforeAll(async function () {
                 const tx = await tronWeb.transactionBuilder.sendTrx(accounts.b58[idx - 1], 10, accounts.b58[idx]);
                 transaction = await tronWeb.trx.sign(tx, accounts.pks[idx]);
             });
@@ -590,7 +589,7 @@ describe('TronWeb.trx', function () {
             });
         });
 
-        describe('#signMessage', async function () {
+        describe.concurrent('#signMessage', async function () {
             const idx = 14;
 
             it('should sign a hex string message', async function () {
@@ -608,12 +607,12 @@ describe('TronWeb.trx', function () {
             });
         });
 
-        describe('#verifyMessage', async function () {
+        describe.concurrent('#verifyMessage', async function () {
             const idx = 14;
             let hexMsg: string;
             let signedMsg: string;
 
-            before(async function () {
+            beforeAll(async function () {
                 hexMsg = '0xe66f4c8f323229131006ad3e4a2ca65dfdf339f0';
                 signedMsg = await tronWeb.trx.sign(hexMsg, accounts.pks[idx], undefined, false);
             });
@@ -646,7 +645,7 @@ describe('TronWeb.trx', function () {
             });
         });
 
-        describe('#signTypedData', async function () {
+        describe.concurrent('#signTypedData', async function () {
             // All properties on a domain are optional
             const domain = {
                 name: 'TrcToken Test',
@@ -756,8 +755,7 @@ describe('TronWeb.trx', function () {
             const idxE = 18;
             const threshold = 3;
 
-            before(async function () {
-                this.timeout(10000);
+            beforeAll(async function () {
                 // update account permission
                 const ownerAddress = accounts.hex[ownerIdx];
                 const ownerPk = accounts.pks[ownerIdx];
@@ -1043,10 +1041,160 @@ describe('TronWeb.trx', function () {
                 }
             });
         });
+
+        describe('#multiSign (getSignWeight transaction validation)', function () {
+            const ownerIdx = 15;
+
+            // A copy of `original` with Permission_id set and `tamper` applied, whose
+            // txID/raw_data_hex are recomputed so the result is internally consistent —
+            // the shape a malicious fullNode would return to pass a self-referential check.
+            function tamperedCopy<T extends Transaction>(original: T, tamper: (rawData: T['raw_data']) => void): T {
+                const tampered = deepCopyJson<T>(original);
+                tampered.raw_data.contract[0].Permission_id = 2;
+                tamper(tampered.raw_data);
+                const pb = txJsonToPb(tampered);
+                tampered.txID = txPbToTxID(pb).replace(/^0x/, '');
+                tampered.raw_data_hex = txPbToRawDataHex(pb).toLowerCase();
+                return tampered;
+            }
+
+            it('should reject a transaction substituted by the fullNode', async function () {
+                const signerPk = accounts.pks[ownerIdx];
+                const signerAddress = tronWeb.address
+                    .toHex(tronWeb.address.fromPrivateKey(signerPk) as string)
+                    .toLowerCase();
+
+                // No Permission_id on the tx + a positive permissionId routes multiSign
+                // through getSignWeight and the adopt-returned-transaction path.
+                const original = await tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.b58[ownerIdx]);
+                // A different, internally-consistent transaction the node "returns" instead.
+                const substituted = await tronWeb.transactionBuilder.freezeBalanceV2(99e5, 'BANDWIDTH', accounts.b58[ownerIdx]);
+
+                const spy = vi.spyOn(tronWeb.trx, 'getSignWeight').mockResolvedValue({
+                    result: { code: 'NOT_ENOUGH_PERMISSION', message: '' },
+                    permission: { keys: [{ address: signerAddress, weight: 1 }] },
+                    approved_list: [],
+                    current_weight: 0,
+                    transaction: { transaction: substituted },
+                } as any);
+
+                try {
+                    await assertThrow(tronWeb.trx.multiSign(original, signerPk, 2), 'Invalid transaction provided');
+                } finally {
+                    spy.mockRestore();
+                }
+            });
+
+            it('should reject a returned transaction whose expiration was extended by the fullNode', async function () {
+                const signerPk = accounts.pks[ownerIdx];
+                const signerAddress = tronWeb.address
+                    .toHex(tronWeb.address.fromPrivateKey(signerPk) as string)
+                    .toLowerCase();
+
+                const original = await tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.b58[ownerIdx]);
+                // Identical contract params, but expiration stretched by an hour.
+                const tampered = tamperedCopy(original, (rawData) => {
+                    rawData.expiration += 3600 * 1000;
+                });
+
+                const spy = vi.spyOn(tronWeb.trx, 'getSignWeight').mockResolvedValue({
+                    result: { code: 'NOT_ENOUGH_PERMISSION', message: '' },
+                    permission: { keys: [{ address: signerAddress, weight: 1 }] },
+                    approved_list: [],
+                    current_weight: 0,
+                    transaction: { transaction: tampered },
+                } as any);
+
+                try {
+                    await assertThrow(tronWeb.trx.multiSign(original, signerPk, 2), 'Invalid transaction provided');
+                } finally {
+                    spy.mockRestore();
+                }
+            });
+
+            it('should reject a returned transaction whose ref block was substituted by the fullNode', async function () {
+                const signerPk = accounts.pks[ownerIdx];
+                const signerAddress = tronWeb.address
+                    .toHex(tronWeb.address.fromPrivateKey(signerPk) as string)
+                    .toLowerCase();
+
+                const original = await tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.b58[ownerIdx]);
+                // Identical contract params, but anchored to a different ref block.
+                const tampered = tamperedCopy(original, (rawData) => {
+                    rawData.ref_block_bytes = rawData.ref_block_bytes === '0001' ? '0002' : '0001';
+                    rawData.ref_block_hash = rawData.ref_block_hash === '95a2484e6b74b0e7' ? '95a2484e6b74b0e8' : '95a2484e6b74b0e7';
+                });
+
+                const spy = vi.spyOn(tronWeb.trx, 'getSignWeight').mockResolvedValue({
+                    result: { code: 'NOT_ENOUGH_PERMISSION', message: '' },
+                    permission: { keys: [{ address: signerAddress, weight: 1 }] },
+                    approved_list: [],
+                    current_weight: 0,
+                    transaction: { transaction: tampered },
+                } as any);
+
+                try {
+                    await assertThrow(tronWeb.trx.multiSign(original, signerPk, 2), 'Invalid transaction provided');
+                } finally {
+                    spy.mockRestore();
+                }
+            });
+
+            it('should reject a returned transaction whose contract type was substituted by the fullNode', async function () {
+                const signerPk = accounts.pks[ownerIdx];
+                const signerAddress = tronWeb.address
+                    .toHex(tronWeb.address.fromPrivateKey(signerPk) as string)
+                    .toLowerCase();
+
+                // WithdrawBalanceContract and CancelAllUnfreezeV2Contract both carry only
+                // { owner_address }, so a node can return a self-consistent transaction of the
+                // other type reusing the same params.
+                const original = await tronWeb.transactionBuilder.withdrawBlockRewards(accounts.hex[ownerIdx]);
+                const tampered = tamperedCopy(original, (rawData) => {
+                    (rawData.contract[0] as any).type = 'CancelAllUnfreezeV2Contract';
+                });
+
+                const spy = vi.spyOn(tronWeb.trx, 'getSignWeight').mockResolvedValue({
+                    result: { code: 'NOT_ENOUGH_PERMISSION', message: '' },
+                    permission: { keys: [{ address: signerAddress, weight: 1 }] },
+                    approved_list: [],
+                    current_weight: 0,
+                    transaction: { transaction: tampered },
+                } as any);
+
+                try {
+                    await assertThrow(tronWeb.trx.multiSign(original, signerPk, 2), 'Invalid transaction provided');
+                } finally {
+                    spy.mockRestore();
+                }
+            });
+
+            it('should reject when getSignWeight returns no transaction', async function () {
+                const signerPk = accounts.pks[ownerIdx];
+                const signerAddress = tronWeb.address
+                    .toHex(tronWeb.address.fromPrivateKey(signerPk) as string)
+                    .toLowerCase();
+
+                const original = await tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.b58[ownerIdx]);
+
+                const spy = vi.spyOn(tronWeb.trx, 'getSignWeight').mockResolvedValue({
+                    result: { code: 'NOT_ENOUGH_PERMISSION', message: '' },
+                    permission: { keys: [{ address: signerAddress, weight: 1 }] },
+                    approved_list: [],
+                    current_weight: 0,
+                } as any);
+
+                try {
+                    await assertThrow(tronWeb.trx.multiSign(original, signerPk, 2), 'Invalid transaction provided');
+                } finally {
+                    spy.mockRestore();
+                }
+            });
+        });
     });
 
-    // Block Test
-    describe('#Block Test', function () {
+    // Block Test — read-only queries throughout.
+    describe.concurrent('#Block Test', function () {
         describe('#getBlock', async function () {
             it('should get earliest or latest block', async function () {
                 const earliestParentHash = '957dc2d350daecc7bb6a38f3938ebde0a0c1cedafe15f0edae4256a2907449f6';
@@ -1136,12 +1284,11 @@ describe('TronWeb.trx', function () {
 
     // Transaction Test
     describe('#Transaction Test', function () {
-        describe('#send', async function () {
+        describe.concurrent('#send', async function () {
             const fromIdx = 19;
             const toIdx = 20;
 
             it('should send trx', async function () {
-                this.timeout(10000);
 
                 const balanceBefore = await tronWeb.trx.getUnconfirmedBalance(accounts.hex[toIdx]);
                 await tronWeb.trx.send(accounts.hex[toIdx], 10e5, {
@@ -1168,12 +1315,11 @@ describe('TronWeb.trx', function () {
             });
         });
 
-        describe('#sendTransaction', async function () {
+        describe.concurrent('#sendTransaction', async function () {
             const fromIdx = 21;
             const toIdx = 22;
 
             it('should send trx', async function () {
-                this.timeout(10000);
 
                 const balanceBefore = await tronWeb.trx.getUnconfirmedBalance(accounts.hex[toIdx]);
                 await tronWeb.trx.sendTransaction(accounts.hex[toIdx], 10e5, { privateKey: accounts.pks[fromIdx] });
@@ -1197,12 +1343,11 @@ describe('TronWeb.trx', function () {
             });
         });
 
-        describe('#sendTrx', async function () {
+        describe.concurrent('#sendTrx', async function () {
             const fromIdx = 23;
             const toIdx = 24;
 
             it('should send trx', async function () {
-                this.timeout(10000);
 
                 const balanceBefore = await tronWeb.trx.getUnconfirmedBalance(accounts.hex[toIdx]);
                 await tronWeb.trx.sendTrx(accounts.hex[toIdx], 10e5, {
@@ -1234,7 +1379,6 @@ describe('TronWeb.trx', function () {
             // const receiverIdx = 26;
 
             it('should freeze balance for energy or bandwidth', async function () {
-                this.timeout(20000);
 
                 let accountBefore = await tronWeb.trx.getAccount(accounts.hex[idx]);
                 await tronWeb.trx.freezeBalance(10e5, 3, 'BANDWIDTH', {
@@ -1290,7 +1434,7 @@ describe('TronWeb.trx', function () {
         /**
         describe.skip("#unfreezeBalance", async function () {
 
-            before(async function(){
+            beforeAll(async function(){
                 await tronWeb.trx.freezeBalance(10e5, 3, 'BANDWIDTH', {}, accounts.b58[15]);
                 await tronWeb.trx.freezeBalance(10e5, 3, 'ENERGY', {}, accounts.b58[15]);
             });
@@ -1325,13 +1469,12 @@ describe('TronWeb.trx', function () {
             let transaction: Transaction;
             let signedTransaction: SignedTransaction;
 
-            before(async function () {
+            beforeAll(async function () {
                 transaction = await tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.b58[idx]);
                 signedTransaction = await tronWeb.trx.sign(transaction, accounts.pks[idx]);
             });
 
             it('should broadcast a transaction', async function () {
-                this.timeout(20000);
                 const result = await tronWeb.trx.broadcast(signedTransaction);
                 assert.isTrue(result.result);
                 assert.equal(result.transaction.signature[0], signedTransaction.signature[0]);
@@ -1350,7 +1493,7 @@ describe('TronWeb.trx', function () {
             });
         });
 
-        describe('#broadcastHex', async function () {
+        describe.concurrent('#broadcastHex', async function () {
             const idx = 26;
 
             it('should broadcast a hex transaction', async function () {
@@ -1358,7 +1501,7 @@ describe('TronWeb.trx', function () {
                 const transaction = await tronWeb.transactionBuilder.sendTrx(receiver.address.base58, 1e6, accounts.b58[idx]);
                 const signedTransaction = await tronWeb.trx.sign(transaction, accounts.pks[idx]);
                 const signedTransactionPb = tronWeb.utils.transaction.txJsonToPb(signedTransaction);
-                signedTransactionPb.addSignature(Buffer.from(signedTransaction.signature[0], 'hex'), 0);
+                signedTransactionPb.addSignature(Uint8Array.from(tronWeb.utils.code.hexStr2byteArray(signedTransaction.signature[0])), 0);
                 const signedHexTransaction = tronWeb.utils.bytes.byteArray2hexStr(signedTransactionPb.serializeBinary());
                 const result = await tronWeb.trx.broadcastHex(signedHexTransaction);
                 assert.isTrue(result.result);
@@ -1370,12 +1513,11 @@ describe('TronWeb.trx', function () {
             });
         });
 
-        describe('#getTransaction', async function () {
+        describe.concurrent('#getTransaction', async function () {
             const idx = 26;
             let transaction: Transaction;
 
-            before(async function () {
-                this.timeout(10000);
+            beforeAll(async function () {
 
                 transaction = (
                     await broadcaster(
@@ -1404,8 +1546,7 @@ describe('TronWeb.trx', function () {
             let transaction: Transaction;
             let currBlockNum: number;
 
-            before(async function () {
-                this.timeout(10000);
+            beforeAll(async function () {
                 await wait(5); // wait for new clear block generated in tre
                 const receipt = await broadcaster(
                     tronWeb.transactionBuilder.sendTrx(accounts.hex[idx], 1),
@@ -1417,7 +1558,6 @@ describe('TronWeb.trx', function () {
             });
 
             it('should get transaction from block', async function () {
-                this.timeout(10000);
                 while (true) {
                     try {
                         const tx = await tronWeb.trx.getTransactionFromBlock(currBlockNum, 0);
@@ -1438,11 +1578,24 @@ describe('TronWeb.trx', function () {
             });
 
             it('should throw transaction not found error by transaction from block', async function () {
-                await createEmptyBlock(tronWeb);
-                await wait(3);
-                await createEmptyBlock(tronWeb);
-                const nowBlock = await tronWeb.trx.getCurrentBlock();
-                await assertThrow(tronWeb.trx.getTransactionFromBlock(nowBlock.block_header.raw_data.number - 1, 0), 'Transaction not found in block');
+                // find a guaranteed-empty block: mine on demand and scan what got
+                // mined — blocks are immutable, so once an empty one exists the
+                // assertion can't be raced by other suites' broadcasts
+                let emptyBlockNum: number | undefined;
+                for (let attempt = 0; attempt < 10 && emptyBlockNum === undefined; attempt++) {
+                    const before = (await tronWeb.trx.getCurrentBlock()).block_header.raw_data.number;
+                    await createEmptyBlock(tronWeb);
+                    const after = (await tronWeb.trx.getCurrentBlock()).block_header.raw_data.number;
+                    for (let n = after; n > before; n--) {
+                        const block = await tronWeb.trx.getBlockByNumber(n);
+                        if (!block.transactions || !block.transactions.length) {
+                            emptyBlockNum = n;
+                            break;
+                        }
+                    }
+                }
+                assert.isDefined(emptyBlockNum);
+                await assertThrow(tronWeb.trx.getTransactionFromBlock(emptyBlockNum as number, 0), 'Transaction not found in block');
             });
 
             it('should throw block not found error by transaction from block', async function () {
@@ -1465,12 +1618,11 @@ describe('TronWeb.trx', function () {
             });
         });
 
-        describe('#getTransactionsFromBlock', async function () {
+        describe.concurrent('#getTransactionsFromBlock', async function () {
             const idx = 26;
             let currBlockNum: number;
 
-            before(async function () {
-                this.timeout(10000);
+            beforeAll(async function () {
                 const receipt = await tronWeb.trx.sendTrx(accounts.hex[idx], 1e6);
                 await wait(3);
                 const transaction = await tronWeb.trx.getUnconfirmedTransactionInfo(receipt.txid);
@@ -1478,7 +1630,6 @@ describe('TronWeb.trx', function () {
             });
 
             it('should get transactions from block', async function () {
-                this.timeout(10000);
                 for (let i = currBlockNum; i < currBlockNum + 3; ) {
                     try {
                         const txs = await tronWeb.trx.getTransactionsFromBlock(i);
@@ -1505,11 +1656,11 @@ describe('TronWeb.trx', function () {
             });
         });
 
-        describe('#getTransactionInfo (Confirmed)', async function () {
+        describe.concurrent('#getTransactionInfo (Confirmed)', async function () {
             const idx = 26;
             let transaction: Transaction;
 
-            before(async function () {
+            beforeAll(async function () {
                 transaction = (
                     await broadcaster(
                         tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.hex[idx]),
@@ -1519,7 +1670,6 @@ describe('TronWeb.trx', function () {
             });
 
             it('should get transaction info by id', async function () {
-                this.timeout(20000);
 
                 while (true) {
                     const tx = await tronWeb.trx.getTransactionInfo(transaction.txID);
@@ -1534,11 +1684,11 @@ describe('TronWeb.trx', function () {
             });
         });
 
-        describe('#geUnconfirmedTransactionInfo', async function () {
+        describe.concurrent('#geUnconfirmedTransactionInfo', async function () {
             const idx = 25;
             let transaction: Transaction;
 
-            before(async function () {
+            beforeAll(async function () {
                 transaction = (
                     await broadcaster(
                         tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.hex[idx]),
@@ -1549,7 +1699,6 @@ describe('TronWeb.trx', function () {
             });
 
             it('should get unconfirmed transaction by id', async function () {
-                this.timeout(10000);
                 await wait(3);
                 const tx = await tronWeb.trx.getUnconfirmedTransactionInfo(transaction.txID);
                 assert.equal(tx.id, transaction.txID);
@@ -1566,7 +1715,7 @@ describe('TronWeb.trx', function () {
             const idx = 26;
             let transaction: Transaction;
 
-            before(async function () {
+            beforeAll(async function () {
                 transaction = (
                     await broadcaster(
                         tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.hex[idx]),
@@ -1576,7 +1725,6 @@ describe('TronWeb.trx', function () {
             });
 
             it('should get confirmed transaction by tx id', async function () {
-                this.timeout(20000);
 
                 while (true) {
                     try {
@@ -1596,15 +1744,15 @@ describe('TronWeb.trx', function () {
         });
     });
 
-    // TRC 10 Token Test
-    describe('#Token Test', function () {
+    // TRC 10 Token Test — each nested suite issues its token from its own account
+    // (an account can issue only one TRC10), so the group runs concurrently.
+    describe.concurrent('#Token Test', function () {
         describe('#sendAsset', async function () {
             let token: Record<string, Token>;
             const fromIdx = 27;
             const toIdx = 28;
 
-            before(async function () {
-                this.timeout(10000);
+            beforeAll(async function () {
 
                 const options = getTokenOptions();
                 const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.hex[fromIdx]);
@@ -1614,7 +1762,6 @@ describe('TronWeb.trx', function () {
             });
 
             it('should send trx by to address and verify account balance', async function () {
-                this.timeout(20000);
 
                 const assetBefore = (await tronWeb.trx.getUnconfirmedAccount(accounts.hex[toIdx])).assetV2;
                 await waitChainData('tokenById', token[Object.keys(token)[0]]['id']);
@@ -1677,8 +1824,7 @@ describe('TronWeb.trx', function () {
             const fromIdx = 60;
             const toIdx = 61;
 
-            before(async function () {
-                this.timeout(10000);
+            beforeAll(async function () {
 
                 const options = getTokenOptions();
                 const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.hex[fromIdx]);
@@ -1688,7 +1834,6 @@ describe('TronWeb.trx', function () {
             });
 
             it('should send trx by to address and verify account balance', async function () {
-                this.timeout(10000);
 
                 const assetBefore = (await tronWeb.trx.getUnconfirmedAccount(accounts.hex[toIdx])).assetV2;
                 // transfer from account 10 to 11
@@ -1753,8 +1898,7 @@ describe('TronWeb.trx', function () {
         describe('#getTokenFromID', async function () {
             const idx = 26;
 
-            before(async function () {
-                this.timeout(10000);
+            beforeAll(async function () {
 
                 const options = getTokenOptions();
                 const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.hex[idx]);
@@ -1784,8 +1928,7 @@ describe('TronWeb.trx', function () {
             const idx = 48;
             let options: any;
 
-            before(async function () {
-                this.timeout(10000);
+            beforeAll(async function () {
 
                 options = getTokenOptions();
                 const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.hex[idx]);
@@ -1818,8 +1961,7 @@ describe('TronWeb.trx', function () {
         describe('#getTokensIssuedByAddress', async function () {
             const idx = 49;
 
-            before(async function () {
-                this.timeout(10000);
+            beforeAll(async function () {
 
                 const options = getTokenOptions();
                 const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.hex[idx]);
@@ -1878,15 +2020,14 @@ describe('TronWeb.trx', function () {
         });
     });
 
-    // Exchange Test
-    describe('#Exchange Test', function () {
+    // Exchange Test — the three suites use disjoint account ranges.
+    describe.concurrent('#Exchange Test', function () {
         describe('#listExchanges', async function () {
             const idxS = 33;
             const idxE = 35;
             const toIdx = 35;
 
-            before(async function () {
-                this.timeout(20000);
+            beforeAll(async function () {
 
                 const tokenNames = [];
 
@@ -1938,8 +2079,7 @@ describe('TronWeb.trx', function () {
             const idxE = 38;
             const toIdx = 38;
 
-            before(async function () {
-                this.timeout(20000);
+            beforeAll(async function () {
 
                 const tokenNames = [];
 
@@ -1994,8 +2134,7 @@ describe('TronWeb.trx', function () {
             const toIdx = 41;
             let exchanges: Exchange[];
 
-            before(async function () {
-                this.timeout(20000);
+            beforeAll(async function () {
 
                 const tokenNames = [];
 
@@ -2048,8 +2187,9 @@ describe('TronWeb.trx', function () {
         });
     });
 
-    // Proposal Test
-    describe('#Proposal Test', async function () {
+    // Proposal Test — proposals are created with pairwise-distinct parameters, so
+    // the concurrent genesis broadcasts can't collide on txID.
+    describe.concurrent('#Proposal Test', async function () {
         describe('#getChainParameters', async function () {
             it('should get proposal list', async function () {
                 const params = await tronWeb.trx.getChainParameters();
@@ -2061,7 +2201,7 @@ describe('TronWeb.trx', function () {
         describe('#getProposal', async function () {
             let proposals: Proposal[];
 
-            before(async function () {
+            beforeAll(async function () {
                 // create proposal
                 const parameters = [
                     { key: 0, value: 100000 },
@@ -2089,7 +2229,7 @@ describe('TronWeb.trx', function () {
         });
 
         describe('#listProposals', async function () {
-            before(async function () {
+            beforeAll(async function () {
                 // create proposal
                 for (let i = 0; i < 5; i++) {
                     const parameters = [
@@ -2115,12 +2255,11 @@ describe('TronWeb.trx', function () {
     });
 
     // Contract Test
-    describe('#getContract', async function () {
+    describe.concurrent('#getContract', async function () {
         const idx = 42;
         let transaction: CreateSmartContractTransaction;
 
-        before(async function () {
-            this.timeout(10000);
+        beforeAll(async function () {
 
             transaction = await tronWeb.transactionBuilder.createSmartContract(
                 {
@@ -2148,12 +2287,11 @@ describe('TronWeb.trx', function () {
         });
     });
 
-    describe('#getContractInfo', async function () {
+    describe.concurrent('#getContractInfo', async function () {
         const idx = 58;
         let transaction: CreateSmartContractTransaction;
 
-        before(async function () {
-            this.timeout(10000);
+        beforeAll(async function () {
 
             transaction = await tronWeb.transactionBuilder.createSmartContract(
                 {
@@ -2186,14 +2324,14 @@ describe('TronWeb.trx', function () {
     
 
     // Node Test
-    describe('#listNodes', async function () {
+    describe.concurrent('#listNodes', async function () {
         it('should list seeds node', async function () {
             const nodes = await tronWeb.trx.listNodes();
             assert.isArray(nodes);
         });
     });
 
-    describe('#getNodeInfo', async function () {
+    describe.concurrent('#getNodeInfo', async function () {
         it('should get node info', async function () {
             const nodeInfo = await tronWeb.trx.getNodeInfo();
             assert.isDefined(nodeInfo);
@@ -2201,7 +2339,7 @@ describe('TronWeb.trx', function () {
     });
 
     // SR Test
-    describe('#listSuperRepresentatives', async function () {
+    describe.concurrent('#listSuperRepresentatives', async function () {
         it('should list super representatives', async function () {
             const srs = await tronWeb.trx.listSuperRepresentatives();
             assert.isArray(srs);
@@ -2212,56 +2350,56 @@ describe('TronWeb.trx', function () {
         });
     });
 
-    describe('#timeUntilNextVoteCycle', async function () {
+    describe.concurrent('#timeUntilNextVoteCycle', async function () {
         it('should get time util next vote cycle', async function () {
             const num = await tronWeb.trx.timeUntilNextVoteCycle();
             assert.isNumber(num);
         });
     });
 
-    describe('#getReward', async function () {
+    describe.concurrent('#getReward', async function () {
         it('should get the reward', async function () {
             const reward = await tronWeb.trx.getReward(accounts.b58[0]);
             assert.equal(reward, 0);
         });
     });
 
-    describe('#getUnconfirmedReward', async function () {
+    describe.concurrent('#getUnconfirmedReward', async function () {
         it('should get the reward', async function () {
             const reward = await tronWeb.trx.getUnconfirmedReward(accounts.b58[0]);
             assert.equal(reward, 0);
         });
     });
 
-    describe('#getBrokerage', async function () {
+    describe.concurrent('#getBrokerage', async function () {
         it('should get the brokerage', async function () {
             const brokerage = await tronWeb.trx.getBrokerage(accounts.hex[0]);
             assert.equal(brokerage, 20);
         });
     });
 
-    describe('#getUnconfirmedBrokerage', async function () {
+    describe.concurrent('#getUnconfirmedBrokerage', async function () {
         it('should get the brokerage', async function () {
             const brokerage = await tronWeb.trx.getUnconfirmedBrokerage(accounts.hex[0]);
             assert.equal(brokerage, 20);
         });
     });
 
-    describe('#getBandwidthPrices', async function () {
+    describe.concurrent('#getBandwidthPrices', async function () {
         it('should get bandwidth prices', async function () {
             const prices = await tronWeb.trx.getBandwidthPrices();
             assert.isString(prices);
         });
     });
 
-    describe('#getEnergyPrices', async function () {
+    describe.concurrent('#getEnergyPrices', async function () {
         it('should get energy prices', async function () {
             const prices = await tronWeb.trx.getEnergyPrices();
             assert.isString(prices);
         });
     });
 
-    describe('#signMessageV2', async function () {
+    describe.concurrent('#signMessageV2', async function () {
         tests.forEach(function (test) {
             it('signs a message "' + test.name + '"', async function () {
                 const tronWeb = new TronWeb({ fullHost: FULL_NODE_API, privateKey: test.privateKey });
@@ -2271,7 +2409,7 @@ describe('TronWeb.trx', function () {
         });
     });
 
-    describe('#verifyMessageV2', async function () {
+    describe.concurrent('#verifyMessageV2', async function () {
         tests.forEach(function (test) {
             it('signs a message "' + test.name + '"', async function () {
                 const tronWeb = new TronWeb({ fullHost: FULL_NODE_API, privateKey: test.privateKey });
@@ -2281,7 +2419,7 @@ describe('TronWeb.trx', function () {
         });
     });
 
-    describe('#getCurrentRefBlockParams', async function () {
+    describe.concurrent('#getCurrentRefBlockParams', async function () {
         it('should fetch current ref block params', async () => {
             const result = await tronWeb.trx.getCurrentRefBlockParams();
 
@@ -2302,7 +2440,7 @@ describe('TronWeb.trx', function () {
         });
     });
 
-    describe('#getNowWitnessList', async function () {
+    describe.concurrent('#getNowWitnessList', async function () {
         it('should fetch now witness list', async () => {
             const witnesses = await tronWeb.trx.getNowWitnessList({
                 offset: 0,

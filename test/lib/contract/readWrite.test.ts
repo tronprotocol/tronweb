@@ -1,13 +1,13 @@
-import { Address, TransactionInfo } from '../../../src/types/Trx';
-import { ContractAbiInterface } from '../../../src/types/ABI';
-import { ContractReadNamespace, ContractWriteNamespace } from '../../../src/lib/contract/readWrite';
-import { TransactionWrapper } from '../../../src/types/Transaction';
+import { Address, TransactionInfo } from '../../../src/types/Trx.js';
+import { ContractAbiInterface } from '../../../src/types/ABI.js';
+import { ContractReadNamespace, ContractWriteNamespace } from '../../../src/types/Contract.js';
+import { TransactionWrapper } from '../../../src/types/Transaction.js';
 import {
     ContractFunctionParameter,
     TriggerConstantContractOptions,
     TriggerSmartContractOptions,
-} from '../../../src/types/TransactionBuilder';
-import { assert } from 'chai';
+} from '../../../src/types/TransactionBuilder.js';
+import { assert } from 'vitest';
 import assertThrow from '../../helpers/assertThrow.js';
 import wait from '../../helpers/wait.js';
 import broadcaster from '../../helpers/broadcaster.js';
@@ -138,7 +138,7 @@ describe('#contract.readWrite', function () {
     const addrBody = (a: string) =>
         (/^(0x)?(41)?[0-9a-f]{40}$/i.test(a) ? a : TronWeb.address.toHex(a)).toLowerCase().replace(/^0x/, '').replace(/^41/, '');
 
-    before(async function () {
+    beforeAll(async function () {
         tronWeb = tronWebBuilder.createInstance();
         // ALERT this works only with Tron Quickstart:
         accounts = await tronWebBuilder.getTestAccounts(-1);
@@ -680,7 +680,6 @@ describe('#contract.readWrite', function () {
     });
 
     describe('against a contract deployed to the fullNode', function () {
-        this.timeout(180000);
 
         // funcABIV2_3 exposes setStruct((address,address,address)) (a struct/tuple
         // parameter write) and get1()/s(uint256) (tuple reads), so one deploy covers
@@ -689,8 +688,7 @@ describe('#contract.readWrite', function () {
         let deployedAddress: string;
         let struct: [string, string, string];
 
-        before(async function () {
-            this.timeout(180000);
+        beforeAll(async function () {
 
             struct = [accounts.b58[1], accounts.b58[2], accounts.b58[3]];
 

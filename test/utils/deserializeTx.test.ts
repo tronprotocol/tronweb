@@ -1,4 +1,4 @@
-import { assert } from 'chai';
+import { assert } from 'vitest';
 import { TronWeb, utils, TransactionBuilder } from '../setup/TronWeb.js';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
 import config from '../helpers/config.js';
@@ -20,7 +20,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         let account: Awaited<ReturnType<TronWeb['createAccount']>>;
         let account2: Awaited<ReturnType<TronWeb['createAccount']>>;
         const contractAddress = 'TU1ntBzpGPp7GJkzxLTKwYsneJ9JKUmBCK'; // nile usdt address
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             account2 = await tronWeb.createAccount();
@@ -52,7 +52,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
             assert.equal(value.token_id, '1000008');
 
             const getFunctionSelectorHex = (functionSelector: string) => {
-                return utils.ethersUtils.keccak256(Buffer.from(functionSelector, 'utf-8')).toString().substring(2, 10);
+                return utils.ethersUtils.keccak256(new TextEncoder().encode(functionSelector)).toString().substring(2, 10);
             };
 
             const encodeParameters = (parameters: { type: string; value: unknown }[]) => {
@@ -132,7 +132,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         let tx: Awaited<ReturnType<TransactionBuilder['freezeBalanceV2']>>;
         let account: Awaited<ReturnType<TronWeb['createAccount']>>;
         const freezeBalance = 1e6;
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             tx = await tronWeb.transactionBuilder.freezeBalanceV2(freezeBalance, 'ENERGY', account.address.base58);
@@ -163,7 +163,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         let tx: Awaited<ReturnType<TransactionBuilder['unfreezeBalanceV2']>>;
         let account: Awaited<ReturnType<TronWeb['createAccount']>>;
         const unfreezeBalance = 1e6;
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             tx = await tronWeb.transactionBuilder.unfreezeBalanceV2(unfreezeBalance, 'ENERGY', account.address.base58);
@@ -193,7 +193,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
     describe('DCancelAllUnfreezeV2Contract', async () => {
         let tx: Awaited<ReturnType<TransactionBuilder['cancelUnfreezeBalanceV2']>>;
         let account: Awaited<ReturnType<TronWeb['createAccount']>>;
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             tx = await tronWeb.transactionBuilder.cancelUnfreezeBalanceV2(account.address.base58);
@@ -225,7 +225,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         const delegateAmount = 1e6;
         const lock = true;
         const lockPeriod = 3;
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             account2 = await tronWeb.createAccount();
@@ -268,7 +268,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         let account: Awaited<ReturnType<TronWeb['createAccount']>>;
         let account2: Awaited<ReturnType<TronWeb['createAccount']>>;
         const delegateAmount = 1e6;
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             account2 = await tronWeb.createAccount();
@@ -305,7 +305,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
     describe('DWithdrawExpireUnfreezeContract', async () => {
         let tx: Awaited<ReturnType<TransactionBuilder['withdrawExpireUnfreeze']>>;
         let account: Awaited<ReturnType<TronWeb['createAccount']>>;
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             tx = await tronWeb.transactionBuilder.withdrawExpireUnfreeze(account.address.base58);
@@ -335,7 +335,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         let account: Awaited<ReturnType<TronWeb['createAccount']>>;
         let account2: Awaited<ReturnType<TronWeb['createAccount']>>;
         const sendAmount = 1e6;
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             account2 = await tronWeb.createAccount();
@@ -386,7 +386,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
     describe('DWithdrawBalanceContract', async () => {
         let tx: Awaited<ReturnType<TransactionBuilder['withdrawBlockRewards']>>;
         let account: Awaited<ReturnType<TronWeb['createAccount']>>;
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             tx = await tronWeb.transactionBuilder.withdrawBlockRewards(account.address.base58);
@@ -427,7 +427,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         let tx: Awaited<ReturnType<TransactionBuilder['applyForSR']>>;
         let account: Awaited<ReturnType<TronWeb['createAccount']>>;
         const url = 'https://example.com';
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             tx = await tronWeb.transactionBuilder.applyForSR(account.address.base58, url);
@@ -475,7 +475,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         let tx: Awaited<ReturnType<TransactionBuilder['updateWitness']>>;
         let account: Awaited<ReturnType<TronWeb['createAccount']>>;
         const updateUrl = 'https://example-updated.com';
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             tx = await tronWeb.transactionBuilder.updateWitness(account.address.base58, updateUrl);
@@ -513,7 +513,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         let account2: Awaited<ReturnType<TronWeb['createAccount']>>;
         const sendAmount = 1000;
         const tokenId = '1000001';
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             account2 = await tronWeb.createAccount();
@@ -552,7 +552,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         let account2: Awaited<ReturnType<TronWeb['createAccount']>>;
         const participateAmount = 5000;
         const tokenId = '1000001';
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             account2 = await tronWeb.createAccount();
@@ -603,7 +603,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         const frozenDuration = 3;
         const voteScore = 10;
         const precision = 6;
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             saleStart = Date.now() + 60 * 1000;
@@ -667,7 +667,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         const url = 'https://updated-example.com';
         const freeBandwidth = 2000000;
         const freeBandwidthLimit = 20000;
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             tx = await tronWeb.transactionBuilder.updateToken({
@@ -707,7 +707,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         let owner: Awaited<ReturnType<TronWeb['createAccount']>>;
         let newAccount: Awaited<ReturnType<TronWeb['createAccount']>>;
 
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             owner = await tronWeb.createAccount();
             newAccount = await tronWeb.createAccount();
@@ -735,7 +735,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         let account: Awaited<ReturnType<TronWeb['createAccount']>>;
         const accountName = 'MyTestAccount';
 
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             tx = await tronWeb.transactionBuilder.updateAccount(accountName, account.address.base58);
@@ -762,7 +762,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         let account: Awaited<ReturnType<TronWeb['createAccount']>>;
         const accountId = TronWeb.toHex('testacct01').replace(/^0x/, '');
 
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             tx = await tronWeb.transactionBuilder.setAccountId(accountId, account.address.base58);
@@ -789,7 +789,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         let account: Awaited<ReturnType<TronWeb['createAccount']>>;
         const operations = '7fff1fc0033e0000000000000000000000000000000000000000000000000000';
 
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             const ownerPermission = {
@@ -847,7 +847,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         const frozenBalance = 1e6;
         const frozenDuration = 3;
 
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             receiver = await tronWeb.createAccount();
@@ -884,7 +884,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         let account: Awaited<ReturnType<TronWeb['createAccount']>>;
         let receiver: Awaited<ReturnType<TronWeb['createAccount']>>;
 
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             receiver = await tronWeb.createAccount();
@@ -917,7 +917,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         let account: Awaited<ReturnType<TronWeb['createAccount']>>;
         const voteCount = 5;
 
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             tx = await tronWeb.transactionBuilder.vote(
@@ -950,7 +950,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         let tx: Awaited<ReturnType<TransactionBuilder['createProposal']>>;
         const proposalParams = [{ key: 2, value: 100000 }];
 
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             tx = await tronWeb.transactionBuilder.createProposal(proposalParams, ADDRESS_BASE58);
         });
@@ -977,7 +977,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         let tx: Awaited<ReturnType<TransactionBuilder['voteProposal']>>;
         let proposalId: number;
 
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             const createTx = await tronWeb.transactionBuilder.createProposal([{ key: 0, value: 100000 }], ADDRESS_BASE58);
             const signedTx = await tronWeb.trx.sign(createTx, PRIVATE_KEY);
@@ -1009,7 +1009,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         let tx: Awaited<ReturnType<TransactionBuilder['deleteProposal']>>;
         let proposalId: number;
 
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             const createTx = await tronWeb.transactionBuilder.createProposal([{ key: 0, value: 100000 }], ADDRESS_BASE58);
             const signedTx = await tronWeb.trx.sign(createTx, PRIVATE_KEY);
@@ -1047,7 +1047,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
                          '4d59a43069af0c50a3c1c0fb0e43a6070029';
         const abi = [{ inputs: [], payable: false, stateMutability: 'nonpayable', type: 'constructor' }];
 
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             tx = await tronWeb.transactionBuilder.createSmartContract({
                 abi,
@@ -1082,7 +1082,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         let tx: Awaited<ReturnType<TransactionBuilder['updateSetting']>>;
         const userFeePercentage = 50;
 
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             tx = await tronWeb.transactionBuilder.updateSetting(CONTRACT_ADDRESS, userFeePercentage, ADDRESS_BASE58);
         });
@@ -1108,7 +1108,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         let tx: Awaited<ReturnType<TransactionBuilder['updateEnergyLimit']>>;
         const originEnergyLimit = 5000000;
 
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             tx = await tronWeb.transactionBuilder.updateEnergyLimit(CONTRACT_ADDRESS, originEnergyLimit, ADDRESS_BASE58);
         });
@@ -1133,7 +1133,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
     describe('DClearABIContract', async () => {
         let tx: Awaited<ReturnType<TransactionBuilder['clearABI']>>;
 
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             tx = await tronWeb.transactionBuilder.clearABI(CONTRACT_ADDRESS, ADDRESS_BASE58);
         });
@@ -1162,7 +1162,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         const tokenBalance = 1000;
         const trxBalance = 2000;
 
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             tx = await tronWeb.transactionBuilder.createTRXExchange(tokenName, tokenBalance, trxBalance, ADDRESS_BASE58);
         });
@@ -1191,8 +1191,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         const tokenBalance = 5000;
         const trxBalance = 5000;
 
-        before(async function () {
-            this.timeout(15000);
+        beforeAll(async function () {
             tronWeb = tronWebBuilder.createInstance();
             const createTx = await tronWeb.transactionBuilder.createTRXExchange(tokenName, tokenBalance, trxBalance, ADDRESS_BASE58);
             const signedTx = await tronWeb.trx.sign(createTx, PRIVATE_KEY);
@@ -1206,7 +1205,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
             let tx: Awaited<ReturnType<TransactionBuilder['injectExchangeTokens']>>;
             const injectAmount = 100;
 
-            before(async () => {
+            beforeAll(async () => {
                 tx = await tronWeb.transactionBuilder.injectExchangeTokens(exchangeId, tokenName, injectAmount, ADDRESS_BASE58);
             });
 
@@ -1231,7 +1230,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
             let tx: Awaited<ReturnType<TransactionBuilder['withdrawExchangeTokens']>>;
             const withdrawAmount = 50;
 
-            before(async () => {
+            beforeAll(async () => {
                 tx = await tronWeb.transactionBuilder.withdrawExchangeTokens(exchangeId, tokenName, withdrawAmount, ADDRESS_BASE58);
             });
 
@@ -1257,7 +1256,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
             const amountSold = 10;
             const amountExpected = 5;
 
-            before(async () => {
+            beforeAll(async () => {
                 tx = await tronWeb.transactionBuilder.tradeExchangeTokens(exchangeId, tokenName, amountSold, amountExpected, ADDRESS_BASE58);
             });
 
@@ -1285,7 +1284,7 @@ describe('#TronWeb.utils.deserializeTx', function () {
         let account: Awaited<ReturnType<TronWeb['createAccount']>>;
         const brokerage = 20;
 
-        before(async () => {
+        beforeAll(async () => {
             tronWeb = tronWebBuilder.createInstance();
             account = await tronWeb.createAccount();
             tx = await tronWeb.transactionBuilder.updateBrokerage(brokerage, account.address.base58);

@@ -1,4 +1,4 @@
-import { assert } from 'chai';
+import { assert } from 'vitest';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
 import diskUtils from '../testcases/src/disk-utils.js';
 const { loadTests } = diskUtils;

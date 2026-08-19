@@ -2,7 +2,8 @@ import { AbiCoder } from './ethersUtils.js';
 import { FunctionFragment as EthersFunctionFragment } from './fragments.js';
 import { ADDRESS_PREFIX, ADDRESS_PREFIX_REGEX } from './constants.js';
 import { toHex } from './address.js';
-import { FunctionFragment, AbiParamsCommon, GetOutputsType, ContractAbiInterface } from '../types/ABI.js';
+import type { FunctionFragment, AbiParamsCommon, GetOutputsType, ContractAbiInterface } from '../types/ABI.js';
+import type { FunctionSelector } from '../types/Contract.js';
 
 const abiCoder = new AbiCoder();
 
@@ -289,9 +290,9 @@ export function buildFullTypeDefinition(typeDef: AbiParamsCommon): string {
     return canonicalizeIntType(typeDef.type);
 }
 
-export function buildFunctionSelector(fragment: FunctionFragment): string {
+export function buildFunctionSelector<F extends FunctionFragment>(fragment: F): FunctionSelector<F> {
     const inputs = fragment.inputs ?? [];
-    return `${fragment.name}(${inputs.map((input) => buildFullTypeDefinition(input)).join(',')})`;
+    return `${fragment.name}(${inputs.map((input) => buildFullTypeDefinition(input)).join(',')})` as FunctionSelector<F>;
 }
 
 /** All function fragments in `abi` that share `functionName`. */

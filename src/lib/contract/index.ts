@@ -2,7 +2,7 @@ import { TronWeb } from '../../tronweb.js';
 import utils from '../../utils/index.js';
 import { Method, AbiFragmentNoErrConstructor } from './method.js';
 import { buildReadNamespace, buildWriteNamespace } from './readWrite.js';
-import type { ContractReadNamespace, ContractWriteNamespace } from './readWrite.js';
+import type { ContractReadNamespace, ContractWriteNamespace } from '../../types/Contract.js';
 import type { ContractAbiInterface, GetMethodsTypeFromAbi, GetOnMethodTypeFromAbi, AnyOnMethodType } from '../../types/ABI.js';
 import type { Address } from '../../types/Trx.js';
 import type { CreateSmartContractOptions } from '../../types/TransactionBuilder.js';
@@ -102,8 +102,10 @@ export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
     }
 
     hasProperty(property: number | string | symbol) {
-        // eslint-disable-next-line no-prototype-builtins
-        return this.hasOwnProperty(property) || (this as any).__proto__.hasOwnProperty(property);
+        return (
+            Object.prototype.hasOwnProperty.call(this, property) ||
+            Object.prototype.hasOwnProperty.call(Object.getPrototypeOf(this), property)
+        );
     }
 
     loadAbi(abi: Abi) {
@@ -112,6 +114,7 @@ export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
         this.methodInstances = Object.create(null) as GetMethodsTypeFromAbi<Abi>;
 
         this.props.forEach((prop: string) => delete (this as any)[prop]);
+        this.props = [];
 
         abi.forEach((func) => {
             // Don't build a method for constructor function. That's handled through contract create.
@@ -221,5 +224,6 @@ export type {
     ReadOptions,
     WriteOptions,
     CollapseSingleItemTuple,
-} from './readWrite.js';
+    FunctionSelector,
+} from '../../types/Contract.js';
 export { buildReadNamespace, buildWriteNamespace } from './readWrite.js';
