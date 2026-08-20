@@ -19,7 +19,11 @@
         "strict": true,
         "sourceMap": true,
         "target": "ES2022",
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        // only auto-include @types/node globals; keeps tsc from type-checking
+        // unrelated transitive @types (webpack's @types/eslint-scope conflicts
+        // with eslint 10's bundled types). Imported packages are unaffected.
+        "types": ["node"]
     },
     "exclude": ["src/protocol/**/*"],
     "include": ["src/**/*"]

@@ -1,4 +1,4 @@
-import { assert } from 'chai';
+import { assert } from 'vitest';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
 import { TronWeb, Plugin, Trx } from '../setup/TronWeb.js';
 import GetNowBlock from '../helpers/GetNowBlock.js';
@@ -24,7 +24,7 @@ declare global {
 describe('TronWeb.lib.plugin', async function () {
     let tronWeb: TronWeb;
 
-    before(async function () {
+    beforeAll(async function () {
         tronWeb = tronWebBuilder.createInstance();
     });
 

@@ -1,6 +1,33 @@
 Change Log
 =========
 
+__6.5.0__
+
+## New Features
+
+- Added `trx.raw` — chain reads without int64 precision loss
+
+  Added a `tronWeb.trx.raw` namespace that mirrors the chain-reading methods of `trx` (`getBalance`, `getAccount`, `getBlock`, `getTransaction`, `getTransactionInfo`, `getAccountResources`, token / proposal / exchange queries, ...) but issues them as GET requests with `int64_as_string=true` (java-tron#6699). The node then serializes int64 / uint64 fields as JSON strings, so values above 2^53 - 1 (`Number.MAX_SAFE_INTEGER`) reach JavaScript without precision loss. Return types reflect this at compile time: int64 fields are typed (and arrive) as strings, via the new `Types.Int64AsString` / `Types.Precise64` mapped types.
+
+  - `getCurrentBlock` / `getConfirmedCurrentBlock` are rerouted in raw mode to the flag-honoring `wallet/getblock?detail=true` / `walletsolidity/getblock?detail=true` (`getnowblock` ignores the flag).
+  - Reads that cannot take the flag keep returning numbers in both modes: `getNodeInfo`, `listNodes`, `getBandwidthPrices`, `getEnergyPrices`, `getDelegatedResourceAccountIndexV2`, `getBrokerage` / `getUnconfirmedBrokerage`, the deprecated `getTransactionsToAddress` / `getTransactionsFromAddress` / `getTransactionsRelated`, `getSignWeight` / `getApprovedList`, and `getCurrentRefBlockParams` (feeds local transaction building and must stay on the number path).
+  - Requirements and caveats: the connected node must run a java-tron build that includes #6699 — older nodes ignore the flag and keep returning (possibly precision-lossy) numbers. Responses read via `trx.raw` must not be fed back into transaction-consuming endpoints (`sendRawTransaction`, `getSignWeight`, ...): the node rejects string-encoded int64 fields in request bodies.
+  - The plugin system cannot override the `raw` sub-module.
+
+## Improvements
+
+- `multiSign` verifies the transaction returned by `getSignWeight`
+
+  When `multiSign` is called with a `permissionId` on a transaction that does not carry one yet, it refreshes the transaction through `getSignWeight` and previously adopted the fullNode's response unchecked. It now verifies that the returned transaction matches the one submitted (including the injected `Permission_id`) before signing, and throws `Invalid transaction provided` otherwise — a compromised or malicious fullNode can no longer substitute a different transaction for signing.
+
+- Corrected `Types.Proposal` to match the node's JSON wire format
+
+  `Proposal.state` is now typed as the enum-name string the node actually returns (`'PENDING' | 'DISAPPROVED' | 'APPROVED' | 'CANCELED'`) instead of a numeric enum, and `Proposal.parameters` as the `{ key, value }[]` array the node serializes instead of a key/value map. Runtime values are unchanged — the previous declarations did not match what `getProposal` / `listProposals` return; code type-checked against the old numeric `state` (e.g. `state === 2`) now fails to compile and should compare against the string form.
+
+## Changes
+
+- Migrated the test stack from mocha / karma / chai / nyc to Vitest 4 (node suite plus a headless-Playwright browser suite). Vitest runs the TypeScript test sources directly and provisions test accounts in its `globalSetup`, so the `build:test` / `newaccount` npm scripts are gone; `test`, `test:watch`, `coverage` and `test:browser` are the remaining test scripts.
+
 __6.4.0__
 
 ## New Features

@@ -1,4 +1,4 @@
-import { assert } from 'chai';
+import { assert } from 'vitest';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
 const utils = tronWebBuilder.utils;
 

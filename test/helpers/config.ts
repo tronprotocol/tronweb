@@ -1,4 +1,4 @@
-import { TronWeb } from '../setup/node.js';
+import { TronWeb } from '../setup/TronWeb.js';
 
 const fullHost = 'http://127.0.0.1:' + (process.env.HOST_PORT || 9090);
 // const fullHost = 'https://nile.trongrid.io';
@@ -25,12 +25,15 @@ export default {
             description: 'Useless utility token',
             url: `https://example-${rnd}.com/`,
             totalSupply: 100000000,
-            saleEnd: Date.now() + 60000, // 1 minute
+            saleEnd: Date.now() + 3600000, // 1 hour
             frozenAmount: 5,
             frozenDuration: 1,
             trxRatio: 10,
             tokenRatio: 2,
-            saleStart: Date.now() + 100,
+            // far enough out that concurrently instamined head blocks can't outrun
+            // it (the node rejects start_time <= headBlockTimestamp); suites that
+            // purchase from the sale override this with a near-immediate start
+            saleStart: Date.now() + 60000, // 1 minute
             freeBandwidth: 100,
             freeBandwidthLimit: 1000,
         } as any;

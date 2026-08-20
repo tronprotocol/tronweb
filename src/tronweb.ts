@@ -6,7 +6,7 @@ import EventEmitter from 'eventemitter3';
 import semver from 'semver';
 
 import { TransactionBuilder } from './lib/TransactionBuilder/TransactionBuilder.js';
-import { Trx } from './lib/trx.js';
+import { Trx } from './lib/trx/trx.js';
 import { Contract } from './lib/contract/index.js';
 import { Plugin } from './lib/plugin.js';
 import { Event } from './lib/event.js';
@@ -18,11 +18,11 @@ import { DefaultAddress, NodeProvider, TronWebOptions, IBigNumber } from './type
 import { ContractAbiInterface, ContractInstance } from './types/ABI.js';
 import { Address } from './types/Trx.js';
 
-const DEFAULT_VERSION = '4.7.1';
+const DEFAULT_VERSION = '4.8.2';
 
 const FEE_LIMIT = 150000000;
 
-const version = '6.4.0';
+const version = '6.5.0';
 
 function isValidOptions(options: unknown): options is TronWebOptions {
     return (

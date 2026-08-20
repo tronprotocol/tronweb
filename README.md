@@ -79,19 +79,19 @@ cp node_modules/tronweb/dist/TronWeb.js ./js/tronweb.js
 ```
 so that you can call it in your HTML page as
 ```
-<script src="./js/tronweb.js"><script>
+<script src="./js/tronweb.js"></script>
 ```
 
 This project is also published on NPM and you can access CDN mirrors of this release (please use sub-resource integrity for any `<script>` includes).
 
 ## Testnet
 
-Shasta is the official Tron testnet. To use it use the following endpoint:
+Nile is a Tron testnet. To use it use the following endpoint:
 ```
-https://api.shasta.trongrid.io
+https://nile.trongrid.io
 ```
-Get some Shasta TRX at https://www.trongrid.io/shasta and play with it.
-Anything you do should be explorable on https://shasta.tronscan.org
+Get some Nile TRX at https://nileex.io/join/getJoinPage and play with it.
+Anything you do should be explorable on https://nile.tronscan.org
 
 ## Your local private network for heavy testing
 
@@ -198,7 +198,7 @@ In order to contribute you can
 * install the dependencies — `npm i`
 * do your changes to the code
 * build the TronWeb dist files — `npm run build:all`
-* run a local private network using Tron Quickstart
+* run a local [private network](#your-local-private-network-for-heavy-testing)
 * run the tests — `npm run test`
 * push your changes and open a pull request
 

@@ -1,4 +1,4 @@
-import { assert } from 'chai';
+import { assert } from 'vitest';
 
 export default async function (func: unknown, expectedError?: any, expectedErrorContains?: any) {
     let errMsg;

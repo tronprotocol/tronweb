@@ -1,5 +1,14 @@
 import { Resource } from '../types/TransactionBuilder.js';
-import { ContractAbiInterface } from './ABI.js';
+import {
+    AbiParamsCommon,
+    ContractAbiInterface,
+    FunctionFragment,
+    GetMethodsTypeFromAbi,
+    GetOutputsType,
+    GetParamsType,
+    IsConstAbi,
+} from './ABI.js';
+import { IsNever, Prettify, UnionToIntersection } from './UtilsTypes.js';
 export enum ContractType {
     AccountCreateContract = 'AccountCreateContract',
     TransferContract = 'TransferContract',
@@ -356,3 +365,205 @@ export type ContractParamter =
     | WitnessCreateContract
     | WitnessUpdateContract
     | VoteWitnessContract;
+
+// ─── contract.read / contract.write namespaces ──────────────────────────────
+
+type IsReadOnlyFunction<Fragment> = Fragment extends FunctionFragment
+    ? Fragment['stateMutability'] extends 'view' | 'pure'
+        ? true
+        : Fragment['constant'] extends true
+          ? true
+          : false
+    : false;
+
+type IsWriteFunction<Fragment> = Fragment extends FunctionFragment
+    ? IsReadOnlyFunction<Fragment> extends true
+        ? false
+        : true
+    : false;
+
+type ReadContractFragments<Abi extends ContractAbiInterface> = Abi[number] extends infer Fragment
+    ? Fragment extends FunctionFragment
+        ? IsReadOnlyFunction<Fragment> extends true
+            ? Fragment
+            : never
+        : never
+    : never;
+
+type WriteContractFragments<Abi extends ContractAbiInterface> = Abi[number] extends infer Fragment
+    ? Fragment extends FunctionFragment
+        ? IsWriteFunction<Fragment> extends true
+            ? Fragment
+            : never
+        : never
+    : never;
+
+export type ReadContractFunctionName<Abi extends ContractAbiInterface> = ReadContractFragments<Abi>['name'];
+
+export type WriteContractFunctionName<Abi extends ContractAbiInterface> = WriteContractFragments<Abi>['name'];
+
+export type CollapseSingleItemTuple<Value> = Value extends readonly [infer Only] ? Only : Value;
+
+type ChangeNeverToString<T> = IsNever<T> extends true ? string : T;
+
+export type ReadContractParameters<
+    AbiFrag extends FunctionFragment = FunctionFragment,
+> = {
+    readonly functionName: ChangeNeverToString<AbiFrag['name']>;
+    readonly args?: GetParamsType<AbiFrag['inputs']>;
+    /** Caller address for the constant call. */
+    readonly from?: string;
+    readonly value?: number | bigint;
+};
+
+export type ReadContractReturnType<
+    AbiFrag extends FunctionFragment = FunctionFragment,
+> = CollapseSingleItemTuple<GetOutputsType<AbiFrag['outputs']>>;
+
+export type WriteContractParameters<
+    AbiFrag extends FunctionFragment = FunctionFragment,
+> = {
+    readonly functionName: ChangeNeverToString<AbiFrag['name']>;
+    readonly args?: GetParamsType<AbiFrag['inputs']>;
+    /**
+     * Signer: a private key whose derived address owns and signs the transaction,
+     * allowing a non-default signer. When omitted, the instance default key signs.
+     */
+    readonly account?: string;
+    readonly value?: number | bigint;
+    readonly feeLimit?: number;
+    readonly tokenId?: string;
+    readonly tokenValue?: number;
+    readonly permissionId?: number;
+};
+
+export type WriteContractReturnType = string;
+
+export type ReadOptions<
+    AbiFrag extends FunctionFragment
+> = Prettify<Omit<ReadContractParameters<AbiFrag>, 'functionName' | 'args'>>;
+
+export type WriteOptions<
+    AbiFrag extends FunctionFragment
+> = Prettify<Omit<WriteContractParameters<AbiFrag>, 'functionName' | 'args'>>;
+
+type ReadFragmentSignature<
+    AbiFrag extends FunctionFragment,
+    Parameters = NonNullable<ReadContractParameters<AbiFrag>['args']>,
+    Options = ReadOptions<AbiFrag>
+> = AbiFrag extends FunctionFragment ? (
+    ...parameters: Parameters extends readonly [] ? [
+        options?: Options
+    ] : [
+        args: Parameters,
+        options?: Options
+    ]
+) => Promise<ReadContractReturnType<AbiFrag>> : never;
+
+type ReadSignaturesForName<Abi extends ContractAbiInterface, Name extends ReadContractFunctionName<Abi>> =
+    Extract<ReadContractFragments<Abi>, { name: Name }> extends infer F
+        ? F extends FunctionFragment ? ReadFragmentSignature<F> : never
+        : never;
+
+// Type-level mirror of `canonicalizeIntType`: bare `uint`/`int` (and their array
+// forms) canonicalize to `uint256`/`int256`; width-qualified types are untouched.
+type CanonicalizeIntType<T extends string> =
+    T extends `uint[${infer Rest}` ? `uint256[${Rest}`
+        : T extends `int[${infer Rest}` ? `int256[${Rest}`
+            : T extends 'uint' ? 'uint256'
+                : T extends 'int' ? 'int256'
+                    : T;
+
+// Type-level mirror of `buildFullTypeDefinition`: the canonical Solidity type
+// string for one ABI parameter, expanding tuples into their component list.
+type ParamTypeSignature<Param extends AbiParamsCommon> =
+    Param['type'] extends `tuple${infer Suffix}`
+        ? Param extends { components: infer Components }
+            ? Components extends ReadonlyArray<AbiParamsCommon>
+                ? `(${JoinParamTypeSignatures<Components>})${Suffix}`
+                : Param['type']
+            : Param['type']
+        : CanonicalizeIntType<Param['type']>;
+
+// Comma-joined canonical types for a parameter list. A non-tuple array (a
+// fragment typed as plain `FunctionFragment` rather than a const ABI literal)
+// has unknowable arity and degrades to `string`.
+type JoinParamTypeSignatures<Params extends ReadonlyArray<AbiParamsCommon>> =
+    Params extends readonly [infer Head, ...infer Rest]
+        ? Head extends AbiParamsCommon
+            ? Rest extends ReadonlyArray<AbiParamsCommon>
+                ? Rest extends readonly []
+                    ? ParamTypeSignature<Head>
+                    : `${ParamTypeSignature<Head>},${JoinParamTypeSignatures<Rest>}`
+                : ParamTypeSignature<Head>
+            : ''
+        : Params extends readonly []
+          ? ''
+          : string;
+
+// The fragment's declared inputs. `'inputs' extends keyof` distinguishes a
+// literal fragment WITHOUT the key (indexing would fall back to the optional
+// constraint member, `ReadonlyArray | undefined`) from one that declares it; a
+// missing or undefined `inputs` means a parameterless list, matching the
+// runtime's `inputs ?? []`.
+type FragmentInputs<Fragment extends FunctionFragment> = 'inputs' extends keyof Fragment
+    ? [NonNullable<Fragment['inputs']>] extends [never]
+        ? readonly []
+        : NonNullable<Fragment['inputs']>
+    : readonly [];
+
+/**
+ * A fragment's full signature, e.g. `"transfer(address,uint256)"` — the return
+ * type of `buildFunctionSelector`. Const ABI fragments produce the literal
+ * signature; a plain `FunctionFragment` degrades to `` `${string}(${string})` ``.
+ */
+export type FunctionSelector<Fragment extends FunctionFragment> =
+    `${Fragment['name']}(${JoinParamTypeSignatures<FragmentInputs<Fragment>>})`;
+
+// Names map to the merged overload signatures; full selectors map to their one
+// fragment's signature so overloads stay addressable unambiguously — mirrors the
+// dual keys (`read[name]` and `read[selector]`) registered at runtime.
+type ExtractReadNamespace<Abi extends ContractAbiInterface> = {
+    [K in ReadContractFragments<Abi> as K['name']]: UnionToIntersection<ReadSignaturesForName<Abi, K['name']>>;
+} & {
+    [K in ReadContractFragments<Abi> as FunctionSelector<K>]: ReadFragmentSignature<K>;
+};
+
+export type ContractReadNamespace<Abi extends ContractAbiInterface> = IsConstAbi<Abi> extends true
+    ? 'read' extends ReadContractFunctionName<Abi> | WriteContractFunctionName<Abi>
+        ? GetMethodsTypeFromAbi<Abi>['read']['onMethod'] & Prettify<ExtractReadNamespace<Abi>>
+        : Prettify<ExtractReadNamespace<Abi>>
+    : any;
+
+type WriteFragmentSignature<
+    AbiFrag extends FunctionFragment,
+    Parameters = NonNullable<WriteContractParameters<AbiFrag>['args']>,
+    Options = WriteOptions<AbiFrag>
+> = AbiFrag extends FunctionFragment ? (
+    ...parameters: Parameters extends readonly [] ? [
+        options?: Options
+    ] : [
+        args: Parameters,
+        options?: Options
+    ]
+) => Promise<WriteContractReturnType> : never;
+
+type WriteSignaturesForName<Abi extends ContractAbiInterface, Name extends WriteContractFunctionName<Abi>> =
+    Extract<WriteContractFragments<Abi>, { name: Name }> extends infer F
+        ? F extends FunctionFragment ? WriteFragmentSignature<F> : never
+        : never;
+
+// Names map to the merged overload signatures; full selectors map to their one
+// fragment's signature so overloads stay addressable unambiguously — mirrors the
+// dual keys (`write[name]` and `write[selector]`) registered at runtime.
+type ExtractWriteNamespace<Abi extends ContractAbiInterface> = {
+    [K in WriteContractFragments<Abi> as K['name']]: UnionToIntersection<WriteSignaturesForName<Abi, K['name']>>;
+} & {
+    [K in WriteContractFragments<Abi> as FunctionSelector<K>]: WriteFragmentSignature<K>;
+};
+
+export type ContractWriteNamespace<Abi extends ContractAbiInterface> = IsConstAbi<Abi> extends true
+    ? 'write' extends ReadContractFunctionName<Abi> | WriteContractFunctionName<Abi>
+        ? GetMethodsTypeFromAbi<Abi>['write']['onMethod'] & Prettify<ExtractWriteNamespace<Abi>>
+        : Prettify<ExtractWriteNamespace<Abi>>
+    : any;

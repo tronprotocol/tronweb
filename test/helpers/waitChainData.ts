@@ -10,7 +10,9 @@ function log(x: string) {
 
 export default async function (type: string, ...params: any[]) {
     let startTimestamp = Date.now();
-    let timeLimit = 5000;
+    // generous cap: with concurrent suites hammering the node, a fixture can take
+    // well over 5s to land; polling exits as soon as the data shows up
+    let timeLimit = 30000;
     do {
         let data;
         let isFound = false;

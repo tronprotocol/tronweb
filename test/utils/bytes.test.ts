@@ -1,4 +1,4 @@
-import { assert } from 'chai';
+import { assert } from 'vitest';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
 
 describe('TronWeb.utils.bytes', function () {

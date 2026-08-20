@@ -10,7 +10,7 @@ export { providers };
 import { TransactionBuilder } from './lib/TransactionBuilder/TransactionBuilder.js';
 export { TransactionBuilder };
 
-import { Trx } from './lib/trx.js';
+import { Trx } from './lib/trx/trx.js';
 export { Trx };
 
 import { Contract, Method } from './lib/contract/index.js';

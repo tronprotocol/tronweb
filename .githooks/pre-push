@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+if ! command -v npm >/dev/null 2>&1; then
+    echo "[error] Push blocked: npm not found in PATH, cannot run the pre-push npm audit check."
+    exit 1
+fi
+
+echo "[pre-push] Running npm audit (push is blocked on high/critical vulnerabilities)..."
+
+if ! npm audit --audit-level=high; then
+    echo ""
+    echo "[error] Push blocked: npm audit reported high or critical vulnerabilities (see report above)."
+    echo "[error] Fix them (e.g. npm audit fix) and try pushing again."
+    exit 1
+fi
+
+echo "[pre-push] npm audit passed."

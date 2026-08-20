@@ -8,7 +8,7 @@ function log(x: string) {
     if (process.stdout !== undefined) {
         process.stdout.write(chalk.yellow(x));
     } else {
-        console.log(chalk.yellow(x)); // used for karma
+        console.log(chalk.yellow(x));
     }
 }
 

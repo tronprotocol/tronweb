@@ -1,4 +1,4 @@
-import { assert } from 'chai';
+import { assert } from 'vitest';
 import config from '../helpers/config.js';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
 import testUtils from '../helpers/testUtils.js';
@@ -146,7 +146,6 @@ describe('TronWeb.utils.abi', function () {
             funcABI[0].inputs = funcABI[0].outputs;
             const title = test.name + ' => (' + test.types + ') = (' + test.normalizedValues + ')';
             it('encodes parameters - ' + test.name + ' - ' + test.types, function () {
-                this.timeout(120000);
                 const encoded = coder.encodeParamsV2ByABI(funcABI[0], inputValues);
                 assert.equal(encoded, result, 'encoded data - ' + title);
             });
@@ -165,7 +164,6 @@ describe('TronWeb.utils.abi', function () {
             funcABI[0].inputs = funcABI[0].outputs;
             const title = test.name + ' => (' + test.types + ') = (' + test.normalizedValues + ')';
             it('encodes parameters - ' + test.name + ' - ' + test.types, function () {
-                this.timeout(120000);
                 const encoded = coder.encodeParamsV2ByABI(funcABI[0], inputValues);
                 assert.equal(encoded, result, 'encoded data - ' + title);
             });
@@ -183,7 +181,6 @@ describe('TronWeb.utils.abi', function () {
             const outputValues = getValues(JSON.parse(normalizedValues));
             const title = test.name + ' => (' + test.types + ') = (' + test.normalizedValues + ')';
             it('decodes parameters - ' + test.name + ' - ' + test.types, function () {
-                this.timeout(120000);
                 const decoded = coder.decodeParamsV2ByABI(funcABI[0], result);
                 assert.ok(equals(decoded, outputValues), 'decoded data - ' + title);
             });
@@ -201,7 +198,6 @@ describe('TronWeb.utils.abi', function () {
             const outputValues = getValues(JSON.parse(values));
             const title = test.name + ' => (' + test.types + ') = (' + test.normalizedValues + ')';
             it('decodes parameters - ' + test.name + ' - ' + test.types, function () {
-                this.timeout(120000);
                 const decoded = coder.decodeParamsV2ByABI(funcABI[0], result);
                 assert.ok(equals(decoded, outputValues), 'decoded data - ' + title);
             });

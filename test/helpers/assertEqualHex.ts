@@ -1,4 +1,4 @@
-import { assert } from 'chai';
+import { assert } from 'vitest';
 import { TronWeb } from '../setup/TronWeb.js';
 
 export default async function (result: any, string: any) {

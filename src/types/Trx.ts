@@ -171,26 +171,10 @@ export interface TransactionSignWeight {
     transaction: { transaction: Transaction };
 }
 
-enum BroadcastReturn_response_code {
-    SUCCESS = 0,
-    SIGERROR = 1, // error in signature
-    CONTRACT_VALIDATE_ERROR = 2,
-    CONTRACT_EXE_ERROR = 3,
-    BANDWITH_ERROR = 4,
-    DUP_TRANSACTION_ERROR = 5,
-    TAPOS_ERROR = 6,
-    TOO_BIG_TRANSACTION_ERROR = 7,
-    TRANSACTION_EXPIRATION_ERROR = 8,
-    SERVER_BUSY = 9,
-    NO_CONNECTION = 10,
-    NOT_ENOUGH_EFFECTIVE_CONNECTION = 11,
-    OTHER_ERROR = 20,
-}
-
 export interface BroadcastReturn<T extends SignedTransaction> {
     result: boolean;
     txid: string;
-    code: BroadcastReturn_response_code;
+    code: string;
     message: string;
     transaction: T;
 }
@@ -209,16 +193,16 @@ export interface AddressOptions {
 }
 
 enum ProposalState {
-    PENDING = 0,
-    DISAPPROVED = 1,
-    APPROVED = 2,
-    CANCELED = 3,
+    PENDING = 'PENDING',
+    DISAPPROVED = 'DISAPPROVED',
+    APPROVED = 'APPROVED',
+    CANCELED = 'CANCELED',
 }
 
 export interface Proposal {
     proposal_id: number;
     proposer_address: string;
-    parameters: HTTPMap<number, number>;
+    parameters: { key: number; value: number }[];
     expiration_time: number;
     create_time: number;
     approvals: string[];
@@ -321,3 +305,50 @@ export interface TransactionInfo {
 export interface WitnessList {
     witnesses: BaseWitness[];
 }
+
+/**
+ * Field names inside the mapped response types whose numeric value is NOT a proto
+ * int64/uint64, so the node does not stringify them under `int64_as_string=true`:
+ * - `id` — `Permission.id` is a proto int32 (Owner id=0, Witness id=1, Active id >= 2);
+ * - `type` — `Account.type` / `contract[].type` are proto enums;
+ * - `Permission_id` — proto int32 on `contract[]`;
+ * - `version` — `block_header.raw_data.version` is a proto int32;
+ * - `trx_num` / `precision` / `num` / `vote_score` — proto int32 fields of TRC10 tokens.
+ * Verified against Nile: with the flag on, int64 fields flip to strings while these
+ * keep their regular wire form (e.g. block `version: 37`, permission `id: 2`).
+ */
+type NonInt64NumberField = 'id' | 'type' | 'Permission_id' | 'version' | 'trx_num' | 'precision' | 'num' | 'vote_score';
+
+/**
+ * Response shape of `RawTrx` reads. With `int64_as_string=true` (java-tron#6699)
+ * the node serializes protobuf int64/uint64 fields as JSON strings; this type maps
+ * exactly those fields to `string` and leaves everything else as declared:
+ * - proto int32 and enum fields (see {@link NonInt64NumberField}) keep their type;
+ * - strings/booleans pass through untouched.
+ *
+ * Note: proto3 omits fields holding their default value, so declared-required fields
+ * can still be absent at runtime (a fresh account is `{}`).
+ */
+export type Int64AsString<T> = T extends bigint | string | boolean | null | undefined
+    ? T
+    : T extends number
+      ? string
+      : T extends (...args: any[]) => any
+        ? T
+        : T extends Map<any, any> | Set<any> | Date
+          ? T
+          : T extends object
+            ? {
+                  [K in keyof T]: K extends NonInt64NumberField
+                      ? T[K] extends number | undefined
+                          ? T[K]
+                          : Int64AsString<T[K]>
+                      : Int64AsString<T[K]>;
+              }
+            : T;
+
+/**
+ * Resolves to the raw (string-int64) response shape when `P` is true,
+ * to the regular response shape otherwise.
+ */
+export type Precise64<T, P extends boolean> = P extends true ? Int64AsString<T> : T;
