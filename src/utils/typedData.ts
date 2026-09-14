@@ -679,8 +679,9 @@ export class TypedDataEncoder {
     }
 }
 
-// A deep copy of a `signTypedData` input. Accepts `Uint8Array` values (`salt`, `bytes`, `bytesN`)
-// and rejects anything that is not typed data with `Invalid typed data: <reason> at <path>`.
+// A deep copy of the `domain` or `types` input of `signTypedData`. Accepts `Uint8Array` values
+// (`salt`) and rejects anything that is not plain data with `Invalid typed data: <reason> at <path>`.
+// `value` does not go through here: see `hashTypedData`.
 function cloneInput<T>(input: T, root: string): T {
     return clonePlainData(input, {
         root,
@@ -701,10 +702,18 @@ function copyLeaf(_type: string, leaf: unknown): unknown {
 /**
  *  Hash the typed data from a snapshot of its inputs.
  *
- *  `domain`, `types` and `value` are copied before anything reads them — each field is
- *  read from the caller's objects exactly once — and the digest is computed from that
- *  copy, so signing and verifying read their inputs the same way. Inputs that are not
- *  plain typed data are rejected with `Invalid typed data: <reason> at <path>`.
+ *  `domain` and `types` are deep-copied into plain data before anything reads them.
+ *  Anything there that is not plain data (a class instance, a `Date`, a function, a
+ *  circular reference, ...) is rejected with `Invalid typed data: <reason> at <path>`.
+ *
+ *  `value` is not restricted by type. It is walked along the type definitions: each
+ *  field declared in `types` is read from the caller's object exactly once and handed
+ *  to the EIP-712 encoder as it is (a `Uint8Array` leaf is copied), so only the
+ *  encoder's own per-type checks apply to the leaves. Fields that `types` does not
+ *  declare are never read, whatever they hold.
+ *
+ *  The digest is computed from these copies, so signing and verifying read their
+ *  inputs the same way.
  */
 export function hashTypedData(
     domain: TypedDataDomain,
