@@ -51,6 +51,7 @@ import {
 import {
     createTransaction,
     cloneTriggerOptions,
+    cloneParameters,
     deepCopyJson,
     fromUtf8,
     genContractAddress,
@@ -1022,6 +1023,7 @@ export class TransactionBuilder {
         } else {
             params[2] = cloneTriggerOptions(params[2] ?? {});
         }
+        params[3] = cloneParameters(params[3]);
         if (params[2]?.txLocal) {
             return this._triggerSmartContractLocal(...params);
         }
@@ -1036,6 +1038,7 @@ export class TransactionBuilder {
         issuerAddress: string = this.tronWeb.defaultAddress.hex as string
     ): Promise<TransactionWrapper> {
         options = cloneTriggerOptions(options);
+        parameters = cloneParameters(parameters);
         options._isConstant = true;
         return this._triggerSmartContract(contractAddress, functionSelector, options, parameters, issuerAddress);
     }
@@ -1048,6 +1051,7 @@ export class TransactionBuilder {
         issuerAddress: string = this.tronWeb.defaultAddress.hex as string
     ): Promise<TransactionWrapper> {
         options = cloneTriggerOptions(options);
+        parameters = cloneParameters(parameters);
         options._isConstant = true;
         options.confirmed = true;
         return this._triggerSmartContract(contractAddress, functionSelector, options, parameters, issuerAddress);
@@ -1061,6 +1065,7 @@ export class TransactionBuilder {
         issuerAddress: string = this.tronWeb.defaultAddress.hex as string
     ): Promise<{ result: { result: boolean }; energy_required: number }> {
         options = cloneTriggerOptions(options);
+        parameters = cloneParameters(parameters);
         options.estimateEnergy = true;
         const result = await this._triggerSmartContract(contractAddress, functionSelector, options, parameters, issuerAddress);
         return result as { result: { result: boolean }; energy_required: number };

@@ -41,6 +41,19 @@ export function cloneTriggerOptions<T>(options: T): T {
     });
 }
 
+/**
+ * Deep-copies the `parameters` of `triggerSmartContract` (`{ type, value }` entries) into plain
+ * data. The copy keeps `Uint8Array` values (`bytes` arguments); anything else that is not plain
+ * data is rejected with `Invalid parameters provided: <reason> at <path>`.
+ */
+export function cloneParameters<T>(parameters: T): T {
+    return clonePlainData(parameters, {
+        root: 'parameters',
+        bytes: true,
+        invalid: (reason, path) => new Error(`Invalid parameters provided: ${reason} at ${path}`),
+    });
+}
+
 export function resultManagerTriggerSmartContract(
     transaction: TransactionWrapper,
     data: unknown,

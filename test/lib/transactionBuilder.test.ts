@@ -73,6 +73,24 @@ import { deepCopyJson } from '../../src/lib/TransactionBuilder/helper';
 import { createEmptyBlock } from '../helpers/createEmptyBlock';
 const { ADDRESS_HEX, ADDRESS_BASE58, UPDATED_TEST_TOKEN_OPTIONS, PRIVATE_KEY, getTokenOptions, isProposalApproved } = Config;
 
+// A `parameters` array whose first entry hands out `first` on the first read and `later` afterwards
+function withSwappingFirstParameter(
+    first: ContractFunctionParameter,
+    later: ContractFunctionParameter,
+    rest: ContractFunctionParameter[] = []
+) {
+    let reads = 0;
+    const parameters: ContractFunctionParameter[] = [first, ...rest];
+    Object.defineProperty(parameters, '0', {
+        enumerable: true,
+        get() {
+            reads++;
+            return reads === 1 ? first : later;
+        },
+    });
+    return { parameters, reads: () => reads };
+}
+
 /**
  * Following cases should be test in Nile testnet:
  * - should create a TestToken without freezing anything in 3.6.0
@@ -2251,6 +2269,21 @@ describe('TronWeb.transactionBuilder', function () {
                 'Invalid options provided: unsupported function at options.onDone'
             );
         });
+
+        it('should copy the parameters once at entry and read each entry from that copy', async function () {
+            const swapping = withSwappingFirstParameter({ type: 'uint256', value: 1 }, { type: 'uint256', value: 7 }, [
+                { type: 'uint256', value: 2 },
+            ]);
+            const tx = await tronWeb.transactionBuilder.triggerConstantContract(
+                contractAddress,
+                'testPure(uint256,uint256)',
+                {},
+                swapping.parameters,
+                accounts.hex[6]
+            );
+            assert.equal(tx.constant_result, '0000000000000000000000000000000000000000000000000000000000000004');
+            assert.equal(swapping.reads(), 1);
+        });
     });
 
     describe('#triggerComfirmedConstantContract', async function () {
@@ -2342,6 +2375,21 @@ describe('TronWeb.transactionBuilder', function () {
                 ),
                 'Invalid options provided: unsupported function at options.onDone'
             );
+        });
+
+        it('should copy the parameters once at entry and read each entry from that copy', async function () {
+            const swapping = withSwappingFirstParameter({ type: 'uint256', value: 1 }, { type: 'uint256', value: 7 }, [
+                { type: 'uint256', value: 2 },
+            ]);
+            const tx = await tronWeb.transactionBuilder.triggerConfirmedConstantContract(
+                contractAddress,
+                'testPure(uint256,uint256)',
+                {},
+                swapping.parameters,
+                accounts.hex[6]
+            );
+            assert.equal(tx.constant_result, '0000000000000000000000000000000000000000000000000000000000000004');
+            assert.equal(swapping.reads(), 1);
         });
     });
 
@@ -2690,6 +2738,67 @@ describe('TronWeb.transactionBuilder', function () {
                 const { receipt } = await broadcaster(null, accounts.pks[6], tx.transaction);
                 assert.isTrue(receipt.result);
             }
+        });
+
+        it('should copy the parameters once at entry and read each entry from that copy', async function () {
+            const contractAddress = transaction.contract_address;
+            const issuerAddress = accounts.hex[6];
+            const swapping = withSwappingFirstParameter({ type: 'uint256', value: 1 }, { type: 'uint256', value: 2 });
+            const tx = await tronWeb.transactionBuilder.triggerSmartContract(
+                contractAddress,
+                'store(uint256)',
+                {},
+                swapping.parameters,
+                issuerAddress
+            );
+            const { data } = tx.transaction.raw_data.contract[0].parameter.value;
+            assert.isTrue(data!.endsWith('0'.repeat(63) + '1'), data);
+            assert.equal(swapping.reads(), 1);
+        });
+
+        it('should copy the parameters once at entry and read each entry from that copy when txLocal is true', async function () {
+            const contractAddress = transaction.contract_address;
+            const issuerAddress = accounts.hex[6];
+            const swapping = withSwappingFirstParameter({ type: 'uint256', value: 1 }, { type: 'uint256', value: 2 });
+            const tx = await tronWeb.transactionBuilder.triggerSmartContract(
+                contractAddress,
+                'store(uint256)',
+                { txLocal: true },
+                swapping.parameters,
+                issuerAddress
+            );
+            const { data } = tx.transaction.raw_data.contract[0].parameter.value;
+            assert.isTrue(data!.endsWith('0'.repeat(63) + '1'), data);
+            assert.equal(swapping.reads(), 1);
+        });
+
+        it('should reject parameters that are not plain data', async function () {
+            const contractAddress = transaction.contract_address;
+            const issuerAddress = accounts.hex[6];
+            await assertThrow(
+                tronWeb.transactionBuilder.triggerSmartContract(
+                    contractAddress,
+                    'store(uint256)',
+                    {},
+                    [{ type: 'uint256', value: 1, onDone() {} } as unknown as ContractFunctionParameter],
+                    issuerAddress
+                ),
+                'Invalid parameters provided: unsupported function at parameters[0].onDone'
+            );
+        });
+
+        it('should keep Uint8Array values in the parameters when copying them', async function () {
+            const contractAddress = transaction.contract_address;
+            const issuerAddress = accounts.hex[6];
+            const tx = await tronWeb.transactionBuilder.triggerSmartContract(
+                contractAddress,
+                'setHash(bytes32)',
+                { txLocal: true },
+                [{ type: 'bytes32', value: new Uint8Array(32).fill(1) }],
+                issuerAddress
+            );
+            const { data } = tx.transaction.raw_data.contract[0].parameter.value;
+            assert.isTrue(data!.endsWith('01'.repeat(32)), data);
         });
     });
 
@@ -3851,6 +3960,19 @@ describe('TronWeb.transactionBuilder', function () {
                 ),
                 'Invalid options provided: unsupported function at options.onDone'
             );
+        });
+
+        it('should copy the parameters once at entry and read each entry from that copy', async function () {
+            const swapping = withSwappingFirstParameter({ type: 'uint256', value: 1 }, { type: 'uint256', value: 2 });
+            const result = await tronWeb.transactionBuilder.estimateEnergy(
+                transaction.contract_address,
+                'set(uint256)',
+                {},
+                swapping.parameters,
+                accounts.hex[5]
+            );
+            assert.isTrue(result.result.result);
+            assert.equal(swapping.reads(), 1);
         });
     });
     describe.concurrent('#deployConstantContract', async function () {
