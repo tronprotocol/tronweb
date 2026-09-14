@@ -23,6 +23,8 @@ __6.5.1__
 
   Inputs that are not plain data are now rejected: class instances, `Date`, functions, typed arrays outside the two cases above, circular references, and nesting deeper than 64 levels. Errors are reported as `Invalid transaction provided`, `Invalid typed data`, `Invalid options provided`, `Invalid parameters provided` or `Invalid ABI provided`, each followed by the reason and the path to the offending value.
 
+  For `signTypedData` / `verifyTypedData` (and `hashTypedData`) these requirements apply to `domain` and `types` only. The `value` argument is not restricted by type: it is walked along the type definitions, each field declared in `types` is read once and handed to the EIP-712 encoder as it is (a `Uint8Array` is copied), and only the encoder's own per-type checks apply to the leaves. Fields that `types` does not declare are ignored as before, whatever they hold — a `Date`, a class instance or a function there is not rejected.
+
 __6.5.0__
 
 ## New Features
