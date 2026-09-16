@@ -10,7 +10,12 @@ import {
     VoteInfo,
     ContractFunctionParameter,
 } from '../../src/types/TransactionBuilder';
-import { ContractParamterWrapper, CreateSmartContractTransaction, SignedTransaction } from '../../src/types/Transaction';
+import {
+    ContractParamterWrapper,
+    CreateSmartContractTransaction,
+    SignedTransaction,
+    Transaction,
+} from '../../src/types/Transaction';
 
 import { assert } from 'vitest';
 import txPars from '../helpers/txPars.js';
@@ -23,6 +28,7 @@ import tronWebBuilder from '../helpers/tronWebBuilder';
 import assertEqualHex from '../helpers/assertEqualHex';
 import {
     AccountCreateContract,
+    AccountPermissionUpdateContract,
     AccountUpdateContract,
     AssetIssueContract,
     ClearABIContract,
@@ -31,6 +37,7 @@ import {
     FreezeBalanceContract,
     FreezeBalanceV2Contract,
     ParticipateAssetIssueContract,
+    Permission,
     ProposalCreateContract,
     ProposalDeleteContract,
     SetAccountIdContract,
@@ -65,6 +72,24 @@ import Config from '../helpers/config';
 import { deepCopyJson } from '../../src/lib/TransactionBuilder/helper';
 import { createEmptyBlock } from '../helpers/createEmptyBlock';
 const { ADDRESS_HEX, ADDRESS_BASE58, UPDATED_TEST_TOKEN_OPTIONS, PRIVATE_KEY, getTokenOptions, isProposalApproved } = Config;
+
+// A `parameters` array whose first entry hands out `first` on the first read and `later` afterwards
+function withSwappingFirstParameter(
+    first: ContractFunctionParameter,
+    later: ContractFunctionParameter,
+    rest: ContractFunctionParameter[] = []
+) {
+    let reads = 0;
+    const parameters: ContractFunctionParameter[] = [first, ...rest];
+    Object.defineProperty(parameters, '0', {
+        enumerable: true,
+        get() {
+            reads++;
+            return reads === 1 ? first : later;
+        },
+    });
+    return { parameters, reads: () => reads };
+}
 
 /**
  * Following cases should be test in Nile testnet:
@@ -2190,10 +2215,80 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.equal(transaction.transaction.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
             }
         });
+
+        it("should leave the caller's options untouched", async function () {
+            const options: TriggerConstantContractOptions = {};
+            const tx = await tronWeb.transactionBuilder.triggerConstantContract(
+                contractAddress,
+                'testPure(uint256,uint256)',
+                options,
+                [
+                    { type: 'uint256', value: 1 },
+                    { type: 'uint256', value: 2 },
+                ],
+                accounts.hex[6]
+            );
+            assert.isTrue(tx.result.result);
+            assert.deepEqual(options, {});
+        });
+
+        it('should copy the options once at entry and read funcABIV2 from that copy', async function () {
+            const fragment = testConstant.abi.find((f: any) => f.name === 'testPure');
+            let reads = 0;
+            const options: TriggerConstantContractOptions = { parametersV2: [1, 2] };
+            Object.defineProperty(options, 'funcABIV2', {
+                enumerable: true,
+                get() {
+                    reads++;
+                    return fragment;
+                },
+            });
+            const tx = await tronWeb.transactionBuilder.triggerConstantContract(
+                contractAddress,
+                'testPure(uint256,uint256)',
+                options,
+                [],
+                accounts.hex[6]
+            );
+            assert.equal(tx.constant_result, '0000000000000000000000000000000000000000000000000000000000000004');
+            assert.equal(reads, 1);
+        });
+
+        it('should reject options that are not plain data', async function () {
+            await assertThrow(
+                tronWeb.transactionBuilder.triggerConstantContract(
+                    contractAddress,
+                    'testPure(uint256,uint256)',
+                    { onDone() {} } as unknown as TriggerConstantContractOptions,
+                    [
+                        { type: 'uint256', value: 1 },
+                        { type: 'uint256', value: 2 },
+                    ],
+                    accounts.hex[6]
+                ),
+                'Invalid options provided: unsupported function at options.onDone'
+            );
+        });
+
+        it('should copy the parameters once at entry and read each entry from that copy', async function () {
+            const swapping = withSwappingFirstParameter({ type: 'uint256', value: 1 }, { type: 'uint256', value: 7 }, [
+                { type: 'uint256', value: 2 },
+            ]);
+            const tx = await tronWeb.transactionBuilder.triggerConstantContract(
+                contractAddress,
+                'testPure(uint256,uint256)',
+                {},
+                swapping.parameters,
+                accounts.hex[6]
+            );
+            assert.equal(tx.constant_result, '0000000000000000000000000000000000000000000000000000000000000004');
+            assert.equal(swapping.reads(), 1);
+        });
     });
 
     describe('#triggerComfirmedConstantContract', async function () {
         let transaction: any;
+        let contractAddress: string;
         beforeAll(async function () {
 
             transaction = await tronWeb.transactionBuilder.createSmartContract(
@@ -2213,6 +2308,7 @@ describe('TronWeb.transactionBuilder', function () {
                     break;
                 }
             }
+            contractAddress = transaction.contract_address;
         });
 
         it('should trigger confirmed constant contract successfully', async function () {
@@ -2247,6 +2343,53 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.isTrue(transaction.receipt.result);
                 assert.equal(transaction.transaction.raw_data.contract[0].Permission_id || 0, options.permissionId || 0);
             }
+        });
+
+        it("should leave the caller's options untouched", async function () {
+            const options: TriggerConstantContractOptions = {};
+            const tx = await tronWeb.transactionBuilder.triggerConfirmedConstantContract(
+                contractAddress,
+                'testPure(uint256,uint256)',
+                options,
+                [
+                    { type: 'uint256', value: 1 },
+                    { type: 'uint256', value: 2 },
+                ],
+                accounts.hex[6]
+            );
+            assert.isTrue(tx.result.result);
+            assert.deepEqual(options, {});
+        });
+
+        it('should reject options that are not plain data', async function () {
+            await assertThrow(
+                tronWeb.transactionBuilder.triggerConfirmedConstantContract(
+                    contractAddress,
+                    'testPure(uint256,uint256)',
+                    { onDone() {} } as unknown as TriggerConstantContractOptions,
+                    [
+                        { type: 'uint256', value: 1 },
+                        { type: 'uint256', value: 2 },
+                    ],
+                    accounts.hex[6]
+                ),
+                'Invalid options provided: unsupported function at options.onDone'
+            );
+        });
+
+        it('should copy the parameters once at entry and read each entry from that copy', async function () {
+            const swapping = withSwappingFirstParameter({ type: 'uint256', value: 1 }, { type: 'uint256', value: 7 }, [
+                { type: 'uint256', value: 2 },
+            ]);
+            const tx = await tronWeb.transactionBuilder.triggerConfirmedConstantContract(
+                contractAddress,
+                'testPure(uint256,uint256)',
+                {},
+                swapping.parameters,
+                accounts.hex[6]
+            );
+            assert.equal(tx.constant_result, '0000000000000000000000000000000000000000000000000000000000000004');
+            assert.equal(swapping.reads(), 1);
         });
     });
 
@@ -2433,6 +2576,118 @@ describe('TronWeb.transactionBuilder', function () {
             }
         });
 
+        // `_isConstant` hands out false on the first read and true afterwards
+        function withSwappingIsConstant(base: TriggerConstantContractOptions = {}) {
+            let reads = 0;
+            const options = { ...base };
+            Object.defineProperty(options, '_isConstant', {
+                enumerable: true,
+                get() {
+                    reads++;
+                    return reads !== 1;
+                },
+            });
+            return { options, reads: () => reads };
+        }
+
+        it('should copy the options once at entry and read _isConstant from that copy', async function () {
+            const contractAddress = transaction.contract_address;
+            const issuerAddress = accounts.hex[6];
+            const swapping = withSwappingIsConstant();
+            const tx = await tronWeb.transactionBuilder.triggerSmartContract(
+                contractAddress,
+                'store(uint256)',
+                swapping.options,
+                [{ type: 'uint256', value: 1 }],
+                issuerAddress
+            );
+            assert.isTrue(tx.result.result);
+            assert.notProperty(tx, 'constant_result');
+            assert.equal(tx.transaction.raw_data.fee_limit, tronWeb.feeLimit);
+            assert.equal(swapping.reads(), 1);
+        });
+
+        it('should copy the options once at entry and read _isConstant from that copy when txLocal is true', async function () {
+            const contractAddress = transaction.contract_address;
+            const issuerAddress = accounts.hex[6];
+            const swapping = withSwappingIsConstant({ txLocal: true });
+            const tx = await tronWeb.transactionBuilder.triggerSmartContract(
+                contractAddress,
+                'store(uint256)',
+                swapping.options,
+                [{ type: 'uint256', value: 1 }],
+                issuerAddress
+            );
+            assert.isTrue(tx.result.result);
+            assert.equal(tx.transaction.raw_data.fee_limit, tronWeb.feeLimit);
+            assert.equal(swapping.reads(), 1);
+        });
+
+        it('should copy the options deeply so a nested blockHeader field is read once when txLocal is true', async function () {
+            const contractAddress = transaction.contract_address;
+            const issuerAddress = accounts.hex[6];
+            const header = await tronWeb.trx.getCurrentRefBlockParams();
+            // `expiration` hands out the real value on the first read and a later one afterwards
+            let reads = 0;
+            const { expiration, ...rest } = header;
+            const swappingHeader = { ...rest } as typeof header;
+            Object.defineProperty(swappingHeader, 'expiration', {
+                enumerable: true,
+                get() {
+                    reads++;
+                    return reads === 1 ? expiration : expiration + 3600 * 1000;
+                },
+            });
+            const tx = await tronWeb.transactionBuilder.triggerSmartContract(
+                contractAddress,
+                'store(uint256)',
+                { txLocal: true, blockHeader: swappingHeader },
+                [{ type: 'uint256', value: 1 }],
+                issuerAddress
+            );
+            assert.equal(tx.transaction.raw_data.expiration, expiration);
+            assert.equal(reads, 1);
+        });
+
+        it('should reject options that are not plain data', async function () {
+            const contractAddress = transaction.contract_address;
+            const issuerAddress = accounts.hex[6];
+            await assertThrow(
+                tronWeb.transactionBuilder.triggerSmartContract(
+                    contractAddress,
+                    'store(uint256)',
+                    { feeLimit: 1e8, onDone() {} } as unknown as TriggerConstantContractOptions,
+                    [{ type: 'uint256', value: 1 }],
+                    issuerAddress
+                ),
+                'Invalid options provided: unsupported function at options.onDone'
+            );
+        });
+
+        it('should keep Uint8Array values in parametersV2 when copying the options', async function () {
+            const contractAddress = transaction.contract_address;
+            const issuerAddress = accounts.hex[6];
+            const tx = await tronWeb.transactionBuilder.triggerSmartContract(
+                contractAddress,
+                'setHash(bytes32)',
+                {
+                    txLocal: true,
+                    funcABIV2: {
+                        type: 'function',
+                        name: 'setHash',
+                        inputs: [{ name: 'h', type: 'bytes32' }],
+                        outputs: [],
+                        stateMutability: 'nonpayable',
+                    },
+                    parametersV2: [new Uint8Array(32).fill(1)],
+                },
+                [],
+                issuerAddress
+            );
+            const { data } = tx.transaction.raw_data.contract[0].parameter.value;
+            assert.isTrue(data!.endsWith('01'.repeat(32)), data);
+        });
+
         it('should trigger smart contract successfully', async function () {
 
             const contractAddress = transaction.contract_address;
@@ -2483,6 +2738,67 @@ describe('TronWeb.transactionBuilder', function () {
                 const { receipt } = await broadcaster(null, accounts.pks[6], tx.transaction);
                 assert.isTrue(receipt.result);
             }
+        });
+
+        it('should copy the parameters once at entry and read each entry from that copy', async function () {
+            const contractAddress = transaction.contract_address;
+            const issuerAddress = accounts.hex[6];
+            const swapping = withSwappingFirstParameter({ type: 'uint256', value: 1 }, { type: 'uint256', value: 2 });
+            const tx = await tronWeb.transactionBuilder.triggerSmartContract(
+                contractAddress,
+                'store(uint256)',
+                {},
+                swapping.parameters,
+                issuerAddress
+            );
+            const { data } = tx.transaction.raw_data.contract[0].parameter.value;
+            assert.isTrue(data!.endsWith('0'.repeat(63) + '1'), data);
+            assert.equal(swapping.reads(), 1);
+        });
+
+        it('should copy the parameters once at entry and read each entry from that copy when txLocal is true', async function () {
+            const contractAddress = transaction.contract_address;
+            const issuerAddress = accounts.hex[6];
+            const swapping = withSwappingFirstParameter({ type: 'uint256', value: 1 }, { type: 'uint256', value: 2 });
+            const tx = await tronWeb.transactionBuilder.triggerSmartContract(
+                contractAddress,
+                'store(uint256)',
+                { txLocal: true },
+                swapping.parameters,
+                issuerAddress
+            );
+            const { data } = tx.transaction.raw_data.contract[0].parameter.value;
+            assert.isTrue(data!.endsWith('0'.repeat(63) + '1'), data);
+            assert.equal(swapping.reads(), 1);
+        });
+
+        it('should reject parameters that are not plain data', async function () {
+            const contractAddress = transaction.contract_address;
+            const issuerAddress = accounts.hex[6];
+            await assertThrow(
+                tronWeb.transactionBuilder.triggerSmartContract(
+                    contractAddress,
+                    'store(uint256)',
+                    {},
+                    [{ type: 'uint256', value: 1, onDone() {} } as unknown as ContractFunctionParameter],
+                    issuerAddress
+                ),
+                'Invalid parameters provided: unsupported function at parameters[0].onDone'
+            );
+        });
+
+        it('should keep Uint8Array values in the parameters when copying them', async function () {
+            const contractAddress = transaction.contract_address;
+            const issuerAddress = accounts.hex[6];
+            const tx = await tronWeb.transactionBuilder.triggerSmartContract(
+                contractAddress,
+                'setHash(bytes32)',
+                { txLocal: true },
+                [{ type: 'bytes32', value: new Uint8Array(32).fill(1) }],
+                issuerAddress
+            );
+            const { data } = tx.transaction.raw_data.contract[0].parameter.value;
+            assert.isTrue(data!.endsWith('01'.repeat(32)), data);
         });
     });
 
@@ -3063,6 +3379,47 @@ describe('TronWeb.transactionBuilder', function () {
             );
             assert.isObject(tx);
         });
+        it('should copy every permission once at entry and build from that copy', async function () {
+            const firstKeys = [{ address: accounts.hex[6], weight: 1 }];
+            const laterKeys = [{ address: accounts.hex[7], weight: 2 }];
+            // `keys` hands out one valid list on the first read and a different valid list afterwards
+            function withSwappingKeys(base: Omit<Permission, 'keys'>) {
+                let reads = 0;
+                const permission = { ...base } as Permission;
+                Object.defineProperty(permission, 'keys', {
+                    enumerable: true,
+                    get() {
+                        reads++;
+                        return reads === 1 ? firstKeys : laterKeys;
+                    },
+                });
+                return { permission, reads: () => reads };
+            }
+            const owner = withSwappingKeys({ type: 0, threshold: 1, permission_name: 'owner' });
+            const witness = withSwappingKeys({ type: 1, id: 1, threshold: 1, permission_name: 'witness' });
+            const active = withSwappingKeys({
+                type: 2,
+                id: 2,
+                threshold: 1,
+                permission_name: 'active',
+                operations: '7fff1fc0033e0000000000000000000000000000000000000000000000000000',
+            });
+
+            const tx = await tronWeb.transactionBuilder.updateAccountPermissions(
+                accounts.hex[6],
+                owner.permission,
+                witness.permission,
+                [active.permission]
+            );
+
+            const value = txPars(tx).value as AccountPermissionUpdateContract;
+            assert.deepEqual(value.owner!.keys, firstKeys);
+            assert.deepEqual(value.witness!.keys, firstKeys);
+            assert.deepEqual(value.actives![0].keys, firstKeys);
+            assert.equal(owner.reads(), 1);
+            assert.equal(witness.reads(), 1);
+            assert.equal(active.reads(), 1);
+        });
     });
 
     describe('Alter existent transactions', async function () {
@@ -3071,6 +3428,43 @@ describe('TronWeb.transactionBuilder', function () {
         // assert exact balance deltas on a shared sender, and both tests broadcast
         // near-identical transactions that could collide on txID if built together.
         describe.concurrent('#newTxID', async function () {
+            // `raw_data` hands out the real value on the first read and a copy with a later expiration afterwards
+            function withSwappingRawData<T extends Transaction>(transaction: T) {
+                const { raw_data, ...rest } = transaction;
+                const later = deepCopyJson<T['raw_data']>(raw_data);
+                later.expiration += 3600 * 1000;
+                let reads = 0;
+                const swapping = { ...rest } as T;
+                Object.defineProperty(swapping, 'raw_data', {
+                    enumerable: true,
+                    get() {
+                        reads++;
+                        return reads === 1 ? raw_data : later;
+                    },
+                });
+                return { transaction: swapping, reads: () => reads };
+            }
+
+            it('should copy the transaction once at entry and rebuild from that copy when txLocal is true', async function () {
+                const receiver = accounts.b58[42];
+                const sender = accounts.hex[43];
+                const transaction = await tronWeb.transactionBuilder.sendTrx(receiver, 10, sender);
+                const swapping = withSwappingRawData(transaction);
+                const transactionLater = await tronWeb.transactionBuilder.newTxID(swapping.transaction, { txLocal: true });
+                assert.equal(transactionLater.txID, transaction.txID);
+                assert.equal(swapping.reads(), 1);
+            });
+
+            it('should copy the transaction once at entry and rebuild from that copy when txLocal is unset', async function () {
+                const receiver = accounts.b58[42];
+                const sender = accounts.hex[43];
+                const transaction = await tronWeb.transactionBuilder.sendTrx(receiver, 10, sender);
+                const swapping = withSwappingRawData(transaction);
+                const transactionLater = await tronWeb.transactionBuilder.newTxID(swapping.transaction);
+                assert.equal(transactionLater.txID, transaction.txID);
+                assert.equal(swapping.reads(), 1);
+            });
+
             it('should keep txID unchanged when txLocal is true', async function () {
                 const receiver = accounts.b58[42];
                 const sender = accounts.hex[43];
@@ -3540,6 +3934,45 @@ describe('TronWeb.transactionBuilder', function () {
                 assert.isDefined(result.energy_required);
                 assert.isNumber(result.energy_required);
             }
+        });
+
+        it("should leave the caller's options untouched", async function () {
+            const options: TriggerConstantContractOptions = {};
+            const result = await tronWeb.transactionBuilder.estimateEnergy(
+                transaction.contract_address,
+                'set(uint256)',
+                options,
+                [{ type: 'uint256', value: 3 }],
+                accounts.hex[5]
+            );
+            assert.isTrue(result.result.result);
+            assert.deepEqual(options, {});
+        });
+
+        it('should reject options that are not plain data', async function () {
+            await assertThrow(
+                tronWeb.transactionBuilder.estimateEnergy(
+                    transaction.contract_address,
+                    'set(uint256)',
+                    { onDone() {} } as unknown as TriggerConstantContractOptions,
+                    [{ type: 'uint256', value: 3 }],
+                    accounts.hex[5]
+                ),
+                'Invalid options provided: unsupported function at options.onDone'
+            );
+        });
+
+        it('should copy the parameters once at entry and read each entry from that copy', async function () {
+            const swapping = withSwappingFirstParameter({ type: 'uint256', value: 1 }, { type: 'uint256', value: 2 });
+            const result = await tronWeb.transactionBuilder.estimateEnergy(
+                transaction.contract_address,
+                'set(uint256)',
+                {},
+                swapping.parameters,
+                accounts.hex[5]
+            );
+            assert.isTrue(result.result.result);
+            assert.equal(swapping.reads(), 1);
         });
     });
     describe.concurrent('#deployConstantContract', async function () {
