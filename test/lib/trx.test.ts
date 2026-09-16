@@ -19,6 +19,21 @@ const tests = signMessageTests.tests;
 const testRevertContract = contracts.testRevert;
 const { ADDRESS_BASE58, PRIVATE_KEY, getTokenOptions, FULL_NODE_API } = config;
 
+const FAKE_TXID = 'f'.repeat(64);
+
+// A shallow copy of `transaction` whose `txID` is an accessor answering the real txID on the
+// first `realReads` reads and FAKE_TXID on every later one.
+function withSwappingTxID<T extends Transaction>(transaction: T, realReads = 1): T {
+    let reads = 0;
+    const trapped = { ...transaction };
+    Object.defineProperty(trapped, 'txID', {
+        enumerable: true,
+        configurable: true,
+        get: () => (reads++ < realReads ? transaction.txID : FAKE_TXID),
+    });
+    return trapped;
+}
+
 describe('TronWeb.trx', function () {
     let accounts: {
         hex: Address[];
@@ -546,6 +561,80 @@ describe('TronWeb.trx', function () {
             });
         });
 
+        describe('#sign / #multiSign (transaction snapshot)', function () {
+            const idx = 14;
+
+            it('sign should sign the txID it validated, not what a getter returns afterwards', async function () {
+                const transaction = await tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.b58[idx]);
+                const signed = await tronWeb.trx.sign(withSwappingTxID(transaction), accounts.pks[idx]);
+
+                assert.equal(signed.txID, transaction.txID);
+                assert.equal(tronWeb.trx.ecRecover(signed), accounts.b58[idx]);
+            });
+
+            it("sign should not mutate the caller's transaction", async function () {
+                const transaction = await tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.b58[idx]);
+                const signed = await tronWeb.trx.sign(transaction, accounts.pks[idx]);
+
+                assert.notStrictEqual(signed, transaction);
+                assert.equal(signed.signature.length, 1);
+                assert.isUndefined((transaction as Partial<SignedTransaction>).signature);
+            });
+
+            it('sign should reject a transaction that cannot be snapshotted', async function () {
+                const transaction = await tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.b58[idx]);
+                const circular: Transaction & { self?: unknown } = { ...transaction };
+                circular.self = circular;
+
+                await assertThrow(tronWeb.trx.sign(circular, accounts.pks[idx]), undefined, 'Invalid transaction provided');
+            });
+
+            it('multiSign should sign the txID it validated, not what a getter returns afterwards', async function () {
+                // A Permission_id already inside the tx keeps multiSign off the getSignWeight path.
+                const transaction = await tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.b58[idx], {
+                    permissionId: 2,
+                });
+                const signed = await tronWeb.trx.multiSign(withSwappingTxID(transaction), accounts.pks[idx]);
+
+                assert.equal(signed.txID, transaction.txID);
+                assert.equal(tronWeb.trx.ecRecover(signed), accounts.b58[idx]);
+            });
+
+            it("multiSign should not write Permission_id or signatures into the caller's transaction", async function () {
+                const signerPk = accounts.pks[idx];
+                const signerAddress = tronWeb.address.toHex(tronWeb.address.fromPrivateKey(signerPk) as string).toLowerCase();
+                const transaction = await tronWeb.transactionBuilder.freezeBalanceV2(10e5, 'BANDWIDTH', accounts.b58[idx]);
+
+                // What the node hands back: the same tx with Permission_id = 2 and recomputed txID / raw_data_hex.
+                const refreshed = deepCopyJson<Transaction>(transaction);
+                refreshed.raw_data.contract[0].Permission_id = 2;
+                const pb = txJsonToPb(refreshed);
+                refreshed.txID = txPbToTxID(pb).replace(/^0x/, '');
+                refreshed.raw_data_hex = txPbToRawDataHex(pb).toLowerCase();
+
+                const spy = vi.spyOn(tronWeb.trx, 'getSignWeight').mockResolvedValue({
+                    result: { code: 'NOT_ENOUGH_PERMISSION', message: '' },
+                    permission: { keys: [{ address: signerAddress, weight: 1 }] },
+                    approved_list: [],
+                    current_weight: 0,
+                    transaction: { transaction: refreshed },
+                } as any);
+
+                try {
+                    const signed = await tronWeb.trx.multiSign(transaction, signerPk, 2);
+
+                    assert.equal(signed.raw_data.contract[0].Permission_id, 2);
+                    assert.equal(signed.signature.length, 1);
+                    // getSignWeight must have been fed the snapshot, and the caller's object left untouched.
+                    assert.notStrictEqual(spy.mock.calls[0][0], transaction);
+                    assert.isUndefined(transaction.raw_data.contract[0].Permission_id);
+                    assert.isUndefined((transaction as Partial<SignedTransaction>).signature);
+                } finally {
+                    spy.mockRestore();
+                }
+            });
+        });
+
         describe('#ecRecover', async function () {
             const idx = 14;
             let transaction: SignedTransaction;
@@ -566,6 +655,15 @@ describe('TronWeb.trx', function () {
                 for (let i = 0; i < recoveredAddresses.length; i++) {
                     assert.equal(recoveredAddresses[i], accounts.b58[idx+i]);
                 }
+            });
+
+            it('should read txID once and recover every signature against it, not re-read it per signature', async function () {
+                const tx = await tronWeb.transactionBuilder.sendTrx(accounts.b58[idx - 1], 10, accounts.b58[idx]);
+                const signed = await tronWeb.trx.multiSign(await tronWeb.trx.sign(tx, accounts.pks[idx]), accounts.pks[idx + 1]);
+
+                // The snapshot reads txID exactly once; validation and every recovery use that value.
+                const recovered = tronWeb.trx.ecRecover(withSwappingTxID(signed));
+                assert.deepEqual(recovered, [accounts.b58[idx], accounts.b58[idx + 1]]);
             });
 
             it('should throw Invalid transaction error', async function () {
@@ -735,6 +833,23 @@ describe('TronWeb.trx', function () {
                 assert.isTrue(signature.startsWith('0x'));
                 assert.equal(tSignature, signature);
                 assert.isTrue(result);
+            });
+
+            it('signs a snapshot of the domain when a getter changes its answer between reads', function () {
+                const idx = 14;
+                let reads = 0;
+                const trapped = { ...domain };
+                // Answers the real chainId on the first read and a different one on every later read.
+                Object.defineProperty(trapped, 'chainId', {
+                    enumerable: true,
+                    configurable: true,
+                    get: () => (reads++ === 0 ? domain.chainId : 999),
+                });
+
+                const signature = Trx.signTypedData(trapped, types, value, accounts.pks[idx]);
+
+                assert.equal(signature, Trx.signTypedData(domain, types, value, accounts.pks[idx]));
+                assert.isTrue(Trx.verifyTypedData(domain, types, value, signature, accounts.b58[idx]));
             });
 
             it('should throw signature does not match error', function () {

@@ -22,7 +22,7 @@ const DEFAULT_VERSION = '4.8.2';
 
 const FEE_LIMIT = 150000000;
 
-const version = '6.5.0';
+const version = '6.5.1';
 
 function isValidOptions(options: unknown): options is TronWebOptions {
     return (

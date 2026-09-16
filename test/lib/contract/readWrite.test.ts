@@ -679,6 +679,82 @@ describe('#contract.readWrite', function () {
         });
     });
 
+    describe('#ABI snapshot', function () {
+        // A shallow copy of `fragment` whose `name` is an accessor counting its reads.
+        function withCountedName<F extends { readonly name: string }>(fragment: F) {
+            let reads = 0;
+            const counted = { ...fragment };
+            Object.defineProperty(counted, 'name', {
+                enumerable: true,
+                configurable: true,
+                get: () => {
+                    reads++;
+                    return fragment.name;
+                },
+            });
+            return { fragment: counted as F, reads: () => reads };
+        }
+
+        it('keeps its own copy of the ABI', function () {
+            const abi = [{ ...contractAbi[0] }, { ...contractAbi[1] }];
+            const contract = tronWeb.contract(abi, contractAddress);
+
+            assert.notStrictEqual(contract.abi, abi);
+            assert.notStrictEqual(contract.abi[0], abi[0]);
+            assert.equal(contract.abi[0].name, 'balanceOf');
+        });
+
+        it('reads each fragment once, when the ABI is loaded', function () {
+            const balanceOf = withCountedName(contractAbi[0]);
+            const transfer = withCountedName(contractAbi[1]);
+            const contract = tronWeb.contract([balanceOf.fragment, transfer.fragment], contractAddress);
+
+            assert.equal(balanceOf.reads(), 1);
+            assert.equal(transfer.reads(), 1);
+
+            assert.deepEqual(Object.keys(contract.read), ['balanceOf', 'balanceOf(address)']);
+            assert.deepEqual(Object.keys(contract.write), ['transfer', 'transfer(address,uint256)']);
+            assert.equal(balanceOf.reads(), 1);
+            assert.equal(transfer.reads(), 1);
+        });
+
+        it("builds the namespaces from the copy, so later changes to the caller's ABI do not reach them", function () {
+            const abi = [{ ...contractAbi[0] }, { ...contractAbi[1] }];
+            const contract = tronWeb.contract(abi, contractAddress);
+
+            (abi[0] as { name: string }).name = 'renamed';
+            (abi[1] as { name: string }).name = 'renamed';
+
+            assert.deepEqual(Object.keys(contract.read), ['balanceOf', 'balanceOf(address)']);
+            assert.deepEqual(Object.keys(contract.write), ['transfer', 'transfer(address,uint256)']);
+        });
+
+        it("does not modify the caller's ABI when loading it", function () {
+            const abi = [{ ...contractAbi[0], stateMutability: 'View', type: 'Function' }];
+            const contract = tronWeb.contract(abi as any, contractAddress);
+
+            assert.equal(abi[0].stateMutability, 'View');
+            assert.equal(abi[0].type, 'Function');
+            assert.equal(contract.abi[0].stateMutability, 'view');
+            assert.equal(contract.abi[0].type, 'function');
+        });
+
+        it('rejects an ABI that is not plain data when it is loaded, naming the path', function () {
+            const circular: Record<string, unknown> = { ...contractAbi[0] };
+            circular.self = circular;
+            const event = { type: 'event', name: 'Moved', inputs: [], anonymous: new Date(0) };
+
+            assert.throws(
+                () => tronWeb.contract([circular as any, contractAbi[1]], contractAddress),
+                'Invalid ABI provided: circular reference at abi[0].self'
+            );
+            assert.throws(
+                () => tronWeb.contract([contractAbi[0], event as any], contractAddress),
+                'Invalid ABI provided: unsupported Date at abi[1].anonymous'
+            );
+        });
+    });
+
     describe('against a contract deployed to the fullNode', function () {
 
         // funcABIV2_3 exposes setStruct((address,address,address)) (a struct/tuple

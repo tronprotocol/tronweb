@@ -7,6 +7,7 @@ import { CreateSmartContractTransaction, SignedTransaction, Transaction, Transac
 import { Validator } from '../../paramValidator/index.js';
 import { GetSignWeightResponse } from '../../types/APIResponse.js';
 import { isArray, isHex, isInteger, isNotNullOrUndefined, isObject, isString } from '../../utils/validations.js';
+import { cloneTransaction } from '../../utils/clone.js';
 import {
     AccountCreateContract,
     AccountPermissionUpdateContract,
@@ -49,6 +50,8 @@ import {
 } from '../../types/Contract.js';
 import {
     createTransaction,
+    cloneTriggerOptions,
+    cloneParameters,
     deepCopyJson,
     fromUtf8,
     genContractAddress,
@@ -1017,7 +1020,10 @@ export class TransactionBuilder {
                 callValue: params[3] as unknown as number,
             };
             params.splice(3, 1);
+        } else {
+            params[2] = cloneTriggerOptions(params[2] ?? {});
         }
+        params[3] = cloneParameters(params[3]);
         if (params[2]?.txLocal) {
             return this._triggerSmartContractLocal(...params);
         }
@@ -1031,6 +1037,8 @@ export class TransactionBuilder {
         parameters: ContractFunctionParameter[] = [],
         issuerAddress: string = this.tronWeb.defaultAddress.hex as string
     ): Promise<TransactionWrapper> {
+        options = cloneTriggerOptions(options);
+        parameters = cloneParameters(parameters);
         options._isConstant = true;
         return this._triggerSmartContract(contractAddress, functionSelector, options, parameters, issuerAddress);
     }
@@ -1042,6 +1050,8 @@ export class TransactionBuilder {
         parameters: ContractFunctionParameter[] = [],
         issuerAddress: string = this.tronWeb.defaultAddress.hex as string
     ): Promise<TransactionWrapper> {
+        options = cloneTriggerOptions(options);
+        parameters = cloneParameters(parameters);
         options._isConstant = true;
         options.confirmed = true;
         return this._triggerSmartContract(contractAddress, functionSelector, options, parameters, issuerAddress);
@@ -1054,6 +1064,8 @@ export class TransactionBuilder {
         parameters: ContractFunctionParameter[] = [],
         issuerAddress: string = this.tronWeb.defaultAddress.hex as string
     ): Promise<{ result: { result: boolean }; energy_required: number }> {
+        options = cloneTriggerOptions(options);
+        parameters = cloneParameters(parameters);
         options.estimateEnergy = true;
         const result = await this._triggerSmartContract(contractAddress, functionSelector, options, parameters, issuerAddress);
         return result as { result: { result: boolean }; energy_required: number };
@@ -2354,6 +2366,10 @@ export class TransactionBuilder {
     ): Promise<Transaction<AccountPermissionUpdateContract>> {
         if (!TronWeb.isAddress(ownerAddress as Address)) throw new Error('Invalid ownerAddress provided');
 
+        ownerPermission = ownerPermission && deepCopyJson<Permission>(ownerPermission);
+        witnessPermission = witnessPermission && deepCopyJson<Permission>(witnessPermission);
+        activesPermissions = activesPermissions && deepCopyJson<Permission | Permission[]>(activesPermissions);
+
         if (!this.checkPermissions(ownerPermission, 0)) {
             throw new Error('Invalid ownerPermissions provided');
         }
@@ -2376,7 +2392,7 @@ export class TransactionBuilder {
             owner_address: toHex(ownerAddress as string),
         };
         if (ownerPermission) {
-            const _ownerPermissions = deepCopyJson<Partial<Permission>>(ownerPermission);
+            const _ownerPermissions: Partial<Permission> = ownerPermission;
             // for compatible with old way of building transaction from chain which type prop is omitted
             if ('type' in _ownerPermissions) {
                 delete _ownerPermissions.type;
@@ -2388,32 +2404,30 @@ export class TransactionBuilder {
             data.owner = _ownerPermissions as Permission;
         }
         if (witnessPermission) {
-            const _witnessPermissions = deepCopyJson<Permission>(witnessPermission);
             // for compatible with old way of building transaction from chain which type prop is Witness
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            _witnessPermissions.type = 'Witness';
-            _witnessPermissions.keys = _witnessPermissions.keys.map(({ address, weight }) => ({
+            witnessPermission.type = 'Witness';
+            witnessPermission.keys = witnessPermission.keys.map(({ address, weight }) => ({
                 address: toHex(address),
                 weight,
             }));
-            data.witness = _witnessPermissions;
+            data.witness = witnessPermission;
         }
         if (activesPermissions) {
-            const _activesPermissions = deepCopyJson<Permission[]>(activesPermissions);
             // for compatible with old way of building transaction from chain which type prop is Active
-            _activesPermissions.forEach((activePermissions: Permission) => {
+            activesPermissions.forEach((activePermissions: Permission) => {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
                 activePermissions.type = 'Active';
             });
-            _activesPermissions.forEach((_activesPermission) => {
-                _activesPermission.keys = _activesPermission.keys.map(({ address, weight }) => ({
+            activesPermissions.forEach((activePermissions) => {
+                activePermissions.keys = activePermissions.keys.map(({ address, weight }) => ({
                     address: toHex(address),
                     weight,
                 }));
             });
-            data.actives = _activesPermissions as Permission[];
+            data.actives = activesPermissions;
         }
 
         const transactionOptions = getTransactionOptions(options);
@@ -2430,6 +2444,8 @@ export class TransactionBuilder {
         transaction: U,
         options: { txLocal?: boolean } = {}
     ): Promise<U> {
+        transaction = cloneTransaction(transaction);
+
         if (options?.txLocal) {
             const contract = transaction.raw_data.contract[0];
             try {
@@ -2475,6 +2491,8 @@ export class TransactionBuilder {
     }
 
     async alterTransaction<T extends Transaction>(transaction: T, options: AlterTransactionOptions = {}) {
+        transaction = cloneTransaction(transaction);
+
         if (Reflect.has(transaction, 'signature')) throw new Error('You can not extend the expiration of a signed transaction.');
 
         if (options.data) {

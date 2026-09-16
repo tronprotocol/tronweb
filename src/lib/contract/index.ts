@@ -2,6 +2,7 @@ import { TronWeb } from '../../tronweb.js';
 import utils from '../../utils/index.js';
 import { Method, AbiFragmentNoErrConstructor } from './method.js';
 import { buildReadNamespace, buildWriteNamespace } from './readWrite.js';
+import { clonePlainData } from '../../utils/clone.js';
 import type { ContractReadNamespace, ContractWriteNamespace } from '../../types/Contract.js';
 import type { ContractAbiInterface, GetMethodsTypeFromAbi, GetOnMethodTypeFromAbi, AnyOnMethodType } from '../../types/ABI.js';
 import type { Address } from '../../types/Trx.js';
@@ -19,6 +20,15 @@ function wrapReservedNamespace<T extends object>(namespace: T, legacyCall: unkno
         ownKeys: () => Reflect.ownKeys(namespace),
         getOwnPropertyDescriptor: (_target, prop) => Object.getOwnPropertyDescriptor(namespace, prop),
     }) as T;
+}
+
+// The contract works on a plain copy of the ABI it is given, so the caller's fragments are
+// read once, when the ABI is loaded, and are never modified.
+function cloneAbi<Abi extends ContractAbiInterface>(abi: Abi): Abi {
+    return clonePlainData(abi, {
+        root: 'abi',
+        invalid: (reason, path) => new Error(`Invalid ABI provided: ${reason} at ${path}`),
+    });
 }
 
 export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
@@ -109,14 +119,14 @@ export class Contract<Abi extends ContractAbiInterface = ContractAbiInterface> {
     }
 
     loadAbi(abi: Abi) {
-        this.abi = abi;
+        this.abi = cloneAbi(abi);
         this.methods = Object.create(null) as GetOnMethodTypeFromAbi<Abi> & AnyOnMethodType;
         this.methodInstances = Object.create(null) as GetMethodsTypeFromAbi<Abi>;
 
         this.props.forEach((prop: string) => delete (this as any)[prop]);
         this.props = [];
 
-        abi.forEach((func) => {
+        this.abi.forEach((func) => {
             // Don't build a method for constructor function. That's handled through contract create.
             // Don't build a method for error function.
             if (!func.type || ['constructor', 'error'].includes(func.type.toLowerCase())) return;

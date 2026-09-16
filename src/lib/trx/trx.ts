@@ -6,6 +6,7 @@ import { fromHex, toHex } from '../../utils/address.js';
 import { AbstractTrx } from './AbstractTrx.js';
 import { RawTrx } from './RawTrx.js';
 import { txCheck, txCheckWithArgs } from '../../utils/transaction.js';
+import { cloneTransaction } from '../../utils/clone.js';
 import { ecRecover } from '../../utils/crypto.js';
 import { BroadcastReturn, AddressOptions, BroadcastHexReturn, Address } from '../../types/Trx.js';
 import { SignedTransaction, Transaction } from '../../types/Transaction.js';
@@ -54,18 +55,20 @@ export class Trx extends AbstractTrx<false> {
     }
 
     static ecRecover(transaction: SignedTransaction): Address | Address[] {
-        if (!txCheck(transaction)) {
+        const tx = cloneTransaction(transaction);
+        if (!txCheck(tx)) {
             throw new Error('Invalid transaction');
         }
-        if (!transaction.signature?.length) {
+        if (!tx.signature?.length) {
             throw new Error('Transaction is not signed');
         }
-        if (transaction.signature.length === 1) {
-            const tronAddress = ecRecover(transaction.txID, transaction.signature[0]);
+        const txID = tx.txID;
+        if (tx.signature.length === 1) {
+            const tronAddress = ecRecover(txID, tx.signature[0]);
             return TronWeb.address.fromHex(tronAddress);
         }
-        return transaction.signature.map((sig) => {
-            const tronAddress = ecRecover(transaction.txID, sig);
+        return tx.signature.map((sig) => {
+            const tronAddress = ecRecover(txID, sig);
             return TronWeb.address.fromHex(tronAddress);
         });
     }
@@ -125,7 +128,7 @@ export class Trx extends AbstractTrx<false> {
         signature: string,
         address: string
     ) {
-        const messageDigest = utils.typedData.TypedDataEncoder.hash(domain, types, value);
+        const messageDigest = utils.typedData.hashTypedData(domain, types, value);
         const recovered = recoverAddress(messageDigest, Signature.from(`0x${signature.replace(/^0x/, '')}`));
 
         const tronAddress = ADDRESS_PREFIX + recovered.substr(2);
@@ -153,23 +156,25 @@ export class Trx extends AbstractTrx<false> {
             throw new Error('Invalid transaction provided');
         }
 
-        if (!multisig && (transaction as SignedTransaction).signature) {
+        const tx = cloneTransaction(transaction as Transaction | SignedTransaction);
+
+        if (!multisig && (tx as SignedTransaction).signature) {
             throw new Error('Transaction is already signed');
         }
 
         if (!multisig) {
             const address = toHex(this.tronWeb.address.fromPrivateKey(privateKey as string) as string).toLowerCase();
 
-            if (address !== toHex(transaction.raw_data.contract[0].parameter.value.owner_address)) {
+            if (address !== toHex(tx.raw_data.contract[0].parameter.value.owner_address)) {
                 throw new Error('Private key does not match address in transaction');
             }
         }
 
-        if (!txCheck(transaction)) {
+        if (!txCheck(tx)) {
             throw new Error('Invalid transaction');
         }
 
-        return utils.crypto.signTransaction(privateKey as string, transaction) as SignedStringOrSignedTransaction<T>;
+        return utils.crypto.signTransaction(privateKey as string, tx) as SignedStringOrSignedTransaction<T>;
     }
 
     static signString(message: string, privateKey: string, useTronHeader = true) {
@@ -240,7 +245,13 @@ export class Trx extends AbstractTrx<false> {
     }
 
     async multiSign(transaction: Transaction, privateKey = this.tronWeb.defaultPrivateKey, permissionId = 0) {
-        if (!utils.isObject(transaction) || !transaction.raw_data || !transaction.raw_data.contract) {
+        if (!utils.isObject(transaction)) {
+            throw new Error('Invalid transaction provided');
+        }
+
+        transaction = cloneTransaction(transaction);
+
+        if (!transaction.raw_data || !transaction.raw_data.contract) {
             throw new Error('Invalid transaction provided');
         }
 
