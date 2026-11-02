@@ -170,6 +170,42 @@ describe('TronWeb.utils.abi', function () {
         });
     });
 
+    describe('#encodeParamsV2ByABI()-(argument count)', function () {
+        const tronWeb = tronWebBuilder.createInstance();
+        const coder = tronWeb.utils.abi;
+
+        it('should throw instead of encoding missing string and bool arguments as defaults', function () {
+            const funcABI = {
+                name: 'setMemo',
+                type: 'function',
+                inputs: [
+                    { name: 'memo', type: 'string' },
+                    { name: 'note', type: 'string' },
+                    { name: 'flag', type: 'bool' },
+                ],
+                outputs: [],
+            } as const;
+            assert.throws(() => {
+                coder.encodeParamsV2ByABI(funcABI, ['memo']);
+            }, /expected 3 arguments, got 1/);
+            assert.throws(() => {
+                coder.encodeParamsV2ByABI(funcABI, ['memo', 'note']);
+            }, /expected 3 arguments, got 2/);
+        });
+
+        it('should throw on extra arguments', function () {
+            const funcABI = { name: 'totalSupply', type: 'function', inputs: [], outputs: [] } as const;
+            assert.throws(() => {
+                coder.encodeParamsV2ByABI(funcABI, [1]);
+            }, /expected 0 arguments, got 1/);
+        });
+
+        it('should treat omitted arguments as empty for a function without inputs', function () {
+            const funcABI = { name: 'totalSupply', type: 'function', inputs: [], outputs: [] } as const;
+            assert.equal(coder.encodeParamsV2ByABI(funcABI, undefined as any), '0x');
+        });
+    });
+
     describe('#decodeParamsV2ByABI()-(v1 output)', function () {
         const tronWeb = tronWebBuilder.createInstance();
         const coder = tronWeb.utils.abi;

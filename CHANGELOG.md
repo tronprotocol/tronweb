@@ -35,6 +35,10 @@ __6.5.2__
 
   `contract.write`, `contract.method().send()` and `contract().new()` now treat a broadcast as successful only when the node answers `result: true`. Previously anything without a `code` (or, on the `write` path, without `result: false`) counted as sent, so an empty or non-JSON body from a proxy, a `{ "Error": ... }` exception body from the node, or `{ "result": 0 }` returned a txID for a transaction that never reached the network. Such answers now throw with the node's `message`, `code` or `Error` text, or `Failed to broadcast transaction`. The error shapes are unchanged (`Error` with `.error` on `send()`, a plain `{ error, message }` object on `new()`), and `trx.sendRawTransaction` still returns the node's answer as is.
 
+- Contract method arguments must match the ABI inputs in number
+
+  `utils.abi.encodeParamsV2ByABI`, and with it `contract.method(...args)` and the `funcABIV2` / `parametersV2` options of `createSmartContract`, `triggerSmartContract`, `triggerConstantContract`, `triggerConfirmedConstantContract` and `estimateEnergy`, now throws `Invalid arguments provided: expected N arguments, got M` when the argument count differs from the function inputs, as `encodeFunctionData` already did. Previously missing trailing arguments were padded with `''`, so an omitted `string` was silently encoded as `""` and an omitted `bool` as `false`, and the call went through; other omitted types already failed with an encoder error. Code that relied on leaving trailing `string` / `bool` arguments out must now pass them explicitly.
+
 - `createProposal` lists parameters in serialization order
 
   jspb serializes the `parameters` map sorted by key as a string (e.g. `1000`, `20`, `9`), while the node hashes the entries in the order the broadcast JSON lists them, so any other input order made the two txIDs differ and the node rejected the signature (`SIGERROR`). `createProposal` now sorts the parameters into the jspb order, and throws `Duplicate proposal parameter key <key>` on a repeated key instead of letting jspb collapse the entries into one.
