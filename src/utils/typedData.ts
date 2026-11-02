@@ -682,7 +682,7 @@ export class TypedDataEncoder {
                     case 'trcToken':
                         return getBigInt(value).toString();
                     case 'address':
-                        return value.toLowerCase();
+                        return getTronAddress(value).toLowerCase();
                     case 'bool':
                         return !!value;
                     case 'string':

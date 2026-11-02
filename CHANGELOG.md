@@ -43,6 +43,8 @@ __6.5.2__
 
   jspb serializes the `parameters` map sorted by key as a string (e.g. `1000`, `20`, `9`), while the node hashes the entries in the order the broadcast JSON lists them, so any other input order made the two txIDs differ and the node rejected the signature (`SIGERROR`). `createProposal` now sorts the parameters into the jspb order, and throws `Duplicate proposal parameter key <key>` on a repeated key instead of letting jspb collapse the entries into one.
 
+- `TypedDataEncoder.getPayload` now exports message addresses as lowercase `41`-prefixed hex, like `domain.verifyingContract`, instead of lowercasing base58 addresses into invalid strings.
+
 - `contract_address` moved from `Types.SignedTransaction` to `Types.CreateSmartContractTransaction`, the only transaction that carries it. TypeScript code reading it from a generic signed transaction may need a narrower type.
 
 ## Performance

@@ -95,6 +95,18 @@ describe('TronWeb.utils.typedData', function () {
                 '0x15a2ddfbd93ad048b6c1391659543b5e0dd5799cde747e219cbb07c2c3badd09'
             );
         });
+
+        it('exports base58 and hex addresses in the payload as lowercase 41-prefixed hex, like the domain', function () {
+            const hex = '41bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+            const base58 = utils.address.fromHex(hex);
+            const payloadTypes = { Wallet: [{ name: 'owner', type: 'address' }, { name: 'peers', type: 'address[]' }] };
+            const payload = utils._TypedDataEncoder.getPayload(domain, payloadTypes, {
+                owner: base58,
+                peers: ['0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB', base58],
+            });
+            assert.deepEqual(payload.message, { owner: hex, peers: [hex, hex] });
+            assert.equal(payload.domain.verifyingContract, utils.address.toHex(domain.verifyingContract).toLowerCase());
+        });
     });
 
     describe('#signTypedData', function () {
