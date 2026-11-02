@@ -465,6 +465,44 @@ describe('TronWeb.transactionBuilder', function () {
             await assertThrow(tronWeb.transactionBuilder.createToken(options), 'Invalid Frozen duration provided');
         });
 
+        it('should create a TestToken with multiple frozen supplies', async function () {
+            const options = getTokenOptions();
+            options.totalSupply = 100;
+            options.frozenAmount = 1;
+            options.frozenDuration = 1;
+            options.frozenSupply = [
+                { frozenAmount: 5, frozenDays: 2 },
+                { frozenAmount: '10', frozenDays: '3' },
+            ];
+            const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.b58[46]);
+            const parameter = txPars(transaction) as ContractParamterWrapper<AssetIssueContract>;
+            assert.deepEqual(parameter.value.frozen_supply, [
+                { frozen_amount: 5, frozen_days: 2 },
+                { frozen_amount: 10, frozen_days: 3 },
+            ]);
+
+            options.frozenSupply = [];
+            const transaction2 = await tronWeb.transactionBuilder.createToken(options, accounts.b58[46]);
+            const parameter2 = txPars(transaction2) as ContractParamterWrapper<AssetIssueContract>;
+            assert.isUndefined(parameter2.value.frozen_supply);
+        });
+
+        it('should throw if frozenSupply is invalid', async function () {
+            const options = getTokenOptions();
+
+            options.frozenSupply = 'something';
+            await assertThrow(tronWeb.transactionBuilder.createToken(options), 'Invalid frozenSupply provided');
+
+            options.frozenSupply = [null];
+            await assertThrow(tronWeb.transactionBuilder.createToken(options), 'Invalid frozenSupply[0] provided');
+
+            options.frozenSupply = [{ frozenAmount: 5, frozenDays: 2 }, { frozenAmount: 0, frozenDays: 2 }];
+            await assertThrow(tronWeb.transactionBuilder.createToken(options), 'frozenSupply[1].frozenAmount must be a positive integer');
+
+            options.frozenSupply = [{ frozenAmount: 5, frozenDays: 'something' }];
+            await assertThrow(tronWeb.transactionBuilder.createToken(options), 'frozenSupply[0].frozenDays must be a positive integer');
+        });
+
         it('should throw if the issuer address is invalid', async function () {
             const options = getTokenOptions();
 

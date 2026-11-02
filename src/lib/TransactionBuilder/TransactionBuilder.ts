@@ -1499,6 +1499,7 @@ export class TransactionBuilder {
             freeBandwidthLimit = 0, // Out of `totalFreeBandwidth`, the amount each token holder get
             frozenAmount = 0,
             frozenDuration = 0,
+            frozenSupply,
             // for now there is no default for the following values
             voteScore,
             precision,
@@ -1566,19 +1567,51 @@ export class TransactionBuilder {
                 value: saleEnd,
                 gt: toInteger(saleStart),
             },
-            {
-                name: 'Frozen supply',
-                type: 'integer',
-                value: frozenAmount,
-                gte: 0,
-            },
-            {
-                name: 'Frozen duration',
-                type: 'integer',
-                value: frozenDuration,
-                gte: 0,
-            },
         ]);
+
+        if (frozenSupply !== undefined) {
+            this.validator.notValid([
+                {
+                    name: 'frozenSupply',
+                    type: 'array',
+                    value: frozenSupply,
+                },
+            ]);
+            frozenSupply.forEach((item, index) => {
+                this.validator.notValid([
+                    {
+                        name: `frozenSupply[${index}]`,
+                        type: 'notEmptyObject',
+                        value: item as unknown as Record<string, unknown>,
+                    },
+                    {
+                        name: `frozenSupply[${index}].frozenAmount`,
+                        type: 'positive-integer',
+                        value: item?.frozenAmount,
+                    },
+                    {
+                        name: `frozenSupply[${index}].frozenDays`,
+                        type: 'positive-integer',
+                        value: item?.frozenDays,
+                    },
+                ]);
+            });
+        } else {
+            this.validator.notValid([
+                {
+                    name: 'Frozen supply',
+                    type: 'integer',
+                    value: frozenAmount,
+                    gte: 0,
+                },
+                {
+                    name: 'Frozen duration',
+                    type: 'integer',
+                    value: frozenDuration,
+                    gte: 0,
+                },
+            ]);
+        }
 
         this.validator.notValid([
             {
@@ -1611,19 +1644,24 @@ export class TransactionBuilder {
             num: asInteger(tokenRatio),
             start_time: asInteger(saleStart),
             end_time: asInteger(saleEnd),
-            frozen_supply: [
-                {
-                    frozen_amount: asInteger(frozenAmount),
-                    frozen_days: asInteger(frozenDuration),
-                },
-            ],
+            frozen_supply: frozenSupply
+                ? frozenSupply.map(({ frozenAmount, frozenDays }) => ({
+                      frozen_amount: asInteger(frozenAmount),
+                      frozen_days: asInteger(frozenDays),
+                  }))
+                : [
+                      {
+                          frozen_amount: asInteger(frozenAmount),
+                          frozen_days: asInteger(frozenDuration),
+                      },
+                  ],
         };
         (['name', 'abbr', 'description', 'url'] as (keyof typeof data)[]).forEach((key) => {
             if (!data[key]) {
                 delete data[key];
             }
         });
-        if (!(asInteger(frozenAmount) > 0)) {
+        if (frozenSupply ? !frozenSupply.length : !(asInteger(frozenAmount) > 0)) {
             delete data.frozen_supply;
         }
         if (freeBandwidth && !isNaN(parseInt(freeBandwidth)) && parseInt(freeBandwidth) >= 0) {
