@@ -85,6 +85,19 @@ const getFunctionSelector = (abi: Readonly<AbiFragmentNoErrConstructor>) => {
     throw new Error('unknown function');
 };
 
+// Legacy ABIs predate stateMutability and only carry constant/payable; derive it the same way
+// ethers' FunctionFragment.from does.
+const getStateMutability = (abi: Readonly<AbiFragmentNoErrConstructor>): string => {
+    const { stateMutability, constant, payable } = abi as {
+        stateMutability?: string;
+        constant?: boolean;
+        payable?: boolean;
+    };
+    if (stateMutability) return stateMutability.toLowerCase();
+    if (constant === true) return 'view';
+    return payable === false ? 'nonpayable' : 'payable';
+};
+
 const decodeOutput = <T extends Readonly<AbiFragmentNoErrConstructor>>(abi: T, output: string) => {
     return decodeParamsV2ByABI(abi, output) as OutputType<T>;
 };
@@ -253,14 +266,14 @@ export class Method<AbiFrag extends Readonly<AbiFragmentNoErrConstructor>> {
             throw new Error('Calling smart contracts requires you to load the contract first');
         }
 
-        const { stateMutability } = this.abi as { stateMutability: StateMutabilityTypes };
+        const stateMutability = getStateMutability(this.abi);
 
-        if (['pure', 'view'].includes(stateMutability.toLowerCase())) {
+        if (['pure', 'view'].includes(stateMutability)) {
             throw new Error(`Methods with state mutability "${stateMutability}" must use call()`);
         }
 
         // If a function isn't payable, dont provide a callValue.
-        if (!['payable'].includes(stateMutability.toLowerCase())) {
+        if (stateMutability !== 'payable') {
             options.callValue = 0;
         }
 
