@@ -573,10 +573,12 @@ const buildAssetIssueContract = (value, options) => {
     assetIssueContract.setFreeAssetNetLimit(free_asset_net_limit);
     assetIssueContract.setPublicFreeAssetNetLimit(public_free_asset_net_limit);
     if (frozen_supply) {
-        const frozenSupplyContract = new AssetIssueContract.FrozenSupply();
-        frozenSupplyContract.setFrozenAmount(frozen_supply.length ? frozen_supply[0].frozen_amount : frozen_supply.frozen_amount);
-        frozenSupplyContract.setFrozenDays(frozen_supply.length ? frozen_supply[0].frozen_days : frozen_supply.frozen_days);
-        assetIssueContract.addFrozenSupply(frozenSupplyContract);
+        (Array.isArray(frozen_supply) ? frozen_supply : [frozen_supply]).forEach(({ frozen_amount, frozen_days }) => {
+            const frozenSupplyContract = new AssetIssueContract.FrozenSupply();
+            frozenSupplyContract.setFrozenAmount(frozen_amount);
+            frozenSupplyContract.setFrozenDays(frozen_days);
+            assetIssueContract.addFrozenSupply(frozenSupplyContract);
+        });
     }
     return buildCommonTransaction(
         assetIssueContract,
