@@ -13,6 +13,16 @@ function normalizePrivateKeyBytes(priKeyBytes: BytesLike) {
     return hexStr2byteArray(byteArray2hexStr(priKeyBytes).padStart(64, '0'));
 }
 
+const PRIVATE_KEY_HEX = /^(0x)?[0-9a-fA-F]{64}$/;
+
+export function privateKeyToSigningHex(privateKey: string): string {
+    const key = (privateKey as unknown) instanceof String ? privateKey.valueOf() : privateKey;
+    if (typeof key !== 'string' || !PRIVATE_KEY_HEX.test(key)) {
+        throw new Error('Invalid private key provided');
+    }
+    return `0x${key.replace(/^0x/, '')}`;
+}
+
 export function getBase58CheckAddress(addressBytes: number[]) {
     const hash0 = SHA256(addressBytes);
     const hash1 = SHA256(hash0);

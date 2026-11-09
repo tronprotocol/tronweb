@@ -17,7 +17,7 @@ import {
     Transaction,
 } from '../../src/types/Transaction';
 
-import { assert } from 'vitest';
+import { assert, vi } from 'vitest';
 import txPars from '../helpers/txPars.js';
 // const jlog = require('../helpers/jlog');
 import assertThrow from '../helpers/assertThrow.js';
@@ -89,6 +89,27 @@ function withSwappingFirstParameter(
         },
     });
     return { parameters, reads: () => reads };
+}
+
+// Re-derives `txID` / `raw_data_hex` from the transaction JSON, exactly as a node that built (or
+// rewrote) the transaction would return it: the result is self-consistent whatever its contract type.
+function selfConsistent<T extends Transaction>(tx: T): T {
+    const pb = utils.transaction.txJsonToPb(tx);
+    tx.txID = utils.transaction.txPbToTxID(pb).replace(/^0x/, '');
+    tx.raw_data_hex = utils.transaction.txPbToRawDataHex(pb).toLowerCase();
+    return tx;
+}
+
+// Spies on `local.fullNode.request` and lets `mutate` rewrite the node's answer to `path`
+// (every other request passes through).
+function stubNodeAnswer(local: TronWeb, path: string, mutate: (res: any, payload: any) => void) {
+    // Always call the provider's own method, never an earlier spy left on the instance.
+    const request = Object.getPrototypeOf(local.fullNode).request as TronWeb['fullNode']['request'];
+    return vi.spyOn(local.fullNode, 'request').mockImplementation(async (url: string, payload: any = {}, method: any = 'get') => {
+        const res: any = await request.call(local.fullNode, url, payload, method);
+        if (url === path) mutate(res, payload);
+        return res;
+    });
 }
 
 /**
@@ -442,6 +463,44 @@ describe('TronWeb.transactionBuilder', function () {
             options.frozenDuration = 'something';
 
             await assertThrow(tronWeb.transactionBuilder.createToken(options), 'Invalid Frozen duration provided');
+        });
+
+        it('should create a TestToken with multiple frozen supplies', async function () {
+            const options = getTokenOptions();
+            options.totalSupply = 100;
+            options.frozenAmount = 1;
+            options.frozenDuration = 1;
+            options.frozenSupply = [
+                { frozenAmount: 5, frozenDays: 2 },
+                { frozenAmount: '10', frozenDays: '3' },
+            ];
+            const transaction = await tronWeb.transactionBuilder.createToken(options, accounts.b58[46]);
+            const parameter = txPars(transaction) as ContractParamterWrapper<AssetIssueContract>;
+            assert.deepEqual(parameter.value.frozen_supply, [
+                { frozen_amount: 5, frozen_days: 2 },
+                { frozen_amount: 10, frozen_days: 3 },
+            ]);
+
+            options.frozenSupply = [];
+            const transaction2 = await tronWeb.transactionBuilder.createToken(options, accounts.b58[46]);
+            const parameter2 = txPars(transaction2) as ContractParamterWrapper<AssetIssueContract>;
+            assert.isUndefined(parameter2.value.frozen_supply);
+        });
+
+        it('should throw if frozenSupply is invalid', async function () {
+            const options = getTokenOptions();
+
+            options.frozenSupply = 'something';
+            await assertThrow(tronWeb.transactionBuilder.createToken(options), 'Invalid frozenSupply provided');
+
+            options.frozenSupply = [null];
+            await assertThrow(tronWeb.transactionBuilder.createToken(options), 'Invalid frozenSupply[0] provided');
+
+            options.frozenSupply = [{ frozenAmount: 5, frozenDays: 2 }, { frozenAmount: 0, frozenDays: 2 }];
+            await assertThrow(tronWeb.transactionBuilder.createToken(options), 'frozenSupply[1].frozenAmount must be a positive integer');
+
+            options.frozenSupply = [{ frozenAmount: 5, frozenDays: 'something' }];
+            await assertThrow(tronWeb.transactionBuilder.createToken(options), 'frozenSupply[0].frozenDays must be a positive integer');
         });
 
         it('should throw if the issuer address is invalid', async function () {
@@ -992,6 +1051,56 @@ describe('TronWeb.transactionBuilder', function () {
             const transaction = await tronWeb.transactionBuilder.createProposal(...input);
             const res = await broadcaster(transaction);
             assert.isTrue(res.receipt.result);
+        });
+
+        it('should broadcast a proposal whose parameters are not in serialization order', async function () {
+            const transaction = await tronWeb.transactionBuilder.createProposal([parameters[1], parameters[0]], ADDRESS_BASE58);
+            const res = await broadcaster(transaction);
+            assert.isTrue(res.receipt.result);
+        });
+
+        it('should list the parameters in the order they are serialized, whatever the input order', async function () {
+            const blockHeader = { ref_block_bytes: '0000', ref_block_hash: '0000000000000000', expiration: 1, timestamp: 1 };
+            const cases: [number[], number[]][] = [
+                [[70, 52], [52, 70]],
+                [[52, 70], [52, 70]],
+                // jspb orders map keys as strings, not as numbers
+                [[9, 20, 1000, 1001], [1000, 1001, 20, 9]],
+                [[1000, 1001, 20, 9], [1000, 1001, 20, 9]],
+            ];
+            const rawDataHexes: string[] = [];
+            for (const [keys, expected] of cases) {
+                const input = keys.map((key) => ({ key, value: key + 1 }));
+                const transaction = await tronWeb.transactionBuilder.createProposal(input, ADDRESS_BASE58, { blockHeader });
+                const parameter = txPars(transaction) as ContractParamterWrapper<ProposalCreateContract>;
+
+                assert.deepEqual(
+                    parameter.value.parameters,
+                    expected.map((key) => ({ key, value: key + 1 }))
+                );
+                assert.deepEqual(
+                    input.map(({ key }) => key),
+                    keys,
+                    'does not reorder the caller array'
+                );
+                rawDataHexes.push(transaction.raw_data_hex);
+            }
+            // The input order does not change the transaction
+            assert.equal(rawDataHexes[0], rawDataHexes[1]);
+            assert.equal(rawDataHexes[2], rawDataHexes[3]);
+        });
+
+        it('should throw on a duplicate parameter key', async function () {
+            await assertThrow(
+                tronWeb.transactionBuilder.createProposal(
+                    [
+                        { key: 52, value: 1 },
+                        { key: 52, value: 2 },
+                    ],
+                    ADDRESS_BASE58
+                ),
+                'Duplicate proposal parameter key 52'
+            );
         });
 
         it('should throw if issuer address is invalid', async function () {
@@ -2800,6 +2909,132 @@ describe('TronWeb.transactionBuilder', function () {
             const { data } = tx.transaction.raw_data.contract[0].parameter.value;
             assert.isTrue(data!.endsWith('01'.repeat(32)), data);
         });
+
+        describe('fullNode response validation', function () {
+            let local: TronWeb;
+            let contractAddress: string;
+            const issuerAddress = () => accounts.hex[6];
+            const parameters = [{ type: 'uint256', value: 5 }];
+
+            beforeAll(function () {
+                local = tronWebBuilder.createInstance();
+                local.setPrivateKey(accounts.pks[6]);
+                contractAddress = transaction.contract_address;
+            });
+
+            afterEach(function () {
+                vi.restoreAllMocks();
+            });
+
+            const trigger = () =>
+                local.transactionBuilder.triggerSmartContract(contractAddress, 'store(uint256)', {}, parameters, issuerAddress());
+
+            function setTriggerType(type: string, value?: (payload: any) => Record<string, unknown>) {
+                return stubNodeAnswer(local, 'wallet/triggersmartcontract', (res, payload) => {
+                    const contract = res.transaction.raw_data.contract[0];
+                    contract.type = type;
+                    contract.parameter.type_url = `type.googleapis.com/protocol.${type}`;
+                    contract.parameter.value = value
+                        ? value(payload)
+                        : { owner_address: payload.owner_address, contract_address: payload.contract_address };
+                    selfConsistent(res.transaction);
+                });
+            }
+
+            it('should accept the transaction the node actually built', async function () {
+                // Control: re-deriving txID / raw_data_hex of the node's answer changes nothing.
+                let answer: any;
+                stubNodeAnswer(local, 'wallet/triggersmartcontract', (res) => {
+                    answer = deepCopyJson(res.transaction);
+                    selfConsistent(res.transaction);
+                });
+                const tx = await trigger();
+                assert.equal(tx.transaction.raw_data.contract[0].type, 'TriggerSmartContract');
+                assert.equal(tx.transaction.txID, answer.txID);
+                assert.equal(tx.transaction.raw_data_hex, answer.raw_data_hex);
+            });
+
+            it('should reject a ClearABIContract response', async function () {
+                setTriggerType('ClearABIContract');
+                await assertThrow(trigger(), 'Invalid transaction');
+            });
+
+            it('should reject an UpdateSettingContract response', async function () {
+                setTriggerType('UpdateSettingContract');
+                await assertThrow(trigger(), 'Invalid transaction');
+            });
+
+            it('should reject an UpdateEnergyLimitContract response', async function () {
+                setTriggerType('UpdateEnergyLimitContract');
+                await assertThrow(trigger(), 'Invalid transaction');
+            });
+
+            it('should reject a WithdrawBalanceContract response', async function () {
+                setTriggerType('WithdrawBalanceContract', (payload) => ({ owner_address: payload.owner_address }));
+                await assertThrow(trigger(), 'Invalid transaction');
+            });
+
+            it('should reject a response carrying a second contract', async function () {
+                stubNodeAnswer(local, 'wallet/triggersmartcontract', (res, payload) => {
+                    res.transaction.raw_data.contract.push({
+                        parameter: {
+                            value: { owner_address: payload.owner_address, contract_address: payload.contract_address },
+                            type_url: 'type.googleapis.com/protocol.ClearABIContract',
+                        },
+                        type: 'ClearABIContract',
+                    });
+                });
+                await assertThrow(trigger(), 'Invalid transaction');
+            });
+
+            it('should not sign or broadcast a mismatched transaction through contract.method().send()', async function () {
+                setTriggerType('ClearABIContract');
+                const broadcast = vi.spyOn(local.trx, 'sendRawTransaction');
+                const contract = local.contract(testPayable.abi, contractAddress);
+                await assertThrow(contract.store(5).send(), 'Invalid transaction');
+                assert.equal(broadcast.mock.calls.length, 0);
+            });
+
+            it('should not sign or broadcast a mismatched transaction through contract.write', async function () {
+                setTriggerType('UpdateSettingContract');
+                const broadcast = vi.spyOn(local.trx, 'sendRawTransaction');
+                const contract = local.contract(testPayable.abi, contractAddress);
+                await assertThrow(contract.write.store([5]), 'Invalid transaction');
+                assert.equal(broadcast.mock.calls.length, 0);
+            });
+
+            it('should keep skipping the check for constant calls', async function () {
+                // Constant calls are never signed, so their answer is returned as is (unchanged behaviour).
+                stubNodeAnswer(local, 'wallet/triggerconstantcontract', (res) => {
+                    res.transaction.raw_data.contract[0].type = 'ClearABIContract';
+                });
+                const constant = await local.transactionBuilder.triggerConstantContract(
+                    contractAddress,
+                    'store(uint256)',
+                    {},
+                    parameters,
+                    issuerAddress()
+                );
+                assert.equal(constant.transaction.raw_data.contract[0].type, 'ClearABIContract');
+            });
+
+            it('should keep skipping the check for energy estimation', async function () {
+                // `wallet/estimateenergy` answers with no transaction at all; the answer is returned as is.
+                stubNodeAnswer(local, 'wallet/estimateenergy', (res) => {
+                    res.transaction = { raw_data: { contract: [{ type: 'ClearABIContract' }, { type: 'ClearABIContract' }] } };
+                });
+                const estimate = await local.transactionBuilder.estimateEnergy(
+                    contractAddress,
+                    'store(uint256)',
+                    {},
+                    parameters,
+                    issuerAddress()
+                );
+                assert.isTrue(estimate.result.result);
+                assert.isNumber(estimate.energy_required);
+                assert.equal((estimate as any).transaction.raw_data.contract.length, 2);
+            });
+        });
     });
 
     describe('#createTokenExchange', async function () {
@@ -3483,6 +3718,138 @@ describe('TronWeb.transactionBuilder', function () {
                 const previousId = transaction.txID;
                 const transactionLater = (await tronWeb.transactionBuilder.newTxID(transaction as SignedTransaction)) as any;
                 assert.equal(previousId, transactionLater.txID);
+            });
+
+            describe('fullNode response validation', function () {
+                // `newTxID` (and `extendExpiration` / `alterTransaction` / `addUpdateData` without txLocal)
+                // use `wallet/getsignweight`; the returned contract type and block header must match.
+                let local: TronWeb;
+
+                beforeAll(function () {
+                    local = tronWebBuilder.createInstance();
+                });
+
+                afterEach(function () {
+                    vi.restoreAllMocks();
+                });
+
+                // WithdrawBalanceContract and CancelAllUnfreezeV2Contract both carry only { owner_address }.
+                function setSignWeightType(type: string) {
+                    return stubNodeAnswer(local, 'wallet/getsignweight', (res) => {
+                        const tx = res.transaction.transaction;
+                        tx.raw_data.contract[0].type = type;
+                        tx.raw_data.contract[0].parameter.type_url = `type.googleapis.com/protocol.${type}`;
+                        selfConsistent(tx);
+                    });
+                }
+
+                it('should accept the transaction the node re-serialized', async function () {
+                    // Control: re-deriving txID / raw_data_hex of the node's answer changes nothing.
+                    const original = await local.transactionBuilder.sendTrx(accounts.b58[49], 10, accounts.hex[48]);
+                    let answer: any;
+                    stubNodeAnswer(local, 'wallet/getsignweight', (res) => {
+                        answer = deepCopyJson(res.transaction.transaction);
+                        selfConsistent(res.transaction.transaction);
+                    });
+                    const later = await local.transactionBuilder.newTxID(original);
+                    assert.equal(later.raw_data.contract[0].type, 'TransferContract');
+                    assert.equal(later.txID, answer.txID);
+                    assert.equal(later.raw_data_hex, answer.raw_data_hex);
+                    assert.equal(later.txID, original.txID);
+                    assert.isTrue(utils.transaction.txCheck(later));
+                });
+
+                it('should accept a locally extended expiration (what extendExpiration submits)', async function () {
+                    const original = await local.transactionBuilder.sendTrx(accounts.b58[49], 10, accounts.hex[48]);
+                    stubNodeAnswer(local, 'wallet/getsignweight', (res) => selfConsistent(res.transaction.transaction));
+                    const later = await local.transactionBuilder.extendExpiration(original, 3600);
+                    assert.equal(later.raw_data.expiration, original.raw_data.expiration + 3600 * 1000);
+                    assert.notEqual(later.txID, original.txID);
+                    assert.isTrue(utils.transaction.txCheck(later));
+                });
+
+                it('should reject a returned transaction with a different expiration', async function () {
+                    const original = await local.transactionBuilder.sendTrx(accounts.b58[49], 10, accounts.hex[48]);
+                    stubNodeAnswer(local, 'wallet/getsignweight', (res) => {
+                        const tx = res.transaction.transaction;
+                        tx.raw_data.expiration += 23 * 3600 * 1000;
+                        selfConsistent(tx);
+                    });
+                    await assertThrow(local.transactionBuilder.newTxID(original), 'Error generating a new transaction id.');
+                });
+
+                it('should reject a returned transaction with a different timestamp', async function () {
+                    const original = await local.transactionBuilder.sendTrx(accounts.b58[49], 10, accounts.hex[48]);
+                    stubNodeAnswer(local, 'wallet/getsignweight', (res) => {
+                        const tx = res.transaction.transaction;
+                        tx.raw_data.timestamp += 1000;
+                        selfConsistent(tx);
+                    });
+                    await assertThrow(local.transactionBuilder.newTxID(original), 'Error generating a new transaction id.');
+                });
+
+                it('should reject a returned transaction with a different ref block', async function () {
+                    const original = await local.transactionBuilder.sendTrx(accounts.b58[49], 10, accounts.hex[48]);
+                    stubNodeAnswer(local, 'wallet/getsignweight', (res) => {
+                        const tx = res.transaction.transaction;
+                        tx.raw_data.ref_block_bytes = 'beef';
+                        tx.raw_data.ref_block_hash = '0102030405060708';
+                        selfConsistent(tx);
+                    });
+                    await assertThrow(local.transactionBuilder.newTxID(original), 'Error generating a new transaction id.');
+                });
+
+                it('should reject a returned transaction with a different parameter value', async function () {
+                    const original = await local.transactionBuilder.sendTrx(accounts.b58[49], 10, accounts.hex[48]);
+                    stubNodeAnswer(local, 'wallet/getsignweight', (res) => {
+                        const tx = res.transaction.transaction;
+                        tx.raw_data.contract[0].parameter.value.amount = 10_000_000;
+                        selfConsistent(tx);
+                    });
+                    await assertThrow(local.transactionBuilder.newTxID(original), 'Error generating a new transaction id.');
+                });
+
+                it('should reject a returned transaction with a different contract type', async function () {
+                    const original = await local.transactionBuilder.withdrawBlockRewards(accounts.hex[48]);
+                    setSignWeightType('CancelAllUnfreezeV2Contract');
+                    await assertThrow(local.transactionBuilder.newTxID(original), 'Error generating a new transaction id.');
+                });
+
+                it('should reject a returned transaction carrying a second contract', async function () {
+                    const original = await local.transactionBuilder.withdrawBlockRewards(accounts.hex[48]);
+                    stubNodeAnswer(local, 'wallet/getsignweight', (res) => {
+                        const tx = res.transaction.transaction;
+                        tx.raw_data.contract.push(deepCopyJson(tx.raw_data.contract[0]));
+                    });
+                    await assertThrow(local.transactionBuilder.newTxID(original), 'Error generating a new transaction id.');
+                });
+
+                it('should reject a different contract type through extendExpiration', async function () {
+                    const original = await local.transactionBuilder.withdrawBlockRewards(accounts.hex[48]);
+                    setSignWeightType('CancelAllUnfreezeV2Contract');
+                    await assertThrow(
+                        local.transactionBuilder.extendExpiration(original, 3600),
+                        'Error generating a new transaction id.'
+                    );
+                });
+
+                it('should reject a different contract type through alterTransaction', async function () {
+                    const original = await local.transactionBuilder.withdrawBlockRewards(accounts.hex[48]);
+                    setSignWeightType('CancelAllUnfreezeV2Contract');
+                    await assertThrow(
+                        local.transactionBuilder.alterTransaction(original, { data: 'memo' }),
+                        'Error generating a new transaction id.'
+                    );
+                });
+
+                it('should reject a different contract type through addUpdateData', async function () {
+                    const original = await local.transactionBuilder.withdrawBlockRewards(accounts.hex[48]);
+                    setSignWeightType('CancelAllUnfreezeV2Contract');
+                    await assertThrow(
+                        local.transactionBuilder.addUpdateData(original, 'memo'),
+                        'Error generating a new transaction id.'
+                    );
+                });
             });
         });
 

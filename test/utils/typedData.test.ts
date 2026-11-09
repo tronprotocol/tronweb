@@ -95,6 +95,18 @@ describe('TronWeb.utils.typedData', function () {
                 '0x15a2ddfbd93ad048b6c1391659543b5e0dd5799cde747e219cbb07c2c3badd09'
             );
         });
+
+        it('exports base58 and hex addresses in the payload as lowercase 41-prefixed hex, like the domain', function () {
+            const hex = '41bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+            const base58 = utils.address.fromHex(hex);
+            const payloadTypes = { Wallet: [{ name: 'owner', type: 'address' }, { name: 'peers', type: 'address[]' }] };
+            const payload = utils._TypedDataEncoder.getPayload(domain, payloadTypes, {
+                owner: base58,
+                peers: ['0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB', base58],
+            });
+            assert.deepEqual(payload.message, { owner: hex, peers: [hex, hex] });
+            assert.equal(payload.domain.verifyingContract, utils.address.toHex(domain.verifyingContract).toLowerCase());
+        });
     });
 
     describe('#signTypedData', function () {
@@ -256,6 +268,74 @@ describe('TronWeb.utils.typedData', function () {
             circular.Mail.push(circular);
             assert.throws(() => sign(domain, circular, value), 'Invalid typed data: circular reference at types.Mail[1]');
         });
+
+        it('rejects a struct type named like a base type, instead of signing it as that base type', function () {
+            for (const name of [
+                'bool',
+                'address',
+                'string',
+                'bytes',
+                'bytes32',
+                'uint256',
+                'int',
+                'trcToken',
+                'uint7',
+                'bytes0',
+            ]) {
+                const shadowing = { [name]: [{ name: 'amount', type: 'uint256' }] };
+                assert.throws(
+                    () => sign(domain, shadowing, { amount: 1 }),
+                    `struct type name ${JSON.stringify(name)} collides with a base type`
+                );
+                assert.throws(
+                    () => utils._TypedDataEncoder.from(shadowing),
+                    `struct type name ${JSON.stringify(name)} collides with a base type`
+                );
+            }
+
+            const child = { Mail: [{ name: 'flag', type: 'bool' }], bool: [{ name: 'amount', type: 'uint256' }] };
+            assert.throws(
+                () => sign(domain, child, { flag: { amount: 1 } }),
+                'struct type name "bool" collides with a base type'
+            );
+        });
+    });
+
+    describe('#signTypedData private key handling', function () {
+        const key = 'e5a7d3c6b1f04c2d9e8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e';
+        const domain = { name: 'Key Test', version: '1', chainId: 1 };
+        const types = { Mail: [{ name: 'contents', type: 'string' }] };
+        const value = { contents: 'Hello, Bob!' };
+
+        it('accepts the key with or without 0x and in either hex case, with the same signature', function () {
+            const reference = utils.typedData.signTypedData(domain, types, value, key);
+            assert.equal(utils.typedData.signTypedData(domain, types, value, '0x' + key), reference);
+            assert.equal(utils.typedData.signTypedData(domain, types, value, key.toUpperCase()), reference);
+            assert.equal(utils.typedData.signTypedData(domain, types, value, '0x' + key.toUpperCase()), reference);
+        });
+
+        const malformed: Record<string, unknown> = {
+            'trailing newline': key + '\n',
+            '63 hex digits': key.slice(1),
+            '65 hex digits': key + 'f',
+            '0X prefix': '0X' + key,
+            'not a string': undefined,
+        };
+
+        for (const [name, pk] of Object.entries(malformed)) {
+            it(`rejects a key with a ${name} without echoing it`, function () {
+                let error: any;
+                try {
+                    utils.typedData.signTypedData(domain, types, value, pk as string);
+                } catch (err) {
+                    error = err;
+                }
+                assert.instanceOf(error, Error);
+                assert.equal(error.message, 'Invalid private key provided');
+                assert.isUndefined((error as any).value);
+                assert.notInclude(error.message, key.slice(1));
+            });
+        }
     });
 
     describe('#verifyTypedData', function () {
@@ -316,6 +396,14 @@ describe('TronWeb.utils.typedData', function () {
             assert.throws(
                 () => utils.typedData.verifyTypedData({ ...domain, chainId: () => 1 } as any, types, value, signature),
                 'Invalid typed data: unsupported function at domain.chainId'
+            );
+        });
+
+        it('rejects a struct type named like a base type', function () {
+            const shadowing = { bool: [{ name: 'amount', type: 'uint256' }] };
+            assert.throws(
+                () => utils.typedData.verifyTypedData(domain, shadowing, { amount: 2 }, signature),
+                'struct type name "bool" collides with a base type'
             );
         });
     });

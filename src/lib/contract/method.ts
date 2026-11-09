@@ -3,6 +3,7 @@ import utils from '../../utils/index.js';
 import { encodeParamsV2ByABI, decodeParamsV2ByABI } from '../../utils/abi.js';
 import { TronWeb } from '../../tronweb.js';
 import { Contract } from './index.js';
+import { isBroadcastAccepted, getBroadcastErrorMessage } from './readWrite.js';
 import { sha3 } from '../../utils/crypto.js';
 
 export interface CallOptions {
@@ -82,6 +83,19 @@ const getFunctionSelector = (abi: Readonly<AbiFragmentNoErrConstructor>) => {
         return obj.format('sighash');
     }
     throw new Error('unknown function');
+};
+
+// Legacy ABIs predate stateMutability and only carry constant/payable; derive it the same way
+// ethers' FunctionFragment.from does.
+const getStateMutability = (abi: Readonly<AbiFragmentNoErrConstructor>): string => {
+    const { stateMutability, constant, payable } = abi as {
+        stateMutability?: string;
+        constant?: boolean;
+        payable?: boolean;
+    };
+    if (stateMutability) return stateMutability.toLowerCase();
+    if (constant === true) return 'view';
+    return payable === false ? 'nonpayable' : 'payable';
 };
 
 const decodeOutput = <T extends Readonly<AbiFragmentNoErrConstructor>>(abi: T, output: string) => {
@@ -252,14 +266,14 @@ export class Method<AbiFrag extends Readonly<AbiFragmentNoErrConstructor>> {
             throw new Error('Calling smart contracts requires you to load the contract first');
         }
 
-        const { stateMutability } = this.abi as { stateMutability: StateMutabilityTypes };
+        const stateMutability = getStateMutability(this.abi);
 
-        if (['pure', 'view'].includes(stateMutability.toLowerCase())) {
+        if (['pure', 'view'].includes(stateMutability)) {
             throw new Error(`Methods with state mutability "${stateMutability}" must use call()`);
         }
 
         // If a function isn't payable, dont provide a callValue.
-        if (!['payable'].includes(stateMutability.toLowerCase())) {
+        if (stateMutability !== 'payable') {
             options.callValue = 0;
         }
 
@@ -268,6 +282,9 @@ export class Method<AbiFrag extends Readonly<AbiFragmentNoErrConstructor>> {
             from: this.tronWeb.defaultAddress.hex,
             ...options,
         };
+        // send() must build a real transaction: a caller-supplied _isConstant would route it to
+        // triggerconstantcontract and skip txCheckWithArgs before the result is signed.
+        delete (options as _CallOptions)._isConstant;
 
         const parameters = args.map((value, index) => ({
             type: types[index],
@@ -300,14 +317,10 @@ export class Method<AbiFrag extends Readonly<AbiFragmentNoErrConstructor>> {
 
         const broadcast = await this.tronWeb.trx.sendRawTransaction(signedTransaction);
 
-        if (broadcast.code) {
-            const err = {
-                error: broadcast.code,
-                message: broadcast.code as unknown as string,
-            };
-            if (broadcast.message) err.message = this.tronWeb.toUtf8(broadcast.message);
-            const error = new Error(err.message);
-            (error as any).error = broadcast.code;
+        if (!isBroadcastAccepted(broadcast)) {
+            const message = getBroadcastErrorMessage(this.tronWeb, broadcast);
+            const error = new Error(message);
+            (error as any).error = broadcast?.code || message;
             throw error;
         }
 

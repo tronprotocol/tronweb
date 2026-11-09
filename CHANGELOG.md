@@ -1,6 +1,71 @@
 Change Log
 =========
 
+__6.5.2__
+
+## Improvements
+
+- Stricter validation of transactions returned by the node
+
+  `triggerSmartContract` (and every `contract.method().send()` / `contract.write` call) and `newTxID` (`extendExpiration`, `alterTransaction`, `addUpdateData` without `txLocal`) now also check that the transaction returned by the fullNode has the requested contract type and holds exactly one contract. On the `newTxID` path the block header (`ref_block_bytes`, `ref_block_hash`, `expiration`, `timestamp`) must also match the submitted values, as `multiSign` already required. Rejections keep the existing errors (`Invalid transaction`, `Error generating a new transaction id.`).
+
+  `utils.transaction.txCheckWithArgs` gains an optional fourth `expectedType` argument. Its three-argument form behaves as before, except that a transaction whose `raw_data.contract` does not hold exactly one entry now returns `false`: previously a missing or empty contract list threw a `TypeError`, and contracts beyond the first were ignored.
+
+- `contract().at()` keeps the requested address
+
+  `Contract.at(address)` now keeps the requested address on the instance (normalized to hex as before) and throws `Invalid contract address provided` when the node's answer describes a different address.
+
+  `trx.getContract` now keys its cache by the hex form for both reads and writes (as does the eviction in `clearABI`), so a base58 address hits the cache on repeated calls instead of re-fetching. An answer that describes no contract (not deployed yet) is no longer cached, so polling for a freshly deployed contract on the same instance sees it once it lands.
+
+- `TriggerSmartContract` transactions cannot carry both `data` and `function_selector` / `parameter`
+
+  Rebuilding a `TriggerSmartContract` whose value sets `data` together with a non-empty `function_selector` or `parameter` now throws `Invalid TriggerSmartContract: data cannot be combined with function_selector or parameter`, which surfaces from `trx.sign`, `multiSign`, `ecRecover`, `utils.transaction.txCheck` and `txCheckWithArgs`. Transactions with only `data`, or only `function_selector` / `parameter`, are unaffected, as are empty-string values; transactions built by TronWeb or by the node carry `data` alone.
+
+- `CreateSmartContract` outer fields are taken from the top level only
+
+  When rebuilding a `CreateSmartContract` transaction, `owner_address`, `call_token_value` and `token_id` are now always read from the top level of the contract value, and same-named keys inside `new_contract` are ignored. Transactions built by TronWeb or by the node are unaffected.
+
+- Typed data rejects struct names that collide with base types
+
+  A struct named like an EIP-712 base type (e.g. `bool`, `uint256`) is ambiguous: it was encoded as the base type rather than as the struct. `signTypedData`, `verifyTypedData` and `hashTypedData` now reject such names, including malformed base-type look-alikes such as `uint7`.
+
+## Bug Fixes
+
+- Contract sends require an explicit broadcast acknowledgement
+
+  `contract.write`, `contract.method().send()` and `contract().new()` now treat a broadcast as successful only when the node answers `result: true`. Previously anything without a `code` (or, on the `write` path, without `result: false`) counted as sent, so an empty or non-JSON body from a proxy, a `{ "Error": ... }` exception body from the node, or `{ "result": 0 }` returned a txID for a transaction that never reached the network. Such answers now throw with the node's `message`, `code` or `Error` text, or `Failed to broadcast transaction`. The error shapes are unchanged (`Error` with `.error` on `send()`, a plain `{ error, message }` object on `new()`), and `trx.sendRawTransaction` still returns the node's answer as is.
+
+- Contract method arguments must match the ABI inputs in number
+
+  `utils.abi.encodeParamsV2ByABI`, and with it `contract.method(...args)` and the `funcABIV2` / `parametersV2` options of `createSmartContract`, `triggerSmartContract`, `triggerConstantContract`, `triggerConfirmedConstantContract` and `estimateEnergy`, now throws `Invalid arguments provided: expected N arguments, got M` when the argument count differs from the function inputs, as `encodeFunctionData` already did. Previously missing trailing arguments were padded with `''`, so an omitted `string` was silently encoded as `""` and an omitted `bool` as `false`, and the call went through; other omitted types already failed with an encoder error. Code that relied on leaving trailing `string` / `bool` arguments out must now pass them explicitly.
+
+- `createProposal` lists parameters in serialization order
+
+  jspb serializes the `parameters` map sorted by key as a string (e.g. `1000`, `20`, `9`), while the node hashes the entries in the order the broadcast JSON lists them, so any other input order made the two txIDs differ and the node rejected the signature (`SIGERROR`). `createProposal` now sorts the parameters into the jspb order, and throws `Duplicate proposal parameter key <key>` on a repeated key instead of letting jspb collapse the entries into one.
+
+- `TypedDataEncoder.getPayload` now exports message addresses as lowercase `41`-prefixed hex, like `domain.verifyingContract`, instead of lowercasing base58 addresses into invalid strings.
+
+- `contract_address` moved from `Types.SignedTransaction` to `Types.CreateSmartContractTransaction`, the only transaction that carries it. TypeScript code reading it from a generic signed transaction may need a narrower type.
+
+## Performance
+
+- `dist/TronWeb.js` goes from 941,066 bytes in 6.5.1 to 791,622 bytes (232,073 to 185,405 bytes gzipped), from the changes below.
+
+- The browser bundle ships a single copy of `@noble/curves` and `@noble/hashes`
+
+  ethers pins older versions of both, so `dist/TronWeb.js` used to include two copies. They are now deduplicated, with a major-version check that fails the build if the two ever diverge. This alone saves about 30 KB (about 10.6 KB gzipped); the Node build is unchanged. Signing, recovery, message and typed-data signatures and BIP39 / BIP32 derivation produce byte-identical results.
+
+- Only `isURL` is imported from `validator`, and only `satisfies` from `semver` (in `tronweb.ts` and `plugin.ts`), instead of the whole packages.
+
+- `concat`, `id`, `getBytes`, `toUtf8Bytes` and `toUtf8String` are now local ports of the ethers v6 helpers, used by typed data, `Interface` and fragments. `utils.ethersUtils` still exports them with the same signatures, results and errors.
+
+## Dependencies and Environment
+
+- Node.js `^22.23.4 || ^24.22.1 || >=26.12.1` is now declared in `engines`. Node.js 20 is end-of-life and receives no fix for the October 2026 security releases, which include a Brotli decoder out-of-bounds write reachable through axios response decompression.
+- `axios` bumped to 1.20.0; its dependency `follow-redirects` resolves to 1.16.2.
+- Dev dependencies: `ts-loader` 9.6.2 (its dependency chain moves to `picomatch` 4, dropping `micromatch` and related packages), `vitest` / `@vitest/*` 4.1.12, `vite` 8.3.5, `fast-uri` 3.1.9, and refreshed transitive packages (`brace-expansion`, `source-map-js`, ...) to clear `npm audit` findings.
+- `TronWeb.version` reports `6.5.2`.
+
 __6.5.1__
 
 ## Improvements

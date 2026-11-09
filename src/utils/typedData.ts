@@ -1,10 +1,8 @@
 import {
     keccak256,
     recoverAddress,
-    concat,
     defineProperties,
     getBigInt,
-    getBytes,
     hexlify,
     isHexString,
     mask,
@@ -13,10 +11,11 @@ import {
     toTwos,
     zeroPadValue,
     assertArgument,
-    id,
     SigningKey,
 } from 'ethers';
 import type { BigNumberish, BytesLike, SignatureLike } from 'ethers';
+import { concat, getBytes, id } from './bytesUtils.js';
+import { privateKeyToSigningHex } from './crypto.js';
 
 import { toHex } from './address.js';
 import { clonePlainData } from './clone.js';
@@ -206,6 +205,16 @@ function getBaseEncoder(type: string): null | ((value: any) => string) {
     return null;
 }
 
+// Whether %%name%% is in the base type namespace (address, bool, uintXX, bytesXX,
+// ...). Names that look like a base type but are malformed (e.g. uint7) count too.
+function isBaseTypeName(name: string): boolean {
+    try {
+        return getBaseEncoder(name) != null;
+    } catch (error) {
+        return true;
+    }
+}
+
 function encodeType(name: string, fields: Array<TypedDataField>): string {
     return `${name}(${fields.map(({ name, type }) => type + ' ' + name).join(',')})`;
 }
@@ -270,6 +279,14 @@ export class TypedDataEncoder {
         });
 
         for (const name in types) {
+            // Struct names must not overlap with the base type namespace
+            assertArgument(
+                !isBaseTypeName(name),
+                `struct type name ${JSON.stringify(name)} collides with a base type`,
+                'types',
+                types
+            );
+
             const uniqueNames: Set<string> = new Set();
 
             for (const field of types[name]) {
@@ -665,7 +682,7 @@ export class TypedDataEncoder {
                     case 'trcToken':
                         return getBigInt(value).toString();
                     case 'address':
-                        return value.toLowerCase();
+                        return getTronAddress(value).toLowerCase();
                     case 'bool':
                         return !!value;
                     case 'string':
@@ -735,8 +752,7 @@ export function signTypedData(
 ) {
     const messageDigest = hashTypedData(domain, types, value);
 
-    const key = `0x${privateKey.replace(/^0x/, '')}`;
-    const signingKey = new SigningKey(key);
+    const signingKey = new SigningKey(privateKeyToSigningHex(privateKey));
 
     const signature = signingKey.sign(messageDigest);
     const signatureHex = ['0x', signature.r.substring(2), signature.s.substring(2), Number(signature.v).toString(16)].join('');

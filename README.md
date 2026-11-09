@@ -41,7 +41,7 @@ Any new TRON feature will be incorporated into TronWeb. Changes to the API to im
 __[tronweb.network](https://tronweb.network)__
 
 ## Compatibility
-- Version built for Node.js v14 and above
+- Version built for Node.js — v24 LTS is recommended (supported: `^22.23.4 || ^24.22.1 || >=26.12.1`)
 - Version built for browsers with more than 0.25% market share
 
 You can access either version specifically from the dist folder.

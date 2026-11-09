@@ -755,6 +755,71 @@ describe('#contract.readWrite', function () {
         });
     });
 
+    describe('#legacy ABI without stateMutability', function () {
+        const legacyAbi = [
+            { type: 'function', name: 'pay', constant: false, payable: true, inputs: [], outputs: [] },
+            {
+                type: 'function',
+                name: 'set',
+                constant: false,
+                payable: false,
+                inputs: [{ name: 'v', type: 'uint256' }],
+                outputs: [],
+            },
+            {
+                type: 'function',
+                name: 'get',
+                constant: true,
+                payable: false,
+                inputs: [],
+                outputs: [{ name: '', type: 'uint256' }],
+            },
+        ];
+
+        function stubWrite(tw: TronWeb) {
+            const calls: CapturedSmartCall[] = [];
+            tw.transactionBuilder.triggerSmartContract = async (
+                address,
+                functionSelector,
+                options = {},
+                parameters = [],
+                issuerAddress = ''
+            ) => {
+                calls.push({ address, functionSelector, options, parameters, issuerAddress });
+                return smartCallResult('cafe');
+            };
+            tw.trx.sign = async (transaction: any) => ({ ...transaction, signature: ['00'] });
+            tw.trx.sendRawTransaction = (async (signedTransaction: any) => ({
+                result: true,
+                transaction: signedTransaction,
+            })) as typeof tw.trx.sendRawTransaction;
+            return calls;
+        }
+
+        it('derives payability from the legacy payable flag in send()', async function () {
+            const tw = tronWebBuilder.createInstance();
+            const contract = tw.contract(legacyAbi, contractAddress);
+            const calls = stubWrite(tw);
+
+            assert.equal(await contract.methods.pay().send({ callValue: 10 }), 'cafe');
+            assert.equal(calls[0].functionSelector, 'pay()');
+            assert.equal(calls[0].options.callValue, 10);
+
+            assert.equal(await contract.methods.set(1).send({ callValue: 10 }), 'cafe');
+            assert.equal(calls[1].functionSelector, 'set(uint256)');
+            assert.equal(calls[1].options.callValue, 0);
+        });
+
+        it('rejects send() on a legacy constant function', async function () {
+            const tw = tronWebBuilder.createInstance();
+            const contract = tw.contract(legacyAbi, contractAddress);
+            const calls = stubWrite(tw);
+
+            await assertThrow(contract.methods.get().send(), 'Methods with state mutability "view" must use call()');
+            assert.lengthOf(calls, 0);
+        });
+    });
+
     describe('against a contract deployed to the fullNode', function () {
 
         // funcABIV2_3 exposes setStruct((address,address,address)) (a struct/tuple

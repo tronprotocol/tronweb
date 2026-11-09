@@ -11,12 +11,10 @@
  */
 
 import { keccak256 } from 'ethers';
-import { id } from 'ethers';
+import { concat, getBytes, id } from './bytesUtils.js';
 import {
-    concat,
     dataSlice,
     getBigInt,
-    getBytes,
     getBytesCopy,
     hexlify,
     zeroPadValue,

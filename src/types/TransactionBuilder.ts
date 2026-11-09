@@ -150,6 +150,17 @@ export interface ContractFunctionParameter {
     value: unknown;
 }
 
+export interface FrozenSupplyOption {
+    /**
+     * Token staked amount.
+     */
+    frozenAmount: number;
+    /**
+     * Token staked duration in days.
+     */
+    frozenDays: number;
+}
+
 export interface CreateTokenOptions extends TransactionCommonOptions {
     /**
      * Token name, default string.
@@ -209,6 +220,10 @@ export interface CreateTokenOptions extends TransactionCommonOptions {
      * Default is 0.
      */
     frozenDuration?: number;
+    /**
+     * List of token staked supplies. When provided, `frozenAmount` and `frozenDuration` are ignored.
+     */
+    frozenSupply?: FrozenSupplyOption[];
     /**
      * @todo: desc
      */

@@ -7,7 +7,7 @@ import { AbstractTrx } from './AbstractTrx.js';
 import { RawTrx } from './RawTrx.js';
 import { txCheck, txCheckWithArgs } from '../../utils/transaction.js';
 import { cloneTransaction } from '../../utils/clone.js';
-import { ecRecover } from '../../utils/crypto.js';
+import { ecRecover, privateKeyToSigningHex } from '../../utils/crypto.js';
 import { BroadcastReturn, AddressOptions, BroadcastHexReturn, Address } from '../../types/Trx.js';
 import { SignedTransaction, Transaction } from '../../types/Transaction.js';
 import { TypedDataDomain, TypedDataField } from '../../utils/typedData.js';
@@ -179,8 +179,7 @@ export class Trx extends AbstractTrx<false> {
 
     static signString(message: string, privateKey: string, useTronHeader = true) {
         message = message.replace(/^0x/, '');
-        const value = `0x${privateKey.replace(/^0x/, '')}`;
-        const signingKey = new SigningKey(value);
+        const signingKey = new SigningKey(privateKeyToSigningHex(privateKey));
         const messageBytes = [
             ...toUtf8Bytes(useTronHeader ? TRX_MESSAGE_HEADER : ETH_MESSAGE_HEADER),
             ...utils.code.hexStr2byteArray(message),

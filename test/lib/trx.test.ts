@@ -561,6 +561,57 @@ describe('TronWeb.trx', function () {
             });
         });
 
+        describe('#sign (message) / #signMessageV2 / #signTypedData private key handling', function () {
+            const key = 'e5a7d3c6b1f04c2d9e8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e';
+            const domain = { name: 'Key Test', version: '1', chainId: 1 };
+            const types = { Mail: [{ name: 'contents', type: 'string' }] };
+            const value = { contents: 'Hello, Bob!' };
+
+            const sinks: Record<string, (pk: string) => unknown> = {
+                'trx.sign(hexMessage, pk)': (pk) => tronWeb.trx.sign('0xdeadbeef', pk),
+                'trx.sign(hexMessage, pk, false)': (pk) => tronWeb.trx.sign('0xdeadbeef', pk, false),
+                'trx.signMessageV2': (pk) => tronWeb.trx.signMessageV2('hello', pk),
+                'trx.signTypedData': (pk) => tronWeb.trx.signTypedData(domain, types, value, pk),
+                'trx._signTypedData': (pk) => tronWeb.trx._signTypedData(domain, types, value, pk),
+                'Trx.signString': (pk) => Trx.signString('deadbeef', pk),
+            };
+
+            for (const [name, sink] of Object.entries(sinks)) {
+                it(`${name} accepts the key with or without 0x and in either hex case`, async function () {
+                    const reference = await sink(key);
+                    assert.equal(await sink('0x' + key), reference);
+                    assert.equal(await sink(key.toUpperCase()), reference);
+                });
+
+                for (const [variant, pk] of Object.entries({
+                    'trailing newline': key + '\n',
+                    '63 hex digits': key.slice(1),
+                    '0X prefix': '0X' + key,
+                })) {
+                    it(`${name} rejects a key with a ${variant} without echoing it`, async function () {
+                        let error: any;
+                        try {
+                            await sink(pk);
+                        } catch (err) {
+                            error = err;
+                        }
+                        assert.instanceOf(error, Error);
+                        assert.equal(error.message, 'Invalid private key provided');
+                        assert.isUndefined((error as any).value);
+                        assert.notInclude(error.message, key.slice(1));
+                    });
+                }
+            }
+
+            it('rejects a missing default private key with the same error', async function () {
+                const noKey = tronWebBuilder.createInstance();
+                noKey.defaultPrivateKey = false;
+                await assertThrow(noKey.trx.sign('0xdeadbeef'), 'Invalid private key provided');
+                assert.throws(() => noKey.trx.signMessageV2('hello'), 'Invalid private key provided');
+                assert.throws(() => noKey.trx.signTypedData(domain, types, value), 'Invalid private key provided');
+            });
+        });
+
         describe('#sign / #multiSign (transaction snapshot)', function () {
             const idx = 14;
 
@@ -2399,6 +2450,62 @@ describe('TronWeb.trx', function () {
         it('should return empty object', async function () {
             const ret = await tronWeb.trx.getContract('417cbcc41052b59584d1ac9fc1ce39106533aa1d40');
             assert.deepEqual(ret, {});
+        });
+
+        it('should serve repeated lookups from the cache whatever the address format', async function () {
+            const local = tronWebBuilder.createInstance();
+            const request = vi.spyOn(local.fullNode, 'request');
+            const hex = transaction.contract_address;
+            const b58 = TronWeb.address.fromHex(hex);
+
+            const first = await local.trx.getContract(b58);
+            const second = await local.trx.getContract(b58);
+            const third = await local.trx.getContract(hex);
+            const fourth = await local.trx.getContract(hex.toUpperCase());
+
+            assert.equal(request.mock.calls.filter(([url]) => url === 'wallet/getcontract').length, 1);
+            assert.equal(first.contract_address, hex);
+            assert.strictEqual(second, first);
+            assert.strictEqual(third, first);
+            assert.strictEqual(fourth, first);
+            request.mockRestore();
+        });
+
+        it('should not cache an answer that describes no contract', async function () {
+            const local = tronWebBuilder.createInstance();
+            const deploy = await local.transactionBuilder.createSmartContract(
+                { abi: testRevertContract.abi, bytecode: testRevertContract.bytecode },
+                accounts.hex[idx]
+            );
+            const hex = deploy.contract_address;
+            const b58 = TronWeb.address.fromHex(hex);
+
+            assert.deepEqual(await local.trx.getContract(b58), {});
+            assert.deepEqual(await local.trx.getContract(hex), {});
+
+            await broadcaster(null, accounts.pks[idx], deploy);
+            await waitChainData('contract', hex);
+
+            assert.equal((await local.trx.getContract(b58)).contract_address, hex);
+            const contract = await local.contract().at(b58);
+            assert.equal(contract.address, hex);
+        });
+
+        it('should evict the cached contract on clearABI whatever the address format', async function () {
+            const local = tronWebBuilder.createInstance();
+            const hex = transaction.contract_address;
+            const b58 = TronWeb.address.fromHex(hex);
+            const cache = (local.trx as any).cache.contracts as Record<string, unknown>;
+
+            await local.trx.getContract(b58);
+            assert.isDefined(cache[hex]);
+            await local.transactionBuilder.clearABI(b58, accounts.hex[idx]);
+            assert.isUndefined(cache[hex]);
+
+            await local.trx.getContract(hex.toUpperCase());
+            assert.isDefined(cache[hex]);
+            await local.transactionBuilder.clearABI(hex.toUpperCase(), accounts.hex[idx]);
+            assert.isUndefined(cache[hex]);
         });
     });
 

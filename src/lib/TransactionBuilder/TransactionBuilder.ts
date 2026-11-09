@@ -4,7 +4,7 @@ import { toHex } from '../../utils/address.js';
 import { ADDRESS_PREFIX_REGEX } from '../../utils/constants.js';
 import { encodeParamsV2ByABI } from '../../utils/abi.js';
 import { CreateSmartContractTransaction, SignedTransaction, Transaction, TransactionWrapper } from '../../types/Transaction.js';
-import { Validator } from '../../paramValidator/index.js';
+import { Validator, toInteger } from '../../paramValidator/index.js';
 import { GetSignWeightResponse } from '../../types/APIResponse.js';
 import { isArray, isHex, isInteger, isNotNullOrUndefined, isObject, isString } from '../../utils/validations.js';
 import { cloneTransaction } from '../../utils/clone.js';
@@ -82,6 +82,9 @@ interface IArgs extends TriggerSmartContract {
     fee_limit?: number;
     Permission_id?: number;
 }
+// Reads an argument that has already passed an 'integer' / 'positive-integer' rule.
+const asInteger = (value: unknown) => toInteger(value) as number;
+
 export class TransactionBuilder {
     private tronWeb: TronWeb;
     private validator: Validator;
@@ -99,9 +102,6 @@ export class TransactionBuilder {
         from: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
     ): Promise<Transaction<TransferContract>> {
-        // accept amounts passed as strings
-        amount = parseInt(amount);
-
         this.validator.notValid([
             {
                 name: 'recipient',
@@ -129,7 +129,7 @@ export class TransactionBuilder {
         const data: TransferContract = {
             to_address: toHex(to),
             owner_address: toHex(from as string),
-            amount: amount,
+            amount: asInteger(amount),
         };
 
         const transactionOptions = getTransactionOptions(options);
@@ -149,7 +149,6 @@ export class TransactionBuilder {
         from: string = this.tronWeb.defaultAddress.hex as string,
         options: TransactionCommonOptions = {}
     ): Promise<Transaction<TransferAssetContract>> {
-        amount = parseInt(amount);
         this.validator.notValid([
             {
                 name: 'recipient',
@@ -183,7 +182,7 @@ export class TransactionBuilder {
             to_address: toHex(to),
             owner_address: toHex(from as string),
             asset_name: fromUtf8(tokenId as string),
-            amount,
+            amount: asInteger(amount),
         };
 
         const transactionOptions = getTransactionOptions(options);
@@ -236,7 +235,7 @@ export class TransactionBuilder {
             to_address: toHex(issuerAddress),
             owner_address: toHex(buyer as string),
             asset_name: fromUtf8(tokenId as string),
-            amount: parseInt(amount),
+            amount: asInteger(amount),
         };
 
         const transactionOptions = getTransactionOptions(options);
@@ -290,8 +289,8 @@ export class TransactionBuilder {
         ]);
         const data: FreezeBalanceContract = {
             owner_address: toHex(ownerAddress as string),
-            frozen_balance: parseInt(amount),
-            frozen_duration: parseInt(String(duration)),
+            frozen_balance: asInteger(amount),
+            frozen_duration: asInteger(duration),
         };
         if (resource !== 'BANDWIDTH') {
             data.resource = resource as Resource;
@@ -384,7 +383,7 @@ export class TransactionBuilder {
         ]);
         const data: FreezeBalanceV2Contract = {
             owner_address: toHex(address as string),
-            frozen_balance: parseInt(amount),
+            frozen_balance: asInteger(amount),
         };
         if (resource !== 'BANDWIDTH') {
             data.resource = resource as Resource;
@@ -427,7 +426,7 @@ export class TransactionBuilder {
         ]);
         const data: UnfreezeBalanceV2Contract = {
             owner_address: toHex(address as string),
-            unfreeze_balance: parseInt(amount),
+            unfreeze_balance: asInteger(amount),
         };
         if (resource !== 'BANDWIDTH') {
             data.resource = resource as Resource;
@@ -520,7 +519,7 @@ export class TransactionBuilder {
         const data: DelegateResourceContract = {
             owner_address: toHex(address as string),
             receiver_address: toHex(receiverAddress),
-            balance: parseInt(amount),
+            balance: asInteger(amount),
         };
         if (resource !== 'BANDWIDTH') {
             data.resource = resource as Resource;
@@ -528,7 +527,7 @@ export class TransactionBuilder {
         if (lock) {
             data.lock = lock as boolean;
             if (isNotNullOrUndefined(lockPeriod)) {
-                data.lock_period = lockPeriod as number;
+                data.lock_period = asInteger(lockPeriod);
             }
         }
 
@@ -581,7 +580,7 @@ export class TransactionBuilder {
         const data: UnDelegateResourceContract = {
             owner_address: toHex(address as string),
             receiver_address: toHex(receiverAddress),
-            balance: parseInt(amount),
+            balance: asInteger(amount),
         };
         if (resource !== 'BANDWIDTH') {
             data.resource = resource as Resource;
@@ -769,7 +768,7 @@ export class TransactionBuilder {
         const voteList = entries.map(([srAddress, voteCount]) => {
             return {
                 vote_address: toHex(srAddress),
-                vote_count: parseInt(voteCount),
+                vote_count: asInteger(voteCount),
             };
         });
 
@@ -886,9 +885,7 @@ export class TransactionBuilder {
             },
         ]);
 
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        if (!payable && (callValue > 0 || tokenValue > 0))
+        if (!payable && (asInteger(callValue) > 0 || (isNotNullOrUndefined(tokenValue) && asInteger(tokenValue) > 0)))
             throw new Error('When contract is not payable, options.callValue and options.tokenValue must be 0');
 
         const { rawParameter, funcABIV2, parametersV2 } = options as any;
@@ -944,10 +941,10 @@ export class TransactionBuilder {
 
         const args: any = {
             owner_address: toHex(issuerAddress),
-            fee_limit: parseInt(feeLimit),
-            call_value: parseInt(callValue),
-            consume_user_resource_percent: userFeePercentage,
-            origin_energy_limit: originEnergyLimit,
+            fee_limit: asInteger(feeLimit),
+            call_value: asInteger(callValue),
+            consume_user_resource_percent: asInteger(userFeePercentage),
+            origin_energy_limit: asInteger(originEnergyLimit),
             abi: JSON.stringify(entries),
             bytecode,
             parameter,
@@ -956,10 +953,10 @@ export class TransactionBuilder {
 
         // tokenValue and tokenId can cause errors if provided when the trx10 proposal has not been approved yet. So we set them only if they are passed to the method.
         if (isNotNullOrUndefined(tokenValue)) {
-            args.call_token_value = parseInt(tokenValue as number);
+            args.call_token_value = asInteger(tokenValue);
         }
         if (isNotNullOrUndefined(tokenId)) {
-            args.token_id = parseInt(tokenId);
+            args.token_id = asInteger(tokenId);
         }
 
         const contract: CreateSmartContract = {} as CreateSmartContract;
@@ -1110,14 +1107,14 @@ export class TransactionBuilder {
         const args: DeployConstantContract = {
             data: input,
             owner_address: toHex(ownerAddress),
-            call_value: callValue,
+            call_value: asInteger(callValue),
         };
 
         if (tokenId) {
-            args.token_id = tokenId;
+            args.token_id = asInteger(tokenId);
         }
         if (tokenValue) {
-            args.call_token_value = tokenValue;
+            args.call_token_value = asInteger(tokenValue);
         }
 
         const pathInfo = `wallet${options.confirmed ? 'solidity' : ''}/estimateenergy`;
@@ -1214,12 +1211,12 @@ export class TransactionBuilder {
             args.data = options.input;
         }
 
-        args.call_value = parseInt(callValue as number);
-        if (isNotNullOrUndefined(tokenValue)) args.call_token_value = parseInt(tokenValue as number);
-        if (isNotNullOrUndefined(tokenId)) args.token_id = parseInt(tokenId as string);
+        args.call_value = asInteger(callValue);
+        if (isNotNullOrUndefined(tokenValue)) args.call_token_value = asInteger(tokenValue);
+        if (isNotNullOrUndefined(tokenId)) args.token_id = asInteger(tokenId);
 
         if (!(options._isConstant || options.estimateEnergy)) {
-            args.fee_limit = parseInt(feeLimit as number);
+            args.fee_limit = asInteger(feeLimit);
         }
 
         if (options.permissionId) {
@@ -1437,11 +1434,7 @@ export class TransactionBuilder {
 
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        if (this.tronWeb.trx.cache.contracts[contractAddress]) {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            delete this.tronWeb.trx.cache.contracts[contractAddress];
-        }
+        delete this.tronWeb.trx.cache.contracts[data.contract_address];
 
         const transactionOptions = getTransactionOptions(options);
         return createTransaction<ClearABIContract>(
@@ -1460,13 +1453,21 @@ export class TransactionBuilder {
     ): Promise<Transaction<UpdateBrokerageContract>> {
         if (!isNotNullOrUndefined(brokerage)) throw new Error('Invalid brokerage provided');
 
-        if (!isInteger(brokerage) || brokerage < 0 || brokerage > 100)
-            throw new Error('Brokerage must be an integer between 0 and 100');
+        this.validator.notValid([
+            {
+                name: 'brokerage',
+                type: 'integer',
+                value: brokerage,
+                gte: 0,
+                lte: 100,
+                msg: 'Brokerage must be an integer between 0 and 100',
+            },
+        ]);
 
         if (!TronWeb.isAddress(ownerAddress)) throw new Error('Invalid owner address provided');
 
         const data: UpdateBrokerageContract = {
-            brokerage: parseInt(brokerage),
+            brokerage: asInteger(brokerage),
             owner_address: toHex(ownerAddress as string),
         };
 
@@ -1498,6 +1499,7 @@ export class TransactionBuilder {
             freeBandwidthLimit = 0, // Out of `totalFreeBandwidth`, the amount each token holder get
             frozenAmount = 0,
             frozenDuration = 0,
+            frozenSupply,
             // for now there is no default for the following values
             voteScore,
             precision,
@@ -1563,27 +1565,73 @@ export class TransactionBuilder {
                 name: 'sale end timestamp',
                 type: 'integer',
                 value: saleEnd,
-                gt: saleStart,
-            },
-            {
-                name: 'Frozen supply',
-                type: 'integer',
-                value: frozenAmount,
-                gte: 0,
-            },
-            {
-                name: 'Frozen duration',
-                type: 'integer',
-                value: frozenDuration,
-                gte: 0,
+                gt: toInteger(saleStart),
             },
         ]);
 
-        if (isNotNullOrUndefined(voteScore) && (!isInteger(voteScore) || voteScore <= 0))
-            throw new Error('voteScore must be a positive integer greater than 0');
+        if (frozenSupply !== undefined) {
+            this.validator.notValid([
+                {
+                    name: 'frozenSupply',
+                    type: 'array',
+                    value: frozenSupply,
+                },
+            ]);
+            frozenSupply.forEach((item, index) => {
+                this.validator.notValid([
+                    {
+                        name: `frozenSupply[${index}]`,
+                        type: 'notEmptyObject',
+                        value: item as unknown as Record<string, unknown>,
+                    },
+                    {
+                        name: `frozenSupply[${index}].frozenAmount`,
+                        type: 'positive-integer',
+                        value: item?.frozenAmount,
+                    },
+                    {
+                        name: `frozenSupply[${index}].frozenDays`,
+                        type: 'positive-integer',
+                        value: item?.frozenDays,
+                    },
+                ]);
+            });
+        } else {
+            this.validator.notValid([
+                {
+                    name: 'Frozen supply',
+                    type: 'integer',
+                    value: frozenAmount,
+                    gte: 0,
+                },
+                {
+                    name: 'Frozen duration',
+                    type: 'integer',
+                    value: frozenDuration,
+                    gte: 0,
+                },
+            ]);
+        }
 
-        if (isNotNullOrUndefined(precision) && (!isInteger(precision) || precision < 0 || precision > 6))
-            throw new Error('precision must be a positive integer >= 0 and <= 6');
+        this.validator.notValid([
+            {
+                name: 'voteScore',
+                type: 'integer',
+                value: voteScore,
+                gt: 0,
+                optional: true,
+                msg: 'voteScore must be a positive integer greater than 0',
+            },
+            {
+                name: 'precision',
+                type: 'integer',
+                value: precision,
+                gte: 0,
+                lte: 6,
+                optional: true,
+                msg: 'precision must be a positive integer >= 0 and <= 6',
+            },
+        ]);
 
         const data: Partial<AssetIssueContract> = {
             owner_address: toHex(issuerAddress),
@@ -1591,24 +1639,29 @@ export class TransactionBuilder {
             abbr: fromUtf8(abbreviation as string),
             description: fromUtf8(description),
             url: fromUtf8(url as string),
-            total_supply: parseInt(totalSupply),
-            trx_num: parseInt(trxRatio),
-            num: parseInt(tokenRatio),
-            start_time: parseInt(saleStart),
-            end_time: parseInt(saleEnd as number),
-            frozen_supply: [
-                {
-                    frozen_amount: parseInt(frozenAmount),
-                    frozen_days: parseInt(frozenDuration),
-                },
-            ],
+            total_supply: asInteger(totalSupply),
+            trx_num: asInteger(trxRatio),
+            num: asInteger(tokenRatio),
+            start_time: asInteger(saleStart),
+            end_time: asInteger(saleEnd),
+            frozen_supply: frozenSupply
+                ? frozenSupply.map(({ frozenAmount, frozenDays }) => ({
+                      frozen_amount: asInteger(frozenAmount),
+                      frozen_days: asInteger(frozenDays),
+                  }))
+                : [
+                      {
+                          frozen_amount: asInteger(frozenAmount),
+                          frozen_days: asInteger(frozenDuration),
+                      },
+                  ],
         };
         (['name', 'abbr', 'description', 'url'] as (keyof typeof data)[]).forEach((key) => {
             if (!data[key]) {
                 delete data[key];
             }
         });
-        if (!(parseInt(frozenAmount) > 0)) {
+        if (frozenSupply ? !frozenSupply.length : !(asInteger(frozenAmount) > 0)) {
             delete data.frozen_supply;
         }
         if (freeBandwidth && !isNaN(parseInt(freeBandwidth)) && parseInt(freeBandwidth) >= 0) {
@@ -1617,11 +1670,11 @@ export class TransactionBuilder {
         if (freeBandwidthLimit && !isNaN(parseInt(freeBandwidthLimit)) && parseInt(freeBandwidthLimit) >= 0) {
             data.public_free_asset_net_limit = parseInt(freeBandwidthLimit);
         }
-        if (precision && !isNaN(parseInt(precision))) {
-            data.precision = parseInt(precision);
+        if (precision) {
+            data.precision = asInteger(precision);
         }
-        if (voteScore && !isNaN(parseInt(voteScore))) {
-            data.vote_score = parseInt(voteScore);
+        if (voteScore) {
+            data.vote_score = asInteger(voteScore);
         }
         const transactionOptions = getTransactionOptions(options);
         return createTransaction<AssetIssueContract>(
@@ -1855,10 +1908,22 @@ export class TransactionBuilder {
         const invalid = 'Invalid proposal parameters provided';
         if (!parameters) throw new Error(invalid);
 
-        const newParams = isArray(parameters) ? parameters : [parameters];
+        const newParams = isArray(parameters) ? [...parameters] : [parameters];
+        const keys = new Set<string>();
         for (const parameter of newParams) {
             if (!isObject(parameter)) throw new Error(invalid);
+            const key = String(parameter.key);
+            if (keys.has(key)) throw new Error(`Duplicate proposal parameter key ${key}`);
+            keys.add(key);
         }
+        // `parameters` is a protobuf map: jspb serializes its entries sorted by the key as a string
+        // (e.g. 1000, 20, 9), while the node hashes them in the order the JSON lists them. List them
+        // in the jspb order so both compute the same txID.
+        newParams.sort((a, b) => {
+            const ka = String(a.key);
+            const kb = String(b.key);
+            return ka < kb ? -1 : ka > kb ? 1 : 0;
+        });
 
         const data: ProposalCreateContract = {
             owner_address: toHex(issuerAddress as string),
@@ -1900,7 +1965,7 @@ export class TransactionBuilder {
 
         const data: ProposalDeleteContract = {
             owner_address: toHex(issuerAddress as string),
-            proposal_id: parseInt(proposalID as number),
+            proposal_id: asInteger(proposalID),
         };
 
         const transactionOptions = getTransactionOptions(options);
@@ -1944,7 +2009,7 @@ export class TransactionBuilder {
 
         const data: VoteProposalContract = {
             owner_address: toHex(voterAddress as string),
-            proposal_id: parseInt(proposalID),
+            proposal_id: asInteger(proposalID),
             is_add_approval: isApproval,
         };
 
@@ -1996,9 +2061,9 @@ export class TransactionBuilder {
         const data: ExchangeCreateContract = {
             owner_address: toHex(ownerAddress as string),
             first_token_id: fromUtf8(tokenName),
-            first_token_balance: tokenBalance,
+            first_token_balance: asInteger(tokenBalance),
             second_token_id: '5f', // Constant for TRX.
-            second_token_balance: trxBalance,
+            second_token_balance: asInteger(trxBalance),
         };
 
         const transactionOptions = getTransactionOptions(options);
@@ -2056,9 +2121,9 @@ export class TransactionBuilder {
         const data: ExchangeCreateContract = {
             owner_address: toHex(ownerAddress as string),
             first_token_id: fromUtf8(firstTokenName),
-            first_token_balance: firstTokenBalance,
+            first_token_balance: asInteger(firstTokenBalance),
             second_token_id: fromUtf8(secondTokenName),
-            second_token_balance: secondTokenBalance,
+            second_token_balance: asInteger(secondTokenBalance),
         };
 
         const transactionOptions = getTransactionOptions(options);
@@ -2110,9 +2175,9 @@ export class TransactionBuilder {
 
         const data: ExchangeInjectContract = {
             owner_address: toHex(ownerAddress as string),
-            exchange_id: parseInt(exchangeID),
+            exchange_id: asInteger(exchangeID),
             token_id: fromUtf8(tokenName),
-            quant: parseInt(tokenAmount),
+            quant: asInteger(tokenAmount),
         };
 
         const transactionOptions = getTransactionOptions(options);
@@ -2164,9 +2229,9 @@ export class TransactionBuilder {
 
         const data: ExchangeWithdrawContract = {
             owner_address: toHex(ownerAddress as string),
-            exchange_id: parseInt(exchangeID),
+            exchange_id: asInteger(exchangeID),
             token_id: fromUtf8(tokenName),
-            quant: parseInt(tokenAmount),
+            quant: asInteger(tokenAmount),
         };
 
         const transactionOptions = getTransactionOptions(options);
@@ -2225,10 +2290,10 @@ export class TransactionBuilder {
 
         const data: ExchangeTransactionContract = {
             owner_address: toHex(ownerAddress as string),
-            exchange_id: parseInt(exchangeID),
+            exchange_id: asInteger(exchangeID),
             token_id: TronWeb.fromAscii(tokenName).replace(/^0x/, ''),
-            quant: parseInt(tokenAmountSold),
-            expected: parseInt(tokenAmountExpected),
+            quant: asInteger(tokenAmountSold),
+            expected: asInteger(tokenAmountExpected),
         };
 
         const transactionOptions = getTransactionOptions(options);
@@ -2273,7 +2338,7 @@ export class TransactionBuilder {
         const data: UpdateSettingContract = {
             owner_address: toHex(ownerAddress as string),
             contract_address: toHex(contractAddress),
-            consume_user_resource_percent: userFeePercentage,
+            consume_user_resource_percent: asInteger(userFeePercentage),
         };
 
         const transactionOptions = getTransactionOptions(options);
@@ -2318,7 +2383,7 @@ export class TransactionBuilder {
         const data: UpdateEnergyLimitContract = {
             owner_address: toHex(ownerAddress as string),
             contract_address: toHex(contractAddress),
-            origin_energy_limit: originEnergyLimit,
+            origin_energy_limit: asInteger(originEnergyLimit),
         };
 
         const transactionOptions = getTransactionOptions(options);
@@ -2475,15 +2540,28 @@ export class TransactionBuilder {
             if (typeof transaction.visible === 'boolean') {
                 res.transaction.transaction.visible = transaction.visible;
             }
+            const returned = res.transaction.transaction;
+            const localRawData = transaction.raw_data;
+            const checked = {
+                ...returned,
+                raw_data: {
+                    ...returned.raw_data,
+                    ref_block_bytes: localRawData.ref_block_bytes,
+                    ref_block_hash: localRawData.ref_block_hash,
+                    expiration: localRawData.expiration,
+                    timestamp: localRawData.timestamp,
+                },
+            };
             return resultManager(
-                res.transaction.transaction as unknown as TransactionWrapper,
+                checked as unknown as TransactionWrapper,
                 {
-                    ...transaction.raw_data.contract[0].parameter.value,
-                    Permission_id: transaction.raw_data.contract[0].Permission_id,
+                    ...localRawData.contract[0].parameter.value,
+                    Permission_id: localRawData.contract[0].Permission_id,
                 },
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 /* @ts-ignore */
-                { data: transaction.raw_data.data, fee_limit: transaction.raw_data.fee_limit }
+                { data: localRawData.data, fee_limit: localRawData.fee_limit },
+                localRawData.contract[0].type
             ) as unknown as U;
         } catch (e) {
             throw new Error('Error generating a new transaction id.');
