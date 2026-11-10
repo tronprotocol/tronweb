@@ -66,5 +66,4 @@ export interface TransactionWrapper {
 
 export interface SignedTransaction<T extends ContractParamter = ContractParamter> extends Transaction<T> {
     signature: string[];
-    contract_address?: string;
 }

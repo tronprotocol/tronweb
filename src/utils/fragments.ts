@@ -11,7 +11,7 @@
  */
 
 import { defineProperties, getBigInt, getNumber, assert, assertPrivate, assertArgument } from 'ethers';
-import { id } from 'ethers';
+import { id } from './bytesUtils.js';
 
 /**
  *  A Type description in a [JSON ABI format](link-solc-jsonabi).

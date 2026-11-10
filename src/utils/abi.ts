@@ -64,7 +64,13 @@ function extractArrayDim(type: string) {
     return (size.match(/\]\[/g) || []).length + 1;
 }
 
-export function encodeParamsV2ByABI(funABI: FunctionFragment, args: any[]) {
+export function encodeParamsV2ByABI(funABI: FunctionFragment, args: any[] = []) {
+    const inputsLength = funABI.inputs ? funABI.inputs.length : 0;
+    const argsLength = args ? args.length : 0;
+    if (argsLength !== inputsLength) {
+        throw new Error(`Invalid arguments provided: expected ${inputsLength} arguments, got ${argsLength}`);
+    }
+
     const types: string[] = [];
 
     const buildFullTypeDefinition = (typeDef: AbiParamsCommon): string => {
@@ -139,9 +145,6 @@ export function encodeParamsV2ByABI(funABI: FunctionFragment, args: any[]) {
                 args[i] = false;
             }
             types.push(type.indexOf('tuple') === 0 ? buildFullTypeDefinition(funABI.inputs[i]) : type);
-            if (args.length < types.length) {
-                args.push('');
-            }
         }
     }
 
@@ -261,8 +264,9 @@ export function encodeFunctionData(funcABI: FunctionFragment, args: any[] = []):
         throw new Error('Invalid function ABI fragment provided: only "function" type fragments with a name are supported');
     }
     const inputsLength = funcABI.inputs ? funcABI.inputs.length : 0;
-    if (args.length !== inputsLength) {
-        throw new Error(`Invalid arguments provided: expected ${inputsLength} arguments, got ${args.length}`);
+    const argsLength = args ? args.length : 0;
+    if (argsLength !== inputsLength) {
+        throw new Error(`Invalid arguments provided: expected ${inputsLength} arguments, got ${argsLength}`);
     }
     // The selector keeps trcToken in the signature (TVM convention), while parameter
     // encoding treats trcToken as uint256 and converts addresses inside args in place

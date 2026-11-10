@@ -164,6 +164,10 @@ const buildTriggerSmartContract = (value, options) => {
     triggerSmartContract.setOwnerAddress(fromHexString(owner_address));
     triggerSmartContract.setContractAddress(fromHexString(contract_address));
     triggerSmartContract.setCallValue(call_value);
+    // data and function_selector / parameter are alternative encodings of the call; accept only one.
+    if (data && (function_selector || parameter)) {
+        throw new Error('Invalid TriggerSmartContract: data cannot be combined with function_selector or parameter');
+    }
     if (data) {
         triggerSmartContract.setData(stringToUint8Array(data));
     } else if (function_selector) {
@@ -383,12 +387,10 @@ const buildVoteWitnessAccount = (value, options) => {
 const buildCreateSmartContract = (value, options) => {
     const params = value?.new_contract
         ? {
-              ...{
-                  owner_address: value.owner_address,
-                  call_token_value: value.call_token_value,
-                  token_id: value.token_id,
-              },
               ...value.new_contract,
+              owner_address: value.owner_address,
+              call_token_value: value.call_token_value,
+              token_id: value.token_id,
           }
         : value;
     const {
@@ -571,10 +573,12 @@ const buildAssetIssueContract = (value, options) => {
     assetIssueContract.setFreeAssetNetLimit(free_asset_net_limit);
     assetIssueContract.setPublicFreeAssetNetLimit(public_free_asset_net_limit);
     if (frozen_supply) {
-        const frozenSupplyContract = new AssetIssueContract.FrozenSupply();
-        frozenSupplyContract.setFrozenAmount(frozen_supply.length ? frozen_supply[0].frozen_amount : frozen_supply.frozen_amount);
-        frozenSupplyContract.setFrozenDays(frozen_supply.length ? frozen_supply[0].frozen_days : frozen_supply.frozen_days);
-        assetIssueContract.addFrozenSupply(frozenSupplyContract);
+        (Array.isArray(frozen_supply) ? frozen_supply : [frozen_supply]).forEach(({ frozen_amount, frozen_days }) => {
+            const frozenSupplyContract = new AssetIssueContract.FrozenSupply();
+            frozenSupplyContract.setFrozenAmount(frozen_amount);
+            frozenSupplyContract.setFrozenDays(frozen_days);
+            assetIssueContract.addFrozenSupply(frozenSupplyContract);
+        });
     }
     return buildCommonTransaction(
         assetIssueContract,
@@ -996,7 +1000,14 @@ const txCheck = (transaction) => {
     return compareTransaction(transaction, transactionPb);
 };
 
-const txCheckWithArgs = (transaction, args, options) => {
+const txCheckWithArgs = (transaction, args, options, expectedType?: string) => {
+    const contracts = transaction?.raw_data?.contract;
+    if (!Array.isArray(contracts) || contracts.length !== 1) {
+        return false;
+    }
+    if (typeof expectedType === 'string' && contracts[0]?.type !== expectedType) {
+        return false;
+    }
     const transactionPb = txJsonToPbWithArgs(transaction, args, options);
     return compareTransaction(transaction, transactionPb);
 };

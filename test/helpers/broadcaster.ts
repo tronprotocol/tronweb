@@ -1,4 +1,4 @@
-import { SignedTransaction, Transaction } from '../../src/types/Transaction.js';
+import { Transaction } from '../../src/types/Transaction.js';
 import tronWebBuilder from '../helpers/tronWebBuilder.js';
 
 export default async function <T extends Transaction>(func: Promise<T> | null | T, pk?: string, transaction?: T) {
@@ -10,7 +10,7 @@ export default async function <T extends Transaction>(func: Promise<T> | null | 
     const result = {
         transaction,
         signedTransaction,
-        receipt: await tronWeb.trx.sendRawTransaction(signedTransaction as SignedTransaction),
+        receipt: await tronWeb.trx.sendRawTransaction(signedTransaction),
     };
     return Promise.resolve(result);
 }

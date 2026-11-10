@@ -1,6 +1,6 @@
 import { keccak256, toUtf8Bytes, concat, recoverAddress, SigningKey, joinSignature } from './ethersUtils.js';
 import { ADDRESS_PREFIX } from './constants.js';
-import { getBase58CheckAddress } from './crypto.js';
+import { getBase58CheckAddress, privateKeyToSigningHex } from './crypto.js';
 import { hexStr2byteArray } from './code.js';
 
 export const TRON_MESSAGE_PREFIX = '\x19TRON Signed Message:\n';
@@ -16,11 +16,7 @@ export function hashMessage(message: string | Uint8Array | Array<number>) {
 }
 
 export function signMessage(message: string | Uint8Array | Array<number>, privateKey: string) {
-    if (!privateKey.match(/^0x/)) {
-        privateKey = '0x' + privateKey;
-    }
-
-    const signingKey = new SigningKey(privateKey);
+    const signingKey = new SigningKey(privateKeyToSigningHex(privateKey));
     const messageDigest = hashMessage(message);
     const signature = signingKey.sign(messageDigest);
 

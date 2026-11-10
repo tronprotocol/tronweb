@@ -885,11 +885,11 @@ export abstract class AbstractTrx<P extends boolean = false> {
             throw new Error('Invalid contract address provided');
         }
 
+        contractAddress = toHex(contractAddress);
+
         if (this.cache.contracts[contractAddress]) {
             return this.cache.contracts[contractAddress];
         }
-
-        contractAddress = toHex(contractAddress);
 
         const contract = await this.readRequest<any>(
             'fullNode',
@@ -902,7 +902,9 @@ export abstract class AbstractTrx<P extends boolean = false> {
         if (contract.Error) {
             throw new Error('Contract does not exist');
         }
-        this.cache.contracts[contractAddress] = contract;
+        if (contract.contract_address) {
+            this.cache.contracts[contractAddress] = contract;
+        }
         return contract;
     }
 

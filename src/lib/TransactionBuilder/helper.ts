@@ -15,13 +15,18 @@ export function deepCopyJson<T = unknown>(json: object): T {
     return JSON.parse(JSON.stringify(json));
 }
 
-export function resultManager(transaction: TransactionWrapper, data: unknown, options: TriggerConstantContractOptions) {
+export function resultManager(
+    transaction: TransactionWrapper,
+    data: unknown,
+    options: TriggerConstantContractOptions,
+    expectedType: ContractType
+) {
     if (transaction.Error) throw new Error(transaction.Error);
 
     if (transaction.result && transaction.result.message) {
         throw new Error(TronWeb.toUtf8(transaction.result.message));
     }
-    const authResult = txCheckWithArgs(transaction, data, options);
+    const authResult = txCheckWithArgs(transaction, data, options, expectedType);
     if (authResult) {
         return transaction;
     }
@@ -66,7 +71,7 @@ export function resultManagerTriggerSmartContract(
     }
 
     if (!(options._isConstant || options.estimateEnergy)) {
-        const authResult = txCheckWithArgs(transaction.transaction, data, options);
+        const authResult = txCheckWithArgs(transaction.transaction, data, options, ContractType.TriggerSmartContract);
         if (authResult) {
             return transaction;
         }

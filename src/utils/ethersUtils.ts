@@ -3,24 +3,20 @@ import {
     sha256,
     sha512,
     pbkdf2,
-    toUtf8Bytes,
-    toUtf8String,
     recoverAddress,
     SigningKey,
     AbiCoder,
     Signature,
-    concat,
-    id,
     Mnemonic,
     Wordlist,
     wordlists,
     HDNodeWallet as ethersHDNodeWallet,
-    getBytes,
     computeHmac,
 } from 'ethers';
 
 import type { BytesLike, SignatureLike } from 'ethers';
 
+import { concat, id, getBytes, toUtf8Bytes, toUtf8String } from './bytesUtils.js';
 import { Interface } from './interface.js';
 
 const splitSignature = (sigBytes: SignatureLike) => Signature.from(sigBytes);

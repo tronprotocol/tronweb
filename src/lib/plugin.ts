@@ -1,6 +1,6 @@
 import { TronWeb } from '../tronweb.js';
 import utils from '../utils/index.js';
-import semver from 'semver';
+import satisfies from 'semver/functions/satisfies.js';
 
 interface PluginConstructorOptions {
     disablePlugins?: boolean;
@@ -62,7 +62,7 @@ export class Plugin {
         if (utils.isFunction(plugin.pluginInterface)) {
             pluginInterface = plugin.pluginInterface(options);
         }
-        if (semver.satisfies(TronWeb.version, pluginInterface.requires)) {
+        if (satisfies(TronWeb.version, pluginInterface.requires)) {
             if (pluginInterface.fullClass) {
                 // plug the entire class at the same level of tronWeb.trx
                 const className = plugin.constructor.name;

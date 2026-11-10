@@ -2,6 +2,7 @@ import { Address } from '../../../src/types/Trx.js';
 import { assert } from 'vitest';
 import assertThrow from '../../helpers/assertThrow.js';
 import broadcaster from '../../helpers/broadcaster.js';
+import waitChainData from '../../helpers/waitChainData.js';
 import tronWebBuilder from '../../helpers/tronWebBuilder.js';
 import { Contract, TronWeb } from '../../setup/TronWeb.js';
 import contracts from '../../fixtures/contracts.js';
@@ -37,6 +38,7 @@ describe('#contract.method', function () {
                 ),
                 accounts.pks[0]
             );
+            await waitChainData('contract', tx.transaction.contract_address);
             testRevert = await tronWeb.contract().at(tx.transaction.contract_address);
 
             const tx2 = await broadcaster(
@@ -89,6 +91,7 @@ describe('#contract.method', function () {
                 ),
                 accounts.pks[0]
             );
+            await waitChainData('contract', tx.transaction.contract_address);
             testRevert = await tronWeb.contract().at(tx.transaction.contract_address);
             await testRevert.setOwner(accounts.b58[2]).send();
         });

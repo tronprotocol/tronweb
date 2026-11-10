@@ -198,26 +198,37 @@ function normalizeReadContractOutput(fragment: FunctionFragment, data: string | 
     return output;
 }
 
-function getBroadcastErrorMessage(tronWeb: TronWeb, broadcast: Record<string, unknown>): string {
-    if (typeof broadcast.message === 'string' && broadcast.message.length > 0) {
-        return tronWeb.toUtf8(broadcast.message);
+export function isBroadcastAccepted(broadcast: unknown): boolean {
+    if (broadcast === null || typeof broadcast !== 'object') {
+        return false;
     }
+    const { result, code } = broadcast as { result?: unknown; code?: unknown };
+    return result === true && (!code || code === 'SUCCESS');
+}
 
-    if (typeof broadcast.code === 'string' && broadcast.code.length > 0) {
-        return broadcast.code;
+export function getBroadcastErrorMessage(tronWeb: TronWeb, broadcast: unknown): string {
+    if (broadcast && typeof broadcast === 'object') {
+        const { message, code, Error: nodeError } = broadcast as Record<string, unknown>;
+        if (typeof message === 'string' && message.length > 0) {
+            try {
+                return tronWeb.toUtf8(message);
+            } catch {
+                return message;
+            }
+        }
+        if (typeof code === 'string' && code.length > 0) {
+            return code;
+        }
+        if (typeof nodeError === 'string' && nodeError.length > 0) {
+            return nodeError;
+        }
     }
-
     return 'Failed to broadcast transaction';
 }
 
 function assertBroadcastOk(tronWeb: TronWeb, broadcast: unknown): void {
-    if (broadcast && typeof broadcast === 'object') {
-        const result = broadcast as { code?: unknown; result?: unknown };
-        // `.code` covers normal TRON broadcast failures; `result === false` also covers a
-        // failure shaped `{ result: false }` that carries no code.
-        if (result.code || result.result === false) {
-            throw new Error(getBroadcastErrorMessage(tronWeb, broadcast as Record<string, unknown>));
-        }
+    if (!isBroadcastAccepted(broadcast)) {
+        throw new Error(getBroadcastErrorMessage(tronWeb, broadcast));
     }
 }
 
