@@ -31,7 +31,8 @@ export function stringToBytes(str: string) {
     let c: number;
 
     for (let i = 0; i < len; i++) {
-        c = str.charCodeAt(i);
+        c = str.codePointAt(i)!;
+        if (c > 0xffff) i++;
 
         if (c >= 0x010000 && c <= 0x10ffff) {
             bytes.push(((c >> 18) & 0x07) | 0xf0);
