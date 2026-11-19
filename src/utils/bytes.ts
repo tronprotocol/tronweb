@@ -22,11 +22,11 @@ export function bytesToString(arr: BytesLike) {
 
         if (v && one.length === 8) {
             const bytesLength = v[0].length;
-            let store = arr[i].toString(2).slice(7 - bytesLength);
+            let store = one.slice(bytesLength + 1);
 
             for (let st = 1; st < bytesLength; st++) store += arr[st + i].toString(2).slice(2);
 
-            str += String.fromCharCode(parseInt(store, 2));
+            str += String.fromCodePoint(parseInt(store, 2));
             i += bytesLength - 1;
         } else {
             str += String.fromCharCode(arr[i]);
